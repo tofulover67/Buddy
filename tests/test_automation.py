@@ -13,6 +13,9 @@ from unittest import mock
 import _paths  # noqa: F401
 from pages.automation import steps as st
 
+# A folder as it's typed on this computer.
+A_FOLDER = "C:\\a\\b" if os.name == "nt" else "/a/b"
+
 try:
     from PySide6.QtCore import QEventLoop, QTimer
     from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
@@ -46,8 +49,8 @@ class StepsTests(unittest.TestCase):
     def test_values_are_checked_against_each_option(self):
         self.assertEqual(st.clean_options(SPEC, {"to_master": "yes", "size": "huge", "folder": 3, "name": "  x "}),
                          {"folder": "", "to_master": False, "size": "half", "name": "x"})
-        self.assertEqual(st.clean_options(SPEC, {"to_master": True, "size": "full", "folder": ' "C:\\a\\b\\" '}),
-                         {"folder": os.path.normpath("C:\\a\\b"), "to_master": True, "size": "full", "name": ""})
+        self.assertEqual(st.clean_options(SPEC, {"to_master": True, "size": "full", "folder": f' "{A_FOLDER}{os.sep}" '}),
+                         {"folder": A_FOLDER, "to_master": True, "size": "full", "name": ""})
         self.assertEqual(st.clean_ask(SPEC, ["folder", "to_master", "folder", 5]), ["folder"])
 
     def test_a_saved_automation_cleaned(self):
@@ -231,8 +234,8 @@ class PageTests(unittest.TestCase):
         self.page.on_move_step({"id": a["id"], "step": third["id"], "to": 0})
         self.assertEqual([s["step"] for s in a["steps"]], ["nope", "quick", "slow"])
         self.page.on_remove_step({"id": a["id"], "step": third["id"]})
-        self.page.on_option({"id": a["id"], "step": first["id"], "key": "folder", "value": "C:\\x\\"})
-        self.assertEqual(first["options"]["folder"], os.path.normpath("C:\\x"))
+        self.page.on_option({"id": a["id"], "step": first["id"], "key": "folder", "value": A_FOLDER + os.sep})
+        self.assertEqual(first["options"]["folder"], A_FOLDER)
         self.page.on_ask({"id": a["id"], "step": first["id"], "key": "folder", "on": True})
         self.assertEqual(first["ask"], ["folder"])
         self.page.on_duplicate({"id": a["id"]})
