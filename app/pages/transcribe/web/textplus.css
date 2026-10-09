@@ -1,0 +1,237 @@
+/* Transcribe's Text+ tabs (textplus.js). Theme colours only - the clips' own colours arrive inline.
+   Loaded before transcribe.css, which wins where both style the same thing. */
+
+.timeline { color: var(--text-dim); font-size: var(--fs-sm); }
+.panel { display: flex; flex-direction: column; gap: 12px; }
+.box { display: flex; flex-direction: column; gap: var(--card-gap); padding: var(--card-pad); }
+.box p { margin: 0; line-height: 1.5; }
+.note { line-height: 1.5; }
+.wrap { flex-wrap: wrap; }
+.gap { gap: 14px; align-items: flex-end; }
+.grow { flex: 1; min-width: 0; }
+.arrow { display: flex; color: var(--text-dim); padding-bottom: 8px; }
+.btn.big { padding: 10px 22px; }
+.tabs { overflow-x: auto; flex: none; }
+.page > * { flex-shrink: 0; }
+/* A scrollbar coming and going would resize the canvas, and the canvas the scrollbar. */
+.page { scrollbar-gutter: stable; }
+.tabs button { white-space: nowrap; }
+
+/* ------------------------------------------------------------- style -- */
+
+/* Wide timeline: looks across the top, the preview beside the controls. Tall (.tall, a 9:16
+   timeline): the preview down the left, the looks and controls beside it. */
+.style-layout {
+    display: grid; gap: 14px; align-items: start;
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+    grid-template-areas: "looks looks" "stage controls";
+}
+.style-layout.tall {
+    grid-template-columns: auto minmax(320px, 1fr); grid-template-rows: auto 1fr;
+    grid-template-areas: "stage looks" "stage controls";
+}
+.style-looks { grid-area: looks; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.style-stage { grid-area: stage; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.style-controls { grid-area: controls; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.style-layout.tall .style-stage { position: sticky; top: 0; }
+
+/* The looks: one card each, its sample drawn with the look's own colours. */
+.looks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.look {
+    font: inherit; color: var(--text); cursor: pointer; padding: 5px; text-align: center;
+    display: flex; flex-direction: column; gap: 5px; min-width: 0;
+    border-radius: var(--r-md); background: var(--raised-bg); border: var(--bw) solid var(--card-border);
+}
+.look:hover { border-color: var(--text-dim); }
+.look[aria-pressed="true"] { border-color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-text); }
+.look-thumb {
+    aspect-ratio: 16 / 7; border-radius: var(--r-sm); overflow: hidden; position: relative;
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8%;
+}
+.tall .look-thumb { aspect-ratio: 4 / 5; align-items: center; padding-bottom: 0; }
+.look-thumb span { white-space: nowrap; line-height: 1.1; paint-order: stroke fill; }
+.look-name { font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.look-state { min-height: 30px; }
+#look-now b { color: var(--text-strong); font-weight: 600; }
+
+/* The preview: the timeline's frame, behind it a stand-in picture (dark or light) or the
+   checkerboard. textplus.js sizes it. */
+.preview {
+    position: relative; overflow: hidden; align-self: center; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--r-md); box-shadow: 0 0 0 var(--bw) var(--card-border);
+    background: repeating-conic-gradient(color-mix(in srgb, var(--text) 10%, var(--surface)) 0 25%, var(--surface) 0 50%) 0 0 / 20px 20px;
+}
+.preview.dark, .preview.light, .look-thumb { background-size: cover; background-position: center; }
+/* The stand-in pictures are photographs' colours, the same in every theme. */
+.preview.dark, .look-thumb.dark {
+    background-color: #33424d;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none'%3E%3Crect width='160' height='90' fill='%233d4f5c'/%3E%3Cpath d='M0 64 30 40 58 60 90 30 120 54 160 36V90H0z' fill='%2326323b'/%3E%3Cpath d='M0 80 45 64 82 76 130 62 160 72V90H0z' fill='%231a2329'/%3E%3C/svg%3E");
+}
+.preview.light, .look-thumb.light {
+    background-color: #c9d8e0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none'%3E%3Crect width='160' height='90' fill='%23dfe9ee'/%3E%3Cpath d='M0 64 30 40 58 60 90 30 120 54 160 36V90H0z' fill='%23b9ccd6'/%3E%3Cpath d='M0 80 45 64 82 76 130 62 160 72V90H0z' fill='%23f2efe6'/%3E%3C/svg%3E");
+}
+.tall .preview.dark, .tall .look-thumb.dark {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 160' preserveAspectRatio='none'%3E%3Crect width='90' height='160' fill='%234a5a52'/%3E%3Ccircle cx='45' cy='52' r='17' fill='%237a6a5c'/%3E%3Cpath d='M12 160Q12 86 45 80Q78 86 78 160z' fill='%232c3530'/%3E%3C/svg%3E");
+}
+.tall .preview.light, .tall .look-thumb.light {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 160' preserveAspectRatio='none'%3E%3Crect width='90' height='160' fill='%23e8e4da'/%3E%3Ccircle cx='45' cy='52' r='17' fill='%23d9b99b'/%3E%3Cpath d='M12 160Q12 86 45 80Q78 86 78 160z' fill='%23f7f7f2'/%3E%3C/svg%3E");
+}
+/* Like Text+ with Wrap off: the clip's own line breaks, centred, running off both
+   edges when too wide (flex centring overflows evenly). LineSpacing 1.0 is the font's own
+   line step, which textplus.js sets from Text+'s figures ("normal" until they arrive). */
+.sample { position: relative; z-index: 1; white-space: pre; text-align: center; line-height: normal; flex-shrink: 0; }
+.safe-shade { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+.preview-tag {
+    position: absolute; left: 8px; top: 8px; z-index: 3; max-width: calc(100% - 16px);
+    padding: 2px 8px; border-radius: var(--r-sm); font-size: var(--fs-xs);
+    color: var(--overlay-text); background: var(--overlay-tint);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.preview-tag:empty { display: none; }
+.stage-bar { row-gap: 6px; }
+.stage-bar .segmented button { padding: 2px 10px; }
+.safe-pick .field { padding-top: 3px; padding-bottom: 3px; }
+
+/* The four layers: a tab each, with its own on/off switch. */
+.layers { padding: 0; overflow: hidden; }
+.layer-tabs { display: flex; gap: 4px; padding: 4px; background: var(--raised-bg); border-bottom: var(--bw) solid var(--card-border); }
+.layer-tab {
+    flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px;
+    border-radius: var(--r-sm); padding: 0 8px 0 4px;
+}
+.layer-tab button {
+    font: inherit; font-weight: 600; color: var(--text-dim); background: none; border: 0; cursor: pointer;
+    padding: 7px 4px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.layer-tab:hover button { color: var(--text-strong); }
+.layer-tab.selected { background: var(--card-bg); box-shadow: 0 0 0 var(--bw) var(--card-border); }
+.layer-tab.selected button { color: var(--text-strong); }
+.layer-body { display: flex; flex-direction: column; gap: 12px; padding: var(--card-pad); }
+.layer-body.off .srow, .layer-body.off .slider { opacity: .45; }
+
+.switch {
+    appearance: none; -webkit-appearance: none; margin: 0; flex: none; cursor: pointer; position: relative;
+    width: 28px; height: 16px; border-radius: var(--r-full);
+    background: var(--field-bg); border: var(--bw) solid var(--field-border);
+    transition: background-color .15s, border-color .15s;
+}
+.switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--text-dim); transition: left .15s, background-color .15s;
+}
+.switch:checked { background: var(--primary); border-color: var(--primary); }
+.switch:checked::after { left: 14px; background: var(--on-primary); }
+
+/* A control's row: name, control, value. */
+.srow, .slider { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 12px; }
+.slider { grid-template-columns: 96px minmax(0, 1fr) 62px; }
+.srow > span:first-child, .slider > span:first-child { color: var(--text-dim); font-size: var(--fs-sm); }
+.val { color: var(--text-strong); font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; cursor: text; }
+/* A value being typed in (double-click), where it read. */
+.val .typein { box-sizing: border-box; width: 62px; padding: 1px 4px; font: inherit; font-weight: 400; text-align: right; }
+input[type="range"] { width: 100%; margin: 0; accent-color: var(--primary); cursor: pointer; }
+.colours { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.quick {
+    width: 22px; height: 22px; padding: 0; border-radius: 50%; cursor: pointer; border: 0;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 30%, transparent);
+}
+.quick[aria-pressed="true"] { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.colour {
+    font: inherit; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 3px 10px 3px 3px; border-radius: var(--r-sm); color: var(--text);
+    background: var(--field-bg); border: var(--bw) solid var(--field-border); width: max-content;
+}
+.colour:hover { border-color: var(--field-focus-border); }
+.colour i { width: 20px; height: 20px; border-radius: var(--r-xs); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 25%, transparent); }
+.colour span { font-family: var(--font-mono); font-size: var(--fs-sm); }
+
+.apply-bar { padding: 10px 14px; }
+.apply-bar .scope-row { row-gap: 8px; }
+
+.name-field { width: 100%; box-sizing: border-box; }
+.name-note { margin: 6px 0 0; }
+
+/* --------------------------------------------------------- canvases -- */
+
+.canvas-card { gap: 10px; }
+.canvas-head { flex-wrap: wrap; row-gap: 4px; }
+.canvas-host { width: 100%; display: flex; justify-content: center; }
+.canvas-host .stage {
+    position: relative; overflow: hidden; outline: none; user-select: none; touch-action: none;
+    border-radius: var(--r-sm); box-shadow: 0 0 0 var(--bw) var(--card-border);
+}
+.canvas-host .stage:focus-visible { box-shadow: 0 0 0 2px var(--accent-text); }
+.layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.layer.over { z-index: 3; }
+.layer .bound { pointer-events: all; cursor: ew-resize; }
+.boxes { position: absolute; inset: 0; z-index: 2; }
+.tbox {
+    position: absolute; cursor: move;
+    outline: 1px solid color-mix(in srgb, var(--primary) 55%, transparent);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.tbox:hover { outline: 2px solid var(--primary); }
+.tbox.selected { outline: 2px solid var(--primary); background: color-mix(in srgb, var(--primary) 20%, transparent); }
+.tsvg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.handle {
+    position: absolute; width: 10px; height: 10px; margin: -4px 0 0 -4px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--primary); display: none;
+}
+.tbox:hover .handle, .tbox.selected .handle { display: block; }
+.handle.tl { left: 0; top: 0; cursor: nwse-resize; }
+.handle.br { left: 100%; top: 100%; cursor: nwse-resize; }
+.handle.tr { left: 100%; top: 0; cursor: nesw-resize; }
+.handle.bl { left: 0; top: 100%; cursor: nesw-resize; }
+.band { position: absolute; z-index: 4; border: 1px dashed var(--accent-text); background: color-mix(in srgb, var(--accent-text) 12%, transparent); pointer-events: none; }
+.stage-empty {
+    position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center;
+    padding: 20px; text-align: center; color: var(--text-dim); pointer-events: none;
+}
+.history { display: inline-flex; gap: 2px; }
+.history.labelled { gap: 8px; }
+
+.guides-pop {
+    position: fixed; z-index: 80; width: 280px; padding: 14px; display: flex; flex-direction: column; gap: 14px;
+    background: var(--surface); box-shadow: 0 14px 40px rgba(0, 0, 0, .4);
+}
+.pop-section { display: flex; flex-direction: column; gap: 8px; }
+.pop-section b { color: var(--text-strong); }
+.pop-section .lbl .field { width: 100%; }
+
+.tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.tools .btn { align-self: flex-start; }
+
+/* ------------------------------------------------------ presets -- */
+
+.presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.preset {
+    font: inherit; text-align: left; cursor: pointer; color: var(--text);
+    display: flex; flex-direction: column; gap: 4px; padding: 12px 14px;
+    border-radius: var(--r-md); background: var(--raised-bg); border: var(--bw) solid var(--card-border);
+}
+.preset b { color: var(--text-strong); }
+.preset:hover { border-color: var(--text-dim); }
+.preset[aria-pressed="true"] { border-color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-text); }
+/* Each Text+ tab's "Apply to": the dropdown, and the track picker beside it for Specific track. */
+.scope-row [data-scope-track] .field { width: 90px; }
+
+.diag summary, .activity summary { cursor: pointer; }
+.activity { padding: 10px 16px; }
+.activity summary { display: flex; align-items: baseline; gap: 10px; }
+.activity summary::-webkit-details-marker { display: none; }
+#activity-last { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.activity[open] #activity-last { visibility: hidden; }
+.log { margin: 8px 0 2px; padding-left: 18px; font-size: var(--fs-sm); display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+.log .error { color: var(--danger-text); }
+
+@media (max-width: 760px) {
+    .style-layout, .style-layout.tall { grid-template-columns: minmax(0, 1fr); grid-template-areas: "looks" "stage" "controls"; }
+    .style-layout.tall .style-stage { position: static; }
+    .looks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Word-by-word: Lines' and Apply to's labels level, though the buttons are taller than the dropdown. */
+.wbw-controls { align-items: flex-start; }
+.wbw-spacing { max-width: 360px; }

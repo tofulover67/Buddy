@@ -1,0 +1,212 @@
+Installing Buddy without the installer
+======================================
+
+The installer (BuddySetup-x.y.z.exe for Windows or Buddy-x.y.z.pkg for
+macOS, on the Releases page) is the easy way: it does everything below for
+you. Use these steps if you'd rather not run it, or want to see exactly
+what goes where.
+
+Buddy is two files - Buddy.py and buddy.zip - that DaVinci Resolve runs
+with Python. So a manual install is: have Python, give it Buddy's
+packages, and put the two files where Resolve looks for scripts.
+
+Windows 10 or 11, or macOS, and DaVinci Resolve. The steps are the same on
+both; where a command or a folder differs, the step gives one for each.
+
+Which Resolve you have decides how Buddy can reach it:
+
+  - DaVinci Resolve Studio: from Workspace > Scripts, and from outside
+    Resolve too (Buddy started on its own, or - on Windows - "Start Buddy
+    automatically when Resolve starts"). Outside Resolve needs Preferences >
+    System > General > "External scripting using" set to Local.
+  - The free version, up to 21.0.4: from Workspace > Scripts only. A Buddy
+    started outside Resolve can't connect to it.
+  - The free version, 21.1 and later: not at all - from 21.1 on, only
+    Studio supports Python scripts.
+
+Without a connection Buddy still opens, and the tools that don't use
+Resolve still work.
+
+
+1. Python 3.10 or newer
+-----------------------
+
+On Windows, Resolve runs scripts with the Python that Windows' "py"
+launcher finds. Open Command Prompt and check:
+
+    py -3 --version
+
+If that prints Python 3.10 or newer, go on to step 2.
+
+If it says 'py' isn't recognised, or shows an older version, install
+Python from https://www.python.org/downloads/windows/ - the 64-bit
+"Windows installer". Python 3.13 is what the Buddy installer uses. Keep
+"Install py launcher" ticked (it is by default), then close and reopen
+Command Prompt and run the check again.
+
+On a Mac, Resolve runs scripts with a Python from python.org. Those live
+in /Library/Frameworks/Python.framework, and they are the only ones the
+Buddy installer counts. Open Terminal and check:
+
+    ls /Library/Frameworks/Python.framework/Versions
+
+If that lists 3.10 or a newer one, go on to step 2.
+
+If it says there is no such folder, or lists only older ones, install
+Python from https://www.python.org/downloads/macos/ - the "macOS 64-bit
+universal2 installer". Python 3.13 is what the Buddy installer uses.
+
+
+2. Buddy's packages
+-------------------
+
+On Windows, in Command Prompt, run this one line. It installs into the
+same Python Resolve will use, and takes a few minutes (about 300 MB,
+mostly PySide6):
+
+    py -3 -m pip install "PySide6>=6.10,<7" "pillow>=12.3" numpy openpyxl pynput "pymupdf>=1.26.7" pymupdf4llm "cryptography>=50.0"
+
+On a Mac, in Terminal, give the same packages to the Python from step 1,
+with its version in place of 3.13:
+
+    /Library/Frameworks/Python.framework/Versions/3.13/bin/python3 -m pip install "PySide6>=6.10,<7" "pillow>=12.3" numpy openpyxl pynput "pymupdf>=1.26.7" pymupdf4llm "cryptography>=50.0"
+
+If step 1 listed more than one at 3.10 or newer, run it for each of them:
+Resolve uses one of them, and the Buddy installer gives every one the
+packages for that reason.
+
+(From a copy of the source you can run the equivalent "py -3 -m pip
+install -r installer\requirements.txt" instead - on a Mac, that same
+python3 with "-m pip install -r installer/requirements.txt". It's the
+same list the installer uses.)
+
+What each one is for - Buddy starts without the optional ones, and only
+the feature that needs one is switched off, with a message saying what to
+install:
+
+    PySide6         required - Buddy's window. Install the full "PySide6",
+                    not only "PySide6-Essentials": Buddy Network needs its
+                    WebSockets part, and Asset Manager's previews its
+                    multimedia part.
+    cryptography    Buddy Network (its direct messages are end-to-end
+                    encrypted)
+    pillow          Color Palette: extracting colours from images
+    pynput          Color Palette: the screen colour dropper
+    numpy           Project Setup: syncing audio
+    openpyxl        Time Tracker: Excel export
+    pymupdf,
+    pymupdf4llm     Ask Buddy: building manuals from PDFs
+
+On a Mac, requirements.txt also names pyobjc-framework-Cocoa (pasting a
+GIF into Buddy Network). pynput brings it, so the line above installs it
+too.
+
+Subtitles isn't in this list: it downloads its own engine and models from
+inside Buddy (Subtitles > Setup), installer or not.
+
+
+3. Buddy.py and buddy.zip
+-------------------------
+
+From a copy of this repository (Code > Download ZIP on GitHub, then
+unzip it), open Command Prompt - Terminal on a Mac - in its folder and
+run:
+
+    py -3 build_buddy_zip.py          (Windows)
+    python3 build_buddy_zip.py        (macOS)
+
+That makes buddy.zip in the same folder. Buddy.py is already there.
+
+Shortcut: the same line with " --deploy" on the end also does step 4 for
+you.
+
+
+4. Put them where Resolve looks for scripts
+-------------------------------------------
+
+Copy Buddy.py and buddy.zip, side by side, into this folder. On Windows:
+
+    %APPDATA%\Blackmagic Design\DaVinci Resolve\Support\Fusion\Scripts\Utility
+
+On a Mac:
+
+    ~/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Utility
+
+(Paste that line into File Explorer's address bar - on a Mac, into
+Finder's Go > Go to Folder. If the Utility folder doesn't exist yet,
+create it.) Don't unzip buddy.zip - Buddy.py runs it as it is.
+
+
+5. Start Buddy
+--------------
+
+Restart DaVinci Resolve (on a Mac, quit it with Cmd+Q and reopen it), then
+choose Workspace > Scripts > Buddy.
+
+That's all of Buddy, Buddy Network included. (A few things aren't
+available on a Mac yet; README.md says which.) Once it's open, Buddy on
+Windows can also start itself whenever Resolve starts: Settings > Window >
+"Start Buddy automatically when Resolve starts". That starts Buddy outside
+Resolve, so it connects only in Resolve Studio (see the top of this file).
+
+
+Updating
+--------
+
+Build or download the new buddy.zip and Buddy.py and replace both files
+in the Utility folder, then relaunch Buddy (quit it first if it's
+running: from the system tray on Windows, from its menu bar icon on a
+Mac). If a new version needs a new package, its release notes say so -
+run the step 2 line again.
+
+
+Uninstalling
+------------
+
+1. On Windows, if you turned on "Start Buddy automatically when Resolve
+   starts", turn it off first (Settings > Window) - that removes the small
+   helper that watches for Resolve.
+2. Quit Buddy from the system tray (on a Mac, from its menu bar icon).
+3. Delete Buddy.py and buddy.zip from the Utility folder above.
+
+The macOS installer has no uninstaller, so steps 2 and 3 are also how to
+remove a Buddy it installed.
+
+Buddy's settings and downloaded models stay in %USERPROFILE%\.buddy (on a
+Mac, ~/.buddy). Your Buddy Network identity and keys are in there too, in
+tools\buddy_network - or still in .buddy_network beside .buddy, if an
+older Buddy's folder couldn't be moved. Delete those folders too if you
+want everything gone - but deleting the Buddy Network one loses your
+Buddy Network account for good unless you saved its recovery code (Buddy
+Network > Account) or a transfer file first.
+
+On a Mac, the key that locks Buddy Network's saved files is kept in your
+login Keychain, as an item named "Buddy Network". Keychain Access can
+delete it once the folder is gone.
+
+Python and its packages are left alone; other programs may use them.
+
+
+If something goes wrong
+-----------------------
+
+"PySide6 is not installed for the Python interpreter DaVinci Resolve is
+using to run this script" - the message shows that Python's full path and the exact command
+to run. Run it, with that path, in Command Prompt. (This happens when a PC
+has more than one Python and packages went into a different one.) On a
+Mac the path shown can be Resolve's own script runner rather than a
+Python; run the step 2 line again instead, for each Python step 1 listed.
+
+Nothing under Workspace > Scripts - check both files are directly in the
+Utility folder (not in a subfolder), and restart Resolve. On the free
+version of Resolve 21.1 or later, that menu runs no Python scripts at all;
+Buddy needs Studio there, or the free version up to 21.0.4.
+
+Buddy opened from outside Resolve but can't reach it - that only works in
+Resolve Studio, with Preferences > System > General > "External scripting
+using" set to Local. In the free version, quit that Buddy from the system
+tray (the menu bar on a Mac), then open it from Workspace > Scripts (while
+one is already open, the menu only brings that one up).
+
+A feature says a package is missing - run the step 2 line again; it only
+adds what isn't there yet.

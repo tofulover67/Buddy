@@ -1,0 +1,576 @@
+#!/usr/bin/env python3
+"""
+Build the manual bundle (chunks.jsonl + vectors-int8-512.bin + sidecars)
+straight from the Resolve Reference Manual PDF, so a new manual release
+needs nothing but the PDF and a button press.
+
+No Qt in here: the Settings dialog runs build_bundle() on a QThread, and
+build_manual_bundle.py at the repo root runs it from a terminal. Both pass
+a progress callback and a cancel check; neither changes what gets written.
+
+Pipeline, one pass per stage:
+
+  1. Extract   Every page twice. Plain get_text() is fast and keeps the
+               running footer intact ("Setup and Workflows | Chapter 8
+               Improving Performance..."), which is where the chapter
+               metadata comes from - the PDF's own bookmarks have 217
+               mangled entries for 203 chapters, the footer has the real
+               ones. pymupdf4llm gives the Markdown body (headings, tables)
+               that becomes the chunk text. OCR is forced off: every page
+               already has a text layer, and with OCR on the full manual
+               takes ~37 min instead of ~6.
+  2. Clean     Drop the footer, the page number, the side-tab label (FUSION,
+               MEDIA...) and chapter-contents dot leaders. Leaders are pure
+               keyword noise to BM25: "Clip Resolution....296" outranks the
+               page that actually explains clip resolution.
+  3. Chunk     Paragraphs packed up to MAX_CHARS within one chapter, cut at
+               headings once a chunk is big enough, cited by start page.
+  4. Embed     The embedder Settings chose (embedder.py) - Buddy's own
+               EmbeddingGemma, Ollama's or another server's - with the
+               document-side prefix. Optional: without one the bundle is
+               written keyword-only and Buddy runs at the bundle-bm25 tier.
+  5. Write     Into a sibling "<name>.building" dir, then swapped in, so a
+               cancelled or failed build never leaves Buddy a half bundle.
+
+The vector format is checked against the bundle this replaces: re-embedding
+its stored chunks with DOC_PREFIX reproduces the stored vectors at cosine
+0.99997 (int8 rounding), while "title: none" drops to 0.94 and no prefix to
+0.93. That is why the prefix carries the real chapter title.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import re
+import shutil
+import struct
+import sys
+import time
+import unicodedata
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Callable
+
+from core.python_exe import standalone_python
+
+from .retrieval import BUNDLE_CHUNKS, BUNDLE_VECTORS, DOC_PREFIX, VECTOR_MAGIC
+
+FULL_DIM = 768
+MRL_DIM = 512
+
+BUNDLE_CHAPTERS = "chapters.json"
+BUNDLE_META = "meta.json"
+# Not read by Buddy, but an existing bundle may hold it, and a rebuild
+# shouldn't be what deletes it.
+CARRY_OVER = ("notes_chunks.jsonl",)
+
+MAX_CHARS = 950
+MIN_CHARS = 350        # below this a heading doesn't start a new chunk
+EXTRACT_BATCH = 40     # pages per pymupdf4llm call - also the cancel grain
+EMBED_BATCH = 64       # measured: 64 is ~30% faster than 16, 1.3 min total
+EMBED_TIMEOUT = 300
+
+LICENSE_NOTE = (
+    "Bundle contains text extracted from the DaVinci Resolve Reference "
+    "Manual, (c) Blackmagic Design. Built locally by the user; do not "
+    "redistribute unless you have determined your use is permitted."
+)
+
+# The footer after NFKC + whitespace collapse. The PDF separates the parts
+# with U+2002/U+2003, which NFKC folds to plain spaces.
+FOOTER_RE = re.compile(
+    r"^(?P<section>[^|]+?)\s*\|\s*Chapter\s*(?P<num>\d+)\s+(?P<title>.+?)$"
+)
+# The coloured side tab on every page. Measured over the 21 manual: these
+# 13 labels, nothing else. Matched only as a whole line, so a sentence
+# that happens to say "Fusion" is untouched.
+SIDE_TABS = {
+    "FUSION", "MEDIA", "COLOR", "EDIT", "FAIRLIGHT", "RESOLVE FX", "DELIVER",
+    "PHOTO", "INTRO", "IMMERSIVE", "CLOUD", "COLLAB", "OTHER",
+}
+# Dot leaders come through pymupdf4llm as U+FFFD or \x08 runs, plain text
+# as periods. Five in a row never occurs in prose.
+LEADER_RE = re.compile(r"[.�\x08…]{5,}")
+PAGE_NO_RE = re.compile(r"^\**\s*\d{1,5}\s*\**$")
+
+
+class BuildError(RuntimeError):
+    """A build that cannot go ahead, with a message fit to show the user."""
+
+
+class BuildCancelled(Exception):
+    pass
+
+
+@dataclass
+class BuildResult:
+    out_dir: Path
+    chunks: int
+    chapters: int
+    pages: int
+    has_vectors: bool
+    seconds: float
+    warnings: list[str] = field(default_factory=list)
+
+
+# (stage, done, total, message). Stages: "extract", "chunk", "embed",
+# "write". total is 0 for a stage with no meaningful count.
+Progress = Callable[[str, int, int, str], None]
+
+
+# ----------------------------------------------------------- dependencies
+
+
+def pymupdf_status() -> tuple[bool, bool]:
+    """(pymupdf importable, pymupdf4llm importable) for THIS interpreter."""
+    import importlib.util
+
+    has_fitz = bool(
+        importlib.util.find_spec("pymupdf") or importlib.util.find_spec("fitz")
+    )
+    return has_fitz, bool(importlib.util.find_spec("pymupdf4llm"))
+
+
+def install_hint() -> str:
+    # The Python Buddy runs on, not "pip" (rarely the one on PATH) and not
+    # sys.executable (inside Resolve that's its script host, fuscript, which
+    # can't run pip): on macOS the interpreter the host embeds, on Windows
+    # the python.exe of the install Buddy runs on. -s: Resolve runs Python
+    # isolated (seen on Windows; macOS's fuscript embeds Python the same
+    # way), so a package in the per-user folder (%APPDATA%\Python on Windows)
+    # is invisible to Buddy - without -s, pip would call a copy there
+    # "already satisfied" and install nothing.
+    if sys.platform == "darwin":
+        return f'"{standalone_python()}" -s -m pip install pymupdf pymupdf4llm'
+    else:
+        from core.startup_manager import running_python_exe
+
+        python = running_python_exe() or sys.executable
+        return f'"{python}" -s -m pip install pymupdf pymupdf4llm'
+
+
+def _open_pdf(path: Path):
+    try:
+        import pymupdf
+    except ImportError:
+        try:
+            import fitz as pymupdf  # type: ignore[no-redef]
+        except ImportError:
+            raise BuildError(
+                "PyMuPDF is not installed for the Python running Buddy "
+                f"({sys.executable}).\n\nInstall it with:\n{install_hint()}"
+            ) from None
+    try:
+        return pymupdf.open(str(path))
+    except Exception as exc:  # pymupdf raises its own FileDataError etc.
+        raise BuildError(f"Could not open {path.name} as a PDF: {exc}") from exc
+
+
+# ------------------------------------------------------------ extraction
+
+
+def _norm(line: str) -> str:
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", line)).strip()
+
+
+def _plain_md(line: str) -> str:
+    """A Markdown line minus emphasis/heading marks, for matching
+    boilerplate. Keeps "|": the footer's own separator is one, and a table
+    row still starts with one, so neither can be mistaken for the other."""
+    return _norm(re.sub(r"[*#_`]", " ", line))
+
+
+def parse_footer(page_text: str) -> dict | None:
+    lines = [_norm(l) for l in page_text.splitlines() if l.strip()]
+    for line in reversed(lines[-6:]):
+        m = FOOTER_RE.match(line)
+        if m:
+            return {
+                "section": m.group("section").strip(),
+                "chapter_no": int(m.group("num")),
+                "chapter_title": m.group("title").strip(),
+            }
+    return None
+
+
+TABLE_RULE_RE = re.compile(r"^\|?(\s*:?-{3,}:?\s*\|)+\s*:?-*:?\s*$")
+
+
+def clean_page(markdown: str) -> str:
+    kept: list[str] = []
+    for raw in markdown.splitlines():
+        line = raw.rstrip()
+        if TABLE_RULE_RE.match(line.strip()):
+            # A table's header rule. Kept only while the header row above
+            # it survived - a chapter-contents table loses every row to the
+            # leader filter and would otherwise leave a bare "|---|".
+            if kept and kept[-1].lstrip().startswith("|"):
+                kept.append(line)
+            continue
+        bare = _plain_md(line)
+        if not bare:
+            kept.append("")
+            continue
+        if FOOTER_RE.match(bare) or PAGE_NO_RE.match(bare) or bare in SIDE_TABS:
+            continue
+        if LEADER_RE.search(line):
+            continue
+        kept.append(unicodedata.normalize("NFKC", line).replace("�", ""))
+    text = "\n".join(kept)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def _extract(doc, progress: Progress, cancelled) -> list[dict]:
+    """One dict per page: page (1-based), text (cleaned), and footer meta."""
+    try:
+        import pymupdf4llm
+    except ImportError:
+        pymupdf4llm = None
+
+    n = doc.page_count
+    pages: list[dict] = []
+    for start in range(0, n, EXTRACT_BATCH):
+        if cancelled():
+            raise BuildCancelled()
+        idx = list(range(start, min(start + EXTRACT_BATCH, n)))
+        if pymupdf4llm is not None:
+            md = pymupdf4llm.to_markdown(
+                doc, pages=idx, page_chunks=True, show_progress=False,
+                use_ocr=False,
+            )
+            bodies = [p.get("text", "") for p in md]
+            if len(bodies) != len(idx):
+                raise BuildError(
+                    f"pymupdf4llm returned {len(bodies)} pages for a batch "
+                    f"of {len(idx)} (pages {idx[0] + 1}-{idx[-1] + 1})."
+                )
+        else:
+            bodies = [doc[i].get_text() for i in idx]
+        for i, body in zip(idx, bodies):
+            pages.append({
+                "page": i + 1,
+                "text": clean_page(body),
+                "meta": parse_footer(doc[i].get_text()),
+            })
+        done = idx[-1] + 1
+        progress("extract", done, n, f"Reading page {done} of {n}")
+    return pages
+
+
+# -------------------------------------------------------------- chunking
+
+
+def _split_long(paragraph: str) -> list[str]:
+    """A paragraph over MAX_CHARS, cut at lines, then sentences, then words."""
+    if len(paragraph) <= MAX_CHARS:
+        return [paragraph]
+    for sep in ("\n", ". ", " "):
+        parts = paragraph.split(sep)
+        if len(parts) == 1:
+            continue
+        out, cur = [], ""
+        for i, part in enumerate(parts):
+            piece = part + (sep if i < len(parts) - 1 else "")
+            if cur and len(cur) + len(piece) > MAX_CHARS:
+                out.append(cur.rstrip())
+                cur = ""
+            cur += piece
+        if cur.strip():
+            out.append(cur.rstrip())
+        if all(len(p) <= MAX_CHARS for p in out):
+            return out
+        return [q for p in out for q in _split_long(p)]
+    return [paragraph[i:i + MAX_CHARS] for i in range(0, len(paragraph), MAX_CHARS)]
+
+
+def chunk_pages(pages: list[dict]) -> tuple[list[dict], dict]:
+    """(chunks, chapters). Chunks never span chapters, so every chunk's
+    chapter citation is exact; they may span pages and cite the first."""
+    chunks: list[dict] = []
+    chapters: dict[int, dict] = {}
+    seen_chapter = False
+
+    cur: list[str] = []
+    cur_len = 0
+    cur_page = None
+    cur_meta: dict = {}
+
+    def flush():
+        nonlocal cur, cur_len, cur_page
+        text = "\n\n".join(cur).strip()
+        if text:
+            chunks.append({
+                "id": len(chunks),
+                "text": text,
+                "section": cur_meta.get("section", ""),
+                "chapter_no": cur_meta.get("chapter_no", 0),
+                "chapter_title": cur_meta.get("chapter_title", ""),
+                "page": cur_page,
+            })
+        cur, cur_len, cur_page = [], 0, None
+
+    for p in pages:
+        meta = p["meta"]
+        if meta:
+            seen_chapter = True
+            ch = chapters.setdefault(meta["chapter_no"], {
+                "title": meta["chapter_title"],
+                "section": meta["section"],
+                "start_page": p["page"],
+                "end_page": p["page"],
+            })
+            ch["end_page"] = p["page"]
+        else:
+            # Cover, contents, part dividers, the quick reference at the
+            # back - real pages with no chapter. Chapter 0, so citations
+            # still carry a page number.
+            meta = {
+                "section": "",
+                "chapter_no": 0,
+                "chapter_title": "Back Matter" if seen_chapter else "Front Matter",
+            }
+        if meta.get("chapter_no") != cur_meta.get("chapter_no") or (
+            meta.get("chapter_title") != cur_meta.get("chapter_title")
+        ):
+            flush()
+            cur_meta = meta
+
+        for para in re.split(r"\n\s*\n", p["text"]):
+            para = para.strip()
+            if not para:
+                continue
+            for piece in _split_long(para):
+                is_heading = piece.startswith("#")
+                if cur and (
+                    cur_len + len(piece) + 2 > MAX_CHARS
+                    or (is_heading and cur_len >= MIN_CHARS)
+                ):
+                    flush()
+                if cur_page is None:
+                    cur_page = p["page"]
+                cur.append(piece)
+                cur_len += len(piece) + 2
+    flush()
+
+    # Tail fragments - a heading orphaned at a chapter's end - carry no
+    # answer on their own and only dilute BM25's length normalisation.
+    chunks = [c for c in chunks if len(c["text"]) >= 40]
+    for i, c in enumerate(chunks):
+        c["id"] = i
+
+    out = {
+        str(n): {
+            "title": c["title"],
+            "section": c["section"],
+            "start_page": c["start_page"],
+            "pages": c["end_page"] - c["start_page"] + 1,
+        }
+        for n, c in sorted(chapters.items())
+    }
+    out["0"] = {"title": "Front Matter", "section": "Front", "start_page": None, "pages": 1}
+    return chunks, out
+
+
+# ------------------------------------------------------------- embedding
+
+
+def _embed(embedder, texts: list[str]) -> list[list[float]]:
+    try:
+        return embedder.embed(texts, timeout=EMBED_TIMEOUT)
+    except Exception as exc:  # noqa: BLE001 - EmbedError, or a server's own
+        raise BuildError(f"{embedder.label} stopped answering mid-build: {exc}") from exc
+
+
+def quantize(vec: list[float]) -> tuple[float, bytes]:
+    """MRL-truncate, L2-normalise, int8 with one scale per row - the exact
+    inverse of retrieval.ManualRetriever._vector_scores."""
+    v = vec[:MRL_DIM]
+    norm = math.sqrt(sum(x * x for x in v)) or 1.0
+    v = [x / norm for x in v]
+    peak = max((abs(x) for x in v), default=0.0)
+    scale = (peak / 127.0) or 1.0
+    q = bytes((max(-127, min(127, round(x / scale))) & 0xFF) for x in v)
+    return scale, q
+
+
+def _embed_all(embedder, chunks, progress: Progress, cancelled) -> bytes:
+    n = len(chunks)
+    scales: list[float] = []
+    rows: list[bytes] = []
+    for start in range(0, n, EMBED_BATCH):
+        if cancelled():
+            raise BuildCancelled()
+        batch = chunks[start:start + EMBED_BATCH]
+        texts = [
+            DOC_PREFIX.format(title=c["chapter_title"] or "none") + c["text"]
+            for c in batch
+        ]
+        for vec in _embed(embedder, texts):
+            if len(vec) < MRL_DIM:
+                raise BuildError(
+                    f"{embedder.label} returned {len(vec)}-dim vectors; the "
+                    f"bundle format needs at least {MRL_DIM}."
+                )
+            s, q = quantize(vec)
+            scales.append(s)
+            rows.append(q)
+        done = min(start + EMBED_BATCH, n)
+        progress("embed", done, n, f"Embedding chunk {done} of {n}")
+    return (
+        VECTOR_MAGIC
+        + struct.pack("<ii", n, MRL_DIM)
+        + struct.pack(f"<{n}f", *scales)
+        + b"".join(rows)
+    )
+
+
+# --------------------------------------------------------------- driver
+
+
+def _no_progress(stage, done, total, message):
+    pass
+
+
+def build_bundle(
+    pdf_path: str | Path,
+    out_dir: str | Path,
+    progress: Progress | None = None,
+    cancelled: Callable[[], bool] | None = None,
+    require_vectors: bool = False,
+    embedder=None,
+) -> BuildResult:
+    """Build a bundle from pdf_path into out_dir, replacing what is there.
+
+    The previous bundle is kept as "<out_dir>.previous" (one generation) so
+    a bad manual extraction can be rolled back by renaming a folder.
+    embedder: what makes the vectors (embedder.py) - by default the
+    automatic choice: Buddy's own model once set up, else Ollama.
+    """
+    t0 = time.time()
+    pdf_path = Path(pdf_path)
+    out_dir = Path(out_dir)
+    progress = progress or _no_progress
+    cancelled = cancelled or (lambda: False)
+    warnings: list[str] = []
+
+    if not pdf_path.is_file():
+        raise BuildError(f"No PDF at {pdf_path}.")
+    has_fitz, has_llm = pymupdf_status()
+    if not has_fitz:
+        raise BuildError(
+            "PyMuPDF is not installed for the Python running Buddy "
+            f"({sys.executable}).\n\nInstall it with:\n{install_hint()}"
+        )
+    if not has_llm:
+        warnings.append(
+            "pymupdf4llm is not installed, so chunks are plain text without "
+            "headings or tables. Install it for better chunks: "
+            + install_hint()
+        )
+    if embedder is None:
+        from .embedder import from_settings
+        embedder = from_settings({})
+    embed, why = embedder.ready() if embedder is not None else (False, "Semantic search is off in Settings.")
+    if not embed:
+        if require_vectors:
+            raise BuildError(f"{why} Vectors were required, so nothing was built.")
+        warnings.append(
+            f"{why} Built a keyword-only bundle – rebuild once semantic "
+            "search is set up."
+        )
+
+    doc = _open_pdf(pdf_path)
+    staging = out_dir.with_name(out_dir.name + ".building")
+    try:
+        pdf_meta = dict(doc.metadata or {})
+        page_count = doc.page_count
+        pages = _extract(doc, progress, cancelled)
+        if not any(p["meta"] for p in pages):
+            raise BuildError(
+                f"{pdf_path.name} has no 'Section | Chapter N Title' page "
+                "footers. Is it the DaVinci Resolve Reference Manual?"
+            )
+
+        progress("chunk", 0, 0, "Splitting into passages")
+        chunks, chapters = chunk_pages(pages)
+        if not chunks:
+            raise BuildError(f"No text could be extracted from {pdf_path.name}.")
+
+        vectors = _embed_all(embedder, chunks, progress, cancelled) if embed else None
+
+        if cancelled():
+            raise BuildCancelled()
+        progress("write", 0, 0, "Writing the bundle")
+        if staging.exists():
+            shutil.rmtree(staging)
+        staging.mkdir(parents=True)
+        with open(staging / BUNDLE_CHUNKS, "w", encoding="utf-8", newline="\n") as f:
+            for c in chunks:
+                f.write(json.dumps(c, ensure_ascii=False) + "\n")
+        (staging / BUNDLE_CHAPTERS).write_text(
+            json.dumps(chapters, indent=1, ensure_ascii=False), encoding="utf-8"
+        )
+        if vectors is not None:
+            (staging / BUNDLE_VECTORS).write_bytes(vectors)
+        meta = {
+            "model": embedder.model_name if vectors is not None else None,
+            "vector": (
+                {"full_dim": FULL_DIM, "mrl_dim": MRL_DIM, "dtype": "int8"}
+                if vectors is not None else None
+            ),
+            "prefixes": {
+                "query": "task: search result | query: ",
+                "document": "title: <chapter title> | text: ",
+            },
+            "chunks": len(chunks),
+            "chapter_count": len(chapters) - 1,
+            "built_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "source": {
+                "file": pdf_path.name,
+                # Citations open this file at their page (manual_pdf.py).
+                "path": str(pdf_path.resolve()),
+                "title": pdf_meta.get("title", ""),
+                "pdf_modified": pdf_meta.get("modDate", ""),
+                "pages": page_count,
+                "extractor": "pymupdf4llm" if has_llm else "pymupdf",
+            },
+            "license_note": LICENSE_NOTE,
+        }
+        (staging / BUNDLE_META).write_text(
+            json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8"
+        )
+        for name in CARRY_OVER:
+            if (out_dir / name).exists():
+                shutil.copy2(out_dir / name, staging / name)
+
+        previous = out_dir.with_name(out_dir.name + ".previous")
+        if out_dir.exists():
+            if previous.exists():
+                shutil.rmtree(previous)
+            out_dir.rename(previous)
+        staging.rename(out_dir)
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+    finally:
+        doc.close()
+
+    return BuildResult(
+        out_dir=out_dir,
+        chunks=len(chunks),
+        chapters=len(chapters) - 1,
+        pages=page_count,
+        has_vectors=vectors is not None,
+        seconds=time.time() - t0,
+        warnings=warnings,
+    )
+
+
+def read_bundle_meta(bundle_dir: str | Path) -> dict:
+    """meta.json of an existing bundle, or {} - for the Settings summary."""
+    try:
+        return json.loads((Path(bundle_dir) / BUNDLE_META).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}

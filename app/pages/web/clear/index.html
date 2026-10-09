@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Clear browsing data</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="clear.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body class="window">
+<main class="cd">
+    <label class="lbl cd-span">From
+        <select class="field" id="span" aria-label="From">
+            <option value="hour">The last hour</option>
+            <option value="day">The last 24 hours</option>
+            <option value="week">The last 7 days</option>
+            <option value="all" selected>All time</option>
+        </select>
+    </label>
+    <div class="cd-list">
+        <label class="cd-item"><input type="checkbox" value="history" checked>
+            <span><b>History</b><small>The pages you've visited.</small></span></label>
+        <label class="cd-item"><input type="checkbox" value="sites" checked>
+            <span><b>Address bar suggestions</b><small>The sites it finishes as you type.</small></span></label>
+        <label class="cd-item"><input type="checkbox" value="closed" checked>
+            <span><b>Recently closed tabs</b><small>What Reopen closed tab brings back.</small></span></label>
+        <label class="cd-item"><input type="checkbox" value="downloads">
+            <span><b>Downloads list</b><small>The list only - the files stay where they are.</small></span></label>
+        <label class="cd-item"><input type="checkbox" value="cookies">
+            <span><b>Cookies and sign-ins</b><small>Signs you out of every site, and clears what they've
+                stored. Always all time.</small></span></label>
+        <label class="cd-item"><input type="checkbox" value="cache" checked>
+            <span><b>Cached pictures and files</b><small>Pages load a little slower the next time.
+                Always all time.</small></span></label>
+        <label class="cd-item"><input type="checkbox" value="permissions">
+            <span><b>Site permissions</b><small>What sites were allowed or blocked - camera, microphone,
+                notifications. Always all time.</small></span></label>
+    </div>
+    <p class="cd-note" id="note"></p>
+    <footer class="cd-foot">
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="cancel">Cancel</button>
+        <button type="button" class="btn danger" id="go">Clear data</button>
+    </footer>
+</main>
+<script src="clear.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+"""Runs the whole test suite and exits with its result.
+
+    python tests/run_suite.py [-v]
+
+The same as `python -m unittest discover tests`, except for how it ends: it
+leaves with os._exit() once the results are printed, skipping Python's
+normal shutdown. The page tests create QtWebEngine views, and Qt WebEngine's
+own teardown at process exit can crash (an access violation after "OK"),
+which would turn a passing run into a failed exit code - the release
+workflow uses this runner for that reason.
+
+It also sets BUDDY_HOME (core/tool_dirs.py) to a new empty folder, unless
+it's set already, so nothing a test writes by accident lands in the real
+~/.buddy - the folder is removed at the end.
+"""
+
+import os
+import shutil
+import sys
+import tempfile
+import unittest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+if __name__ == "__main__":
+    os.chdir(ROOT)
+    sandbox = None
+    if not os.environ.get("BUDDY_HOME", "").strip():
+        sandbox = tempfile.mkdtemp(prefix="buddy-home-")
+        os.environ["BUDDY_HOME"] = sandbox      # before the tests import anything of Buddy's
+    program = unittest.main(module=None, argv=[sys.argv[0], "discover", "tests", *sys.argv[1:]], exit=False)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    if sandbox:
+        shutil.rmtree(sandbox, ignore_errors=True)
+    os._exit(0 if program.result.wasSuccessful() else 1)

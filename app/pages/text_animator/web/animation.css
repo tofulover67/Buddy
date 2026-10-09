@@ -1,0 +1,888 @@
+/* Animation's own layout. Colours only from buddy.css's theme variables, so
+   every theme and palette draws it its own way. */
+
+.pv {
+    /* One colour per pack: the theme's emphasis (its accent, but Resolve's
+       bright grey - its red means focus), its second colour, and the two
+       mixed; Text and Loops lean one way and the other between them.
+       Off-world is one phosphor, so every pack comes out as it. */
+    --pack-essentials: var(--emphasis);
+    --pack-text: color-mix(in srgb, var(--emphasis) 75%, var(--second-text));
+    --pack-loops: color-mix(in srgb, var(--emphasis) 25%, var(--second-text));
+    --pack-camera: color-mix(in srgb, var(--second-text) 60%, var(--text-strong));
+    --pack-classic: var(--second-text);
+    --pack-magic: color-mix(in srgb, var(--emphasis) 50%, var(--second-text));
+    --pack-saved: color-mix(in srgb, var(--emphasis) 35%, var(--text-strong));
+    display: flex; flex-direction: column; gap: var(--section-gap);
+    flex: 1 1 auto; min-height: 0;
+}
+
+/* Seven tabs scroll sideways on their own in a narrow window, as Subtitles'
+   do (transcribe.css) - not the whole page (Offworld's wide letters pushed
+   Transitions 60px past the edge at 620px). */
+#sections { overflow-x: auto; overflow-y: hidden; flex: none; }
+#sections button { white-space: nowrap; }
+
+/* The title, tabs and apply card stay put and only the presets scroll, in a
+   box of their own - not a sticky card over a scrolling page: on a see-through
+   page (Modern, Nova) Qt's web view left trails of the stuck card behind.
+   The box reaches a few px past the presets so a tile's focus ring and
+   chosen edge aren't clipped. */
+.page:has(> .pv:not([hidden])) { overflow: hidden; }
+.pv-scroll {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: var(--section-gap);
+    padding: 3px; margin: -3px;
+}
+
+/* --------------------------------------------------------- apply card -- */
+
+/* A wrapping row, not a grid: whatever doesn't fit beside the rest goes onto
+   the next line, so a wider theme font can never push the options under the
+   buttons. */
+.pv-apply {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 18px;
+    align-items: center;
+    padding: var(--card-pad);
+    --pack: var(--pack-essentials);
+}
+.pv-chosen { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pv-stage-lg { width: 128px; flex: none; }
+.pv-chosen-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pv-chosen-name { color: var(--text-strong); font-weight: 700; font-size: var(--fs-lg); }
+/* No min-width: 0 - it shrinks only to its widest option, then wraps the card. */
+.pv-options { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.pv-opt { display: inline-flex; align-items: center; gap: 8px; }
+.pv-opt.pv-off { opacity: .45; }            /* Animate by on Clip: Stagger and Order wait, in place */
+.pv-opt.pv-off button { cursor: default; }
+.pv-target { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; margin-left: auto; }
+.pv-sel { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 280px; }
+.pv-go { justify-content: flex-end; }
+.pv-reframed { justify-content: flex-end; }
+
+/* Narrow panes: the card stacks - too tall to keep in view, so the whole
+   page scrolls again. */
+@media (max-width: 720px) {
+    .page:has(> .pv:not([hidden])) { overflow-y: auto; }
+    .pv { flex: none; }
+    .pv-scroll { overflow: visible; flex: none; }
+    .pv-apply { flex-direction: column; align-items: stretch; }
+    .pv-target { align-items: stretch; margin-left: 0; }
+    .pv-sel { justify-content: flex-start; max-width: none; }
+}
+
+/* ------------------------------------------------------------ toolbar -- */
+
+.pv-bar { display: flex; align-items: center; gap: var(--control-gap); flex-wrap: wrap; }
+/* A narrow window can't fit every pack or kind on one line: they wrap. */
+.pv-bar .segmented { flex-wrap: wrap; max-width: 100%; }
+.pv-search { width: 200px; }
+.pv-play { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.segmented .n { color: var(--text-dim); font-weight: 400; margin-left: 5px; }
+.segmented button[aria-pressed="true"] .n { color: inherit; opacity: .75; }
+
+/* ------------------------------------------------------------- groups -- */
+
+.pv-groups { display: flex; flex-direction: column; gap: 18px; padding-bottom: 12px; }
+.pv-group-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px; width: 100%;
+    padding: 2px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.pv-group-head:disabled { cursor: default; }
+.pv-group-head:not(:disabled):hover .section-title { color: var(--emphasis); }
+.pv-group.folded .pv-group-head { margin-bottom: 0; }
+.pv-fold { display: inline-flex; color: var(--text-dim); transition: transform .15s; }
+.pv-fold .icon-svg { width: 14px; height: 14px; }
+.pv-group-head[aria-expanded="true"] .pv-fold { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .pv-fold { transition: none; } }
+.pv-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--pack); align-self: center; }
+
+.pv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+    gap: 10px;
+}
+
+/* -------------------------------------------------------------- tiles -- */
+
+.pv-tile {
+    position: relative;
+    padding: 6px;
+    display: flex; flex-direction: column; gap: 6px;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    transition: border-color .15s, box-shadow .15s;
+}
+.pv-tile:hover { border-color: var(--btn-hover-border); }
+.pv-tile[aria-pressed="true"] {
+    border-color: var(--accent-text);
+    box-shadow: 0 0 0 1px var(--accent-text), var(--card-shadow);
+}
+.pv-tile:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+
+/* The little viewer a preset plays in: a well, like a field. Its edge is
+   softer than a field's - it sits inside the card's own, and two full ink
+   lines (Retro, Desktop) read as a double frame. */
+.pv-stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--field-bg);
+    border: 1px solid color-mix(in srgb, var(--field-border) 45%, transparent);
+    border-radius: var(--r-md);
+    overflow: hidden;
+}
+.pv-stage svg { display: block; width: 100%; height: 100%; }
+.pv-guide { stroke: var(--text-dim); stroke-width: .5; opacity: .22; fill: none; }
+.pv-safe { stroke: var(--text-dim); stroke-width: .5; opacity: .3; fill: none; stroke-dasharray: 2 2; }
+/* What moves: the pack's colour, with its details cut back to the well. */
+.pv-obj { fill: var(--pack); }
+.pv-line { fill: var(--field-bg); }
+/* Sized by its font-size attribute, in the stage's own 128x72 units. */
+.pv-word { font-family: var(--font); font-weight: 800; letter-spacing: -.02em; }
+
+/* Where the preset moves along its length - In, Emphasis, Out - and a playhead. */
+.pv-track {
+    position: relative; height: 4px; margin: 0 2px;
+    border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--text-dim) 22%, transparent);
+    overflow: hidden;
+}
+.pv-seg { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--pack) 55%, transparent); }
+.pv-head { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--text-strong); }
+
+.pv-meta { display: flex; flex-direction: column; gap: 1px; padding: 0 2px 2px; min-width: 0; }
+.pv-name {
+    color: var(--text-strong); font-weight: 600; font-size: var(--fs-md);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pv-sub { display: flex; gap: 6px; }
+.pv-dur { margin-left: auto; font-family: var(--font-mono); }
+
+/* A tile's heart and edit buttons, over its viewer's corner: shown on hover
+   or focus - a heart that's on always shows. */
+.pv-acts {
+    position: absolute; top: 10px; right: 10px;
+    display: flex; gap: 4px;
+}
+.pv-act {
+    width: 24px; height: 24px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--r-full);
+    border: var(--bw) solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-dim);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s, color .15s;
+}
+.pv-act svg { width: 13px; height: 13px; }
+.pv-tile:hover .pv-act, .pv-tile:focus-within .pv-act, .pv-act[aria-pressed="true"] { opacity: 1; }
+.pv-act:hover { color: var(--text-strong); }
+.pv-act.heart[aria-pressed="true"] { color: var(--emphasis); }
+.pv-act.heart[aria-pressed="true"] svg { fill: currentColor; }
+
+/* ------------------------------------------------------------- Editor -- */
+
+.ed { display: flex; flex-direction: column; gap: var(--section-gap); }
+.ed-head {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px;
+    padding: var(--card-pad);
+}
+.ed-field { display: flex; flex-direction: column; gap: 4px; }
+.ed-field #ed-base { min-width: 200px; }
+.ed-name .field { width: 180px; }
+.ed-dur { display: inline-flex; align-items: center; gap: 6px; }
+.ed-dur .field { width: 74px; }
+.ed-save { flex-wrap: wrap; }
+
+.ed-main {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: var(--section-gap);
+    align-items: start;
+}
+.ed-view { padding: var(--card-pad); display: flex; flex-direction: column; gap: 10px; }
+.ed-stage { width: 100%; --pack: var(--emphasis); }     /* the shape, drawn as Previews' Essentials are */
+.ed-transport { gap: 10px; }
+.ed-time { font-family: var(--font-mono); }
+.ed-try { display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+          padding-top: 10px; border-top: var(--bw) solid var(--card-border); }
+.ed-try .pv-sel { justify-content: flex-start; max-width: none; }
+.ed-note { margin: 0; }
+
+.ed-graph-card { padding: var(--card-pad); display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ed-tools { flex-wrap: wrap; gap: 6px; }
+.ed-tools .segmented button { padding: 4px 10px; }
+/* Fifteen channels don't fit one line in a narrow window: they wrap. */
+#ed-channels { flex-wrap: wrap; max-width: 100%; }
+/* The playhead's frame, beside the channels: figures of one width, so it doesn't jitter. */
+.ed-frame { font-family: var(--font-mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+            color: var(--text-strong); white-space: nowrap; margin-left: 6px; }
+.ed-graph-wrap { position: relative; height: 340px; min-width: 0; }
+.ed-graph {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    display: block;
+    background: var(--field-bg);
+    border: var(--bw) solid color-mix(in srgb, var(--field-border) 45%, transparent);
+    border-radius: var(--r-md);
+    touch-action: none;
+    user-select: none;
+    cursor: crosshair;
+}
+.ed-graph:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.ed-hint { margin: 0; }
+
+/* The graph's parts. A channel's colour comes in as --ch. */
+.ed-grid { stroke: var(--text-dim); stroke-width: 1; opacity: .14; }
+.ed-axis { fill: var(--text-dim); font-size: var(--fs-xs); font-family: var(--font-mono); }
+.ed-rest { stroke: var(--text-dim); stroke-width: 1; stroke-dasharray: 3 4; opacity: .55; }
+.ed-move { fill: var(--text-dim); opacity: .06; }
+.ed-curve { fill: none; stroke: var(--ch); stroke-width: 2.25; pointer-events: none; }
+/* A channel not shown: its own colour, muted and faint, behind. */
+.ed-ghost { fill: none; stroke: color-mix(in srgb, var(--ch) 55%, var(--text-dim)); stroke-width: 1.5; opacity: .45; pointer-events: none; }
+/* Another channel shown beside the one being edited: its own colour, under it. */
+.ed-curve.other { stroke-width: 1.75; opacity: .8; pointer-events: none; }
+.ed-key.other { stroke-width: 1.75; cursor: pointer; }
+/* A wide, unseen line along a shown channel's curve: a press on it edits that channel. */
+.ed-hit { fill: none; stroke: transparent; stroke-width: 12; pointer-events: stroke; cursor: pointer; }
+/* Where a dragged key snapped to another channel's key. */
+.ed-snap { stroke: var(--text-strong); stroke-width: 1; stroke-dasharray: 2 3; opacity: .75; pointer-events: none; }
+.ed-axis.ed-value { fill: var(--ch); opacity: .9; }
+.ed-key { fill: var(--field-bg); stroke: var(--ch); stroke-width: 2; cursor: grab; }
+.ed-key.sel { fill: var(--ch); }
+.ed-arm { stroke: var(--ch); stroke-width: 1; opacity: .7; }
+.ed-hand { fill: var(--field-bg); stroke: var(--ch); stroke-width: 1.5; cursor: grab; }
+.ed-head-line { stroke: var(--text-strong); stroke-width: 1.5; opacity: .8; pointer-events: none; }
+/* The time bar along the top: the one place that moves the playhead. */
+.ed-bar { fill: var(--raised-bg); stroke: color-mix(in srgb, var(--field-border) 45%, transparent); cursor: ew-resize; }
+.ed-tick { stroke: var(--text-dim); stroke-width: 1; opacity: .5; pointer-events: none; }
+.ed-bar-label { pointer-events: none; }
+.ed-head-knob { fill: var(--text-strong); pointer-events: none; }
+/* The part of the curve the kind leaves out. */
+.ed-unused { fill: var(--field-bg); opacity: .75; pointer-events: none; }
+/* The box dragged around keys to select them. */
+.ed-box { fill: color-mix(in srgb, var(--accent-text) 12%, transparent); stroke: var(--accent-text);
+          stroke-width: 1; stroke-dasharray: 4 3; pointer-events: none; }
+.ed-kind-note { margin: 0; }
+
+/* The selected keys' menu: a small bar of icons beside them, over the graph. */
+.ed-keymenu {
+    position: absolute; z-index: 3;
+    display: flex; align-items: center; gap: 1px;
+    padding: 3px;
+    background: var(--pop-bg);
+    border: var(--bw) solid var(--pop-border);
+    border-radius: var(--r-md);
+    box-shadow: var(--pop-shadow);
+    backdrop-filter: var(--pop-blur);
+}
+.ed-km-btn {
+    width: 26px; height: 26px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 0; border-radius: var(--r-sm);
+    background: transparent; color: var(--text);
+    cursor: pointer;
+}
+.ed-km-btn svg { width: 15px; height: 15px; }
+.ed-km-btn:hover:not(:disabled) { background: var(--pop-hover-bg); color: var(--pop-hover-fg); }
+.ed-km-btn:disabled { opacity: .35; cursor: default; }
+.ed-km-sep { width: 1px; align-self: stretch; margin: 4px 3px; background: var(--pop-border); }
+/* Its grip: drag to move it, double-click to put it back by the keys. */
+.ed-km-grip {
+    width: 14px; height: 26px; margin-right: 2px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--text-dim);
+    border-radius: var(--r-sm);
+    cursor: grab; touch-action: none;
+}
+.ed-km-grip svg { width: 14px; height: 14px; }
+.ed-km-grip:hover { color: var(--text-strong); background: var(--pop-hover-bg); }
+.ed-keymenu.moving, .ed-keymenu.moving .ed-km-grip { cursor: grabbing; }
+.ed-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ch); display: inline-block; margin-right: 6px; }
+.ed-still { opacity: .55; }
+/* The channel being edited, of the ones shown: a ring round its dot. */
+#ed-channels .ed-editing .ed-dot { box-shadow: 0 0 0 2px var(--field-bg), 0 0 0 3.5px var(--ch); }
+#ed-channels button[aria-pressed="false"] .ed-dot { opacity: .45; }
+
+/* Each channel's colour: vivid and apart, to tell them apart drawn over
+   each other. A colour picked by right-clicking a channel is set inline. */
+.ed {
+    --ch-x: #ff5a5f;
+    --ch-y: #3ddc84;
+    --ch-r: #ffb21e;
+    --ch-s: #3ea6ff;
+    --ch-o: #d07bff;
+    --ch-b: #9aa4b1;
+    --ch-w: #ff8ad8;
+    --ch-h: #2fd6c9;
+    --ch-m: #f5f07a;
+    --ch-k: #a3e05a;
+    --ch-e: #ff9e5e;
+    --ch-l: #ffffff;
+    --ch-c: #ff4fa3;
+    --ch-f: #7fb2ff;
+    --ch-g: #b48bff;
+    --ch: var(--ch-s); }      /* the channel being drawn: set per curve and per button */
+
+@media (max-width: 860px) {
+    .ed-main { grid-template-columns: 1fr; }
+    .ed-view { max-width: 420px; }
+}
+
+/* ------------------------------------------------------------ Presets -- */
+
+/* Highlight's card: the preview and what it says, the choices, then the
+   clips it goes on - a wrapping row like Previews' apply card. */
+.hl { display: flex; flex-direction: column; gap: var(--section-gap); }
+.hl-card {
+    display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center;
+    padding: var(--card-pad);
+}
+.hl-view { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1 1 360px; }
+.hl-player { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.hl-stage { width: 240px; flex: none; background: #2a2d33; }
+.hl-transport { gap: 8px; }
+.hl-time { font-family: var(--font-mono); }
+.hl-meta { display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 420px; }
+.hl-options { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.hl-options .segmented { flex-wrap: wrap; }
+.hl-foot { margin: 0; }
+
+/* A colour button: its swatch and name. */
+.hl-color { display: inline-flex; align-items: center; gap: 7px; }
+/* A real border, not an inset shadow: GPU painting (AMD) drops an inset
+   shadow's bottom-left corner on a rounded box. */
+.hl-swatch {
+    width: 14px; height: 14px; border-radius: 4px; flex: none; box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, .35);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .25);
+}
+
+/* The preview: a caption on a dim frame, as it'll look over footage - a
+   fixed dark well in every theme, since the captions are white. Words
+   are spans; the box is one element moving behind them. */
+.hl-caption {
+    position: absolute; left: 6%; right: 6%; bottom: 14%;
+    text-align: center;
+    font-family: var(--font); font-weight: 700; font-size: var(--fs-lg); line-height: 1.25;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .5);
+}
+.hl-word { position: relative; z-index: 1; display: inline-block; transform-origin: 50% 60%; }
+.hl-box { position: absolute; z-index: 0; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+.hl-stage .hl-word.lit { text-shadow: none; }
+
+/* The timing strip: a caption's words along its length, each a chip from
+   its start to the next word's, dragged by its start. */
+.hl-timing { padding: var(--card-pad); display: flex; flex-direction: column; gap: 10px; }
+.hl-timing-head { gap: 8px; flex-wrap: wrap; align-items: center; }
+.hl-strip {
+    position: relative; height: 66px;
+    background: var(--field-bg);
+    border: 1px solid color-mix(in srgb, var(--field-border) 60%, transparent);
+    border-radius: var(--r-md);
+    overflow: hidden; user-select: none; outline: none;
+}
+.hl-strip:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.hl-ruler {
+    position: absolute; left: 0; right: 0; top: 0; height: 18px; cursor: pointer;
+    border-bottom: 1px solid color-mix(in srgb, var(--field-border) 50%, transparent);
+}
+.hl-tick {
+    position: absolute; top: 0; height: 100%; padding-left: 3px;
+    border-left: 1px solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+    font-size: var(--fs-xs); line-height: 18px; color: var(--text-dim);
+}
+.hl-lane { position: absolute; left: 0; right: 0; top: 24px; bottom: 8px; }
+.hl-chip {
+    position: absolute; top: 0; bottom: 0; box-sizing: border-box;
+    display: flex; align-items: center; padding: 0 6px;
+    /* One border width all round, and the start marked by a stripe in the
+       background: a thicker left border on a rounded box had its
+       bottom-left corner bitten under Buddy's GPU painting (AMD). */
+    border-radius: 6px; border: 1px solid color-mix(in srgb, var(--text-strong) 16%, transparent);
+    padding-left: 9px;
+    --chip-fill: color-mix(in srgb, var(--text-strong) 8%, transparent);
+    background: linear-gradient(90deg, var(--emphasis) 3px, var(--chip-fill) 3px);
+    color: var(--text-strong); font-size: var(--fs-sm); white-space: nowrap; overflow: hidden;
+    cursor: ew-resize; touch-action: none;
+}
+.hl-chip.now { --chip-fill: color-mix(in srgb, var(--emphasis) 16%, transparent); }
+.hl-chip.sel { --chip-fill: color-mix(in srgb, var(--emphasis) 32%, transparent); border-color: var(--emphasis); }
+.hl-head, .hl-resolve-head { position: absolute; top: 0; bottom: 0; width: 0; pointer-events: none; }
+.hl-head { border-left: 1px solid var(--text-strong); opacity: .55; }
+.hl-resolve-head { border-left: 2px solid var(--accent-text); }
+
+/* --------------------------------------------------------------- Zoom -- */
+
+/* The selected clip playing, its zooms on a track under it. Every rounded
+   box here has one border width all round and no inset shadow: GPU painting
+   on AMD bites the corner off either (see .hl-chip). */
+.zm { display: flex; flex-direction: column; gap: var(--section-gap); }
+.zm-card { padding: var(--card-pad); display: flex; flex-direction: column; gap: 12px; }
+.zm-top { gap: 8px; flex-wrap: wrap; align-items: center; }
+.zm-main { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+/* The picture at a working size, not the pane's whole width. */
+.zm-viewer { flex: 0 1 580px; max-width: 580px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.zm-stage {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background: #000; border-radius: var(--r-md); overflow: hidden;
+    user-select: none; touch-action: none;
+}
+.zm-img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 50%; display: block; }
+.zm-img:not([src]), .zm-img[src=""] { visibility: hidden; }
+.zm-lut { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 50% 50%; display: block; }
+.zm-stage:not(.graded) .zm-lut, .zm-stage.graded .zm-img { visibility: hidden; }
+/* An adjustment clip: the clips under it fitted into the timeline's frame, as Resolve fits them. */
+.zm-stage.adjust .zm-img { object-fit: contain; background: #000; }
+.zm-frame {
+    position: absolute; box-sizing: border-box; border: 2px solid #fff;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, .45); cursor: move;
+}
+.zm-corner {
+    position: absolute; width: 12px; height: 12px; box-sizing: border-box;
+    background: #fff; border: 1px solid rgba(0, 0, 0, .5);
+}
+.zm-corner[data-corner="nw"] { left: -7px; top: -7px; cursor: nwse-resize; }
+.zm-corner[data-corner="se"] { right: -7px; bottom: -7px; cursor: nwse-resize; }
+.zm-corner[data-corner="ne"] { right: -7px; top: -7px; cursor: nesw-resize; }
+.zm-corner[data-corner="sw"] { left: -7px; bottom: -7px; cursor: nesw-resize; }
+.zm-note {
+    position: absolute; left: 10px; bottom: 8px; padding: 2px 8px; border-radius: 6px;
+    background: rgba(0, 0, 0, .55); color: #fff; font-size: var(--fs-sm); pointer-events: none;
+}
+.zm-note:empty { display: none; }
+.zm-transport { gap: 6px; align-items: center; }
+.zm-time { font-family: var(--font-mono); margin-left: 4px; }
+.zm-side { flex: 1 1 260px; min-width: 220px; display: flex; flex-direction: column; gap: 8px; }
+.zm-kinds { display: flex; flex-wrap: wrap; gap: 6px; }
+.zm-edit { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.zm-scale { display: flex; align-items: center; gap: 8px; }
+.zm-scale input { flex: 1 1 auto; min-width: 0; }
+.zm-scale-text { font-family: var(--font-mono); min-width: 44px; text-align: right; }
+.zm-hint { margin: 0; }
+
+/* The track: a block a zoom, its easing in and out shaded at its ends. */
+.zm-track { height: 76px; }
+.zm-block {
+    position: absolute; top: 4px; bottom: 0; box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--emphasis) 55%, transparent);
+    border-radius: 6px; cursor: grab;
+    background: color-mix(in srgb, var(--emphasis) 14%, transparent);
+}
+.zm-block.sel { border-color: var(--emphasis); background: color-mix(in srgb, var(--emphasis) 26%, transparent); }
+.zm-block.dragging { cursor: grabbing; }
+.zm-ramps { position: absolute; inset: 0; border-radius: 5px; overflow: hidden; pointer-events: none; }
+.zm-ramp { position: absolute; top: 0; bottom: 0; }
+.zm-ramp.in { left: 0; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--emphasis) 38%, transparent)); }
+.zm-ramp.out { right: 0; background: linear-gradient(270deg, transparent, color-mix(in srgb, var(--emphasis) 38%, transparent)); }
+.zm-label {
+    position: absolute; left: 8px; right: 8px; top: 50%; transform: translateY(-50%);
+    font-size: var(--fs-xs); color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    pointer-events: none;
+}
+.zm-edge { position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; }
+.zm-edge.l { left: -4px; }
+.zm-edge.r { right: -4px; }
+.zm-knob {
+    position: absolute; top: -5px; width: 10px; height: 10px; margin-left: -5px;
+    border-radius: 50%; background: var(--emphasis); cursor: ew-resize;
+}
+.zm-line { z-index: 2; }
+#zm-clip { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* A pan's or follow's framings: the selected one is the box, the rest
+   numbered outlines to click. Square, one border width: nothing to bite. */
+.zm-ghosts { position: absolute; inset: 0; }
+.zm-ghost {
+    position: absolute; box-sizing: border-box; border: 1px dashed rgba(255, 255, 255, .75); cursor: pointer;
+}
+.zm-ghost span, .zm-frame-num {
+    position: absolute; left: 4px; top: 2px; color: #fff; font-size: var(--fs-sm); font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .8); pointer-events: none;
+}
+.zm-frame-num:empty { display: none; }
+.zm-pt {
+    position: absolute; bottom: 3px; width: 16px; height: 16px; margin-left: -8px; box-sizing: border-box;
+    border: 1px solid var(--emphasis); border-radius: 4px; background: var(--card-bg, #222);
+    color: var(--text-strong); font-size: var(--fs-xs); line-height: 14px; text-align: center; cursor: ew-resize;
+}
+.zm-pt.on { background: var(--emphasis-fill); color: var(--on-primary); }
+.zm-points { gap: 6px; flex-wrap: wrap; align-items: center; }
+.zm-check { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fs-sm); }
+
+/* Several clips selected with zooms copied: paste them onto all. */
+.zm-paste-many { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 14px; }
+.zm-paste-buttons { gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+/* ------------------------------------------------------- Transitions -- */
+
+/* As Previews: the card with Play, Apply and the options stays put and only
+   the transitions scroll, in a box of their own (not a sticky card - see
+   .pv-scroll). */
+.tr { display: flex; flex-direction: column; gap: var(--section-gap); flex: 1 1 auto; min-height: 0; }
+.page:has(> .tr:not([hidden])) { overflow: hidden; }
+.tr-scroll {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 3px; margin: -3px;
+}
+@media (max-width: 720px) {
+    .page:has(> .tr:not([hidden])) { overflow-y: auto; }
+    .tr { flex: none; }
+    .tr-scroll { overflow: visible; flex: none; }
+}
+.tr-card { padding: var(--card-pad); display: flex; flex-direction: column; gap: 12px; flex: none; }
+.tr-top { gap: 8px; align-items: center; flex-wrap: wrap; }
+.tr-where { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+.tr-options { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.tr-opt { display: inline-flex; align-items: center; gap: 8px; }
+.tr-slider input { width: 120px; }
+.tr-value { font-family: var(--font-mono); min-width: 40px; }
+.tr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 10px; }
+.tr-tile { padding: 6px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; text-align: left;
+           font: inherit; color: inherit; transition: border-color .15s, box-shadow .15s; }
+.tr-tile:hover { border-color: var(--btn-hover-border); }
+.tr-tile[aria-pressed="true"] { border-color: var(--accent-text); box-shadow: 0 0 0 1px var(--accent-text), var(--card-shadow); }
+.tr-tile:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.tr-stage { position: relative; aspect-ratio: 16 / 9; border-radius: var(--r-md); overflow: hidden; background: #000; }
+.tr-stage canvas { display: block; width: 100%; height: 100%; }
+.tr-name { color: var(--text-strong); font-weight: 600; font-size: var(--fs-md); padding: 0 2px 2px; }
+.tr-hint { margin: 0; }
+.tr-group { grid-column: 1 / -1; color: var(--text-dim); font-size: var(--fs-sm); font-weight: 600; margin-top: 4px; }
+.tr-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--field-border); vertical-align: middle; }
+/* Any colour: a colour wheel until one's chosen, then that colour. */
+.tr-swatch-any { background: conic-gradient(#ff4d4d, #ffd24d, #5cff4d, #4dfff0, #4d6bff, #e14dff, #ff4d4d); }
+
+/* ------------------------------------------------------------- Titles -- */
+
+/* Dynamic titles (titles.js): the Looks rail, the frame and the inspector across the
+   top; the timeline and curves under them (folding to a strip); Place along the
+   bottom. The page doesn't scroll - each part scrolls on its own if it must - until
+   the window's too narrow for the three across, when they stack and the page scrolls. */
+.page:has(> .ti:not([hidden])) { overflow: hidden; }
+.ti {
+    /* The curves' channels: the theme's emphasis and second colour, and three
+       fixed hues that read on any card. */
+    --ti-ch-scale: #ff7a59; --ti-ch-alpha: var(--text-strong); --ti-ch-move: #4ea1ff;
+    --ti-ch-rot: #f2c94c; --ti-ch-blur: #b88cff;
+    /* A word's entrance and exit, in the inspector. */
+    --ti-in: #3fbf7f;
+    --ti-out: #ff8a4c;
+    display: grid; grid-template-rows: minmax(0, 1fr) 236px auto;
+    gap: var(--control-gap); flex: 1 1 auto; min-height: 0;
+}
+.ti.ti-folded { grid-template-rows: minmax(0, 1fr) auto auto; }
+/* A dock card made big: the whole width, and whatever height the frame above can spare
+   (up to half): the frame keeps its row (390px - in a short window, all it had), so the
+   title stays in view to see what an edit does. */
+.ti.ti-x-tl, .ti.ti-x-cv { grid-template-rows: minmax(min(390px, calc(100% - 300px)), 1fr) minmax(236px, 50%) auto; }
+.ti.ti-x-tl .ti-dock, .ti.ti-x-cv .ti-dock { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.ti.ti-x-tl .ti-cv, .ti.ti-x-cv .ti-tl { display: none; }
+.ti-expand { padding: 1px 5px !important; display: inline-flex; align-items: center; margin-left: auto; }   /* right, on whichever row */
+.ti-expand svg { width: 13px; height: 13px; }
+.ti-cv-io button[data-v="in"][aria-pressed="true"] { color: var(--ti-in); }
+.ti-cv-io button[data-v="out"][aria-pressed="true"] { color: var(--ti-out); }
+.ti-expand[aria-pressed="true"] { color: var(--accent-text); }
+/* What's dragged - the frame, the lanes, the curves, the strip - never selects text, nor
+   does anything while a drag's going (titles.js tiDragStart). */
+.ti-stage-wrap, .ti-dock, .ti-strip, .ti-transport { user-select: none; }
+.ti-dock input, .ti-strip input { user-select: text; }
+html.ti-dragging, html.ti-dragging * { user-select: none !important; }
+.ti-studio { display: grid; grid-template-columns: 136px minmax(0, 1fr) 286px; gap: var(--control-gap); min-height: 0; }
+.ti .card { padding: 0; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.ti-hd {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px; min-height: 32px;
+    border-bottom: var(--bw) solid var(--card-border); color: var(--text-strong); font-weight: 600;
+    font-size: var(--fs-xs); letter-spacing: .3px; flex: none;
+}
+.ti-hd .muted { font-weight: 400; letter-spacing: 0; }
+/* Too narrow for a header on one line: it wraps onto a second, nothing breaking inside. */
+.ti-dock .ti-hd { flex-wrap: wrap; row-gap: 4px; }
+.ti-dock .ti-hd > *, .ti-hctl, .ti-hctl * { white-space: nowrap; }
+#ti-tl-sub, #ti-cv-sub { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ti-mono { font-family: var(--font-mono, Consolas, monospace); font-variant-numeric: tabular-nums; }
+.ti .btn.small { padding: 1px 10px; font-size: var(--fs-xs); }
+.ti-seg button { padding: 2px 10px; font-size: var(--fs-xs); }
+.ti-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none;
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-dim) 45%, transparent); }
+
+/* ------------------------------------------------------------ looks rail */
+.ti-looks { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.ti-look {
+    position: relative; display: flex; flex-direction: column; gap: 3px; padding: 3px; cursor: pointer; text-align: left;
+    border: var(--bw) solid transparent; border-radius: var(--r-sm, 4px); background: none; color: inherit; font: inherit;
+}
+.ti-look:hover { border-color: var(--btn-border); }
+.ti-look[aria-selected="true"] { border-color: var(--accent-text); box-shadow: 0 0 0 1px var(--accent-text); }
+.ti-look-name { font-size: var(--fs-xs); color: var(--text-dim); padding: 0 1px; }
+.ti-look[aria-selected="true"] .ti-look-name { color: var(--text-strong); }
+.ti-thumb { display: block; aspect-ratio: 16 / 9; background: #16161a; border-radius: 2px; overflow: hidden; }
+.ti-thumb svg { display: block; width: 100%; height: 100%; }
+.ti-rail-sub { font-size: var(--fs-xs); color: var(--text-dim); text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
+.ti-forget {
+    position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; padding: 0; border-radius: 50%;
+    border: var(--bw) solid var(--card-border); background: var(--card-bg); color: var(--text-dim);
+    cursor: pointer; opacity: 0; line-height: 1;
+}
+.ti-mine:hover .ti-forget, .ti-mine:focus-within .ti-forget { opacity: 1; }
+.ti-forget:hover { color: var(--text-strong); }
+
+/* ---------------------------------------------------------------- centre */
+.ti-hook { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-bottom: var(--bw) solid var(--card-border); flex: none; }
+.ti-text { width: 100%; font-size: 1.1em; }
+.ti-words-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; min-height: 30px; }
+.ti-words { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; flex: 1 1 340px; min-width: 0; }
+.ti-chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px 2px 7px; cursor: pointer;
+    border: var(--bw) solid var(--field-border); border-radius: var(--r-xs, 3px); background: var(--field-bg);
+    color: var(--text-strong); font-size: var(--fs-xs);
+}
+.ti-chip:hover { border-color: var(--btn-hover-border, var(--btn-border)); }
+.ti-chip.on { border-color: var(--accent-text); box-shadow: 0 0 0 1px var(--accent-text) inset; }
+.ti-gap {
+    width: 20px; height: 22px; padding: 0; border: 0; background: none; color: var(--text-dim);
+    cursor: pointer; border-radius: var(--r-xs, 3px); font-size: var(--fs-xs);
+}
+.ti-gap:hover { background: var(--pop-hover-bg, var(--btn-hover-bg)); color: var(--text-strong); }
+.ti-gap.brk { color: var(--text-strong); }
+.ti-gap.mine { color: var(--accent-text); }
+.ti-gap.sugg { box-shadow: 0 0 0 1px var(--btn-border) inset; border-radius: var(--r-xs, 3px); }
+.ti-auto-breaks { margin-left: 6px; }
+.ti-sugg { display: flex; align-items: center; gap: 6px; flex: none; margin-left: auto; }
+.ti-alt {
+    display: flex; align-items: center; gap: 6px; padding: 2px 8px 2px 2px; cursor: pointer;
+    border: var(--bw) solid var(--field-border); border-radius: var(--r-xs, 3px); background: var(--field-bg); color: var(--text);
+}
+.ti-alt:hover { border-color: var(--btn-hover-border, var(--btn-border)); color: var(--text-strong); }
+.ti-alt .ti-thumb { width: 52px; }
+
+.ti-vtools { display: flex; align-items: center; gap: 10px; padding: 5px 10px; flex: none; flex-wrap: wrap; }
+.ti-stage-wrap { position: relative; flex: 1 1 auto; min-height: 120px; margin: 0 10px; display: flex; align-items: center; justify-content: center; }
+.ti-stage { position: relative; background: #111114; box-shadow: 0 0 0 1px var(--card-border); }
+.ti-stage[data-back="light"] { background: #d9d9de; }
+.ti-stage[data-back="checker"] {
+    background: repeating-conic-gradient(#3a3a3f 0 25%, #2c2c30 0 50%) 0 0 / 22px 22px;
+}
+/* The title on a see-through layer of its own: Chromium smooths its letters in grey
+   there, as Qt does, rather than with ClearType's colour fringes. */
+/* Clipped to the frame: a kinetic title's camera passes words far beyond it. */
+.ti-title { position: absolute; inset: 0; will-change: transform; pointer-events: none; overflow: hidden; }
+.ti-title svg { display: block; width: 100%; height: 100%; overflow: hidden; }
+.ti-over { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; }
+.ti-guide { fill: none; stroke: #fff; stroke-opacity: .3; pointer-events: none; }
+.ti-stage[data-back="light"] .ti-guide { stroke: #000; stroke-opacity: .35; }
+.ti-block { fill: transparent; stroke: none; cursor: move; }
+.ti-block.on { stroke: var(--accent-text); stroke-opacity: .8; }
+.ti-word { fill: transparent; stroke: none; cursor: pointer; }
+.ti-word.hover { stroke: #fff; stroke-opacity: .65; }
+.ti-stage[data-back="light"] .ti-word.hover { stroke: #000; }
+.ti-word.on { stroke: var(--accent-text); cursor: move; }
+.ti-arm { stroke: var(--accent-text); pointer-events: none; }
+.ti-knob, .ti-handle { fill: var(--field-bg); stroke: var(--accent-text); }
+.ti-knob { cursor: grab; }
+.ti-handle { cursor: nwse-resize; }
+.ti-spot { fill: #fff; opacity: .55; pointer-events: none; }
+.ti-snap { stroke: #ff4fd8; pointer-events: none; }
+
+/* The toolbar over the frame: the clicked words' role, colour, size. */
+.ti-ftb {
+    position: absolute; z-index: 5; display: flex; align-items: center; gap: 3px; padding: 3px 5px; white-space: nowrap;
+    background: var(--pop-bg); border: var(--bw) solid var(--pop-border); border-radius: var(--r-sm, 4px); box-shadow: var(--pop-shadow);
+}
+.ti-ftb[hidden] { display: none; }
+.ti-ftb button {
+    height: 22px; min-width: 22px; padding: 0; display: inline-grid; place-items: center; cursor: pointer;
+    border: var(--bw) solid transparent; border-radius: var(--r-xs, 3px); background: none; color: var(--text);
+}
+.ti-ftb button:hover { background: var(--pop-hover-bg); color: var(--pop-hover-fg); }
+.ti-ftb button[aria-pressed="true"] { border-color: var(--btn-border); background: var(--pop-hover-bg); color: var(--text-strong); }
+.ti-ftb .ti-tb-txt { display: inline-flex; gap: 4px; padding: 0 6px; font-size: var(--fs-xs); }
+.ti-sw { width: 13px; height: 13px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255, 255, 255, .3); }
+.ti-sep { width: 1px; height: 16px; background: var(--pop-border); margin: 0 2px; }
+
+.ti-transport { display: flex; align-items: center; gap: 10px; padding: 6px 10px 8px; flex: none; }
+.ti-transport .btn.icon { width: 30px; height: 26px; }
+.ti-toggle[aria-pressed="true"] { color: var(--text-strong); border-color: var(--btn-hover-border, var(--btn-border)); }
+.ti-toggle[aria-pressed="false"] { opacity: .5; }
+
+/* ------------------------------------------------------------- inspector */
+.ti-insp-body { overflow-y: auto; padding-bottom: 10px; }
+.ti-ihead { padding: 10px 12px 8px; border-bottom: var(--bw) solid var(--card-border); }
+.ti-big { font-size: var(--fs-lg); font-weight: 800; line-height: 1.15; color: var(--text-strong); word-break: break-word; }
+.ti-grp {
+    padding: 9px 12px; border-bottom: var(--bw) solid var(--card-border);
+    display: grid; grid-template-columns: 66px minmax(0, 1fr); gap: 8px; align-items: center;
+}
+.ti-grp h4 {
+    grid-column: 1 / -1; margin: 0; display: flex; align-items: center; gap: 6px;
+    font-size: var(--fs-xs); color: var(--text-strong); letter-spacing: .5px; text-transform: uppercase; font-weight: 600;
+}
+.ti-lbl { font-size: var(--fs-xs); color: var(--text-dim); display: flex; align-items: center; gap: 4px; }
+.ti-full, .ti-note { grid-column: 1 / -1; }
+.ti-note { margin: 0; font-size: var(--fs-xs); color: var(--text-dim); }
+/* Animation in the inspector: In and Out, each under its own heading, over a strip of
+   where they fall along the title. */
+.ti-sub {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
+    margin-top: 4px; padding-top: 9px; border-top: 1px dashed var(--card-border);
+}
+.ti-grp h4 + .ti-sub, .ti-iostrip + .ti-sub { margin-top: 0; padding-top: 0; border-top: 0; }
+.ti-io {
+    --ti-io: var(--text-dim);
+    font-size: var(--fs-xs); font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+    padding: 1px 8px; border-radius: 999px; color: var(--ti-io);
+    background: color-mix(in srgb, var(--ti-io) 14%, transparent); border: 1px solid color-mix(in srgb, var(--ti-io) 55%, transparent);
+}
+.ti-io.in, .ti-io-bar.in { --ti-io: var(--ti-in); }
+.ti-io.out, .ti-io-bar.out { --ti-io: var(--ti-out); }
+.ti-iostrip {
+    position: relative; height: 30px; border-radius: var(--r-xs, 3px);
+    background: var(--field-bg); box-shadow: inset 0 0 0 1px var(--field-border);
+}
+.ti-io-bar { position: absolute; top: 6px; height: 9px; border-radius: 2px; background: var(--ti-io); }
+.ti-io-hold { position: absolute; top: 10px; height: 2px; background: var(--text-dim); opacity: .55; }
+.ti-io-t { position: absolute; bottom: 2px; left: 4px; font-family: var(--font-mono, Consolas, monospace); font-size: var(--fs-xs); color: var(--text-dim); line-height: 1; }
+.ti-io-t.end { left: auto; right: 4px; }
+.ti-ctl { display: flex; align-items: center; gap: 6px; min-width: 0; flex-wrap: wrap; }
+.ti-ctl input[type="range"] { flex: 1; min-width: 60px; }
+.ti-val { font-family: var(--font-mono, Consolas, monospace); font-size: var(--fs-xs); color: var(--text-strong); min-width: 40px; text-align: right; }
+.ti-num { width: 58px; }
+.ti-reset { border: 0; background: none; color: var(--accent-text); cursor: pointer; padding: 0 2px; font-size: var(--fs-md); line-height: 1; }
+.ti-reset:hover { color: var(--text-strong); }
+/* Choices as separate chips (a pill round a wrapped row reads as broken). */
+.ti-chipset { flex-wrap: wrap; justify-self: start; max-width: 100%; padding: 0; gap: 3px; border: 0; background: none; }
+.ti-chipset button {
+    padding: 2px 8px; font-size: var(--fs-xs); display: inline-flex; align-items: center; gap: 5px;
+    border: var(--bw) solid var(--field-border); border-radius: var(--r-xs, 3px); background: var(--field-bg);
+}
+.ti-sws { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ti-sws button { width: 16px; height: 16px; padding: 0; border-radius: 50%; cursor: pointer; border: 0; box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
+.ti-sws button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3.5px var(--text-strong); }
+.ti-sws .ti-any { background: conic-gradient(#ff4d4d, #ffd24d, #5cff4d, #4dfff0, #4d6bff, #e14dff, #ff4d4d); }
+.ti-kinds { display: flex; flex-wrap: wrap; gap: 4px; }
+.ti-kind {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; cursor: pointer; font: inherit; font-size: var(--fs-xs);
+    border: var(--bw) solid var(--field-border); border-radius: var(--r-xs, 3px); background: var(--field-bg); color: var(--text);
+}
+.ti-kind svg { width: 18px; height: 12px; }
+.ti-kind:hover { color: var(--text-strong); border-color: var(--btn-hover-border, var(--btn-border)); }
+.ti-kind[aria-pressed="true"] { color: var(--selection-fg); background: var(--selection-bg); border-color: transparent; }
+.ti-spots { display: grid; grid-template-columns: repeat(3, 20px); gap: 3px; flex: none; }
+.ti-spots button {
+    width: 20px; height: 14px; padding: 0; cursor: pointer; border-radius: 2px;
+    border: var(--bw) solid var(--field-border); background: var(--field-bg);
+}
+.ti-spots button[aria-pressed="true"] { background: var(--text-strong); border-color: var(--text-strong); }
+.ti-dirpad { display: grid; grid-template-columns: repeat(3, 20px); gap: 2px; }
+.ti-dirpad button {
+    width: 20px; height: 18px; padding: 0; font-size: var(--fs-xs); line-height: 1; cursor: pointer; border-radius: 2px;
+    border: var(--bw) solid var(--field-border); background: var(--field-bg); color: var(--text);
+}
+.ti-dirpad button[aria-pressed="true"] { background: var(--text-strong); color: var(--card-bg); }
+.ti-dirpad span { text-align: center; color: var(--text-dim); }
+.ti-rolerow { grid-column: 1 / -1; display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 6px; align-items: center; }
+.ti-rn { display: flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--text-strong); }
+.ti-rolerow select { width: 100%; min-width: 0; }
+
+/* ------------------------------------------------------------------ dock */
+.ti-dock { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--control-gap); min-height: 0; }
+.ti-dock[hidden] { display: none; }
+.ti-fold { padding: 0 6px !important; }
+.ti-hctl { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
+.ti-hctl input { width: 90px; }
+.ti-lanes { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.ti-ruler {
+    position: sticky; top: 0; z-index: 3; height: 22px; cursor: ew-resize;
+    background: var(--raised-bg, var(--card-bg)); border-bottom: var(--bw) solid var(--card-border);
+}
+.ti-tick { position: absolute; top: 0; bottom: 0; border-left: 1px solid color-mix(in srgb, var(--text-dim) 40%, transparent); }
+.ti-tick.minor { top: 15px; }
+.ti-tick b { position: absolute; left: 3px; top: 2px; font: 400 var(--fs-xs) var(--font-mono, Consolas, monospace); color: var(--text-dim); }
+.ti-endgrip {
+    position: absolute; top: 0; bottom: 0; width: 8px; cursor: col-resize; opacity: .8;
+    background: repeating-linear-gradient(90deg, transparent 0 2px, var(--text-dim) 2px 3px);
+}
+.ti-rows { position: relative; }
+.ti-lline { height: 16px; padding: 2px 8px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim);
+            background: color-mix(in srgb, var(--field-bg) 50%, transparent); }
+.ti-row { display: flex; height: 24px; align-items: center; border-bottom: 1px solid color-mix(in srgb, var(--card-border) 70%, transparent); }
+.ti-row.on { background: color-mix(in srgb, var(--accent-text) 8%, transparent); }
+.ti-name { flex: none; padding: 0 8px; display: flex; gap: 6px; align-items: center; font-size: var(--fs-xs); color: var(--text-strong);
+           cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ti-lane { position: relative; flex: 1; height: 100%; }
+.ti-bar { position: absolute; top: 4px; height: 16px; border-radius: 3px; cursor: grab;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35); }
+.ti-bar::after { content: ""; position: absolute; right: -4px; top: 0; bottom: 0; width: 8px; cursor: col-resize; }
+.ti-bar.out { opacity: .55; }
+.ti-bar.out:hover, .ti-row.on .ti-bar.out { opacity: .8; }
+.ti-bar.out::before { content: ""; position: absolute; left: -4px; top: 0; bottom: 0; width: 8px; cursor: col-resize; }
+.ti-row.on .ti-bar { outline: 1px solid var(--accent-text); outline-offset: 1px; }
+/* The timeline made big: taller lanes, easier to grab. */
+.ti.ti-x-tl .ti-row { height: 36px; }
+.ti.ti-x-tl .ti-bar { top: 7px; height: 22px; }
+.ti.ti-x-tl .ti-hold { top: 17px; }
+.ti-hold { position: absolute; top: 11px; height: 2px; opacity: .5; pointer-events: none; }
+.ti-moved { position: absolute; top: -3px; left: -3px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-text); }
+.ti-ph { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--text-strong); pointer-events: none; z-index: 2; }
+
+/* Length: a value with a step either side, in the timeline's header and the folded strip. */
+.ti-len .ti-num { width: 52px; }
+.ti-units { margin-left: auto; }
+/* A slider's value: double-click it to type one. */
+.ti-val, #ti-stagger-v { cursor: text; }
+.ti-typein, .ti-hctl .ti-typein { width: 58px; padding: 1px 4px; font: inherit; text-align: right; }
+.ti-step { padding: 0 7px !important; min-width: 22px; }
+.ti-cv-wrap { position: relative; flex: 1; min-height: 0; }
+#ti-curves { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; user-select: none; outline: none; }
+.ti-g-key.other { opacity: .75; }
+.ti-g-box { fill: color-mix(in srgb, var(--accent-text) 12%, transparent); stroke: var(--accent-text); stroke-width: 1; stroke-dasharray: 4 3; pointer-events: none; }
+.ti-chs { display: inline-flex; gap: 4px; flex-wrap: wrap; font-weight: 400; }
+.ti-chbtn { display: inline-flex; align-items: center; gap: 5px; }
+.ti-chbtn.on { color: var(--text-strong); border-color: var(--btn-hover-border, var(--btn-border)); }
+.ti-chbtn.off { opacity: .45; }
+.ti-cv-foot { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-top: var(--bw) solid var(--card-border); flex-wrap: wrap; flex: none; }
+.ti-cv.ti-flash { box-shadow: 0 0 0 2px var(--accent-text); transition: box-shadow .2s; }
+.ti-g-grid { stroke: var(--text-dim); opacity: .14; }
+.ti-g-axis { fill: var(--text-dim); font: var(--fs-xs) var(--font-mono, Consolas, monospace); }
+.ti-g-rest { stroke: var(--text-dim); stroke-dasharray: 3 4; opacity: .55; }
+.ti-g-curve { fill: none; stroke-width: 2.25; pointer-events: none; }
+.ti-g-curve.other { stroke-width: 1.5; opacity: .4; pointer-events: stroke; cursor: pointer; }
+.ti-g-hit { fill: none; stroke: transparent; stroke-width: 14; cursor: copy; }
+.ti-g-key { fill: var(--field-bg); stroke-width: 2; cursor: grab; }
+.ti-g-key.on { fill: currentColor; }
+.ti-g-arm { stroke-width: 1; opacity: .7; pointer-events: none; }
+.ti-g-hand { fill: var(--field-bg); stroke-width: 1.5; cursor: grab; }
+.ti-g-head { stroke: var(--text-strong); stroke-width: 1; opacity: .7; pointer-events: none; }
+
+/* The folded dock: a strip with the title's length, its words' entrances and the playhead. */
+.ti-strip { display: flex; align-items: center; gap: 10px; padding: 4px 6px; border: var(--bw) solid var(--card-border); border-radius: var(--card-radius); background: var(--card-bg); }
+.ti-strip[hidden] { display: none; }
+.ti-mini { position: relative; flex: 1; height: 14px; border-radius: 3px; cursor: ew-resize;
+           background: color-mix(in srgb, var(--field-bg) 80%, transparent); box-shadow: inset 0 0 0 1px var(--field-border); }
+.ti-mini-in { position: absolute; top: 3px; height: 8px; border-radius: 2px; opacity: .85; pointer-events: none; }
+.ti-mini-head { position: absolute; top: -2px; bottom: -2px; width: 0; border-left: 2px solid var(--text-strong); pointer-events: none; }
+
+.ti-foot { display: flex; align-items: center; gap: 12px; padding: 2px 2px 0; flex-wrap: wrap; }
+
+/* Too narrow for three across: the rail runs along the top, the inspector under the
+   frame, and the page scrolls. */
+@media (max-width: 1000px) {
+    .page:has(> .ti:not([hidden])) { overflow-y: auto; }
+    .ti { grid-template-rows: auto 236px auto; flex: none; }
+    .ti-studio { grid-template-columns: minmax(0, 1fr); }
+    .ti-rail .ti-looks { flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+    .ti-look { width: 120px; flex: none; }
+    .ti-rail .ti-rail-sub { flex: none; align-self: center; margin-top: 0; }
+    .ti-center { height: 70vh; min-height: 380px; }
+    .ti-insp .ti-insp-body { max-height: none; }
+    .ti-dock { grid-template-columns: minmax(0, 1fr); grid-template-rows: 236px 236px; }
+    .ti, .ti.ti-x-tl, .ti.ti-x-cv { grid-template-rows: auto auto auto; }
+    .ti.ti-x-tl .ti-dock, .ti.ti-x-cv .ti-dock { grid-template-rows: max(360px, 60vh); }
+}

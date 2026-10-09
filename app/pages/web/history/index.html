@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>History</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="history.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body class="window">
+<main class="hi">
+    <header class="hi-head">
+        <input type="search" class="field hi-search" id="search" placeholder="Search history" autocomplete="off"
+               spellcheck="false" aria-label="Search history">
+        <span class="hi-profile" id="profile" translate="no"></span>
+    </header>
+    <div class="hi-list" id="list" role="list" aria-label="History"></div>
+    <footer class="hi-foot">
+        <span id="count"></span>
+        <button type="button" class="btn ghost" id="more" hidden>Show more</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="clear">Clear browsing data…</button>
+    </footer>
+    <p class="hi-tip">Click a page (or Enter) to open it in a new tab - Shift+click opens it in the tab you're on.
+        Private tabs are never kept here.</p>
+</main>
+<script src="history.js"></script>
+</body>
+</html>

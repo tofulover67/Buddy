@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Buddy's macOS installer (build_mac_installer.py fills in @VERSION@).
+     The macOS counterpart of installer/Buddy.iss. -->
+<installer-gui-script minSpecVersion="2">
+    <title>Buddy</title>
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <readme file="readme.html" mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+    <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64"/>
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <choices-outline>
+        <line choice="default"/>
+    </choices-outline>
+    <choice id="default" title="Buddy">
+        <pkg-ref id="com.buddy.installer"/>
+    </choice>
+    <pkg-ref id="com.buddy.installer" version="@VERSION@" onConclusion="none">Buddy-component.pkg</pkg-ref>
+</installer-gui-script>

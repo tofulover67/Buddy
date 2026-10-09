@@ -1,0 +1,391 @@
+{
+  "_comment": [
+    "What each Buddy tool can do, in the agent's words rather than the nav rail's.",
+    "Every entry is derived from that tool's own code and documentation - not",
+    "invented. When a tool changes, update its entry here; nothing reads the",
+    "tool's code at runtime.",
+    "",
+    "Availability is NOT stored here. core/tools_kb.py computes it from the live",
+    "registry via ToolPage.is_placeholder, so this file can never claim a tool",
+    "works when the shell still shows a placeholder for it."
+  ],
+  "tools": {
+    "manual_chat": {
+      "name": "Ask Buddy",
+      "summary": "This chat. Answers DaVinci Resolve questions from the reference manual with chapter and page citations, and can read your open project.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Hybrid semantic + keyword search over the DaVinci Resolve 21 Reference Manual, citing chapter and page for every claim",
+        "Click a citation to open the manual PDF at that page; save, search, rename and delete local conversations (one at a time, or all of them)",
+        "Reads the currently open Resolve project read-only: timeline frame rate and resolution, colour management settings, track counts, selected clip properties",
+        "Checks the current timeline for format mismatches and missing local media paths, and explains the selected clip or clip under the playhead",
+        "Uses the detected Free or Studio edition for every question when connected to Resolve",
+        "Points you at whichever other Buddy tool automates what you are asking about",
+        "Runs on the AI model you choose in Settings > Ask Buddy: Google Gemini, Anthropic Claude, OpenAI, OpenRouter, Groq or Azure OpenAI in the cloud; Ollama, llama.cpp's llama-server (started with --jinja) or LM Studio on your own computer or network; or any other OpenAI-compatible endpoint. Test connection checks the key, the model and that it can call tools"
+      ]
+    },
+    "audit": {
+      "name": "Audit",
+      "summary": "Checks the open timeline before delivery and lists what it finds, worst first, with a Go to button that moves Resolve's playhead there. Read-only apart from the playhead.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Missing (offline) media",
+        "Fonts used by Text+ titles that aren't installed",
+        "Black gaps and flash frames",
+        "Tracks and clips turned off",
+        "Unfinished Text+ titles (empty or starting text)",
+        "To-do markers (fix, todo, TBD, temp, ??)",
+        "Subtitles too long or too fast to read",
+        "Footage at another frame rate",
+        "Pictures smaller than the timeline"
+      ],
+      "notes": "Choose checks turns single checks off. Missing media links to Media Relink for the fix."
+    },
+    "project_setup": {
+      "name": "Project Setup",
+      "summary": "Builds out a new project's Media Pool and timeline: bin structure from a list, folder-tree import, bin-to-timeline, a full multicam sync suite, and ffmpeg-rendered proxy media.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Bins tab: one bin per line, prefix a line with '>' to nest it inside the nearest bin above with one fewer '>' (Tab / Shift+Tab in the list adds or removes one); a live tree preview shows exactly what will be created",
+        "The bin list is remembered between launches and creates the whole nested structure under the Media Pool root in one go",
+        "Import Folder: mirrors an entire folder tree from disk into the Media Pool as nested bins, skipping non-media files; shows what's inside first (video, audio, stills, image sequences counted once, subfolders) and whether it goes into the open bin or the Master level",
+        "Populate Timeline: adds the currently selected Media Pool bin's clips to the open timeline, or creates a new timeline from them; shows which bin and which timeline, following Resolve as you click around",
+        "Sync tab: Sync Everything lines clips up by embedded timecode or waveform, places untimecoded audio, packs to the fewest tracks and shifts to the start - all as one offline transform that imports a NEW timeline and never touches the original; long audio jobs show progress and can be cancelled",
+        "Sync tab: Expand (one clip per track), Align, Sync External Audio, Collapse (with optional silent-audio removal) and Shift (optionally closing gaps) as separate steps under 'Or run the steps yourself'",
+        "Proxy tab: renders lightweight .mov copies of the project's video clips with ffmpeg into a 'Proxy' folder beside each source (Resolve's own proxy convention) and links them with LinkProxyMedia - the same call as Resolve's manual proxy relink; source files are never touched",
+        "Proxy tab can target the Media Pool selection, the clips selected on the open timeline (Resolve 21.0.4 or later), the open bin (optionally with its sub-bins), or every clip in the project - only video files, since audio-only clips never play from a proxy",
+        "Proxy tab: Original/Half/Quarter resolution and a Format dropdown - H.264, H.265 (HEVC), ProRes 422 Proxy/LT/422, DNxHR LB/SQ/HQ or CineForm; each proxy carries its clip's start timecode, which Resolve needs to link it; a clip whose proxy file already exists is linked, not re-rendered (unless its timecode is wrong, when it's rendered again); audio is stream-copied so multicam tracks survive; each render writes to a .buddy-part file and only moves into place on success, so a cancelled run leaves nothing half-written"
+      ],
+      "notes": "Formerly called Resolve Bin Generator, then Media Pool Organizer. Waveform sync and silent-audio detection need ffmpeg installed (path settable in Settings); the Proxy tab needs it for every render. The Proxy tab's Current timeline takes the clips selected on the open timeline, or every clip on it when none are selected."
+    },
+    "automation": {
+      "name": "Automation",
+      "summary": "Lines up steps from Buddy's tools and runs them one after another, unattended - for example Import a folder > Make proxies > Put the bin on a timeline > Sync - with a Windows notification when it finishes or stops.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Make named automations (New, rename, Duplicate, Delete) and add steps from a list grouped by tool; reorder them with the arrows",
+        "Project Setup steps: Create bins, Import a folder (opens the bin it made), Make proxies (for the open bin, every clip, or the open timeline; size and format), Put the bin on a timeline (a new timeline named after the bin, opened), Sync (timecode or waveform), Sync external audio, Collapse the timeline, Shift to the start",
+        "Subtitles step: Transcribe the timeline (model, language, put them on the timeline, replace subtitles already on track 1, use Resolve's own transcription if there is one)",
+        "Audit step: Check the timeline (and optionally its sound); it can stop the automation if it finds problems or warnings",
+        "Command Center steps: Save a version of the timeline, Remove gaps",
+        "Each step keeps its own options; some (the folder to import, the timeline name, the language) can be set to Ask when it runs - asked once at the start, then it runs on its own",
+        "Each step leaves Resolve ready for the next: Import opens its new bin, Populate opens its new timeline, and the proxies, Populate and Sync use what's open",
+        "While it runs: each step's progress and how long it took, a log of what happened, and Stop; if a step fails the run stops there and says why, and Resume from the step that stopped runs it again from there",
+        "A [[win:Windows ]]notification when it finishes or stops, and the last run's result on each automation"
+      ]
+    },
+    "asset_manager": {
+      "name": "Asset Manager",
+      "summary": "A reusable library of commonly-used images, audio and video, with three views and per-project lists.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Add individual files or whole folders (or drag them in), recursively picking up all supported media beneath them",
+        "Each asset is tracked by a stable id rather than its path, so it survives being moved later",
+        "All media view: filter by type (Image/Audio/Video/Other), live text search, optional grouping by shared source folder",
+        "By folder view: every asset bucketed by the folder it was added from, with Expand all / Collapse all",
+        "Projects view: named lists that link into the shared library; Add from library picks existing assets with a search",
+        "Preview shows images, decoded audio waveforms (click or drag to seek, Space to play) and video with a scrub bar; missing files are flagged",
+        "Imports selected assets (or a whole folder as a new sub-bin) into the open project's Media Pool in one click",
+        "Find it / Moved it? re-points an asset whose file moved, without losing its project links"
+      ]
+    },
+    "image_importer": {
+      "name": "Image Importer",
+      "summary": "Pulls images into a Resolve bin straight from the clipboard - a copied image, copied files, or a copied image URL.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Ctrl+V reads whatever is on the clipboard and stages it for import; image files can also be dragged in from Explorer or added with Add files",
+        "A copied image (from a browser or image editor) is saved as a timestamped PNG",
+        "Copied or dropped files are copied into the save folder, skipping ones that aren't images",
+        "A copied image URL is downloaded and staged, showing in the list while it downloads",
+        "Thumbnails of everything staged; the save folder and bin name are remembered between launches"
+      ]
+    },
+    "svg_importer": {
+      "name": "SVG Importer",
+      "summary": "Converts an SVG or Lottie/Bodymovin JSON into Fusion node-graph paste-text, copied to the clipboard for pasting into the Fusion page.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Parses path, rect, ellipse and polyline geometry, fills, strokes and gradients in pure Python",
+        "Handles blur, drop-shadow and inner-shadow filters, and basic <mask> and group clip-path clipping",
+        "Builds real Fusion PolylineMask / Background / Merge / Group node graphs, with a pivot on every shape and one for the whole graphic",
+        "Batch-converts several files (dragged in, picked, or a whole folder) into one paste",
+        "Consolidate Colors: one Master Controller swatch per distinct solid color, wired to every shape using it",
+        "Reads Lottie/Bodymovin JSON: shape layers and precomps, with real keyframes for position, anchor, scale, rotation and opacity, and each layer's in/out points",
+        "Diagnostics: dumps the selected Fusion nodes' settings to a JSON file on the Desktop"
+      ],
+      "notes": "Works on the Fusion page: a Fusion comp must be open, and the result is pasted with Ctrl+V into the Flow view. Not supported: SVG <text>, Lottie path morphing and trim-path reveal. Known limitations include fill-rule and stroke dash patterns."
+    },
+    "media_relink": {
+      "name": "Media Relink",
+      "summary": "Relinks clips that have gone offline, and relocates media that is still online, through a scan then search-folder then relink loop.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Fix offline media: scans the project for clips whose files have gone missing and relinks them from a chosen search folder - clips that work are never touched",
+        "Move to a new location: points clips at copies somewhere else even when nothing is broken; only the clips you tick are relinked",
+        "Shows each clip's recorded folder and the proposed new one before anything changes; the folder search shows progress and can be cancelled",
+        "When a search finds several files with a clip's name, you pick which one (or browse for another) in the page",
+        "Which clips: the current bin, the current timeline (every clip used on it), the selected clips (Media Pool selection, or the timeline's when none), or the entire project",
+        "Checks every relink by reading the Media Pool again afterwards, and image sequences (R[0001-0100].jpg) are found by their first frame"
+      ],
+      "notes": "A tab on the Media Manager page, beside Batch Clip Renamer (open it as media_relink). PROTOTYPE. The core loop works, but it shouldn't be relied on for anything irreplaceable. Say so when recommending it."
+    },
+    "batch_clip_renamer": {
+      "name": "Batch Clip Renamer",
+      "summary": "Batch renames clips in the current Media Pool bin, or only the selected clips, by sequential numbering or find and replace.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Scope switch between 'All Clips in Current Bin' and 'Selected Clips Only', with a visible reminder of which is active",
+        "Sequential Renamer: give a base name and a starting number to get BaseName_01, BaseName_02 and so on with a 2-digit padded counter",
+        "Find and Replace across the targeted clip names, optionally ignoring case",
+        "Live preview of every targeted clip's current and new name before anything changes, with a count and a warning when two clips would end up with the same name",
+        "Undo last rename puts the old names back (skipping any clip renamed again since)",
+        "Only the Clip Name property is touched, so the underlying file path and extension are untouched",
+        "Timelines sitting in the same bin are filtered out so they cannot be renamed by accident"
+      ],
+      "notes": "A tab on the Media Manager page, beside Media Relink (open it as batch_clip_renamer). Scope deliberately resets to the safer 'All Clips' default each launch, because which clips are selected changes every session."
+    },
+    "dailies": {
+      "name": "Dailies",
+      "summary": "Review Media Pool clips as a continuous source tape, make clip-by-clip notes, then apply the notes and tags to Resolve metadata.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Review all Media Pool clips, clips in the current bin, or a named source tape assembled from chosen clips",
+        "Filter a tape to all media, video, audio, images or other media",
+        "Play video and audio clips back to back; images stay on screen for five seconds; unsupported local formats can be skipped",
+        "Keep free-form per-clip review notes as drafts saved in Buddy while typing",
+        "Recognize s1, sh2 and t3 in notes as Scene 1, Shot 2 and Take 3 while keeping the original notes in Comments",
+        "Set Resolve's Good Take, Untagged or Rejected tag and edit Scene, Shot, Take, Camera and Reel fields",
+        "Automatically apply pending notes to Resolve Media Pool metadata at the end of continuous playback, or apply earlier with a button"
+      ],
+      "notes": "Named source tapes and drafts are kept per Resolve project. Playback uses local files through Qt Multimedia, so formats the decoder cannot read require manual skip; the Media Pool contents themselves are not changed until Apply."
+    },
+    "text_animator": {
+      "name": "Animation",
+      "summary": "The page for animating things in Resolve: motion presets put on the clips selected in the timeline (stills, video, Text+ and other titles), played line by line, word by word or letter by letter on a Text+ if wanted, and an Editor for presets of your own; a word highlight for Text+ captions, zooms on a clip and Buddy's own transitions on cuts. Tabs: Previews, Editor, Favorites, Presets, Titles, Zoom, Transitions. Formerly Text Animator.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Previews: every motion preset playing in a little viewer, by pack (Essentials - including Glitch, Tilt, Zoom blur and Impact; Text - Typewriter, Letter pop, Word rise, Letter drop, Wave, Letter stretch, Word pop, Word highlight (karaoke-style), Letter fade, Letter slam, made to play by letter or word, so choosing one sets Animate by; Loops - Float, Breathe, Turn, Rock, Orbit, Wiggle, Flicker, Vibrate, Handheld, Shake hard, Shake slow, Jitter, Rattle, Crazy, Jelly, Glitch, Heartbeat, Pulse, Blink, Pendulum; Camera - Push in, Pull out, Pan, Drift, stretched over the whole clip; Classic and Magic, from animate.css and Magic Animations; and your own Saved ones); a kind filter (In · Out, Emphasis, Out, Loop, Whole clip) and search narrow them. Apply to selected puts the chosen one on the clips selected in Resolve's timeline, Remove takes it off",
+        "Put on: In & Out, just the In or just the Out of a preset - the In starts on each clip's first frame and the Out ends on its last; an Emphasis plays at the playhead or mid-clip; a Loop repeats from each clip's first frame to its last (whole passes, stretched a little to fit); a Whole clip move (the Camera pack) runs from the first frame to the last however long the clip is, and Speed doesn't change it. Speed: 0.5x to 2x",
+        "Direction (for presets that move across the frame, like Whip, Slide, Drop, Rise or Shake): Own (as made), left, right, up or down - the way it travels as it comes in. Turned back the other way it's mirrored, spins too; turned a quarter, the whole move turns. Update framing keeps the direction it went on with",
+        "Animate by (Text+ only): Clip, Line, Word or Letter - each line, word or letter of a Text+ plays the preset in turn, a Stagger apart (0.03 to 0.3 seconds), in an Order: first to last, last to first, from the middle, from the edges or random. Outlines and shadows fade with their words. Clips that aren't a Text+ move as a whole, and so does a Text+ whose text has Character Level Styling or another modifier on it (Animate by's text Follower would replace it) - Buddy says which",
+        "The clip's Inspector framing (zoom, position, rotation, crop) is built into the move so it isn't cut off at the frame's edge; Update framing takes in re-framing done since",
+        "Editor: any preset as curves on a spline editor with a viewer, to apply as it is or save as a preset of your own - Position X/Y, Rotation, Scale, Opacity, Blur, Width and Height (Width and Height squash and stretch on top of Scale); Favorites: the hearted presets",
+        "Blur and squash/stretch: presets like Focus, Blur slide, Squash drop, Jelly pop, Jelly, Letter stretch, Rubber band and Bounce drop; Puff and Vanish blur as in Magic Animations. Blur goes on a Blur node after Buddy's Merge, squash on a Transform in front of it. With Animate by, squash plays per letter or word but blur doesn't (a Text+ letter can't be blurred on its own)",
+        "More effects: Reveal (Wipe, Soft wipe, Iris, Split - a mask over the clip's own picture, a title's text rather than the whole frame; Direction turns a wipe or split), Tracking (Tracking in, Spread, Breathing letters - a Text+'s letter spacing, given back on Remove), Trails (Trail slide, Trail spin - fading copies a moment behind), Sweep (Shine, Glint - a band of light only on the clip itself), Colour split (Colour split, and in Glitch - red and blue pulled apart), Flip (Flip, Fold down, Letter flip - turned in depth with perspective; per letter with Animate by). All are channels in the Editor too. Reveal, Trails, Sweep and Colour split apply to the whole clip, not per letter",
+        "Also: Line rise and Word line rise (text rises from behind a line - a mask held where the text rests, on a Text+ played by word too), Diagonal wipe, Blinds (slats; Direction turns them), Expand in and Focus expand (letters open out), Swing in (a door on its left edge), Coin spin (loop), Gleam (fade in with a light sweep), Chroma pop, Trail drop",
+        "Presets: Word highlight on the selected Text+ captions - a box behind the word being said, a colour change, a pop, or a mix - timed from Transcribe's word timings (the transcript whose words match; even timing when none does). With one Text+ selected, a Word timing strip: drag a word's start (Shift moves the rest with it), arrow keys nudge a frame, Start at playhead, undo/redo, Reset to auto and Apply timing",
+        "Titles: type a hook and Buddy lays it out as a styled, stacked title - the key word picked and sized up, lines broken where they read well, Suggestions for other breaks - in a look (Hormozi stack, Script + gradient, Clean outline, Outline + fill, Echo, Neon extrude, Title + bar, Long shadow, 3D pop, Mixed sizes). Layout (lines, arrangement, width), Position, Animation (entrance, direction, plays by word/line/all, stagger, exit; Echoes while held: Still or Pulse for looks with echoes) and Timing (length); Play previews it. Place title puts it at the playhead on the topmost free video track as one Text+ clip, a Text+ per word in its Fusion comp, its fonts installed for you first. It never covers someone else's clip, and replaces Buddy's own title in that spot",
+        "Zoom: the one video clip or still selected in Resolve plays right in Buddy - or an adjustment clip, to zoom everything under it - with a track of zooms to add, drag and edit, and a framing box to drag on the picture. Kinds: Punch in, Push in, Zoom in & out, Pull out, Slow creep, Crash zoom (with motion blur), Bounce, Step zoom, Impact (with a shake), Pan & zoom, Follow pan, Pulse and Tilt zoom. Copy and Paste zooms onto other clips (same timing or stretched to fit); Graded shows the clip with its Resolve grade; Apply puts them on the clip as a Fusion Transform",
+        "Transitions: Buddy's own transitions on the cut between two selected clips that meet (or the cuts at one selected clip's ends), built as Fusion transitions in Resolve. Motion - Zoom in/out, Whip left/right/up/down/diagonal, Spin left/right, Zoom spin, Stretch sideways/up, Shake, Tunnel (zooming through copies of the picture nested inside it), Chroma zoom, Roll left/right, Punch zoom (lands with a flash and a jolt), Zoom out-in; Light & blur - Light leak, Film burn, Dreamy blur, Flash, Light rays, Lens flare, Bloom, Bokeh, Dip to colour, Light sweep, Blur to colour, Negative, Directional blur, Zoom blur, Spin blur; Wipes - Liquid, Ink, Circle, Bars, Swipe, Clock, Box, Barn doors, Star, Luma fade (the next clip's brights first), Blinds, Halftone, Shutter (a camera aperture closing and opening), Luma burn, Scanner, Diagonal, Spiral, Corner, Zigzag, Diamond, Heart, Iris (a round iris closing on one clip and opening on the next); Glitch - VHS, Bad signal, Digital, Pixelate, TV switch (squashed to a line and a dot, like an old TV), Strobe, Chaos (every glitch at once, jumping and flashing negative); Paper & grunge - Paper tear, Burn away, Brush stroke, Grunge, Ink bleed, Paint splash; Distortions - Twirl, Ripple, Kaleidoscope, Bulge, Pinch, Warp, Wave, Melt, Fisheye zoom, Glass; Split screen - Split open, Diagonal split, Panels, Strips, Grid, Mosaic, Push left/right/up/down, Slices, Columns, Checker, Zoom push, Film roll (the clips as frames on a running film strip), Squeeze, Squeeze up (pieces of the picture sliding or growing into place, a coloured line round each); 3D - Flip, Flip up, Flip zoom, Cube, Cube up, Cube zoom, Door, Fall back, Page turn, Louvers (the pictures turned in perspective; Amount brings the camera closer). Feel (Ease, Hit, Swing, Bounce), Length, Amount, Blur, and a Colour (four presets or any colour) for the light, wipe, paper and split-screen ones. A transition needs the clips' unused frames past the cut - with too few it's made shorter; Apply replaces whatever transition is on the cut, Remove takes them off. Play: All, or On hover so the previews only move under the pointer (shared with Previews)",
+        "Command Center can put an Animation preset on the selected clips from [[win:a hot key]][[mac:its Run button (hot keys are Windows-only so far)]]"
+      ],
+      "notes": "Animate by works on one Text+ through Fusion's text Follower; changed the words afterwards? Apply again so the timing follows them. A trimmed clip keeps its whole move with Clip, but with Animate by needs Apply again. Font styling, placement and the older word-by-word tools are on the Subtitles page's Text+ tabs. On the Fusion page, the nodes Buddy adds are laid out in order: the clip's path in one row to the MediaOut, masks and canvases above, the nodes holding keys in a row underneath; your own placed nodes stay where they are."
+    },
+    "audio_assistant": {
+      "name": "Audio Assistant",
+      "summary": "An easier alternative to Resolve's Fairlight page for a clip's audio - volume, fades, a volume line to keyframe, noise reduction and voice clean-up. Its Timeline tab shows the audio tracks, changes the selected clips' levels and draws a volume curve that becomes Resolve keyframes; effects are still to come.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Timeline tab: mirrors the open timeline's audio tracks - each clip where it sits, named, in its clip colour, with disabled clips and tracks dimmed, crossfades shown, and the track's name, type (mono, stereo, adaptive) and lock shown",
+        "Draws each clip's waveform from its media file in grey, and over it in blue the same wave through the clip's volume and fades - red where it would go over 0 dBFS",
+        "Zoom (buttons or [[win:Alt]][[mac:Option]] + scroll[[mac:, or a trackpad pinch]], as in Resolve) and scroll along the timeline; the playhead and markers are shown, and clicking or dragging on the ruler moves Resolve's playhead",
+        "Select clips by clicking them (Ctrl/Shift for several), clicking a track's name for all its clips, or selecting them in Resolve",
+        "Levels: set the clip volume (or change several clips' by the same amount), pan and fade in/out - with the controls, or by dragging the selected clip's yellow volume line and fade handles on the timeline (Shift for fine steps)",
+        "Loudness: integrated LUFS (BS.1770, measured by Buddy from the files, through the clip volume and fades) and peak level, live as the volume changes",
+        "Match: sets the clip volume so the clips hit YouTube/Spotify -14 LUFS, podcast -16, EBU R128 -23, ATSC A/85 -24, or peaks at -1 dBFS - each clip on its own, or several together keeping their balance",
+        "Clean-up: Resolve's Voice Isolation (on/off and amount) and Dialogue Leveler (mode, reduce loud, lift soft, reduce background, output gain), where Resolve offers them for the clip",
+        "Crossfade the cuts between selected clips (Cross Fade +3/0/-3 dB, length in frames) - after asking, since Buddy can't remove them",
+        "Volume curve: double-click the selected clip's line to add a key, drag a key (Shift keeps it to one direction) or a stretch between two, drag the grip at the line's end to move the whole line, right-click a key to ease it in and out or delete it, or type the picked key's level; the waveform and loudness follow as it's drawn, and nothing reaches Resolve until Apply",
+        "Apply puts the curve in Resolve as real volume keyframes: a one-clip timeline named '<file> (Buddy curve)' in a 'Buddy Audio' bin, placed as a nested clip on the first free audio track under the clip (or a new track), carrying the clip's volume, pan, fades, Voice Isolation and Dialogue Leveler, with the original clip kept and turned off. Applying again replaces it; 'Take the curve off' removes it and turns the original back on",
+        "Shows volume keyframes drawn in Resolve (read from an FCP 7 XML export of the timeline, which changes nothing), and the Buddy curves on the timeline with their eases",
+        "Undo for every change except crossfades, step by step - including applying, changing or taking off a curve"
+      ],
+      "notes": "Buddy can read Resolve's selection but can't set it, and it can't move or trim clips. Resolve's scripting has no call for volume keyframes, so Buddy reads them from a timeline export and writes them by importing a small timeline (a nested clip). On a clip keyframed in Resolve the keys set the volume and the clip volume isn't heard, so Buddy leaves its volume alone and Match skips it - draw the line instead and Apply. On a Buddy curve clip the clip volume is heard on top of the keys, so it moves the whole line. Buddy writes eases as short straight keys, so Resolve plays exactly the drawn line; to edit a curve in Resolve, open the nested clip. Applying a curve takes about a second and briefly switches Resolve to the new timeline and back. Match uses Buddy's own measurement (the file through the clip's volume and fades, not through Voice Isolation or the Dialogue Leveler), because Resolve's NormalizeAudioLevel ignores the loudness target in 21.1. Voice Isolation and the Dialogue Leveler only work on the active timeline and not for all media (camera MXF/MP4 files often don't have them). Clip volume stops at +30 dB. Waveforms and loudness are decoded from the files once and cached."
+    },
+    "color_palette": {
+      "name": "Color Palette Manager",
+      "summary": "A general colour-palette and design tool. It does not read or write anything in a Resolve project.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Palettes: create, rename, tag, folder and version colour palettes (drag palettes onto folders, drag swatches to reorder, right-click a swatch to change or remove it, Undo after a removal); a colour picker with a screen colour dropper; floating mini palette windows",
+        "Generators tab: harmony, light/dark theme, gradient, grayscale, neon/pastel and glass generators - each opens in the tab and keeps its work while Buddy is open; drag colours in from a palette, drag preview swatches to swap them, then create a new palette or add the colours to the open one; the gradient exports a PNG (up to 8192 px, 8 or 16-bit)",
+        "Extract: pull a palette out of an image (browse, drag a file or a web image in, or Ctrl+V to paste), with Average or Balanced weighing, an ARRI LogC false colour preview with its zone legend, and exports of the image with a palette strip or in false colour",
+        "Visualize: an 8-block treemap and three UI mockup cards (header card, stat tile, tags); click a block or card part to recolour it or drag a colour onto it - this never changes the saved palette, and Reset to Original undoes it",
+        "Vision: every tab can show colours as people with protanopia, deuteranopia, tritanopia or achromatopsia see them",
+        "Tools: WCAG 2.1 / APCA contrast checker, palette import (json, gpl, ase, aco, swatches, css/scss/txt/js) and export (CSS, SCSS, JSON, Swift, Tailwind, GPL, ASE, Procreate, .cube LUT) with a copyable preview of text formats",
+        "Runs entirely standalone - no Resolve scripting API dependency at all"
+      ],
+      "notes": "Works with Resolve closed. Never claim it reads or changes a Resolve project. Its own options (language, focus overlay, mini palette transparency, backup/restore) are in Settings while this tool is open."
+    },
+    "generative": {
+      "name": "Generative",
+      "summary": "Changes pictures and footage with models that run on this computer, nothing uploaded. It starts by asking what you want to do - Remove an object (paint over what shouldn't be there and Remove fills it with what would be behind it, LaMa), Cut out the subject (found by itself, BiRefNet, shown on transparency) or Split into layers (the subject and the background with the subject taken out) - and only then takes a file: dropping one before a task is picked is turned away. The picture has its tools on it and a short panel beside it saying what's next; one Export button holds Save, Save as, Replace in Resolve and Add to the Media Pool. The task can be changed with something open (Change, top of the panel). The original is never changed.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Remove an object: take out objects, people, signs, wires and dust spots; Brush and Erase with Size and Soft edge ([[win:Alt]][[mac:Option]] + scroll wheel sizes the brush), or drag a Rectangle, Ellipse or freehand Lasso (an ellipse drawn out from its centre; Shift for a square or circle; Soft edge fades the removal into the picture across its outline) and move or resize it after by its handles, arrow keys or Delete; a Masks list beside the picture shows every shape and brush, to hide (left out of the removal), select or delete each one, or Clear all; undo, redo, hold Before to compare; rectangles and ellipses can be turned too: drag the round handle above a selected shape (Shift: 15° steps), and a lasso turns the same way; Margin takes the removal that much further past the paint (a glow, motion blur, a soft edge it missed), shown round the paint",
+        "Cut out the subject: found automatically as the picture opens (Standard or Best model - Edge detail), fix the edge by painting Keep and Take away (brush, rectangle, ellipse or lasso), show it as Cut-out, Black and white or Over the picture; picked the wrong thing - Draw round it, then find it only in there; hair and fur keep clean edge colours",
+        "Footage too, for all three tasks, in numbered steps (paint it, follow it through the shot, run it, export - the next one open; painted on every frame, nothing needs following): open a video file or the clip under the playhead (the part the timeline uses, at the playhead's frame)[[win: - or drag a clip off Resolve's timeline onto Generative to open that one (Media Pool clips can't be dragged out of Resolve: select one and press From Resolve); the result comes back looking the same in Resolve (same colour matrix and range)]], scrub with the bar under the picture (arrow keys a frame, Shift 10; Shift+I / Shift+O set in and out; From timeline sets in and out to the part of the open clip the Resolve timeline uses, when it's the clip under the playhead), in steps: 1 paint on any frames (or draw round the subject for Separate), 2 Track follows it through the part to work on - Direction: Back (from the painted frame to the in point), Both, or Forward (to the out point), only those frames then worked on - (Follow: Standard follows the paint itself, matched back to the frame it was painted on so it doesn't drift - best for signs, text, logos, marks on a surface; Object uses SAM 2.1 Tiny, a 190 MB one-time download that runs on this computer, to find the object under the paint and follow it - for people, cars, things that move on their own, change shape or pass behind something, about 1.5 s a frame) and shows it over the picture in colour (Show the tracked area, or T, switches that on and off; changing the paint or the part means tracking again), 3 Remove / Separate uses that tracking and runs as a job into a Buddy Generative folder beside the clip, frames appearing as they are done, Stop and run again to carry on; Save as picks the result: ProRes 422 HQ (default), ProRes 4444, DNxHR HQX or H.264 as one video file with the source's audio and timecode (needs ffmpeg; the subject is always ProRes 4444 for its transparency), or an image sequence; Show Original / Removed (or Subject / Background) to look through them; Add to Media Pool puts it in the original clip's bin and shows that bin with it selected",
+        "Split into layers: the subject layer plus a clean background plate, to stack in Resolve; the subject is found by itself as the picture opens, or draw round it (Rectangle, Ellipse, Lasso or brush) and either Find the subject in here (the model looks only inside what was drawn) or Use what I drew (what was drawn is the cut-out, as soft as its Soft edge); then Make the clean background",
+        "Opens JPEG, PNG, TIFF (16-bit too), WebP, BMP, EXR and JPEG 2000; Save saves what's shown beside the original (_clean, or _subject on transparency as PNG, TIFF or EXR; Split adds _background) at the same bit depth",
+        "Open the still under the playhead or the one selected in the Media Pool; swap the cleaned picture or the cut-out into its Media Pool clip, or add results to the Media Pool beside the original",
+        "Graphics card[[mac: (Windows only, not on a Mac)]]: with an NVIDIA RTX (RTX 30 or later) Generative can run on it - many times faster (on an RTX 5070 Ti: finding a subject 8 s to 0.5 s, following an object 1.5 s to 0.25 s a frame). Offered on Generative's start screen and in Settings > Generative: a one-time 105 MB download (NVIDIA TensorRT for RTX, hash-checked, runs on this computer); each model is prepared for the card the first time it's used (a minute or two, once) and kept; Use the graphics card switches it off; without one everything runs on the processor",
+        "Quality: Standard or High[[mac: (Windows only, not on a Mac)]]. High needs the High quality add-on (NVIDIA RTX 30 or later with 8 GB, driver 580 or later; a one-time download of about 13.7 GB - PyTorch and two models, Apache 2.0, hash-checked, from Generative's start screen or Settings > Generative) and redraws what's behind instead of continuing what's round it: pictures with FLUX.2 klein 4B (about 7 s, 15 s the first time; puts back a street, a doorway, a kerb behind a person where Standard leaves a smear), footage with ROSE, which draws the whole part again without it and holds still as the camera moves (about a minute for every two seconds of footage). For footage on High: Also its shadow and reflection (on to start with) takes out its shadow on the ground and its reflection in water too; Finer detail runs ROSE at 720p, sharper on 4K but about 5 times slower. It runs on the graphics card beside Resolve, using 3-5 GB of its memory; Standard (LaMa) stays for any computer"
+      ],
+      "notes": "Each task downloads its model once, the first time it's picked (removal 93 MB, subject 115 MB Standard or 490 MB Best, plus a ~70 MB engine). Runs on the CPU. Footage runs on the CPU: removal is a few seconds a frame, Cut out and Split about 12 s a frame (the subject model). High quality (the add-on): pictures about 7 s with FLUX.2 klein, footage about a minute per 2 seconds with ROSE, on an NVIDIA RTX[[mac: - Windows only]]."
+    },
+    "marker_manager": {
+      "name": "Marker Manager",
+      "summary": "Stills Exporter and YouTube Chapters in separate tabs: export marker-based stills or turn timeline markers into a YouTube chapter list.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Shows the open timeline's markers live, with how many there are of each of Resolve's 16 marker colours",
+        "Drop a marker at the playhead in the chosen colour, optionally named",
+        "Grab stills for one marker colour: switches to the Color page, visits every marker of that colour in frame order, grabbing a still at each",
+        "Reusing one colour across several frames groups them so they can all be grabbed in a single pass",
+        "Lists the grabbed stills; one can be taken off the list (the gallery keeps it)",
+        "Export the grabbed stills as JPEG, PNG or TIFF with a filename prefix, optionally deleting them from Resolve's gallery afterwards (asks first)",
+        "Reads the open timeline's markers live while the page is open (Refresh reads them again), optionally filtered to one of the 16 marker colours",
+        "Converts each marker's frame position into HH:MM:SS past an hour, or MM:SS before that, using the timeline's own frame rate; marker names become the chapter titles",
+        "Enforces YouTube's first chapter at 00:00: a first marker under 10 seconds in is moved to 00:00 keeping its name, otherwise '00:00 - Intro' is added",
+        "Leaves out markers less than 10 seconds after the previous chapter (YouTube's minimum) and lists them with the reason; warns when there are fewer than 3 chapters",
+        "Copy puts the chapter list on the clipboard to paste into the video description; the text can be edited first",
+        "Save .txt to a remembered folder, with the file name filled in from the timeline name"
+      ],
+      "notes": "The Stills Exporter tab can add markers and grab stills; its grabbed-stills list lasts for this session. The YouTube Chapters tab is read-only in Resolve. Each tab remembers its own export options."
+    },
+    "time_tracker": {
+      "name": "Time Tracker",
+      "summary": "Automatically tracks time against whichever project is open in Resolve, with idle detection.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Auto-tracking: starts an entry when a project opens, ends it when Resolve closes or switches projects",
+        "Optional manual mode where you drive Start/Pause/Stop yourself, with the project name still coming from Resolve",
+        "Pause and Resume freeze the running entry in place with no reset and no separate log row",
+        "Stop saves the session, resets to zero, asks for confirmation and offers a brief Undo",
+        "Idle detection auto-pauses and trims the idle time off",
+        "The Tracker tab shows today's and this week's time so far, and progress toward a weekly goal",
+        "This Project and History list past sessions: add, edit, hide from exports or delete entries (tick several to act on them together), and export as PDF, CSV, JSON or Excel",
+        "Reports: today / this week / this month totals with earnings per currency, weekly and monthly goals, a last-7-days chart, time per project, a custom date range, and an hourly rate per project",
+        "Generates a client-ready PDF invoice for one project over a date range"
+      ]
+    },
+    "command_center": {
+      "name": "Command Center",
+      "summary": "A new main tab of its own. Only the page is there so far - it will let you set hot key combos that run Buddy's actions.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Nothing yet - the page is in place and its hot keys are still being built"
+      ]
+    },
+    "essentials": {
+      "name": "Essentials",
+      "summary": "Small everyday tools on one tab: a calculator with a timecode mode, a data rate / storage calculator, an aspect ratio calculator, a stopwatch and countdown timer, a world clock, and notes (general and per project).",
+      "needs_resolve": false,
+      "capabilities": [
+        "Calculator tab, Standard mode: + - x / with brackets and %, typed or clicked; Enter works it out, the answer stays in the field to carry on from, and a History list keeps the last 20 answers (click one to reuse it; click the answer to copy it)",
+        "Calculator tab, Timecode mode: adds and subtracts timecodes at 23.976, 24, 25, 29.97 DF/NDF, 30, 48, 50, 59.94 DF/NDF or 60 fps; digits fill a timecode from the right as in Resolve (1000 = 00:00:10:00), 48f is frames and 2.5s seconds, a timecode x or / a number scales it, and a timecode / a timecode says how many times one fits; every answer also shows the frame count and the real running time",
+        "Data Rate tab: picks a codec (ProRes Proxy to 4444 XQ, DNxHR LB to 444, Blackmagic RAW 3:1 to 12:1, uncompressed 8/10/16-bit, or any bitrate typed in for H.264/H.265), a resolution, a frame rate and audio channels, and gives the data rate (Mb/s and MB/s), GB per hour, the file size for a duration and how long a drive of a given size holds; Copy summary puts it all on the clipboard. ProRes/DNxHR/RAW figures are the makers' published rates scaled to the frame size and rate",
+        "Aspect Ratio tab: shows a frame size's ratio (16:9, 1.78:1) and resizes it keeping the shape (type a new width or height, optionally rounded to even numbers); Fit a shape in a frame gives the picture size and the letterbox or pillarbox bars in pixels for 2.39, 2.35, 2:1, 1.85, 16:9, 4:3, 1:1, 4:5, 9:16 or a custom ratio, with a little preview",
+        "Timer tab: a stopwatch with laps that carries on across a Buddy restart, and a countdown (hours/minutes/seconds or 1-60 minute presets) that keeps running while other tools are open, then chimes, flashes and shows a Windows notification when Buddy isn't in front",
+        "World Clock tab: your local time plus any cities you add (search every time zone, or common cities such as San Francisco, Mumbai or Seoul), each with its date, how many hours ahead or behind it is (and tomorrow/yesterday), and whether it's working hours (9-6, Mon-Fri), off hours or night there; rename a clock (a client, a studio), reorder or remove it; 12- or 24-hour; Plan a time converts a date and time in any of those places (a client's 10 am Tuesday) to all the others, daylight saving included; Copy times copies the list for an email",
+        "Notes tab: notes saved as you type - General notes for everything, plus a set per project picked from the Notes for dropdown; the project open in Resolve is added by itself and, with Follow the open project on, its notes come up when you open it (New project notes... starts some for any project by name); word and character counts, Copy all and Clear (clearing a project's notes takes it off the list)"
+      ],
+      "notes": "Never calls Resolve itself: which project is open comes from Time Tracker's own check. Its calculators don't read the timeline - type the numbers in."
+    },
+    "games": {
+      "name": "Games",
+      "summary": "A main tab of small games for a break, one sub-tab each: Pong, Snake, Minesweeper, Solitaire, Falling blocks, 2048, Breakout, Sudoku, Wordin', Checkers and Chess.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Pong tab: against the computer (Easy, Medium or Hard - it can be beaten) or two players on one keyboard; first to 5, 7 or 11 points; move with W/S or the arrow keys (left player W/S and right player the arrows in two-player), or with the mouse if Mouse control is ticked (off by default); Space starts and pauses; sound can be turned off",
+        "Snake tab: steer with the arrow keys or W/A/S/D to the food, growing and speeding up with each bite; Slow, Normal or Fast; Walls on (the edge ends the game) or off (it wraps round to the other side); Space starts and pauses; keeps your best score for each speed and walls setting",
+        "Minesweeper tab: Beginner (9x9, 10 mines), Intermediate (16x16, 40) or Expert (30x16, 99); click to dig, right-click or Shift+click to flag, click a number whose flags are all placed to dig round it; the first dig is always safe and opens an area; a mines-left counter and a clock; keeps your best time for each difficulty; paused, the clock stops and the board is covered",
+        "Solitaire tab: Klondike, Draw one or Draw three; drag cards, or click one to send it where it fits (a foundation first, then a column); click the deck to draw, and again to turn the pile back over when it runs out; face-down cards turn over by themselves; unlimited Undo (button or Ctrl+Z); finishes by itself once every card is face up and the deck is used; moves and a clock; keeps games won and the best time for each deal. Every deal can be won: each one is checked by a solver before it is dealt. Hint (button or H) lights up the next move of a winning line from where you are (or the deck, when the card needed is in it); if the position can no longer be won it says so, and Undo goes back",
+        "Falling blocks tab: a Tetris-style game - pieces of four squares fall into a 10 x 20 well and full rows clear; Left/Right move, Up or X turns, Z turns back, Down drops faster, Space drops at once, C or Shift holds a piece for later; shows the next three pieces and a ghost of where the piece will land (Ghost piece can be turned off); pieces come in shuffled bags of all seven and turn with the standard rotation rules; a level every 10 rows, each faster; start at level 1, 5, 10 or 15; Esc pauses and covers the well; keeps your best score",
+        "2048 tab: slide all the tiles one way with the arrow keys, W/A/S/D or by dragging across the board; two tiles of the same number merge into their sum; make a 2048 tile (and keep going if you like) until no move is left; one slide can be undone (Undo or Ctrl+Z); keeps your best score and biggest tile",
+        "Breakout tab: knock out every brick with the ball, bouncing it off the paddle (where it hits sets the angle); arrow keys or A/D move, or the mouse if Mouse control is ticked (off by default); Space launches the ball and pauses; ringed bricks take two hits, top rows score more; five walls that come round again faster; three lives; keeps your best score and the level it reached",
+        "Sudoku tab: Easy, Medium or Hard puzzles made on the spot, each with exactly one answer; click a square and type a number or click one on the keypad beside the grid; Notes (or Shift with a number) pencils candidates in, and placing a number clears it from the notes in its row, column and box; the same number twice in a row, column or box shows red, and Show mistakes (on by default) also marks numbers that don't match the answer; Undo or Ctrl+Z; a clock that stops and covers the grid when paused; keeps puzzles solved and the best time for each difficulty",
+        "Wordin' tab: a Wordle-style game - find the hidden five-letter English word in six guesses; type a word (or click the keyboard under the board) and press Enter; each letter turns green (right letter, right place), yellow (in the word, somewhere else) or grey (not in the word), and the keyboard keeps the colours; guesses must be real words. Daily word: the same word for everyone on a day, once a day, with a day-after-day streak; Unlimited: a new word whenever you like (New word). Hard mode makes every guess use the letters already found (it changes with the next word once a guess is in); High-contrast colours swaps green and yellow for orange and blue; Statistics shows words played and won, the streak, the best streak and how many guesses each win took; a word part-played is kept between runs",
+        "Checkers tab: American checkers (English draughts) against the computer (Easy, Medium or Hard) or two players on one computer; you can play Black (moves first), White or either at random, and the board turns so your pieces are at the bottom; click a piece and then where it lands, or drag it; jumps are forced and a jump goes on while it can (click the last square, or each landing in turn); a man reaching the far row is crowned a king; you lose with no move left; draws by 40 moves each without a jump or a man moving, or the same position three times; dots show where the picked piece can land (Show moves); the moves are listed in checkers notation (11-15, 22x15); Undo or Ctrl+Z takes back a move",
+        "Chess tab: against the computer (Easy, Medium or Hard - it thinks for up to about a second and a half) or two players on one computer; you can play White, Black or either at random; click a piece and then where it goes, or drag it; every rule - castling, en passant, promotion with a choice of piece, check, checkmate, stalemate and the draws by fifty moves, three repeats or too little left to mate (Buddy ends the game as a draw the moment one happens - tournament rules let a player claim it then, and only force it at 75 moves or five repeats; a repeat only counts en passant if the capture was really possible); dots show where the picked piece can go (Show moves); the moves are listed in the usual notation (Nf3, O-O) with the pieces each side has taken; Undo or Ctrl+Z takes back a move",
+        "Each game pauses itself when Buddy loses the focus or another tool or tab is shown, so no point goes by unseen (Wordin', Checkers and Chess have no clock - they just wait for your move); New game starts over",
+        "Keeps Pong's won-lost record against the computer for each difficulty, Snake's best scores, Minesweeper's best times, Solitaire's wins and best times, the best Falling blocks, 2048 and Breakout scores, Sudoku's puzzles solved and best times, Wordin''s statistics (daily and unlimited apart), the games of Checkers and Chess won, lost and drawn against the computer at each difficulty, and the chosen settings, between runs"
+      ],
+      "notes": "Never touches Resolve or the network."
+    },
+    "transcribe": {
+      "name": "Subtitles",
+      "summary": "Transcribes the current timeline's dialogue into subtitles on the timeline (Whisper or NVIDIA Parakeet, running locally), and translates subtitles into other languages (NLLB-200 or MADLAD-400 locally, or Ask Buddy's AI model), and turns them into styled, placed and animated Text+. Formerly called Transcribe; its first tab is still Transcribe.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Nine tabs: Transcribe, Translate, Subtitle Conversion, the five Text+ tabs (Font Styling, Timeline Layout, Word-by-word, Timeline Animation, Custom Animation - formerly the Text Animator page), and Setup at the far right (install the engine and download models)",
+        "Renders the timeline's audio mix, transcribes it locally with Whisper (faster-whisper) and builds readable subtitles from the word timings",
+        "Runs on the GPU with an NVIDIA card and on the CPU on any other Windows PC or Mac; transcription sends nothing to the internet",
+        "Models: Whisper Large v3 (most accurate, every language), Large v3 Turbo (fast, nearly as accurate), Distil-Whisper Large v3.5 (English only, about twice as fast), Small (fastest); NVIDIA Parakeet v3 (25 European languages, very fast even without a GPU, punctuates by itself); downloaded on the Setup tab, or a copy another app already downloaded reused",
+        "Auto model choice: detects the language, then uses Parakeet for its 25 European languages and the best installed Whisper model for everything else",
+        "On DaVinci Resolve Studio 21.1 or later the Model menu also offers 'DaVinci Resolve (Studio)': Resolve transcribes the timeline itself (nothing to install or download), tells the speakers apart so no subtitle mixes two people's words, and can start each turn with the speaker's name ('Speaker 1:' or what they were named in Resolve); if Resolve already has a transcription of the timeline it asks whether to use it or transcribe again. One language per timeline; no spelling hints",
+        "Language auto-detect, a chosen language, or Mixed languages (tick the ones spoken; each part is transcribed in its own language)",
+        "A box for names and terms to spell right (Whisper models only), and characters-per-line (1-60, 42 usual; words are never split, so 1 gives one word per subtitle - for word-by-word animation on the Custom Animation tab) / lines-per-subtitle limits",
+        "Places the subtitles on subtitle track 1 and saves an SRT; Convert to Text+ goes straight to the Subtitle Conversion tab",
+        "Subtitle Conversion: converts a subtitle track into Text+ clips on a video track (the topmost empty one is suggested; a track the user picks is kept), placed from a Media Pool Text+ for exact timing - Buddy adds one (a 'Buddy Text+' bin) if the project has none. The toast afterwards offers Font Styling",
+        "Apply to (on Font Styling, Timeline Layout and Timeline Animation): Entire timeline, Selected clips (the clips selected on Resolve's timeline - needs Resolve 21.0.4 or later), Under the playhead, or Specific track",
+        "Font Styling: font, size and colour, text outline, drop shadow and a box behind the text for Text+ clips - on the Text+ clips its Apply to dropdown chooses - with an approximate live preview over a stand-in picture (Dark, Light or Clear). Four tabs (Text, Outline, Shadow, Box), each with its own on/off switch; ones switched off are turned off on the clips where Font Styling switched them on (an outline, shadow or box set in Resolve's Inspector, or by an earlier Buddy, stays - tick it and apply once to take it over, then untick it to remove it). Size reads as the text's height in pixels on the timeline's frame (hover for Text+'s own Size). The page follows the timeline's shape: a wide one has the looks across the top and the preview beside the controls; a vertical (9:16) one has a tall preview down the left, with App buttons to shade where Instagram, TikTok or YouTube Shorts put their buttons and caption",
+        "Font Styling looks: ready-made ones for the timeline's shape (wide: Clean, Outlined, Boxed, Broadcast, Social pill; vertical: Big bold, Yellow pop, Social pill, Boxed, Minimal) put their colours and effects on the controls, which can then be adjusted - nothing changes in Resolve until Apply style. Save look keeps the controls (font included) under a name; Saved looks lists them in every project, with Rename and Delete. After changing a saved look, Update puts the changes into it",
+        "Timeline Layout: a live placement preview of every Text+ clip under the playhead at its real position and size - drag to move, drag a corner to resize, arrow keys to nudge; changes reach Resolve on release. Grid overlays (Standard, Rule of Thirds, Center, Phi), platform safe zones (YouTube Shorts, Instagram, TikTok, General) and snapping (frame centre, other text, safe-zone edges) under Guides & snapping",
+        "Apply Position copies each playhead clip's position to the Text+ clips on its track that Apply to chooses; Bounding lines resize the chosen clips' text to fill the space between them, and stack overlapping clips vertically",
+        "Word-by-word: for animations made of one Text+ clip per word. Space words sets single-word Text+ clips out the way one Text+ clip would show them as a sentence - the same space between words and between lines, on 1, 2 or 3 lines (Auto: the fewest that fit in 90% of the frame's width), in the order the clips start, each word keeping its own font and size and the group staying centred where it is. Apply to: the words under the playhead (only those selected in its preview, if any), or every group of single-word clips on screen together across the timeline. Undoable",
+        "Word-by-word's Stack on their own tracks: the Text+ clips selected on Resolve's timeline (Resolve 21.0.4 or later), each moved to a video track of its own - the lowest from its own up that's free - and lengthened to end at the playhead, so the words build up and stay on screen together. Done in a copy of the timeline, '<name> (Word-by-word)', which opens; the original is not changed. Keeps each clip's text, style and animation (measured on Resolve 21.1)",
+        "Timeline Animation: Pop, Bounce, Fade and Slide (from left/right/top/bottom) whole-clip animations, and letter-by-letter Typewriter, Letter Fade and Letter Pop (Fusion's text Follower), at Fast/Medium/Slow, on the clips its Apply to dropdown chooses; Remove Animations (same choice) takes either kind off and leaves the text as it was. Only this tab's own: a Previews preset, the highlight's pop, Character Level Styling and animation keyed by hand in Fusion are left alone, and Apply skips (and counts) a clip where one of those already has the text, size, opacity or pivot",
+        "Custom Animation: word-by-word layout presets (Hero + Stack - click a word to make it the hero, Side-by-Side, Grid) for subtitles split one word per clip, with marquee multi-select to move several words together",
+        "Undo/Redo (Ctrl+Z / Ctrl+Shift+Z) for moves, resizes, layouts and animations",
+        "Diagnostics: dumps a selected Fusion node's real settings to JSON on the Desktop for debugging animation issues",
+        "Translates the last transcript, or any SRT file, one SRT per chosen language, saved to a folder the user picks; optionally automatic after each transcription",
+        "Optionally makes a NEW timeline - a copy of the current one named '<name> (Subtitles)' - with the original language on subtitle track 1 and one subtitle track per translation; the timeline the user is on is never changed",
+        "Translation engines: NLLB-200 (200 languages, non-commercial use only), MADLAD-400 (about 180 languages, free for commercial use) on this computer, or the AI model Ask Buddy is set up with (asks before sending a transcript to a cloud provider, once per provider)",
+        "Translation works on whole sentences, then re-cuts them into timed cues; Chinese and Japanese get character-based line breaking and native punctuation"
+      ],
+      "notes": "Needs a one-time setup on the Setup tab: the engine is about 1.45 GB with an NVIDIA GPU, about 110 MB without, plus a model (0.5-3.1 GB). Buddy places subtitles on subtitle track 1 only, and Resolve puts them on its destination subtitle track, so ST1 has to be the destination (its patch lit red in Resolve's track headers) - otherwise Buddy takes them off again and says so. Existing subtitles on track 1 are replaced only if the user confirms. The user's render settings are restored after the audio render. Local translation needs an NLLB-200 or MADLAD-400 model from the Setup tab; AI translation needs nothing there. The Text+ tabs need DaVinci Resolve Studio (Fusion scripting); their preview is approximate - Resolve draws the real text."
+    },
+    "web": {
+      "name": "Web",
+      "summary": "A light web browser inside Buddy, for reference video, stock footage and music sites, client review sites and general browsing beside Resolve.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Tabs, back and forward, an address bar that takes a web address or words to search for (DuckDuckGo, Google, Bing or Brave Search, chosen in Settings > Tools > Web), zoom (Ctrl + and Ctrl -), full screen video, and Ctrl+T or Ctrl+N (new tab) / Ctrl+W / Ctrl+Shift+T / Ctrl+L shortcuts; a middle-click on a tab closes it, and tabs can be dragged left or right to reorder them (as in Chrome); a new tab - Ctrl+T, a link that opens a new window, Duplicate - always opens at the right-hand end of the row",
+        "Stays light: a tab only loads when it's first shown - Buddy starts with every tab asleep, the one on screen too, so a site that plays music or video doesn't start with Buddy (it shows an Open the page button; clicking the tab, Reload or typing an address also opens it) - and a background tab goes to sleep after a while (5, 15, 30 or 60 minutes, or never) - its memory given back, reloading when it's next opened. The bar shows how much memory the open pages use",
+        "A tab playing sound never sleeps, so music keeps playing while the user works in Resolve or another Buddy tab; a tab can also be kept awake (right-click it), and Settings has a list of sites that never sleep (right-click a tab for 'Never sleep on <site>')",
+        "Blocks ads and trackers (Settings > Tools > Web > Privacy > Block): Ads and trackers uses EasyList, EasyPrivacy and uBlock Origin's filter lists - downloaded from their makers and refreshed every 4 days, read by Buddy itself - to refuse ad and tracker requests and hide the empty boxes ads leave; Known trackers only uses a short built-in list; or Off. A site that breaks can be allowed (right-click its tab > Allow ads on <site>, or the list in Settings). YouTube's video ads come from YouTube itself, so a separate switch (Remove YouTube's video ads, off by default) takes the ad entries out of the video data YouTube sends its player - Buddy's own small script, on YouTube's pages only. YouTube works against this, so it can show its ad-blocker warning or ads can return until Buddy is updated",
+        "Remembers sign-ins and open tabs between runs, in its own browser profile (kept apart from Buddy's own pages). On Windows the sign-ins (cookies) are saved encrypted with the user's Windows account, so only they can read them back on that PC; Clear browsing data (... menu, Ctrl+Shift+Del - Cmd+Shift+Backspace on a Mac -, History or Settings) forgets, for the last hour, day, week or all time: history, the address bar's sites, recently closed tabs, the Downloads list (the files stay), cookies and sign-ins, cached files and site permissions - in the profile in use",
+        "Google sign-in works: Google refuses browsers built into other apps, so on Google's sign-in page alone the browser says it's Firefox (as qutebrowser does); every other site sees Chrome. Once signed in to Google, YouTube, Gmail, Drive and other sites' 'Continue with Google' buttons work",
+        "Downloads go to a folder chosen in Settings (the Downloads folder by default); the downloads button opens the Downloads window: everything downloaded, newest first and grouped by day, with a search and filters for the kind of file (video, audio, images, documents, archives), its size, the date and a sort (newest, oldest, largest, smallest, name). A download can be dragged from there - or from the bar when it finishes - onto DaVinci Resolve, and it ends up in a 'Downloads' bin of the Media Pool (made if needed); or select downloads and press Send to Resolve. Each can also be opened, shown in its folder, taken off the list or moved to the Recycle Bin",
+        "A tab's right-click menu: reload, duplicate, pin (a pinned tab is just its icon, kept at the left and left alone by Close other tabs), mute, pop out video, keep awake, never sleep on the site, sleep now, add to the link bar, open in the user's own browser, close",
+        "Audio ducking (Windows): while DaVinci Resolve plays sound - or, if chosen, any other app - the Web tab's sound fades down (to anywhere from 0% to 100% in steps of 5 - a slider in Settings > Tools > Web > Sound) and comes back up a moment after it stops. It turns down Buddy's own entry in the Windows volume mixer, so it works for every site, and puts it back to where it was",
+        "While a tab plays sound, a speaker shows beside 'Web' in the sidebar (and on its taskbar button under the Desktop theme), so it's clear where the sound is coming from",
+        "The address bar finishes a site as you type ('goo' -> google.com, the rest selected: keep typing, Backspace it away, or Enter to go), from the sites the user goes to (typed ones first), their link bar links, open tabs and a short list of common sites. Only each site is counted, never the pages; Under it, a list of open tabs (Switch to tab) and pages from History that match what's typed - arrow keys and Enter, or a click (a middle-click opens it behind). Typing @tabs first (or Ctrl+Shift+A, ... > Search tabs) lists only the open tabs. Settings > Tools > Web can turn it off; Clear browsing data forgets the sites",
+        "Private tabs (Ctrl+Shift+N, right-click the + or the ... menu): kept in memory only - not saved with the open tabs, not used for address bar suggestions, and their cookies and sign-ins are forgotten once the last private tab closes. They have a dashed outline and their own mark; downloads from them are kept",
+        "The new-tab page shows the link bar's web links plus the user's own shortcuts: its + (or ... > Add a shortcut to the new-tab page) adds one, and the x on a shortcut removes it. They're kept in the Web tab's settings and don't go on the link bar",
+        "YouTube video quality (Settings > Tools > Web > Video): Automatic, Best available, or a cap from 2160p down to 144p - YouTube and YouTube Music play at it or the nearest below, through YouTube's own player. One video's quality can still be changed in YouTube's menu. Other sites choose their own",
+        "History (the ... menu, or Ctrl+H - Cmd+Y on a Mac) opens a window of its own: the pages visited, newest first and grouped by day, kept for 90 days, with a search; click a page to open it in a new tab (Shift+click: in the tab you are on), the x takes one off the list, the arrow keys and Enter work too, and its Clear browsing data button opens that window. Private tabs are never kept in it. Ctrl+J (Cmd+Option+L on a Mac) opens the Downloads window",
+        "Profiles (... menu > Profile): one used at a time, each signed in to its own accounts with its own cookies and site data, tabs, history and remembered sites - one for work and one for home, say. Add a profile names a new one and switches to it; switching puts the current profile's tabs away and brings the other's back; Rename and Delete act on the one in use (deleting signs out of everything in it and removes its tabs and history; the last profile can't be deleted). Once there is more than one, a button with the profile's name and colour sits beside the downloads button. Settings, the Downloads list and the downloads folder are shared by every profile; Clear cookies and site data clears only the profile in use",
+        "While a tab plays sound, a pause button beside its speaker pauses whatever the page is playing without opening the tab; it turns into a play button to carry on",
+        "Find on page (Ctrl+F, or ... > Find on page): a bar under the address with the number of matches; Enter or F3 for the next (Cmd+G on a Mac), Shift+Enter for the one before, Match case, Esc to close",
+        "A middle-click or Ctrl+click on a link opens it in a new tab behind the one you're on, as in Chrome. Ctrl+1 to Ctrl+8 jump to that tab and Ctrl+9 to the last; Ctrl+Tab / Ctrl+PgDn go to the next (Control+Tab or Cmd+Option+arrows on a Mac, where back and forward are Cmd+[ and Cmd+])",
+        "Each tab keeps its back and forward list through sleep, a restart and a profile switch",
+        "Zoom is remembered per site: zoom one YouTube page and every YouTube tab, now and later, opens at it",
+        "Sleeping never takes the tab the Web tab shows, even while Buddy shows another tool, nor a tab with text typed in it that hasn't been sent (a reply, a form) - its tooltip says so. Sleep other tabs now leaves tabs playing sound, kept awake or on never-sleep sites alone",
+        "A page that crashes (or runs out of memory) shows a note with a Reload button instead of going blank, and its tab gets a warning mark",
+        "A page showing pop-ups (alert boxes) one after another: after the third Buddy offers to stop them for that page",
+        "Site permissions: when a site wants the camera, microphone, screen sharing, location, notifications, the clipboard or to lock the mouse, Buddy asks (Allow / Block) and remembers the answer per site - right-click its tab to forget it, or Settings > Tools > Web > Site permissions for every site. Screen sharing asks which screen or window. A tab using the camera, microphone or screen shows a red mark. Notifications show on the bar",
+        "Dark pages (Settings > Tools > Web > Pages): Off, Always, or When Buddy's theme is dark - Chromium darkens sites that only come in white; a site that looks wrong can be kept light (right-click its tab > Darken <site>, or the list in Settings)",
+        "Spell check (Settings > Tools > Web > Check spelling in): underlines misspelt words typed on pages, with suggestions on right-click. The first time a language is chosen Buddy downloads Chrome's dictionary for it",
+        "Print (Ctrl+P, or a page's own print button) and Save page as PDF (the ... menu)",
+        "Pop out video (a tab's right-click menu, the ... menu, or right-click a video): the video moves into a small window of its own that stays on top of Resolve, filling it; close it or press Bring it back and it returns to its tab",
+        "Downloads straight into Resolve: right-click a picture, video or sound on a page > Save image (video, audio) to Resolve downloads it into the project's Downloads bin; Settings > Tools > Web > Downloads can send every downloaded video, audio file and picture in by itself. In the Downloads window a download can be paused and resumed, and a failed or cancelled one tried again; a cancelled one says Cancelled",
+        "Command Center can have hot keys for the Web tab's music (Web group): play / pause, next track, previous track - for YouTube Music, Spotify and other sites with media controls - from any app",
+        "Typing a local address - 192.168.1.1, nas.local - goes to http://, which routers and NAS boxes answer"
+      ],
+      "notes": "Built on the Chromium engine Buddy already uses for its own windows, so nothing extra is installed. Its Chromium can't decode H.264/AAC (the licensed formats most news sites and Reddit use) or DRM-protected streams (Netflix, Spotify's web player). YouTube's VP9/AV1 video plays in the page; for a video that can't, a 'Play in Buddy' button appears over it - and clicking its play button opens it at once - in Buddy's own player window (play, seek, volume, full screen, and Save, which downloads the file), which uses Buddy's built-in FFmpeg. DRM streams still need 'Open in your browser'. A site may still refuse to sign in inside an embedded browser; 'Open in your browser' is there for that."
+    }
+  }
+}

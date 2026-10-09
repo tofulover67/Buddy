@@ -1,0 +1,1623 @@
+{
+ "_comment": "Games. English -> each language; see core/i18n.py.",
+ "Games": {
+  "日本語": "ゲーム",
+  "Español": "Juegos",
+  "Deutsch": "Spiele",
+  "Français": "Jeux",
+  "한국어": "게임",
+  "中文": "游戏",
+  "العربية": "الألعاب",
+  "Tiếng Việt": "Trò chơi"
+ },
+ "Against the computer": {
+  "日本語": "コンピューターと対戦",
+  "Español": "Contra el ordenador",
+  "Deutsch": "Gegen den Computer",
+  "Français": "Contre l'ordinateur",
+  "한국어": "컴퓨터와 대전",
+  "中文": "对战电脑",
+  "العربية": "ضد الكمبيوتر",
+  "Tiếng Việt": "Đấu với máy"
+ },
+ "Two players": {
+  "日本語": "2 人で対戦",
+  "Español": "Dos jugadores",
+  "Deutsch": "Zwei Spieler",
+  "Français": "Deux joueurs",
+  "한국어": "2인 플레이",
+  "中文": "双人对战",
+  "العربية": "لاعبان",
+  "Tiếng Việt": "Hai người chơi"
+ },
+ "Players": {
+  "日本語": "プレイヤー",
+  "Español": "Jugadores",
+  "Deutsch": "Spieler",
+  "Français": "Joueurs",
+  "한국어": "플레이어",
+  "中文": "玩家",
+  "العربية": "اللاعبون",
+  "Tiếng Việt": "Người chơi"
+ },
+ "Difficulty": {
+  "日本語": "難易度",
+  "Español": "Dificultad",
+  "Deutsch": "Schwierigkeit",
+  "Français": "Difficulté",
+  "한국어": "난이도",
+  "中文": "难度",
+  "العربية": "الصعوبة",
+  "Tiếng Việt": "Độ khó"
+ },
+ "Easy": {
+  "日本語": "やさしい",
+  "Español": "Fácil",
+  "Deutsch": "Leicht",
+  "Français": "Facile",
+  "한국어": "쉬움",
+  "中文": "简单",
+  "العربية": "سهل",
+  "Tiếng Việt": "Dễ"
+ },
+ "Hard": {
+  "日本語": "むずかしい",
+  "Español": "Difícil",
+  "Deutsch": "Schwer",
+  "Français": "Difficile",
+  "한국어": "어려움",
+  "中文": "困难",
+  "العربية": "صعب",
+  "Tiếng Việt": "Khó"
+ },
+ "Points to win": {
+  "日本語": "勝利に必要な点数",
+  "Español": "Puntos para ganar",
+  "Deutsch": "Punkte zum Sieg",
+  "Français": "Points pour gagner",
+  "한국어": "승리 점수",
+  "中文": "获胜分数",
+  "العربية": "النقاط للفوز",
+  "Tiếng Việt": "Điểm để thắng"
+ },
+ "Mouse control": {
+  "日本語": "マウス操作",
+  "Español": "Control con el ratón",
+  "Deutsch": "Maussteuerung",
+  "Français": "Contrôle à la souris",
+  "한국어": "마우스 조작",
+  "中文": "鼠标控制",
+  "العربية": "التحكم بالفأرة",
+  "Tiếng Việt": "Điều khiển bằng chuột"
+ },
+ "Your paddle follows the mouse over the court": {
+  "日本語": "コート上でパドルがマウスに追従します",
+  "Español": "Tu pala sigue al ratón sobre la pista",
+  "Deutsch": "Dein Schläger folgt der Maus über dem Spielfeld",
+  "Français": "Votre raquette suit la souris sur le terrain",
+  "한국어": "코트 위에서 패들이 마우스를 따라갑니다",
+  "中文": "球拍会跟随鼠标在球场上移动",
+  "العربية": "يتبع مضربك الفأرة فوق الملعب",
+  "Tiếng Việt": "Vợt của bạn đi theo chuột trên sân"
+ },
+ "New game": {
+  "日本語": "新しいゲーム",
+  "Español": "Nueva partida",
+  "Deutsch": "Neues Spiel",
+  "Français": "Nouvelle partie",
+  "한국어": "새 게임",
+  "中文": "新游戏",
+  "العربية": "لعبة جديدة",
+  "Tiếng Việt": "Ván mới"
+ },
+ "Pong court": {
+  "日本語": "Pong のコート",
+  "Español": "Pista de Pong",
+  "Deutsch": "Pong-Spielfeld",
+  "Français": "Terrain de Pong",
+  "한국어": "Pong 코트",
+  "中文": "Pong 球场",
+  "العربية": "ملعب Pong",
+  "Tiếng Việt": "Sân Pong"
+ },
+ "Press Space or click to start": {
+  "日本語": "スペースキーかクリックでスタート",
+  "Español": "Pulsa Espacio o haz clic para empezar",
+  "Deutsch": "Leertaste drücken oder klicken zum Starten",
+  "Français": "Appuyez sur Espace ou cliquez pour commencer",
+  "한국어": "스페이스 키나 클릭으로 시작",
+  "中文": "按空格键或点击开始",
+  "العربية": "اضغط مسافة أو انقر للبدء",
+  "Tiếng Việt": "Nhấn Space hoặc bấm để bắt đầu"
+ },
+ "Press Space or click to carry on": {
+  "日本語": "スペースキーかクリックで再開",
+  "Español": "Pulsa Espacio o haz clic para seguir",
+  "Deutsch": "Leertaste drücken oder klicken zum Weiterspielen",
+  "Français": "Appuyez sur Espace ou cliquez pour reprendre",
+  "한국어": "스페이스 키나 클릭으로 계속",
+  "中文": "按空格键或点击继续",
+  "العربية": "اضغط مسافة أو انقر للمتابعة",
+  "Tiếng Việt": "Nhấn Space hoặc bấm để chơi tiếp"
+ },
+ "Press Space or click to play again": {
+  "日本語": "スペースキーかクリックでもう一度",
+  "Español": "Pulsa Espacio o haz clic para volver a jugar",
+  "Deutsch": "Leertaste drücken oder klicken für ein neues Spiel",
+  "Français": "Appuyez sur Espace ou cliquez pour rejouer",
+  "한국어": "스페이스 키나 클릭으로 다시 하기",
+  "中文": "按空格键或点击再玩一次",
+  "العربية": "اضغط مسافة أو انقر للعب مجددًا",
+  "Tiếng Việt": "Nhấn Space hoặc bấm để chơi lại"
+ },
+ "You win!": {
+  "日本語": "あなたの勝ち！",
+  "Español": "¡Has ganado!",
+  "Deutsch": "Du hast gewonnen!",
+  "Français": "Vous avez gagné !",
+  "한국어": "승리했습니다!",
+  "中文": "你赢了！",
+  "العربية": "لقد فزت!",
+  "Tiếng Việt": "Bạn thắng!"
+ },
+ "The computer wins": {
+  "日本語": "コンピューターの勝ち",
+  "Español": "Gana el ordenador",
+  "Deutsch": "Der Computer gewinnt",
+  "Français": "L'ordinateur gagne",
+  "한국어": "컴퓨터가 이겼습니다",
+  "中文": "电脑获胜",
+  "العربية": "فاز الكمبيوتر",
+  "Tiếng Việt": "Máy thắng"
+ },
+ "Left player wins": {
+  "日本語": "左のプレイヤーの勝ち",
+  "Español": "Gana el jugador de la izquierda",
+  "Deutsch": "Der linke Spieler gewinnt",
+  "Français": "Le joueur de gauche gagne",
+  "한국어": "왼쪽 플레이어 승리",
+  "中文": "左侧玩家获胜",
+  "العربية": "فاز اللاعب الأيسر",
+  "Tiếng Việt": "Người chơi bên trái thắng"
+ },
+ "Right player wins": {
+  "日本語": "右のプレイヤーの勝ち",
+  "Español": "Gana el jugador de la derecha",
+  "Deutsch": "Der rechte Spieler gewinnt",
+  "Français": "Le joueur de droite gagne",
+  "한국어": "오른쪽 플레이어 승리",
+  "中文": "右侧玩家获胜",
+  "العربية": "فاز اللاعب الأيمن",
+  "Tiếng Việt": "Người chơi bên phải thắng"
+ },
+ "Move with W and S or the arrow keys. Space pauses.": {
+  "日本語": "W と S か矢印キーで移動。スペースキーで一時停止。",
+  "Español": "Muévete con W y S o las flechas. Espacio pausa.",
+  "Deutsch": "Bewegen mit W und S oder den Pfeiltasten. Leertaste pausiert.",
+  "Français": "Déplacez-vous avec W et S ou les flèches. Espace met en pause.",
+  "한국어": "W와 S 또는 화살표 키로 이동. 스페이스 키로 일시정지.",
+  "中文": "用 W 和 S 或方向键移动，空格键暂停。",
+  "العربية": "تحرّك بـ W وS أو بمفاتيح الأسهم. المسافة توقف اللعب مؤقتًا.",
+  "Tiếng Việt": "Di chuyển bằng W và S hoặc phím mũi tên. Space để tạm dừng."
+ },
+ "Move with W and S, the arrow keys or the mouse. Space pauses.": {
+  "日本語": "W と S、矢印キー、マウスで移動。スペースキーで一時停止。",
+  "Español": "Muévete con W y S, las flechas o el ratón. Espacio pausa.",
+  "Deutsch": "Bewegen mit W und S, den Pfeiltasten oder der Maus. Leertaste pausiert.",
+  "Français": "Déplacez-vous avec W et S, les flèches ou la souris. Espace met en pause.",
+  "한국어": "W와 S, 화살표 키 또는 마우스로 이동. 스페이스 키로 일시정지.",
+  "中文": "用 W 和 S、方向键或鼠标移动，空格键暂停。",
+  "العربية": "تحرّك بـ W وS أو بمفاتيح الأسهم أو بالفأرة. المسافة توقف اللعب مؤقتًا.",
+  "Tiếng Việt": "Di chuyển bằng W và S, phím mũi tên hoặc chuột. Space để tạm dừng."
+ },
+ "Left player: W and S. Right player: the arrow keys. Space pauses.": {
+  "日本語": "左のプレイヤー：W と S。右のプレイヤー：矢印キー。スペースキーで一時停止。",
+  "Español": "Jugador izquierdo: W y S. Jugador derecho: las flechas. Espacio pausa.",
+  "Deutsch": "Linker Spieler: W und S. Rechter Spieler: die Pfeiltasten. Leertaste pausiert.",
+  "Français": "Joueur de gauche : W et S. Joueur de droite : les flèches. Espace met en pause.",
+  "한국어": "왼쪽 플레이어: W와 S. 오른쪽 플레이어: 화살표 키. 스페이스 키로 일시정지.",
+  "中文": "左侧玩家：W 和 S。右侧玩家：方向键。空格键暂停。",
+  "العربية": "اللاعب الأيسر: W وS. اللاعب الأيمن: مفاتيح الأسهم. المسافة توقف اللعب مؤقتًا.",
+  "Tiếng Việt": "Người chơi trái: W và S. Người chơi phải: phím mũi tên. Space để tạm dừng."
+ },
+ "Your record against the computer": {
+  "日本語": "コンピューターとの対戦成績",
+  "Español": "Tu historial contra el ordenador",
+  "Deutsch": "Deine Bilanz gegen den Computer",
+  "Français": "Votre bilan contre l'ordinateur",
+  "한국어": "컴퓨터 상대 전적",
+  "中文": "你对战电脑的战绩",
+  "العربية": "سجلك ضد الكمبيوتر",
+  "Tiếng Việt": "Thành tích của bạn khi đấu với máy"
+ },
+ "Snake": {
+  "日本語": "スネーク",
+  "Español": "Serpiente",
+  "Deutsch": "Snake",
+  "Français": "Snake",
+  "한국어": "스네이크",
+  "中文": "贪吃蛇",
+  "العربية": "الثعبان",
+  "Tiếng Việt": "Rắn săn mồi"
+ },
+ "Normal": {
+  "日本語": "ふつう",
+  "Español": "Normal",
+  "Deutsch": "Normal",
+  "Français": "Normal",
+  "한국어": "보통",
+  "中文": "普通",
+  "العربية": "عادي",
+  "Tiếng Việt": "Bình thường"
+ },
+ "Walls": {
+  "日本語": "壁あり",
+  "Español": "Paredes",
+  "Deutsch": "Wände",
+  "Français": "Murs",
+  "한국어": "벽",
+  "中文": "墙壁",
+  "العربية": "الجدران",
+  "Tiếng Việt": "Tường"
+ },
+ "Off: the snake goes out one side and comes back in the other": {
+  "日本語": "オフ：ヘビは片側から出て反対側から戻ってきます",
+  "Español": "Desactivado: la serpiente sale por un lado y vuelve a entrar por el otro",
+  "Deutsch": "Aus: Die Schlange verlässt das Feld auf einer Seite und kommt auf der anderen wieder herein",
+  "Français": "Désactivé : le serpent sort d'un côté et revient de l'autre",
+  "한국어": "끄면: 뱀이 한쪽으로 나가 반대쪽으로 다시 들어옵니다",
+  "中文": "关闭时：蛇从一边出去，会从另一边回来",
+  "العربية": "عند الإيقاف: يخرج الثعبان من جهة ويعود من الجهة الأخرى",
+  "Tiếng Việt": "Tắt: rắn đi ra một bên và vào lại từ bên kia"
+ },
+ "Snake board": {
+  "日本語": "スネークの盤面",
+  "Español": "Tablero de la serpiente",
+  "Deutsch": "Snake-Spielfeld",
+  "Français": "Plateau de Snake",
+  "한국어": "스네이크 보드",
+  "中文": "贪吃蛇棋盘",
+  "العربية": "لوحة الثعبان",
+  "Tiếng Việt": "Bàn chơi rắn"
+ },
+ "Steer with the arrow keys or W, A, S and D. Space pauses.": {
+  "日本語": "矢印キーか W・A・S・D で操作。スペースキーで一時停止。",
+  "Español": "Dirige con las flechas o W, A, S y D. Espacio pausa.",
+  "Deutsch": "Steuern mit den Pfeiltasten oder W, A, S und D. Leertaste pausiert.",
+  "Français": "Dirigez avec les flèches ou W, A, S et D. Espace met en pause.",
+  "한국어": "화살표 키나 W, A, S, D로 조종. 스페이스 키로 일시정지.",
+  "中文": "用方向键或 W、A、S、D 控制方向，空格键暂停。",
+  "العربية": "وجّه بمفاتيح الأسهم أو W وA وS وD. المسافة توقف اللعب مؤقتًا.",
+  "Tiếng Việt": "Điều khiển bằng phím mũi tên hoặc W, A, S, D. Space để tạm dừng."
+ },
+ "Score": {
+  "日本語": "スコア",
+  "Español": "Puntuación",
+  "Deutsch": "Punkte",
+  "Français": "Score",
+  "한국어": "점수",
+  "中文": "得分",
+  "العربية": "النتيجة",
+  "Tiếng Việt": "Điểm"
+ },
+ "Best": {
+  "日本語": "ベスト",
+  "Español": "Mejor",
+  "Deutsch": "Bestwert",
+  "Français": "Record",
+  "한국어": "최고",
+  "中文": "最佳",
+  "العربية": "الأفضل",
+  "Tiếng Việt": "Cao nhất"
+ },
+ "Game over": {
+  "日本語": "ゲームオーバー",
+  "Español": "Fin de la partida",
+  "Deutsch": "Spiel vorbei",
+  "Français": "Partie terminée",
+  "한국어": "게임 오버",
+  "中文": "游戏结束",
+  "العربية": "انتهت اللعبة",
+  "Tiếng Việt": "Kết thúc"
+ },
+ "New best!": {
+  "日本語": "ベスト更新！",
+  "Español": "¡Nuevo récord!",
+  "Deutsch": "Neuer Bestwert!",
+  "Français": "Nouveau record !",
+  "한국어": "최고 기록 경신!",
+  "中文": "新纪录！",
+  "العربية": "رقم قياسي جديد!",
+  "Tiếng Việt": "Kỷ lục mới!"
+ },
+ "You filled the board!": {
+  "日本語": "盤面を埋め尽くしました！",
+  "Español": "¡Has llenado el tablero!",
+  "Deutsch": "Du hast das ganze Feld gefüllt!",
+  "Français": "Vous avez rempli le plateau !",
+  "한국어": "보드를 가득 채웠습니다!",
+  "中文": "你填满了整个棋盘！",
+  "العربية": "لقد ملأت اللوحة!",
+  "Tiếng Việt": "Bạn đã lấp kín bàn chơi!"
+ },
+ "You scored {n}. Press Space or click to play again": {
+  "日本語": "スコアは {n}。スペースキーかクリックでもう一度",
+  "Español": "Has conseguido {n}. Pulsa Espacio o haz clic para volver a jugar",
+  "Deutsch": "Du hast {n} Punkte. Leertaste drücken oder klicken für ein neues Spiel",
+  "Français": "Vous avez marqué {n}. Appuyez sur Espace ou cliquez pour rejouer",
+  "한국어": "점수 {n}점. 스페이스 키나 클릭으로 다시 하기",
+  "中文": "你得了 {n} 分。按空格键或点击再玩一次",
+  "العربية": "سجّلت {n}. اضغط مسافة أو انقر للعب مجددًا",
+  "Tiếng Việt": "Bạn được {n} điểm. Nhấn Space hoặc bấm để chơi lại"
+ },
+ "Minesweeper": {
+  "日本語": "マインスイーパー",
+  "Español": "Buscaminas",
+  "Deutsch": "Minesweeper",
+  "Français": "Démineur",
+  "한국어": "지뢰찾기",
+  "中文": "扫雷",
+  "العربية": "كاسحة الألغام",
+  "Tiếng Việt": "Dò mìn"
+ },
+ "Beginner – 9 × 9, 10 mines": {
+  "日本語": "初級 – 9 × 9、地雷 10 個",
+  "Español": "Principiante – 9 × 9, 10 minas",
+  "Deutsch": "Anfänger – 9 × 9, 10 Minen",
+  "Français": "Débutant – 9 × 9, 10 mines",
+  "한국어": "초급 – 9 × 9, 지뢰 10개",
+  "中文": "初级 – 9 × 9，10 个雷",
+  "العربية": "مبتدئ – 9 × 9، 10 ألغام",
+  "Tiếng Việt": "Dễ – 9 × 9, 10 mìn"
+ },
+ "Intermediate – 16 × 16, 40 mines": {
+  "日本語": "中級 – 16 × 16、地雷 40 個",
+  "Español": "Intermedio – 16 × 16, 40 minas",
+  "Deutsch": "Fortgeschritten – 16 × 16, 40 Minen",
+  "Français": "Intermédiaire – 16 × 16, 40 mines",
+  "한국어": "중급 – 16 × 16, 지뢰 40개",
+  "中文": "中级 – 16 × 16，40 个雷",
+  "العربية": "متوسط – 16 × 16، 40 لغمًا",
+  "Tiếng Việt": "Trung bình – 16 × 16, 40 mìn"
+ },
+ "Expert – 30 × 16, 99 mines": {
+  "日本語": "上級 – 30 × 16、地雷 99 個",
+  "Español": "Experto – 30 × 16, 99 minas",
+  "Deutsch": "Profi – 30 × 16, 99 Minen",
+  "Français": "Expert – 30 × 16, 99 mines",
+  "한국어": "고급 – 30 × 16, 지뢰 99개",
+  "中文": "高级 – 30 × 16，99 个雷",
+  "العربية": "خبير – 30 × 16، 99 لغمًا",
+  "Tiếng Việt": "Khó – 30 × 16, 99 mìn"
+ },
+ "Mines left": {
+  "日本語": "残りの地雷",
+  "Español": "Minas restantes",
+  "Deutsch": "Minen übrig",
+  "Français": "Mines restantes",
+  "한국어": "남은 지뢰",
+  "中文": "剩余地雷",
+  "العربية": "الألغام المتبقية",
+  "Tiếng Việt": "Mìn còn lại"
+ },
+ "Minefield": {
+  "日本語": "地雷原",
+  "Español": "Campo de minas",
+  "Deutsch": "Minenfeld",
+  "Français": "Champ de mines",
+  "한국어": "지뢰밭",
+  "中文": "雷区",
+  "العربية": "حقل الألغام",
+  "Tiếng Việt": "Bãi mìn"
+ },
+ "Click to dig. Right-click or Shift+click to flag a mine. Click a number whose flags are all placed to dig the squares round it.": {
+  "日本語": "クリックで掘ります。右クリックか Shift+クリックで地雷に旗を立てます。旗がそろった数字をクリックすると周りのマスを掘ります。",
+  "Español": "Haz clic para excavar. Clic derecho o Mayús+clic marca una mina con bandera. Haz clic en un número con todas sus banderas puestas para excavar las casillas de alrededor.",
+  "Deutsch": "Klicken zum Graben. Rechtsklick oder Umschalt+Klick setzt eine Flagge auf eine Mine. Ein Klick auf eine Zahl, deren Flaggen alle gesetzt sind, gräbt die Felder ringsum auf.",
+  "Français": "Cliquez pour creuser. Clic droit ou Maj+clic pour marquer une mine d'un drapeau. Cliquez sur un chiffre dont tous les drapeaux sont posés pour creuser les cases autour.",
+  "한국어": "클릭해서 파세요. 오른쪽 클릭이나 Shift+클릭으로 지뢰에 깃발을 꽂습니다. 깃발을 모두 꽂은 숫자를 클릭하면 주변 칸을 팝니다.",
+  "中文": "单击挖开。右键或 Shift+单击给地雷插旗。点击旗子已插满的数字，可挖开它周围的格子。",
+  "العربية": "انقر للحفر. انقر بزر الفأرة الأيمن أو Shift+نقرة لوضع علم على لغم. انقر رقمًا وُضعت كل أعلامه لحفر المربعات حوله.",
+  "Tiếng Việt": "Bấm để đào. Chuột phải hoặc Shift+bấm để cắm cờ lên mìn. Bấm vào một số đã cắm đủ cờ để đào các ô xung quanh."
+ },
+ "Click to carry on": {
+  "日本語": "クリックで再開",
+  "Español": "Haz clic para seguir",
+  "Deutsch": "Klicken zum Weiterspielen",
+  "Français": "Cliquez pour reprendre",
+  "한국어": "클릭해서 계속",
+  "中文": "点击继续",
+  "العربية": "انقر للمتابعة",
+  "Tiếng Việt": "Bấm để chơi tiếp"
+ },
+ "Click to play again": {
+  "日本語": "クリックでもう一度",
+  "Español": "Haz clic para volver a jugar",
+  "Deutsch": "Klicken für ein neues Spiel",
+  "Français": "Cliquez pour rejouer",
+  "한국어": "클릭해서 다시 하기",
+  "中文": "点击再玩一次",
+  "العربية": "انقر للعب مجددًا",
+  "Tiếng Việt": "Bấm để chơi lại"
+ },
+ "Boom!": {
+  "日本語": "ドカン！",
+  "Español": "¡Bum!",
+  "Deutsch": "Bumm!",
+  "Français": "Boum !",
+  "한국어": "펑!",
+  "中文": "轰！",
+  "العربية": "بووم!",
+  "Tiếng Việt": "Bùm!"
+ },
+ "Cleared in {time}. Click to play again": {
+  "日本語": "{time} でクリア。クリックでもう一度",
+  "Español": "Despejado en {time}. Haz clic para volver a jugar",
+  "Deutsch": "Geschafft in {time}. Klicken für ein neues Spiel",
+  "Français": "Terminé en {time}. Cliquez pour rejouer",
+  "한국어": "{time} 만에 완료. 클릭해서 다시 하기",
+  "中文": "用时 {time} 完成。点击再玩一次",
+  "العربية": "أنهيتها في {time}. انقر للعب مجددًا",
+  "Tiếng Việt": "Hoàn thành trong {time}. Bấm để chơi lại"
+ },
+ "Solitaire": {
+  "日本語": "ソリティア",
+  "Español": "Solitario",
+  "Deutsch": "Solitär",
+  "Français": "Solitaire",
+  "한국어": "솔리테어",
+  "中文": "纸牌接龙",
+  "العربية": "سوليتير",
+  "Tiếng Việt": "Xếp bài"
+ },
+ "Deal": {
+  "日本語": "めくり方",
+  "Español": "Robo",
+  "Deutsch": "Ziehen",
+  "Français": "Pioche",
+  "한국어": "뽑기",
+  "中文": "发牌",
+  "العربية": "السحب",
+  "Tiếng Việt": "Rút bài"
+ },
+ "Draw one": {
+  "日本語": "1 枚ずつ",
+  "Español": "Robar una",
+  "Deutsch": "Eine ziehen",
+  "Français": "Une carte",
+  "한국어": "한 장씩",
+  "中文": "每次一张",
+  "العربية": "سحب ورقة واحدة",
+  "Tiếng Việt": "Rút một lá"
+ },
+ "Draw three": {
+  "日本語": "3 枚ずつ",
+  "Español": "Robar tres",
+  "Deutsch": "Drei ziehen",
+  "Français": "Trois cartes",
+  "한국어": "세 장씩",
+  "中文": "每次三张",
+  "العربية": "سحب ثلاث أوراق",
+  "Tiếng Việt": "Rút ba lá"
+ },
+ "Moves": {
+  "日本語": "手数",
+  "Español": "Movimientos",
+  "Deutsch": "Züge",
+  "Français": "Coups",
+  "한국어": "이동",
+  "中文": "步数",
+  "العربية": "الحركات",
+  "Tiếng Việt": "Nước đi"
+ },
+ "Won": {
+  "日本語": "勝利数",
+  "Español": "Ganadas",
+  "Deutsch": "Gewonnen",
+  "Français": "Gagnées",
+  "한국어": "승리",
+  "中文": "胜局",
+  "العربية": "الفوز",
+  "Tiếng Việt": "Thắng"
+ },
+ "Solitaire table": {
+  "日本語": "ソリティアの台",
+  "Español": "Mesa del solitario",
+  "Deutsch": "Solitär-Tisch",
+  "Français": "Table de solitaire",
+  "한국어": "솔리테어 테이블",
+  "中文": "纸牌桌面",
+  "العربية": "طاولة السوليتير",
+  "Tiếng Việt": "Bàn xếp bài"
+ },
+ "Won in {time} with {moves} moves. Click to deal again": {
+  "日本語": "{time}、{moves} 手で勝利。クリックで次のゲーム",
+  "Español": "Ganada en {time} con {moves} movimientos. Haz clic para repartir otra vez",
+  "Deutsch": "Gewonnen in {time} mit {moves} Zügen. Klicken für ein neues Spiel",
+  "Français": "Gagné en {time} en {moves} coups. Cliquez pour redistribuer",
+  "한국어": "{time}, {moves}번 이동으로 승리. 클릭해서 다시 시작",
+  "中文": "用时 {time}，{moves} 步获胜。点击重新发牌",
+  "العربية": "فزت في {time} بـ {moves} حركة. انقر لتوزيع جديد",
+  "Tiếng Việt": "Thắng trong {time} với {moves} nước đi. Bấm để chia bài lại"
+ },
+ "Falling blocks": {
+  "日本語": "落ちものブロック",
+  "Español": "Bloques que caen",
+  "Deutsch": "Fallende Blöcke",
+  "Français": "Blocs qui tombent",
+  "한국어": "떨어지는 블록",
+  "中文": "下落方块",
+  "العربية": "الكتل المتساقطة",
+  "Tiếng Việt": "Khối rơi"
+ },
+ "Breakout": {
+  "日本語": "ブロック崩し",
+  "Español": "Rompeladrillos",
+  "Deutsch": "Breakout",
+  "Français": "Casse-briques",
+  "한국어": "벽돌 깨기",
+  "中文": "打砖块",
+  "العربية": "تحطيم الطوب",
+  "Tiếng Việt": "Phá gạch"
+ },
+ "Sudoku": {
+  "日本語": "数独",
+  "Español": "Sudoku",
+  "Deutsch": "Sudoku",
+  "Français": "Sudoku",
+  "한국어": "스도쿠",
+  "中文": "数独",
+  "العربية": "سودوكو",
+  "Tiếng Việt": "Sudoku"
+ },
+ "Start at level": {
+  "日本語": "開始レベル",
+  "Español": "Empezar en el nivel",
+  "Deutsch": "Startlevel",
+  "Français": "Commencer au niveau",
+  "한국어": "시작 레벨",
+  "中文": "起始等级",
+  "العربية": "البدء من المستوى",
+  "Tiếng Việt": "Bắt đầu ở cấp"
+ },
+ "Ghost piece": {
+  "日本語": "ゴースト表示",
+  "Español": "Pieza fantasma",
+  "Deutsch": "Geisterteil",
+  "Français": "Pièce fantôme",
+  "한국어": "고스트 블록",
+  "中文": "落点提示",
+  "العربية": "القطعة الشبح",
+  "Tiếng Việt": "Bóng khối"
+ },
+ "Shows where the piece will land": {
+  "日本語": "ピースが落ちる位置を表示します",
+  "Español": "Muestra dónde caerá la pieza",
+  "Deutsch": "Zeigt, wo das Teil landet",
+  "Français": "Montre où la pièce va tomber",
+  "한국어": "블록이 떨어질 위치를 보여 줍니다",
+  "中文": "显示方块将落下的位置",
+  "العربية": "يُظهر أين ستستقر القطعة",
+  "Tiếng Việt": "Cho thấy khối sẽ rơi xuống đâu"
+ },
+ "Level": {
+  "日本語": "レベル",
+  "Español": "Nivel",
+  "Deutsch": "Level",
+  "Français": "Niveau",
+  "한국어": "레벨",
+  "中文": "等级",
+  "العربية": "المستوى",
+  "Tiếng Việt": "Cấp"
+ },
+ "Falling blocks well": {
+  "日本語": "落ちものブロックのフィールド",
+  "Español": "Pozo de bloques que caen",
+  "Deutsch": "Spielfeld für fallende Blöcke",
+  "Français": "Puits des blocs qui tombent",
+  "한국어": "떨어지는 블록 판",
+  "中文": "下落方块游戏区",
+  "العربية": "بئر الكتل المتساقطة",
+  "Tiếng Việt": "Giếng khối rơi"
+ },
+ "Press Enter or click to start": {
+  "日本語": "Enter キーかクリックで開始",
+  "Español": "Pulsa Intro o haz clic para empezar",
+  "Deutsch": "Eingabe drücken oder klicken zum Starten",
+  "Français": "Appuyez sur Entrée ou cliquez pour commencer",
+  "한국어": "Enter 키를 누르거나 클릭하면 시작합니다",
+  "中文": "按 Enter 或点击开始",
+  "العربية": "اضغط Enter أو انقر للبدء",
+  "Tiếng Việt": "Nhấn Enter hoặc bấm để bắt đầu"
+ },
+ "Left and Right move, Up or X turns, Z turns back, Down drops faster, Space drops at once, C or Shift holds the piece. Esc pauses.": {
+  "日本語": "左右で移動、上か X で回転、Z で逆回転、下で速く落とし、スペースで一気に落とします。C か Shift でホールド。Esc で一時停止。",
+  "Español": "Izquierda y Derecha mueven, Arriba o X gira, Z gira al revés, Abajo baja más rápido, Espacio la deja caer de golpe, C o Mayús guarda la pieza. Esc pausa.",
+  "Deutsch": "Links und Rechts bewegen, Oben oder X dreht, Z dreht zurück, Unten lässt schneller fallen, Leertaste lässt sofort fallen, C oder Umschalt hält das Teil. Esc pausiert.",
+  "Français": "Gauche et Droite déplacent, Haut ou X tourne, Z tourne dans l'autre sens, Bas accélère la chute, Espace la fait tomber d'un coup, C ou Maj garde la pièce. Échap met en pause.",
+  "한국어": "좌우로 이동, 위쪽이나 X로 회전, Z로 반대로 회전, 아래쪽으로 빨리 떨어뜨리고 스페이스로 바로 떨어뜨립니다. C나 Shift로 보관. Esc로 일시 정지.",
+  "中文": "左右移动，上或 X 旋转，Z 反向旋转，下加速下落，空格直接落下，C 或 Shift 暂存方块。Esc 暂停。",
+  "العربية": "اليسار واليمين للتحريك، الأعلى أو X للتدوير، Z للتدوير عكسيًا، الأسفل لإسقاط أسرع، المسافة لإسقاط فوري، C أو Shift لحجز القطعة. Esc للإيقاف المؤقت.",
+  "Tiếng Việt": "Trái và Phải để di chuyển, Lên hoặc X để xoay, Z để xoay ngược, Xuống để rơi nhanh hơn, Space để thả ngay, C hoặc Shift để giữ khối. Esc để tạm dừng."
+ },
+ "2048 board": {
+  "日本語": "2048 の盤面",
+  "Español": "Tablero de 2048",
+  "Deutsch": "2048-Spielfeld",
+  "Français": "Plateau de 2048",
+  "한국어": "2048 판",
+  "中文": "2048 棋盘",
+  "العربية": "لوحة 2048",
+  "Tiếng Việt": "Bảng 2048"
+ },
+ "Slide the tiles with the arrow keys or W, A, S and D, or drag across the board. Matching numbers merge. Ctrl+Z undoes one slide.": {
+  "日本語": "矢印キーか W、A、S、D、または盤面をドラッグしてタイルを滑らせます。同じ数字は合体します。Ctrl+Z で 1 手戻せます。",
+  "Español": "Desliza las fichas con las flechas o W, A, S y D, o arrastrando por el tablero. Los números iguales se unen. Ctrl+Z deshace un movimiento.",
+  "Deutsch": "Schiebe die Kacheln mit den Pfeiltasten oder W, A, S und D oder durch Ziehen über das Feld. Gleiche Zahlen verschmelzen. Strg+Z macht einen Zug rückgängig.",
+  "Français": "Faites glisser les tuiles avec les flèches ou W, A, S et D, ou en glissant sur le plateau. Les nombres identiques fusionnent. Ctrl+Z annule un coup.",
+  "한국어": "방향키나 W, A, S, D, 또는 판을 드래그해 타일을 밉니다. 같은 숫자끼리 합쳐집니다. Ctrl+Z로 한 번 되돌립니다.",
+  "中文": "用方向键或 W、A、S、D，或在棋盘上拖动来滑动方块。相同数字会合并。Ctrl+Z 撤销一步。",
+  "العربية": "حرّك المربعات بمفاتيح الأسهم أو W وA وS وD، أو اسحب عبر اللوحة. تندمج الأرقام المتطابقة. Ctrl+Z للتراجع عن حركة واحدة.",
+  "Tiếng Việt": "Trượt các ô bằng phím mũi tên hoặc W, A, S và D, hoặc kéo trên bảng. Các số giống nhau sẽ gộp lại. Ctrl+Z hoàn tác một lượt."
+ },
+ "The paddle follows the mouse over the court": {
+  "日本語": "パドルがコート上のマウスに付いて動きます",
+  "Español": "La pala sigue al ratón sobre la pista",
+  "Deutsch": "Der Schläger folgt der Maus über dem Spielfeld",
+  "Français": "La raquette suit la souris sur le terrain",
+  "한국어": "패들이 코트 위의 마우스를 따라갑니다",
+  "中文": "挡板跟随球场上的鼠标移动",
+  "العربية": "يتبع المضرب الفأرة فوق الملعب",
+  "Tiếng Việt": "Thanh đỡ đi theo chuột trên sân"
+ },
+ "Lives": {
+  "日本語": "残機",
+  "Español": "Vidas",
+  "Deutsch": "Leben",
+  "Français": "Vies",
+  "한국어": "목숨",
+  "中文": "生命",
+  "العربية": "الأرواح",
+  "Tiếng Việt": "Mạng"
+ },
+ "Breakout court": {
+  "日本語": "ブロック崩しのコート",
+  "Español": "Pista del rompeladrillos",
+  "Deutsch": "Breakout-Spielfeld",
+  "Français": "Terrain du casse-briques",
+  "한국어": "벽돌 깨기 코트",
+  "中文": "打砖块球场",
+  "العربية": "ملعب تحطيم الطوب",
+  "Tiếng Việt": "Sân phá gạch"
+ },
+ "Move with the arrow keys or A and D. Space launches the ball and pauses.": {
+  "日本語": "矢印キーか A と D で移動。スペースでボールを打ち出し、一時停止もします。",
+  "Español": "Muévete con las flechas o A y D. Espacio lanza la pelota y pausa.",
+  "Deutsch": "Bewegen mit den Pfeiltasten oder A und D. Die Leertaste schlägt den Ball ab und pausiert.",
+  "Français": "Déplacez-vous avec les flèches ou A et D. Espace lance la balle et met en pause.",
+  "한국어": "방향키나 A와 D로 움직입니다. 스페이스로 공을 쏘고 일시 정지합니다.",
+  "中文": "用方向键或 A 和 D 移动。空格发球和暂停。",
+  "العربية": "تحرّك بمفاتيح الأسهم أو A وD. المسافة تطلق الكرة وتوقف اللعب مؤقتًا.",
+  "Tiếng Việt": "Di chuyển bằng phím mũi tên hoặc A và D. Space để phát bóng và tạm dừng."
+ },
+ "Press Space or click to launch the ball": {
+  "日本語": "スペースかクリックでボールを打ち出します",
+  "Español": "Pulsa Espacio o haz clic para lanzar la pelota",
+  "Deutsch": "Leertaste drücken oder klicken, um den Ball abzuschlagen",
+  "Français": "Appuyez sur Espace ou cliquez pour lancer la balle",
+  "한국어": "스페이스를 누르거나 클릭해 공을 쏘세요",
+  "中文": "按空格或点击发球",
+  "العربية": "اضغط المسافة أو انقر لإطلاق الكرة",
+  "Tiếng Việt": "Nhấn Space hoặc bấm để phát bóng"
+ },
+ "Show mistakes": {
+  "日本語": "間違いを表示",
+  "Español": "Mostrar errores",
+  "Deutsch": "Fehler zeigen",
+  "Français": "Afficher les erreurs",
+  "한국어": "실수 표시",
+  "中文": "显示错误",
+  "العربية": "إظهار الأخطاء",
+  "Tiếng Việt": "Hiện lỗi sai"
+ },
+ "Numbers that don't match the answer turn red": {
+  "日本語": "答えと合わない数字が赤くなります",
+  "Español": "Los números que no coinciden con la solución se ponen en rojo",
+  "Deutsch": "Zahlen, die nicht zur Lösung passen, werden rot",
+  "Français": "Les nombres qui ne correspondent pas à la solution passent en rouge",
+  "한국어": "정답과 맞지 않는 숫자가 빨갛게 표시됩니다",
+  "中文": "与答案不符的数字会变红",
+  "العربية": "تتحول الأرقام التي لا تطابق الحل إلى اللون الأحمر",
+  "Tiếng Việt": "Số không khớp với đáp án sẽ chuyển sang màu đỏ"
+ },
+ "Sudoku grid": {
+  "日本語": "数独の盤面",
+  "Español": "Cuadrícula de sudoku",
+  "Deutsch": "Sudoku-Gitter",
+  "Français": "Grille de sudoku",
+  "한국어": "스도쿠 판",
+  "中文": "数独盘面",
+  "العربية": "شبكة السودوكو",
+  "Tiếng Việt": "Lưới Sudoku"
+ },
+ "Click a square, then type a number or click one on the right. Notes (or Shift with a number) pencils it in. Arrow keys move, Backspace clears, Ctrl+Z undoes.": {
+  "日本語": "マスをクリックし、数字を入力するか右の数字をクリックします。メモ（または Shift と数字）で候補を書き込みます。矢印キーで移動、Backspace で消去、Ctrl+Z で元に戻します。",
+  "Español": "Haz clic en una casilla y escribe un número o haz clic en uno de la derecha. Notas (o Mayús con un número) lo apunta a lápiz. Las flechas mueven, Retroceso borra, Ctrl+Z deshace.",
+  "Deutsch": "Klicke auf ein Feld und tippe eine Zahl oder klicke rechts auf eine. Notizen (oder Umschalt mit einer Zahl) trägt sie mit Bleistift ein. Pfeiltasten bewegen, Rücktaste löscht, Strg+Z macht rückgängig.",
+  "Français": "Cliquez sur une case, puis tapez un chiffre ou cliquez-en un à droite. Notes (ou Maj avec un chiffre) l'inscrit au crayon. Les flèches déplacent, Retour arrière efface, Ctrl+Z annule.",
+  "한국어": "칸을 클릭한 뒤 숫자를 입력하거나 오른쪽 숫자를 클릭하세요. 메모(또는 Shift와 숫자)로 후보를 적습니다. 방향키로 이동, Backspace로 지우기, Ctrl+Z로 되돌리기.",
+  "中文": "点击一个格子，然后输入数字或点击右侧的数字。笔记（或 Shift 加数字）用铅笔标记。方向键移动，Backspace 清除，Ctrl+Z 撤销。",
+  "العربية": "انقر مربعًا ثم اكتب رقمًا أو انقر رقمًا على اليمين. الملاحظات (أو Shift مع رقم) تكتبه بالقلم الرصاص. مفاتيح الأسهم للتنقل، Backspace للمسح، Ctrl+Z للتراجع.",
+  "Tiếng Việt": "Bấm vào một ô, rồi gõ số hoặc bấm số bên phải. Ghi chú (hoặc Shift kèm số) để ghi nháp. Phím mũi tên để di chuyển, Backspace để xóa, Ctrl+Z để hoàn tác."
+ },
+ "Hold": {
+  "日本語": "ホールド",
+  "Español": "Reserva",
+  "Deutsch": "Halten",
+  "Français": "Réserve",
+  "한국어": "보관",
+  "中文": "暂存",
+  "العربية": "محجوز",
+  "Tiếng Việt": "Giữ"
+ },
+ "Next": {
+  "日本語": "ネクスト",
+  "Español": "Siguiente",
+  "Deutsch": "Nächste",
+  "Français": "Suivante",
+  "한국어": "다음",
+  "中文": "下一个",
+  "العربية": "التالي",
+  "Tiếng Việt": "Tiếp theo"
+ },
+ "Press Enter or click to carry on": {
+  "日本語": "Enter キーかクリックで再開",
+  "Español": "Pulsa Intro o haz clic para continuar",
+  "Deutsch": "Eingabe drücken oder klicken zum Weiterspielen",
+  "Français": "Appuyez sur Entrée ou cliquez pour continuer",
+  "한국어": "Enter 키를 누르거나 클릭하면 계속합니다",
+  "中文": "按 Enter 或点击继续",
+  "العربية": "اضغط Enter أو انقر للمتابعة",
+  "Tiếng Việt": "Nhấn Enter hoặc bấm để chơi tiếp"
+ },
+ "You scored {score} with {lines} lines. Press Enter or click to play again": {
+  "日本語": "{lines} ライン、{score} 点でした。Enter キーかクリックでもう一度",
+  "Español": "Has conseguido {score} puntos con {lines} líneas. Pulsa Intro o haz clic para volver a jugar",
+  "Deutsch": "{score} Punkte mit {lines} Reihen. Eingabe drücken oder klicken für ein neues Spiel",
+  "Français": "Vous avez marqué {score} points avec {lines} lignes. Appuyez sur Entrée ou cliquez pour rejouer",
+  "한국어": "{lines}줄, {score}점을 얻었습니다. Enter 키를 누르거나 클릭하면 다시 시작합니다",
+  "中文": "你消除了 {lines} 行，得分 {score}。按 Enter 或点击再玩一次",
+  "العربية": "سجّلت {score} نقطة بـ {lines} صفًا. اضغط Enter أو انقر للعب مجددًا",
+  "Tiếng Việt": "Bạn được {score} điểm với {lines} hàng. Nhấn Enter hoặc bấm để chơi lại"
+ },
+ "You made 2048!": {
+  "日本語": "2048 を作りました！",
+  "Español": "¡Has hecho 2048!",
+  "Deutsch": "Du hast 2048 geschafft!",
+  "Français": "Vous avez fait 2048 !",
+  "한국어": "2048을 만들었습니다!",
+  "中文": "你合成了 2048！",
+  "العربية": "لقد صنعت 2048!",
+  "Tiếng Việt": "Bạn đã tạo được 2048!"
+ },
+ "Press Enter or click to keep going": {
+  "日本語": "Enter キーかクリックで続けます",
+  "Español": "Pulsa Intro o haz clic para seguir",
+  "Deutsch": "Eingabe drücken oder klicken zum Weitermachen",
+  "Français": "Appuyez sur Entrée ou cliquez pour continuer à jouer",
+  "한국어": "Enter 키를 누르거나 클릭하면 계속 진행합니다",
+  "中文": "按 Enter 或点击继续玩",
+  "العربية": "اضغط Enter أو انقر لمواصلة اللعب",
+  "Tiếng Việt": "Nhấn Enter hoặc bấm để chơi tiếp"
+ },
+ "No moves left": {
+  "日本語": "もう動かせません",
+  "Español": "No quedan movimientos",
+  "Deutsch": "Keine Züge mehr",
+  "Français": "Plus aucun coup possible",
+  "한국어": "더 이상 움직일 수 없습니다",
+  "中文": "无路可走",
+  "العربية": "لا توجد حركات متبقية",
+  "Tiếng Việt": "Hết nước đi"
+ },
+ "You scored {score}. Press Enter or click to play again": {
+  "日本語": "{score} 点でした。Enter キーかクリックでもう一度",
+  "Español": "Has conseguido {score} puntos. Pulsa Intro o haz clic para volver a jugar",
+  "Deutsch": "{score} Punkte. Eingabe drücken oder klicken für ein neues Spiel",
+  "Français": "Vous avez marqué {score} points. Appuyez sur Entrée ou cliquez pour rejouer",
+  "한국어": "{score}점을 얻었습니다. Enter 키를 누르거나 클릭하면 다시 시작합니다",
+  "中文": "得分 {score}。按 Enter 或点击再玩一次",
+  "العربية": "سجّلت {score} نقطة. اضغط Enter أو انقر للعب مجددًا",
+  "Tiếng Việt": "Bạn được {score} điểm. Nhấn Enter hoặc bấm để chơi lại"
+ },
+ "Biggest tile": {
+  "日本語": "最大タイル",
+  "Español": "Ficha más alta",
+  "Deutsch": "Größte Kachel",
+  "Français": "Plus grande tuile",
+  "한국어": "가장 큰 타일",
+  "中文": "最大方块",
+  "العربية": "أكبر مربع",
+  "Tiếng Việt": "Ô lớn nhất"
+ },
+ "Level {level} cleared!": {
+  "日本語": "レベル {level} クリア！",
+  "Español": "¡Nivel {level} superado!",
+  "Deutsch": "Level {level} geschafft!",
+  "Français": "Niveau {level} terminé !",
+  "한국어": "레벨 {level} 클리어!",
+  "中文": "第 {level} 关完成！",
+  "العربية": "اكتمل المستوى {level}!",
+  "Tiếng Việt": "Hoàn thành cấp {level}!"
+ },
+ "Press Space or click for level {level}": {
+  "日本語": "スペースかクリックでレベル {level} へ",
+  "Español": "Pulsa Espacio o haz clic para el nivel {level}",
+  "Deutsch": "Leertaste drücken oder klicken für Level {level}",
+  "Français": "Appuyez sur Espace ou cliquez pour le niveau {level}",
+  "한국어": "스페이스를 누르거나 클릭하면 레벨 {level}로 갑니다",
+  "中文": "按空格或点击进入第 {level} 关",
+  "العربية": "اضغط المسافة أو انقر للمستوى {level}",
+  "Tiếng Việt": "Nhấn Space hoặc bấm để sang cấp {level}"
+ },
+ "Erase": {
+  "日本語": "消す",
+  "Español": "Borrar",
+  "Deutsch": "Löschen",
+  "Français": "Effacer",
+  "한국어": "지우기",
+  "中文": "擦除",
+  "العربية": "مسح",
+  "Tiếng Việt": "Xóa"
+ },
+ "Solved!": {
+  "日本語": "クリア！",
+  "Español": "¡Resuelto!",
+  "Deutsch": "Gelöst!",
+  "Français": "Résolu !",
+  "한국어": "완성!",
+  "中文": "解开了！",
+  "العربية": "تم الحل!",
+  "Tiếng Việt": "Đã giải xong!"
+ },
+ "Solved in {time}. Click for a new puzzle": {
+  "日本語": "{time} で解きました。クリックで新しい問題へ",
+  "Español": "Resuelto en {time}. Haz clic para otro sudoku",
+  "Deutsch": "Gelöst in {time}. Klicken für ein neues Rätsel",
+  "Français": "Résolu en {time}. Cliquez pour une nouvelle grille",
+  "한국어": "{time} 만에 풀었습니다. 클릭하면 새 문제",
+  "中文": "用时 {time} 解开。点击开始新题",
+  "العربية": "حُلّت في {time}. انقر للغز جديد",
+  "Tiếng Việt": "Đã giải trong {time}. Bấm để chơi câu mới"
+ },
+ "Solved": {
+  "日本語": "解いた数",
+  "Español": "Resueltos",
+  "Deutsch": "Gelöst",
+  "Français": "Résolus",
+  "한국어": "푼 문제",
+  "中文": "已解",
+  "العربية": "المحلولة",
+  "Tiếng Việt": "Đã giải"
+ },
+ "Checkers": {
+  "日本語": "チェッカー",
+  "Español": "Damas",
+  "Deutsch": "Dame",
+  "Français": "Dames",
+  "한국어": "체커",
+  "中文": "西洋跳棋",
+  "العربية": "الداما",
+  "Tiếng Việt": "Cờ đam"
+ },
+ "Chess": {
+  "日本語": "チェス",
+  "Español": "Ajedrez",
+  "Deutsch": "Schach",
+  "Français": "Échecs",
+  "한국어": "체스",
+  "中文": "国际象棋",
+  "العربية": "الشطرنج",
+  "Tiếng Việt": "Cờ vua"
+ },
+ "You play": {
+  "日本語": "自分の色",
+  "Español": "Juegas con",
+  "Deutsch": "Du spielst",
+  "Français": "Vous jouez",
+  "한국어": "내 색",
+  "中文": "你执",
+  "العربية": "تلعب بـ",
+  "Tiếng Việt": "Bạn cầm quân"
+ },
+ "Black (moves first)": {
+  "日本語": "黒（先手）",
+  "Español": "Negras (empiezan)",
+  "Deutsch": "Schwarz (beginnt)",
+  "Français": "Noirs (commencent)",
+  "한국어": "흑 (선공)",
+  "中文": "黑方（先走）",
+  "العربية": "الأسود (يبدأ)",
+  "Tiếng Việt": "Đen (đi trước)"
+ },
+ "White": {
+  "日本語": "白",
+  "Español": "Blancas",
+  "Deutsch": "Weiß",
+  "Français": "Blancs",
+  "한국어": "백",
+  "中文": "白方",
+  "العربية": "الأبيض",
+  "Tiếng Việt": "Trắng"
+ },
+ "Black": {
+  "日本語": "黒",
+  "Español": "Negras",
+  "Deutsch": "Schwarz",
+  "Français": "Noirs",
+  "한국어": "흑",
+  "中文": "黑方",
+  "العربية": "الأسود",
+  "Tiếng Việt": "Đen"
+ },
+ "Either": {
+  "日本語": "どちらでも",
+  "Español": "Cualquiera",
+  "Deutsch": "Egal",
+  "Français": "Au hasard",
+  "한국어": "무작위",
+  "中文": "随机",
+  "العربية": "أيّهما",
+  "Tiếng Việt": "Ngẫu nhiên"
+ },
+ "Show moves": {
+  "日本語": "移動先を表示",
+  "Español": "Mostrar jugadas",
+  "Deutsch": "Züge zeigen",
+  "Français": "Montrer les coups",
+  "한국어": "이동 표시",
+  "中文": "显示走法",
+  "العربية": "إظهار النقلات",
+  "Tiếng Việt": "Hiện nước đi"
+ },
+ "Dots show where the picked piece can land": {
+  "日本語": "点は選んだ駒の着地先です",
+  "Español": "Los puntos muestran dónde puede caer la ficha elegida",
+  "Deutsch": "Punkte zeigen, wo der gewählte Stein landen kann",
+  "Français": "Les points montrent où le pion choisi peut arriver",
+  "한국어": "점은 고른 말이 놓일 수 있는 곳입니다",
+  "中文": "圆点表示所选棋子可以落到的位置",
+  "العربية": "تُظهر النقاط أين يمكن أن تهبط القطعة المختارة",
+  "Tiếng Việt": "Dấu chấm cho biết quân đã chọn có thể đến đâu"
+ },
+ "Dots show where the picked piece can go": {
+  "日本語": "点は選んだ駒の移動先です",
+  "Español": "Los puntos muestran adónde puede ir la pieza elegida",
+  "Deutsch": "Punkte zeigen, wohin die gewählte Figur ziehen kann",
+  "Français": "Les points montrent où la pièce choisie peut aller",
+  "한국어": "점은 고른 기물이 갈 수 있는 곳입니다",
+  "中文": "圆点表示所选棋子可以走到的位置",
+  "العربية": "تُظهر النقاط أين يمكن أن تذهب القطعة المختارة",
+  "Tiếng Việt": "Dấu chấm cho biết quân đã chọn có thể đi đâu"
+ },
+ "Checkers board": {
+  "日本語": "チェッカーの盤",
+  "Español": "Tablero de damas",
+  "Deutsch": "Damebrett",
+  "Français": "Damier",
+  "한국어": "체커 판",
+  "中文": "西洋跳棋棋盘",
+  "العربية": "لوحة الداما",
+  "Tiếng Việt": "Bàn cờ đam"
+ },
+ "Chess board": {
+  "日本語": "チェス盤",
+  "Español": "Tablero de ajedrez",
+  "Deutsch": "Schachbrett",
+  "Français": "Échiquier",
+  "한국어": "체스판",
+  "中文": "国际象棋棋盘",
+  "العربية": "رقعة الشطرنج",
+  "Tiếng Việt": "Bàn cờ vua"
+ },
+ "Click a piece, then where it lands - or drag it. Jumps are forced; for a double jump, click the last square or each landing in turn. Ctrl+Z takes back a move.": {
+  "日本語": "駒をクリックしてから着地先をクリックするか、ドラッグします。ジャンプは必須です。連続ジャンプは最後のマスか、着地するマスを順にクリックします。Ctrl+Z で 1 手戻せます。",
+  "Español": "Haz clic en una ficha y luego donde cae, o arrástrala. Capturar es obligatorio; para una captura doble, haz clic en la última casilla o en cada casilla por orden. Ctrl+Z deshace una jugada.",
+  "Deutsch": "Klicke einen Stein an und dann, wo er landet - oder zieh ihn. Schlagen ist Pflicht; bei einem Doppelsprung klicke das letzte Feld oder jedes Landefeld der Reihe nach. Strg+Z nimmt einen Zug zurück.",
+  "Français": "Cliquez sur un pion puis sur sa case d'arrivée, ou faites-le glisser. La prise est obligatoire ; pour une rafle, cliquez la dernière case ou chaque case d'arrivée tour à tour. Ctrl+Z annule un coup.",
+  "한국어": "말을 클릭한 다음 놓을 곳을 클릭하거나 드래그합니다. 잡기는 강제입니다. 연속 잡기는 마지막 칸이나 착지하는 칸을 차례로 클릭합니다. Ctrl+Z로 한 수 되돌립니다.",
+  "中文": "点击棋子，再点击落点，或直接拖动。吃子是强制的；连跳时点击最后一格，或依次点击每个落点。Ctrl+Z 悔一步。",
+  "العربية": "انقر قطعة ثم مكان هبوطها، أو اسحبها. القفز إلزامي؛ في القفز المزدوج انقر المربع الأخير أو كل مربع هبوط بالترتيب. Ctrl+Z للتراجع عن نقلة.",
+  "Tiếng Việt": "Bấm vào một quân rồi bấm ô nó đáp xuống, hoặc kéo nó. Bắt buộc phải ăn quân; với nước ăn kép, bấm ô cuối hoặc lần lượt từng ô đáp. Ctrl+Z để đi lại một nước."
+ },
+ "Click a piece, then where it goes - or drag it. Ctrl+Z takes back a move.": {
+  "日本語": "駒をクリックしてから移動先をクリックするか、ドラッグします。Ctrl+Z で 1 手戻せます。",
+  "Español": "Haz clic en una pieza y luego adónde va, o arrástrala. Ctrl+Z deshace una jugada.",
+  "Deutsch": "Klicke eine Figur an und dann ihr Zielfeld - oder zieh sie. Strg+Z nimmt einen Zug zurück.",
+  "Français": "Cliquez sur une pièce puis sur sa destination, ou faites-la glisser. Ctrl+Z annule un coup.",
+  "한국어": "기물을 클릭한 다음 갈 곳을 클릭하거나 드래그합니다. Ctrl+Z로 한 수 되돌립니다.",
+  "中文": "点击棋子，再点击目标格，或直接拖动。Ctrl+Z 悔一步。",
+  "العربية": "انقر قطعة ثم مكان ذهابها، أو اسحبها. Ctrl+Z للتراجع عن نقلة.",
+  "Tiếng Việt": "Bấm vào một quân rồi bấm nơi nó đi tới, hoặc kéo nó. Ctrl+Z để đi lại một nước."
+ },
+ "Computer": {
+  "日本語": "コンピューター",
+  "Español": "Ordenador",
+  "Deutsch": "Computer",
+  "Français": "Ordinateur",
+  "한국어": "컴퓨터",
+  "中文": "电脑",
+  "العربية": "الكمبيوتر",
+  "Tiếng Việt": "Máy"
+ },
+ "Your move": {
+  "日本語": "あなたの番",
+  "Español": "Tu turno",
+  "Deutsch": "Du bist am Zug",
+  "Français": "À vous de jouer",
+  "한국어": "당신 차례",
+  "中文": "轮到你",
+  "العربية": "دورك",
+  "Tiếng Việt": "Đến lượt bạn"
+ },
+ "White to move": {
+  "日本語": "白の番",
+  "Español": "Juegan blancas",
+  "Deutsch": "Weiß am Zug",
+  "Français": "Aux blancs de jouer",
+  "한국어": "백 차례",
+  "中文": "白方走",
+  "العربية": "دور الأبيض",
+  "Tiếng Việt": "Trắng đi"
+ },
+ "Black to move": {
+  "日本語": "黒の番",
+  "Español": "Juegan negras",
+  "Deutsch": "Schwarz am Zug",
+  "Français": "Aux noirs de jouer",
+  "한국어": "흑 차례",
+  "中文": "黑方走",
+  "العربية": "دور الأسود",
+  "Tiếng Việt": "Đen đi"
+ },
+ "White wins": {
+  "日本語": "白の勝ち",
+  "Español": "Ganan blancas",
+  "Deutsch": "Weiß gewinnt",
+  "Français": "Les blancs gagnent",
+  "한국어": "백 승리",
+  "中文": "白方胜",
+  "العربية": "فاز الأبيض",
+  "Tiếng Việt": "Trắng thắng"
+ },
+ "Black wins": {
+  "日本語": "黒の勝ち",
+  "Español": "Ganan negras",
+  "Deutsch": "Schwarz gewinnt",
+  "Français": "Les noirs gagnent",
+  "한국어": "흑 승리",
+  "中文": "黑方胜",
+  "العربية": "فاز الأسود",
+  "Tiếng Việt": "Đen thắng"
+ },
+ "Draw": {
+  "日本語": "引き分け",
+  "Español": "Tablas",
+  "Deutsch": "Remis",
+  "Français": "Partie nulle",
+  "한국어": "무승부",
+  "中文": "和棋",
+  "العربية": "تعادل",
+  "Tiếng Việt": "Hòa"
+ },
+ "Check!": {
+  "日本語": "チェック！",
+  "Español": "¡Jaque!",
+  "Deutsch": "Schach!",
+  "Français": "Échec !",
+  "한국어": "체크!",
+  "中文": "将军！",
+  "العربية": "كش!",
+  "Tiếng Việt": "Chiếu!"
+ },
+ "Checkmate": {
+  "日本語": "チェックメイト",
+  "Español": "Jaque mate",
+  "Deutsch": "Schachmatt",
+  "Français": "Échec et mat",
+  "한국어": "체크메이트",
+  "中文": "将死",
+  "العربية": "كش مات",
+  "Tiếng Việt": "Chiếu hết"
+ },
+ "Stalemate - no legal move, but not in check": {
+  "日本語": "ステイルメイト - 指せる手がないが、チェックではない",
+  "Español": "Ahogado: no hay jugada legal, pero tampoco jaque",
+  "Deutsch": "Patt - kein Zug möglich, aber kein Schach",
+  "Français": "Pat : aucun coup légal, mais pas d'échec",
+  "한국어": "스테일메이트 - 둘 수 있는 수가 없지만 체크는 아님",
+  "中文": "逼和 - 无子可走，但未被将军",
+  "العربية": "جمود - لا نقلة قانونية لكن دون كش",
+  "Tiếng Việt": "Hết nước - không còn nước đi hợp lệ nhưng không bị chiếu"
+ },
+ "Fifty moves without a capture or a pawn move": {
+  "日本語": "50 手の間、駒取りもポーンの移動もなし",
+  "Español": "Cincuenta jugadas sin capturas ni movimientos de peón",
+  "Deutsch": "Fünfzig Züge ohne Schlagen und ohne Bauernzug",
+  "Français": "Cinquante coups sans prise ni coup de pion",
+  "한국어": "50수 동안 잡기나 폰 이동이 없음",
+  "中文": "五十回合内没有吃子或走兵",
+  "العربية": "خمسون نقلة بلا أسر ولا تحريك بيدق",
+  "Tiếng Việt": "Năm mươi nước không ăn quân hay đi tốt"
+ },
+ "The same position three times": {
+  "日本語": "同じ局面が 3 回",
+  "Español": "La misma posición tres veces",
+  "Deutsch": "Dreimal dieselbe Stellung",
+  "Français": "La même position trois fois",
+  "한국어": "같은 국면이 세 번",
+  "中文": "同一局面出现三次",
+  "العربية": "الوضع نفسه ثلاث مرات",
+  "Tiếng Việt": "Cùng một thế cờ ba lần"
+ },
+ "Not enough pieces left to checkmate": {
+  "日本語": "チェックメイトできる駒が残っていない",
+  "Español": "No quedan piezas suficientes para dar mate",
+  "Deutsch": "Nicht genug Figuren für ein Matt",
+  "Français": "Plus assez de pièces pour mater",
+  "한국어": "체크메이트할 기물이 부족함",
+  "中文": "剩余棋子不足以将死",
+  "العربية": "لم يبقَ ما يكفي من القطع لكش مات",
+  "Tiếng Việt": "Không đủ quân để chiếu hết"
+ },
+ "Press New game to play again": {
+  "日本語": "「新しいゲーム」でもう一度遊べます",
+  "Español": "Pulsa Nueva partida para volver a jugar",
+  "Deutsch": "Mit „Neues Spiel“ noch einmal spielen",
+  "Français": "Appuyez sur Nouvelle partie pour rejouer",
+  "한국어": "다시 하려면 새 게임을 누르세요",
+  "中文": "点击“新游戏”再来一局",
+  "العربية": "اضغط لعبة جديدة للعب مجددًا",
+  "Tiếng Việt": "Nhấn Ván mới để chơi lại"
+ },
+ "A jump is forced": {
+  "日本語": "ジャンプしなければなりません",
+  "Español": "Es obligatorio capturar",
+  "Deutsch": "Schlagen ist Pflicht",
+  "Français": "La prise est obligatoire",
+  "한국어": "잡기가 강제됩니다",
+  "中文": "必须吃子",
+  "العربية": "القفز إلزامي",
+  "Tiếng Việt": "Bắt buộc phải ăn quân"
+ },
+ "The computer has no moves left": {
+  "日本語": "コンピューターは指せる手がありません",
+  "Español": "El ordenador no tiene movimientos",
+  "Deutsch": "Der Computer hat keine Züge mehr",
+  "Français": "L'ordinateur n'a plus de coup possible",
+  "한국어": "컴퓨터가 둘 수 있는 수가 없음",
+  "中文": "电脑无棋可走",
+  "العربية": "لم تبقَ للكمبيوتر أي نقلة",
+  "Tiếng Việt": "Máy đã hết nước đi"
+ },
+ "You have no moves left": {
+  "日本語": "あなたは指せる手がありません",
+  "Español": "No te quedan movimientos",
+  "Deutsch": "Du hast keine Züge mehr",
+  "Français": "Vous n'avez plus de coup possible",
+  "한국어": "둘 수 있는 수가 없습니다",
+  "中文": "你无棋可走",
+  "العربية": "لم تبقَ لك أي نقلة",
+  "Tiếng Việt": "Bạn đã hết nước đi"
+ },
+ "40 moves each without a jump or a man moving": {
+  "日本語": "双方 40 手の間、ジャンプもキング以外の駒の移動もなし",
+  "Español": "40 jugadas cada uno sin capturas ni movimientos de peones",
+  "Deutsch": "Je 40 Züge ohne Schlagen und ohne Zug eines einfachen Steins",
+  "Français": "40 coups chacun sans prise ni mouvement de pion",
+  "한국어": "각자 40수 동안 잡기나 일반 말의 이동이 없음",
+  "中文": "双方各 40 步内没有吃子，也没有普通棋子移动",
+  "العربية": "40 نقلة لكل لاعب بلا قفز ولا تحريك قطعة عادية",
+  "Tiếng Việt": "Mỗi bên 40 nước không ăn quân và không đi quân thường"
+ },
+ "Won – lost – drawn": {
+  "日本語": "勝ち – 負け – 引き分け",
+  "Español": "Ganadas – perdidas – tablas",
+  "Deutsch": "Gewonnen – verloren – remis",
+  "Français": "Gagnées – perdues – nulles",
+  "한국어": "승 – 패 – 무",
+  "中文": "胜 – 负 – 和",
+  "العربية": "فوز – خسارة – تعادل",
+  "Tiếng Việt": "Thắng – thua – hòa"
+ },
+ "Daily word": {
+  "日本語": "今日の単語",
+  "Español": "Palabra del día",
+  "Deutsch": "Wort des Tages",
+  "Français": "Mot du jour",
+  "한국어": "오늘의 단어",
+  "中文": "每日一词",
+  "العربية": "كلمة اليوم",
+  "Tiếng Việt": "Từ hôm nay"
+ },
+ "Unlimited": {
+  "日本語": "無制限",
+  "Español": "Ilimitado",
+  "Deutsch": "Unbegrenzt",
+  "Français": "Illimité",
+  "한국어": "무제한",
+  "中文": "无限",
+  "العربية": "غير محدود",
+  "Tiếng Việt": "Không giới hạn"
+ },
+ "Hard mode": {
+  "日本語": "ハードモード",
+  "Español": "Modo difícil",
+  "Deutsch": "Schwerer Modus",
+  "Français": "Mode difficile",
+  "한국어": "하드 모드",
+  "中文": "困难模式",
+  "العربية": "الوضع الصعب",
+  "Tiếng Việt": "Chế độ khó"
+ },
+ "Letters you've found must be used in every guess after": {
+  "日本語": "見つけた文字はその後の予想で必ず使う",
+  "Español": "Las letras encontradas deben usarse en cada intento siguiente",
+  "Deutsch": "Gefundene Buchstaben müssen in jedem weiteren Versuch vorkommen",
+  "Français": "Les lettres trouvées doivent figurer dans chaque essai suivant",
+  "한국어": "찾은 글자는 이후 모든 추측에 써야 합니다",
+  "中文": "已找到的字母必须用在之后的每次猜测中",
+  "العربية": "يجب استخدام الأحرف التي وجدتها في كل تخمين بعدها",
+  "Tiếng Việt": "Các chữ đã tìm được phải dùng trong mọi lần đoán sau"
+ },
+ "High-contrast colours": {
+  "日本語": "高コントラストの色",
+  "Español": "Colores de alto contraste",
+  "Deutsch": "Kontrastreiche Farben",
+  "Français": "Couleurs à fort contraste",
+  "한국어": "고대비 색상",
+  "中文": "高对比度颜色",
+  "العربية": "ألوان عالية التباين",
+  "Tiếng Việt": "Màu tương phản cao"
+ },
+ "Orange and blue instead of green and yellow": {
+  "日本語": "緑と黄の代わりにオレンジと青",
+  "Español": "Naranja y azul en lugar de verde y amarillo",
+  "Deutsch": "Orange und Blau statt Grün und Gelb",
+  "Français": "Orange et bleu au lieu de vert et jaune",
+  "한국어": "초록과 노랑 대신 주황과 파랑",
+  "中文": "用橙色和蓝色代替绿色和黄色",
+  "العربية": "البرتقالي والأزرق بدل الأخضر والأصفر",
+  "Tiếng Việt": "Cam và xanh dương thay cho xanh lá và vàng"
+ },
+ "Statistics": {
+  "日本語": "統計",
+  "Español": "Estadísticas",
+  "Deutsch": "Statistik",
+  "Français": "Statistiques",
+  "한국어": "통계",
+  "中文": "统计",
+  "العربية": "الإحصاءات",
+  "Tiếng Việt": "Thống kê"
+ },
+ "New word": {
+  "日本語": "新しい単語",
+  "Español": "Nueva palabra",
+  "Deutsch": "Neues Wort",
+  "Français": "Nouveau mot",
+  "한국어": "새 단어",
+  "中文": "新单词",
+  "العربية": "كلمة جديدة",
+  "Tiếng Việt": "Từ mới"
+ },
+ "Type a word and press Enter. Green: the right letter in the right place. Yellow: in the word, somewhere else. Grey: not in the word.": {
+  "日本語": "単語を入力して Enter を押します。緑: 文字も位置も正しい。黄: 単語にあるが別の位置。灰: 単語にない。",
+  "Español": "Escribe una palabra y pulsa Intro. Verde: letra correcta en su sitio. Amarillo: está en la palabra, en otro sitio. Gris: no está en la palabra.",
+  "Deutsch": "Wort eingeben und Eingabe drücken. Grün: richtiger Buchstabe an richtiger Stelle. Gelb: im Wort, an anderer Stelle. Grau: nicht im Wort.",
+  "Français": "Tapez un mot et appuyez sur Entrée. Vert : bonne lettre, bonne place. Jaune : dans le mot, ailleurs. Gris : absente du mot.",
+  "한국어": "단어를 입력하고 Enter를 누르세요. 초록: 글자와 위치가 맞음. 노랑: 단어에 있지만 다른 위치. 회색: 단어에 없음.",
+  "中文": "输入一个单词并按 Enter。绿色：字母和位置都对。黄色：在单词中但位置不对。灰色：不在单词中。",
+  "العربية": "اكتب كلمة واضغط Enter. الأخضر: الحرف الصحيح في مكانه الصحيح. الأصفر: في الكلمة لكن في مكان آخر. الرمادي: ليس في الكلمة.",
+  "Tiếng Việt": "Gõ một từ rồi nhấn Enter. Xanh lá: đúng chữ, đúng chỗ. Vàng: có trong từ nhưng ở chỗ khác. Xám: không có trong từ."
+ },
+ "Guesses": {
+  "日本語": "予想",
+  "Español": "Intentos",
+  "Deutsch": "Versuche",
+  "Français": "Essais",
+  "한국어": "추측",
+  "中文": "猜测",
+  "العربية": "التخمينات",
+  "Tiếng Việt": "Lượt đoán"
+ },
+ "Played": {
+  "日本語": "プレイ",
+  "Español": "Jugadas",
+  "Deutsch": "Gespielt",
+  "Français": "Jouées",
+  "한국어": "플레이",
+  "中文": "已玩",
+  "العربية": "لُعبت",
+  "Tiếng Việt": "Đã chơi"
+ },
+ "Streak": {
+  "日本語": "連続",
+  "Español": "Racha",
+  "Deutsch": "Serie",
+  "Français": "Série",
+  "한국어": "연속",
+  "中文": "连胜",
+  "العربية": "سلسلة",
+  "Tiếng Việt": "Chuỗi thắng"
+ },
+ "Best streak": {
+  "日本語": "最長連続",
+  "Español": "Mejor racha",
+  "Deutsch": "Beste Serie",
+  "Français": "Meilleure série",
+  "한국어": "최고 연속",
+  "中文": "最长连胜",
+  "العربية": "أفضل سلسلة",
+  "Tiếng Việt": "Chuỗi dài nhất"
+ },
+ "First try!": {
+  "日本語": "一発で正解!",
+  "Español": "¡A la primera!",
+  "Deutsch": "Beim ersten Versuch!",
+  "Français": "Du premier coup !",
+  "한국어": "한 번에 맞혔어요!",
+  "中文": "一次猜中!",
+  "العربية": "من أول محاولة!",
+  "Tiếng Việt": "Đoán trúng ngay!"
+ },
+ "Brilliant!": {
+  "日本語": "見事!",
+  "Español": "¡Brillante!",
+  "Deutsch": "Brillant!",
+  "Français": "Brillant !",
+  "한국어": "훌륭해요!",
+  "中文": "太厉害了!",
+  "العربية": "رائع!",
+  "Tiếng Việt": "Xuất sắc!"
+ },
+ "Great!": {
+  "日本語": "すごい!",
+  "Español": "¡Genial!",
+  "Deutsch": "Großartig!",
+  "Français": "Génial !",
+  "한국어": "대단해요!",
+  "中文": "很棒!",
+  "العربية": "عظيم!",
+  "Tiếng Việt": "Tuyệt!"
+ },
+ "Nice!": {
+  "日本語": "いいね!",
+  "Español": "¡Bien hecho!",
+  "Deutsch": "Schön!",
+  "Français": "Bien joué !",
+  "한국어": "좋아요!",
+  "中文": "不错!",
+  "العربية": "جميل!",
+  "Tiếng Việt": "Hay lắm!"
+ },
+ "Good!": {
+  "日本語": "よし!",
+  "Español": "¡Bien!",
+  "Deutsch": "Gut!",
+  "Français": "Bien !",
+  "한국어": "잘했어요!",
+  "中文": "好!",
+  "العربية": "جيد!",
+  "Tiếng Việt": "Tốt!"
+ },
+ "Phew!": {
+  "日本語": "ふう!",
+  "Español": "¡Uf!",
+  "Deutsch": "Puh!",
+  "Français": "Ouf !",
+  "한국어": "휴!",
+  "中文": "好险!",
+  "العربية": "أخيرًا!",
+  "Tiếng Việt": "Phù!"
+ },
+ "Out of guesses": {
+  "日本語": "予想を使い切りました",
+  "Español": "Sin intentos",
+  "Deutsch": "Keine Versuche mehr",
+  "Français": "Plus d'essais",
+  "한국어": "추측을 다 썼어요",
+  "中文": "猜测次数用完了",
+  "العربية": "نفدت التخمينات",
+  "Tiếng Việt": "Hết lượt đoán"
+ },
+ "Found in {n} of 6": {
+  "日本語": "6 回中 {n} 回で正解",
+  "Español": "Encontrada en {n} de 6",
+  "Deutsch": "Gefunden in {n} von 6",
+  "Français": "Trouvé en {n} sur 6",
+  "한국어": "6번 중 {n}번 만에 맞힘",
+  "中文": "用 {n}/6 次猜中",
+  "العربية": "وُجدت في {n} من 6",
+  "Tiếng Việt": "Đoán trúng sau {n}/6 lượt"
+ },
+ "The word was {word}": {
+  "日本語": "正解は {word}",
+  "Español": "La palabra era {word}",
+  "Deutsch": "Das Wort war {word}",
+  "Français": "Le mot était {word}",
+  "한국어": "정답은 {word}",
+  "中文": "答案是 {word}",
+  "العربية": "كانت الكلمة {word}",
+  "Tiếng Việt": "Từ đúng là {word}"
+ },
+ "Next word in {time}": {
+  "日本語": "次の単語まで {time}",
+  "Español": "Siguiente palabra en {time}",
+  "Deutsch": "Nächstes Wort in {time}",
+  "Français": "Prochain mot dans {time}",
+  "한국어": "다음 단어까지 {time}",
+  "中文": "距下一个单词 {time}",
+  "العربية": "الكلمة التالية بعد {time}",
+  "Tiếng Việt": "Từ tiếp theo sau {time}"
+ },
+ "Press Enter or click for a new word": {
+  "日本語": "Enter かクリックで新しい単語",
+  "Español": "Pulsa Intro o haz clic para una nueva palabra",
+  "Deutsch": "Eingabe drücken oder klicken für ein neues Wort",
+  "Français": "Appuyez sur Entrée ou cliquez pour un nouveau mot",
+  "한국어": "Enter를 누르거나 클릭하면 새 단어",
+  "中文": "按 Enter 或点击换一个新单词",
+  "العربية": "اضغط Enter أو انقر لكلمة جديدة",
+  "Tiếng Việt": "Nhấn Enter hoặc bấm để có từ mới"
+ },
+ "Not enough letters": {
+  "日本語": "文字が足りません",
+  "Español": "Faltan letras",
+  "Deutsch": "Zu wenige Buchstaben",
+  "Français": "Pas assez de lettres",
+  "한국어": "글자가 부족해요",
+  "中文": "字母不够",
+  "العربية": "الأحرف غير كافية",
+  "Tiếng Việt": "Chưa đủ chữ"
+ },
+ "Not in the word list": {
+  "日本語": "単語リストにありません",
+  "Español": "No está en la lista de palabras",
+  "Deutsch": "Nicht in der Wortliste",
+  "Français": "Pas dans la liste de mots",
+  "한국어": "단어 목록에 없어요",
+  "中文": "不在单词表中",
+  "العربية": "ليست في قائمة الكلمات",
+  "Tiếng Việt": "Không có trong danh sách từ"
+ },
+ "Hard mode changes with the next word": {
+  "日本語": "ハードモードは次の単語から切り替わります",
+  "Español": "El modo difícil cambia con la próxima palabra",
+  "Deutsch": "Der schwere Modus wechselt mit dem nächsten Wort",
+  "Français": "Le mode difficile change au prochain mot",
+  "한국어": "하드 모드는 다음 단어부터 바뀝니다",
+  "中文": "困难模式将从下一个单词起切换",
+  "العربية": "يتغيّر الوضع الصعب مع الكلمة التالية",
+  "Tiếng Việt": "Chế độ khó sẽ đổi từ từ tiếp theo"
+ },
+ "Letter {n} must be {letter}": {
+  "日本語": "{n} 文字目は {letter} でなければなりません",
+  "Español": "La letra {n} debe ser {letter}",
+  "Deutsch": "Buchstabe {n} muss {letter} sein",
+  "Français": "La lettre {n} doit être {letter}",
+  "한국어": "{n}번째 글자는 {letter}여야 해요",
+  "中文": "第 {n} 个字母必须是 {letter}",
+  "العربية": "يجب أن يكون الحرف {n} هو {letter}",
+  "Tiếng Việt": "Chữ thứ {n} phải là {letter}"
+ },
+ "Guess must contain {letter}": {
+  "日本語": "{letter} を含める必要があります",
+  "Español": "El intento debe contener {letter}",
+  "Deutsch": "Der Versuch muss {letter} enthalten",
+  "Français": "L'essai doit contenir {letter}",
+  "한국어": "{letter}를 넣어야 해요",
+  "中文": "猜测必须包含 {letter}",
+  "العربية": "يجب أن يحتوي التخمين على {letter}",
+  "Tiếng Việt": "Lượt đoán phải có {letter}"
+ },
+ "Enter": {
+  "日本語": "Enter",
+  "Español": "Intro",
+  "Deutsch": "Eingabe",
+  "Français": "Entrée",
+  "한국어": "Enter",
+  "中文": "Enter",
+  "العربية": "إدخال",
+  "Tiếng Việt": "Enter"
+ },
+ "Backspace": {
+  "日本語": "Backspace",
+  "Español": "Retroceso",
+  "Deutsch": "Rücktaste",
+  "Français": "Retour arrière",
+  "한국어": "백스페이스",
+  "中文": "退格",
+  "العربية": "مسافة للخلف",
+  "Tiếng Việt": "Xóa lùi"
+ },
+ "Drag cards, or click one to send it where it fits. Click the deck to draw. Every deal can be won. H shows a hint, Ctrl+Z undoes.": {
+  "日本語": "カードをドラッグするか、クリックして置ける場所へ送ります。山札をクリックで引きます。どの配りも必ずクリアできます。H でヒント、Ctrl+Z で元に戻します。",
+  "Español": "Arrastra las cartas o haz clic en una para enviarla donde encaje. Haz clic en el mazo para robar. Todas las partidas se pueden ganar. H muestra una pista y Ctrl+Z deshace.",
+  "Deutsch": "Karten ziehen oder anklicken, um sie dorthin zu schicken, wo sie passen. Zum Ziehen auf den Stapel klicken. Jedes Spiel ist lösbar. H zeigt einen Tipp, Strg+Z macht rückgängig.",
+  "Français": "Faites glisser les cartes, ou cliquez sur l'une pour l'envoyer là où elle va. Cliquez sur la pioche pour tirer. Chaque donne peut être gagnée. H montre un indice, Ctrl+Z annule.",
+  "한국어": "카드를 끌거나 클릭해 맞는 자리로 보냅니다. 덱을 클릭하면 카드를 뽑습니다. 모든 판은 이길 수 있습니다. H는 힌트, Ctrl+Z는 실행 취소입니다.",
+  "中文": "拖动纸牌，或点击一张纸牌把它送到合适的位置。点击牌堆抽牌。每一局都能赢。按 H 显示提示，Ctrl+Z 撤销。",
+  "العربية": "اسحب الأوراق أو انقر على ورقة لإرسالها إلى حيث تناسب. انقر على الرزمة للسحب. كل توزيعة يمكن الفوز بها. H يعرض تلميحًا، وCtrl+Z يتراجع.",
+  "Tiếng Việt": "Kéo bài, hoặc bấm vào một lá để đưa nó tới chỗ hợp lệ. Bấm vào chồng bài để rút. Ván nào cũng thắng được. H để xem gợi ý, Ctrl+Z để hoàn tác."
+ },
+ "Hint": {
+  "日本語": "ヒント",
+  "Español": "Pista",
+  "Deutsch": "Tipp",
+  "Français": "Indice",
+  "한국어": "힌트",
+  "中文": "提示",
+  "العربية": "تلميح",
+  "Tiếng Việt": "Gợi ý"
+ },
+ "Draw from the deck": {
+  "日本語": "山札から引きましょう",
+  "Español": "Roba del mazo",
+  "Deutsch": "Vom Stapel ziehen",
+  "Français": "Tirez dans la pioche",
+  "한국어": "덱에서 뽑으세요",
+  "中文": "从牌堆抽牌",
+  "العربية": "اسحب من الرزمة",
+  "Tiếng Việt": "Rút từ chồng bài"
+ },
+ "Turn the deck over": {
+  "日本語": "山札を戻しましょう",
+  "Español": "Da la vuelta al mazo",
+  "Deutsch": "Stapel umdrehen",
+  "Français": "Retournez la pioche",
+  "한국어": "덱을 다시 뒤집으세요",
+  "中文": "把牌堆翻回来",
+  "العربية": "اقلب الرزمة",
+  "Tiếng Việt": "Lật lại chồng bài"
+ },
+ "No moves left - Undo goes back": {
+  "日本語": "動かせる手がありません - 元に戻すで戻れます",
+  "Español": "No quedan jugadas: Deshacer vuelve atrás",
+  "Deutsch": "Keine Züge mehr - Rückgängig geht zurück",
+  "Français": "Plus aucun coup - Annuler revient en arrière",
+  "한국어": "둘 수 있는 수가 없어요 - 실행 취소로 되돌리세요",
+  "中文": "没有可走的了 - 撤销可以返回",
+  "العربية": "لا حركات متبقية - التراجع يعيدك",
+  "Tiếng Việt": "Hết nước đi - Hoàn tác để quay lại"
+ },
+ "Couldn't find a way to win from here - Undo goes back": {
+  "日本語": "ここから勝つ手が見つかりません - 元に戻すで戻れます",
+  "Español": "No encuentro forma de ganar desde aquí: Deshacer vuelve atrás",
+  "Deutsch": "Von hier aus wurde kein Weg zum Sieg gefunden - Rückgängig geht zurück",
+  "Français": "Aucun moyen de gagner trouvé d'ici - Annuler revient en arrière",
+  "한국어": "여기서 이길 방법을 찾지 못했어요 - 실행 취소로 되돌리세요",
+  "中文": "从这里找不到获胜的走法 - 撤销可以返回",
+  "العربية": "لم أجد طريقة للفوز من هنا - التراجع يعيدك",
+  "Tiếng Việt": "Không tìm được cách thắng từ đây - Hoàn tác để quay lại"
+ },
+ "Share on Buddy Network": {
+  "日本語": "Buddy Network で共有",
+  "Español": "Compartir en Buddy Network",
+  "Deutsch": "In Buddy Network teilen",
+  "Français": "Partager sur Buddy Network",
+  "한국어": "Buddy Network에 공유",
+  "中文": "分享到 Buddy Network",
+  "العربية": "المشاركة على Buddy Network",
+  "Tiếng Việt": "Chia sẻ lên Buddy Network"
+ },
+ "Your squares, without the word": {
+  "日本語": "単語は伏せて、マス目だけ",
+  "Español": "Tus casillas, sin la palabra",
+  "Deutsch": "Deine Kästchen, ohne das Wort",
+  "Français": "Vos cases, sans le mot",
+  "한국어": "단어 없이 칸만",
+  "中文": "只分享方块,不含答案",
+  "العربية": "مربعاتك، دون الكلمة",
+  "Tiếng Việt": "Các ô của bạn, không lộ từ"
+ }
+}

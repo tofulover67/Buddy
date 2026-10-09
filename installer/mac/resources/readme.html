@@ -1,0 +1,15 @@
+<html><body style="font-family: -apple-system, 'Helvetica Neue', sans-serif; font-size: 13px;">
+<h3>What gets installed</h3>
+<p>This installer sets up:</p>
+<ul>
+<li>Buddy, in DaVinci Resolve's <b>Workspace &gt; Scripts</b> menu</li>
+<li>Python 3.13 from python.org - only if this Mac doesn't already have Python 3.10 or newer from python.org</li>
+<li>The Python packages Buddy uses (PySide6, Pillow, NumPy, openpyxl, pynput, PyMuPDF, cryptography) - only the ones that are missing</li>
+</ul>
+<p>Anything missing is downloaded while installing - up to about 330 MB, so it needs an internet
+connection and can take a few minutes.</p>
+<p>Transcription (Whisper) is set up later from inside Buddy, only if you want it.</p>
+<p><b>DaVinci Resolve:</b> the free Resolve runs Buddy on version 21.0.x and earlier. From 21.1,
+scripting needs DaVinci Resolve Studio.</p>
+<p>If something goes wrong, the details are in <code>/Library/Logs/Buddy-install.log</code>.</p>
+</body></html>

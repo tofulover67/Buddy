@@ -1,0 +1,97 @@
+#!/bin/bash
+# Buddy's macOS installer: runs as root once the user clicks Install
+# (build_mac_installer.py puts it in the .pkg). The macOS counterpart of
+# installer/Buddy.iss:
+#   1. Python from python.org - only if the Mac has no 3.10 or newer that
+#      DaVinci Resolve can use (python.org's, in /Library/Frameworks).
+#   2. The packages Buddy imports (requirements.txt) - pip skips the ones
+#      already there.
+#   3. Buddy.py + buddy.zip into the user's Resolve Scripts/Utility folder
+#      (the same one build_buddy_zip.py --deploy uses, so Buddy never shows
+#      up twice in the menu).
+# Everything is logged to /Library/Logs/Buddy-install.log. Any failure
+# exits non-zero, which the installer shows as "The installation failed".
+
+set -u
+
+LOG=/Library/Logs/Buddy-install.log
+exec >>"$LOG" 2>&1
+echo "=== Buddy install, $(date)"
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+# Same version as installer/Buddy.iss. Pinned by its SHA-256 from
+# python.org's release page, so a tampered download is refused.
+PY_VERSION="3.13.15"
+PY_URL="https://www.python.org/ftp/python/${PY_VERSION}/python-${PY_VERSION}-macos11.pkg"
+PY_SHA256="3b7eaf7f29825f796e8267024435540ddf1f17fc9a97ad58095daa7a75bfdcd3"
+
+fail() {
+    echo "FAILED: $1"
+    exit 1
+}
+
+# The person at the Mac - this script itself runs as root.
+USER_NAME="$(stat -f%Su /dev/console)"
+if [ -z "$USER_NAME" ] || [ "$USER_NAME" = "root" ] || [ "$USER_NAME" = "loginwindow" ]; then
+    fail "couldn't tell which user is logged in (got '$USER_NAME')"
+fi
+USER_HOME="$(dscl . -read "/Users/$USER_NAME" NFSHomeDirectory | awk '{print $2}')"
+[ -d "$USER_HOME" ] || fail "no home folder for $USER_NAME"
+echo "Installing for $USER_NAME ($USER_HOME)"
+
+# ------------------------------------------------------------------ Python
+
+# Every python.org Python 3.10+ - Resolve runs scripts on one of these, so
+# each gets the packages.
+find_pythons() {
+    for dir in /Library/Frameworks/Python.framework/Versions/3.*; do
+        minor="${dir##*/3.}"
+        case "$minor" in ''|*[!0-9]*) continue ;; esac
+        if [ "$minor" -ge 10 ] && [ -x "$dir/bin/python3" ]; then
+            echo "$dir/bin/python3"
+        fi
+    done
+}
+
+PYTHONS="$(find_pythons)"
+if [ -z "$PYTHONS" ]; then
+    echo "No Python 3.10+ from python.org - installing Python $PY_VERSION"
+    WORK="$(mktemp -d)"
+    trap 'rm -rf "$WORK"' EXIT
+    curl -fL --retry 3 -o "$WORK/python.pkg" "$PY_URL" || fail "couldn't download $PY_URL"
+    GOT="$(shasum -a 256 "$WORK/python.pkg" | awk '{print $1}')"
+    [ "$GOT" = "$PY_SHA256" ] || fail "Python download's checksum is wrong (got $GOT) - not installing it"
+    installer -pkg "$WORK/python.pkg" -target / || fail "Python's own installer failed"
+    PYTHONS="$(find_pythons)"
+    [ -n "$PYTHONS" ] || fail "Python installed, but no Python 3.10+ found afterwards"
+fi
+
+# ---------------------------------------------------------------- packages
+
+# (PIP_ROOT_USER_ACTION: this runs as root on purpose - these Pythons'
+# site-packages are shared, and it's where Resolve finds them.)
+export PIP_ROOT_USER_ACTION=ignore PIP_DISABLE_PIP_VERSION_CHECK=1
+while IFS= read -r py; do
+    echo "Packages for $py"
+    "$py" -m pip install --progress-bar off -r "$HERE/requirements.txt" \
+        || fail "couldn't install Buddy's packages for $py (no internet connection?)"
+    # The same check as installer/Buddy.iss: every screen is a QtWebEngine
+    # page now, so a package pip "installed" but that won't load leaves
+    # Buddy blank.
+    "$py" -c "import PySide6.QtWidgets, PySide6.QtMultimedia, PySide6.QtWebEngineWidgets, PIL, numpy, openpyxl, pynput, pymupdf, pymupdf4llm, cryptography" \
+        || fail "Buddy's packages were installed for $py but don't load"
+done <<< "$PYTHONS"
+
+# ------------------------------------------------------------------- Buddy
+
+DEST="$USER_HOME/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Utility"
+# As the user, so any folder made here is theirs, like Resolve's own.
+sudo -u "$USER_NAME" mkdir -p "$DEST" || fail "couldn't create $DEST"
+for file in Buddy.py buddy.zip; do
+    install -o "$USER_NAME" -m 644 "$HERE/$file" "$DEST/$file" || fail "couldn't copy $file to $DEST"
+done
+echo "Copied Buddy.py and buddy.zip to $DEST"
+
+echo "=== Done"
+exit 0

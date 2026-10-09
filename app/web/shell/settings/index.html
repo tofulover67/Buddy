@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Settings</title>
+    <link rel="stylesheet" href="../../buddy.css">
+    <link rel="stylesheet" href="../shell.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../buddy.js"></script>
+</head>
+<body class="window">
+<main class="settings">
+    <nav class="set-rail" id="rail" aria-label="Settings sections"></nav>
+    <aside class="set-nav">
+        <input type="search" class="field set-search" id="search" placeholder="Search settings"
+               autocomplete="off" spellcheck="false" aria-label="Search settings">
+        <div class="set-pages" id="pages" role="list"></div>
+    </aside>
+    <section class="set-main">
+        <header class="set-head">
+            <div class="set-head-text">
+                <h1 class="set-title" id="title"></h1>
+                <p class="set-subtitle" id="subtitle"></p>
+            </div>
+            <button type="button" class="btn icon ghost set-where" id="where" title="Where Buddy keeps things"
+                    aria-label="Where Buddy keeps things"></button>
+        </header>
+        <div class="set-body form" id="form"></div>
+        <div class="dialog-foot">
+            <span class="form-status" id="status" role="status"></span>
+            <div class="spacer"></div>
+            <button type="button" class="btn accent" id="close">Close</button>
+        </div>
+    </section>
+</main>
+<script src="settings.js"></script>
+</body>
+</html>

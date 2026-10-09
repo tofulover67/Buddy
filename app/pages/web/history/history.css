@@ -1,0 +1,34 @@
+/* The Web tab's History window (pages/web/history_window.py, history.js). */
+
+html, body { margin: 0; }
+.hi { height: 100vh; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 8px; box-sizing: border-box; }
+.hi-head { display: flex; align-items: center; gap: 10px; }
+.hi-search { flex: 1; min-width: 0; }
+.hi-profile { flex: none; font-size: var(--fs-xs); color: var(--text-dim); max-width: 40%; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; }
+
+.hi-list {
+    flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 1px;
+    background: var(--card-bg); border: var(--bw) solid var(--card-border); border-radius: var(--r-md); padding: 4px;
+}
+.hi-day {
+    padding: 8px 8px 3px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
+    color: var(--text-dim);
+}
+.hi-day:first-child { padding-top: 3px; }
+.hi-item {
+    display: flex; align-items: center; gap: 10px; padding: 4px 8px; min-height: 38px; border-radius: var(--r-sm);
+    cursor: pointer; color: var(--text);
+}
+.hi-item:hover, .hi-item:focus-visible { background: var(--nav-hover-bg); color: var(--nav-hover-fg); }
+.hi-item:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.hi-time { flex: none; width: 5.2em; font-size: var(--fs-xs); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.hi-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.hi-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm); color: var(--text-strong); }
+.hi-site { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-xs); color: var(--text-dim); }
+.hi-remove { flex: none; width: 26px; height: 26px; padding: 0; visibility: hidden; }
+.hi-item:hover .hi-remove, .hi-item:focus-within .hi-remove, .hi-remove:focus-visible { visibility: visible; }
+.hi-empty { padding: 28px 8px; text-align: center; font-size: var(--fs-sm); color: var(--text-dim); }
+
+.hi-foot { display: flex; align-items: center; gap: 10px; font-size: var(--fs-xs); color: var(--text-dim); flex-wrap: wrap; }
+.hi-tip { margin: 0; font-size: var(--fs-xs); color: var(--text-dim); }

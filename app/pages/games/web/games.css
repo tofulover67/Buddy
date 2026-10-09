@@ -1,0 +1,151 @@
+/* Games: a tab row, a panel per game. Each game's court keeps a 16:10
+   shape and fills what room the page has (games.js fitCourt). */
+
+.games { gap: var(--section-gap); }
+/* Eight games: in a narrow window (or Offworld's wide capitals) the row wraps instead of scrolling sideways. */
+#game-tabs { flex: none; flex-wrap: wrap; }
+.game-panel { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--section-gap); min-height: 0; }
+
+.game-bar { flex-wrap: wrap; gap: 8px 14px; }
+.game-opt { gap: 8px; }
+.game-opt select.field { min-width: 90px; }
+
+.game-court-card { flex: 1 1 auto; min-height: 260px; padding: 10px; display: flex; align-items: center; justify-content: center; }
+.game-court {
+    position: relative; flex: none;   /* its size: the largest 16:10 that fits (fitCourt) */
+    border-radius: var(--r-md); overflow: hidden; outline: none;
+    background: color-mix(in srgb, var(--raised-bg) 70%, black 30%);
+    /* A real border, not an inset box-shadow: painting on the GPU, the AMD
+       graphics drop the shadow's bottom-left rounded corner. */
+    border: var(--bw) solid var(--card-border);
+}
+.game-court.mouse { cursor: none; }      /* the paddle is the pointer */
+.game-court.idle { cursor: pointer; }
+.game-court canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.game-overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; text-align: center; padding: 16px; pointer-events: none;
+    background: color-mix(in srgb, black 35%, transparent);
+}
+.game-overlay-title { font-size: var(--fs-2xl); font-weight: 800; color: var(--text-strong); letter-spacing: .02em; }
+.game-overlay-text { font-size: var(--fs-md); color: var(--text); }
+
+.game-foot { flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
+.game-keys, .game-score { margin: 0; }
+.game-score { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* Minesweeper: the counters in its bar; paused, the board is covered. */
+.mines-count { display: inline-flex; align-items: baseline; gap: 6px; }
+.mines-count b { min-width: 2.5ch; font-family: var(--font-mono); font-size: var(--fs-lg); color: var(--text-strong);
+    font-variant-numeric: tabular-nums; }
+.mines-court { cursor: default; }
+.game-overlay.covered { background: color-mix(in srgb, var(--raised-bg) 94%, black 6%); }
+.mines-court .game-overlay:not(.covered) { background: color-mix(in srgb, black 62%, transparent); }   /* the message over the numbers */
+
+/* Solitaire: the table in the theme, like the other courts; the end message dims it more. */
+.sol-note { margin: 0; font-weight: 700; color: var(--text-strong); }
+.sol-court { cursor: default; touch-action: none; }
+.sol-court .game-overlay:not(.covered) { background: color-mix(in srgb, black 55%, transparent); }
+
+/* 2048 is dragged across; Sudoku is clicked square by square. */
+.g2048-court { cursor: grab; touch-action: none; }
+.sudoku-court { cursor: default; }
+.sudoku-court .game-overlay:not(.covered) { background: color-mix(in srgb, black 55%, transparent); }
+.btn[aria-pressed="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.breakout-serve { margin: 0; color: var(--text); }
+
+/* Checkers and Chess: pieces are clicked or dragged; the result shows beside the board, not over it. */
+.board-court { cursor: default; touch-action: none; }
+
+/* Wordin': a board of letter tiles and a keyboard under it, sized from
+   the card (words.js fit sets --t, the tile, and the key sizes). Green and
+   yellow as the game has always had them; orange and blue with
+   High-contrast colours. */
+.words-court {
+    --t: 52px;
+    --kw: 40px;
+    --kh: 46px;
+    --kg: 6px;
+    --w-correct: #538d4e;
+    --w-present: #b59f3b;
+    --w-on: #fff;
+    --w-absent: color-mix(in srgb, #787c7e 78%, var(--raised-bg));    /* a plain grey, whatever the theme's colour */
+    position: relative; align-self: stretch; flex: 1 1 auto; outline: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: calc(var(--t) * .45); padding: 4px; user-select: none; cursor: default; border-radius: var(--r-md);
+}
+.words-court.contrast { --w-correct: #f5793a; --w-present: #85c0f9; }
+.words-board { display: grid; grid-template-rows: repeat(6, var(--t)); gap: calc(var(--t) / 10); }
+.words-row { display: grid; grid-template-columns: repeat(5, var(--t)); gap: calc(var(--t) / 10); }
+.words-tile {
+    display: flex; align-items: center; justify-content: center; border-radius: var(--r-md);
+    border: 2px solid var(--card-border); background: transparent;
+    font: 800 calc(var(--t) * .52) / 1 var(--font); color: var(--text-strong); text-transform: uppercase;
+}
+.words-tile.filled { border-color: var(--text-dim); }
+.words-tile.correct, .words-tile.present, .words-tile.absent { border-color: transparent; color: var(--w-on); }
+.words-tile.correct { background: var(--w-correct); }
+.words-tile.present { background: var(--w-present); }
+.words-tile.absent { background: var(--w-absent); }
+.words-tile.pop { animation: words-pop .1s ease-out; }
+.words-tile.flip { animation: words-flip .32s ease-in-out; }
+.words-row.shake { animation: words-shake .4s; }
+.words-row.bounce .words-tile { animation: words-bounce .5s ease-out both; }
+.words-row.bounce .words-tile:nth-child(2) { animation-delay: .08s; }
+.words-row.bounce .words-tile:nth-child(3) { animation-delay: .16s; }
+.words-row.bounce .words-tile:nth-child(4) { animation-delay: .24s; }
+.words-row.bounce .words-tile:nth-child(5) { animation-delay: .32s; }
+@keyframes words-pop { 50% { transform: scale(1.1); } }
+@keyframes words-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg); } 100% { transform: rotateX(0); } }
+@keyframes words-shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+@keyframes words-bounce { 40% { transform: translateY(-30%); } 70% { transform: translateY(4%); } }
+@media (prefers-reduced-motion: reduce) {
+    .words-tile.pop, .words-tile.flip, .words-row.shake, .words-row.bounce .words-tile { animation: none; }
+}
+
+.words-keys { display: flex; flex-direction: column; align-items: center; gap: var(--kg); }
+.words-key-row { display: flex; gap: var(--kg); }
+.words-key {
+    width: var(--kw); height: var(--kh); padding: 0; border: none; border-radius: var(--r-md); cursor: pointer;
+    background: color-mix(in srgb, var(--text-dim) 22%, var(--raised-bg)); color: var(--text-strong);
+    font: 700 calc(var(--kh) * .36) var(--font); text-transform: uppercase;
+}
+.words-key.wide { width: calc(var(--kw) * 1.5 + var(--kg) / 2); font-size: calc(var(--kh) * .28); }
+.words-key:hover { filter: brightness(1.15); }
+.words-key.correct, .words-key.present { color: var(--w-on); }
+.words-key.correct { background: var(--w-correct); }
+.words-key.present { background: var(--w-present); }
+/* Not in the word: darker than a key not tried yet, its letter faded. */
+.words-key.absent { background: color-mix(in srgb, var(--raised-bg) 72%, black 28%); color: color-mix(in srgb, var(--text-dim) 70%, transparent); }
+
+.words-toast {
+    position: absolute; top: 2px; left: 50%; transform: translateX(-50%); z-index: 2; pointer-events: none;
+    padding: 8px 14px; border-radius: var(--r-md); font-weight: 700; white-space: nowrap;
+    background: var(--text-strong); color: var(--raised-bg);
+}
+
+/* The end panel (and Statistics): over the board, clickable. Kept inside
+   the court: taller than a narrow court, it scrolls there rather than
+   spilling over the bar above and the keys below. */
+.words-panel { pointer-events: auto; cursor: pointer; z-index: 3; border-radius: var(--r-lg);
+    background: color-mix(in srgb, black 45%, transparent);
+    overflow-y: auto; justify-content: safe center; padding: 8px; }
+.words-panel-box {
+    position: relative; flex: none;
+    display: flex; flex-direction: column; align-items: center; gap: 10px; width: min(92%, 340px);
+    padding: 18px 20px; border-radius: var(--r-lg); background: var(--raised-bg); border: var(--bw) solid var(--card-border);
+}
+.words-panel-close { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; padding: 0; }
+.words-statline { display: flex; gap: 18px; justify-content: center; }
+.words-stat { display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+.words-stat b { font-size: var(--fs-2xl); color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.words-stat span { text-align: center; }
+.words-dist-title { margin-top: 4px; }
+.words-dist { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.words-bar-row { display: flex; align-items: center; gap: 6px; }
+.words-bar-label { width: 1ch; font-variant-numeric: tabular-nums; color: var(--text); }
+.words-bar { display: flex; justify-content: flex-end; min-width: 22px; padding: 2px 6px; border-radius: 4px;
+    background: var(--w-absent); color: var(--w-on); font-size: var(--fs-sm); font-weight: 700; }
+.words-bar.now { background: var(--w-correct); }
+.words-share { margin-top: 2px; }

@@ -1,0 +1,1573 @@
+{
+ "_comment": "Audit. English -> each language; see core/i18n.py.",
+ "Audit": {
+  "日本語": "監査",
+  "Español": "Auditoría",
+  "Deutsch": "Prüfung",
+  "Français": "Audit",
+  "한국어": "감사",
+  "中文": "审核",
+  "العربية": "تدقيق",
+  "Tiếng Việt": "Kiểm tra"
+ },
+ "Choose checks": {
+  "日本語": "チェック項目を選ぶ",
+  "Español": "Elegir comprobaciones",
+  "Deutsch": "Prüfungen auswählen",
+  "Français": "Choisir les vérifications",
+  "한국어": "검사 항목 선택",
+  "中文": "选择检查项",
+  "العربية": "اختر الفحوصات",
+  "Tiếng Việt": "Chọn mục kiểm tra"
+ },
+ "Missing media": {
+  "日本語": "見つからないメディア",
+  "Español": "Medios que faltan",
+  "Deutsch": "Fehlende Medien",
+  "Français": "Médias manquants",
+  "한국어": "누락된 미디어",
+  "中文": "缺失的媒体",
+  "العربية": "وسائط مفقودة",
+  "Tiếng Việt": "Phương tiện bị thiếu"
+ },
+ "Fonts not installed": {
+  "日本語": "インストールされていないフォント",
+  "Español": "Fuentes no instaladas",
+  "Deutsch": "Nicht installierte Schriften",
+  "Français": "Polices non installées",
+  "한국어": "설치되지 않은 글꼴",
+  "中文": "未安装的字体",
+  "العربية": "خطوط غير مثبتة",
+  "Tiếng Việt": "Phông chữ chưa cài"
+ },
+ "Black gaps": {
+  "日本語": "黒い隙間",
+  "Español": "Huecos en negro",
+  "Deutsch": "Schwarze Lücken",
+  "Français": "Trous noirs",
+  "한국어": "검은 빈틈",
+  "中文": "黑色空隙",
+  "العربية": "فراغات سوداء",
+  "Tiếng Việt": "Khoảng đen"
+ },
+ "Flash frames": {
+  "日本語": "フラッシュフレーム",
+  "Español": "Fotogramas sueltos",
+  "Deutsch": "Blitzframes",
+  "Français": "Images flash",
+  "한국어": "플래시 프레임",
+  "中文": "闪帧",
+  "العربية": "إطارات وامضة",
+  "Tiếng Việt": "Khung hình chớp"
+ },
+ "Tracks turned off": {
+  "日本語": "オフのトラック",
+  "Español": "Pistas desactivadas",
+  "Deutsch": "Ausgeschaltete Spuren",
+  "Français": "Pistes désactivées",
+  "한국어": "꺼진 트랙",
+  "中文": "已关闭的轨道",
+  "العربية": "مسارات مطفأة",
+  "Tiếng Việt": "Track đang tắt"
+ },
+ "Clips turned off": {
+  "日本語": "オフのクリップ",
+  "Español": "Clips desactivados",
+  "Deutsch": "Ausgeschaltete Clips",
+  "Français": "Clips désactivés",
+  "한국어": "꺼진 클립",
+  "中文": "已关闭的片段",
+  "العربية": "مقاطع مطفأة",
+  "Tiếng Việt": "Clip đang tắt"
+ },
+ "Unfinished titles": {
+  "日本語": "未完成のタイトル",
+  "Español": "Títulos sin terminar",
+  "Deutsch": "Unfertige Titel",
+  "Français": "Titres inachevés",
+  "한국어": "완성되지 않은 타이틀",
+  "中文": "未完成的标题",
+  "العربية": "عناوين غير مكتملة",
+  "Tiếng Việt": "Tiêu đề chưa xong"
+ },
+ "To-do markers": {
+  "日本語": "作業中マーカー",
+  "Español": "Marcadores pendientes",
+  "Deutsch": "To-do-Marker",
+  "Français": "Marqueurs à faire",
+  "한국어": "할 일 마커",
+  "中文": "待办标记",
+  "العربية": "علامات مهام معلقة",
+  "Tiếng Việt": "Điểm đánh dấu việc cần làm"
+ },
+ "Long subtitles": {
+  "日本語": "長い字幕",
+  "Español": "Subtítulos largos",
+  "Deutsch": "Lange Untertitel",
+  "Français": "Sous-titres trop longs",
+  "한국어": "긴 자막",
+  "中文": "过长的字幕",
+  "العربية": "ترجمات طويلة",
+  "Tiếng Việt": "Phụ đề dài"
+ },
+ "Fast subtitles": {
+  "日本語": "速すぎる字幕",
+  "Español": "Subtítulos rápidos",
+  "Deutsch": "Zu schnelle Untertitel",
+  "Français": "Sous-titres trop rapides",
+  "한국어": "너무 빠른 자막",
+  "中文": "过快的字幕",
+  "العربية": "ترجمات سريعة",
+  "Tiếng Việt": "Phụ đề quá nhanh"
+ },
+ "Frame rate differs": {
+  "日本語": "フレームレートが異なる",
+  "Español": "Frecuencia de fotogramas distinta",
+  "Deutsch": "Abweichende Bildrate",
+  "Français": "Fréquence d'images différente",
+  "한국어": "프레임 레이트가 다름",
+  "中文": "帧率不同",
+  "العربية": "معدل إطارات مختلف",
+  "Tiếng Việt": "Tốc độ khung hình khác"
+ },
+ "Enlarged pictures": {
+  "日本語": "拡大された画像",
+  "Español": "Imágenes ampliadas",
+  "Deutsch": "Vergrößerte Bilder",
+  "Français": "Images agrandies",
+  "한국어": "확대된 이미지",
+  "中文": "被放大的画面",
+  "العربية": "صور مكبّرة",
+  "Tiếng Việt": "Hình bị phóng to"
+ },
+ "Clipping": {
+  "日本語": "クリッピング",
+  "Español": "Saturación (clipping)",
+  "Deutsch": "Übersteuerung",
+  "Français": "Écrêtage",
+  "한국어": "클리핑",
+  "中文": "削波",
+  "العربية": "تشبّع (Clipping)",
+  "Tiếng Việt": "Vỡ tiếng (clipping)"
+ },
+ "Peaks too high": {
+  "日本語": "ピークが高すぎる",
+  "Español": "Picos demasiado altos",
+  "Deutsch": "Spitzen zu hoch",
+  "Français": "Crêtes trop hautes",
+  "한국어": "피크가 너무 높음",
+  "中文": "峰值过高",
+  "العربية": "ذروات مرتفعة جدًا",
+  "Tiếng Việt": "Đỉnh quá cao"
+ },
+ "Loudness off target": {
+  "日本語": "ラウドネスが目標外",
+  "Español": "Sonoridad fuera del objetivo",
+  "Deutsch": "Lautheit nicht im Ziel",
+  "Français": "Sonie hors cible",
+  "한국어": "라우드니스가 목표를 벗어남",
+  "中文": "响度偏离目标",
+  "العربية": "الجهارة خارج الهدف",
+  "Tiếng Việt": "Độ lớn lệch mục tiêu"
+ },
+ "The file behind the clip isn't where Resolve expects it. It renders as a red 'Media Offline' frame.": {
+  "日本語": "クリップの元ファイルが Resolve の想定する場所にありません。赤い「Media Offline」画面として書き出されます。",
+  "Español": "El archivo del clip no está donde Resolve lo espera. Se renderiza como un fotograma rojo de 'Media Offline'.",
+  "Deutsch": "Die Datei hinter dem Clip liegt nicht dort, wo Resolve sie erwartet. Sie wird als rotes „Media Offline“-Bild gerendert.",
+  "Français": "Le fichier du clip n'est pas là où Resolve l'attend. Il est rendu comme une image rouge « Media Offline ».",
+  "한국어": "클립의 원본 파일이 Resolve가 예상하는 위치에 없습니다. 빨간 'Media Offline' 화면으로 렌더링됩니다.",
+  "中文": "片段对应的文件不在 Resolve 预期的位置。渲染出来会是红色的“Media Offline”画面。",
+  "العربية": "الملف الذي يعتمد عليه المقطع ليس حيث يتوقعه Resolve. سيُصيَّر كإطار أحمر مكتوب عليه 'Media Offline'.",
+  "Tiếng Việt": "Tệp gốc của clip không nằm ở chỗ Resolve mong đợi. Khi xuất, nó thành khung hình đỏ 'Media Offline'."
+ },
+ "A Text+ title uses a font (or a style of one) this computer doesn't have. Resolve draws it in another.": {
+  "日本語": "Text+ タイトルが、このコンピューターにないフォント（またはスタイル）を使っています。Resolve は別のフォントで描きます。",
+  "Español": "Un título Text+ usa una fuente (o un estilo de ella) que este equipo no tiene. Resolve la dibuja con otra.",
+  "Deutsch": "Ein Text+-Titel verwendet eine Schrift (oder einen Schnitt davon), die dieser Computer nicht hat. Resolve zeichnet ihn in einer anderen.",
+  "Français": "Un titre Text+ utilise une police (ou un de ses styles) absente de cet ordinateur. Resolve l'affiche avec une autre.",
+  "한국어": "Text+ 타이틀이 이 컴퓨터에 없는 글꼴(또는 그 스타일)을 사용합니다. Resolve는 다른 글꼴로 표시합니다.",
+  "中文": "某个 Text+ 标题使用了这台电脑没有的字体（或字体样式）。Resolve 会用其他字体显示。",
+  "العربية": "يستخدم عنوان Text+ خطًا (أو نمطًا منه) غير موجود على هذا الكمبيوتر. يرسمه Resolve بخط آخر.",
+  "Tiếng Việt": "Một tiêu đề Text+ dùng phông chữ (hoặc kiểu chữ) mà máy này không có. Resolve sẽ vẽ bằng phông khác."
+ },
+ "Nothing is on any video track here, so the export shows black.": {
+  "日本語": "ここはどのビデオトラックにも何もないため、書き出しでは黒になります。",
+  "Español": "Aquí no hay nada en ninguna pista de vídeo, así que la exportación muestra negro.",
+  "Deutsch": "Hier liegt auf keiner Videospur etwas, also zeigt der Export Schwarz.",
+  "Français": "Aucune piste vidéo n'a rien ici, donc l'export montre du noir.",
+  "한국어": "여기에는 어떤 비디오 트랙에도 아무것도 없어서 내보내기에서 검은 화면이 나옵니다.",
+  "中文": "这里所有视频轨道都是空的，导出时会显示黑屏。",
+  "العربية": "لا يوجد شيء على أي مسار فيديو هنا، لذا يظهر التصدير أسود.",
+  "Tiếng Việt": "Ở đây không có gì trên track video nào, nên bản xuất sẽ bị đen."
+ },
+ "A clip only one or two frames long – usually left behind by a trim or a cut.": {
+  "日本語": "1〜2 フレームしかないクリップです。たいていはトリムやカットの残りです。",
+  "Español": "Un clip de solo uno o dos fotogramas, normalmente un resto de un recorte o un corte.",
+  "Deutsch": "Ein Clip, der nur ein oder zwei Frames lang ist – meist ein Rest von einem Trimmen oder Schnitt.",
+  "Français": "Un clip d'une ou deux images seulement – en général un reste de découpe ou de coupe.",
+  "한국어": "1~2프레임짜리 클립입니다. 보통 트림이나 컷 후에 남은 것입니다.",
+  "中文": "只有一两帧长的片段——通常是修剪或剪切后遗留的。",
+  "العربية": "مقطع طوله إطار أو إطاران فقط – غالبًا ما يتبقى بعد قص أو تشذيب.",
+  "Tiếng Việt": "Clip chỉ dài một hai khung hình – thường sót lại sau khi cắt hoặc tỉa."
+ },
+ "A track that's turned off (or muted) isn't in the export, clips and all.": {
+  "日本語": "オフ（またはミュート）のトラックは、クリップごと書き出しに含まれません。",
+  "Español": "Una pista desactivada (o silenciada) no entra en la exportación, con todos sus clips.",
+  "Deutsch": "Eine ausgeschaltete (oder stummgeschaltete) Spur fehlt samt ihren Clips im Export.",
+  "Français": "Une piste désactivée (ou muette) n'est pas exportée, ni ses clips.",
+  "한국어": "꺼지거나 음소거된 트랙은 클립까지 모두 내보내기에서 빠집니다.",
+  "中文": "已关闭（或静音）的轨道连同其片段都不会被导出。",
+  "العربية": "المسار المطفأ (أو المكتوم) لا يدخل في التصدير، بكل مقاطعه.",
+  "Tiếng Việt": "Track bị tắt (hoặc tắt tiếng) sẽ không có trong bản xuất, kể cả các clip trên đó."
+ },
+ "A disabled clip isn't in the export.": {
+  "日本語": "無効なクリップは書き出しに含まれません。",
+  "Español": "Un clip desactivado no entra en la exportación.",
+  "Deutsch": "Ein deaktivierter Clip fehlt im Export.",
+  "Français": "Un clip désactivé n'est pas exporté.",
+  "한국어": "비활성화된 클립은 내보내기에 포함되지 않습니다.",
+  "中文": "已禁用的片段不会被导出。",
+  "العربية": "المقطع المعطّل لا يدخل في التصدير.",
+  "Tiếng Việt": "Clip bị tắt sẽ không có trong bản xuất."
+ },
+ "A Text+ title that's empty or still has its starting text.": {
+  "日本語": "空のまま、または初期テキストのままの Text+ タイトルです。",
+  "Español": "Un título Text+ vacío o que aún tiene su texto inicial.",
+  "Deutsch": "Ein Text+-Titel, der leer ist oder noch seinen Starttext hat.",
+  "Français": "Un titre Text+ vide ou qui a encore son texte de départ.",
+  "한국어": "비어 있거나 처음 텍스트 그대로인 Text+ 타이틀입니다.",
+  "中文": "空白或仍是初始文字的 Text+ 标题。",
+  "العربية": "عنوان Text+ فارغ أو ما زال يحمل نصه الابتدائي.",
+  "Tiếng Việt": "Tiêu đề Text+ còn trống hoặc vẫn là chữ mặc định."
+ },
+ "A marker whose name or note says there's still something to do (fix, todo, TBD, temp, ??).": {
+  "日本語": "名前やメモに、まだ作業が残っていると書かれたマーカーです（fix、todo、TBD、temp、?? など）。",
+  "Español": "Un marcador cuyo nombre o nota dice que aún queda algo por hacer (fix, todo, TBD, temp, ??).",
+  "Deutsch": "Ein Marker, dessen Name oder Notiz sagt, dass noch etwas zu tun ist (fix, todo, TBD, temp, ??).",
+  "Français": "Un marqueur dont le nom ou la note indique qu'il reste quelque chose à faire (fix, todo, TBD, temp, ??).",
+  "한국어": "이름이나 메모에 아직 할 일이 남았다고 적힌 마커입니다(fix, todo, TBD, temp, ?? 등).",
+  "中文": "名称或备注表明还有事情没做完的标记（fix、todo、TBD、temp、?? 等）。",
+  "العربية": "علامة يقول اسمها أو ملاحظتها إن هناك شيئًا لم يُنجز بعد (fix، todo، TBD، temp، ??).",
+  "Tiếng Việt": "Điểm đánh dấu có tên hoặc ghi chú cho biết vẫn còn việc phải làm (fix, todo, TBD, temp, ??)."
+ },
+ "Subtitles read best as at most {lines} lines of {chars} characters.": {
+  "日本語": "字幕は {lines} 行・1 行 {chars} 文字以内が読みやすい長さです。",
+  "Español": "Los subtítulos se leen mejor con {lines} líneas de {chars} caracteres como máximo.",
+  "Deutsch": "Untertitel lesen sich am besten mit höchstens {lines} Zeilen zu {chars} Zeichen.",
+  "Français": "Les sous-titres se lisent mieux en {lines} lignes de {chars} caractères au plus.",
+  "한국어": "자막은 최대 {lines}줄, 줄당 {chars}자일 때 가장 읽기 좋습니다.",
+  "中文": "字幕最好不超过 {lines} 行、每行 {chars} 个字符。",
+  "العربية": "تُقرأ الترجمات بأفضل شكل في {lines} أسطر كحد أقصى، كل منها {chars} حرفًا.",
+  "Tiếng Việt": "Phụ đề dễ đọc nhất khi tối đa {lines} dòng, mỗi dòng {chars} ký tự."
+ },
+ "More than {cps} characters a second, or on screen for under {s} s, is hard to read.": {
+  "日本語": "1 秒あたり {cps} 文字を超える、または表示が {s} 秒未満だと読みにくくなります。",
+  "Español": "Más de {cps} caracteres por segundo, o menos de {s} s en pantalla, cuesta leerlo.",
+  "Deutsch": "Mehr als {cps} Zeichen pro Sekunde oder weniger als {s} s im Bild ist schwer zu lesen.",
+  "Français": "Plus de {cps} caractères par seconde, ou moins de {s} s à l'écran, c'est difficile à lire.",
+  "한국어": "초당 {cps}자를 넘거나 화면에 {s}초 미만으로 나오면 읽기 어렵습니다.",
+  "中文": "每秒超过 {cps} 个字符，或显示不到 {s} 秒，就很难读完。",
+  "العربية": "أكثر من {cps} حرفًا في الثانية، أو ظهور أقل من {s} ث على الشاشة، يصعب قراءته.",
+  "Tiếng Việt": "Hơn {cps} ký tự mỗi giây, hoặc hiện dưới {s} giây, thì khó đọc."
+ },
+ "Footage shot at another frame rate than the timeline's plays with repeated or skipped frames – fine when it's slow motion on purpose.": {
+  "日本語": "タイムラインと違うフレームレートで撮った素材は、フレームが重複したり飛んだりして再生されます。意図したスローモーションなら問題ありません。",
+  "Español": "El material grabado a otra frecuencia que la línea de tiempo se reproduce con fotogramas repetidos o saltados; está bien si es cámara lenta a propósito.",
+  "Deutsch": "Material mit einer anderen Bildrate als die Timeline läuft mit doppelten oder ausgelassenen Frames – in Ordnung, wenn es gewollte Zeitlupe ist.",
+  "Français": "Une séquence tournée à une autre fréquence que la timeline est lue avec des images répétées ou sautées – c'est bien si c'est un ralenti voulu.",
+  "한국어": "타임라인과 다른 프레임 레이트로 촬영한 영상은 프레임이 반복되거나 건너뛰며 재생됩니다. 의도한 슬로 모션이라면 괜찮습니다.",
+  "中文": "以与时间线不同的帧率拍摄的素材，播放时会出现重复或跳帧——如果是有意的慢动作则没问题。",
+  "العربية": "اللقطات المصوّرة بمعدل إطارات غير معدل المخطط الزمني تُعرض بإطارات مكررة أو متخطاة – لا بأس إن كانت حركة بطيئة مقصودة.",
+  "Tiếng Việt": "Cảnh quay ở tốc độ khung hình khác timeline sẽ phát với khung hình bị lặp hoặc bị bỏ – không sao nếu đó là quay chậm có chủ ý."
+ },
+ "Smaller than the timeline, so it's scaled up to fill the frame and may look soft.": {
+  "日本語": "タイムラインより小さいため、画面いっぱいに拡大され、ぼやけて見えることがあります。",
+  "Español": "Es más pequeña que la línea de tiempo, así que se amplía para llenar el encuadre y puede verse suave.",
+  "Deutsch": "Kleiner als die Timeline, also wird es zum Füllen des Bildes hochskaliert und kann weich wirken.",
+  "Français": "Plus petite que la timeline, elle est agrandie pour remplir l'image et peut paraître floue.",
+  "한국어": "타임라인보다 작아서 화면을 채우도록 확대되며 흐릿해 보일 수 있습니다.",
+  "中文": "比时间线小，所以会被放大填满画面，可能显得模糊。",
+  "العربية": "أصغر من المخطط الزمني، لذا تُكبَّر لملء الإطار وقد تبدو غير حادة.",
+  "Tiếng Việt": "Nhỏ hơn timeline nên bị phóng to cho đầy khung và có thể trông mờ."
+ },
+ "The mix goes over full scale here and is cut off – it crackles or distorts.": {
+  "日本語": "ここでミックスがフルスケールを超えて切り取られ、音割れやひずみが出ます。",
+  "Español": "Aquí la mezcla supera la escala completa y se recorta: cruje o se distorsiona.",
+  "Deutsch": "Die Mischung geht hier über Vollaussteuerung und wird abgeschnitten – sie knackt oder verzerrt.",
+  "Français": "Le mixage dépasse ici la pleine échelle et est écrêté – ça grésille ou ça sature.",
+  "한국어": "여기서 믹스가 풀 스케일을 넘어 잘립니다. 지직거리거나 찌그러집니다.",
+  "中文": "混音在这里超过满刻度被削掉——会出现爆音或失真。",
+  "العربية": "يتجاوز المزيج هنا الحد الأقصى فيُقطع – فيُطقطق أو يتشوّه.",
+  "Tiếng Việt": "Bản mix vượt mức tối đa ở đây và bị cắt – sẽ rè hoặc méo tiếng."
+ },
+ "The mix peaks above the ceiling of the target you picked – it may distort once it's encoded.": {
+  "日本語": "ミックスのピークが、選んだ目標の上限を超えています。エンコード後にひずむおそれがあります。",
+  "Español": "La mezcla tiene picos por encima del techo del objetivo elegido; puede distorsionarse al codificarla.",
+  "Deutsch": "Die Mischung hat Spitzen über der Obergrenze des gewählten Ziels – nach dem Kodieren kann sie verzerren.",
+  "Français": "Le mixage a des crêtes au-dessus du plafond de la cible choisie – il peut saturer une fois encodé.",
+  "한국어": "믹스의 피크가 선택한 목표의 상한을 넘습니다. 인코딩 후 찌그러질 수 있습니다.",
+  "中文": "混音峰值超过所选目标的上限——编码后可能失真。",
+  "العربية": "يبلغ المزيج ذروات فوق سقف الهدف الذي اخترته – وقد يتشوّه بعد الترميز.",
+  "Tiếng Việt": "Bản mix có đỉnh vượt trần của mục tiêu bạn chọn – có thể bị méo sau khi mã hóa."
+ },
+ "The whole mix's loudness (BS.1770), against the target you picked.": {
+  "日本語": "ミックス全体のラウドネス（BS.1770）を、選んだ目標と比べます。",
+  "Español": "La sonoridad de toda la mezcla (BS.1770), frente al objetivo elegido.",
+  "Deutsch": "Die Lautheit der ganzen Mischung (BS.1770), verglichen mit dem gewählten Ziel.",
+  "Français": "La sonie de tout le mixage (BS.1770), comparée à la cible choisie.",
+  "한국어": "믹스 전체의 라우드니스(BS.1770)를 선택한 목표와 비교합니다.",
+  "中文": "整个混音的响度（BS.1770），与所选目标比较。",
+  "العربية": "جهارة المزيج كله (BS.1770) مقارنةً بالهدف الذي اخترته.",
+  "Tiếng Việt": "Độ lớn của cả bản mix (BS.1770), so với mục tiêu bạn chọn."
+ },
+ "Turned off – 1 clip on it": {
+  "日本語": "オフ – クリップ 1 個",
+  "Español": "Desactivada: 1 clip",
+  "Deutsch": "Ausgeschaltet – 1 Clip darauf",
+  "Français": "Désactivée – 1 clip dessus",
+  "한국어": "꺼짐 – 클립 1개",
+  "中文": "已关闭 – 上面有 1 个片段",
+  "العربية": "مطفأ – عليه مقطع واحد",
+  "Tiếng Việt": "Đang tắt – có 1 clip"
+ },
+ "Turned off – {n} clips on it": {
+  "日本語": "オフ – クリップ {n} 個",
+  "Español": "Desactivada: {n} clips",
+  "Deutsch": "Ausgeschaltet – {n} Clips darauf",
+  "Français": "Désactivée – {n} clips dessus",
+  "한국어": "꺼짐 – 클립 {n}개",
+  "中文": "已关闭 – 上面有 {n} 个片段",
+  "العربية": "مطفأ – عليه {n} مقاطع",
+  "Tiếng Việt": "Đang tắt – có {n} clip"
+ },
+ "Disabled": {
+  "日本語": "無効",
+  "Español": "Desactivado",
+  "Deutsch": "Deaktiviert",
+  "Français": "Désactivé",
+  "한국어": "비활성화됨",
+  "中文": "已禁用",
+  "العربية": "معطّل",
+  "Tiếng Việt": "Đã tắt"
+ },
+ "Before the first clip": {
+  "日本語": "最初のクリップの前",
+  "Español": "Antes del primer clip",
+  "Deutsch": "Vor dem ersten Clip",
+  "Français": "Avant le premier clip",
+  "한국어": "첫 클립 앞",
+  "中文": "第一个片段之前",
+  "العربية": "قبل المقطع الأول",
+  "Tiếng Việt": "Trước clip đầu tiên"
+ },
+ "{s} s of black": {
+  "日本語": "{s} 秒の黒",
+  "Español": "{s} s de negro",
+  "Deutsch": "{s} s Schwarz",
+  "Français": "{s} s de noir",
+  "한국어": "{s}초 검은 화면",
+  "中文": "{s} 秒黑屏",
+  "العربية": "{s} ث من السواد",
+  "Tiếng Việt": "{s} giây màn đen"
+ },
+ "1 frame of black": {
+  "日本語": "1 フレームの黒",
+  "Español": "1 fotograma en negro",
+  "Deutsch": "1 Frame Schwarz",
+  "Français": "1 image de noir",
+  "한국어": "1프레임 검은 화면",
+  "中文": "1 帧黑屏",
+  "العربية": "إطار أسود واحد",
+  "Tiếng Việt": "1 khung hình đen"
+ },
+ "{n} frames of black": {
+  "日本語": "{n} フレームの黒",
+  "Español": "{n} fotogramas en negro",
+  "Deutsch": "{n} Frames Schwarz",
+  "Français": "{n} images de noir",
+  "한국어": "{n}프레임 검은 화면",
+  "中文": "{n} 帧黑屏",
+  "العربية": "{n} إطارات سوداء",
+  "Tiếng Việt": "{n} khung hình đen"
+ },
+ "1 frame long": {
+  "日本語": "長さ 1 フレーム",
+  "Español": "1 fotograma de duración",
+  "Deutsch": "1 Frame lang",
+  "Français": "1 image de long",
+  "한국어": "1프레임 길이",
+  "中文": "长 1 帧",
+  "العربية": "طوله إطار واحد",
+  "Tiếng Việt": "Dài 1 khung hình"
+ },
+ "{n} frames long": {
+  "日本語": "長さ {n} フレーム",
+  "Español": "{n} fotogramas de duración",
+  "Deutsch": "{n} Frames lang",
+  "Français": "{n} images de long",
+  "한국어": "{n}프레임 길이",
+  "中文": "长 {n} 帧",
+  "العربية": "طوله {n} إطارات",
+  "Tiếng Việt": "Dài {n} khung hình"
+ },
+ "{fps} fps on a {timeline} fps timeline": {
+  "日本語": "{timeline} fps のタイムラインに {fps} fps",
+  "Español": "{fps} fps en una línea de tiempo de {timeline} fps",
+  "Deutsch": "{fps} fps auf einer Timeline mit {timeline} fps",
+  "Français": "{fps} i/s sur une timeline à {timeline} i/s",
+  "한국어": "{timeline}fps 타임라인에 {fps}fps",
+  "中文": "{timeline} fps 时间线上的 {fps} fps",
+  "العربية": "{fps} إطار/ث على مخطط زمني بمعدل {timeline} إطار/ث",
+  "Tiếng Việt": "{fps} fps trên timeline {timeline} fps"
+ },
+ "{w}×{h} on a {tw}×{th} timeline": {
+  "日本語": "{tw}×{th} のタイムラインに {w}×{h}",
+  "Español": "{w}×{h} en una línea de tiempo de {tw}×{th}",
+  "Deutsch": "{w}×{h} auf einer Timeline mit {tw}×{th}",
+  "Français": "{w}×{h} sur une timeline en {tw}×{th}",
+  "한국어": "{tw}×{th} 타임라인에 {w}×{h}",
+  "中文": "{tw}×{th} 时间线上的 {w}×{h}",
+  "العربية": "{w}×{h} على مخطط زمني بدقة {tw}×{th}",
+  "Tiếng Việt": "{w}×{h} trên timeline {tw}×{th}"
+ },
+ "Timeline marker": {
+  "日本語": "タイムラインのマーカー",
+  "Español": "Marcador de la línea de tiempo",
+  "Deutsch": "Timeline-Marker",
+  "Français": "Marqueur de timeline",
+  "한국어": "타임라인 마커",
+  "中文": "时间线标记",
+  "العربية": "علامة على المخطط الزمني",
+  "Tiếng Việt": "Điểm đánh dấu trên timeline"
+ },
+ "Marker on a clip": {
+  "日本語": "クリップのマーカー",
+  "Español": "Marcador en un clip",
+  "Deutsch": "Marker auf einem Clip",
+  "Français": "Marqueur sur un clip",
+  "한국어": "클립 마커",
+  "中文": "片段上的标记",
+  "العربية": "علامة على مقطع",
+  "Tiếng Việt": "Điểm đánh dấu trên clip"
+ },
+ "Empty": {
+  "日本語": "空",
+  "Español": "Vacío",
+  "Deutsch": "Leer",
+  "Français": "Vide",
+  "한국어": "비어 있음",
+  "中文": "空",
+  "العربية": "فارغ",
+  "Tiếng Việt": "Trống"
+ },
+ "Still says “{text}”": {
+  "日本語": "まだ「{text}」のまま",
+  "Español": "Aún dice «{text}»",
+  "Deutsch": "Steht noch „{text}“",
+  "Français": "Indique encore « {text} »",
+  "한국어": "아직 “{text}” 그대로",
+  "中文": "仍然是“{text}”",
+  "العربية": "ما زال يقول «{text}»",
+  "Tiếng Việt": "Vẫn ghi “{text}”"
+ },
+ "{n} lines, the longest {m} characters": {
+  "日本語": "{n} 行、最長 {m} 文字",
+  "Español": "{n} líneas, la más larga de {m} caracteres",
+  "Deutsch": "{n} Zeilen, die längste {m} Zeichen",
+  "Français": "{n} lignes, la plus longue de {m} caractères",
+  "한국어": "{n}줄, 가장 긴 줄 {m}자",
+  "中文": "{n} 行，最长 {m} 个字符",
+  "العربية": "{n} أسطر، أطولها {m} حرفًا",
+  "Tiếng Việt": "{n} dòng, dòng dài nhất {m} ký tự"
+ },
+ "{n} lines": {
+  "日本語": "{n} 行",
+  "Español": "{n} líneas",
+  "Deutsch": "{n} Zeilen",
+  "Français": "{n} lignes",
+  "한국어": "{n}줄",
+  "中文": "{n} 行",
+  "العربية": "{n} أسطر",
+  "Tiếng Việt": "{n} dòng"
+ },
+ "A line of {n} characters": {
+  "日本語": "{n} 文字の行",
+  "Español": "Una línea de {n} caracteres",
+  "Deutsch": "Eine Zeile mit {n} Zeichen",
+  "Français": "Une ligne de {n} caractères",
+  "한국어": "{n}자짜리 줄",
+  "中文": "一行有 {n} 个字符",
+  "العربية": "سطر من {n} حرفًا",
+  "Tiếng Việt": "Một dòng {n} ký tự"
+ },
+ "{n} characters a second": {
+  "日本語": "1 秒あたり {n} 文字",
+  "Español": "{n} caracteres por segundo",
+  "Deutsch": "{n} Zeichen pro Sekunde",
+  "Français": "{n} caractères par seconde",
+  "한국어": "초당 {n}자",
+  "中文": "每秒 {n} 个字符",
+  "العربية": "{n} حرفًا في الثانية",
+  "Tiếng Việt": "{n} ký tự mỗi giây"
+ },
+ "On screen for {s} s": {
+  "日本語": "表示 {s} 秒",
+  "Español": "En pantalla {s} s",
+  "Deutsch": "{s} s im Bild",
+  "Français": "À l'écran {s} s",
+  "한국어": "화면에 {s}초",
+  "中文": "显示 {s} 秒",
+  "العربية": "على الشاشة {s} ث",
+  "Tiếng Việt": "Hiện {s} giây"
+ },
+ "Mix": {
+  "日本語": "ミックス",
+  "Español": "Mezcla",
+  "Deutsch": "Mischung",
+  "Français": "Mixage",
+  "한국어": "믹스",
+  "中文": "混音",
+  "العربية": "المزيج",
+  "Tiếng Việt": "Bản mix"
+ },
+ "Hits full scale": {
+  "日本語": "フルスケールに達しています",
+  "Español": "Llega a la escala completa",
+  "Deutsch": "Erreicht Vollaussteuerung",
+  "Français": "Atteint la pleine échelle",
+  "한국어": "풀 스케일에 닿음",
+  "中文": "达到满刻度",
+  "العربية": "يبلغ الحد الأقصى",
+  "Tiếng Việt": "Chạm mức tối đa"
+ },
+ "Hits full scale for {s} s": {
+  "日本語": "{s} 秒間フルスケールに達しています",
+  "Español": "Llega a la escala completa durante {s} s",
+  "Deutsch": "Erreicht {s} s lang Vollaussteuerung",
+  "Français": "Atteint la pleine échelle pendant {s} s",
+  "한국어": "{s}초 동안 풀 스케일에 닿음",
+  "中文": "达到满刻度 {s} 秒",
+  "العربية": "يبلغ الحد الأقصى لمدة {s} ث",
+  "Tiếng Việt": "Chạm mức tối đa trong {s} giây"
+ },
+ "Peaks at {db} dBTP": {
+  "日本語": "ピーク {db} dBTP",
+  "Español": "Picos de {db} dBTP",
+  "Deutsch": "Spitzen bei {db} dBTP",
+  "Français": "Crêtes à {db} dBTP",
+  "한국어": "피크 {db} dBTP",
+  "中文": "峰值 {db} dBTP",
+  "العربية": "ذروة عند {db} dBTP",
+  "Tiếng Việt": "Đỉnh {db} dBTP"
+ },
+ "Peaks at {db} dBTP for {s} s": {
+  "日本語": "{s} 秒間ピーク {db} dBTP",
+  "Español": "Picos de {db} dBTP durante {s} s",
+  "Deutsch": "Spitzen bei {db} dBTP über {s} s",
+  "Français": "Crêtes à {db} dBTP pendant {s} s",
+  "한국어": "{s}초 동안 피크 {db} dBTP",
+  "中文": "峰值 {db} dBTP，持续 {s} 秒",
+  "العربية": "ذروة عند {db} dBTP لمدة {s} ث",
+  "Tiếng Việt": "Đỉnh {db} dBTP trong {s} giây"
+ },
+ "No sound at all": {
+  "日本語": "音がまったくありません",
+  "Español": "No hay nada de sonido",
+  "Deutsch": "Überhaupt kein Ton",
+  "Français": "Aucun son",
+  "한국어": "소리가 전혀 없음",
+  "中文": "完全没有声音",
+  "العربية": "لا صوت إطلاقًا",
+  "Tiếng Việt": "Hoàn toàn không có tiếng"
+ },
+ "{lufs} LUFS – {lu} LU louder than the {target} LUFS target": {
+  "日本語": "{lufs} LUFS – 目標の {target} LUFS より {lu} LU 大きい",
+  "Español": "{lufs} LUFS: {lu} LU por encima del objetivo de {target} LUFS",
+  "Deutsch": "{lufs} LUFS – {lu} LU lauter als das Ziel von {target} LUFS",
+  "Français": "{lufs} LUFS – {lu} LU plus fort que la cible de {target} LUFS",
+  "한국어": "{lufs} LUFS – 목표 {target} LUFS보다 {lu} LU 큼",
+  "中文": "{lufs} LUFS – 比 {target} LUFS 的目标响 {lu} LU",
+  "العربية": "{lufs} LUFS – أعلى بمقدار {lu} LU من الهدف {target} LUFS",
+  "Tiếng Việt": "{lufs} LUFS – to hơn mục tiêu {target} LUFS {lu} LU"
+ },
+ "{lufs} LUFS – {lu} LU quieter than the {target} LUFS target": {
+  "日本語": "{lufs} LUFS – 目標の {target} LUFS より {lu} LU 小さい",
+  "Español": "{lufs} LUFS: {lu} LU por debajo del objetivo de {target} LUFS",
+  "Deutsch": "{lufs} LUFS – {lu} LU leiser als das Ziel von {target} LUFS",
+  "Français": "{lufs} LUFS – {lu} LU plus faible que la cible de {target} LUFS",
+  "한국어": "{lufs} LUFS – 목표 {target} LUFS보다 {lu} LU 작음",
+  "中文": "{lufs} LUFS – 比 {target} LUFS 的目标轻 {lu} LU",
+  "العربية": "{lufs} LUFS – أخفض بمقدار {lu} LU من الهدف {target} LUFS",
+  "Tiếng Việt": "{lufs} LUFS – nhỏ hơn mục tiêu {target} LUFS {lu} LU"
+ },
+ "Turn on": {
+  "日本語": "オンにする",
+  "Español": "Activar",
+  "Deutsch": "Einschalten",
+  "Français": "Activer",
+  "한국어": "켜기",
+  "中文": "打开",
+  "العربية": "تشغيل",
+  "Tiếng Việt": "Bật"
+ },
+ "Close gap": {
+  "日本語": "隙間を詰める",
+  "Español": "Cerrar hueco",
+  "Deutsch": "Lücke schließen",
+  "Français": "Fermer l'espace",
+  "한국어": "빈틈 없애기",
+  "中文": "合拢空隙",
+  "العربية": "إغلاق الفراغ",
+  "Tiếng Việt": "Đóng khoảng trống"
+ },
+ "Remove marker": {
+  "日本語": "マーカーを削除",
+  "Español": "Quitar marcador",
+  "Deutsch": "Marker entfernen",
+  "Français": "Supprimer le marqueur",
+  "한국어": "마커 제거",
+  "中文": "删除标记",
+  "العربية": "إزالة العلامة",
+  "Tiếng Việt": "Xóa điểm đánh dấu"
+ },
+ "Turn all on": {
+  "日本語": "すべてオンにする",
+  "Español": "Activar todo",
+  "Deutsch": "Alle einschalten",
+  "Français": "Tout activer",
+  "한국어": "모두 켜기",
+  "中文": "全部打开",
+  "العربية": "تشغيل الكل",
+  "Tiếng Việt": "Bật tất cả"
+ },
+ "Open Media Relink": {
+  "日本語": "メディア再リンクを開く",
+  "Español": "Abrir Revincular medios",
+  "Deutsch": "Medien neu verknüpfen öffnen",
+  "Français": "Ouvrir Reconnexion des médias",
+  "한국어": "미디어 다시 연결 열기",
+  "中文": "打开媒体重新链接",
+  "العربية": "فتح إعادة ربط الوسائط",
+  "Tiếng Việt": "Mở Liên kết lại phương tiện"
+ },
+ "It's changed since the check – check again.": {
+  "日本語": "チェック後に変更されています。もう一度チェックしてください。",
+  "Español": "Ha cambiado desde la comprobación: vuelve a comprobar.",
+  "Deutsch": "Es hat sich seit der Prüfung geändert – bitte erneut prüfen.",
+  "Français": "Cela a changé depuis la vérification – revérifiez.",
+  "한국어": "검사 후에 바뀌었습니다. 다시 검사하세요.",
+  "中文": "检查之后已有变动——请重新检查。",
+  "العربية": "تغيّر منذ الفحص – افحص مرة أخرى.",
+  "Tiếng Việt": "Đã thay đổi kể từ lần kiểm tra – hãy kiểm tra lại."
+ },
+ "{track} is locked in Resolve – unlock it first.": {
+  "日本語": "{track} は Resolve でロックされています。先にロックを解除してください。",
+  "Español": "{track} está bloqueada en Resolve: desbloquéala primero.",
+  "Deutsch": "{track} ist in Resolve gesperrt – entsperre sie zuerst.",
+  "Français": "{track} est verrouillée dans Resolve – déverrouillez-la d'abord.",
+  "한국어": "{track} 트랙이 Resolve에서 잠겨 있습니다. 먼저 잠금을 해제하세요.",
+  "中文": "{track} 在 Resolve 中已锁定——请先解锁。",
+  "العربية": "{track} مقفل في Resolve – ألغِ قفله أولًا.",
+  "Tiếng Việt": "{track} đang bị khóa trong Resolve – hãy mở khóa trước."
+ },
+ "Something's there now – check again.": {
+  "日本語": "今はそこに何かがあります。もう一度チェックしてください。",
+  "Español": "Ahora hay algo ahí: vuelve a comprobar.",
+  "Deutsch": "Dort liegt jetzt etwas – bitte erneut prüfen.",
+  "Français": "Il y a quelque chose maintenant – revérifiez.",
+  "한국어": "지금은 거기에 무언가가 있습니다. 다시 검사하세요.",
+  "中文": "那里现在有内容了——请重新检查。",
+  "العربية": "يوجد شيء هناك الآن – افحص مرة أخرى.",
+  "Tiếng Việt": "Giờ đã có thứ gì đó ở đó – hãy kiểm tra lại."
+ },
+ "Resolve didn't turn the track on.": {
+  "日本語": "Resolve がトラックをオンにしませんでした。",
+  "Español": "Resolve no activó la pista.",
+  "Deutsch": "Resolve hat die Spur nicht eingeschaltet.",
+  "Français": "Resolve n'a pas activé la piste.",
+  "한국어": "Resolve가 트랙을 켜지 않았습니다.",
+  "中文": "Resolve 没有打开该轨道。",
+  "العربية": "لم يشغّل Resolve المسار.",
+  "Tiếng Việt": "Resolve đã không bật track."
+ },
+ "Resolve didn't turn the clip on.": {
+  "日本語": "Resolve がクリップをオンにしませんでした。",
+  "Español": "Resolve no activó el clip.",
+  "Deutsch": "Resolve hat den Clip nicht eingeschaltet.",
+  "Français": "Resolve n'a pas activé le clip.",
+  "한국어": "Resolve가 클립을 켜지 않았습니다.",
+  "中文": "Resolve 没有打开该片段。",
+  "العربية": "لم يشغّل Resolve المقطع.",
+  "Tiếng Việt": "Resolve đã không bật clip."
+ },
+ "Resolve didn't delete the clip.": {
+  "日本語": "Resolve がクリップを削除しませんでした。",
+  "Español": "Resolve no eliminó el clip.",
+  "Deutsch": "Resolve hat den Clip nicht gelöscht.",
+  "Français": "Resolve n'a pas supprimé le clip.",
+  "한국어": "Resolve가 클립을 삭제하지 않았습니다.",
+  "中文": "Resolve 没有删除该片段。",
+  "العربية": "لم يحذف Resolve المقطع.",
+  "Tiếng Việt": "Resolve đã không xóa clip."
+ },
+ "The marker's changed since the check – check again.": {
+  "日本語": "チェック後にマーカーが変更されています。もう一度チェックしてください。",
+  "Español": "El marcador ha cambiado desde la comprobación: vuelve a comprobar.",
+  "Deutsch": "Der Marker hat sich seit der Prüfung geändert – bitte erneut prüfen.",
+  "Français": "Le marqueur a changé depuis la vérification – revérifiez.",
+  "한국어": "검사 후에 마커가 바뀌었습니다. 다시 검사하세요.",
+  "中文": "检查之后标记已变动——请重新检查。",
+  "العربية": "تغيّرت العلامة منذ الفحص – افحص مرة أخرى.",
+  "Tiếng Việt": "Điểm đánh dấu đã đổi kể từ lần kiểm tra – hãy kiểm tra lại."
+ },
+ "Resolve didn't remove the marker.": {
+  "日本語": "Resolve がマーカーを削除しませんでした。",
+  "Español": "Resolve no quitó el marcador.",
+  "Deutsch": "Resolve hat den Marker nicht entfernt.",
+  "Français": "Resolve n'a pas supprimé le marqueur.",
+  "한국어": "Resolve가 마커를 제거하지 않았습니다.",
+  "中文": "Resolve 没有删除该标记。",
+  "العربية": "لم يُزل Resolve العلامة.",
+  "Tiếng Việt": "Resolve đã không xóa điểm đánh dấu."
+ },
+ "A different timeline is open now – check again to fix this one.": {
+  "日本語": "今は別のタイムラインが開いています。このタイムラインを修正するには、もう一度チェックしてください。",
+  "Español": "Ahora hay otra línea de tiempo abierta: vuelve a comprobar para corregir esta.",
+  "Deutsch": "Jetzt ist eine andere Timeline offen – erneut prüfen, um diese zu beheben.",
+  "Français": "Une autre timeline est ouverte – revérifiez pour corriger celle-ci.",
+  "한국어": "지금은 다른 타임라인이 열려 있습니다. 이 타임라인을 고치려면 다시 검사하세요.",
+  "中文": "现在打开的是另一条时间线——请重新检查以修复这一条。",
+  "العربية": "مخطط زمني آخر مفتوح الآن – افحص مرة أخرى لإصلاح هذا.",
+  "Tiếng Việt": "Đang mở một timeline khác – hãy kiểm tra lại để sửa timeline này."
+ },
+ "A different timeline is open now – check again to go to this one.": {
+  "日本語": "今は別のタイムラインが開いています。このタイムラインに移動するには、もう一度チェックしてください。",
+  "Español": "Ahora hay otra línea de tiempo abierta: vuelve a comprobar para ir a esta.",
+  "Deutsch": "Jetzt ist eine andere Timeline offen – erneut prüfen, um zu dieser zu springen.",
+  "Français": "Une autre timeline est ouverte – revérifiez pour aller à celle-ci.",
+  "한국어": "지금은 다른 타임라인이 열려 있습니다. 이 타임라인으로 이동하려면 다시 검사하세요.",
+  "中文": "现在打开的是另一条时间线——请重新检查以跳转到这一条。",
+  "العربية": "مخطط زمني آخر مفتوح الآن – افحص مرة أخرى للانتقال إلى هذا.",
+  "Tiếng Việt": "Đang mở một timeline khác – hãy kiểm tra lại để đi tới timeline này."
+ },
+ "A different timeline is open now – check again first.": {
+  "日本語": "今は別のタイムラインが開いています。先にもう一度チェックしてください。",
+  "Español": "Ahora hay otra línea de tiempo abierta: vuelve a comprobar primero.",
+  "Deutsch": "Jetzt ist eine andere Timeline offen – zuerst erneut prüfen.",
+  "Français": "Une autre timeline est ouverte – revérifiez d'abord.",
+  "한국어": "지금은 다른 타임라인이 열려 있습니다. 먼저 다시 검사하세요.",
+  "中文": "现在打开的是另一条时间线——请先重新检查。",
+  "العربية": "مخطط زمني آخر مفتوح الآن – افحص مرة أخرى أولًا.",
+  "Tiếng Việt": "Đang mở một timeline khác – hãy kiểm tra lại trước."
+ },
+ "Closing a gap needs a video clip on this timeline to work with.": {
+  "日本語": "隙間を詰めるには、このタイムラインにビデオクリップが必要です。",
+  "Español": "Para cerrar un hueco hace falta un clip de vídeo en esta línea de tiempo.",
+  "Deutsch": "Zum Schließen einer Lücke braucht es einen Videoclip auf dieser Timeline.",
+  "Français": "Pour fermer un espace, il faut un clip vidéo sur cette timeline.",
+  "한국어": "빈틈을 없애려면 이 타임라인에 비디오 클립이 있어야 합니다.",
+  "中文": "合拢空隙需要这条时间线上有视频片段。",
+  "العربية": "يحتاج إغلاق الفراغ إلى مقطع فيديو على هذا المخطط الزمني.",
+  "Tiếng Việt": "Để đóng khoảng trống, timeline này cần có một clip video."
+ },
+ "Resolve is busy with another of Buddy's requests – try again in a moment.": {
+  "日本語": "Resolve は Buddy の別のリクエストを処理中です。少し待ってからもう一度お試しください。",
+  "Español": "Resolve está ocupado con otra petición de Buddy; inténtalo de nuevo en un momento.",
+  "Deutsch": "Resolve ist mit einer anderen Anfrage von Buddy beschäftigt – versuche es gleich noch einmal.",
+  "Français": "Resolve est occupé par une autre demande de Buddy – réessayez dans un instant.",
+  "한국어": "Resolve가 Buddy의 다른 요청을 처리 중입니다. 잠시 후 다시 시도하세요.",
+  "中文": "Resolve 正在处理 Buddy 的另一个请求——请稍后再试。",
+  "العربية": "Resolve مشغول بطلب آخر من Buddy – حاول مرة أخرى بعد قليل.",
+  "Tiếng Việt": "Resolve đang bận với một yêu cầu khác của Buddy – hãy thử lại sau giây lát."
+ },
+ "Wait for Audit to finish what it's doing, then try again.": {
+  "日本語": "監査の処理が終わるまで待ってから、もう一度お試しください。",
+  "Español": "Espera a que Auditoría termine lo que está haciendo y vuelve a intentarlo.",
+  "Deutsch": "Warte, bis die Prüfung fertig ist, und versuche es dann erneut.",
+  "Français": "Attendez qu'Audit ait fini, puis réessayez.",
+  "한국어": "감사가 하던 작업을 마칠 때까지 기다린 다음 다시 시도하세요.",
+  "中文": "请等审核完成当前操作后再试。",
+  "العربية": "انتظر حتى ينتهي التدقيق مما يفعله، ثم حاول مرة أخرى.",
+  "Tiếng Việt": "Hãy đợi Kiểm tra làm xong rồi thử lại."
+ },
+ "Couldn't fix it: {why}": {
+  "日本語": "修正できませんでした: {why}",
+  "Español": "No se pudo corregir: {why}",
+  "Deutsch": "Konnte nicht behoben werden: {why}",
+  "Français": "Impossible de corriger : {why}",
+  "한국어": "고치지 못했습니다: {why}",
+  "中文": "无法修复：{why}",
+  "العربية": "تعذّر الإصلاح: {why}",
+  "Tiếng Việt": "Không sửa được: {why}"
+ },
+ "Fixed {done}, but not {n}: {why}": {
+  "日本語": "{done} 件を修正、{n} 件はできませんでした: {why}",
+  "Español": "Corregidos {done}, pero {n} no: {why}",
+  "Deutsch": "{done} behoben, {n} nicht: {why}",
+  "Français": "{done} corrigé(s), mais pas {n} : {why}",
+  "한국어": "{done}개 고침, {n}개는 못 고침: {why}",
+  "中文": "已修复 {done} 项，{n} 项未能修复：{why}",
+  "العربية": "أُصلح {done}، ولم يُصلح {n}: {why}",
+  "Tiếng Việt": "Đã sửa {done}, còn {n} không sửa được: {why}"
+ },
+ "Fixed – checking again": {
+  "日本語": "修正しました – 再チェック中",
+  "Español": "Corregido; comprobando de nuevo",
+  "Deutsch": "Behoben – wird erneut geprüft",
+  "Français": "Corrigé – nouvelle vérification",
+  "한국어": "고쳤습니다 – 다시 검사 중",
+  "中文": "已修复——正在重新检查",
+  "العربية": "تم الإصلاح – جارٍ الفحص مرة أخرى",
+  "Tiếng Việt": "Đã sửa – đang kiểm tra lại"
+ },
+ "Fixed {n} – checking again": {
+  "日本語": "{n} 件修正しました – 再チェック中",
+  "Español": "{n} corregidos; comprobando de nuevo",
+  "Deutsch": "{n} behoben – wird erneut geprüft",
+  "Français": "{n} corrigés – nouvelle vérification",
+  "한국어": "{n}개 고쳤습니다 – 다시 검사 중",
+  "中文": "已修复 {n} 项——正在重新检查",
+  "العربية": "تم إصلاح {n} – جارٍ الفحص مرة أخرى",
+  "Tiếng Việt": "Đã sửa {n} – đang kiểm tra lại"
+ },
+ "The render has no sound Buddy can read.": {
+  "日本語": "レンダリング結果に Buddy が読める音声がありません。",
+  "Español": "El render no tiene sonido que Buddy pueda leer.",
+  "Deutsch": "Der Render hat keinen Ton, den Buddy lesen kann.",
+  "Français": "Le rendu n'a aucun son lisible par Buddy.",
+  "한국어": "렌더링에 Buddy가 읽을 수 있는 소리가 없습니다.",
+  "中文": "渲染结果中没有 Buddy 能读取的声音。",
+  "العربية": "لا يحتوي التصيير على صوت يستطيع Buddy قراءته.",
+  "Tiếng Việt": "Bản render không có âm thanh nào Buddy đọc được."
+ },
+ "Online video (YouTube, Spotify): −14 LUFS": {
+  "日本語": "オンライン動画（YouTube、Spotify）: −14 LUFS",
+  "Español": "Vídeo en línea (YouTube, Spotify): −14 LUFS",
+  "Deutsch": "Online-Video (YouTube, Spotify): −14 LUFS",
+  "Français": "Vidéo en ligne (YouTube, Spotify) : −14 LUFS",
+  "한국어": "온라인 동영상(YouTube, Spotify): −14 LUFS",
+  "中文": "网络视频（YouTube、Spotify）：−14 LUFS",
+  "العربية": "فيديو عبر الإنترنت (YouTube، Spotify): −14 LUFS",
+  "Tiếng Việt": "Video trực tuyến (YouTube, Spotify): −14 LUFS"
+ },
+ "Podcasts and Apple: −16 LUFS": {
+  "日本語": "ポッドキャストと Apple: −16 LUFS",
+  "Español": "Pódcasts y Apple: −16 LUFS",
+  "Deutsch": "Podcasts und Apple: −16 LUFS",
+  "Français": "Podcasts et Apple : −16 LUFS",
+  "한국어": "팟캐스트와 Apple: −16 LUFS",
+  "中文": "播客与 Apple：−16 LUFS",
+  "العربية": "البودكاست وApple: −16 LUFS",
+  "Tiếng Việt": "Podcast và Apple: −16 LUFS"
+ },
+ "Broadcast, EBU R128: −23 LUFS": {
+  "日本語": "放送（EBU R128）: −23 LUFS",
+  "Español": "Emisión, EBU R128: −23 LUFS",
+  "Deutsch": "Rundfunk, EBU R128: −23 LUFS",
+  "Français": "Diffusion, EBU R128 : −23 LUFS",
+  "한국어": "방송, EBU R128: −23 LUFS",
+  "中文": "广播，EBU R128：−23 LUFS",
+  "العربية": "البث، EBU R128: −23 LUFS",
+  "Tiếng Việt": "Phát sóng, EBU R128: −23 LUFS"
+ },
+ "Broadcast, US ATSC A/85: −24 LUFS": {
+  "日本語": "放送（米国 ATSC A/85）: −24 LUFS",
+  "Español": "Emisión, EE. UU. ATSC A/85: −24 LUFS",
+  "Deutsch": "Rundfunk, USA ATSC A/85: −24 LUFS",
+  "Français": "Diffusion, États-Unis ATSC A/85 : −24 LUFS",
+  "한국어": "방송, 미국 ATSC A/85: −24 LUFS",
+  "中文": "广播，美国 ATSC A/85：−24 LUFS",
+  "العربية": "البث، ATSC A/85 الأمريكي: −24 LUFS",
+  "Tiếng Việt": "Phát sóng, Mỹ ATSC A/85: −24 LUFS"
+ },
+ "1 problem": {
+  "日本語": "問題 1 件",
+  "Español": "1 problema",
+  "Deutsch": "1 Problem",
+  "Français": "1 problème",
+  "한국어": "문제 1개",
+  "中文": "1 个问题",
+  "العربية": "مشكلة واحدة",
+  "Tiếng Việt": "1 vấn đề"
+ },
+ "{n} problems": {
+  "日本語": "問題 {n} 件",
+  "Español": "{n} problemas",
+  "Deutsch": "{n} Probleme",
+  "Français": "{n} problèmes",
+  "한국어": "문제 {n}개",
+  "中文": "{n} 个问题",
+  "العربية": "{n} مشكلات",
+  "Tiếng Việt": "{n} vấn đề"
+ },
+ "1 warning": {
+  "日本語": "警告 1 件",
+  "Español": "1 aviso",
+  "Deutsch": "1 Warnung",
+  "Français": "1 avertissement",
+  "한국어": "경고 1개",
+  "中文": "1 个警告",
+  "العربية": "تحذير واحد",
+  "Tiếng Việt": "1 cảnh báo"
+ },
+ "{n} warnings": {
+  "日本語": "警告 {n} 件",
+  "Español": "{n} avisos",
+  "Deutsch": "{n} Warnungen",
+  "Français": "{n} avertissements",
+  "한국어": "경고 {n}개",
+  "中文": "{n} 个警告",
+  "العربية": "{n} تحذيرات",
+  "Tiếng Việt": "{n} cảnh báo"
+ },
+ "Check timeline": {
+  "日本語": "タイムラインをチェック",
+  "Español": "Comprobar línea de tiempo",
+  "Deutsch": "Timeline prüfen",
+  "Français": "Vérifier la timeline",
+  "한국어": "타임라인 검사",
+  "中文": "检查时间线",
+  "العربية": "فحص المخطط الزمني",
+  "Tiếng Việt": "Kiểm tra timeline"
+ },
+ "Checked at {time}": {
+  "日本語": "{time} にチェック",
+  "Español": "Comprobado a las {time}",
+  "Deutsch": "Geprüft um {time}",
+  "Français": "Vérifié à {time}",
+  "한국어": "{time}에 검사함",
+  "中文": "检查于 {time}",
+  "العربية": "فُحص في {time}",
+  "Tiếng Việt": "Đã kiểm tra lúc {time}"
+ },
+ "Checking the timeline…": {
+  "日本語": "タイムラインをチェックしています…",
+  "Español": "Comprobando la línea de tiempo…",
+  "Deutsch": "Timeline wird geprüft…",
+  "Français": "Vérification de la timeline…",
+  "한국어": "타임라인 검사 중…",
+  "中文": "正在检查时间线…",
+  "العربية": "جارٍ فحص المخطط الزمني…",
+  "Tiếng Việt": "Đang kiểm tra timeline…"
+ },
+ "Resolve answers once playback stops.": {
+  "日本語": "再生が止まると Resolve が応答します。",
+  "Español": "Resolve responde cuando se detiene la reproducción.",
+  "Deutsch": "Resolve antwortet, sobald die Wiedergabe stoppt.",
+  "Français": "Resolve répond dès que la lecture s'arrête.",
+  "한국어": "재생이 멈추면 Resolve가 응답합니다.",
+  "中文": "播放停止后 Resolve 才会响应。",
+  "العربية": "يستجيب Resolve بمجرد توقف التشغيل.",
+  "Tiếng Việt": "Resolve sẽ trả lời khi dừng phát."
+ },
+ "Couldn't check the timeline": {
+  "日本語": "タイムラインをチェックできませんでした",
+  "Español": "No se pudo comprobar la línea de tiempo",
+  "Deutsch": "Timeline konnte nicht geprüft werden",
+  "Français": "Impossible de vérifier la timeline",
+  "한국어": "타임라인을 검사하지 못했습니다",
+  "中文": "无法检查时间线",
+  "العربية": "تعذّر فحص المخطط الزمني",
+  "Tiếng Việt": "Không kiểm tra được timeline"
+ },
+ "Check the open timeline before you deliver it": {
+  "日本語": "納品する前に、開いているタイムラインをチェックします",
+  "Español": "Comprueba la línea de tiempo abierta antes de entregarla",
+  "Deutsch": "Prüfe die offene Timeline, bevor du sie auslieferst",
+  "Français": "Vérifiez la timeline ouverte avant de la livrer",
+  "한국어": "납품하기 전에 열린 타임라인을 검사하세요",
+  "中文": "交付前检查打开的时间线",
+  "العربية": "افحص المخطط الزمني المفتوح قبل تسليمه",
+  "Tiếng Việt": "Kiểm tra timeline đang mở trước khi giao"
+ },
+ "Missing media, missing fonts, black gaps, flash frames, things turned off, unfinished titles, to-do markers and hard-to-read subtitles – all in one list.": {
+  "日本語": "見つからないメディアやフォント、黒い隙間、フラッシュフレーム、オフになっているもの、未完成のタイトル、作業中マーカー、読みにくい字幕を、ひとつのリストにまとめます。",
+  "Español": "Medios y fuentes que faltan, huecos en negro, fotogramas sueltos, cosas desactivadas, títulos sin terminar, marcadores pendientes y subtítulos difíciles de leer, todo en una lista.",
+  "Deutsch": "Fehlende Medien und Schriften, schwarze Lücken, Blitzframes, Ausgeschaltetes, unfertige Titel, To-do-Marker und schwer lesbare Untertitel – alles in einer Liste.",
+  "Français": "Médias et polices manquants, trous noirs, images flash, éléments désactivés, titres inachevés, marqueurs à faire et sous-titres difficiles à lire – tout dans une seule liste.",
+  "한국어": "누락된 미디어와 글꼴, 검은 빈틈, 플래시 프레임, 꺼진 항목, 완성되지 않은 타이틀, 할 일 마커, 읽기 어려운 자막을 한 목록에 모아 보여줍니다.",
+  "中文": "缺失的媒体和字体、黑色空隙、闪帧、被关闭的内容、未完成的标题、待办标记和难以阅读的字幕——全部列在一张清单里。",
+  "العربية": "الوسائط والخطوط المفقودة، والفراغات السوداء، والإطارات الوامضة، وما هو مطفأ، والعناوين غير المكتملة، وعلامات المهام المعلقة، والترجمات الصعبة القراءة – كلها في قائمة واحدة.",
+  "Tiếng Việt": "Phương tiện và phông chữ bị thiếu, khoảng đen, khung hình chớp, mục đang tắt, tiêu đề chưa xong, điểm đánh dấu việc cần làm và phụ đề khó đọc – tất cả trong một danh sách."
+ },
+ "Open Resolve with a project and a timeline, then press Check timeline.": {
+  "日本語": "Resolve でプロジェクトとタイムラインを開いてから、「タイムラインをチェック」を押してください。",
+  "Español": "Abre Resolve con un proyecto y una línea de tiempo y pulsa Comprobar línea de tiempo.",
+  "Deutsch": "Öffne Resolve mit einem Projekt und einer Timeline und drücke dann Timeline prüfen.",
+  "Français": "Ouvrez Resolve avec un projet et une timeline, puis appuyez sur Vérifier la timeline.",
+  "한국어": "Resolve에서 프로젝트와 타임라인을 연 다음 타임라인 검사를 누르세요.",
+  "中文": "在 Resolve 中打开项目和时间线，然后点击“检查时间线”。",
+  "العربية": "افتح Resolve مع مشروع ومخطط زمني، ثم اضغط فحص المخطط الزمني.",
+  "Tiếng Việt": "Mở Resolve với một dự án và timeline, rồi nhấn Kiểm tra timeline."
+ },
+ "All clear": {
+  "日本語": "問題なし",
+  "Español": "Todo en orden",
+  "Deutsch": "Alles in Ordnung",
+  "Français": "Tout est bon",
+  "한국어": "문제 없음",
+  "中文": "一切正常",
+  "العربية": "كل شيء سليم",
+  "Tiếng Việt": "Mọi thứ ổn"
+ },
+ "Nothing turned up in the checks that are on.": {
+  "日本語": "オンになっているチェックでは何も見つかりませんでした。",
+  "Español": "Las comprobaciones activas no encontraron nada.",
+  "Deutsch": "Die eingeschalteten Prüfungen haben nichts gefunden.",
+  "Français": "Les vérifications actives n'ont rien trouvé.",
+  "한국어": "켜져 있는 검사에서 아무것도 나오지 않았습니다.",
+  "中文": "已开启的检查没有发现任何问题。",
+  "العربية": "لم تكشف الفحوصات المفعّلة عن شيء.",
+  "Tiếng Việt": "Các mục kiểm tra đang bật không thấy gì."
+ },
+ "Check sound": {
+  "日本語": "音声をチェック",
+  "Español": "Comprobar sonido",
+  "Deutsch": "Ton prüfen",
+  "Français": "Vérifier le son",
+  "한국어": "소리 검사",
+  "中文": "检查声音",
+  "العربية": "فحص الصوت",
+  "Tiếng Việt": "Kiểm tra âm thanh"
+ },
+ "Check sound again": {
+  "日本語": "音声を再チェック",
+  "Español": "Volver a comprobar el sonido",
+  "Deutsch": "Ton erneut prüfen",
+  "Français": "Revérifier le son",
+  "한국어": "소리 다시 검사",
+  "中文": "重新检查声音",
+  "العربية": "فحص الصوت مرة أخرى",
+  "Tiếng Việt": "Kiểm tra lại âm thanh"
+ },
+ "Target": {
+  "日本語": "目標",
+  "Español": "Objetivo",
+  "Deutsch": "Ziel",
+  "Français": "Cible",
+  "한국어": "목표",
+  "中文": "目标",
+  "العربية": "الهدف",
+  "Tiếng Việt": "Mục tiêu"
+ },
+ "Measuring the mix…": {
+  "日本語": "ミックスを測定しています…",
+  "Español": "Midiendo la mezcla…",
+  "Deutsch": "Mischung wird gemessen…",
+  "Français": "Mesure du mixage…",
+  "한국어": "믹스 측정 중…",
+  "中文": "正在测量混音…",
+  "العربية": "جارٍ قياس المزيج…",
+  "Tiếng Việt": "Đang đo bản mix…"
+ },
+ "Rendering the mix in Resolve…": {
+  "日本語": "Resolve でミックスをレンダリングしています…",
+  "Español": "Renderizando la mezcla en Resolve…",
+  "Deutsch": "Mischung wird in Resolve gerendert…",
+  "Français": "Rendu du mixage dans Resolve…",
+  "한국어": "Resolve에서 믹스 렌더링 중…",
+  "中文": "正在 Resolve 中渲染混音…",
+  "العربية": "جارٍ تصيير المزيج في Resolve…",
+  "Tiếng Việt": "Đang render bản mix trong Resolve…"
+ },
+ "Couldn't check the sound": {
+  "日本語": "音声をチェックできませんでした",
+  "Español": "No se pudo comprobar el sonido",
+  "Deutsch": "Ton konnte nicht geprüft werden",
+  "Français": "Impossible de vérifier le son",
+  "한국어": "소리를 검사하지 못했습니다",
+  "中文": "无法检查声音",
+  "العربية": "تعذّر فحص الصوت",
+  "Tiếng Việt": "Không kiểm tra được âm thanh"
+ },
+ "True peak": {
+  "日本語": "トゥルーピーク",
+  "Español": "Pico real",
+  "Deutsch": "True Peak",
+  "Français": "Crête vraie",
+  "한국어": "트루 피크",
+  "中文": "真峰值",
+  "العربية": "الذروة الحقيقية",
+  "Tiếng Việt": "Đỉnh thực"
+ },
+ "Target {n} LUFS": {
+  "日本語": "目標 {n} LUFS",
+  "Español": "Objetivo {n} LUFS",
+  "Deutsch": "Ziel {n} LUFS",
+  "Français": "Cible {n} LUFS",
+  "한국어": "목표 {n} LUFS",
+  "中文": "目标 {n} LUFS",
+  "العربية": "الهدف {n} LUFS",
+  "Tiếng Việt": "Mục tiêu {n} LUFS"
+ },
+ "Ceiling {n} dBTP": {
+  "日本語": "上限 {n} dBTP",
+  "Español": "Techo {n} dBTP",
+  "Deutsch": "Obergrenze {n} dBTP",
+  "Français": "Plafond {n} dBTP",
+  "한국어": "상한 {n} dBTP",
+  "中文": "上限 {n} dBTP",
+  "العربية": "السقف {n} dBTP",
+  "Tiếng Việt": "Trần {n} dBTP"
+ },
+ "Renders the timeline's mix in Resolve and measures its peaks and loudness. Your Deliver settings stay as they are; the render is deleted afterwards.": {
+  "日本語": "Resolve でタイムラインのミックスをレンダリングし、ピークとラウドネスを測定します。デリバー設定はそのままで、レンダリングしたファイルは後で削除されます。",
+  "Español": "Renderiza la mezcla de la línea de tiempo en Resolve y mide sus picos y su sonoridad. Tus ajustes de Entrega no cambian; el render se elimina después.",
+  "Deutsch": "Rendert die Mischung der Timeline in Resolve und misst Spitzen und Lautheit. Deine Deliver-Einstellungen bleiben, wie sie sind; der Render wird danach gelöscht.",
+  "Français": "Fait le rendu du mixage de la timeline dans Resolve et mesure ses crêtes et sa sonie. Vos réglages Deliver restent tels quels ; le rendu est supprimé ensuite.",
+  "한국어": "Resolve에서 타임라인 믹스를 렌더링하고 피크와 라우드네스를 측정합니다. 딜리버 설정은 그대로이며 렌더링 파일은 나중에 삭제됩니다.",
+  "中文": "在 Resolve 中渲染时间线的混音，并测量其峰值和响度。你的交付设置保持不变；渲染文件之后会被删除。",
+  "العربية": "يصيّر مزيج المخطط الزمني في Resolve ويقيس ذرواته وجهارته. تبقى إعدادات التسليم كما هي، ويُحذف التصيير بعد ذلك.",
+  "Tiếng Việt": "Render bản mix của timeline trong Resolve rồi đo đỉnh và độ lớn. Thiết lập Deliver của bạn giữ nguyên; bản render sẽ bị xóa sau đó."
+ },
+ "Sound (with Check sound)": {
+  "日本語": "音声（「音声をチェック」で）",
+  "Español": "Sonido (con Comprobar sonido)",
+  "Deutsch": "Ton (mit Ton prüfen)",
+  "Français": "Son (avec Vérifier le son)",
+  "한국어": "소리(소리 검사로)",
+  "中文": "声音（通过“检查声音”）",
+  "العربية": "الصوت (عبر فحص الصوت)",
+  "Tiếng Việt": "Âm thanh (qua Kiểm tra âm thanh)"
+ },
+ "Nothing else is there, so everything after it moves up 1 frame to close the space.": {
+  "日本語": "そこにはほかに何もないため、後ろのものがすべて 1 フレーム詰まって隙間がなくなります。",
+  "Español": "No hay nada más ahí, así que todo lo que sigue se adelanta 1 fotograma para cerrar el espacio.",
+  "Deutsch": "Dort ist sonst nichts, also rückt alles danach um 1 Frame auf und schließt die Lücke.",
+  "Français": "Il n'y a rien d'autre à cet endroit, donc tout ce qui suit avance d'1 image pour combler l'espace.",
+  "한국어": "거기에는 다른 것이 없으므로 뒤의 모든 것이 1프레임 앞당겨져 빈 곳이 메워집니다.",
+  "中文": "那里没有其他内容，所以之后的所有内容会前移 1 帧来合拢空位。",
+  "العربية": "لا يوجد شيء آخر هناك، لذا يتقدّم كل ما بعده إطارًا واحدًا لسدّ الفراغ.",
+  "Tiếng Việt": "Ở đó không còn gì khác, nên mọi thứ phía sau sẽ dời lên 1 khung hình để lấp chỗ trống."
+ },
+ "Nothing else is there, so everything after it moves up {n} frames to close the space.": {
+  "日本語": "そこにはほかに何もないため、後ろのものがすべて {n} フレーム詰まって隙間がなくなります。",
+  "Español": "No hay nada más ahí, así que todo lo que sigue se adelanta {n} fotogramas para cerrar el espacio.",
+  "Deutsch": "Dort ist sonst nichts, also rückt alles danach um {n} Frames auf und schließt die Lücke.",
+  "Français": "Il n'y a rien d'autre à cet endroit, donc tout ce qui suit avance de {n} images pour combler l'espace.",
+  "한국어": "거기에는 다른 것이 없으므로 뒤의 모든 것이 {n}프레임 앞당겨져 빈 곳이 메워집니다.",
+  "中文": "那里没有其他内容，所以之后的所有内容会前移 {n} 帧来合拢空位。",
+  "العربية": "لا يوجد شيء آخر هناك، لذا يتقدّم كل ما بعده {n} إطارات لسدّ الفراغ.",
+  "Tiếng Việt": "Ở đó không còn gì khác, nên mọi thứ phía sau sẽ dời lên {n} khung hình để lấp chỗ trống."
+ },
+ "That leaves 1 frame of black – Audit lists it as a black gap.": {
+  "日本語": "1 フレームの黒が残ります。監査はそれを黒い隙間として表示します。",
+  "Español": "Eso deja 1 fotograma en negro; Auditoría lo mostrará como hueco en negro.",
+  "Deutsch": "Dadurch bleibt 1 Frame Schwarz – die Prüfung listet ihn als schwarze Lücke.",
+  "Français": "Cela laisse 1 image de noir – Audit l'indique comme trou noir.",
+  "한국어": "1프레임의 검은 화면이 남습니다. 감사에서 검은 빈틈으로 표시합니다.",
+  "中文": "会留下 1 帧黑屏——审核会把它列为黑色空隙。",
+  "العربية": "يترك ذلك إطارًا أسود واحدًا – ويُدرجه التدقيق كفراغ أسود.",
+  "Tiếng Việt": "Sẽ còn lại 1 khung hình đen – Kiểm tra sẽ liệt kê nó là khoảng đen."
+ },
+ "That leaves {n} frames of black – Audit lists them as a black gap.": {
+  "日本語": "{n} フレームの黒が残ります。監査はそれを黒い隙間として表示します。",
+  "Español": "Eso deja {n} fotogramas en negro; Auditoría los mostrará como hueco en negro.",
+  "Deutsch": "Dadurch bleiben {n} Frames Schwarz – die Prüfung listet sie als schwarze Lücke.",
+  "Français": "Cela laisse {n} images de noir – Audit les indique comme trou noir.",
+  "한국어": "{n}프레임의 검은 화면이 남습니다. 감사에서 검은 빈틈으로 표시합니다.",
+  "中文": "会留下 {n} 帧黑屏——审核会把它们列为黑色空隙。",
+  "العربية": "يترك ذلك {n} إطارات سوداء – ويُدرجها التدقيق كفراغ أسود.",
+  "Tiếng Việt": "Sẽ còn lại {n} khung hình đen – Kiểm tra sẽ liệt kê là khoảng đen."
+ },
+ "Another clip's picture shows there instead.": {
+  "日本語": "代わりに別のクリップの映像が表示されます。",
+  "Español": "En su lugar se verá la imagen de otro clip.",
+  "Deutsch": "Dort ist stattdessen das Bild eines anderen Clips zu sehen.",
+  "Français": "L'image d'un autre clip s'y affiche à la place.",
+  "한국어": "대신 다른 클립의 화면이 보입니다.",
+  "中文": "那里会改为显示另一个片段的画面。",
+  "العربية": "ستظهر صورة مقطع آخر هناك بدلًا منه.",
+  "Tiếng Việt": "Thay vào đó sẽ hiện hình của một clip khác."
+ },
+ "Delete this clip?": {
+  "日本語": "このクリップを削除しますか？",
+  "Español": "¿Eliminar este clip?",
+  "Deutsch": "Diesen Clip löschen?",
+  "Français": "Supprimer ce clip ?",
+  "한국어": "이 클립을 삭제할까요?",
+  "中文": "删除这个片段？",
+  "العربية": "حذف هذا المقطع؟",
+  "Tiếng Việt": "Xóa clip này?"
+ },
+ "The clip and its sound come off the timeline.": {
+  "日本語": "クリップとその音声がタイムラインから削除されます。",
+  "Español": "El clip y su sonido salen de la línea de tiempo.",
+  "Deutsch": "Der Clip und sein Ton kommen aus der Timeline.",
+  "Français": "Le clip et son son sont retirés de la timeline.",
+  "한국어": "클립과 그 소리가 타임라인에서 빠집니다.",
+  "中文": "该片段及其声音将从时间线上移除。",
+  "العربية": "يُزال المقطع وصوته من المخطط الزمني.",
+  "Tiếng Việt": "Clip và âm thanh của nó sẽ bị gỡ khỏi timeline."
+ },
+ "The clip comes off the timeline.": {
+  "日本語": "クリップがタイムラインから削除されます。",
+  "Español": "El clip sale de la línea de tiempo.",
+  "Deutsch": "Der Clip kommt aus der Timeline.",
+  "Français": "Le clip est retiré de la timeline.",
+  "한국어": "클립이 타임라인에서 빠집니다.",
+  "中文": "该片段将从时间线上移除。",
+  "العربية": "يُزال المقطع من المخطط الزمني.",
+  "Tiếng Việt": "Clip sẽ bị gỡ khỏi timeline."
+ },
+ "Close this gap?": {
+  "日本語": "この隙間を詰めますか？",
+  "Español": "¿Cerrar este hueco?",
+  "Deutsch": "Diese Lücke schließen?",
+  "Français": "Fermer cet espace ?",
+  "한국어": "이 빈틈을 없앨까요?",
+  "中文": "合拢这个空隙？",
+  "العربية": "إغلاق هذا الفراغ؟",
+  "Tiếng Việt": "Đóng khoảng trống này?"
+ },
+ "Everything after it, on every track, moves up 1 frame to close it.": {
+  "日本語": "すべてのトラックで、後ろのものが 1 フレーム詰まって隙間がなくなります。",
+  "Español": "Todo lo que sigue, en todas las pistas, se adelanta 1 fotograma para cerrarlo.",
+  "Deutsch": "Alles danach rückt auf jeder Spur um 1 Frame auf und schließt sie.",
+  "Français": "Tout ce qui suit, sur toutes les pistes, avance d'1 image pour le combler.",
+  "한국어": "모든 트랙에서 뒤의 모든 것이 1프레임 앞당겨져 빈틈이 없어집니다.",
+  "中文": "所有轨道上之后的内容都会前移 1 帧来合拢它。",
+  "العربية": "يتقدّم كل ما بعده، على كل المسارات، إطارًا واحدًا لإغلاقه.",
+  "Tiếng Việt": "Mọi thứ phía sau, trên mọi track, dời lên 1 khung hình để đóng nó."
+ },
+ "Everything after it, on every track, moves up {n} frames to close it.": {
+  "日本語": "すべてのトラックで、後ろのものが {n} フレーム詰まって隙間がなくなります。",
+  "Español": "Todo lo que sigue, en todas las pistas, se adelanta {n} fotogramas para cerrarlo.",
+  "Deutsch": "Alles danach rückt auf jeder Spur um {n} Frames auf und schließt sie.",
+  "Français": "Tout ce qui suit, sur toutes les pistes, avance de {n} images pour le combler.",
+  "한국어": "모든 트랙에서 뒤의 모든 것이 {n}프레임 앞당겨져 빈틈이 없어집니다.",
+  "中文": "所有轨道上之后的内容都会前移 {n} 帧来合拢它。",
+  "العربية": "يتقدّم كل ما بعده، على كل المسارات، {n} إطارات لإغلاقه.",
+  "Tiếng Việt": "Mọi thứ phía sau, trên mọi track, dời lên {n} khung hình để đóng nó."
+ },
+ "Everything after it, on every track, moves up {s} s to close it.": {
+  "日本語": "すべてのトラックで、後ろのものが {s} 秒詰まって隙間がなくなります。",
+  "Español": "Todo lo que sigue, en todas las pistas, se adelanta {s} s para cerrarlo.",
+  "Deutsch": "Alles danach rückt auf jeder Spur um {s} s auf und schließt sie.",
+  "Français": "Tout ce qui suit, sur toutes les pistes, avance de {s} s pour le combler.",
+  "한국어": "모든 트랙에서 뒤의 모든 것이 {s}초 앞당겨져 빈틈이 없어집니다.",
+  "中文": "所有轨道上之后的内容都会前移 {s} 秒来合拢它。",
+  "العربية": "يتقدّم كل ما بعده، على كل المسارات، {s} ث لإغلاقه.",
+  "Tiếng Việt": "Mọi thứ phía sau, trên mọi track, dời lên {s} giây để đóng nó."
+ },
+ "Remove this marker?": {
+  "日本語": "このマーカーを削除しますか？",
+  "Español": "¿Quitar este marcador?",
+  "Deutsch": "Diesen Marker entfernen?",
+  "Français": "Supprimer ce marqueur ?",
+  "한국어": "이 마커를 제거할까요?",
+  "中文": "删除这个标记？",
+  "العربية": "إزالة هذه العلامة؟",
+  "Tiếng Việt": "Xóa điểm đánh dấu này?"
+ },
+ "Only the marker goes – the clips stay as they are.": {
+  "日本語": "削除されるのはマーカーだけで、クリップはそのままです。",
+  "Español": "Solo se quita el marcador; los clips quedan como están.",
+  "Deutsch": "Nur der Marker wird entfernt – die Clips bleiben, wie sie sind.",
+  "Français": "Seul le marqueur est supprimé – les clips restent tels quels.",
+  "한국어": "마커만 지워지고 클립은 그대로입니다.",
+  "中文": "只会删除标记——片段保持不变。",
+  "العربية": "تُزال العلامة فقط – وتبقى المقاطع كما هي.",
+  "Tiếng Việt": "Chỉ xóa điểm đánh dấu – các clip giữ nguyên."
+ },
+ "Go there in Resolve": {
+  "日本語": "Resolve でそこへ移動",
+  "Español": "Ir ahí en Resolve",
+  "Deutsch": "In Resolve dorthin springen",
+  "Français": "Y aller dans Resolve",
+  "한국어": "Resolve에서 그곳으로 이동",
+  "中文": "在 Resolve 中跳到这里",
+  "العربية": "الانتقال إلى هناك في Resolve",
+  "Tiếng Việt": "Đi tới đó trong Resolve"
+ },
+ "Used {n} times": {
+  "日本語": "{n} 回使用",
+  "Español": "Usado {n} veces",
+  "Deutsch": "{n}-mal verwendet",
+  "Français": "Utilisé {n} fois",
+  "한국어": "{n}번 사용됨",
+  "中文": "使用了 {n} 次",
+  "العربية": "استُخدم {n} مرات",
+  "Tiếng Việt": "Dùng {n} lần"
+ },
+ "And {n} more": {
+  "日本語": "ほか {n} 件",
+  "Español": "Y {n} más",
+  "Deutsch": "Und {n} weitere",
+  "Français": "Et {n} de plus",
+  "한국어": "그 밖에 {n}개",
+  "中文": "还有 {n} 项",
+  "العربية": "و{n} أخرى",
+  "Tiếng Việt": "Và {n} mục nữa"
+ },
+ "Passed": {
+  "日本語": "合格",
+  "Español": "Superado",
+  "Deutsch": "Bestanden",
+  "Français": "Réussi",
+  "한국어": "통과",
+  "中文": "已通过",
+  "العربية": "ناجح",
+  "Tiếng Việt": "Đạt"
+ },
+ "Fonts couldn't be checked here.": {
+  "日本語": "ここではフォントをチェックできませんでした。",
+  "Español": "Aquí no se pudieron comprobar las fuentes.",
+  "Deutsch": "Schriften konnten hier nicht geprüft werden.",
+  "Français": "Les polices n'ont pas pu être vérifiées ici.",
+  "한국어": "여기서는 글꼴을 검사할 수 없었습니다.",
+  "中文": "此处无法检查字体。",
+  "العربية": "تعذّر فحص الخطوط هنا.",
+  "Tiếng Việt": "Không kiểm tra được phông chữ ở đây."
+ },
+ "Couldn't save your current render settings, so Buddy won't change them. Nothing was rendered.": {
+  "日本語": "現在のレンダー設定を保存できなかったため、Buddy は設定を変更しません。何もレンダリングされていません。",
+  "Español": "No se pudieron guardar tus ajustes de render actuales, así que Buddy no los cambiará. No se renderizó nada.",
+  "Deutsch": "Deine aktuellen Render-Einstellungen konnten nicht gesichert werden, also ändert Buddy sie nicht. Es wurde nichts gerendert.",
+  "Français": "Impossible d'enregistrer vos réglages de rendu actuels, donc Buddy ne les modifiera pas. Rien n'a été rendu.",
+  "한국어": "현재 렌더 설정을 저장하지 못해 Buddy가 설정을 바꾸지 않습니다. 아무것도 렌더링되지 않았습니다.",
+  "中文": "无法保存你当前的渲染设置，所以 Buddy 不会更改它们。没有渲染任何内容。",
+  "العربية": "تعذّر حفظ إعدادات التصيير الحالية، لذا لن يغيّرها Buddy. لم يُصيَّر شيء.",
+  "Tiếng Việt": "Không lưu được thiết lập render hiện tại nên Buddy sẽ không đổi chúng. Chưa render gì cả."
+ },
+ "Clipped recordings": {
+  "日本語": "クリップした録音",
+  "Español": "Grabaciones saturadas",
+  "Deutsch": "Übersteuerte Aufnahmen",
+  "Français": "Enregistrements écrêtés",
+  "한국어": "클리핑된 녹음",
+  "中文": "削波的录音",
+  "العربية": "تسجيلات متشبّعة",
+  "Tiếng Việt": "Bản ghi bị vỡ tiếng"
+ },
+ "The recording itself is cut off here – it was too loud when it was recorded. Turning the clip down doesn't fix it; another take, or a de-clipper, can.": {
+  "日本語": "ここでは録音そのものが切り取られています。録音時に音が大きすぎました。クリップの音量を下げても直りません。別のテイクかデクリッパーなら直せます。",
+  "Español": "Aquí la propia grabación está recortada: estaba demasiado alta al grabarse. Bajar el clip no lo arregla; otra toma, o un declipper, sí.",
+  "Deutsch": "Hier ist die Aufnahme selbst abgeschnitten – sie war beim Aufnehmen zu laut. Den Clip leiser zu machen hilft nicht; ein anderer Take oder ein De-Clipper schon.",
+  "Français": "Ici, l'enregistrement lui-même est écrêté – il était trop fort à la prise. Baisser le clip ne corrige rien ; une autre prise, ou un déclippeur, le peut.",
+  "한국어": "여기서는 녹음 자체가 잘려 있습니다 – 녹음할 때 너무 컸습니다. 클립 볼륨을 줄여도 고쳐지지 않습니다. 다른 테이크나 디클리퍼가 도움이 됩니다.",
+  "中文": "这里录音本身就被削掉了——录音时太响了。把片段调小解决不了，换一条或用去削波工具才行。",
+  "العربية": "التسجيل نفسه مقطوع هنا – كان عاليًا جدًا عند تسجيله. خفض صوت المقطع لا يصلحه؛ لقطة أخرى، أو أداة إزالة التشبّع، تفعل.",
+  "Tiếng Việt": "Ở đây chính bản ghi bị cắt – lúc thu âm quá to. Giảm âm lượng clip không sửa được; một lần thu khác hoặc công cụ khử vỡ tiếng thì được."
+ },
+ "Dropouts": {
+  "日本語": "音切れ",
+  "Español": "Cortes de audio",
+  "Deutsch": "Aussetzer",
+  "Français": "Coupures",
+  "한국어": "끊김",
+  "中文": "掉音",
+  "العربية": "انقطاعات",
+  "Tiếng Việt": "Mất tiếng"
+ },
+ "A gap of digital silence in the middle of the sound – the recorder lost some audio. It's heard as a click or a stutter.": {
+  "日本語": "音の途中にデジタル無音のすき間があります。レコーダーが音声の一部を失いました。クリック音や途切れとして聞こえます。",
+  "Español": "Un hueco de silencio digital en medio del sonido: la grabadora perdió parte del audio. Se oye como un clic o un tartamudeo.",
+  "Deutsch": "Eine Lücke digitaler Stille mitten im Ton – das Aufnahmegerät hat etwas Audio verloren. Sie ist als Klicken oder Stocken zu hören.",
+  "Français": "Un trou de silence numérique au milieu du son – l'enregistreur a perdu un peu d'audio. On l'entend comme un clic ou un bégaiement.",
+  "한국어": "소리 중간에 디지털 무음 구간이 있습니다 – 녹음기가 오디오 일부를 잃었습니다. 딸깍 소리나 끊김으로 들립니다.",
+  "中文": "声音中间有一段数字静音——录音设备丢失了部分音频。听起来像咔嗒声或卡顿。",
+  "العربية": "فجوة من الصمت الرقمي وسط الصوت – فقد جهاز التسجيل بعض الصوت. تُسمع كنقرة أو تقطّع.",
+  "Tiếng Việt": "Một khoảng im lặng số giữa âm thanh – máy ghi đã mất một ít âm thanh. Nghe như tiếng tách hoặc bị khựng."
+ },
+ "Sound on one side": {
+  "日本語": "片側だけの音",
+  "Español": "Sonido en un solo lado",
+  "Deutsch": "Ton nur auf einer Seite",
+  "Français": "Son d'un seul côté",
+  "한국어": "한쪽에만 소리",
+  "中文": "只有一侧有声音",
+  "العربية": "الصوت في جانب واحد",
+  "Tiếng Việt": "Âm thanh chỉ ở một bên"
+ },
+ "A stereo clip with sound on one side only – often a mic recorded on one channel. It plays from one speaker: in Clip Attributes, make it mono from the channel with the sound.": {
+  "日本語": "片側だけに音があるステレオクリップです。多くは 1 チャンネルだけに録音されたマイクです。片方のスピーカーからしか鳴りません。クリップ属性で、音のあるチャンネルからモノラルにしてください。",
+  "Español": "Un clip estéreo con sonido solo en un lado: a menudo un micrófono grabado en un canal. Suena por un solo altavoz; en Atributos del clip, hazlo mono a partir del canal con sonido.",
+  "Deutsch": "Ein Stereo-Clip mit Ton nur auf einer Seite – oft ein Mikro, das auf einem Kanal aufgenommen wurde. Er spielt aus einem Lautsprecher: Mach ihn in den Clip-Attributen mono aus dem Kanal mit dem Ton.",
+  "Français": "Un clip stéréo avec du son d'un seul côté – souvent un micro enregistré sur une seule piste. Il sort d'une seule enceinte : dans Attributs du clip, passez-le en mono depuis le canal qui a le son.",
+  "한국어": "한쪽에만 소리가 있는 스테레오 클립입니다 – 보통 한 채널에만 녹음된 마이크입니다. 한쪽 스피커에서만 나옵니다. 클립 속성에서 소리가 있는 채널로 모노를 만드세요.",
+  "中文": "只有一侧有声音的立体声片段——通常是只录在一个声道上的话筒。它只从一个扬声器发声：在“片段属性”中，用有声音的声道把它设为单声道。",
+  "العربية": "مقطع ستيريو فيه صوت في جانب واحد فقط – غالبًا ميكروفون سُجّل على قناة واحدة. يُسمع من سماعة واحدة: من خصائص المقطع اجعله أحاديًا من القناة التي فيها الصوت.",
+  "Tiếng Việt": "Một clip stereo chỉ có âm thanh ở một bên – thường là micro được ghi vào một kênh. Nó chỉ phát ra một loa: trong Clip Attributes, chuyển sang mono từ kênh có âm thanh."
+ },
+ "Out of phase": {
+  "日本語": "逆相",
+  "Español": "Fuera de fase",
+  "Deutsch": "Phasenverkehrt",
+  "Français": "Hors phase",
+  "한국어": "위상 반전",
+  "中文": "反相",
+  "العربية": "خارج الطور",
+  "Tiếng Việt": "Lệch pha"
+ },
+ "Left and right cancel each other out: played in mono – a phone, a TV – the clip nearly disappears. Usually one side's polarity is flipped.": {
+  "日本語": "左右が打ち消し合っています。モノラル（スマホやテレビ）で再生すると、クリップがほとんど聞こえなくなります。たいていは片側の極性が反転しています。",
+  "Español": "La izquierda y la derecha se anulan: en mono (un móvil, una tele) el clip casi desaparece. Normalmente la polaridad de un lado está invertida.",
+  "Deutsch": "Links und rechts löschen sich gegenseitig aus: in Mono abgespielt – ein Handy, ein Fernseher – verschwindet der Clip fast. Meist ist die Polarität einer Seite umgedreht.",
+  "Français": "La gauche et la droite s'annulent : en mono – un téléphone, une télé – le clip disparaît presque. En général, la polarité d'un côté est inversée.",
+  "한국어": "왼쪽과 오른쪽이 서로 상쇄됩니다: 모노(휴대폰, TV)로 재생하면 클립이 거의 사라집니다. 보통 한쪽의 극성이 뒤집혀 있습니다.",
+  "中文": "左右声道互相抵消：用单声道播放（手机、电视）时，这个片段几乎听不见。通常是一侧的极性被反转了。",
+  "العربية": "اليسار واليمين يُلغي أحدهما الآخر: عند التشغيل بصوت أحادي – هاتف أو تلفاز – يكاد المقطع يختفي. عادةً تكون قطبية أحد الجانبين معكوسة.",
+  "Tiếng Việt": "Trái và phải triệt tiêu nhau: khi phát mono – điện thoại, TV – clip gần như biến mất. Thường là cực tính của một bên bị đảo."
+ },
+ "Pops and wind": {
+  "日本語": "ポップノイズと風",
+  "Español": "Golpes y viento",
+  "Deutsch": "Plopp und Wind",
+  "Français": "Plosives et vent",
+  "한국어": "팝 노이즈와 바람",
+  "中文": "喷麦和风噪",
+  "العربية": "فرقعات ورياح",
+  "Tiếng Việt": "Tiếng bụp và gió"
+ },
+ "Low thumps in speech – a 'p' too close to the mic, the mic knocked – or wind. Audio Assistant's Rumble filter takes most of it out.": {
+  "日本語": "話し声の中の低い「ボン」という音（マイクに近すぎる「p」の音、マイクへの接触）や風の音です。Audio Assistant のランブルフィルターでほとんど取れます。",
+  "Español": "Golpes graves en la voz (una «p» demasiado cerca del micrófono, un golpe al micrófono) o viento. El filtro de retumbo de Audio Assistant elimina casi todo.",
+  "Deutsch": "Tiefe Stöße in der Sprache – ein „p“ zu nah am Mikro, ein Stoß ans Mikro – oder Wind. Der Rumpelfilter im Audio Assistant entfernt das meiste davon.",
+  "Français": "Des coups sourds dans la voix – un « p » trop près du micro, le micro heurté – ou du vent. Le filtre anti-grondement d'Audio Assistant en retire l'essentiel.",
+  "한국어": "말소리 속의 낮은 '퍽' 소리 – 마이크에 너무 가까운 'p' 소리, 마이크를 건드린 소리 – 또는 바람 소리입니다. Audio Assistant의 럼블 필터로 대부분 없앨 수 있습니다.",
+  "中文": "语音中的低频“噗”声——离话筒太近的“p”音、碰到话筒——或风噪。Audio Assistant 的隆隆声滤波器能去掉大部分。",
+  "العربية": "ضربات منخفضة في الكلام – حرف \"p\" قريب جدًا من الميكروفون، أو ارتطام بالميكروفون – أو رياح. يزيل مرشّح الهدير في Audio Assistant معظمها.",
+  "Tiếng Việt": "Tiếng bụp trầm trong lời nói – âm \"p\" quá gần micro, micro bị va – hoặc gió. Bộ lọc tiếng ù của Audio Assistant loại bỏ phần lớn."
+ },
+ "Cut off in the recording": {
+  "日本語": "録音で切り取られています",
+  "Español": "Recortado en la grabación",
+  "Deutsch": "In der Aufnahme abgeschnitten",
+  "Français": "Écrêté à l'enregistrement",
+  "한국어": "녹음에서 잘림",
+  "中文": "录音时被削掉",
+  "العربية": "مقطوع في التسجيل",
+  "Tiếng Việt": "Bị cắt trong bản ghi"
+ },
+ "Cut off in the recording for {seconds} s": {
+  "日本語": "録音で {seconds} 秒間切り取られています",
+  "Español": "Recortado en la grabación durante {seconds} s",
+  "Deutsch": "{seconds} s lang in der Aufnahme abgeschnitten",
+  "Français": "Écrêté à l'enregistrement pendant {seconds} s",
+  "한국어": "녹음에서 {seconds}초 동안 잘림",
+  "中文": "录音时被削掉 {seconds} 秒",
+  "العربية": "مقطوع في التسجيل لمدة {seconds} ث",
+  "Tiếng Việt": "Bị cắt trong bản ghi suốt {seconds} giây"
+ },
+ "Drops out for {ms} ms": {
+  "日本語": "{ms} ミリ秒の音切れ",
+  "Español": "Se corta durante {ms} ms",
+  "Deutsch": "Setzt {ms} ms lang aus",
+  "Français": "Coupure de {ms} ms",
+  "한국어": "{ms}ms 동안 끊김",
+  "中文": "掉音 {ms} 毫秒",
+  "العربية": "ينقطع لمدة {ms} مللي ث",
+  "Tiếng Việt": "Mất tiếng {ms} ms"
+ },
+ "Sound on the left only": {
+  "日本語": "左側だけに音",
+  "Español": "Sonido solo a la izquierda",
+  "Deutsch": "Ton nur links",
+  "Français": "Son à gauche seulement",
+  "한국어": "왼쪽에만 소리",
+  "中文": "只有左侧有声音",
+  "العربية": "الصوت في اليسار فقط",
+  "Tiếng Việt": "Âm thanh chỉ ở bên trái"
+ },
+ "Sound on the right only": {
+  "日本語": "右側だけに音",
+  "Español": "Sonido solo a la derecha",
+  "Deutsch": "Ton nur rechts",
+  "Français": "Son à droite seulement",
+  "한국어": "오른쪽에만 소리",
+  "中文": "只有右侧有声音",
+  "العربية": "الصوت في اليمين فقط",
+  "Tiếng Việt": "Âm thanh chỉ ở bên phải"
+ },
+ "Left and right cancel out in mono": {
+  "日本語": "モノラルで左右が打ち消し合います",
+  "Español": "Izquierda y derecha se anulan en mono",
+  "Deutsch": "Links und rechts löschen sich in Mono aus",
+  "Français": "Gauche et droite s'annulent en mono",
+  "한국어": "모노에서 왼쪽과 오른쪽이 상쇄됨",
+  "中文": "单声道下左右抵消",
+  "العربية": "اليسار واليمين يُلغيان بعضهما بصوت أحادي",
+  "Tiếng Việt": "Trái và phải triệt tiêu khi phát mono"
+ },
+ "A pop": {
+  "日本語": "ポップノイズ",
+  "Español": "Un golpe",
+  "Deutsch": "Ein Plopp",
+  "Français": "Une plosive",
+  "한국어": "팝 노이즈",
+  "中文": "一次喷麦",
+  "العربية": "فرقعة",
+  "Tiếng Việt": "Một tiếng bụp"
+ },
+ "Wind or handling noise": {
+  "日本語": "風または接触ノイズ",
+  "Español": "Viento o ruido de manipulación",
+  "Deutsch": "Wind- oder Griffgeräusch",
+  "Français": "Vent ou bruit de manipulation",
+  "한국어": "바람 또는 핸들링 소음",
+  "中文": "风噪或触碰噪声",
+  "العربية": "رياح أو ضجيج لمس",
+  "Tiếng Việt": "Gió hoặc tiếng va chạm"
+ },
+ "Wind or handling noise for {seconds} s": {
+  "日本語": "{seconds} 秒間の風または接触ノイズ",
+  "Español": "Viento o ruido de manipulación durante {seconds} s",
+  "Deutsch": "{seconds} s lang Wind- oder Griffgeräusch",
+  "Français": "Vent ou bruit de manipulation pendant {seconds} s",
+  "한국어": "{seconds}초 동안 바람 또는 핸들링 소음",
+  "中文": "风噪或触碰噪声 {seconds} 秒",
+  "العربية": "رياح أو ضجيج لمس لمدة {seconds} ث",
+  "Tiếng Việt": "Gió hoặc tiếng va chạm suốt {seconds} giây"
+ },
+ "Listening to each clip's recording…": {
+  "日本語": "各クリップの録音を聞いています…",
+  "Español": "Escuchando la grabación de cada clip…",
+  "Deutsch": "Die Aufnahme jedes Clips wird angehört…",
+  "Français": "Écoute de l'enregistrement de chaque clip…",
+  "한국어": "각 클립의 녹음을 듣는 중…",
+  "中文": "正在听每个片段的录音…",
+  "العربية": "جارٍ الاستماع إلى تسجيل كل مقطع…",
+  "Tiếng Việt": "Đang nghe bản ghi của từng clip…"
+ },
+ "Recordings": {
+  "日本語": "録音",
+  "Español": "Grabaciones",
+  "Deutsch": "Aufnahmen",
+  "Français": "Enregistrements",
+  "한국어": "녹음",
+  "中文": "录音",
+  "العربية": "التسجيلات",
+  "Tiếng Việt": "Bản ghi"
+ },
+ "Listened to": {
+  "日本語": "聞いた数",
+  "Español": "Escuchadas",
+  "Deutsch": "Angehört",
+  "Français": "Écoutés",
+  "한국어": "들은 수",
+  "中文": "已听",
+  "العربية": "تم الاستماع",
+  "Tiếng Việt": "Đã nghe"
+ },
+ "Couldn't listen to": {
+  "日本語": "聞けなかったファイル:",
+  "Español": "No se pudo escuchar",
+  "Deutsch": "Nicht anhörbar:",
+  "Français": "Impossible d'écouter",
+  "한국어": "듣지 못한 파일:",
+  "中文": "无法收听",
+  "العربية": "تعذّر الاستماع إلى",
+  "Tiếng Việt": "Không nghe được"
+ },
+ "Renders the timeline's mix in Resolve and measures its peaks and loudness, then listens to each clip's recording for clipping, dropouts and other faults. Your Deliver settings stay as they are; the render is deleted afterwards.": {
+  "日本語": "Resolve でタイムラインのミックスをレンダリングしてピークとラウドネスを測定し、その後各クリップの録音を聞いて、クリップ、音切れなどの問題を探します。デリバー設定はそのままで、レンダリングは後で削除されます。",
+  "Español": "Renderiza la mezcla de la línea de tiempo en Resolve y mide sus picos y su sonoridad; después escucha la grabación de cada clip en busca de saturación, cortes y otros fallos. Tus ajustes de Entrega no cambian; el render se borra después.",
+  "Deutsch": "Rendert die Mischung der Timeline in Resolve und misst Spitzen und Lautheit, dann hört Buddy die Aufnahme jedes Clips auf Übersteuerung, Aussetzer und andere Fehler ab. Deine Deliver-Einstellungen bleiben, wie sie sind; das Rendering wird danach gelöscht.",
+  "Français": "Fait le rendu du mixage de la timeline dans Resolve et mesure ses crêtes et sa sonie, puis écoute l'enregistrement de chaque clip pour repérer écrêtage, coupures et autres défauts. Vos réglages Deliver restent inchangés ; le rendu est supprimé ensuite.",
+  "한국어": "Resolve에서 타임라인 믹스를 렌더링해 피크와 라우드니스를 측정한 다음, 각 클립의 녹음을 들으며 클리핑, 끊김 등의 문제를 찾습니다. 딜리버 설정은 그대로이고 렌더는 나중에 삭제됩니다.",
+  "中文": "在 Resolve 中渲染时间线的混音并测量峰值和响度，然后逐个听每个片段的录音，查找削波、掉音等问题。你的交付设置保持不变；渲染文件之后会删除。",
+  "العربية": "يصيّر مزيج الخط الزمني في Resolve ويقيس ذراه وجهارته، ثم يستمع إلى تسجيل كل مقطع بحثًا عن التشبّع والانقطاعات وغيرها من العيوب. تبقى إعدادات التسليم كما هي؛ ويُحذف التصيير بعد ذلك.",
+  "Tiếng Việt": "Render bản mix của timeline trong Resolve và đo đỉnh cùng độ to, rồi nghe bản ghi của từng clip để tìm vỡ tiếng, mất tiếng và lỗi khác. Thiết lập Deliver của bạn giữ nguyên; bản render sẽ bị xóa sau đó."
+ }
+}

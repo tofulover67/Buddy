@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Automation</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="automation.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page">
+    <header class="page-head">
+        <h1 class="page-title">Automation</h1>
+    </header>
+    <p class="muted au-intro">Line up steps from Buddy's tools and run them one after another – import, make proxies,
+        build the timeline, sync – while you do something else. Buddy lets you know when it's finished, or where it
+        stopped and why.</p>
+    <div class="au-layout">
+        <aside class="card au-list">
+            <div class="card-head">
+                <h2 class="section-title">Automations</h2>
+                <div class="spacer"></div>
+                <button type="button" class="btn small au-new" id="new"></button>
+            </div>
+            <div class="au-items" id="list" role="list"></div>
+        </aside>
+        <section class="au-main" id="main"></section>
+    </div>
+</main>
+<script src="automation.js"></script>
+</body>
+</html>

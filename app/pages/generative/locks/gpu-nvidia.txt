@@ -1,0 +1,6 @@
+# Generative's graphics card add-on (engine_setup.install_gpu): NVIDIA's
+# TensorRT for RTX plugin for ONNX Runtime, for RTX 30 and later on Windows.
+# One wheel, no dependencies (it carries TensorRT for RTX and the CUDA
+# runtime it needs). Pinned by hand from PyPI's published SHA-256; installed
+# with --require-hashes --only-binary :all: --no-deps.
+onnxruntime-ep-nv-tensorrt-rtx-cu13==0.4.0 ; sys_platform == 'win32' and platform_machine == 'AMD64'     --hash=sha256:8aa0db63e31384024409818789eaa8ad136f0e83681dda204b7e3d178df2ff69

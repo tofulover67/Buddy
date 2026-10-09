@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Generative</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="generative.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page gen">
+    <header class="page-head">
+        <h1 class="page-title">Generative</h1>
+        <span class="gen-file" id="file" hidden></span>
+        <button type="button" class="btn icon ghost gen-close" id="close" hidden></button>
+        <div class="spacer"></div>
+        <button type="button" class="btn" id="from-resolve" hidden></button>
+        <button type="button" class="btn" id="open" hidden></button>
+    </header>
+
+    <div class="gen-body">
+        <div class="gen-left">
+            <section class="gen-stage" id="stage">
+                <canvas id="canvas"></canvas>
+                <canvas id="marks"></canvas>
+                <div class="gen-tools" id="tools" role="toolbar" aria-label="Tools" hidden></div>
+                <div class="gen-views" id="views" hidden></div>
+                <div class="gen-zoom" id="zoom" hidden></div>
+                <div class="gen-center" id="center" hidden></div>
+                <div class="gen-busy" id="busy" hidden></div>
+            </section>
+            <div class="card gen-scrub" id="scrub" hidden></div>
+        </div>
+        <aside class="card gen-panel" id="panel" hidden></aside>
+    </div>
+</main>
+<script src="generative.js"></script>
+</body>
+</html>

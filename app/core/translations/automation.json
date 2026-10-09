@@ -1,0 +1,723 @@
+{
+ "_comment": "The Automation tab (pages/automation/) and the tools' steps it offers. English -> each language; see core/i18n.py.",
+ "New": {
+  "日本語": "新規",
+  "Español": "Nueva",
+  "Deutsch": "Neu",
+  "Français": "Nouvelle",
+  "한국어": "새로 만들기",
+  "中文": "新建",
+  "العربية": "جديد",
+  "Tiếng Việt": "Mới"
+ },
+ "No automations yet. New makes one – then add its steps.": {
+  "日本語": "まだ自動化はありません。「新規」で作成して、手順を追加してください。",
+  "Español": "Aún no hay automatizaciones. Nueva crea una; después añade sus pasos.",
+  "Deutsch": "Noch keine Automatisierungen. Neu erstellt eine – dann füge ihre Schritte hinzu.",
+  "Français": "Pas encore d'automatisation. Nouvelle en crée une – ajoutez-y ensuite ses étapes.",
+  "한국어": "아직 자동화가 없습니다. 새로 만들기로 하나 만든 다음 단계를 추가하세요.",
+  "中文": "还没有自动化。点“新建”创建一个，然后添加步骤。",
+  "العربية": "لا توجد عمليات أتمتة بعد. «جديد» ينشئ واحدة – ثم أضف خطواتها.",
+  "Tiếng Việt": "Chưa có tự động hóa nào. Mới để tạo một cái – rồi thêm các bước."
+ },
+ "Resume from the step that stopped": {
+  "日本語": "止まった手順から再開",
+  "Español": "Reanudar desde el paso que se detuvo",
+  "Deutsch": "Ab dem gestoppten Schritt fortsetzen",
+  "Français": "Reprendre à l'étape arrêtée",
+  "한국어": "멈춘 단계부터 다시 시작",
+  "中文": "从停止的步骤继续",
+  "العربية": "الاستئناف من الخطوة التي توقفت",
+  "Tiếng Việt": "Tiếp tục từ bước đã dừng"
+ },
+ "What happened": {
+  "日本語": "経過",
+  "Español": "Qué pasó",
+  "Deutsch": "Was passiert ist",
+  "Français": "Ce qui s'est passé",
+  "한국어": "진행 기록",
+  "中文": "运行记录",
+  "العربية": "ما حدث",
+  "Tiếng Việt": "Diễn biến"
+ },
+ "Asked when it runs": {
+  "日本語": "実行時に確認",
+  "Español": "Se pregunta al ejecutarla",
+  "Deutsch": "Wird beim Start gefragt",
+  "Français": "Demandé au lancement",
+  "한국어": "실행할 때 묻기",
+  "中文": "运行时询问",
+  "العربية": "يُسأل عند التشغيل",
+  "Tiếng Việt": "Hỏi khi chạy"
+ },
+ "Choose a folder…": {
+  "日本語": "フォルダーを選択…",
+  "Español": "Elige una carpeta…",
+  "Deutsch": "Ordner wählen …",
+  "Français": "Choisir un dossier…",
+  "한국어": "폴더 선택…",
+  "中文": "选择文件夹…",
+  "العربية": "اختر مجلدًا…",
+  "Tiếng Việt": "Chọn thư mục…"
+ },
+ "Ask when it runs": {
+  "日本語": "実行時に確認する",
+  "Español": "Preguntar al ejecutarla",
+  "Deutsch": "Beim Start fragen",
+  "Français": "Demander au lancement",
+  "한국어": "실행할 때 묻기",
+  "中文": "运行时询问",
+  "العربية": "اسأل عند التشغيل",
+  "Tiếng Việt": "Hỏi khi chạy"
+ },
+ "Remove this step": {
+  "日本語": "この手順を削除",
+  "Español": "Quitar este paso",
+  "Deutsch": "Diesen Schritt entfernen",
+  "Français": "Retirer cette étape",
+  "한국어": "이 단계 제거",
+  "中文": "移除此步骤",
+  "العربية": "إزالة هذه الخطوة",
+  "Tiếng Việt": "Bỏ bước này"
+ },
+ "Add a step": {
+  "日本語": "手順を追加",
+  "Español": "Añadir un paso",
+  "Deutsch": "Schritt hinzufügen",
+  "Français": "Ajouter une étape",
+  "한국어": "단계 추가",
+  "中文": "添加步骤",
+  "العربية": "إضافة خطوة",
+  "Tiếng Việt": "Thêm bước"
+ },
+ "Delete this automation": {
+  "日本語": "この自動化を削除",
+  "Español": "Eliminar esta automatización",
+  "Deutsch": "Diese Automatisierung löschen",
+  "Français": "Supprimer cette automatisation",
+  "한국어": "이 자동화 삭제",
+  "中文": "删除此自动化",
+  "العربية": "حذف هذه الأتمتة",
+  "Tiếng Việt": "Xóa tự động hóa này"
+ },
+ "Delete this automation?": {
+  "日本語": "この自動化を削除しますか？",
+  "Español": "¿Eliminar esta automatización?",
+  "Deutsch": "Diese Automatisierung löschen?",
+  "Français": "Supprimer cette automatisation ?",
+  "한국어": "이 자동화를 삭제할까요?",
+  "中文": "删除此自动化吗？",
+  "العربية": "حذف هذه الأتمتة؟",
+  "Tiếng Việt": "Xóa tự động hóa này?"
+ },
+ "No steps yet – add the first one.": {
+  "日本語": "まだ手順がありません。最初の手順を追加してください。",
+  "Español": "Aún no hay pasos: añade el primero.",
+  "Deutsch": "Noch keine Schritte – füge den ersten hinzu.",
+  "Français": "Pas encore d'étape – ajoutez la première.",
+  "한국어": "아직 단계가 없습니다. 첫 단계를 추가하세요.",
+  "中文": "还没有步骤——添加第一个。",
+  "العربية": "لا خطوات بعد – أضف الأولى.",
+  "Tiếng Việt": "Chưa có bước nào – thêm bước đầu tiên."
+ },
+ "These are asked each time. Then it runs on its own.": {
+  "日本語": "これらは毎回確認されます。その後は自動で進みます。",
+  "Español": "Esto se pregunta cada vez. Después funciona sola.",
+  "Deutsch": "Das wird jedes Mal gefragt. Danach läuft sie von selbst.",
+  "Français": "Ces questions sont posées à chaque fois. Ensuite, tout se fait seul.",
+  "한국어": "매번 묻는 항목입니다. 그다음에는 알아서 진행됩니다.",
+  "中文": "每次都会询问这些。之后它会自动运行。",
+  "العربية": "تُسأل هذه في كل مرة. ثم تعمل وحدها.",
+  "Tiếng Việt": "Những điều này được hỏi mỗi lần. Sau đó nó tự chạy."
+ },
+ "Automation": {
+  "日本語": "自動化",
+  "Español": "Automatización",
+  "Deutsch": "Automatisierung",
+  "Français": "Automatisation",
+  "한국어": "자동화",
+  "中文": "自动化",
+  "العربية": "الأتمتة",
+  "Tiếng Việt": "Tự động hóa"
+ },
+ "Line up steps from Buddy's tools and run them one after another – import, make proxies, build the timeline, sync – while you do something else. Buddy lets you know when it's finished, or where it stopped and why.": {
+  "日本語": "Buddy のツールの手順を並べて、順番に実行します。読み込み、プロキシ作成、タイムライン作成、同期など。その間は別の作業ができます。終わったとき、または止まった場所と理由を Buddy がお知らせします。",
+  "Español": "Ordena pasos de las herramientas de Buddy y ejecútalos uno tras otro –importar, crear proxies, montar la línea de tiempo, sincronizar– mientras haces otra cosa. Buddy te avisa cuando termina, o dónde se detuvo y por qué.",
+  "Deutsch": "Reihe Schritte aus Buddys Werkzeugen auf und lass sie nacheinander laufen – importieren, Proxys erstellen, die Timeline bauen, synchronisieren –, während du etwas anderes machst. Buddy sagt dir, wann es fertig ist oder wo und warum es gestoppt hat.",
+  "Français": "Enchaînez des étapes des outils de Buddy et lancez-les l'une après l'autre – importer, créer des proxys, monter la timeline, synchroniser – pendant que vous faites autre chose. Buddy vous prévient quand c'est fini, ou où et pourquoi ça s'est arrêté.",
+  "한국어": "Buddy 도구의 단계들을 늘어놓고 차례로 실행하세요. 가져오기, 프록시 만들기, 타임라인 만들기, 동기화 등. 그동안 다른 일을 해도 됩니다. 끝나면, 또는 어디서 왜 멈췄는지 Buddy가 알려 줍니다.",
+  "中文": "把 Buddy 各工具的步骤排好，依次运行——导入、生成代理、搭建时间线、同步——你可以同时做别的事。完成时，或在哪里、为何停止，Buddy 都会告诉你。",
+  "العربية": "رتّب خطوات من أدوات Buddy وشغّلها واحدة تلو الأخرى – الاستيراد، وإنشاء البدائل، وبناء الخط الزمني، والمزامنة – بينما تقوم بشيء آخر. يخبرك Buddy عند الانتهاء، أو أين توقف ولماذا.",
+  "Tiếng Việt": "Xếp các bước từ công cụ của Buddy và chạy lần lượt – nhập, tạo proxy, dựng timeline, đồng bộ – trong lúc bạn làm việc khác. Buddy báo khi xong, hoặc dừng ở đâu và vì sao."
+ },
+ "Automations": {
+  "日本語": "自動化",
+  "Español": "Automatizaciones",
+  "Deutsch": "Automatisierungen",
+  "Français": "Automatisations",
+  "한국어": "자동화 목록",
+  "中文": "自动化列表",
+  "العربية": "عمليات الأتمتة",
+  "Tiếng Việt": "Các tự động hóa"
+ },
+ "It's running – change it once it's finished.": {
+  "日本語": "実行中です。終わってから変更してください。",
+  "Español": "Se está ejecutando: cámbiala cuando termine.",
+  "Deutsch": "Sie läuft – ändere sie, wenn sie fertig ist.",
+  "Français": "Elle tourne – modifiez-la une fois terminée.",
+  "한국어": "실행 중입니다. 끝난 다음 바꾸세요.",
+  "中文": "正在运行——完成后再修改。",
+  "العربية": "إنها قيد التشغيل – غيّرها بعد أن تنتهي.",
+  "Tiếng Việt": "Đang chạy – hãy sửa khi nó xong."
+ },
+ "This step's tool isn't in this Buddy.": {
+  "日本語": "この手順のツールはこの Buddy にありません。",
+  "Español": "La herramienta de este paso no está en este Buddy.",
+  "Deutsch": "Das Werkzeug dieses Schritts gibt es in diesem Buddy nicht.",
+  "Français": "L'outil de cette étape n'est pas dans ce Buddy.",
+  "한국어": "이 단계의 도구가 이 Buddy에 없습니다.",
+  "中文": "此 Buddy 中没有该步骤所属的工具。",
+  "العربية": "أداة هذه الخطوة غير موجودة في Buddy هذا.",
+  "Tiếng Việt": "Công cụ của bước này không có trong Buddy này."
+ },
+ "The open bin": {
+  "日本語": "開いているビン",
+  "Español": "La bandeja abierta",
+  "Deutsch": "Die geöffnete Bin",
+  "Français": "Le chutier ouvert",
+  "한국어": "열린 빈",
+  "中文": "打开的素材箱",
+  "العربية": "الحاوية المفتوحة",
+  "Tiếng Việt": "Bin đang mở"
+ },
+ "Every clip in the Media Pool": {
+  "日本語": "メディアプールのすべてのクリップ",
+  "Español": "Todos los clips del Media Pool",
+  "Deutsch": "Alle Clips im Media Pool",
+  "Français": "Tous les plans du Media Pool",
+  "한국어": "미디어 풀의 모든 클립",
+  "中文": "媒体池中的所有片段",
+  "العربية": "كل المقاطع في Media Pool",
+  "Tiếng Việt": "Mọi clip trong Media Pool"
+ },
+ "The clips on the open timeline": {
+  "日本語": "開いているタイムラインのクリップ",
+  "Español": "Los clips de la línea de tiempo abierta",
+  "Deutsch": "Die Clips der geöffneten Timeline",
+  "Français": "Les plans de la timeline ouverte",
+  "한국어": "열린 타임라인의 클립",
+  "中文": "打开的时间线上的片段",
+  "العربية": "مقاطع الخط الزمني المفتوح",
+  "Tiếng Việt": "Các clip trên timeline đang mở"
+ },
+ "Waveform (by their audio)": {
+  "日本語": "波形（音声で）",
+  "Español": "Forma de onda (por su audio)",
+  "Deutsch": "Wellenform (nach dem Ton)",
+  "Français": "Forme d'onde (par leur son)",
+  "한국어": "파형(오디오로)",
+  "中文": "波形（按音频）",
+  "العربية": "الموجة الصوتية (حسب الصوت)",
+  "Tiếng Việt": "Dạng sóng (theo âm thanh)"
+ },
+ "Makes the bins in the list in the Media Pool – one per line, '>' for one inside the bin above.": {
+  "日本語": "リストのビンをメディアプールに作ります。1 行に 1 つ、上のビンの中に作るときは「>」。",
+  "Español": "Crea en el Media Pool las bandejas de la lista: una por línea, '>' para una dentro de la de arriba.",
+  "Deutsch": "Legt die Bins der Liste im Media Pool an – eine pro Zeile, '>' für eine in der Bin darüber.",
+  "Français": "Crée les chutiers de la liste dans le Media Pool – un par ligne, '>' pour un chutier dans celui du dessus.",
+  "한국어": "목록의 빈을 미디어 풀에 만듭니다. 한 줄에 하나, 위 빈 안에 만들려면 '>'.",
+  "中文": "在媒体池中创建列表里的素材箱——每行一个，用“>”表示放在上一个素材箱里。",
+  "العربية": "ينشئ حاويات القائمة في Media Pool – واحدة في كل سطر، و'>' لحاوية داخل التي فوقها.",
+  "Tiếng Việt": "Tạo các bin trong danh sách ở Media Pool – mỗi dòng một bin, '>' cho bin nằm trong bin phía trên."
+ },
+ "Import a folder": {
+  "日本語": "フォルダーを読み込む",
+  "Español": "Importar una carpeta",
+  "Deutsch": "Einen Ordner importieren",
+  "Français": "Importer un dossier",
+  "한국어": "폴더 가져오기",
+  "中文": "导入文件夹",
+  "العربية": "استيراد مجلد",
+  "Tiếng Việt": "Nhập một thư mục"
+ },
+ "Brings a folder on disk into the Media Pool as bins, its subfolders as bins inside, and opens the bin it made.": {
+  "日本語": "ディスク上のフォルダーをビンとしてメディアプールに読み込み（サブフォルダーは中のビンに）、作ったビンを開きます。",
+  "Español": "Trae una carpeta del disco al Media Pool como bandejas, sus subcarpetas como bandejas dentro, y abre la bandeja creada.",
+  "Deutsch": "Holt einen Ordner von der Festplatte als Bins in den Media Pool, seine Unterordner als Bins darin, und öffnet die neue Bin.",
+  "Français": "Amène un dossier du disque dans le Media Pool sous forme de chutiers, ses sous-dossiers en chutiers à l'intérieur, et ouvre le chutier créé.",
+  "한국어": "디스크의 폴더를 빈으로 미디어 풀에 가져오고(하위 폴더는 안쪽 빈으로) 만든 빈을 엽니다.",
+  "中文": "把磁盘上的文件夹作为素材箱导入媒体池（子文件夹成为其中的素材箱），并打开新建的素材箱。",
+  "العربية": "يجلب مجلدًا من القرص إلى Media Pool كحاويات، ومجلداته الفرعية كحاويات داخله، ويفتح الحاوية التي أنشأها.",
+  "Tiếng Việt": "Đưa một thư mục trên đĩa vào Media Pool thành các bin, thư mục con thành bin bên trong, và mở bin vừa tạo."
+ },
+ "Put it at the top of the Media Pool (Master)": {
+  "日本語": "メディアプールの最上位（Master）に置く",
+  "Español": "Ponerla arriba del todo (Master)",
+  "Deutsch": "Ganz oben im Media Pool ablegen (Master)",
+  "Français": "La placer tout en haut (Master)",
+  "한국어": "미디어 풀 맨 위(Master)에 두기",
+  "中文": "放在媒体池顶层（Master）",
+  "العربية": "ضعه في أعلى Media Pool (Master)",
+  "Tiếng Việt": "Đặt ở cấp cao nhất (Master)"
+ },
+ "Renders proxy files beside the camera originals with ffmpeg and links them in Resolve. Clips that have one already are linked, not rendered again.": {
+  "日本語": "ffmpeg でカメラ元素材の隣にプロキシを書き出し、Resolve でリンクします。すでにあるクリップは書き出さずにリンクします。",
+  "Español": "Genera proxies junto a los originales de cámara con ffmpeg y los vincula en Resolve. Los clips que ya tienen uno se vinculan sin volver a generarlo.",
+  "Deutsch": "Rendert Proxys neben den Kamera-Originalen mit ffmpeg und verknüpft sie in Resolve. Clips, die schon einen haben, werden nur verknüpft.",
+  "Français": "Crée des proxys à côté des originaux caméra avec ffmpeg et les lie dans Resolve. Les plans qui en ont déjà un sont liés sans nouveau rendu.",
+  "한국어": "ffmpeg로 카메라 원본 옆에 프록시를 렌더링하고 Resolve에서 연결합니다. 이미 있는 클립은 다시 렌더링하지 않고 연결합니다.",
+  "中文": "用 ffmpeg 在摄影机原始文件旁生成代理文件，并在 Resolve 中链接。已有代理的片段只链接，不重新生成。",
+  "العربية": "يصيّر ملفات بديلة بجانب الأصول بواسطة ffmpeg ويربطها في Resolve. المقاطع التي لها بديل تُربط دون تصيير جديد.",
+  "Tiếng Việt": "Render proxy cạnh file gốc bằng ffmpeg rồi liên kết trong Resolve. Clip đã có proxy chỉ được liên kết, không render lại."
+ },
+ "Put the bin on a timeline": {
+  "日本語": "ビンをタイムラインに置く",
+  "Español": "Poner la bandeja en una línea de tiempo",
+  "Deutsch": "Die Bin auf eine Timeline legen",
+  "Français": "Mettre le chutier sur une timeline",
+  "한국어": "빈을 타임라인에 놓기",
+  "中文": "把素材箱放到时间线上",
+  "العربية": "ضع الحاوية على خط زمني",
+  "Tiếng Việt": "Đặt bin lên timeline"
+ },
+ "Puts the open bin's clips on a timeline, in order.": {
+  "日本語": "開いているビンのクリップを順番にタイムラインに並べます。",
+  "Español": "Pone en orden los clips de la bandeja abierta en una línea de tiempo.",
+  "Deutsch": "Legt die Clips der geöffneten Bin der Reihe nach auf eine Timeline.",
+  "Français": "Place dans l'ordre les plans du chutier ouvert sur une timeline.",
+  "한국어": "열린 빈의 클립을 순서대로 타임라인에 놓습니다.",
+  "中文": "把打开的素材箱中的片段按顺序放到时间线上。",
+  "العربية": "يضع مقاطع الحاوية المفتوحة على خط زمني، بالترتيب.",
+  "Tiếng Việt": "Đặt các clip của bin đang mở lên timeline, theo thứ tự."
+ },
+ "On a new timeline, named after the bin": {
+  "日本語": "ビン名の新しいタイムラインに",
+  "Español": "En una línea de tiempo nueva, con el nombre de la bandeja",
+  "Deutsch": "Auf einer neuen Timeline mit dem Namen der Bin",
+  "Français": "Sur une nouvelle timeline, au nom du chutier",
+  "한국어": "빈 이름의 새 타임라인에",
+  "中文": "放到以素材箱命名的新时间线上",
+  "العربية": "على خط زمني جديد باسم الحاوية",
+  "Tiếng Việt": "Trên timeline mới, đặt tên theo bin"
+ },
+ "Timeline name (empty: the bin's)": {
+  "日本語": "タイムライン名（空欄ならビン名）",
+  "Español": "Nombre (vacío: el de la bandeja)",
+  "Deutsch": "Name der Timeline (leer: der der Bin)",
+  "Français": "Nom de la timeline (vide : celui du chutier)",
+  "한국어": "타임라인 이름(비우면 빈 이름)",
+  "中文": "时间线名称（留空则用素材箱名）",
+  "العربية": "اسم الخط الزمني (فارغ: اسم الحاوية)",
+  "Tiếng Việt": "Tên timeline (để trống: tên bin)"
+ },
+ "Include the bins inside it": {
+  "日本語": "中のビンも含める",
+  "Español": "Incluir las bandejas que contiene",
+  "Deutsch": "Bins darin einbeziehen",
+  "Français": "Inclure les chutiers qu'il contient",
+  "한국어": "안쪽 빈도 포함",
+  "中文": "包括其中的素材箱",
+  "العربية": "ضمّن الحاويات التي بداخلها",
+  "Tiếng Việt": "Gồm cả các bin bên trong"
+ },
+ "Syncs the open timeline's clips into a new multicam-style timeline, '(Synced)' – the one you started from isn't changed.": {
+  "日本語": "開いているタイムラインのクリップを同期し、マルチカム形式の新しいタイムライン「(Synced)」を作ります。元のタイムラインは変わりません。",
+  "Español": "Sincroniza los clips de la línea de tiempo abierta en una nueva de estilo multicámara, '(Synced)'; la de partida no cambia.",
+  "Deutsch": "Synchronisiert die Clips der geöffneten Timeline in eine neue Multicam-artige Timeline, '(Synced)' – die Ausgangs-Timeline bleibt unverändert.",
+  "Français": "Synchronise les plans de la timeline ouverte dans une nouvelle timeline façon multicam, '(Synced)' – celle de départ n'est pas modifiée.",
+  "한국어": "열린 타임라인의 클립을 동기화해 멀티캠 형식의 새 타임라인 '(Synced)'를 만듭니다. 원래 타임라인은 바뀌지 않습니다.",
+  "中文": "把打开的时间线上的片段同步到一条新的多机位式时间线“(Synced)”——原时间线不变。",
+  "العربية": "يزامن مقاطع الخط الزمني المفتوح في خط زمني جديد بأسلوب متعدد الكاميرات '(Synced)' – ولا يتغير الأصلي.",
+  "Tiếng Việt": "Đồng bộ các clip của timeline đang mở vào một timeline kiểu multicam mới, '(Synced)' – timeline ban đầu không đổi."
+ },
+ "Also line up the audio by its waveform": {
+  "日本語": "音声も波形で合わせる",
+  "Español": "Alinear también el audio por su forma de onda",
+  "Deutsch": "Auch den Ton nach der Wellenform ausrichten",
+  "Français": "Aligner aussi le son par sa forme d'onde",
+  "한국어": "오디오도 파형으로 맞추기",
+  "中文": "也按波形对齐音频",
+  "العربية": "حاذِ الصوت أيضًا حسب موجته",
+  "Tiếng Việt": "Căn cả âm thanh theo dạng sóng"
+ },
+ "Lines up separately recorded audio with the cameras' own sound, on a new timeline.": {
+  "日本語": "別録りの音声をカメラの音に合わせ、新しいタイムラインに置きます。",
+  "Español": "Alinea el audio grabado aparte con el sonido de las cámaras, en una línea de tiempo nueva.",
+  "Deutsch": "Richtet separat aufgenommenen Ton am Kameraton aus, auf einer neuen Timeline.",
+  "Français": "Aligne le son enregistré à part sur le son des caméras, sur une nouvelle timeline.",
+  "한국어": "따로 녹음한 오디오를 카메라 소리에 맞춰 새 타임라인에 놓습니다.",
+  "中文": "把单独录制的音频与摄影机自带声音对齐，放到新时间线上。",
+  "العربية": "يحاذي الصوت المسجّل منفصلًا مع صوت الكاميرات، على خط زمني جديد.",
+  "Tiếng Việt": "Căn âm thanh thu riêng với tiếng của máy quay, trên timeline mới."
+ },
+ "Collapse the timeline": {
+  "日本語": "タイムラインをまとめる",
+  "Español": "Compactar la línea de tiempo",
+  "Deutsch": "Timeline zusammenlegen",
+  "Français": "Compacter la timeline",
+  "한국어": "타임라인 합치기",
+  "中文": "压缩时间线",
+  "العربية": "ضغط الخط الزمني",
+  "Tiếng Việt": "Gộp timeline"
+ },
+ "Packs the open timeline's clips onto as few tracks as they fit on, on a new timeline.": {
+  "日本語": "開いているタイムラインのクリップをできるだけ少ないトラックにまとめ、新しいタイムラインに置きます。",
+  "Español": "Agrupa los clips de la línea de tiempo abierta en las menos pistas posibles, en una línea de tiempo nueva.",
+  "Deutsch": "Packt die Clips der geöffneten Timeline auf so wenige Spuren wie möglich, auf einer neuen Timeline.",
+  "Français": "Regroupe les plans de la timeline ouverte sur le moins de pistes possible, sur une nouvelle timeline.",
+  "한국어": "열린 타임라인의 클립을 가능한 적은 트랙에 모아 새 타임라인에 놓습니다.",
+  "中文": "把打开的时间线上的片段尽量压到最少的轨道上，放到新时间线。",
+  "العربية": "يجمع مقاطع الخط الزمني المفتوح على أقل عدد ممكن من المسارات، في خط زمني جديد.",
+  "Tiếng Việt": "Dồn các clip của timeline đang mở vào ít track nhất có thể, trên timeline mới."
+ },
+ "Leave out silent audio clips": {
+  "日本語": "無音のオーディオクリップを除く",
+  "Español": "Omitir los clips de audio en silencio",
+  "Deutsch": "Stille Audioclips weglassen",
+  "Français": "Laisser de côté les plans audio silencieux",
+  "한국어": "무음 오디오 클립 빼기",
+  "中文": "去掉无声的音频片段",
+  "العربية": "استبعد مقاطع الصوت الصامتة",
+  "Tiếng Việt": "Bỏ các clip âm thanh im lặng"
+ },
+ "Shift to the start": {
+  "日本語": "先頭へ移動",
+  "Español": "Mover al inicio",
+  "Deutsch": "An den Anfang verschieben",
+  "Français": "Décaler au début",
+  "한국어": "처음으로 옮기기",
+  "中文": "移到开头",
+  "العربية": "إزاحة إلى البداية",
+  "Tiếng Việt": "Dời về đầu"
+ },
+ "Moves everything on the open timeline to its first frame.": {
+  "日本語": "開いているタイムラインのすべてを最初のフレームへ移動します。",
+  "Español": "Mueve todo lo de la línea de tiempo abierta a su primer fotograma.",
+  "Deutsch": "Verschiebt alles auf der geöffneten Timeline an ihr erstes Bild.",
+  "Français": "Déplace tout le contenu de la timeline ouverte à sa première image.",
+  "한국어": "열린 타임라인의 모든 것을 첫 프레임으로 옮깁니다.",
+  "中文": "把打开的时间线上的所有内容移到第一帧。",
+  "العربية": "ينقل كل ما في الخط الزمني المفتوح إلى إطاره الأول.",
+  "Tiếng Việt": "Dời mọi thứ trên timeline đang mở về khung hình đầu."
+ },
+ "Close the gaps between groups": {
+  "日本語": "グループ間の隙間を詰める",
+  "Español": "Cerrar los huecos entre grupos",
+  "Deutsch": "Lücken zwischen Gruppen schließen",
+  "Français": "Fermer les trous entre les groupes",
+  "한국어": "그룹 사이 빈틈 닫기",
+  "中文": "去掉组之间的空隙",
+  "العربية": "أغلق الفجوات بين المجموعات",
+  "Tiếng Việt": "Đóng khoảng trống giữa các nhóm"
+ },
+ "Project Setup is busy with something else – wait for it to finish, then run it again.": {
+  "日本語": "Project Setup は別の処理中です。終わってからもう一度実行してください。",
+  "Español": "Project Setup está ocupado con otra cosa: espera a que termine y vuelve a ejecutarla.",
+  "Deutsch": "Project Setup ist mit etwas anderem beschäftigt – warte, bis es fertig ist, und starte sie dann erneut.",
+  "Français": "Project Setup est occupé – attendez la fin, puis relancez-la.",
+  "한국어": "Project Setup가 다른 작업 중입니다. 끝난 뒤 다시 실행하세요.",
+  "中文": "Project Setup 正忙于其他事情——完成后再运行。",
+  "العربية": "Project Setup مشغول بشيء آخر – انتظر حتى ينتهي، ثم شغّلها مجددًا.",
+  "Tiếng Việt": "Project Setup đang bận việc khác – đợi xong rồi chạy lại."
+ },
+ "Not connected to Resolve – open Resolve with a project, then run it again.": {
+  "日本語": "Resolve に接続されていません。プロジェクトを開いた Resolve でもう一度実行してください。",
+  "Español": "No hay conexión con Resolve: abre Resolve con un proyecto y vuelve a ejecutarla.",
+  "Deutsch": "Keine Verbindung zu Resolve – öffne Resolve mit einem Projekt und starte sie erneut.",
+  "Français": "Pas de connexion à Resolve – ouvrez Resolve avec un projet, puis relancez-la.",
+  "한국어": "Resolve에 연결되지 않았습니다. 프로젝트가 열린 Resolve에서 다시 실행하세요.",
+  "中文": "未连接到 Resolve——打开带项目的 Resolve 后再运行。",
+  "العربية": "غير متصل بـ Resolve – افتح Resolve مع مشروع، ثم شغّلها مجددًا.",
+  "Tiếng Việt": "Chưa kết nối với Resolve – mở Resolve với một dự án rồi chạy lại."
+ },
+ "Stopped.": {
+  "日本語": "停止しました。",
+  "Español": "Detenida.",
+  "Deutsch": "Gestoppt.",
+  "Français": "Arrêté.",
+  "한국어": "멈췄습니다.",
+  "中文": "已停止。",
+  "العربية": "توقف.",
+  "Tiếng Việt": "Đã dừng."
+ },
+ "Transcribe the timeline": {
+  "日本語": "タイムラインを文字起こし",
+  "Español": "Transcribir la línea de tiempo",
+  "Deutsch": "Timeline transkribieren",
+  "Français": "Transcrire la timeline",
+  "한국어": "타임라인 받아쓰기",
+  "中文": "转写时间线",
+  "العربية": "تفريغ الخط الزمني",
+  "Tiếng Việt": "Chép lời timeline"
+ },
+ "Turns the open timeline's dialogue into subtitles on subtitle track 1, and saves them as an SRT file.": {
+  "日本語": "開いているタイムラインの台詞を字幕トラック 1 の字幕にし、SRT ファイルとしても保存します。",
+  "Español": "Convierte los diálogos de la línea de tiempo abierta en subtítulos en la pista 1 y los guarda como SRT.",
+  "Deutsch": "Macht aus den Dialogen der geöffneten Timeline Untertitel auf Untertitelspur 1 und speichert sie als SRT-Datei.",
+  "Français": "Transforme les dialogues de la timeline ouverte en sous-titres sur la piste 1, et les enregistre en SRT.",
+  "한국어": "열린 타임라인의 대사를 자막 트랙 1의 자막으로 만들고 SRT 파일로 저장합니다.",
+  "中文": "把打开的时间线上的对白转成字幕轨道 1 上的字幕，并保存为 SRT 文件。",
+  "العربية": "يحوّل حوار الخط الزمني المفتوح إلى ترجمات على مسار الترجمة 1، ويحفظها كملف SRT.",
+  "Tiếng Việt": "Biến lời thoại của timeline đang mở thành phụ đề trên track phụ đề 1, và lưu thành tệp SRT."
+ },
+ "As set in Subtitles": {
+  "日本語": "Subtitles の設定どおり",
+  "Español": "Como en Subtitles",
+  "Deutsch": "Wie in Subtitles eingestellt",
+  "Français": "Comme dans Subtitles",
+  "한국어": "Subtitles 설정대로",
+  "中文": "按 Subtitles 中的设置",
+  "العربية": "كما في Subtitles",
+  "Tiếng Việt": "Như trong Subtitles"
+ },
+ "Language": {
+  "日本語": "言語",
+  "Español": "Idioma",
+  "Deutsch": "Sprache",
+  "Français": "Langue",
+  "한국어": "언어",
+  "中文": "语言",
+  "العربية": "اللغة",
+  "Tiếng Việt": "Ngôn ngữ"
+ },
+ "Put them on the timeline": {
+  "日本語": "タイムラインに置く",
+  "Español": "Ponerlos en la línea de tiempo",
+  "Deutsch": "Auf die Timeline legen",
+  "Français": "Les mettre sur la timeline",
+  "한국어": "타임라인에 놓기",
+  "中文": "放到时间线上",
+  "العربية": "ضعها على الخط الزمني",
+  "Tiếng Việt": "Đặt lên timeline"
+ },
+ "Replace subtitles already on track 1": {
+  "日本語": "トラック 1 の既存の字幕を置き換える",
+  "Español": "Reemplazar los subtítulos de la pista 1",
+  "Deutsch": "Vorhandene Untertitel auf Spur 1 ersetzen",
+  "Français": "Remplacer les sous-titres déjà sur la piste 1",
+  "한국어": "트랙 1의 기존 자막 바꾸기",
+  "中文": "替换轨道 1 上已有的字幕",
+  "العربية": "استبدل الترجمات الموجودة على المسار 1",
+  "Tiếng Việt": "Thay phụ đề đã có trên track 1"
+ },
+ "Off: when track 1 has subtitles, the new ones are kept as an SRT file only.": {
+  "日本語": "オフ: トラック 1 に字幕があれば、新しい字幕は SRT ファイルだけに保存します。",
+  "Español": "Desactivado: si la pista 1 tiene subtítulos, los nuevos se guardan solo como SRT.",
+  "Deutsch": "Aus: Hat Spur 1 schon Untertitel, werden die neuen nur als SRT-Datei behalten.",
+  "Français": "Désactivé : si la piste 1 a des sous-titres, les nouveaux sont gardés en SRT seulement.",
+  "한국어": "끄면: 트랙 1에 자막이 있을 때 새 자막은 SRT 파일로만 남깁니다.",
+  "中文": "关闭：轨道 1 已有字幕时，新字幕只保存为 SRT 文件。",
+  "العربية": "إيقاف: إن كان على المسار 1 ترجمات، تُحفظ الجديدة كملف SRT فقط.",
+  "Tiếng Việt": "Tắt: khi track 1 đã có phụ đề, phụ đề mới chỉ được giữ dưới dạng tệp SRT."
+ },
+ "Use Resolve's own transcription if it has one": {
+  "日本語": "Resolve 自身の文字起こしがあれば使う",
+  "Español": "Usar la transcripción de Resolve si ya la tiene",
+  "Deutsch": "Resolves eigene Transkription nutzen, falls vorhanden",
+  "Français": "Utiliser la transcription de Resolve s'il en a une",
+  "한국어": "Resolve 자체 받아쓰기가 있으면 사용",
+  "中文": "如果 Resolve 已有转写则使用",
+  "العربية": "استخدم تفريغ Resolve نفسه إن وُجد",
+  "Tiếng Việt": "Dùng bản chép lời của Resolve nếu có"
+ },
+ "Subtitles is busy with something else – wait for it to finish, then run it again.": {
+  "日本語": "Subtitles は別の処理中です。終わってからもう一度実行してください。",
+  "Español": "Subtitles está ocupado con otra cosa: espera a que termine y vuelve a ejecutarla.",
+  "Deutsch": "Subtitles ist mit etwas anderem beschäftigt – warte, bis es fertig ist, und starte sie dann erneut.",
+  "Français": "Subtitles est occupé – attendez la fin, puis relancez-la.",
+  "한국어": "Subtitles가 다른 작업 중입니다. 끝난 뒤 다시 실행하세요.",
+  "中文": "Subtitles 正忙于其他事情——完成后再运行。",
+  "العربية": "Subtitles مشغول بشيء آخر – انتظر حتى ينتهي، ثم شغّلها مجددًا.",
+  "Tiếng Việt": "Subtitles đang bận việc khác – đợi xong rồi chạy lại."
+ },
+ "Transcription isn't set up on this computer yet – set it up on Subtitles' Setup tab.": {
+  "日本語": "このコンピューターではまだ文字起こしが設定されていません。Subtitles の Setup タブで設定してください。",
+  "Español": "La transcripción aún no está configurada en este equipo: configúrala en la pestaña Setup de Subtitles.",
+  "Deutsch": "Die Transkription ist auf diesem Computer noch nicht eingerichtet – richte sie im Setup-Tab von Subtitles ein.",
+  "Français": "La transcription n'est pas encore installée sur cet ordinateur – installez-la dans l'onglet Setup de Subtitles.",
+  "한국어": "이 컴퓨터에는 아직 받아쓰기가 설정되지 않았습니다. Subtitles의 Setup 탭에서 설정하세요.",
+  "中文": "这台电脑还没有设置转写——请在 Subtitles 的 Setup 选项卡中设置。",
+  "العربية": "التفريغ غير مُعدّ على هذا الكمبيوتر بعد – أعدّه من تبويب Setup في Subtitles.",
+  "Tiếng Việt": "Máy này chưa thiết lập chép lời – hãy thiết lập ở tab Setup của Subtitles."
+ },
+ "Track 1 already has subtitles – kept the new ones as an SRT file only.": {
+  "日本語": "トラック 1 にはすでに字幕があります。新しい字幕は SRT ファイルだけに保存しました。",
+  "Español": "La pista 1 ya tiene subtítulos: los nuevos se guardaron solo como SRT.",
+  "Deutsch": "Spur 1 hat schon Untertitel – die neuen wurden nur als SRT-Datei behalten.",
+  "Français": "La piste 1 a déjà des sous-titres – les nouveaux sont gardés en SRT seulement.",
+  "한국어": "트랙 1에 이미 자막이 있어 새 자막은 SRT 파일로만 남겼습니다.",
+  "中文": "轨道 1 已有字幕——新字幕只保存为 SRT 文件。",
+  "العربية": "على المسار 1 ترجمات بالفعل – حُفظت الجديدة كملف SRT فقط.",
+  "Tiếng Việt": "Track 1 đã có phụ đề – phụ đề mới chỉ được giữ dưới dạng tệp SRT."
+ },
+ "Transcribing didn't start.": {
+  "日本語": "文字起こしが始まりませんでした。",
+  "Español": "La transcripción no empezó.",
+  "Deutsch": "Die Transkription hat nicht begonnen.",
+  "Français": "La transcription n'a pas démarré.",
+  "한국어": "받아쓰기가 시작되지 않았습니다.",
+  "中文": "转写没有开始。",
+  "العربية": "لم يبدأ التفريغ.",
+  "Tiếng Việt": "Chép lời chưa bắt đầu."
+ },
+ "Never – just report": {
+  "日本語": "止めない（報告のみ）",
+  "Español": "Nunca: solo informar",
+  "Deutsch": "Nie – nur berichten",
+  "Français": "Jamais – seulement signaler",
+  "한국어": "멈추지 않음 – 알리기만",
+  "中文": "从不——只报告",
+  "العربية": "أبدًا – أبلغ فقط",
+  "Tiếng Việt": "Không bao giờ – chỉ báo cáo"
+ },
+ "If it finds problems": {
+  "日本語": "問題が見つかったら",
+  "Español": "Si encuentra problemas",
+  "Deutsch": "Wenn es Probleme findet",
+  "Français": "S'il trouve des problèmes",
+  "한국어": "문제를 찾으면",
+  "中文": "如果发现问题",
+  "العربية": "إن وجد مشكلات",
+  "Tiếng Việt": "Nếu thấy vấn đề"
+ },
+ "If it finds problems or warnings": {
+  "日本語": "問題または警告が見つかったら",
+  "Español": "Si encuentra problemas o avisos",
+  "Deutsch": "Wenn es Probleme oder Warnungen findet",
+  "Français": "S'il trouve des problèmes ou des avertissements",
+  "한국어": "문제나 경고를 찾으면",
+  "中文": "如果发现问题或警告",
+  "العربية": "إن وجد مشكلات أو تحذيرات",
+  "Tiếng Việt": "Nếu thấy vấn đề hoặc cảnh báo"
+ },
+ "Check the timeline": {
+  "日本語": "タイムラインをチェック",
+  "Español": "Revisar la línea de tiempo",
+  "Deutsch": "Timeline prüfen",
+  "Français": "Vérifier la timeline",
+  "한국어": "타임라인 검사",
+  "中文": "检查时间线",
+  "العربية": "افحص الخط الزمني",
+  "Tiếng Việt": "Kiểm tra timeline"
+ },
+ "Audit's checks on the open timeline: missing media and fonts, gaps, flash frames, subtitles, frame rates and more.": {
+  "日本語": "開いているタイムラインに Audit のチェック: メディアやフォントの欠落、隙間、フラッシュフレーム、字幕、フレームレートなど。",
+  "Español": "Las comprobaciones de Audit en la línea de tiempo abierta: medios y fuentes que faltan, huecos, fotogramas sueltos, subtítulos, frecuencias de imagen y más.",
+  "Deutsch": "Audits Prüfungen der geöffneten Timeline: fehlende Medien und Schriften, Lücken, Blitzbilder, Untertitel, Bildraten und mehr.",
+  "Français": "Les vérifications d'Audit sur la timeline ouverte : médias et polices manquants, trous, images flash, sous-titres, cadences, etc.",
+  "한국어": "열린 타임라인에 Audit 검사: 빠진 미디어와 글꼴, 빈틈, 플래시 프레임, 자막, 프레임 레이트 등.",
+  "中文": "对打开的时间线运行 Audit 检查：缺失的媒体和字体、空隙、闪帧、字幕、帧率等。",
+  "العربية": "فحوص Audit على الخط الزمني المفتوح: الوسائط والخطوط المفقودة، والفجوات، والإطارات الخاطفة، والترجمات، ومعدلات الإطارات وغيرها.",
+  "Tiếng Việt": "Các kiểm tra của Audit trên timeline đang mở: thiếu media và phông, khoảng trống, khung hình lóe, phụ đề, tốc độ khung hình và hơn thế."
+ },
+ "Check the sound too": {
+  "日本語": "音声もチェック",
+  "Español": "Revisar también el sonido",
+  "Deutsch": "Auch den Ton prüfen",
+  "Français": "Vérifier aussi le son",
+  "한국어": "소리도 검사",
+  "中文": "也检查声音",
+  "العربية": "افحص الصوت أيضًا",
+  "Tiếng Việt": "Kiểm tra cả âm thanh"
+ },
+ "Renders the mix to measure loudness and peaks – takes about as long as a fast render.": {
+  "日本語": "ミックスを書き出してラウドネスとピークを測ります。速いレンダーと同じくらいかかります。",
+  "Español": "Renderiza la mezcla para medir sonoridad y picos: tarda lo que un render rápido.",
+  "Deutsch": "Rendert die Mischung, um Lautheit und Spitzen zu messen – dauert etwa so lange wie ein schnelles Rendering.",
+  "Français": "Rend le mixage pour mesurer la sonie et les crêtes – prend environ le temps d'un rendu rapide.",
+  "한국어": "믹스를 렌더링해 라우드니스와 피크를 잽니다. 빠른 렌더링만큼 걸립니다.",
+  "中文": "渲染混音以测量响度和峰值——耗时与一次快速渲染相当。",
+  "العربية": "يصيّر المزيج لقياس الجهارة والذُرى – يستغرق نحو وقت تصيير سريع.",
+  "Tiếng Việt": "Render bản mix để đo độ lớn và đỉnh – mất khoảng thời gian của một lần render nhanh."
+ },
+ "Stop the automation": {
+  "日本語": "自動化を止める",
+  "Español": "Detener la automatización",
+  "Deutsch": "Die Automatisierung stoppen",
+  "Français": "Arrêter l'automatisation",
+  "한국어": "자동화 멈추기",
+  "中文": "停止自动化",
+  "العربية": "أوقف الأتمتة",
+  "Tiếng Việt": "Dừng tự động hóa"
+ },
+ "Audit is busy with something else – wait for it to finish, then run it again.": {
+  "日本語": "Audit は別の処理中です。終わってからもう一度実行してください。",
+  "Español": "Audit está ocupado con otra cosa: espera a que termine y vuelve a ejecutarla.",
+  "Deutsch": "Audit ist mit etwas anderem beschäftigt – warte, bis es fertig ist, und starte sie dann erneut.",
+  "Français": "Audit est occupé – attendez la fin, puis relancez-la.",
+  "한국어": "Audit가 다른 작업 중입니다. 끝난 뒤 다시 실행하세요.",
+  "中文": "Audit 正忙于其他事情——完成后再运行。",
+  "العربية": "Audit مشغول بشيء آخر – انتظر حتى ينتهي، ثم شغّلها مجددًا.",
+  "Tiếng Việt": "Audit đang bận việc khác – đợi xong rồi chạy lại."
+ },
+ "Move up": {
+  "日本語": "上へ",
+  "Español": "Subir",
+  "Deutsch": "Nach oben",
+  "Français": "Monter",
+  "한국어": "위로",
+  "中文": "上移",
+  "العربية": "تحريك لأعلى",
+  "Tiếng Việt": "Lên"
+ },
+ "Move down": {
+  "日本語": "下へ",
+  "Español": "Bajar",
+  "Deutsch": "Nach unten",
+  "Français": "Descendre",
+  "한국어": "아래로",
+  "中文": "下移",
+  "العربية": "تحريك لأسفل",
+  "Tiếng Việt": "Xuống"
+ },
+ "Pick an automation on the left.": {
+  "日本語": "左の自動化を選んでください。",
+  "Español": "Elige una automatización a la izquierda.",
+  "Deutsch": "Wähle links eine Automatisierung.",
+  "Français": "Choisissez une automatisation à gauche.",
+  "한국어": "왼쪽에서 자동화를 고르세요.",
+  "中文": "在左侧选择一个自动化。",
+  "العربية": "اختر أتمتة من اليسار.",
+  "Tiếng Việt": "Chọn một tự động hóa ở bên trái."
+ },
+ "Make an automation with New – say, Import a folder › Make proxies › Put the bin on a timeline › Sync.": {
+  "日本語": "「新規」で自動化を作りましょう。たとえば、フォルダーを読み込む › プロキシを作成 › ビンをタイムラインに置く › 同期。",
+  "Español": "Crea una automatización con Nueva; por ejemplo, Importar una carpeta › Crear proxies › Poner la bandeja en una línea de tiempo › Sincronizar.",
+  "Deutsch": "Erstelle mit Neu eine Automatisierung – etwa Einen Ordner importieren › Proxys erstellen › Die Bin auf eine Timeline legen › Sync.",
+  "Français": "Créez une automatisation avec Nouvelle – par exemple Importer un dossier › Créer les proxys › Mettre le chutier sur une timeline › Synchroniser.",
+  "한국어": "새로 만들기로 자동화를 만드세요. 예: 폴더 가져오기 › 프록시 만들기 › 빈을 타임라인에 놓기 › 동기화.",
+  "中文": "用“新建”创建一个自动化——例如：导入文件夹 › 生成代理 › 把素材箱放到时间线上 › 同步。",
+  "العربية": "أنشئ أتمتة بـ«جديد» – مثلًا: استيراد مجلد › إنشاء البدائل › وضع الحاوية على خط زمني › المزامنة.",
+  "Tiếng Việt": "Tạo tự động hóa bằng Mới – ví dụ: Nhập một thư mục › Tạo proxy › Đặt bin lên timeline › Đồng bộ."
+ },
+ "Add a step first.": {
+  "日本語": "先に手順を追加してください。",
+  "Español": "Añade primero un paso.",
+  "Deutsch": "Füge zuerst einen Schritt hinzu.",
+  "Français": "Ajoutez d'abord une étape.",
+  "한국어": "먼저 단계를 추가하세요.",
+  "中文": "请先添加一个步骤。",
+  "العربية": "أضف خطوة أولًا.",
+  "Tiếng Việt": "Hãy thêm một bước trước."
+ },
+ "Command Center is running something else – try again in a moment.": {
+  "日本語": "Command Center は別の処理を実行中です。少ししてからもう一度お試しください。",
+  "Español": "Command Center está ejecutando otra cosa: inténtalo dentro de un momento.",
+  "Deutsch": "Command Center führt gerade etwas anderes aus – versuche es gleich noch einmal.",
+  "Français": "Command Center exécute autre chose – réessayez dans un instant.",
+  "한국어": "Command Center가 다른 작업을 실행 중입니다. 잠시 후 다시 해 보세요.",
+  "中文": "Command Center 正在运行别的操作——稍后再试。",
+  "العربية": "Command Center يشغّل شيئًا آخر – حاول مجددًا بعد قليل.",
+  "Tiếng Việt": "Command Center đang chạy việc khác – thử lại sau giây lát."
+ },
+ "Delete": {
+  "日本語": "削除",
+  "Español": "Eliminar",
+  "Deutsch": "Löschen",
+  "Français": "Supprimer",
+  "한국어": "삭제",
+  "中文": "删除",
+  "العربية": "حذف",
+  "Tiếng Việt": "Xóa"
+ }
+}

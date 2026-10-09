@@ -1,0 +1,11 @@
+# Everything text is stored and checked out with Unix line endings, so a
+# folder copied over from Windows can't turn every file into a diff.
+* text=auto eol=lf
+
+# Shell scripts and service settings used on the Linux server: they must keep
+# Unix line endings.
+*.sh text eol=lf
+*.command text eol=lf
+server/deploy/*.conf text eol=lf
+# Resolve bin exports (zip files): never touch their bytes.
+*.drb binary

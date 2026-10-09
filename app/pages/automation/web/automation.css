@@ -1,0 +1,117 @@
+/* Automation: the automations on the left, the one picked on the right -
+   its run (when there is one) above its steps. */
+
+.au-intro { margin: 0; max-width: 860px; line-height: 1.5; }
+.au-layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: var(--section-gap); }
+.au-list { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.au-list .spacer { flex: 1; }
+.au-new { gap: 6px; }
+.au-new .icon-svg, .au-add .icon-svg, .au-run-btn .icon-svg { width: 14px; height: 14px; }
+.au-items { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.au-item { display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 8px 10px; border: 0;
+    border-radius: var(--r-md); background: none; color: var(--text); cursor: pointer; font: inherit; }
+.au-item:hover { background: var(--nav-hover-bg); color: var(--nav-hover-fg); }
+.au-item[aria-current="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.au-item-name { font-weight: 600; overflow-wrap: anywhere; display: flex; align-items: center; gap: 6px; }
+.au-item-sub { font-size: var(--fs-xs); opacity: .75; }
+.au-item .dots { margin-left: auto; }
+.au-empty { padding: 18px 10px; color: var(--text-dim); font-size: var(--fs-sm); line-height: 1.5; }
+
+.au-main { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--section-gap); padding-right: 4px; }
+.au-editor { display: flex; flex-direction: column; gap: 12px; padding: var(--card-pad); }
+.au-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.au-name { flex: 1 1 260px; font-size: var(--fs-md); font-weight: 700; }
+.au-run-btn { gap: 6px; }
+.au-problems { margin: 0; padding-left: 18px; color: var(--second-text); font-size: var(--fs-sm); }
+.au-last { font-size: var(--fs-sm); }
+.au-last.bad { color: var(--danger-text); }
+
+.au-steps { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.au-step { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: var(--r-md);
+    background: color-mix(in srgb, var(--raised-bg) 70%, transparent); border: var(--bw) solid transparent; }
+.au-step.missing { border-color: var(--danger-text); }
+.au-step-head { display: flex; align-items: flex-start; gap: 10px; }
+.au-num { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+    font-size: var(--fs-xs); font-weight: 700; color: var(--text-strong); background: var(--surface, var(--card-bg));
+    border: var(--bw) solid var(--card-border); }
+.au-step-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.au-step-tool { font-size: var(--fs-xs); color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; }
+.au-step-label { font-weight: 700; color: var(--text-strong); }
+.au-step-about { font-size: var(--fs-sm); color: var(--text-dim); line-height: 1.4; }
+.au-step-tools { display: flex; gap: 2px; flex: none; }
+.au-step-tools .btn { width: 28px; height: 28px; }
+.au-step-tools .icon-svg { width: 14px; height: 14px; }
+.au-arrow-up .icon-svg { transform: rotate(-90deg); }
+.au-arrow-down .icon-svg { transform: rotate(90deg); }
+
+.au-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px 16px; padding-left: 34px; }
+.au-opt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.au-opt.wide { grid-column: 1 / -1; }
+.check.au-opt { flex-direction: row; align-items: center; gap: 8px; align-self: center; }
+.au-opt-label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-dim); }
+.au-opt .field { width: 100%; }
+.au-opt textarea.field { min-height: 110px; resize: vertical; font-family: var(--font-mono); font-size: var(--fs-sm); }
+.au-folder { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.au-folder .field { flex: 1; min-width: 0; }
+.au-asked { font-size: var(--fs-sm); color: var(--accent-text); font-style: italic; padding: 6px 0; }
+.au-ask { font-size: var(--fs-xs); color: var(--text-dim); }
+.au-ask input { width: 13px; height: 13px; }
+.au-hint { font-size: var(--fs-xs); color: var(--text-dim); line-height: 1.4; }
+.au-add { align-self: flex-start; gap: 6px; }
+.au-none { color: var(--text-dim); font-size: var(--fs-sm); padding: 6px 0; }
+
+/* The run. */
+.au-run { display: flex; flex-direction: column; gap: 10px; padding: var(--card-pad); }
+.au-run.ok { border-color: color-mix(in srgb, var(--success) 55%, var(--card-border)); }
+.au-run.bad { border-color: color-mix(in srgb, var(--danger-text) 55%, var(--card-border)); }
+.au-run-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.au-run-title { flex: 1; margin: 0; font-size: var(--fs-md); font-weight: 700; color: var(--text-strong); }
+.au-run-text { margin: 0; font-size: var(--fs-sm); line-height: 1.5; }
+.au-run-text.bad { color: var(--danger-text); }
+.au-run-text.ok { color: var(--success); }
+.au-run-steps { display: flex; flex-direction: column; gap: 6px; }
+.au-run-step { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 2px 10px; align-items: start; }
+.au-mark { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-xs);
+    border: var(--bw) solid var(--card-border); color: var(--text-dim); }
+.au-mark .icon-svg { width: 13px; height: 13px; }
+.au-run-step.done .au-mark { color: var(--success); border-color: currentColor; }
+.au-run-step.failed .au-mark { color: var(--danger-text); border-color: currentColor; }
+.au-run-step.running .au-mark { border: 0; }
+.au-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--raised-bg);
+    border-top-color: var(--accent-text); animation: au-turn .9s linear infinite; }
+@keyframes au-turn { to { transform: rotate(360deg); } }
+.au-run-step.not_run, .au-run-step.skipped { opacity: .55; }
+.au-run-label { font-weight: 600; color: var(--text-strong); }
+.au-run-detail { grid-column: 2 / 4; font-size: var(--fs-sm); color: var(--text-dim); line-height: 1.4; overflow-wrap: anywhere; }
+.au-run-step.failed .au-run-detail { color: var(--danger-text); }
+.au-took { font-size: var(--fs-xs); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.au-bar { grid-column: 2 / 4; height: 5px; border-radius: 3px; background: var(--raised-bg); overflow: hidden; position: relative; }
+.au-bar i { display: block; height: 100%; background: var(--emphasis-fill); border-radius: inherit; transition: width .3s; }
+.au-bar.indeterminate i { width: 30% !important; position: absolute; animation: au-slide 1.3s ease-in-out infinite; }
+@keyframes au-slide { from { left: -30%; } to { left: 100%; } }
+.au-log summary { cursor: pointer; font-size: var(--fs-sm); color: var(--text-dim); }
+.au-log-lines { margin-top: 6px; max-height: 220px; overflow-y: auto; font-size: var(--fs-xs); line-height: 1.5;
+    font-family: var(--font-mono); user-select: text; }
+.au-log-line.error { color: var(--danger-text); }
+.au-log-line.warn { color: var(--second-text); }
+.au-log-line.success { color: var(--success); }
+.au-log-line.step { color: var(--text-strong); font-weight: 700; margin-top: 4px; }
+.au-log-time { color: var(--text-dim); margin-right: 8px; }
+
+/* Add a step / the questions. */
+.au-picker { display: flex; flex-direction: column; gap: 12px; max-height: min(60vh, 520px); overflow-y: auto; }
+.au-picker-tool { display: flex; flex-direction: column; gap: 4px; }
+.au-picker-step { display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 8px 10px; font: inherit;
+    border-radius: var(--r-md); border: var(--bw) solid var(--card-border); background: var(--raised-bg);
+    color: var(--text); cursor: pointer; }
+.au-picker-step:hover { border-color: var(--accent-text); }
+.au-picker-step b { color: var(--text-strong); }
+.au-picker-step span { font-size: var(--fs-sm); color: var(--text-dim); line-height: 1.4; }
+.au-question { display: flex; flex-direction: column; gap: 4px; }
+.au-question .au-opt-label b { color: var(--text-strong); }
+
+@media (max-width: 760px) {
+    .au-layout { grid-template-columns: minmax(0, 1fr); }
+    .au-list { max-height: 220px; }
+}
+.au-slot { display: contents; }

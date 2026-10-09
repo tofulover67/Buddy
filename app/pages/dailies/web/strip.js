@@ -1,0 +1,459 @@
+/* Dailies: the strip under the player, and the transcript beside it.
+
+   The strip draws the player's position two ways (the "viewer" setting):
+   the clip on its own, or the whole source tape laid end to end, each clip
+   at its place on it. Pressing or dragging on it moves the playhead there -
+   seek_to names a clip and a time in it, and Python opens that clip if it
+   isn't the one playing. The page's position messages are always a time
+   inside the current clip; everything about where that sits on the tape
+   is worked out here, from the tape rows' lengths. */
+"use strict";
+
+// Resolve's clip colours, as its own picker draws them.
+const CLIP_COLORS = {
+    Orange: "#E8742B", Apricot: "#F0A052", Yellow: "#E2C33D", Lime: "#9FC43A",
+    Olive: "#76902F", Green: "#3F9E4D", Teal: "#2FA39A", Navy: "#2B4F8F",
+    Blue: "#4A83D8", Purple: "#8C5BC9", Violet: "#B066C9", Pink: "#E0709F",
+    Tan: "#C9A77C", Beige: "#D8C9A8", Brown: "#8A5A3A", Chocolate: "#6B4331",
+};
+
+function clockText(seconds, long = false) {
+    const s = Math.max(0, Math.floor(seconds + 1e-6));
+    const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = s % 60;
+    const mm = String(m).padStart(2, "0"), ss = String(sec).padStart(2, "0");
+    return h || long ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+const Strip = (() => {
+    const {el, send} = Buddy;
+    const $ = id => document.getElementById(id);
+    const strip = $("strip"), ruler = $("ruler"), blocks = $("blocks"), playhead = $("playhead");
+    const hoverLine = $("hover-line"), hoverTime = $("hover-time");
+    let hoverX = null;                      // clientX of a pointer over the strip, not pressed
+    let clips = [], starts = [], total = 0;
+    let viewer = "clip", currentId = null, playing = false;
+    let local = 0, localLength = 0;         // seconds, inside the current clip
+    let view = null;                        // [from, to] seconds shown; null = fit
+    let wholeTape = false;                  // zoomed right out by hand: leave it there
+    // A tape of hundreds of clips fitted to the strip is hundreds of slivers,
+    // so a long one opens on the clips around the current one instead - few
+    // enough that each has room for its name.
+    const FIT_CLIPS = 12, BEFORE = 1, AFTER = 5;
+    let dragging = null;                    // {id, seconds} while the pointer is down
+    let seekTimer = 0;
+    const onChange = [];
+
+    const index = () => clips.findIndex(c => c.id === currentId);
+    const clipLength = i => {
+        const c = clips[i];
+        return c ? (c.id === currentId && localLength > 0 ? localLength : c.seconds || 0) : 0;
+    };
+    // The span the strip covers, and where the current clip starts on it.
+    const span = () => viewer === "source" ? total : Math.max(clipLength(index()), 0.001);
+    const origin = () => viewer === "source" && index() >= 0 ? starts[index()] : 0;
+    const shown = () => view || [0, span()];
+
+    function opening() {
+        const i = index();
+        if (viewer !== "source" || wholeTape || clips.length <= FIT_CLIPS || i < 0) return null;
+        const first = Math.max(0, i - BEFORE), last = Math.min(clips.length - 1, i + AFTER);
+        return [starts[first], starts[last] + (clips[last].seconds || 0)];
+    }
+    function layout() {
+        starts = []; total = 0;
+        for (const c of clips) { starts.push(total); total += Math.max(0, c.seconds || 0); }
+    }
+    function x(seconds) {
+        const [from, to] = shown();
+        return (seconds - from) / Math.max(to - from, 1e-6) * strip.clientWidth;
+    }
+    function secondsAt(clientX) {
+        const [from, to] = shown();
+        const rect = strip.getBoundingClientRect();
+        return from + (clientX - rect.left) / Math.max(rect.width, 1) * (to - from);
+    }
+    // Which clip, and how far into it, a time on the strip is.
+    function locate(seconds) {
+        if (viewer !== "source") {
+            return currentId ? {id: currentId, at: Math.min(Math.max(seconds, 0), span())} : null;
+        }
+        if (!clips.length) return null;
+        let i = starts.findLastIndex(start => start <= seconds);
+        i = Math.max(0, i);
+        return {id: clips[i].id, at: Math.min(Math.max(seconds - starts[i], 0), clips[i].seconds || 0)};
+    }
+
+    function drawRuler() {
+        const [from, to] = shown();
+        const width = strip.clientWidth || 1;
+        // Labels are whole seconds, so a second apart at the least - half
+        // seconds read 00:00 00:00 00:01 00:01 on a long strip.
+        const steps = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200];
+        const step = steps.find(s => s / (to - from) * width >= 90) || steps.at(-1);
+        const long = span() >= 3600;     // matching the time readout
+        const ticks = [];
+        // Five short marks between labels, where there's room for them.
+        const minor = step / 5 / (to - from) * width >= 12 ? step / 5 : 0;
+        for (let t = Math.ceil(from / step) * step; t <= to; t += step) {
+            ticks.push(el("span.tick", {text: clockText(t, long), style: `left:${x(t)}px`}));
+            for (let k = 1; minor && k < 5; k++) {
+                const m = t + k * minor;
+                if (m <= to) ticks.push(el("span.tick.minor", {style: `left:${x(m)}px`}));
+            }
+        }
+        ruler.replaceChildren(...ticks);
+    }
+    // A name shortened to fit `px`, in the middle: camera files differ at the
+    // end ("CAM_FX3_A_20260101_8206.MP4"), so "CAM_FX3…8206" beats
+    // "CAM_FX3_A…". The extension goes first.
+    let measure = null;
+    function fitName(name, px) {
+        if (!measure) {
+            const probe = blocks.querySelector(".block-name");
+            if (!probe) return name;
+            measure = document.createElement("canvas").getContext("2d");
+            const cs = getComputedStyle(probe);
+            measure.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        }
+        const fits = text => measure.measureText(text).width <= px;
+        if (fits(name)) return name;
+        const bare = name.replace(/\.[A-Za-z0-9]{2,4}$/, "");
+        if (fits(bare)) return bare;
+        let keep = bare.length - 1;
+        while (keep > 2) {
+            const tail = Math.ceil(keep * 0.55), text = bare.slice(0, keep - tail) + "…" + bare.slice(-tail);
+            if (fits(text)) return text;
+            keep--;
+        }
+        return "";      // a sliver: its name is in the hover label
+    }
+    function drawBlocks() {
+        const [from, to] = shown();
+        const items = [];
+        const rows = viewer === "source" ? clips.map((c, i) => [c, starts[i], c.seconds || 0])
+            : index() >= 0 ? [[clips[index()], 0, span()]] : [];
+        for (const [clip, start, length] of rows) {
+            if (start + length < from || start > to) continue;
+            const left = x(start), width = Math.max(1, x(start + length) - left);
+            const block = el("div.block", {title: `${clip.name} · ${clockText(length)}`}, [
+                el("span.block-name", {text: clip.name, translate: "no"}),
+                el("span.block-length", {text: clockText(length)}),
+            ]);
+            block.style.left = `${left}px`;
+            block.style.width = `${width}px`;
+            if (clip.id === currentId) block.classList.add("current");
+            if (CLIP_COLORS[clip.color]) block.style.setProperty("--clip-color", CLIP_COLORS[clip.color]);
+            if (width < 28) block.classList.add("narrow");
+            else if (width < 80) block.classList.add("small");
+            items.push(block);
+        }
+        blocks.replaceChildren(...items);
+        // Shortened once they're laid out (what fits is the block's own width).
+        for (const block of items) {
+            const name = block.firstChild, room = parseFloat(block.style.width) - 20;
+            if (!block.classList.contains("narrow")) name.textContent = fitName(name.textContent, room);
+        }
+    }
+    function drawPlayhead() {
+        const seconds = origin() + (dragging && dragging.id === currentId ? dragging.at : local);
+        const px = x(dragging && viewer === "source" ? dragging.seconds : seconds);
+        playhead.style.transform = `translateX(${Math.round(px)}px)`;
+        playhead.hidden = !currentId || px < -1 || px > strip.clientWidth + 1;
+    }
+    // Where a press would land, before pressing: a line and its time (and,
+    // over the whole tape, which clip).
+    function drawHover() {
+        if (hoverX === null || dragging || !clips.length || !currentId && viewer !== "source") {
+            hoverLine.hidden = true;
+            return;
+        }
+        const rect = strip.getBoundingClientRect();
+        const px = Math.min(Math.max(hoverX - rect.left, 0), rect.width);
+        const seconds = secondsAt(hoverX);
+        const long = span() >= 3600;
+        const at = locate(seconds);
+        const clip = viewer === "source" && at ? clips.find(c => c.id === at.id) : null;
+        hoverTime.textContent = clip ? `${clockText(seconds, long)} · ${clip.name}` : clockText(seconds, long);
+        hoverLine.style.transform = `translateX(${Math.round(px)}px)`;
+        hoverLine.classList.toggle("flip", px > rect.width - 260);
+        hoverLine.hidden = false;
+    }
+    function draw() {
+        drawRuler(); drawBlocks(); drawPlayhead(); drawHover();
+        for (const fn of onChange) fn();
+    }
+
+    // Zooms by `factor` (<1 in, >1 out) around a time on the strip.
+    function zoom(factor, around) {
+        if (!clips.length) return;
+        const [from, to] = shown(), width = to - from, full = span();
+        const next = Math.min(Math.max(width * factor, Math.min(2, full)), full);
+        if (next >= full - 1e-6) {
+            view = null;
+            wholeTape = viewer === "source";
+        } else {
+            const start = Math.min(Math.max(around - (around - from) * next / width, 0), full - next);
+            view = [start, start + next];
+        }
+        draw();
+    }
+    const playheadSeconds = () => origin() + local;
+    $("zoom-in").addEventListener("click", () => {
+        const [from, to] = shown(), at = playheadSeconds();
+        zoom(0.5, at >= from && at <= to ? at : (from + to) / 2);
+    });
+    $("zoom-out").addEventListener("click", () => {
+        const [from, to] = shown(), at = playheadSeconds();
+        zoom(2, at >= from && at <= to ? at : (from + to) / 2);
+    });
+    $("zoom-fit").addEventListener("click", () => zoom(Infinity, 0));
+
+    // Keeps the playhead on screen while playing, and the chosen clip on
+    // screen when it changes, without undoing a zoom.
+    function follow(seconds, margin = 0.1) {
+        if (!view) return;
+        const [from, to] = view, width = to - from;
+        if (seconds < from || seconds > to) {
+            const start = Math.min(Math.max(seconds - width * margin, 0), Math.max(span() - width, 0));
+            view = [start, start + width];
+        }
+    }
+
+    function seek(target, final) {
+        if (!target) return;
+        clearTimeout(seekTimer);
+        const go = () => send("seek_to", {id: target.id, ms: Math.round(target.at * 1000)});
+        // Dragging inside the playing clip seeks as it goes; onto another
+        // clip, only where the drag ends - every clip crossed would be
+        // opened otherwise.
+        if (final) go();
+        else if (target.id === currentId) seekTimer = setTimeout(go, 60);
+    }
+    strip.addEventListener("pointerdown", e => {
+        if (e.button !== 0 || !clips.length) return;
+        strip.setPointerCapture(e.pointerId);
+        const seconds = secondsAt(e.clientX);
+        dragging = {seconds, ...locate(seconds)};
+        strip.classList.add("dragging");
+        drawPlayhead();
+        drawHover();
+        seek(dragging, false);
+    });
+    strip.addEventListener("pointermove", e => {
+        hoverX = e.clientX;
+        if (!dragging) { drawHover(); return; }
+        const seconds = secondsAt(e.clientX);
+        dragging = {seconds, ...locate(seconds)};
+        drawPlayhead();
+        seek(dragging, false);
+    });
+    const release = () => {
+        if (!dragging) return;
+        const target = dragging;
+        dragging = null;
+        strip.classList.remove("dragging");
+        if (target.id === currentId) local = target.at;
+        seek(target, true);
+        drawPlayhead();
+        drawHover();
+    };
+    // Right-click: the menu for the clip under the pointer (dailies.js clipMenu).
+    strip.addEventListener("contextmenu", e => {
+        e.preventDefault();
+        const target = clips.length ? locate(secondsAt(e.clientX)) : null;
+        if (target) clipMenu(target.id, e.clientX, e.clientY);
+    });
+    strip.addEventListener("pointerup", release);
+    strip.addEventListener("pointercancel", release);
+    strip.addEventListener("pointerleave", () => { hoverX = null; drawHover(); });
+
+    // Alt+scroll zooms around the pointer; scrolling (or Shift+scroll, or a
+    // sideways swipe) pans. A plain scroll over a strip with nothing to pan
+    // is left to the page.
+    strip.addEventListener("wheel", e => {
+        if (!clips.length) return;
+        const [from, to] = shown(), width = to - from, full = span();
+        if (e.altKey) {
+            e.preventDefault();
+            // Alt turns a vertical wheel into a horizontal one on some systems.
+            zoom(Math.exp((e.deltaY || e.deltaX) * 0.0015), secondsAt(e.clientX));
+            return;
+        }
+        if (!view) return;
+        e.preventDefault();
+        const pan = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        const shift = pan / Math.max(strip.clientWidth, 1) * width;
+        const start = Math.min(Math.max(from + shift, 0), Math.max(full - width, 0));
+        view = [start, start + width];
+        draw();
+    }, {passive: false});
+    new ResizeObserver(draw).observe(strip);
+
+    return {
+        onChange: fn => onChange.push(fn),
+        setTape(rows) {
+            clips = rows || [];
+            layout();
+            if (view && view[1] > span()) view = null;
+            if (!view) view = opening();
+            draw();
+        },
+        setViewer(value) {
+            if (value === viewer) return;
+            viewer = value;
+            view = opening();
+            draw();
+        },
+        setCurrent(id) {
+            if (id === currentId) return;
+            currentId = id;
+            local = 0;
+            localLength = 0;
+            if (viewer === "clip") view = null;
+            else if (!view) view = opening();
+            else if (index() >= 0) follow(starts[index()], BEFORE / (BEFORE + AFTER + 1));
+            draw();
+        },
+        setPlaying(value) { playing = value; },
+        setPosition(ms, durationMs) {
+            local = Math.max(0, ms / 1000);
+            const length = durationMs > 0 ? durationMs / 1000 : 0;
+            if (length && Math.abs(length - localLength) > 0.05) {
+                localLength = length;
+                if (viewer === "clip") { draw(); }
+            }
+            if (playing && !dragging) follow(origin() + local);
+            if (view && playing) { drawRuler(); drawBlocks(); }
+            drawPlayhead();
+            for (const fn of onChange) fn();
+        },
+        // "00:12 / 01:40", in the strip's own terms.
+        time() {
+            if (!currentId) return "00:00 / 00:00";
+            const long = span() >= 3600;
+            return `${clockText(origin() + local, long)} / ${clockText(span(), long)}`;
+        },
+        info() {
+            if (viewer !== "source") return "";
+            const i = index();
+            return clips.length ? `${clips.length} clip${clips.length === 1 ? "" : "s"} · ${clockText(total, total >= 3600)}`
+                + (i >= 0 ? ` · clip ${i + 1}` : "") : "";
+        },
+        localSeconds: () => local,
+    };
+})();
+
+const Transcript = (() => {
+    const {el, send} = Buddy;
+    const $ = id => document.getElementById(id);
+    const body = $("transcript-body"), status = $("transcript-status"), menu = $("transcript-language");
+    let clipId = null, words = [], lastIndex = -1, scrolledAt = 0, menuKey = "";
+    body.addEventListener("wheel", () => { scrolledAt = performance.now(); }, {passive: true});
+    // The language spoken: detected, named, or two or more ticked under
+    // "Mixed languages..." (the Subtitles tool's picker) - the page hears
+    // the clip again in it.
+    const change = $("transcript-mixed");
+    let shown = {language: "", mixed: [], spoken: []};
+    function pickMixed() {
+        Buddy.pickLanguages({
+            title: "Languages spoken",
+            hint: "Tick every language spoken in these clips. Each part is transcribed in its own – choosing only the ones really there keeps short replies from being mistaken.",
+            entries: shown.spoken, selected: shown.mixed, min: 2,
+        }).then(codes => {
+            if (codes) send("transcript_mixed", {codes});
+            else menu.value = shown.language;
+        });
+    }
+    menu.onchange = () => {
+        menu.blur();
+        if (menu.value === "mixed" && shown.mixed.length < 2) pickMixed();
+        else send("transcript_language", {language: menu.value});
+    };
+    change.onclick = pickMixed;
+    function drawMenu(data) {
+        const options = data.languages || [];
+        const key = JSON.stringify(options);
+        if (key !== menuKey) {
+            menuKey = key;
+            menu.replaceChildren(...options.map(o => new Option(o.label, o.value)));
+        }
+        shown = {language: data.language || "", mixed: data.mixed || [], spoken: data.spoken || []};
+        menu.value = shown.language;
+        menu.disabled = !data.on;
+        change.hidden = shown.language !== "mixed" || !data.on;
+    }
+
+    function wordsOf(segment) {
+        const list = segment.words?.length ? segment.words
+            : [{start: segment.start, end: segment.end, word: segment.text || ""}];
+        return list.map(w => ({start: +w.start || 0, end: +w.end || 0, text: String(w.word || "")}));
+    }
+    function append(segment) {
+        const line = el("span.segment");
+        for (const w of wordsOf(segment)) {
+            const span = el("span.word.ahead", {text: w.text});
+            span.addEventListener("click", () => { if (clipId) send("seek_to", {id: clipId, ms: Math.round(w.start * 1000)}); });
+            w.el = span;
+            words.push(w);
+            line.append(span);
+        }
+        body.querySelector(".transcript-empty")?.remove();
+        body.append(line);
+        lastIndex = -1;
+        mark(Strip.localSeconds());
+    }
+    function empty(text) {
+        body.replaceChildren(el("div.transcript-empty.muted.small", {text}));
+    }
+    // Spoken, now, and still to come: the text reads as if it were being
+    // written while the clip plays, and all of it can still be read ahead.
+    function mark(seconds) {
+        if (!words.length) return;
+        let i = words.findLastIndex(w => w.start <= seconds + 0.05);
+        if (i === lastIndex) return;
+        const lo = Math.min(i, lastIndex), hi = Math.max(i, lastIndex);
+        for (let k = Math.max(lo, 0); k <= hi && k < words.length; k++) {
+            words[k].el.className = `word ${k < i ? "spoken" : k === i ? "now" : "ahead"}`;
+        }
+        if (lastIndex === -1) {
+            words.forEach((w, k) => { w.el.className = `word ${k < i ? "spoken" : k === i ? "now" : "ahead"}`; });
+        }
+        lastIndex = i;
+        if (i >= 0 && performance.now() - scrolledAt > 4000) words[i].el.scrollIntoView({block: "nearest"});
+    }
+
+    return {
+        set(data) {
+            const fresh = data.id !== clipId || !data.segments.length || data.segments.length !== body.querySelectorAll(".segment").length;
+            clipId = data.id;
+            $("transcribe-on").checked = !!data.on;
+            $("transcript-to-log").disabled = !data.segments.length;
+            drawMenu(data);
+            const count = data.segments.reduce((n, s) => n + wordsOf(s).length, 0);
+            // Heard as what: so a wrong detection shows, beside the menu that corrects it.
+            const heard = data.heard && !data.language ? ` · heard as ${data.heard}` : "";
+            status.textContent = !data.id ? "" : !data.on ? "Off" :
+                data.status === "running" ? "Transcribing…" :
+                data.status === "done" ? (count ? `${count} words${heard}` : "No speech found") :
+                data.status === "error" ? "Couldn't transcribe" : "";
+            if (fresh) {
+                words = []; lastIndex = -1;
+                body.replaceChildren();
+                for (const segment of data.segments) append(segment);
+            }
+            if (!data.segments.length) {
+                empty(!data.id ? "Choose a clip to see what's said in it." :
+                    data.message ? data.message :
+                    !data.on ? "Transcription is off. Tick Transcribe clips to have each clip's speech written out here." :
+                    data.status === "running" ? "Listening…" :
+                    data.status === "done" ? "No speech in this clip." : "");
+            }
+        },
+        add(data) {
+            if (data.id !== clipId) return;
+            append(data.segment);
+            $("transcript-to-log").disabled = false;
+        },
+        time: seconds => mark(seconds),
+    };
+})();

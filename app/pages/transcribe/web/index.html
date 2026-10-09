@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Subtitles</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="textplus.css">
+    <link rel="stylesheet" href="transcribe.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page">
+    <header class="page-head">
+        <h1 class="page-title">Subtitles</h1>
+        <span class="timeline" id="timeline"></span>
+        <button type="button" class="btn ghost icon" data-action="refresh_timeline" id="refresh" title="Read the timeline again"></button>
+    </header>
+
+    <nav class="tabs" role="tablist" id="tabs">
+        <button type="button" role="tab" data-tab="subtitles">Transcribe</button>
+        <button type="button" role="tab" data-tab="translate">Translate</button>
+        <button type="button" role="tab" data-tab="convert">Subtitle conversion</button>
+        <button type="button" role="tab" data-tab="style">Font styling</button>
+        <button type="button" role="tab" data-tab="layout">Timeline layout</button>
+        <button type="button" role="tab" data-tab="wordbyword">Word-by-word</button>
+        <button type="button" role="tab" data-tab="animation">Timeline animation</button>
+        <button type="button" role="tab" data-tab="words">Custom animation</button>
+        <button type="button" role="tab" data-tab="setup" class="end">Setup <i class="badge-dot" id="setup-dot" hidden></i></button>
+    </nav>
+
+    <section class="card jobbar" id="jobbar" hidden>
+        <div class="row">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="stage" id="stage"></span>
+            <div class="spacer"></div>
+            <span class="pct" id="pct"></span>
+            <button type="button" class="btn" id="stop">Stop</button>
+        </div>
+        <div class="bar" id="bar"><i></i></div>
+    </section>
+
+    <!-- ----------------------------------------------------- subtitles -->
+    <section class="panel" id="panel-subtitles">
+        <div class="card callout" id="not-ready" hidden>
+            <div class="callout-text">
+                <b>Set up transcription first</b>
+                <span class="muted" id="not-ready-why"></span>
+            </div>
+            <button type="button" class="btn accent" data-goto="setup">Open Setup</button>
+        </div>
+
+        <section class="card opts">
+            <div class="grid">
+                <label class="lbl">Model
+                    <select class="field" id="model"></select>
+                    <span class="hint" id="model-tip"></span>
+                </label>
+                <label class="lbl">Language spoken
+                    <select class="field" id="language"></select>
+                    <span class="hint" id="language-tip"></span>
+                </label>
+                <label class="lbl narrow">Characters per line
+                    <input class="field num" id="max-chars" inputmode="numeric" maxlength="2" autocomplete="off">
+                    <span class="hint">1–60. 42 is the usual; 1 gives each word its own subtitle.</span>
+                </label>
+                <div class="lbl narrow">Per subtitle
+                    <div class="segmented" id="max-lines">
+                        <button type="button" data-value="1">1 line</button>
+                        <button type="button" data-value="2">2 lines</button>
+                    </div>
+                </div>
+            </div>
+            <label class="lbl" id="hotwords-row">Names and terms to spell right
+                <input class="field" id="hotwords" spellcheck="false" autocomplete="off"
+                       placeholder="e.g. DaVinci Resolve, Buddy, your guests' names">
+                <span class="hint">Used by the Whisper models. Parakeet has no way to take hints.</span>
+            </label>
+            <div class="check-row" id="speakers-row" hidden>
+                <label class="check"><input type="checkbox" id="speaker-names"> Name who's speaking</label>
+                <span class="hint">Each subtitle is one person's words either way. Ticked, the first line of each turn starts with their name – "Speaker 1:", or what you named them in Resolve.</span>
+            </div>
+            <div class="check-row">
+                <label class="check"><input type="checkbox" id="place-on-timeline"> Add to the timeline when done</label>
+                <span class="hint">Onto subtitle track 1, so ST1 has to be the destination track in Resolve (its patch lit red in the track headers). If it already has subtitles, you're asked before they're replaced. Unticked, the subtitles are saved as an SRT file only.</span>
+            </div>
+            <div class="run-row">
+                <button type="button" class="btn accent big" data-action="run" id="run">Transcribe timeline</button>
+                <span class="muted small" id="run-note">Renders the timeline's audio, transcribes it on this computer, and puts the subtitles on subtitle track 1.</span>
+            </div>
+        </section>
+
+        <section class="card result" id="result-transcribe" hidden>
+            <div class="result-head"><span class="result-icon" id="rt-icon"></span><b id="rt-message"></b></div>
+            <div class="muted" id="rt-summary"></div>
+            <div class="row wrap">
+                <button type="button" class="btn accent" data-action="place_last" id="rt-place"
+                        title="Puts these subtitles on subtitle track 1 of the timeline they were made from">Add to timeline</button>
+                <button type="button" class="btn" data-action="save_srt" id="rt-save">Save SRT…</button>
+                <button type="button" class="btn" data-goto="convert" id="rt-convert"
+                        title="Turns each subtitle into its own Text+ clip, to style, place and animate on the tabs that follow">Convert to Text+…</button>
+                <button type="button" class="btn ghost" data-goto="translate" id="rt-translate">Translate it…</button>
+            </div>
+        </section>
+    </section>
+
+    <!-- ----------------------------------------------------- translate -->
+    <section class="panel" id="panel-translate" hidden>
+        <section class="card opts">
+            <label class="lbl">Translate with
+                <select class="field" id="engine"></select>
+                <span class="hint" id="engine-status"></span>
+            </label>
+            <div class="lbl">Into
+                <div class="targets" id="targets"></div>
+                <div><button type="button" class="btn" id="choose-targets">Choose languages…</button></div>
+            </div>
+            <div class="lbl">Save to
+                <div class="row">
+                    <span class="field path" id="folder"></span>
+                    <button type="button" class="btn" data-action="choose_folder">Browse…</button>
+                </div>
+            </div>
+            <label class="check"><input type="checkbox" id="tr-timeline"> Also make a new timeline with a subtitle track for each language</label>
+            <label class="check"><input type="checkbox" id="tr-auto"> Translate automatically after each transcription</label>
+            <div class="row wrap">
+                <button type="button" class="btn accent" data-action="translate_last" id="tr-last">Translate last transcript</button>
+                <button type="button" class="btn" data-action="translate_srt" id="tr-srt">Translate an SRT file…</button>
+                <div class="spacer"></div>
+                <button type="button" class="btn ghost" data-action="show_files" id="tr-show">Show files</button>
+            </div>
+            <p class="muted small note">Each language becomes its own SRT file. With the new timeline on, Buddy also copies
+                the current timeline as "&lt;name&gt; (Subtitles)" with every language on its own subtitle track – ready to
+                export them all from Deliver. The timeline you're on isn't changed.</p>
+        </section>
+
+        <section class="card result" id="result-translate" hidden>
+            <div class="result-head"><span class="result-icon" id="rtr-icon"></span><b id="rtr-message"></b></div>
+            <ul class="files" id="rtr-files"></ul>
+        </section>
+    </section>
+
+    <!-- ------------------------------------------------------- convert -->
+    <section class="panel" id="panel-convert" hidden>
+        <section class="card opts">
+            <span class="section-title">Subtitles to Text+</span>
+            <p class="muted">Turns each subtitle on a subtitle track into its own Text+ clip on a video track, at the
+                same time – ready to style, place and animate on the tabs that follow.</p>
+            <div class="row wrap conv-row">
+                <label class="lbl">From subtitle track <select class="field" id="sub-track"></select></label>
+                <span class="conv-arrow" id="conv-arrow"></span>
+                <label class="lbl">To video track <select class="field" id="target-track"></select></label>
+            </div>
+            <div class="run-row">
+                <button type="button" class="btn accent big" data-action="convert" id="convert">Convert subtitles to Text+</button>
+            </div>
+            <p class="muted small note">Titles are placed from a Text+ in your Media Pool, for exact timing. If the
+                project has none, Buddy adds one the first time (a "Buddy Text+" bin) – nothing to set up.
+                The video track suggested is the topmost empty one.</p>
+        </section>
+    </section>
+
+    <!-- The Text+ tabs (textplus.js, canvas.js; text_animator/text_plus.py). -->
+    <!-- --------------------------------------------------------- style -->
+    <section class="panel" id="panel-style" hidden>
+        <!-- Wide timelines: looks across the top, the preview beside the controls. Tall (9:16) ones:
+             the preview down the left, everything else beside it. textplus.js sets .tall. -->
+        <div class="style-layout" id="style-layout">
+            <div class="style-looks">
+                <div class="row">
+                    <span class="section-title">Looks</span>
+                    <span class="muted small" id="looks-hint">Start from one, then adjust it below</span>
+                    <div class="spacer"></div>
+                    <button type="button" class="btn" id="saved-looks" aria-haspopup="menu">Saved looks</button>
+                </div>
+                <div class="looks" id="looks"></div>
+                <div class="row look-state" id="look-state">
+                    <span class="muted small" id="look-now"></span>
+                    <div class="spacer"></div>
+                    <button type="button" class="btn ghost" id="update-look" hidden></button>
+                    <button type="button" class="btn" id="save-look">Save look…</button>
+                </div>
+            </div>
+
+            <div class="style-stage" id="style-stage">
+                <div class="preview" id="preview">
+                    <svg class="safe-shade" id="safe-shade" aria-hidden="true"></svg>
+                    <span class="sample" id="sample"></span>
+                    <span class="preview-tag" id="look-tag" translate="no"></span>
+                </div>
+                <div class="row wrap stage-bar">
+                    <div class="segmented" id="backdrop" role="group" aria-label="Behind the text">
+                        <button type="button" data-value="dark">Dark</button>
+                        <button type="button" data-value="light">Light</button>
+                        <button type="button" data-value="clear">Clear</button>
+                    </div>
+                    <div class="spacer"></div>
+                    <label class="row safe-pick" id="safe-pick"><span class="muted small">App buttons</span>
+                        <select class="field" id="style-safe" aria-label="Show where an app's buttons go"></select></label>
+                </div>
+                <p class="muted small note">Approximate – Resolve draws the real thing.</p>
+            </div>
+
+            <div class="style-controls">
+                <section class="card layers">
+                    <div class="layer-tabs" role="tablist" id="layer-tabs">
+                        <div class="layer-tab" data-layer="font">
+                            <button type="button" role="tab">Text</button>
+                            <input type="checkbox" class="switch" data-toggle-input="font_on" aria-label="Set the text's font, size and colour"
+                                   title="Off: the clips keep their own font, size and colour">
+                        </div>
+                        <div class="layer-tab" data-layer="outline">
+                            <button type="button" role="tab">Outline</button>
+                            <input type="checkbox" class="switch" data-toggle-input="outline_on" aria-label="Outline">
+                        </div>
+                        <div class="layer-tab" data-layer="shadow">
+                            <button type="button" role="tab">Shadow</button>
+                            <input type="checkbox" class="switch" data-toggle-input="shadow_on" aria-label="Shadow">
+                        </div>
+                        <div class="layer-tab" data-layer="background">
+                            <button type="button" role="tab">Box</button>
+                            <input type="checkbox" class="switch" data-toggle-input="background_on" aria-label="Box behind the text">
+                        </div>
+                    </div>
+                    <div class="layer-body" data-layer-body="font" data-toggle="font_on">
+                        <div class="srow"><span>Font</span>
+                            <div class="row">
+                                <select class="field grow" id="font" translate="no"
+                                        title="Resolve's own fonts, once Buddy reaches Resolve. A font installed while Resolve was open shows up after Resolve restarts."></select>
+                                <button type="button" class="btn ghost icon" data-tp="reset_font" id="reset-font"
+                                        title="Reset to Arial Regular, size 0.08 – applied straight away to the clips in Apply to"></button>
+                            </div>
+                        </div>
+                        <div data-slider="font_size"></div>
+                        <div class="srow"><span>Colour</span><div class="colours" data-color="font_color" data-quick="#FFFFFF #FFE600 #000000"></div></div>
+                    </div>
+                    <div class="layer-body" data-layer-body="outline" data-toggle="outline_on" hidden>
+                        <div class="srow"><span>Colour</span><div class="colours" data-color="outline_color" data-quick="#000000 #FFFFFF"></div></div>
+                        <div data-slider="outline_thickness"></div>
+                        <div data-slider="outline_opacity"></div>
+                    </div>
+                    <div class="layer-body" data-layer-body="shadow" data-toggle="shadow_on" hidden>
+                        <div class="srow"><span>Colour</span><div class="colours" data-color="shadow_color" data-quick="#000000"></div></div>
+                        <div data-slider="shadow_offset_x"></div>
+                        <div data-slider="shadow_offset_y"></div>
+                        <div data-slider="shadow_blur"></div>
+                        <div data-slider="shadow_opacity"></div>
+                    </div>
+                    <div class="layer-body" data-layer-body="background" data-toggle="background_on" hidden>
+                        <div class="srow"><span>Colour</span><div class="colours" data-color="background_color" data-quick="#000000 #FFFFFF"></div></div>
+                        <div data-slider="background_opacity"></div>
+                        <div data-slider="background_corner_radius"></div>
+                        <div data-slider="background_extend_horizontal"></div>
+                        <div data-slider="background_extend_vertical"></div>
+                    </div>
+                </section>
+
+                <section class="card box apply-bar">
+                    <div class="row wrap scope-row">
+                        <span class="muted small">Apply to</span>
+                        <select class="field" data-scope-select="style_scope" aria-label="Apply to">
+                            <option value="timeline">Entire timeline</option>
+                            <option value="selected">Selected clips</option>
+                            <option value="playhead">Under the playhead</option>
+                            <option value="track">Specific track</option>
+                        </select>
+                        <label class="row" data-scope-track="style_scope"><span class="muted small">Video track</span> <select class="field" id="style-track"></select></label>
+                        <div class="spacer"></div>
+                        <button type="button" class="btn accent big" data-tp="apply_style"
+                                title="Outline, shadow and box that are switched off are turned off where Font styling switched them on">Apply style</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- -------------------------------------------------------- layout -->
+    <section class="panel" id="panel-layout" hidden>
+        <section class="card box canvas-card">
+            <div class="row canvas-head">
+                <span class="section-title">Live placement</span>
+                <span class="muted small">Drag to move, drag a corner to resize, arrow keys to nudge; hold Alt while dragging to place without snapping. Changes go to Resolve when you let go.</span>
+                <div class="spacer"></div>
+                <div class="history"><button type="button" class="btn ghost icon" data-undo title="Undo (Ctrl+Z)"></button><button type="button" class="btn ghost icon" data-redo title="Redo (Ctrl+Shift+Z)"></button></div>
+                <button type="button" class="btn ghost" data-guides>Guides &amp; snapping</button>
+            </div>
+            <div class="canvas-host" id="canvas-layout"></div>
+        </section>
+        <section class="card box">
+            <div class="row wrap gap">
+                <span class="section-title">Apply to</span>
+                <div class="row wrap gap scope-row">
+                    <select class="field" data-scope-select="layout_scope" aria-label="Apply to">
+                        <option value="timeline">Entire timeline</option>
+                        <option value="selected">Selected clips</option>
+                        <option value="playhead">Under the playhead</option>
+                        <option value="track">Specific track</option>
+                    </select>
+                    <label class="lbl" data-scope-track="layout_scope">Video track <select class="field" id="layout-track"></select></label>
+                </div>
+            </div>
+            <p class="muted small note">Which Text+ clips Apply position and Apply bounding change.</p>
+        </section>
+        <div class="tools">
+            <section class="card box">
+                <span class="section-title">Apply position</span>
+                <p class="muted small note">Copies the position of each clip under the playhead onto the other Text+ clips on
+                    its video track that Apply to chooses. A track with nothing under the playhead is left alone.</p>
+                <button type="button" class="btn accent" data-tp="apply_position" id="apply-position">Apply position</button>
+            </section>
+            <section class="card box">
+                <span class="section-title">Bounding</span>
+                <p class="muted small note">Two lines to drag in the preview (e.g. onto a safe zone's edges). Applying
+                    resizes the text of each clip Apply to chooses to fill the space between them, and centres it there.
+                    Turning them on also stacks clips under the playhead together vertically.</p>
+                <label class="check"><input type="checkbox" id="bounding-on"> Show bounding lines</label>
+                <button type="button" class="btn accent" data-tp="apply_bounding" id="apply-bounding">Apply bounding</button>
+            </section>
+        </div>
+    </section>
+
+    <!-- --------------------------------------------------- word-by-word -->
+    <section class="panel" id="panel-wordbyword" hidden>
+        <section class="card box canvas-card">
+            <div class="row canvas-head">
+                <span class="section-title">Word preview</span>
+                <span class="muted small">For animations with one word per Text+ clip. Drag across empty space to select some of the words; Shift-click adds one.</span>
+                <div class="spacer"></div>
+                <div class="history"><button type="button" class="btn ghost icon" data-undo title="Undo (Ctrl+Z)"></button><button type="button" class="btn ghost icon" data-redo title="Redo (Ctrl+Shift+Z)"></button></div>
+                <button type="button" class="btn ghost" data-guides>Guides &amp; snapping</button>
+            </div>
+            <div class="canvas-host" id="canvas-wordbyword"></div>
+        </section>
+        <section class="card box">
+            <span class="section-title">Stack on their own tracks</span>
+            <p class="muted small note">Copies the timeline with each Text+ clip selected on Resolve's timeline on a
+                video track of its own, lasting until the playhead, so the words build up and stay on screen
+                together. The copy opens in Resolve; this timeline isn't changed. Needs DaVinci Resolve 21.0.4 or
+                later.</p>
+            <p class="warn note">With several Text+ clips selected, don't click into Resolve's Inspector Text box (it
+                shows --): Resolve writes that empty box into every selected clip, and their words are gone.</p>
+            <div class="row">
+                <div class="spacer"></div>
+                <button type="button" class="btn accent" data-tp="stack_words" id="stack-words">Stack selected clips</button>
+            </div>
+        </section>
+        <section class="card box">
+            <span class="section-title">Space as one</span>
+            <p class="muted small note">Sets single-word Text+ clips out the way one Text+ clip would show them as a
+                sentence: the same space between words and between lines, in the order the clips start on the
+                timeline. Each word keeps its own font and size, and the words stay centred where they are.</p>
+            <div class="row wrap gap wbw-controls">
+                <div class="lbl">Lines <div class="segmented" id="wbw-lines"></div></div>
+                <label class="lbl">Apply to <select class="field" id="wbw-scope" aria-label="Apply to">
+                    <option value="playhead">Under the playhead</option>
+                    <option value="timeline">Entire timeline</option>
+                </select></label>
+            </div>
+            <div class="wbw-spacing" data-slider="wbw_spacing"></div>
+            <p class="muted small note">Word spacing: 1 is the space one Text+ clip would put between the words, 0 has
+                them touching, 2 is twice as wide. Double-click the slider to go back to 1.</p>
+            <p class="muted small note" id="wbw-note"></p>
+            <div class="row">
+                <div class="spacer"></div>
+                <button type="button" class="btn accent" id="space-words">Space words</button>
+            </div>
+        </section>
+    </section>
+
+    <!-- --------------------------------------------------------- words -->
+    <section class="panel" id="panel-words" hidden>
+        <section class="card box canvas-card">
+            <div class="row canvas-head">
+                <span class="section-title">Word preview</span>
+                <span class="muted small">For subtitles split one word per Text+ clip. Drag across empty space to select several words; Shift-click adds one.</span>
+                <div class="spacer"></div>
+                <div class="history"><button type="button" class="btn ghost icon" data-undo title="Undo (Ctrl+Z)"></button><button type="button" class="btn ghost icon" data-redo title="Redo (Ctrl+Shift+Z)"></button></div>
+                <button type="button" class="btn ghost" data-guides>Guides &amp; snapping</button>
+            </div>
+            <div class="canvas-host" id="canvas-words"></div>
+        </section>
+        <section class="card box">
+            <span class="section-title">Layout presets</span>
+            <div class="presets" id="presets"></div>
+            <div class="row">
+                <span class="muted small" id="preset-note"></span>
+                <div class="spacer"></div>
+                <button type="button" class="btn accent" id="apply-layout">Apply layout</button>
+            </div>
+        </section>
+    </section>
+
+    <!-- ----------------------------------------------------- animation -->
+    <section class="panel" id="panel-animation" hidden>
+        <section class="card box">
+            <span class="section-title">Animation</span>
+            <div class="presets" id="anim-presets"></div>
+            <div class="row wrap gap">
+                <div class="lbl" id="direction-row">Slide from <div class="segmented" id="anim-direction"></div></div>
+                <div class="lbl">Speed <div class="segmented" id="anim-speed"></div></div>
+            </div>
+        </section>
+        <section class="card box">
+            <span class="section-title">Apply to</span>
+            <div class="row wrap gap">
+                <div class="row wrap gap scope-row">
+                    <select class="field" data-scope-select="anim_scope" aria-label="Apply to">
+                        <option value="timeline">Entire timeline</option>
+                        <option value="selected">Selected clips</option>
+                        <option value="playhead">Under the playhead</option>
+                        <option value="track">Specific track</option>
+                    </select>
+                    <label class="lbl" data-scope-track="anim_scope">Video track <select class="field" id="anim-track"></select></label>
+                </div>
+                <button type="button" class="btn accent" data-tp="apply_animation">Apply animation</button>
+            </div>
+            <div class="row wrap">
+                <button type="button" class="btn danger" id="remove-anims">Remove animations…</button>
+                <div class="spacer"></div>
+                <div class="history labelled"><button type="button" class="btn" data-undo>Undo</button><button type="button" class="btn" data-redo>Redo</button></div>
+            </div>
+        </section>
+        <details class="card box diag">
+            <summary><span class="section-title">Diagnostics</span></summary>
+            <p class="muted small note">To help debug an animation: click the clip on the timeline, switch Resolve to the
+                Fusion page, select the TextPlus node (or a modifier) in the Flow view, then dump it. Its full settings are
+                saved to your Desktop as a JSON file you can share.</p>
+            <div><button type="button" class="btn" data-tp="dump">Dump selected node settings</button></div>
+        </details>
+    </section>
+
+    <!-- --------------------------------------------------------- setup -->
+    <section class="panel" id="panel-setup" hidden>
+        <section class="card setup-card">
+            <div class="row">
+                <span class="section-title">This computer</span>
+                <div class="spacer"></div>
+                <button type="button" class="btn ghost" data-action="rescan" id="rescan">Check again</button>
+            </div>
+            <div id="hardware" class="muted"></div>
+        </section>
+
+        <section class="card setup-card">
+            <span class="section-title">Transcription engine</span>
+            <div class="engine-row">
+                <div class="engine-text">
+                    <b id="env-status"></b>
+                    <span class="hint" id="env-hint"></span>
+                </div>
+                <button type="button" class="btn accent" data-action="install_env" id="env-button">Install engine</button>
+            </div>
+        </section>
+
+        <section class="card setup-card">
+            <div class="row">
+                <span class="section-title">Speech models</span>
+                <div class="spacer"></div>
+                <button type="button" class="btn ghost" id="pick-model" title="Point Buddy at a faster-whisper model another app already downloaded">Use a model folder…</button>
+            </div>
+            <p class="hint" id="models-hint"></p>
+            <div class="models" id="models"></div>
+        </section>
+
+        <section class="card setup-card">
+            <div class="row">
+                <span class="section-title">Translation models</span>
+                <span class="chip">Optional</span>
+                <div class="spacer"></div>
+                <button type="button" class="btn ghost" id="pick-tmodel" title="Point Buddy at a CTranslate2 NLLB-200 or MADLAD-400 model already on disk">Use a model folder…</button>
+            </div>
+            <p class="hint" id="tmodels-hint"></p>
+            <div class="models" id="tmodels"></div>
+        </section>
+    </section>
+
+    <details class="card activity" id="activity" hidden>
+        <summary><span class="section-title">Activity</span> <span class="muted small" id="activity-last"></span></summary>
+        <ol class="log" id="log"></ol>
+    </details>
+
+    <div class="card guides-pop" id="guides-pop" hidden></div>
+</main>
+<script src="canvas.js"></script>
+<script src="textplus.js"></script>
+<script src="transcribe.js"></script>
+</body>
+</html>

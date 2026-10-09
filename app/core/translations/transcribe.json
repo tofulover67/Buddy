@@ -1,0 +1,2983 @@
+{
+ "_comment": "Transcribe. English -> each language; see core/i18n.py.",
+ "Subtitles": {
+  "日本語": "字幕",
+  "Español": "Subtítulos",
+  "Deutsch": "Untertitel",
+  "Français": "Sous-titres",
+  "한국어": "자막",
+  "中文": "字幕",
+  "العربية": "الترجمة المرئية",
+  "Tiếng Việt": "Phụ đề"
+ },
+ "Translate": {
+  "日本語": "翻訳",
+  "Español": "Traducir",
+  "Deutsch": "Übersetzen",
+  "Français": "Traduire",
+  "한국어": "번역",
+  "中文": "翻译",
+  "العربية": "ترجمة",
+  "Tiếng Việt": "Dịch"
+ },
+ "Set up transcription first": {
+  "日本語": "先に文字起こしを設定してください",
+  "Español": "Configura primero la transcripción",
+  "Deutsch": "Richten Sie zuerst die Transkription ein",
+  "Français": "Configurez d'abord la transcription",
+  "한국어": "먼저 받아쓰기를 설정하세요",
+  "中文": "请先设置转录",
+  "العربية": "أعدّ التفريغ النصي أولًا",
+  "Tiếng Việt": "Hãy thiết lập phiên âm trước"
+ },
+ "Open Setup": {
+  "日本語": "セットアップを開く",
+  "Español": "Abrir Configuración",
+  "Deutsch": "Einrichtung öffnen",
+  "Français": "Ouvrir la configuration",
+  "한국어": "설정 열기",
+  "中文": "打开设置",
+  "العربية": "فتح الإعداد",
+  "Tiếng Việt": "Mở Thiết lập"
+ },
+ "Model": {
+  "日本語": "モデル",
+  "Español": "Modelo",
+  "Deutsch": "Modell",
+  "Français": "Modèle",
+  "한국어": "모델",
+  "中文": "模型",
+  "العربية": "النموذج",
+  "Tiếng Việt": "Mô hình"
+ },
+ "Language spoken": {
+  "日本語": "話されている言語",
+  "Español": "Idioma hablado",
+  "Deutsch": "Gesprochene Sprache",
+  "Français": "Langue parlée",
+  "한국어": "말하는 언어",
+  "中文": "所说语言",
+  "العربية": "اللغة المنطوقة",
+  "Tiếng Việt": "Ngôn ngữ nói"
+ },
+ "Characters per line": {
+  "日本語": "1 行の文字数",
+  "Español": "Caracteres por línea",
+  "Deutsch": "Zeichen pro Zeile",
+  "Français": "Caractères par ligne",
+  "한국어": "줄당 글자 수",
+  "中文": "每行字符数",
+  "العربية": "عدد الأحرف في السطر",
+  "Tiếng Việt": "Số ký tự mỗi dòng"
+ },
+ "1–60. 42 is the usual; 1 gives each word its own subtitle.": {
+  "日本語": "1–60。通常は 42。1 にすると単語ごとに 1 つの字幕になります。",
+  "Español": "1–60. Lo habitual es 42; con 1, cada palabra tiene su propio subtítulo.",
+  "Deutsch": "1–60. Üblich sind 42; bei 1 bekommt jedes Wort einen eigenen Untertitel.",
+  "Français": "1–60. 42 est la valeur habituelle ; 1 donne à chaque mot son propre sous-titre.",
+  "한국어": "1–60. 보통 42입니다. 1로 하면 단어마다 자막이 하나씩 됩니다.",
+  "中文": "1–60。通常为 42；设为 1 时每个词单独成一条字幕。",
+  "العربية": "1–60. المعتاد 42؛ و1 يجعل لكل كلمة ترجمة خاصة بها.",
+  "Tiếng Việt": "1–60. Thường là 42; đặt 1 thì mỗi từ thành một phụ đề riêng."
+ },
+ "Per subtitle": {
+  "日本語": "1 つの字幕あたり",
+  "Español": "Por subtítulo",
+  "Deutsch": "Pro Untertitel",
+  "Français": "Par sous-titre",
+  "한국어": "자막당",
+  "中文": "每条字幕",
+  "العربية": "لكل ترجمة",
+  "Tiếng Việt": "Mỗi phụ đề"
+ },
+ "1 line": {
+  "日本語": "1 行",
+  "Español": "1 línea",
+  "Deutsch": "1 Zeile",
+  "Français": "1 ligne",
+  "한국어": "1줄",
+  "中文": "1 行",
+  "العربية": "سطر واحد",
+  "Tiếng Việt": "1 dòng"
+ },
+ "2 lines": {
+  "日本語": "2 行",
+  "Español": "2 líneas",
+  "Deutsch": "2 Zeilen",
+  "Français": "2 lignes",
+  "한국어": "2줄",
+  "中文": "2 行",
+  "العربية": "سطران",
+  "Tiếng Việt": "2 dòng"
+ },
+ "Names and terms to spell right": {
+  "日本語": "正しく表記したい名前や用語",
+  "Español": "Nombres y términos que deben escribirse bien",
+  "Deutsch": "Namen und Begriffe, die richtig geschrieben werden sollen",
+  "Français": "Noms et termes à bien orthographier",
+  "한국어": "정확히 써야 할 이름과 용어",
+  "中文": "需要拼写正确的名称和术语",
+  "العربية": "أسماء ومصطلحات يجب كتابتها بشكل صحيح",
+  "Tiếng Việt": "Tên và thuật ngữ cần viết đúng"
+ },
+ "e.g. DaVinci Resolve, Buddy, your guests' names": {
+  "日本語": "例: DaVinci Resolve、Buddy、ゲストの名前",
+  "Español": "p. ej., DaVinci Resolve, Buddy, los nombres de tus invitados",
+  "Deutsch": "z. B. DaVinci Resolve, Buddy, die Namen Ihrer Gäste",
+  "Français": "ex. : DaVinci Resolve, Buddy, les noms de vos invités",
+  "한국어": "예: DaVinci Resolve, Buddy, 게스트 이름",
+  "中文": "例如 DaVinci Resolve、Buddy、嘉宾姓名",
+  "العربية": "مثال: DaVinci Resolve، Buddy، أسماء ضيوفك",
+  "Tiếng Việt": "vd: DaVinci Resolve, Buddy, tên khách mời"
+ },
+ "Used by the Whisper models. Parakeet has no way to take hints.": {
+  "日本語": "Whisper モデルで使われます。Parakeet にはヒントを渡す方法がありません。",
+  "Español": "Lo usan los modelos Whisper. Parakeet no admite sugerencias.",
+  "Deutsch": "Wird von den Whisper-Modellen verwendet. Parakeet kann keine Hinweise aufnehmen.",
+  "Français": "Utilisé par les modèles Whisper. Parakeet ne peut pas recevoir d'indications.",
+  "한국어": "Whisper 모델에서 사용합니다. Parakeet는 힌트를 받을 수 없습니다.",
+  "中文": "由 Whisper 模型使用。Parakeet 无法接收提示。",
+  "العربية": "تستخدمه نماذج Whisper. لا يمكن لـ Parakeet تلقي تلميحات.",
+  "Tiếng Việt": "Được dùng bởi các mô hình Whisper. Parakeet không nhận được gợi ý."
+ },
+ "Transcribe timeline": {
+  "日本語": "タイムラインを文字起こし",
+  "Español": "Transcribir línea de tiempo",
+  "Deutsch": "Timeline transkribieren",
+  "Français": "Transcrire la timeline",
+  "한국어": "타임라인 받아쓰기",
+  "中文": "转录时间线",
+  "العربية": "تفريغ الخط الزمني",
+  "Tiếng Việt": "Phiên âm timeline"
+ },
+ "Transcribing…": {
+  "日本語": "文字起こし中…",
+  "Español": "Transcribiendo…",
+  "Deutsch": "Wird transkribiert…",
+  "Français": "Transcription…",
+  "한국어": "받아쓰는 중…",
+  "中文": "正在转录…",
+  "العربية": "جارٍ التفريغ…",
+  "Tiếng Việt": "Đang phiên âm…"
+ },
+ "Renders the timeline's audio, transcribes it on this computer, and puts the subtitles on subtitle track 1.": {
+  "日本語": "タイムラインのオーディオをレンダリングし、このコンピューターで文字起こしして、字幕を字幕トラック 1 に配置します。",
+  "Español": "Renderiza el audio de la línea de tiempo, lo transcribe en este equipo y pone los subtítulos en la pista de subtítulos 1.",
+  "Deutsch": "Rendert den Ton der Timeline, transkribiert ihn auf diesem Computer und legt die Untertitel auf Untertitelspur 1.",
+  "Français": "Rend l'audio de la timeline, le transcrit sur cet ordinateur et place les sous-titres sur la piste de sous-titres 1.",
+  "한국어": "타임라인의 오디오를 렌더링하고 이 컴퓨터에서 받아쓴 뒤 자막을 자막 트랙 1에 넣습니다.",
+  "中文": "渲染时间线的音频，在本机上转录，并将字幕放到字幕轨道 1。",
+  "العربية": "يصيّر صوت الخط الزمني، ويفرّغه على هذا الكمبيوتر، ويضع الترجمات على مسار الترجمة 1.",
+  "Tiếng Việt": "Kết xuất âm thanh của timeline, phiên âm trên máy này và đặt phụ đề lên track phụ đề 1."
+ },
+ "Save SRT…": {
+  "日本語": "SRT を保存…",
+  "Español": "Guardar SRT…",
+  "Deutsch": "SRT speichern…",
+  "Français": "Enregistrer le SRT…",
+  "한국어": "SRT 저장…",
+  "中文": "保存 SRT…",
+  "العربية": "حفظ SRT…",
+  "Tiếng Việt": "Lưu SRT…"
+ },
+ "Convert to Text+…": {
+  "日本語": "Text+ に変換…",
+  "Español": "Convertir a Text+…",
+  "Deutsch": "In Text+ umwandeln …",
+  "Français": "Convertir en Text+…",
+  "한국어": "Text+로 변환…",
+  "中文": "转换为 Text+…",
+  "العربية": "تحويل إلى Text+…",
+  "Tiếng Việt": "Chuyển thành Text+…"
+ },
+ "Turns each subtitle into its own Text+ clip, to style, place and animate on the tabs that follow": {
+  "日本語": "各字幕を個別の Text+ クリップに変換し、続くタブでスタイル設定、配置、アニメーションができるようにします",
+  "Español": "Convierte cada subtítulo en su propio clip Text+, para darle estilo, colocarlo y animarlo en las pestañas siguientes",
+  "Deutsch": "Macht aus jedem Untertitel einen eigenen Text+-Clip, zum Gestalten, Platzieren und Animieren auf den folgenden Tabs",
+  "Français": "Transforme chaque sous-titre en son propre clip Text+, à styliser, placer et animer dans les onglets suivants",
+  "한국어": "각 자막을 개별 Text+ 클립으로 바꿔 이어지는 탭에서 스타일, 배치, 애니메이션을 적용할 수 있게 합니다",
+  "中文": "将每条字幕转为独立的 Text+ 片段，可在后面的标签页中设置样式、放置和添加动画",
+  "العربية": "يحوّل كل ترجمة إلى مقطع Text+ خاص بها، لتنسيقه ووضعه وتحريكه في التبويبات التالية",
+  "Tiếng Việt": "Biến mỗi phụ đề thành một clip Text+ riêng, để định dạng, đặt vị trí và tạo hoạt ảnh ở các thẻ tiếp theo"
+ },
+ "Translate it…": {
+  "日本語": "翻訳する…",
+  "Español": "Traducirlo…",
+  "Deutsch": "Übersetzen…",
+  "Français": "Le traduire…",
+  "한국어": "번역하기…",
+  "中文": "翻译…",
+  "العربية": "ترجمته…",
+  "Tiếng Việt": "Dịch…"
+ },
+ "Translate with": {
+  "日本語": "翻訳方法",
+  "Español": "Traducir con",
+  "Deutsch": "Übersetzen mit",
+  "Français": "Traduire avec",
+  "한국어": "번역 방법",
+  "中文": "翻译方式",
+  "العربية": "الترجمة باستخدام",
+  "Tiếng Việt": "Dịch bằng"
+ },
+ "Into": {
+  "日本語": "翻訳先",
+  "Español": "A",
+  "Deutsch": "In",
+  "Français": "Vers",
+  "한국어": "대상 언어",
+  "中文": "译为",
+  "العربية": "إلى",
+  "Tiếng Việt": "Sang"
+ },
+ "Choose languages…": {
+  "日本語": "言語を選択…",
+  "Español": "Elegir idiomas…",
+  "Deutsch": "Sprachen wählen…",
+  "Français": "Choisir les langues…",
+  "한국어": "언어 선택…",
+  "中文": "选择语言…",
+  "العربية": "اختيار اللغات…",
+  "Tiếng Việt": "Chọn ngôn ngữ…"
+ },
+ "Save to": {
+  "日本語": "保存先",
+  "Español": "Guardar en",
+  "Deutsch": "Speichern in",
+  "Français": "Enregistrer dans",
+  "한국어": "저장 위치",
+  "中文": "保存到",
+  "العربية": "حفظ في",
+  "Tiếng Việt": "Lưu vào"
+ },
+ "Also make a new timeline with a subtitle track for each language": {
+  "日本語": "言語ごとの字幕トラックを持つ新しいタイムラインも作成する",
+  "Español": "Crear también una nueva línea de tiempo con una pista de subtítulos por idioma",
+  "Deutsch": "Außerdem eine neue Timeline mit einer Untertitelspur pro Sprache erstellen",
+  "Français": "Créer aussi une nouvelle timeline avec une piste de sous-titres par langue",
+  "한국어": "언어마다 자막 트랙이 있는 새 타임라인도 만들기",
+  "中文": "同时新建一个每种语言各有一条字幕轨道的时间线",
+  "العربية": "إنشاء خط زمني جديد أيضًا بمسار ترجمة لكل لغة",
+  "Tiếng Việt": "Tạo thêm timeline mới có một track phụ đề cho mỗi ngôn ngữ"
+ },
+ "Translate automatically after each transcription": {
+  "日本語": "文字起こしのたびに自動で翻訳する",
+  "Español": "Traducir automáticamente después de cada transcripción",
+  "Deutsch": "Nach jeder Transkription automatisch übersetzen",
+  "Français": "Traduire automatiquement après chaque transcription",
+  "한국어": "받아쓰기가 끝날 때마다 자동으로 번역",
+  "中文": "每次转录后自动翻译",
+  "العربية": "الترجمة تلقائيًا بعد كل تفريغ",
+  "Tiếng Việt": "Tự động dịch sau mỗi lần phiên âm"
+ },
+ "Translate last transcript": {
+  "日本語": "最後の文字起こしを翻訳",
+  "Español": "Traducir la última transcripción",
+  "Deutsch": "Letzte Transkription übersetzen",
+  "Français": "Traduire la dernière transcription",
+  "한국어": "마지막 받아쓰기 번역",
+  "中文": "翻译上次的转录",
+  "العربية": "ترجمة آخر تفريغ",
+  "Tiếng Việt": "Dịch bản phiên âm gần nhất"
+ },
+ "Translate an SRT file…": {
+  "日本語": "SRT ファイルを翻訳…",
+  "Español": "Traducir un archivo SRT…",
+  "Deutsch": "SRT-Datei übersetzen…",
+  "Français": "Traduire un fichier SRT…",
+  "한국어": "SRT 파일 번역…",
+  "中文": "翻译 SRT 文件…",
+  "العربية": "ترجمة ملف SRT…",
+  "Tiếng Việt": "Dịch tệp SRT…"
+ },
+ "Show files": {
+  "日本語": "ファイルを表示",
+  "Español": "Mostrar archivos",
+  "Deutsch": "Dateien anzeigen",
+  "Français": "Afficher les fichiers",
+  "한국어": "파일 보기",
+  "中文": "显示文件",
+  "العربية": "إظهار الملفات",
+  "Tiếng Việt": "Hiện tệp"
+ },
+ "Each language becomes its own SRT file. With the new timeline on, Buddy also copies the current timeline as \"<name> (Subtitles)\" with every language on its own subtitle track – ready to export them all from Deliver. The timeline you're on isn't changed.": {
+  "日本語": "言語ごとに SRT ファイルが作られます。新しいタイムラインをオンにすると、Buddy は現在のタイムラインを「<name> (Subtitles)」としてコピーし、各言語を個別の字幕トラックに置きます – デリバーページからまとめて書き出せます。今のタイムラインは変更されません。",
+  "Español": "Cada idioma se convierte en su propio archivo SRT. Con la nueva línea de tiempo activada, Buddy también copia la línea de tiempo actual como \"<name> (Subtitles)\" con cada idioma en su propia pista de subtítulos, listas para exportarlas todas desde Entrega. La línea de tiempo actual no cambia.",
+  "Deutsch": "Jede Sprache wird eine eigene SRT-Datei. Mit aktivierter neuer Timeline kopiert Buddy außerdem die aktuelle Timeline als „<name> (Subtitles)“ mit jeder Sprache auf einer eigenen Untertitelspur – bereit, alle über Deliver zu exportieren. Die aktuelle Timeline bleibt unverändert.",
+  "Français": "Chaque langue devient son propre fichier SRT. Avec la nouvelle timeline activée, Buddy copie aussi la timeline actuelle sous le nom « <name> (Subtitles) » avec chaque langue sur sa propre piste de sous-titres – prêtes à être toutes exportées depuis Deliver. La timeline actuelle n'est pas modifiée.",
+  "한국어": "언어마다 별도의 SRT 파일이 만들어집니다. 새 타임라인을 켜면 Buddy가 현재 타임라인을 \"<name> (Subtitles)\"로 복사하고 언어마다 별도의 자막 트랙에 넣습니다 – 딜리버 페이지에서 한꺼번에 내보낼 수 있습니다. 현재 타임라인은 바뀌지 않습니다.",
+  "中文": "每种语言各生成一个 SRT 文件。开启新时间线后，Buddy 还会将当前时间线复制为“<name> (Subtitles)”，每种语言位于各自的字幕轨道上——可直接从交付页面全部导出。当前时间线不会被更改。",
+  "العربية": "تصبح كل لغة ملف SRT خاصًا بها. مع تفعيل الخط الزمني الجديد، ينسخ Buddy أيضًا الخط الزمني الحالي باسم \"<name> (Subtitles)\" مع كل لغة على مسار ترجمة خاص بها – جاهزة لتصديرها كلها من Deliver. لا يتغير الخط الزمني الحالي.",
+  "Tiếng Việt": "Mỗi ngôn ngữ thành một tệp SRT riêng. Khi bật timeline mới, Buddy còn sao chép timeline hiện tại thành \"<name> (Subtitles)\" với mỗi ngôn ngữ trên một track phụ đề riêng – sẵn sàng xuất tất cả từ trang Deliver. Timeline bạn đang dùng không bị thay đổi."
+ },
+ "This computer": {
+  "日本語": "このコンピューター",
+  "Español": "Este ordenador",
+  "Deutsch": "Dieser Computer",
+  "Français": "Cet ordinateur",
+  "한국어": "이 컴퓨터",
+  "中文": "这台电脑",
+  "العربية": "هذا الكمبيوتر",
+  "Tiếng Việt": "Máy tính này"
+ },
+ "Check again": {
+  "日本語": "再確認",
+  "Español": "Volver a comprobar",
+  "Deutsch": "Erneut prüfen",
+  "Français": "Revérifier",
+  "한국어": "다시 확인",
+  "中文": "重新检查",
+  "العربية": "تحقق مرة أخرى",
+  "Tiếng Việt": "Kiểm tra lại"
+ },
+ "Transcription engine": {
+  "日本語": "文字起こしエンジン",
+  "Español": "Motor de transcripción",
+  "Deutsch": "Transkriptions-Engine",
+  "Français": "Moteur de transcription",
+  "한국어": "전사 엔진",
+  "中文": "转写引擎",
+  "العربية": "محرك النسخ",
+  "Tiếng Việt": "Bộ máy phiên âm"
+ },
+ "Install engine": {
+  "日本語": "エンジンをインストール",
+  "Español": "Instalar motor",
+  "Deutsch": "Engine installieren",
+  "Français": "Installer le moteur",
+  "한국어": "엔진 설치",
+  "中文": "安装引擎",
+  "العربية": "تثبيت المحرك",
+  "Tiếng Việt": "Cài đặt công cụ"
+ },
+ "Repair engine": {
+  "日本語": "エンジンを修復",
+  "Español": "Reparar motor",
+  "Deutsch": "Engine reparieren",
+  "Français": "Réparer le moteur",
+  "한국어": "엔진 복구",
+  "中文": "修复引擎",
+  "العربية": "إصلاح المحرك",
+  "Tiếng Việt": "Sửa công cụ"
+ },
+ "Speech models": {
+  "日本語": "音声認識モデル",
+  "Español": "Modelos de voz",
+  "Deutsch": "Sprachmodelle",
+  "Français": "Modèles vocaux",
+  "한국어": "음성 모델",
+  "中文": "语音模型",
+  "العربية": "نماذج الكلام",
+  "Tiếng Việt": "Mô hình giọng nói"
+ },
+ "Use a model folder…": {
+  "日本語": "モデルフォルダーを使う…",
+  "Español": "Usar una carpeta de modelo…",
+  "Deutsch": "Modellordner verwenden…",
+  "Français": "Utiliser un dossier de modèle…",
+  "한국어": "모델 폴더 사용…",
+  "中文": "使用模型文件夹…",
+  "العربية": "استخدام مجلد نموذج…",
+  "Tiếng Việt": "Dùng thư mục mô hình…"
+ },
+ "Point Buddy at a faster-whisper model another app already downloaded": {
+  "日本語": "別のアプリでダウンロード済みの faster-whisper モデルを Buddy に指定",
+  "Español": "Indica a Buddy un modelo faster-whisper que otra aplicación ya haya descargado",
+  "Deutsch": "Buddy auf ein faster-whisper-Modell verweisen, das eine andere App bereits heruntergeladen hat",
+  "Français": "Indiquer à Buddy un modèle faster-whisper déjà téléchargé par une autre application",
+  "한국어": "다른 앱이 이미 다운로드한 faster-whisper 모델을 Buddy에 지정",
+  "中文": "让 Buddy 使用其他应用已下载的 faster-whisper 模型",
+  "العربية": "وجّه Buddy إلى نموذج faster-whisper نزّله تطبيق آخر بالفعل",
+  "Tiếng Việt": "Trỏ Buddy đến mô hình faster-whisper mà ứng dụng khác đã tải"
+ },
+ "Translation models": {
+  "日本語": "翻訳モデル",
+  "Español": "Modelos de traducción",
+  "Deutsch": "Übersetzungsmodelle",
+  "Français": "Modèles de traduction",
+  "한국어": "번역 모델",
+  "中文": "翻译模型",
+  "العربية": "نماذج الترجمة",
+  "Tiếng Việt": "Mô hình dịch"
+ },
+ "Optional": {
+  "日本語": "任意",
+  "Español": "Opcional",
+  "Deutsch": "Optional",
+  "Français": "Facultatif",
+  "한국어": "선택 사항",
+  "中文": "可选",
+  "العربية": "اختياري",
+  "Tiếng Việt": "Tùy chọn"
+ },
+ "Point Buddy at a CTranslate2 NLLB-200 or MADLAD-400 model already on disk": {
+  "日本語": "ディスク上にある CTranslate2 形式の NLLB-200 または MADLAD-400 モデルを Buddy に指定",
+  "Español": "Indica a Buddy un modelo CTranslate2 NLLB-200 o MADLAD-400 que ya esté en el disco",
+  "Deutsch": "Buddy auf ein CTranslate2-Modell NLLB-200 oder MADLAD-400 verweisen, das bereits auf der Festplatte liegt",
+  "Français": "Indiquer à Buddy un modèle CTranslate2 NLLB-200 ou MADLAD-400 déjà sur le disque",
+  "한국어": "디스크에 있는 CTranslate2 NLLB-200 또는 MADLAD-400 모델을 Buddy에 지정",
+  "中文": "让 Buddy 使用磁盘上已有的 CTranslate2 NLLB-200 或 MADLAD-400 模型",
+  "العربية": "وجّه Buddy إلى نموذج CTranslate2 من NLLB-200 أو MADLAD-400 موجود بالفعل على القرص",
+  "Tiếng Việt": "Trỏ Buddy đến mô hình CTranslate2 NLLB-200 hoặc MADLAD-400 đã có trên ổ đĩa"
+ },
+ "Stop?": {
+  "日本語": "停止しますか?",
+  "Español": "¿Detener?",
+  "Deutsch": "Anhalten?",
+  "Français": "Arrêter ?",
+  "한국어": "중지할까요?",
+  "中文": "要停止吗？",
+  "العربية": "إيقاف؟",
+  "Tiếng Việt": "Dừng?"
+ },
+ "Stop this download or install?": {
+  "日本語": "このダウンロードまたはインストールを停止しますか?",
+  "Español": "¿Detener esta descarga o instalación?",
+  "Deutsch": "Diesen Download bzw. diese Installation anhalten?",
+  "Français": "Arrêter ce téléchargement ou cette installation ?",
+  "한국어": "이 다운로드 또는 설치를 중지할까요?",
+  "中文": "要停止此下载或安装吗？",
+  "العربية": "إيقاف هذا التنزيل أو التثبيت؟",
+  "Tiếng Việt": "Dừng lượt tải xuống hoặc cài đặt này?"
+ },
+ "No models installed": {
+  "日本語": "インストール済みのモデルがありません",
+  "Español": "No hay modelos instalados",
+  "Deutsch": "Keine Modelle installiert",
+  "Français": "Aucun modèle installé",
+  "한국어": "설치된 모델 없음",
+  "中文": "未安装模型",
+  "العربية": "لا توجد نماذج مثبتة",
+  "Tiếng Việt": "Chưa cài mô hình nào"
+ },
+ "Auto-detect": {
+  "日本語": "自動検出",
+  "Español": "Detección automática",
+  "Deutsch": "Automatisch erkennen",
+  "Français": "Détection automatique",
+  "한국어": "자동 감지",
+  "中文": "自动检测",
+  "العربية": "اكتشاف تلقائي",
+  "Tiếng Việt": "Tự động phát hiện"
+ },
+ "Mixed languages…": {
+  "日本語": "複数の言語…",
+  "Español": "Varios idiomas…",
+  "Deutsch": "Gemischte Sprachen…",
+  "Français": "Langues mélangées…",
+  "한국어": "여러 언어…",
+  "中文": "多种语言…",
+  "العربية": "لغات مختلطة…",
+  "Tiếng Việt": "Nhiều ngôn ngữ…"
+ },
+ "Mixed: {langs}": {
+  "日本語": "複数: {langs}",
+  "Español": "Varios: {langs}",
+  "Deutsch": "Gemischt: {langs}",
+  "Français": "Mélangées : {langs}",
+  "한국어": "여러 언어: {langs}",
+  "中文": "多种：{langs}",
+  "العربية": "مختلطة: {langs}",
+  "Tiếng Việt": "Nhiều ngôn ngữ: {langs}"
+ },
+ "Each part is transcribed in its own language.": {
+  "日本語": "各部分はそれぞれの言語で文字起こしされます。",
+  "Español": "Cada parte se transcribe en su propio idioma.",
+  "Deutsch": "Jeder Teil wird in seiner eigenen Sprache transkribiert.",
+  "Français": "Chaque partie est transcrite dans sa propre langue.",
+  "한국어": "각 부분은 해당 언어로 받아씁니다.",
+  "中文": "每部分都用其自身的语言转录。",
+  "العربية": "يُفرَّغ كل جزء بلغته.",
+  "Tiếng Việt": "Mỗi phần được phiên âm bằng ngôn ngữ của nó."
+ },
+ "Detected from the audio.": {
+  "日本語": "オーディオから検出します。",
+  "Español": "Se detecta a partir del audio.",
+  "Deutsch": "Wird aus dem Ton erkannt.",
+  "Français": "Détectée à partir de l'audio.",
+  "한국어": "오디오에서 감지합니다.",
+  "中文": "从音频中检测。",
+  "العربية": "يُكتشف من الصوت.",
+  "Tiếng Việt": "Được phát hiện từ âm thanh."
+ },
+ "Languages spoken": {
+  "日本語": "話されている言語",
+  "Español": "Idiomas hablados",
+  "Deutsch": "Gesprochene Sprachen",
+  "Français": "Langues parlées",
+  "한국어": "말하는 언어",
+  "中文": "所说语言",
+  "العربية": "اللغات المنطوقة",
+  "Tiếng Việt": "Các ngôn ngữ nói"
+ },
+ "Tick every language spoken in the timeline. Each part is transcribed in its own – choosing only the ones really there keeps short replies from being mistaken.": {
+  "日本語": "タイムラインで話されているすべての言語にチェックを付けてください。各部分はそれぞれの言語で文字起こしされます – 実際に話されている言語だけを選ぶと、短い返事の誤認識を防げます。",
+  "Español": "Marca cada idioma que se hable en la línea de tiempo. Cada parte se transcribe en el suyo; elegir solo los que de verdad aparecen evita que las respuestas cortas se confundan.",
+  "Deutsch": "Kreuzen Sie jede Sprache an, die in der Timeline gesprochen wird. Jeder Teil wird in seiner eigenen transkribiert – wer nur die tatsächlich vorkommenden wählt, verhindert, dass kurze Antworten falsch erkannt werden.",
+  "Français": "Cochez chaque langue parlée dans la timeline. Chaque partie est transcrite dans la sienne – ne choisir que celles réellement présentes évite que les réponses courtes soient mal reconnues.",
+  "한국어": "타임라인에서 말하는 모든 언어를 선택하세요. 각 부분은 해당 언어로 받아씁니다 – 실제로 나오는 언어만 고르면 짧은 대답을 잘못 인식하지 않습니다.",
+  "中文": "勾选时间线中所说的每种语言。每部分都用其自身的语言转录——只选择确实出现的语言，可避免短回答被识别错误。",
+  "العربية": "حدد كل لغة منطوقة في الخط الزمني. يُفرَّغ كل جزء بلغته – اختيار اللغات الموجودة فعلًا فقط يمنع الخطأ في الردود القصيرة.",
+  "Tiếng Việt": "Đánh dấu mọi ngôn ngữ được nói trong timeline. Mỗi phần được phiên âm bằng ngôn ngữ riêng – chỉ chọn những ngôn ngữ thực sự có giúp tránh nhận nhầm các câu trả lời ngắn."
+ },
+ "· 1 subtitle": {
+  "日本語": "· 字幕 1 件",
+  "Español": "· 1 subtítulo",
+  "Deutsch": "· 1 Untertitel",
+  "Français": "· 1 sous-titre",
+  "한국어": "· 자막 1개",
+  "中文": "· 1 条字幕",
+  "العربية": "· ترجمة واحدة",
+  "Tiếng Việt": "· 1 phụ đề"
+ },
+ "· {count} subtitles": {
+  "日本語": "· 字幕 {count} 件",
+  "Español": "· {count} subtítulos",
+  "Deutsch": "· {count} Untertitel",
+  "Français": "· {count} sous-titres",
+  "한국어": "· 자막 {count}개",
+  "中文": "· {count} 条字幕",
+  "العربية": "· {count} ترجمات",
+  "Tiếng Việt": "· {count} phụ đề"
+ },
+ "Didn't finish: {t_error}": {
+  "日本語": "完了しませんでした: {t_error}",
+  "Español": "No terminó: {t_error}",
+  "Deutsch": "Nicht abgeschlossen: {t_error}",
+  "Français": "Non terminé : {t_error}",
+  "한국어": "완료하지 못했습니다: {t_error}",
+  "中文": "未完成：{t_error}",
+  "العربية": "لم يكتمل: {t_error}",
+  "Tiếng Việt": "Chưa hoàn tất: {t_error}"
+ },
+ "No languages chosen yet.": {
+  "日本語": "まだ言語が選択されていません。",
+  "Español": "Aún no se ha elegido ningún idioma.",
+  "Deutsch": "Noch keine Sprachen gewählt.",
+  "Français": "Aucune langue choisie pour l'instant.",
+  "한국어": "아직 선택한 언어가 없습니다.",
+  "中文": "尚未选择语言。",
+  "العربية": "لم يتم اختيار لغات بعد.",
+  "Tiếng Việt": "Chưa chọn ngôn ngữ nào."
+ },
+ "Transcribe a timeline first.": {
+  "日本語": "先にタイムラインを文字起こししてください。",
+  "Español": "Transcribe primero una línea de tiempo.",
+  "Deutsch": "Transkribieren Sie zuerst eine Timeline.",
+  "Français": "Transcrivez d'abord une timeline.",
+  "한국어": "먼저 타임라인을 받아쓰세요.",
+  "中文": "请先转录一个时间线。",
+  "العربية": "فرّغ خطًا زمنيًا أولًا.",
+  "Tiếng Việt": "Hãy phiên âm một timeline trước."
+ },
+ "Choose the languages first.": {
+  "日本語": "先に言語を選択してください。",
+  "Español": "Elige primero los idiomas.",
+  "Deutsch": "Wählen Sie zuerst die Sprachen.",
+  "Français": "Choisissez d'abord les langues.",
+  "한국어": "먼저 언어를 선택하세요.",
+  "中文": "请先选择语言。",
+  "العربية": "اختر اللغات أولًا.",
+  "Tiếng Việt": "Hãy chọn ngôn ngữ trước."
+ },
+ "Translate '{name}'": {
+  "日本語": "「{name}」を翻訳",
+  "Español": "Traducir '{name}'",
+  "Deutsch": "„{name}“ übersetzen",
+  "Français": "Traduire « {name} »",
+  "한국어": "'{name}' 번역",
+  "中文": "翻译“{name}”",
+  "العربية": "ترجمة '{name}'",
+  "Tiếng Việt": "Dịch '{name}'"
+ },
+ "Translate \"{name}\"": {
+  "日本語": "「{name}」を翻訳",
+  "Español": "Traducir \"{name}\"",
+  "Deutsch": "„{name}“ übersetzen",
+  "Français": "Traduire « {name} »",
+  "한국어": "\"{name}\" 번역",
+  "中文": "翻译“{name}”",
+  "العربية": "ترجمة \"{name}\"",
+  "Tiếng Việt": "Dịch \"{name}\""
+ },
+ "Translate into": {
+  "日本語": "翻訳先の言語",
+  "Español": "Traducir a",
+  "Deutsch": "Übersetzen in",
+  "Français": "Traduire vers",
+  "한국어": "번역할 언어",
+  "中文": "翻译为",
+  "العربية": "الترجمة إلى",
+  "Tiếng Việt": "Dịch sang"
+ },
+ "Each language you tick gets its own SRT file.": {
+  "日本語": "チェックした言語ごとに SRT ファイルが作られます。",
+  "Español": "Cada idioma que marques tendrá su propio archivo SRT.",
+  "Deutsch": "Jede angekreuzte Sprache erhält eine eigene SRT-Datei.",
+  "Français": "Chaque langue cochée obtient son propre fichier SRT.",
+  "한국어": "선택한 언어마다 별도의 SRT 파일이 만들어집니다.",
+  "中文": "每勾选一种语言，都会生成一个 SRT 文件。",
+  "العربية": "تحصل كل لغة تحددها على ملف SRT خاص بها.",
+  "Tiếng Việt": "Mỗi ngôn ngữ bạn chọn sẽ có tệp SRT riêng."
+ },
+ "Checking…": {
+  "日本語": "確認中…",
+  "Español": "Comprobando…",
+  "Deutsch": "Wird geprüft…",
+  "Français": "Vérification…",
+  "한국어": "확인 중…",
+  "中文": "正在检查…",
+  "العربية": "جارٍ التحقق…",
+  "Tiếng Việt": "Đang kiểm tra…"
+ },
+ "Checking the engine…": {
+  "日本語": "エンジンを確認中…",
+  "Español": "Comprobando el motor…",
+  "Deutsch": "Engine wird geprüft…",
+  "Français": "Vérification du moteur…",
+  "한국어": "엔진 확인 중…",
+  "中文": "正在检查引擎…",
+  "العربية": "جارٍ التحقق من المحرك…",
+  "Tiếng Việt": "Đang kiểm tra công cụ…"
+ },
+ "Bigger models are more accurate and slower.": {
+  "日本語": "大きいモデルほど精度が高く、処理は遅くなります。",
+  "Español": "Los modelos más grandes son más precisos y más lentos.",
+  "Deutsch": "Größere Modelle sind genauer und langsamer.",
+  "Français": "Les modèles plus grands sont plus précis et plus lents.",
+  "한국어": "모델이 클수록 더 정확하지만 느립니다.",
+  "中文": "模型越大越准确，但速度越慢。",
+  "العربية": "النماذج الأكبر أدق وأبطأ.",
+  "Tiếng Việt": "Mô hình càng lớn càng chính xác và càng chậm."
+ },
+ "Bigger models are more accurate and slower. Recommended for this computer: {model}, plus Parakeet v3 if you work in European languages – with both, Auto uses each for what it's best at.": {
+  "日本語": "大きいモデルほど精度が高く、処理は遅くなります。このコンピューターへのおすすめ: {model}。ヨーロッパの言語を扱うなら Parakeet v3 も – 両方あれば「自動」がそれぞれの得意分野で使い分けます。",
+  "Español": "Los modelos más grandes son más precisos y más lentos. Recomendado para este equipo: {model}, más Parakeet v3 si trabajas en idiomas europeos; con ambos, Auto usa cada uno para lo que mejor hace.",
+  "Deutsch": "Größere Modelle sind genauer und langsamer. Empfohlen für diesen Computer: {model}, dazu Parakeet v3, wenn Sie mit europäischen Sprachen arbeiten – mit beiden nutzt „Auto“ jedes für das, was es am besten kann.",
+  "Français": "Les modèles plus grands sont plus précis et plus lents. Recommandé pour cet ordinateur : {model}, plus Parakeet v3 si vous travaillez en langues européennes – avec les deux, Auto utilise chacun pour ce qu'il fait le mieux.",
+  "한국어": "모델이 클수록 더 정확하지만 느립니다. 이 컴퓨터 권장: {model}, 유럽 언어로 작업한다면 Parakeet v3도 – 둘 다 있으면 자동이 각각 잘하는 쪽에 사용합니다.",
+  "中文": "模型越大越准确，但速度越慢。本机推荐：{model}，如果处理欧洲语言，再加上 Parakeet v3——两者都有时，“自动”会让它们各展所长。",
+  "العربية": "النماذج الأكبر أدق وأبطأ. الموصى به لهذا الكمبيوتر: {model}، مع Parakeet v3 إذا كنت تعمل باللغات الأوروبية – مع كليهما، يستخدم الوضع التلقائي كلًا منهما فيما يجيده.",
+  "Tiếng Việt": "Mô hình càng lớn càng chính xác và càng chậm. Khuyên dùng cho máy này: {model}, thêm Parakeet v3 nếu bạn làm việc với ngôn ngữ châu Âu – có cả hai, Tự động sẽ dùng mỗi cái cho việc nó giỏi nhất."
+ },
+ "Translates subtitles on this computer. Meta's NLLB-200 covers 200 languages, free for non-commercial use only (CC-BY-NC 4.0). Google's MADLAD-400 covers about 180 and is free for commercial use too (Apache 2.0) – pick it for client work. Recommended: {model}. AI translation, with Ask Buddy's model, needs nothing from here.": {
+  "日本語": "このコンピューターで字幕を翻訳します。Meta の NLLB-200 は 200 言語に対応し、非商用に限り無料です (CC-BY-NC 4.0)。Google の MADLAD-400 は約 180 言語に対応し、商用でも無料です (Apache 2.0) – クライアントの仕事にはこちらを選んでください。おすすめ: {model}。Ask Buddy のモデルを使う AI 翻訳には、ここでの準備は不要です。",
+  "Español": "Traduce subtítulos en este equipo. NLLB-200 de Meta cubre 200 idiomas, gratis solo para uso no comercial (CC-BY-NC 4.0). MADLAD-400 de Google cubre unos 180 y también es gratis para uso comercial (Apache 2.0): elígelo para trabajos de clientes. Recomendado: {model}. La traducción con IA, con el modelo de Pregunta a Buddy, no necesita nada de aquí.",
+  "Deutsch": "Übersetzt Untertitel auf diesem Computer. NLLB-200 von Meta deckt 200 Sprachen ab, nur für nichtkommerzielle Nutzung kostenlos (CC-BY-NC 4.0). MADLAD-400 von Google deckt etwa 180 ab und ist auch für kommerzielle Nutzung kostenlos (Apache 2.0) – wählen Sie es für Kundenaufträge. Empfohlen: {model}. KI-Übersetzung mit dem Modell von „Buddy fragen“ braucht hiervon nichts.",
+  "Français": "Traduit les sous-titres sur cet ordinateur. NLLB-200 de Meta couvre 200 langues, gratuit pour un usage non commercial uniquement (CC-BY-NC 4.0). MADLAD-400 de Google en couvre environ 180 et est aussi gratuit pour un usage commercial (Apache 2.0) – choisissez-le pour le travail client. Recommandé : {model}. La traduction par IA, avec le modèle de Demander à Buddy, ne nécessite rien d'ici.",
+  "한국어": "이 컴퓨터에서 자막을 번역합니다. Meta의 NLLB-200은 200개 언어를 지원하며 비상업적 용도로만 무료입니다(CC-BY-NC 4.0). Google의 MADLAD-400은 약 180개 언어를 지원하며 상업적 용도로도 무료입니다(Apache 2.0) – 고객 작업에는 이것을 선택하세요. 권장: {model}. Buddy에게 질문의 모델을 쓰는 AI 번역은 여기서 준비할 것이 없습니다.",
+  "中文": "在本机上翻译字幕。Meta 的 NLLB-200 支持 200 种语言，仅限非商业用途免费（CC-BY-NC 4.0）。Google 的 MADLAD-400 支持约 180 种语言，商业用途也免费（Apache 2.0）——客户项目请选它。推荐：{model}。使用“询问 Buddy”模型的 AI 翻译无需在此准备任何内容。",
+  "العربية": "يترجم الترجمات على هذا الكمبيوتر. يغطي NLLB-200 من Meta مئتي لغة، مجانًا للاستخدام غير التجاري فقط (CC-BY-NC 4.0). ويغطي MADLAD-400 من Google نحو 180 لغة وهو مجاني للاستخدام التجاري أيضًا (Apache 2.0) – اختره لأعمال العملاء. الموصى به: {model}. لا تحتاج الترجمة بالذكاء الاصطناعي، بنموذج اسأل Buddy، إلى أي شيء من هنا.",
+  "Tiếng Việt": "Dịch phụ đề trên máy này. NLLB-200 của Meta hỗ trợ 200 ngôn ngữ, chỉ miễn phí cho mục đích phi thương mại (CC-BY-NC 4.0). MADLAD-400 của Google hỗ trợ khoảng 180 ngôn ngữ và miễn phí cả cho mục đích thương mại (Apache 2.0) – hãy chọn nó cho công việc với khách hàng. Khuyên dùng: {model}. Dịch bằng AI, với mô hình của Hỏi Buddy, không cần gì ở đây."
+ },
+ "Installed – your copy": {
+  "日本語": "インストール済み – お手持ちのコピー",
+  "Español": "Instalado: tu copia",
+  "Deutsch": "Installiert – Ihre Kopie",
+  "Français": "Installé – votre copie",
+  "한국어": "설치됨 – 내 사본",
+  "中文": "已安装——您的副本",
+  "العربية": "مثبت – نسختك",
+  "Tiếng Việt": "Đã cài đặt – bản của bạn"
+ },
+ "Use this copy": {
+  "日本語": "このコピーを使う",
+  "Español": "Usar esta copia",
+  "Deutsch": "Diese Kopie verwenden",
+  "Français": "Utiliser cette copie",
+  "한국어": "이 사본 사용",
+  "中文": "使用此副本",
+  "العربية": "استخدام هذه النسخة",
+  "Tiếng Việt": "Dùng bản này"
+ },
+ "Download ({size})": {
+  "日本語": "ダウンロード ({size})",
+  "Español": "Descargar ({size})",
+  "Deutsch": "Herunterladen ({size})",
+  "Français": "Télécharger ({size})",
+  "한국어": "다운로드({size})",
+  "中文": "下载（{size}）",
+  "العربية": "تنزيل ({size})",
+  "Tiếng Việt": "Tải xuống ({size})"
+ },
+ "Install the engine first.": {
+  "日本語": "先にエンジンをインストールしてください。",
+  "Español": "Instala primero el motor.",
+  "Deutsch": "Installieren Sie zuerst die Engine.",
+  "Français": "Installez d'abord le moteur.",
+  "한국어": "먼저 엔진을 설치하세요.",
+  "中文": "请先安装引擎。",
+  "العربية": "ثبّت المحرك أولًا.",
+  "Tiếng Việt": "Hãy cài đặt công cụ trước."
+ },
+ "Recommended": {
+  "日本語": "おすすめ",
+  "Español": "Recomendado",
+  "Deutsch": "Empfohlen",
+  "Français": "Recommandé",
+  "한국어": "권장",
+  "中文": "推荐",
+  "العربية": "موصى به",
+  "Tiếng Việt": "Khuyên dùng"
+ },
+ "Search languages…": {
+  "日本語": "言語を検索…",
+  "Español": "Buscar idiomas…",
+  "Deutsch": "Sprachen suchen…",
+  "Français": "Rechercher des langues…",
+  "한국어": "언어 검색…",
+  "中文": "搜索语言…",
+  "العربية": "البحث في اللغات…",
+  "Tiếng Việt": "Tìm ngôn ngữ…"
+ },
+ "None selected": {
+  "日本語": "選択なし",
+  "Español": "Ninguno seleccionado",
+  "Deutsch": "Keine ausgewählt",
+  "Français": "Aucune sélection",
+  "한국어": "선택 안 함",
+  "中文": "未选择",
+  "العربية": "لم يتم تحديد شيء",
+  "Tiếng Việt": "Chưa chọn"
+ },
+ "Tick at least {count}.": {
+  "日本語": "{count} 個以上チェックしてください。",
+  "Español": "Marca al menos {count}.",
+  "Deutsch": "Kreuzen Sie mindestens {count} an.",
+  "Français": "Cochez-en au moins {count}.",
+  "한국어": "{count}개 이상 선택하세요.",
+  "中文": "请至少勾选 {count} 个。",
+  "العربية": "حدد {count} على الأقل.",
+  "Tiếng Việt": "Hãy chọn ít nhất {count}."
+ },
+ "Choose one.": {
+  "日本語": "1 つ選択してください。",
+  "Español": "Elige uno.",
+  "Deutsch": "Wählen Sie eine aus.",
+  "Français": "Choisissez-en une.",
+  "한국어": "하나를 선택하세요.",
+  "中文": "请选择一个。",
+  "العربية": "اختر واحدًا.",
+  "Tiếng Việt": "Hãy chọn một."
+ },
+ "Subtitle track 1 isn't empty": {
+  "日本語": "字幕トラック 1 が空ではありません",
+  "Español": "La pista de subtítulos 1 no está vacía",
+  "Deutsch": "Untertitelspur 1 ist nicht leer",
+  "Français": "La piste de sous-titres 1 n'est pas vide",
+  "한국어": "자막 트랙 1이 비어 있지 않습니다",
+  "中文": "字幕轨道 1 不为空",
+  "العربية": "مسار الترجمة 1 ليس فارغًا",
+  "Tiếng Việt": "Track phụ đề 1 không trống"
+ },
+ "Subtitle track 1 already has {count} subtitle(s).\n\nResolve only lets scripts place subtitles on track 1, so adding these means replacing what's there. The new subtitles are saved as an SRT either way.": {
+  "日本語": "字幕トラック 1 には既に {count} 件の字幕があります。\n\nResolve ではスクリプトから字幕を置けるのはトラック 1 だけなので、追加するには既存の字幕を置き換えることになります。新しい字幕はいずれにしても SRT として保存されます。",
+  "Español": "La pista de subtítulos 1 ya tiene {count} subtítulo(s).\n\nResolve solo permite a los scripts colocar subtítulos en la pista 1, así que añadir estos implica reemplazar lo que hay. Los nuevos subtítulos se guardan como SRT en cualquier caso.",
+  "Deutsch": "Untertitelspur 1 enthält bereits {count} Untertitel.\n\nResolve lässt Skripte Untertitel nur auf Spur 1 platzieren, daher ersetzt das Hinzufügen den vorhandenen Inhalt. Die neuen Untertitel werden in jedem Fall als SRT gespeichert.",
+  "Français": "La piste de sous-titres 1 contient déjà {count} sous-titre(s).\n\nResolve ne permet aux scripts de placer des sous-titres que sur la piste 1 : les ajouter remplace donc ce qui s'y trouve. Les nouveaux sous-titres sont enregistrés en SRT dans tous les cas.",
+  "한국어": "자막 트랙 1에 이미 자막이 {count}개 있습니다.\n\nResolve는 스크립트가 트랙 1에만 자막을 놓을 수 있게 하므로, 추가하면 기존 내용을 바꾸게 됩니다. 새 자막은 어느 경우든 SRT로 저장됩니다.",
+  "中文": "字幕轨道 1 已有 {count} 条字幕。\n\nResolve 只允许脚本在轨道 1 上放置字幕，因此添加这些字幕意味着替换现有内容。无论如何，新字幕都会保存为 SRT。",
+  "العربية": "يحتوي مسار الترجمة 1 بالفعل على {count} ترجمة.\n\nلا يسمح Resolve للبرامج النصية بوضع الترجمات إلا على المسار 1، لذا فإن إضافة هذه يعني استبدال الموجود. تُحفظ الترجمات الجديدة كملف SRT في كل الأحوال.",
+  "Tiếng Việt": "Track phụ đề 1 đã có {count} phụ đề.\n\nResolve chỉ cho phép script đặt phụ đề lên track 1, nên thêm phụ đề mới đồng nghĩa với thay thế phụ đề hiện có. Dù sao phụ đề mới cũng được lưu thành tệp SRT."
+ },
+ "Keep the SRT file only": {
+  "日本語": "SRT ファイルだけを残す",
+  "Español": "Conservar solo el archivo SRT",
+  "Deutsch": "Nur die SRT-Datei behalten",
+  "Français": "Garder uniquement le fichier SRT",
+  "한국어": "SRT 파일만 유지",
+  "中文": "仅保留 SRT 文件",
+  "العربية": "الاحتفاظ بملف SRT فقط",
+  "Tiếng Việt": "Chỉ giữ tệp SRT"
+ },
+ "Replace {count} subtitle(s)": {
+  "日本語": "{count} 件の字幕を置き換える",
+  "Español": "Reemplazar {count} subtítulo(s)",
+  "Deutsch": "{count} Untertitel ersetzen",
+  "Français": "Remplacer {count} sous-titre(s)",
+  "한국어": "자막 {count}개 바꾸기",
+  "中文": "替换 {count} 条字幕",
+  "العربية": "استبدال {count} ترجمة",
+  "Tiếng Việt": "Thay {count} phụ đề"
+ },
+ "AI translation": {
+  "日本語": "AI 翻訳",
+  "Español": "Traducción con IA",
+  "Deutsch": "KI-Übersetzung",
+  "Français": "Traduction par IA",
+  "한국어": "AI 번역",
+  "中文": "AI 翻译",
+  "العربية": "الترجمة بالذكاء الاصطناعي",
+  "Tiếng Việt": "Dịch bằng AI"
+ },
+ "Allow": {
+  "日本語": "許可",
+  "Español": "Permitir",
+  "Deutsch": "Erlauben",
+  "Français": "Autoriser",
+  "한국어": "허용",
+  "中文": "允许",
+  "العربية": "السماح",
+  "Tiếng Việt": "Cho phép"
+ },
+ "AI translation sends the transcript's text to {name} over the internet, under your own API key (the provider may charge for it).\n\nAllow this? Buddy remembers the answer for this provider.": {
+  "日本語": "AI 翻訳では、文字起こしのテキストをあなたの API キーでインターネット経由で {name} に送信します (プロバイダーが料金を請求する場合があります)。\n\n許可しますか? Buddy はこのプロバイダーについての回答を記憶します。",
+  "Español": "La traducción con IA envía el texto de la transcripción a {name} por internet, con tu propia clave de API (el proveedor puede cobrarlo).\n\n¿Lo permites? Buddy recuerda la respuesta para este proveedor.",
+  "Deutsch": "Die KI-Übersetzung sendet den Text der Transkription über das Internet an {name}, mit Ihrem eigenen API-Schlüssel (der Anbieter kann dafür Gebühren verlangen).\n\nErlauben? Buddy merkt sich die Antwort für diesen Anbieter.",
+  "Français": "La traduction par IA envoie le texte de la transcription à {name} par Internet, avec votre propre clé API (le fournisseur peut la facturer).\n\nAutoriser ? Buddy retient la réponse pour ce fournisseur.",
+  "한국어": "AI 번역은 내 API 키로 받아쓴 텍스트를 인터넷을 통해 {name}에 보냅니다(제공업체가 요금을 청구할 수 있음).\n\n허용할까요? Buddy는 이 제공업체에 대한 답을 기억합니다.",
+  "中文": "AI 翻译会使用您自己的 API 密钥，通过互联网将转录文本发送给 {name}（服务商可能会收费）。\n\n允许吗？Buddy 会记住您对此服务商的选择。",
+  "العربية": "ترسل الترجمة بالذكاء الاصطناعي نص التفريغ إلى {name} عبر الإنترنت، باستخدام مفتاح API الخاص بك (قد يفرض المزوّد رسومًا).\n\nهل تسمح بذلك؟ يتذكر Buddy الإجابة لهذا المزوّد.",
+  "Tiếng Việt": "Dịch bằng AI sẽ gửi văn bản phiên âm đến {name} qua internet, bằng khóa API của bạn (nhà cung cấp có thể tính phí).\n\nCho phép? Buddy sẽ nhớ câu trả lời cho nhà cung cấp này."
+ },
+ "Not read yet.": {
+  "日本語": "まだ読み込まれていません。",
+  "Español": "Aún no se ha leído.",
+  "Deutsch": "Noch nicht gelesen.",
+  "Français": "Pas encore lu.",
+  "한국어": "아직 읽지 않았습니다.",
+  "中文": "尚未读取。",
+  "العربية": "لم تتم القراءة بعد.",
+  "Tiếng Việt": "Chưa đọc."
+ },
+ "Checking the transcription engine…": {
+  "日本語": "文字起こしエンジンを確認中…",
+  "Español": "Comprobando el motor de transcripción…",
+  "Deutsch": "Transkriptions-Engine wird geprüft…",
+  "Français": "Vérification du moteur de transcription…",
+  "한국어": "받아쓰기 엔진 확인 중…",
+  "中文": "正在检查转录引擎…",
+  "العربية": "جارٍ التحقق من محرك التفريغ…",
+  "Tiếng Việt": "Đang kiểm tra công cụ phiên âm…"
+ },
+ "Transcription isn't set up on this computer yet – it takes a one-time install of the engine and a model.": {
+  "日本語": "このコンピューターではまだ文字起こしが設定されていません – エンジンとモデルを一度インストールする必要があります。",
+  "Español": "La transcripción aún no está configurada en este equipo: requiere instalar una vez el motor y un modelo.",
+  "Deutsch": "Die Transkription ist auf diesem Computer noch nicht eingerichtet – dazu werden einmalig die Engine und ein Modell installiert.",
+  "Français": "La transcription n'est pas encore configurée sur cet ordinateur – il faut installer une fois le moteur et un modèle.",
+  "한국어": "이 컴퓨터에는 아직 받아쓰기가 설정되지 않았습니다 – 엔진과 모델을 한 번 설치해야 합니다.",
+  "中文": "本机尚未设置转录——需要一次性安装引擎和一个模型。",
+  "العربية": "لم يتم إعداد التفريغ على هذا الكمبيوتر بعد – يتطلب تثبيت المحرك ونموذج لمرة واحدة.",
+  "Tiếng Việt": "Máy này chưa thiết lập phiên âm – cần cài công cụ và một mô hình một lần."
+ },
+ "The engine is installed. Get a model on the Setup tab to start.": {
+  "日本語": "エンジンはインストール済みです。「セットアップ」タブでモデルを入手すると始められます。",
+  "Español": "El motor está instalado. Consigue un modelo en la pestaña Configuración para empezar.",
+  "Deutsch": "Die Engine ist installiert. Holen Sie sich auf dem Tab „Einrichtung“ ein Modell, um zu beginnen.",
+  "Français": "Le moteur est installé. Obtenez un modèle dans l'onglet Configuration pour commencer.",
+  "한국어": "엔진이 설치되어 있습니다. 설정 탭에서 모델을 받아 시작하세요.",
+  "中文": "引擎已安装。在“设置”标签页获取一个模型即可开始。",
+  "العربية": "المحرك مثبت. احصل على نموذج من تبويب الإعداد للبدء.",
+  "Tiếng Việt": "Công cụ đã được cài. Hãy tải một mô hình ở thẻ Thiết lập để bắt đầu."
+ },
+ "AI translation uses Ask Buddy's model, and it isn't set up yet: {problem}": {
+  "日本語": "AI 翻訳は Ask Buddy のモデルを使いますが、まだ設定されていません: {problem}",
+  "Español": "La traducción con IA usa el modelo de Pregunta a Buddy, que aún no está configurado: {problem}",
+  "Deutsch": "Die KI-Übersetzung nutzt das Modell von „Buddy fragen“, das noch nicht eingerichtet ist: {problem}",
+  "Français": "La traduction par IA utilise le modèle de Demander à Buddy, qui n'est pas encore configuré : {problem}",
+  "한국어": "AI 번역은 Buddy에게 질문의 모델을 사용하는데 아직 설정되지 않았습니다: {problem}",
+  "中文": "AI 翻译使用“询问 Buddy”的模型，但尚未设置：{problem}",
+  "العربية": "تستخدم الترجمة بالذكاء الاصطناعي نموذج اسأل Buddy، ولم يُعدّ بعد: {problem}",
+  "Tiếng Việt": "Dịch bằng AI dùng mô hình của Hỏi Buddy, nhưng chưa được thiết lập: {problem}"
+ },
+ "{ai} translates whole passages at once, so names and tone stay consistent. The transcript's text is sent to it.": {
+  "日本語": "{ai} は文章をまとめて翻訳するため、名前や口調の一貫性が保たれます。文字起こしのテキストはそこへ送信されます。",
+  "Español": "{ai} traduce pasajes completos de una vez, así que los nombres y el tono se mantienen coherentes. El texto de la transcripción se le envía.",
+  "Deutsch": "{ai} übersetzt ganze Passagen auf einmal, sodass Namen und Ton einheitlich bleiben. Der Text der Transkription wird dorthin gesendet.",
+  "Français": "{ai} traduit des passages entiers d'un coup, les noms et le ton restent donc cohérents. Le texte de la transcription lui est envoyé.",
+  "한국어": "{ai}은(는) 문단 전체를 한 번에 번역하므로 이름과 어조가 일관되게 유지됩니다. 받아쓴 텍스트가 그곳으로 전송됩니다.",
+  "中文": "{ai} 会一次翻译整段内容，因此名称和语气保持一致。转录文本会发送给它。",
+  "العربية": "يترجم {ai} مقاطع كاملة دفعة واحدة، لذا تبقى الأسماء والنبرة متسقة. يُرسل نص التفريغ إليه.",
+  "Tiếng Việt": "{ai} dịch cả đoạn cùng lúc nên tên và giọng điệu được giữ nhất quán. Văn bản phiên âm được gửi đến nó."
+ },
+ "{ai} translates whole passages at once, so names and tone stay consistent. The transcript's text is sent to it – locally, so it stays on your computer (or your own network).": {
+  "日本語": "{ai} は文章をまとめて翻訳するため、名前や口調の一貫性が保たれます。文字起こしのテキストはそこへ送信されます – ローカルなので、あなたのコンピューター (または自分のネットワーク) から出ません。",
+  "Español": "{ai} traduce pasajes completos de una vez, así que los nombres y el tono se mantienen coherentes. El texto de la transcripción se le envía, en local, así que se queda en tu equipo (o en tu propia red).",
+  "Deutsch": "{ai} übersetzt ganze Passagen auf einmal, sodass Namen und Ton einheitlich bleiben. Der Text der Transkription wird dorthin gesendet – lokal, er bleibt also auf Ihrem Computer (oder in Ihrem eigenen Netzwerk).",
+  "Français": "{ai} traduit des passages entiers d'un coup, les noms et le ton restent donc cohérents. Le texte de la transcription lui est envoyé – en local, il reste donc sur votre ordinateur (ou votre propre réseau).",
+  "한국어": "{ai}은(는) 문단 전체를 한 번에 번역하므로 이름과 어조가 일관되게 유지됩니다. 받아쓴 텍스트가 그곳으로 전송됩니다 – 로컬이므로 내 컴퓨터(또는 내 네트워크)에 머뭅니다.",
+  "中文": "{ai} 会一次翻译整段内容，因此名称和语气保持一致。转录文本会发送给它——在本地进行，因此会留在您的电脑（或您自己的网络）中。",
+  "العربية": "يترجم {ai} مقاطع كاملة دفعة واحدة، لذا تبقى الأسماء والنبرة متسقة. يُرسل نص التفريغ إليه – محليًا، لذا يبقى على كمبيوترك (أو شبكتك الخاصة).",
+  "Tiếng Việt": "{ai} dịch cả đoạn cùng lúc nên tên và giọng điệu được giữ nhất quán. Văn bản phiên âm được gửi đến nó – cục bộ, nên vẫn ở trên máy của bạn (hoặc mạng riêng của bạn)."
+ },
+ "Set up the transcription engine first to translate on this computer – or choose AI translation.": {
+  "日本語": "このコンピューターで翻訳するには、先に文字起こしエンジンを設定してください – または AI 翻訳を選んでください。",
+  "Español": "Configura primero el motor de transcripción para traducir en este equipo, o elige la traducción con IA.",
+  "Deutsch": "Richten Sie zuerst die Transkriptions-Engine ein, um auf diesem Computer zu übersetzen – oder wählen Sie die KI-Übersetzung.",
+  "Français": "Configurez d'abord le moteur de transcription pour traduire sur cet ordinateur – ou choisissez la traduction par IA.",
+  "한국어": "이 컴퓨터에서 번역하려면 먼저 받아쓰기 엔진을 설정하세요 – 또는 AI 번역을 선택하세요.",
+  "中文": "要在本机翻译，请先设置转录引擎——或选择 AI 翻译。",
+  "العربية": "أعدّ محرك التفريغ أولًا للترجمة على هذا الكمبيوتر – أو اختر الترجمة بالذكاء الاصطناعي.",
+  "Tiếng Việt": "Hãy thiết lập công cụ phiên âm trước để dịch trên máy này – hoặc chọn dịch bằng AI."
+ },
+ "Translating on this computer needs a model (NLLB-200 or MADLAD-400) – get one on the Setup tab. Or choose AI translation.": {
+  "日本語": "このコンピューターで翻訳するにはモデル (NLLB-200 または MADLAD-400) が必要です – 「セットアップ」タブで入手してください。または AI 翻訳を選んでください。",
+  "Español": "Traducir en este equipo necesita un modelo (NLLB-200 o MADLAD-400): consíguelo en la pestaña Configuración. O elige la traducción con IA.",
+  "Deutsch": "Für die Übersetzung auf diesem Computer wird ein Modell benötigt (NLLB-200 oder MADLAD-400) – holen Sie es auf dem Tab „Einrichtung“. Oder wählen Sie die KI-Übersetzung.",
+  "Français": "Traduire sur cet ordinateur nécessite un modèle (NLLB-200 ou MADLAD-400) – obtenez-en un dans l'onglet Configuration. Ou choisissez la traduction par IA.",
+  "한국어": "이 컴퓨터에서 번역하려면 모델(NLLB-200 또는 MADLAD-400)이 필요합니다 – 설정 탭에서 받으세요. 또는 AI 번역을 선택하세요.",
+  "中文": "在本机翻译需要一个模型（NLLB-200 或 MADLAD-400）——请在“设置”标签页获取。或选择 AI 翻译。",
+  "العربية": "تحتاج الترجمة على هذا الكمبيوتر إلى نموذج (NLLB-200 أو MADLAD-400) – احصل عليه من تبويب الإعداد. أو اختر الترجمة بالذكاء الاصطناعي.",
+  "Tiếng Việt": "Dịch trên máy này cần một mô hình (NLLB-200 hoặc MADLAD-400) – hãy tải ở thẻ Thiết lập. Hoặc chọn dịch bằng AI."
+ },
+ "MADLAD-400 translates into about 180 languages, on this computer. Free for commercial use.": {
+  "日本語": "MADLAD-400 はこのコンピューター上で約 180 言語に翻訳します。商用でも無料です。",
+  "Español": "MADLAD-400 traduce a unos 180 idiomas, en este equipo. Gratis para uso comercial.",
+  "Deutsch": "MADLAD-400 übersetzt auf diesem Computer in etwa 180 Sprachen. Kostenlos für kommerzielle Nutzung.",
+  "Français": "MADLAD-400 traduit vers environ 180 langues, sur cet ordinateur. Gratuit pour un usage commercial.",
+  "한국어": "MADLAD-400은 이 컴퓨터에서 약 180개 언어로 번역합니다. 상업적 용도로도 무료입니다.",
+  "中文": "MADLAD-400 在本机上可翻译为约 180 种语言。商业用途免费。",
+  "العربية": "يترجم MADLAD-400 إلى نحو 180 لغة، على هذا الكمبيوتر. مجاني للاستخدام التجاري.",
+  "Tiếng Việt": "MADLAD-400 dịch sang khoảng 180 ngôn ngữ, trên máy này. Miễn phí cho mục đích thương mại."
+ },
+ "NLLB-200 translates into any of 200 languages, on this computer. Free for non-commercial use.": {
+  "日本語": "NLLB-200 はこのコンピューター上で 200 言語のいずれにも翻訳します。非商用に限り無料です。",
+  "Español": "NLLB-200 traduce a cualquiera de 200 idiomas, en este equipo. Gratis para uso no comercial.",
+  "Deutsch": "NLLB-200 übersetzt auf diesem Computer in jede von 200 Sprachen. Kostenlos für nichtkommerzielle Nutzung.",
+  "Français": "NLLB-200 traduit vers n'importe laquelle de 200 langues, sur cet ordinateur. Gratuit pour un usage non commercial.",
+  "한국어": "NLLB-200은 이 컴퓨터에서 200개 언어 중 어느 것으로든 번역합니다. 비상업적 용도로 무료입니다.",
+  "中文": "NLLB-200 在本机上可翻译为 200 种语言中的任意一种。非商业用途免费。",
+  "العربية": "يترجم NLLB-200 إلى أي من 200 لغة، على هذا الكمبيوتر. مجاني للاستخدام غير التجاري.",
+  "Tiếng Việt": "NLLB-200 dịch sang bất kỳ ngôn ngữ nào trong 200 ngôn ngữ, trên máy này. Miễn phí cho mục đích phi thương mại."
+ },
+ "{name} · {min} min · starts {tc}": {
+  "日本語": "{name} · {min} 分 · 開始 {tc}",
+  "Español": "{name} · {min} min · empieza en {tc}",
+  "Deutsch": "{name} · {min} Min. · beginnt bei {tc}",
+  "Français": "{name} · {min} min · début {tc}",
+  "한국어": "{name} · {min}분 · 시작 {tc}",
+  "中文": "{name} · {min} 分钟 · 起始 {tc}",
+  "العربية": "{name} · {min} د · يبدأ عند {tc}",
+  "Tiếng Việt": "{name} · {min} phút · bắt đầu {tc}"
+ },
+ "{name} · {min} min · starts {tc} · subtitle track 1 already has {count} subtitle(s)": {
+  "日本語": "{name} · {min} 分 · 開始 {tc} · 字幕トラック 1 に既に {count} 件の字幕があります",
+  "Español": "{name} · {min} min · empieza en {tc} · la pista de subtítulos 1 ya tiene {count} subtítulo(s)",
+  "Deutsch": "{name} · {min} Min. · beginnt bei {tc} · Untertitelspur 1 enthält bereits {count} Untertitel",
+  "Français": "{name} · {min} min · début {tc} · la piste de sous-titres 1 contient déjà {count} sous-titre(s)",
+  "한국어": "{name} · {min}분 · 시작 {tc} · 자막 트랙 1에 이미 자막 {count}개 있음",
+  "中文": "{name} · {min} 分钟 · 起始 {tc} · 字幕轨道 1 已有 {count} 条字幕",
+  "العربية": "{name} · {min} د · يبدأ عند {tc} · يحتوي مسار الترجمة 1 بالفعل على {count} ترجمة",
+  "Tiếng Việt": "{name} · {min} phút · bắt đầu {tc} · track phụ đề 1 đã có {count} phụ đề"
+ },
+ "Tick at least two languages for mixed audio – for one, choose it from the menu.": {
+  "日本語": "複数言語の音声には 2 つ以上の言語にチェックを付けてください – 1 つだけならメニューから選んでください。",
+  "Español": "Marca al menos dos idiomas para audio mixto; para uno solo, elígelo en el menú.",
+  "Deutsch": "Kreuzen Sie für gemischten Ton mindestens zwei Sprachen an – für eine wählen Sie sie im Menü.",
+  "Français": "Cochez au moins deux langues pour un audio mixte – pour une seule, choisissez-la dans le menu.",
+  "한국어": "여러 언어가 섞인 오디오라면 두 개 이상 선택하세요 – 하나라면 메뉴에서 고르세요.",
+  "中文": "混合语言音频请至少勾选两种语言——若只有一种，请从菜单中选择。",
+  "العربية": "حدد لغتين على الأقل للصوت المختلط – ولغة واحدة، اخترها من القائمة.",
+  "Tiếng Việt": "Chọn ít nhất hai ngôn ngữ cho âm thanh hỗn hợp – nếu chỉ một, hãy chọn trong menu."
+ },
+ "Starting…": {
+  "日本語": "開始中…",
+  "Español": "Iniciando…",
+  "Deutsch": "Wird gestartet…",
+  "Français": "Démarrage…",
+  "한국어": "시작하는 중…",
+  "中文": "正在开始…",
+  "العربية": "جارٍ البدء…",
+  "Tiếng Việt": "Đang bắt đầu…"
+ },
+ "Working…": {
+  "日本語": "処理中…",
+  "Español": "Trabajando…",
+  "Deutsch": "Wird bearbeitet…",
+  "Français": "Traitement…",
+  "한국어": "작업 중…",
+  "中文": "正在处理…",
+  "العربية": "جارٍ العمل…",
+  "Tiếng Việt": "Đang xử lý…"
+ },
+ "No timeline": {
+  "日本語": "タイムラインがありません",
+  "Español": "Sin línea de tiempo",
+  "Deutsch": "Keine Timeline",
+  "Français": "Aucune timeline",
+  "한국어": "타임라인 없음",
+  "中文": "没有时间线",
+  "العربية": "لا يوجد خط زمني",
+  "Tiếng Việt": "Không có timeline"
+ },
+ "Transcribing '{name}' ({min} min) with {model}…": {
+  "日本語": "「{name}」({min} 分) を {model} で文字起こし中…",
+  "Español": "Transcribiendo '{name}' ({min} min) con {model}…",
+  "Deutsch": "„{name}“ ({min} Min.) wird mit {model} transkribiert…",
+  "Français": "Transcription de « {name} » ({min} min) avec {model}…",
+  "한국어": "'{name}'({min}분)을(를) {model}(으)로 받아쓰는 중…",
+  "中文": "正在用 {model} 转录“{name}”（{min} 分钟）…",
+  "العربية": "جارٍ تفريغ '{name}' ({min} د) باستخدام {model}…",
+  "Tiếng Việt": "Đang phiên âm '{name}' ({min} phút) bằng {model}…"
+ },
+ "{count} subtitles ({spoken}) – {audio} min of audio in {took} min with {engine} on the {where}.": {
+  "日本語": "字幕 {count} 件 ({spoken}) – {audio} 分の音声を {engine} で {where} を使い {took} 分で処理しました。",
+  "Español": "{count} subtítulos ({spoken}): {audio} min de audio en {took} min con {engine} en la {where}.",
+  "Deutsch": "{count} Untertitel ({spoken}) – {audio} Min. Ton in {took} Min. mit {engine} auf der {where}.",
+  "Français": "{count} sous-titres ({spoken}) – {audio} min d'audio en {took} min avec {engine} sur le {where}.",
+  "한국어": "자막 {count}개({spoken}) – {audio}분 분량의 오디오를 {engine}(으)로 {where}에서 {took}분 만에 처리했습니다.",
+  "中文": "{count} 条字幕（{spoken}）——{audio} 分钟音频，用 {engine} 在 {where} 上耗时 {took} 分钟。",
+  "العربية": "{count} ترجمة ({spoken}) – {audio} د من الصوت في {took} د باستخدام {engine} على {where}.",
+  "Tiếng Việt": "{count} phụ đề ({spoken}) – {audio} phút âm thanh trong {took} phút với {engine} trên {where}."
+ },
+ "{count} subtitles ({spoken}) – {audio} min of audio in {took} min with {engine} on the {where}. Saved: {path}": {
+  "日本語": "字幕 {count} 件 ({spoken}) – {audio} 分の音声を {engine} で {where} を使い {took} 分で処理しました。保存先: {path}",
+  "Español": "{count} subtítulos ({spoken}): {audio} min de audio en {took} min con {engine} en la {where}. Guardado: {path}",
+  "Deutsch": "{count} Untertitel ({spoken}) – {audio} Min. Ton in {took} Min. mit {engine} auf der {where}. Gespeichert: {path}",
+  "Français": "{count} sous-titres ({spoken}) – {audio} min d'audio en {took} min avec {engine} sur le {where}. Enregistré : {path}",
+  "한국어": "자막 {count}개({spoken}) – {audio}분 분량의 오디오를 {engine}(으)로 {where}에서 {took}분 만에 처리했습니다. 저장됨: {path}",
+  "中文": "{count} 条字幕（{spoken}）——{audio} 分钟音频，用 {engine} 在 {where} 上耗时 {took} 分钟。已保存：{path}",
+  "العربية": "{count} ترجمة ({spoken}) – {audio} د من الصوت في {took} د باستخدام {engine} على {where}. تم الحفظ: {path}",
+  "Tiếng Việt": "{count} phụ đề ({spoken}) – {audio} phút âm thanh trong {took} phút với {engine} trên {where}. Đã lưu: {path}"
+ },
+ "language not detected": {
+  "日本語": "言語は検出されませんでした",
+  "Español": "idioma no detectado",
+  "Deutsch": "Sprache nicht erkannt",
+  "Français": "langue non détectée",
+  "한국어": "언어가 감지되지 않음",
+  "中文": "未检测到语言",
+  "العربية": "لم يتم اكتشاف اللغة",
+  "Tiếng Việt": "không phát hiện được ngôn ngữ"
+ },
+ "Adding the subtitles to the timeline…": {
+  "日本語": "字幕をタイムラインに追加中…",
+  "Español": "Añadiendo los subtítulos a la línea de tiempo…",
+  "Deutsch": "Untertitel werden zur Timeline hinzugefügt…",
+  "Français": "Ajout des sous-titres à la timeline…",
+  "한국어": "자막을 타임라인에 추가하는 중…",
+  "中文": "正在将字幕添加到时间线…",
+  "العربية": "جارٍ إضافة الترجمات إلى الخط الزمني…",
+  "Tiếng Việt": "Đang thêm phụ đề vào timeline…"
+ },
+ "Adding subtitles to the timeline…": {
+  "日本語": "字幕をタイムラインに追加中…",
+  "Español": "Añadiendo subtítulos a la línea de tiempo…",
+  "Deutsch": "Untertitel werden zur Timeline hinzugefügt…",
+  "Français": "Ajout des sous-titres à la timeline…",
+  "한국어": "자막을 타임라인에 추가하는 중…",
+  "中文": "正在将字幕添加到时间线…",
+  "العربية": "جارٍ إضافة الترجمات إلى الخط الزمني…",
+  "Tiếng Việt": "Đang thêm phụ đề vào timeline…"
+ },
+ "Couldn't add to the timeline: {error}": {
+  "日本語": "タイムラインに追加できませんでした: {error}",
+  "Español": "No se pudo añadir a la línea de tiempo: {error}",
+  "Deutsch": "Konnte nicht zur Timeline hinzugefügt werden: {error}",
+  "Français": "Impossible d'ajouter à la timeline : {error}",
+  "한국어": "타임라인에 추가할 수 없습니다: {error}",
+  "中文": "无法添加到时间线：{error}",
+  "العربية": "تعذرت الإضافة إلى الخط الزمني: {error}",
+  "Tiếng Việt": "Không thể thêm vào timeline: {error}"
+ },
+ "Done – {count} subtitles on subtitle track 1.": {
+  "日本語": "完了 – 字幕トラック 1 に字幕 {count} 件。",
+  "Español": "Listo: {count} subtítulos en la pista de subtítulos 1.",
+  "Deutsch": "Fertig – {count} Untertitel auf Untertitelspur 1.",
+  "Français": "Terminé – {count} sous-titres sur la piste de sous-titres 1.",
+  "한국어": "완료 – 자막 트랙 1에 자막 {count}개.",
+  "中文": "完成——字幕轨道 1 上有 {count} 条字幕。",
+  "العربية": "تم – {count} ترجمة على مسار الترجمة 1.",
+  "Tiếng Việt": "Xong – {count} phụ đề trên track phụ đề 1."
+ },
+ "Done – saved as an SRT file (not added to the timeline).": {
+  "日本語": "完了 – SRT ファイルとして保存しました (タイムラインには追加していません)。",
+  "Español": "Listo: guardado como archivo SRT (no se añadió a la línea de tiempo).",
+  "Deutsch": "Fertig – als SRT-Datei gespeichert (nicht zur Timeline hinzugefügt).",
+  "Français": "Terminé – enregistré en fichier SRT (non ajouté à la timeline).",
+  "한국어": "완료 – SRT 파일로 저장했습니다(타임라인에는 추가하지 않음).",
+  "中文": "完成——已保存为 SRT 文件（未添加到时间线）。",
+  "العربية": "تم – حُفظ كملف SRT (لم يُضف إلى الخط الزمني).",
+  "Tiếng Việt": "Xong – đã lưu thành tệp SRT (không thêm vào timeline)."
+ },
+ "Save subtitles": {
+  "日本語": "字幕を保存",
+  "Español": "Guardar subtítulos",
+  "Deutsch": "Untertitel speichern",
+  "Français": "Enregistrer les sous-titres",
+  "한국어": "자막 저장",
+  "中文": "保存字幕",
+  "العربية": "حفظ الترجمات",
+  "Tiếng Việt": "Lưu phụ đề"
+ },
+ "SubRip subtitles": {
+  "日本語": "SubRip 字幕",
+  "Español": "Subtítulos SubRip",
+  "Deutsch": "SubRip-Untertitel",
+  "Français": "Sous-titres SubRip",
+  "한국어": "SubRip 자막",
+  "中文": "SubRip 字幕",
+  "العربية": "ترجمات SubRip",
+  "Tiếng Việt": "Phụ đề SubRip"
+ },
+ "Saved a copy to {path}": {
+  "日本語": "コピーを {path} に保存しました",
+  "Español": "Copia guardada en {path}",
+  "Deutsch": "Kopie gespeichert unter {path}",
+  "Français": "Copie enregistrée dans {path}",
+  "한국어": "{path}에 사본을 저장했습니다",
+  "中文": "已将副本保存到 {path}",
+  "العربية": "تم حفظ نسخة في {path}",
+  "Tiếng Việt": "Đã lưu bản sao vào {path}"
+ },
+ "Save translated subtitles to": {
+  "日本語": "翻訳した字幕の保存先",
+  "Español": "Guardar los subtítulos traducidos en",
+  "Deutsch": "Übersetzte Untertitel speichern in",
+  "Français": "Enregistrer les sous-titres traduits dans",
+  "한국어": "번역한 자막 저장 위치",
+  "中文": "译文字幕保存位置",
+  "العربية": "حفظ الترجمات المترجمة في",
+  "Tiếng Việt": "Lưu phụ đề đã dịch vào"
+ },
+ "AI translation (set up in Ask Buddy)": {
+  "日本語": "AI 翻訳 (Ask Buddy で設定)",
+  "Español": "Traducción con IA (se configura en Pregunta a Buddy)",
+  "Deutsch": "KI-Übersetzung (in „Buddy fragen“ einrichten)",
+  "Français": "Traduction par IA (à configurer dans Demander à Buddy)",
+  "한국어": "AI 번역(Buddy에게 질문에서 설정)",
+  "中文": "AI 翻译（在“询问 Buddy”中设置）",
+  "العربية": "الترجمة بالذكاء الاصطناعي (تُعدّ في اسأل Buddy)",
+  "Tiếng Việt": "Dịch bằng AI (thiết lập trong Hỏi Buddy)"
+ },
+ "AI translation · {name}": {
+  "日本語": "AI 翻訳 · {name}",
+  "Español": "Traducción con IA · {name}",
+  "Deutsch": "KI-Übersetzung · {name}",
+  "Français": "Traduction par IA · {name}",
+  "한국어": "AI 번역 · {name}",
+  "中文": "AI 翻译 · {name}",
+  "العربية": "الترجمة بالذكاء الاصطناعي · {name}",
+  "Tiếng Việt": "Dịch bằng AI · {name}"
+ },
+ "Choose the languages to translate into first.": {
+  "日本語": "先に翻訳先の言語を選択してください。",
+  "Español": "Elige primero los idiomas a los que traducir.",
+  "Deutsch": "Wählen Sie zuerst die Zielsprachen.",
+  "Français": "Choisissez d'abord les langues cibles.",
+  "한국어": "먼저 번역할 언어를 선택하세요.",
+  "中文": "请先选择要翻译成的语言。",
+  "العربية": "اختر اللغات المراد الترجمة إليها أولًا.",
+  "Tiếng Việt": "Hãy chọn ngôn ngữ cần dịch sang trước."
+ },
+ "AI translation uses Ask Buddy's model, which isn't set up: {problem}": {
+  "日本語": "AI 翻訳は Ask Buddy のモデルを使いますが、設定されていません: {problem}",
+  "Español": "La traducción con IA usa el modelo de Pregunta a Buddy, que no está configurado: {problem}",
+  "Deutsch": "Die KI-Übersetzung nutzt das Modell von „Buddy fragen“, das nicht eingerichtet ist: {problem}",
+  "Français": "La traduction par IA utilise le modèle de Demander à Buddy, qui n'est pas configuré : {problem}",
+  "한국어": "AI 번역은 Buddy에게 질문의 모델을 사용하는데 설정되어 있지 않습니다: {problem}",
+  "中文": "AI 翻译使用“询问 Buddy”的模型，但尚未设置：{problem}",
+  "العربية": "تستخدم الترجمة بالذكاء الاصطناعي نموذج اسأل Buddy، وهو غير مُعدّ: {problem}",
+  "Tiếng Việt": "Dịch bằng AI dùng mô hình của Hỏi Buddy, nhưng chưa được thiết lập: {problem}"
+ },
+ "Get a translation model first (on the Setup tab), or choose AI translation.": {
+  "日本語": "先に翻訳モデルを入手するか (「セットアップ」タブ)、AI 翻訳を選んでください。",
+  "Español": "Consigue primero un modelo de traducción (en la pestaña Configuración) o elige la traducción con IA.",
+  "Deutsch": "Holen Sie zuerst ein Übersetzungsmodell (auf dem Tab „Einrichtung“) oder wählen Sie die KI-Übersetzung.",
+  "Français": "Obtenez d'abord un modèle de traduction (dans l'onglet Configuration), ou choisissez la traduction par IA.",
+  "한국어": "먼저 번역 모델을 받거나(설정 탭) AI 번역을 선택하세요.",
+  "中文": "请先获取翻译模型（在“设置”标签页），或选择 AI 翻译。",
+  "العربية": "احصل على نموذج ترجمة أولًا (من تبويب الإعداد)، أو اختر الترجمة بالذكاء الاصطناعي.",
+  "Tiếng Việt": "Hãy tải mô hình dịch trước (ở thẻ Thiết lập), hoặc chọn dịch bằng AI."
+ },
+ "Didn't translate: {t_problem}": {
+  "日本語": "翻訳しませんでした: {t_problem}",
+  "Español": "No se tradujo: {t_problem}",
+  "Deutsch": "Nicht übersetzt: {t_problem}",
+  "Français": "Non traduit : {t_problem}",
+  "한국어": "번역하지 않았습니다: {t_problem}",
+  "中文": "未翻译：{t_problem}",
+  "العربية": "لم تتم الترجمة: {t_problem}",
+  "Tiếng Việt": "Chưa dịch: {t_problem}"
+ },
+ "Which language is the transcript in?": {
+  "日本語": "文字起こしはどの言語ですか?",
+  "Español": "¿En qué idioma está la transcripción?",
+  "Deutsch": "In welcher Sprache ist die Transkription?",
+  "Français": "Dans quelle langue est la transcription ?",
+  "한국어": "받아쓴 내용은 어떤 언어인가요?",
+  "中文": "转录内容是什么语言？",
+  "العربية": "بأي لغة التفريغ؟",
+  "Tiếng Việt": "Bản phiên âm bằng ngôn ngữ nào?"
+ },
+ "Translate subtitles": {
+  "日本語": "字幕を翻訳",
+  "Español": "Traducir subtítulos",
+  "Deutsch": "Untertitel übersetzen",
+  "Français": "Traduire des sous-titres",
+  "한국어": "자막 번역",
+  "中文": "翻译字幕",
+  "العربية": "ترجمة الترجمات",
+  "Tiếng Việt": "Dịch phụ đề"
+ },
+ "Couldn't read {path}:\n{error}": {
+  "日本語": "{path} を読み込めませんでした:\n{error}",
+  "Español": "No se pudo leer {path}:\n{error}",
+  "Deutsch": "{path} konnte nicht gelesen werden:\n{error}",
+  "Français": "Impossible de lire {path} :\n{error}",
+  "한국어": "{path}을(를) 읽을 수 없습니다:\n{error}",
+  "中文": "无法读取 {path}：\n{error}",
+  "العربية": "تعذرت قراءة {path}:\n{error}",
+  "Tiếng Việt": "Không thể đọc {path}:\n{error}"
+ },
+ "That file has no subtitles in it.": {
+  "日本語": "そのファイルには字幕がありません。",
+  "Español": "Ese archivo no contiene subtítulos.",
+  "Deutsch": "Diese Datei enthält keine Untertitel.",
+  "Français": "Ce fichier ne contient aucun sous-titre.",
+  "한국어": "해당 파일에 자막이 없습니다.",
+  "中文": "该文件中没有字幕。",
+  "العربية": "لا يحتوي ذلك الملف على ترجمات.",
+  "Tiếng Việt": "Tệp đó không có phụ đề nào."
+ },
+ "The subtitles in {file} are in:": {
+  "日本語": "{file} の字幕の言語:",
+  "Español": "Los subtítulos de {file} están en:",
+  "Deutsch": "Die Untertitel in {file} sind auf:",
+  "Français": "Les sous-titres de {file} sont en :",
+  "한국어": "{file}의 자막 언어:",
+  "中文": "{file} 中的字幕使用的语言：",
+  "العربية": "الترجمات في {file} بلغة:",
+  "Tiếng Việt": "Phụ đề trong {file} bằng:"
+ },
+ "Nothing to translate into.": {
+  "日本語": "翻訳先がありません。",
+  "Español": "No hay idiomas a los que traducir.",
+  "Deutsch": "Keine Zielsprache.",
+  "Français": "Aucune langue cible.",
+  "한국어": "번역할 언어가 없습니다.",
+  "中文": "没有要翻译成的语言。",
+  "العربية": "لا توجد لغة للترجمة إليها.",
+  "Tiếng Việt": "Không có ngôn ngữ để dịch sang."
+ },
+ "Nothing to translate – the transcript is empty.": {
+  "日本語": "翻訳するものがありません – 文字起こしが空です。",
+  "Español": "No hay nada que traducir: la transcripción está vacía.",
+  "Deutsch": "Nichts zu übersetzen – die Transkription ist leer.",
+  "Français": "Rien à traduire – la transcription est vide.",
+  "한국어": "번역할 내용이 없습니다 – 받아쓴 내용이 비어 있습니다.",
+  "中文": "没有可翻译的内容——转录为空。",
+  "العربية": "لا يوجد ما يُترجم – التفريغ فارغ.",
+  "Tiếng Việt": "Không có gì để dịch – bản phiên âm trống."
+ },
+ "Couldn't read the transcript: {error}": {
+  "日本語": "文字起こしを読み込めませんでした: {error}",
+  "Español": "No se pudo leer la transcripción: {error}",
+  "Deutsch": "Die Transkription konnte nicht gelesen werden: {error}",
+  "Français": "Impossible de lire la transcription : {error}",
+  "한국어": "받아쓴 내용을 읽을 수 없습니다: {error}",
+  "中文": "无法读取转录：{error}",
+  "العربية": "تعذرت قراءة التفريغ: {error}",
+  "Tiếng Việt": "Không thể đọc bản phiên âm: {error}"
+ },
+ "Translated into {count} language(s) in {secs} s on the {device}.": {
+  "日本語": "{device} を使い {secs} 秒で {count} 言語に翻訳しました。",
+  "Español": "Traducido a {count} idioma(s) en {secs} s en la {device}.",
+  "Deutsch": "In {count} Sprache(n) übersetzt, in {secs} s auf der {device}.",
+  "Français": "Traduit en {count} langue(s) en {secs} s sur le {device}.",
+  "한국어": "{device}에서 {secs}초 만에 {count}개 언어로 번역했습니다.",
+  "中文": "已在 {device} 上用 {secs} 秒翻译为 {count} 种语言。",
+  "العربية": "تمت الترجمة إلى {count} لغة في {secs} ث على {device}.",
+  "Tiếng Việt": "Đã dịch sang {count} ngôn ngữ trong {secs} giây trên {device}."
+ },
+ "Translated into {count} language(s) in {secs} s with {provider}.": {
+  "日本語": "{provider} で {secs} 秒で {count} 言語に翻訳しました。",
+  "Español": "Traducido a {count} idioma(s) en {secs} s con {provider}.",
+  "Deutsch": "In {count} Sprache(n) übersetzt, in {secs} s mit {provider}.",
+  "Français": "Traduit en {count} langue(s) en {secs} s avec {provider}.",
+  "한국어": "{provider}(으)로 {secs}초 만에 {count}개 언어로 번역했습니다.",
+  "中文": "已用 {provider} 在 {secs} 秒内翻译为 {count} 种语言。",
+  "العربية": "تمت الترجمة إلى {count} لغة في {secs} ث باستخدام {provider}.",
+  "Tiếng Việt": "Đã dịch sang {count} ngôn ngữ trong {secs} giây bằng {provider}."
+ },
+ "Translated into {count} language(s) in {secs} s on the {device}. '{name}' has a subtitle track for each language.": {
+  "日本語": "{device} を使い {secs} 秒で {count} 言語に翻訳しました。「{name}」には言語ごとの字幕トラックがあります。",
+  "Español": "Traducido a {count} idioma(s) en {secs} s en la {device}. '{name}' tiene una pista de subtítulos por idioma.",
+  "Deutsch": "In {count} Sprache(n) übersetzt, in {secs} s auf der {device}. „{name}“ hat eine Untertitelspur pro Sprache.",
+  "Français": "Traduit en {count} langue(s) en {secs} s sur le {device}. « {name} » a une piste de sous-titres par langue.",
+  "한국어": "{device}에서 {secs}초 만에 {count}개 언어로 번역했습니다. '{name}'에 언어마다 자막 트랙이 있습니다.",
+  "中文": "已在 {device} 上用 {secs} 秒翻译为 {count} 种语言。“{name}”中每种语言各有一条字幕轨道。",
+  "العربية": "تمت الترجمة إلى {count} لغة في {secs} ث على {device}. يحتوي '{name}' على مسار ترجمة لكل لغة.",
+  "Tiếng Việt": "Đã dịch sang {count} ngôn ngữ trong {secs} giây trên {device}. '{name}' có một track phụ đề cho mỗi ngôn ngữ."
+ },
+ "Translated into {count} language(s) in {secs} s with {provider}. '{name}' has a subtitle track for each language.": {
+  "日本語": "{provider} で {secs} 秒で {count} 言語に翻訳しました。「{name}」には言語ごとの字幕トラックがあります。",
+  "Español": "Traducido a {count} idioma(s) en {secs} s con {provider}. '{name}' tiene una pista de subtítulos por idioma.",
+  "Deutsch": "In {count} Sprache(n) übersetzt, in {secs} s mit {provider}. „{name}“ hat eine Untertitelspur pro Sprache.",
+  "Français": "Traduit en {count} langue(s) en {secs} s avec {provider}. « {name} » a une piste de sous-titres par langue.",
+  "한국어": "{provider}(으)로 {secs}초 만에 {count}개 언어로 번역했습니다. '{name}'에 언어마다 자막 트랙이 있습니다.",
+  "中文": "已用 {provider} 在 {secs} 秒内翻译为 {count} 种语言。“{name}”中每种语言各有一条字幕轨道。",
+  "العربية": "تمت الترجمة إلى {count} لغة في {secs} ث باستخدام {provider}. يحتوي '{name}' على مسار ترجمة لكل لغة.",
+  "Tiếng Việt": "Đã dịch sang {count} ngôn ngữ trong {secs} giây bằng {provider}. '{name}' có một track phụ đề cho mỗi ngôn ngữ."
+ },
+ "Making a timeline with a subtitle track per language…": {
+  "日本語": "言語ごとの字幕トラックを持つタイムラインを作成中…",
+  "Español": "Creando una línea de tiempo con una pista de subtítulos por idioma…",
+  "Deutsch": "Timeline mit einer Untertitelspur pro Sprache wird erstellt…",
+  "Français": "Création d'une timeline avec une piste de sous-titres par langue…",
+  "한국어": "언어마다 자막 트랙이 있는 타임라인을 만드는 중…",
+  "中文": "正在创建每种语言各有一条字幕轨道的时间线…",
+  "العربية": "جارٍ إنشاء خط زمني بمسار ترجمة لكل لغة…",
+  "Tiếng Việt": "Đang tạo timeline có một track phụ đề cho mỗi ngôn ngữ…"
+ },
+ "Engine installed.": {
+  "日本語": "エンジンをインストールしました。",
+  "Español": "Motor instalado.",
+  "Deutsch": "Engine installiert.",
+  "Français": "Moteur installé.",
+  "한국어": "엔진을 설치했습니다.",
+  "中文": "引擎已安装。",
+  "العربية": "تم تثبيت المحرك.",
+  "Tiếng Việt": "Đã cài đặt công cụ."
+ },
+ "{model} downloaded.": {
+  "日本語": "{model} をダウンロードしました。",
+  "Español": "{model} descargado.",
+  "Deutsch": "{model} heruntergeladen.",
+  "Français": "{model} téléchargé.",
+  "한국어": "{model}을(를) 다운로드했습니다.",
+  "中文": "已下载 {model}。",
+  "العربية": "تم تنزيل {model}.",
+  "Tiếng Việt": "Đã tải xuống {model}."
+ },
+ "Using the existing {model} at {path}.": {
+  "日本語": "{path} にある既存の {model} を使用します。",
+  "Español": "Usando el {model} existente en {path}.",
+  "Deutsch": "Das vorhandene {model} unter {path} wird verwendet.",
+  "Français": "Utilisation du {model} existant dans {path}.",
+  "한국어": "{path}에 있는 기존 {model}을(를) 사용합니다.",
+  "中文": "正在使用 {path} 中现有的 {model}。",
+  "العربية": "استخدام {model} الموجود في {path}.",
+  "Tiếng Việt": "Đang dùng {model} có sẵn tại {path}."
+ },
+ "Choose an NLLB-200 or MADLAD-400 model folder (it contains model.bin and tokenizer.json)": {
+  "日本語": "NLLB-200 または MADLAD-400 のモデルフォルダーを選択 (model.bin と tokenizer.json を含むフォルダー)",
+  "Español": "Elige una carpeta de modelo NLLB-200 o MADLAD-400 (contiene model.bin y tokenizer.json)",
+  "Deutsch": "Einen NLLB-200- oder MADLAD-400-Modellordner wählen (er enthält model.bin und tokenizer.json)",
+  "Français": "Choisir un dossier de modèle NLLB-200 ou MADLAD-400 (il contient model.bin et tokenizer.json)",
+  "한국어": "NLLB-200 또는 MADLAD-400 모델 폴더 선택(model.bin과 tokenizer.json이 있는 폴더)",
+  "中文": "选择 NLLB-200 或 MADLAD-400 模型文件夹（其中包含 model.bin 和 tokenizer.json）",
+  "العربية": "اختر مجلد نموذج NLLB-200 أو MADLAD-400 (يحتوي على model.bin وtokenizer.json)",
+  "Tiếng Việt": "Chọn thư mục mô hình NLLB-200 hoặc MADLAD-400 (chứa model.bin và tokenizer.json)"
+ },
+ "Choose a faster-whisper model folder (it contains model.bin)": {
+  "日本語": "faster-whisper のモデルフォルダーを選択 (model.bin を含むフォルダー)",
+  "Español": "Elige una carpeta de modelo faster-whisper (contiene model.bin)",
+  "Deutsch": "Einen faster-whisper-Modellordner wählen (er enthält model.bin)",
+  "Français": "Choisir un dossier de modèle faster-whisper (il contient model.bin)",
+  "한국어": "faster-whisper 모델 폴더 선택(model.bin이 있는 폴더)",
+  "中文": "选择 faster-whisper 模型文件夹（其中包含 model.bin）",
+  "العربية": "اختر مجلد نموذج faster-whisper (يحتوي على model.bin)",
+  "Tiếng Việt": "Chọn thư mục mô hình faster-whisper (chứa model.bin)"
+ },
+ "That folder doesn't look like a CTranslate2 NLLB-200 or MADLAD-400 3B model – it should contain model.bin, tokenizer.json and shared_vocabulary.json.": {
+  "日本語": "そのフォルダーは CTranslate2 形式の NLLB-200 または MADLAD-400 3B モデルではないようです – model.bin、tokenizer.json、shared_vocabulary.json が含まれているはずです。",
+  "Español": "Esa carpeta no parece un modelo CTranslate2 NLLB-200 o MADLAD-400 3B: debería contener model.bin, tokenizer.json y shared_vocabulary.json.",
+  "Deutsch": "Dieser Ordner sieht nicht wie ein CTranslate2-Modell NLLB-200 oder MADLAD-400 3B aus – er sollte model.bin, tokenizer.json und shared_vocabulary.json enthalten.",
+  "Français": "Ce dossier ne ressemble pas à un modèle CTranslate2 NLLB-200 ou MADLAD-400 3B – il devrait contenir model.bin, tokenizer.json et shared_vocabulary.json.",
+  "한국어": "해당 폴더는 CTranslate2 NLLB-200 또는 MADLAD-400 3B 모델이 아닌 것 같습니다 – model.bin, tokenizer.json, shared_vocabulary.json이 있어야 합니다.",
+  "中文": "该文件夹看起来不像 CTranslate2 NLLB-200 或 MADLAD-400 3B 模型——它应包含 model.bin、tokenizer.json 和 shared_vocabulary.json。",
+  "العربية": "لا يبدو ذلك المجلد نموذج CTranslate2 من NLLB-200 أو MADLAD-400 3B – يجب أن يحتوي على model.bin وtokenizer.json وshared_vocabulary.json.",
+  "Tiếng Việt": "Thư mục đó không giống mô hình CTranslate2 NLLB-200 hoặc MADLAD-400 3B – nó phải chứa model.bin, tokenizer.json và shared_vocabulary.json."
+ },
+ "That folder doesn't look like a faster-whisper (CTranslate2) model – it should contain model.bin and config.json.": {
+  "日本語": "そのフォルダーは faster-whisper (CTranslate2) モデルではないようです – model.bin と config.json が含まれているはずです。",
+  "Español": "Esa carpeta no parece un modelo faster-whisper (CTranslate2): debería contener model.bin y config.json.",
+  "Deutsch": "Dieser Ordner sieht nicht wie ein faster-whisper-Modell (CTranslate2) aus – er sollte model.bin und config.json enthalten.",
+  "Français": "Ce dossier ne ressemble pas à un modèle faster-whisper (CTranslate2) – il devrait contenir model.bin et config.json.",
+  "한국어": "해당 폴더는 faster-whisper(CTranslate2) 모델이 아닌 것 같습니다 – model.bin과 config.json이 있어야 합니다.",
+  "中文": "该文件夹看起来不像 faster-whisper (CTranslate2) 模型——它应包含 model.bin 和 config.json。",
+  "العربية": "لا يبدو ذلك المجلد نموذج faster-whisper (CTranslate2) – يجب أن يحتوي على model.bin وconfig.json.",
+  "Tiếng Việt": "Thư mục đó không giống mô hình faster-whisper (CTranslate2) – nó phải chứa model.bin và config.json."
+ },
+ "Not a model folder": {
+  "日本語": "モデルフォルダーではありません",
+  "Español": "No es una carpeta de modelo",
+  "Deutsch": "Kein Modellordner",
+  "Français": "Pas un dossier de modèle",
+  "한국어": "모델 폴더가 아님",
+  "中文": "不是模型文件夹",
+  "العربية": "ليس مجلد نموذج",
+  "Tiếng Việt": "Không phải thư mục mô hình"
+ },
+ "Auto (Parakeet + Whisper)": {
+  "日本語": "自動 (Parakeet + Whisper)",
+  "Español": "Auto (Parakeet + Whisper)",
+  "Deutsch": "Automatisch (Parakeet + Whisper)",
+  "Français": "Auto (Parakeet + Whisper)",
+  "한국어": "자동(Parakeet + Whisper)",
+  "中文": "自动 (Parakeet + Whisper)",
+  "العربية": "تلقائي (Parakeet + Whisper)",
+  "Tiếng Việt": "Tự động (Parakeet + Whisper)"
+ },
+ "Parakeet for the 25 European languages it covers (fast, even without a GPU), the best installed Whisper model for everything else. The language is detected first, unless you choose one.": {
+  "日本語": "対応する 25 のヨーロッパ言語には Parakeet (GPU がなくても高速)、それ以外にはインストール済みの最適な Whisper モデルを使います。言語を選ばない限り、先に言語を検出します。",
+  "Español": "Parakeet para los 25 idiomas europeos que cubre (rápido, incluso sin GPU) y el mejor modelo Whisper instalado para todo lo demás. Primero se detecta el idioma, salvo que elijas uno.",
+  "Deutsch": "Parakeet für die 25 europäischen Sprachen, die es abdeckt (schnell, auch ohne GPU), das beste installierte Whisper-Modell für alles andere. Die Sprache wird zuerst erkannt, sofern Sie keine wählen.",
+  "Français": "Parakeet pour les 25 langues européennes qu'il couvre (rapide, même sans GPU), le meilleur modèle Whisper installé pour tout le reste. La langue est d'abord détectée, sauf si vous en choisissez une.",
+  "한국어": "지원하는 25개 유럽 언어에는 Parakeet(GPU 없이도 빠름), 그 밖의 언어에는 설치된 최적의 Whisper 모델을 사용합니다. 언어를 선택하지 않으면 먼저 언어를 감지합니다.",
+  "中文": "对其支持的 25 种欧洲语言使用 Parakeet（即使没有 GPU 也很快），其他语言使用已安装的最佳 Whisper 模型。除非您选择语言，否则会先检测语言。",
+  "العربية": "Parakeet للغات الأوروبية الخمس والعشرين التي يغطيها (سريع حتى دون GPU)، وأفضل نموذج Whisper مثبت لكل ما عدا ذلك. تُكتشف اللغة أولًا، ما لم تختر واحدة.",
+  "Tiếng Việt": "Parakeet cho 25 ngôn ngữ châu Âu mà nó hỗ trợ (nhanh, kể cả khi không có GPU), mô hình Whisper tốt nhất đã cài cho mọi thứ khác. Ngôn ngữ được phát hiện trước, trừ khi bạn chọn."
+ },
+ "Uses the model Ask Buddy is set up with (Claude, Gemini, Ollama…). Best quality – it translates whole passages with their context – but a cloud model gets the transcript's text, and may charge for it.": {
+  "日本語": "Ask Buddy に設定されているモデル (Claude、Gemini、Ollama など) を使います。文脈ごと文章全体を翻訳するため最高品質ですが、クラウドのモデルには文字起こしのテキストが送られ、料金がかかる場合があります。",
+  "Español": "Usa el modelo con el que está configurado Pregunta a Buddy (Claude, Gemini, Ollama…). La mejor calidad, porque traduce pasajes completos con su contexto, pero un modelo en la nube recibe el texto de la transcripción y puede cobrar por ello.",
+  "Deutsch": "Verwendet das Modell, mit dem „Buddy fragen“ eingerichtet ist (Claude, Gemini, Ollama…). Beste Qualität – es übersetzt ganze Passagen mit Kontext –, aber ein Cloud-Modell erhält den Text der Transkription und kann dafür Gebühren verlangen.",
+  "Français": "Utilise le modèle configuré dans Demander à Buddy (Claude, Gemini, Ollama…). Meilleure qualité – il traduit des passages entiers avec leur contexte – mais un modèle cloud reçoit le texte de la transcription et peut le facturer.",
+  "한국어": "Buddy에게 질문에 설정된 모델(Claude, Gemini, Ollama 등)을 사용합니다. 문맥과 함께 문단 전체를 번역해 품질이 가장 좋지만, 클라우드 모델은 받아쓴 텍스트를 받으며 요금을 청구할 수 있습니다.",
+  "中文": "使用“询问 Buddy”所设置的模型（Claude、Gemini、Ollama 等）。质量最佳——会结合上下文翻译整段内容——但云端模型会收到转录文本，并可能收费。",
+  "العربية": "يستخدم النموذج المُعدّ في اسأل Buddy (Claude أو Gemini أو Ollama…). أفضل جودة – يترجم مقاطع كاملة مع سياقها – لكن النموذج السحابي يتلقى نص التفريغ، وقد يفرض رسومًا عليه.",
+  "Tiếng Việt": "Dùng mô hình mà Hỏi Buddy đã thiết lập (Claude, Gemini, Ollama…). Chất lượng tốt nhất – dịch cả đoạn cùng ngữ cảnh – nhưng mô hình đám mây sẽ nhận văn bản phiên âm và có thể tính phí."
+ },
+ "That model isn't installed – get it on the Setup tab.": {
+  "日本語": "そのモデルはインストールされていません – 「セットアップ」タブで入手してください。",
+  "Español": "Ese modelo no está instalado: consíguelo en la pestaña Configuración.",
+  "Deutsch": "Dieses Modell ist nicht installiert – holen Sie es auf dem Tab „Einrichtung“.",
+  "Français": "Ce modèle n'est pas installé – obtenez-le dans l'onglet Configuration.",
+  "한국어": "해당 모델이 설치되어 있지 않습니다 – 설정 탭에서 받으세요.",
+  "中文": "该模型未安装——请在“设置”标签页获取。",
+  "العربية": "هذا النموذج غير مثبت – احصل عليه من تبويب الإعداد.",
+  "Tiếng Việt": "Mô hình đó chưa được cài – hãy tải ở thẻ Thiết lập."
+ },
+ "Choose at least two languages for mixed audio – for one, pick it from the menu.": {
+  "日本語": "複数言語の音声には 2 つ以上の言語を選んでください – 1 つだけならメニューから選んでください。",
+  "Español": "Elige al menos dos idiomas para audio mixto; para uno solo, elígelo en el menú.",
+  "Deutsch": "Wählen Sie für gemischten Ton mindestens zwei Sprachen – für eine wählen Sie sie im Menü.",
+  "Français": "Choisissez au moins deux langues pour un audio mixte – pour une seule, choisissez-la dans le menu.",
+  "한국어": "여러 언어가 섞인 오디오라면 두 개 이상 고르세요 – 하나라면 메뉴에서 고르세요.",
+  "中文": "混合语言音频请至少选择两种语言——若只有一种，请从菜单中选择。",
+  "العربية": "اختر لغتين على الأقل للصوت المختلط – ولغة واحدة، اخترها من القائمة.",
+  "Tiếng Việt": "Chọn ít nhất hai ngôn ngữ cho âm thanh hỗn hợp – nếu chỉ một, hãy chọn trong menu."
+ },
+ "Most accurate, every language. Best with an NVIDIA GPU.": {
+  "日本語": "最も高精度で、すべての言語に対応。NVIDIA GPU での使用がおすすめです。",
+  "Español": "La más precisa, todos los idiomas. Mejor con una GPU NVIDIA.",
+  "Deutsch": "Am genauesten, alle Sprachen. Am besten mit einer NVIDIA-GPU.",
+  "Français": "Le plus précis, toutes les langues. Idéal avec un GPU NVIDIA.",
+  "한국어": "가장 정확하며 모든 언어를 지원합니다. NVIDIA GPU에서 가장 좋습니다.",
+  "中文": "最准确，支持所有语言。最好配合 NVIDIA GPU 使用。",
+  "العربية": "الأدق، كل اللغات. الأفضل مع GPU من NVIDIA.",
+  "Tiếng Việt": "Chính xác nhất, mọi ngôn ngữ. Tốt nhất với GPU NVIDIA."
+ },
+ "Nearly as accurate, several times faster. Good default.": {
+  "日本語": "ほぼ同等の精度で数倍高速。標準の選択肢に最適です。",
+  "Español": "Casi igual de precisa y varias veces más rápida. Buena opción por defecto.",
+  "Deutsch": "Fast so genau, mehrfach schneller. Gute Standardwahl.",
+  "Français": "Presque aussi précis, plusieurs fois plus rapide. Bon choix par défaut.",
+  "한국어": "거의 비슷하게 정확하고 몇 배 빠릅니다. 기본으로 좋습니다.",
+  "中文": "几乎同样准确，速度快数倍。适合作为默认选择。",
+  "العربية": "دقيق تقريبًا بالقدر نفسه، وأسرع بعدة مرات. خيار افتراضي جيد.",
+  "Tiếng Việt": "Gần như chính xác bằng, nhanh gấp nhiều lần. Lựa chọn mặc định tốt."
+ },
+ "25 European languages only. Very fast even without a GPU; punctuates by itself.": {
+  "日本語": "ヨーロッパの 25 言語のみ。GPU がなくても非常に高速で、句読点も自動で付けます。",
+  "Español": "Solo 25 idiomas europeos. Muy rápida incluso sin GPU; pone la puntuación sola.",
+  "Deutsch": "Nur 25 europäische Sprachen. Sehr schnell, auch ohne GPU; setzt Satzzeichen selbst.",
+  "Français": "25 langues européennes uniquement. Très rapide même sans GPU ; ponctue tout seul.",
+  "한국어": "유럽 25개 언어만 지원합니다. GPU 없이도 매우 빠르며 문장 부호를 스스로 넣습니다.",
+  "中文": "仅支持 25 种欧洲语言。即使没有 GPU 也非常快；会自动添加标点。",
+  "العربية": "خمس وعشرون لغة أوروبية فقط. سريع جدًا حتى دون GPU؛ يضع علامات الترقيم بنفسه.",
+  "Tiếng Việt": "Chỉ 25 ngôn ngữ châu Âu. Rất nhanh kể cả không có GPU; tự thêm dấu câu."
+ },
+ "English only. About twice as fast as Large v3, nearly as accurate.": {
+  "日本語": "英語のみ。Large v3 の約 2 倍の速さで、精度はほぼ同等です。",
+  "Español": "Solo inglés. Aproximadamente el doble de rápida que Large v3 y casi igual de precisa.",
+  "Deutsch": "Nur Englisch. Etwa doppelt so schnell wie Large v3, fast so genau.",
+  "Français": "Anglais uniquement. Environ deux fois plus rapide que Large v3, presque aussi précis.",
+  "한국어": "영어만 지원합니다. Large v3보다 약 두 배 빠르며 정확도는 거의 비슷합니다.",
+  "中文": "仅支持英语。速度约为 Large v3 的两倍，准确度相近。",
+  "العربية": "الإنجليزية فقط. أسرع بمرتين تقريبًا من Large v3، ودقيق تقريبًا بالقدر نفسه.",
+  "Tiếng Việt": "Chỉ tiếng Anh. Nhanh gấp khoảng hai lần Large v3, gần như chính xác bằng."
+ },
+ "Fast on any computer. Less accurate.": {
+  "日本語": "どのコンピューターでも高速。精度は低めです。",
+  "Español": "Rápida en cualquier equipo. Menos precisa.",
+  "Deutsch": "Schnell auf jedem Computer. Weniger genau.",
+  "Français": "Rapide sur tout ordinateur. Moins précis.",
+  "한국어": "어떤 컴퓨터에서도 빠릅니다. 정확도는 낮습니다.",
+  "中文": "在任何电脑上都很快。准确度较低。",
+  "العربية": "سريع على أي كمبيوتر. أقل دقة.",
+  "Tiếng Việt": "Nhanh trên mọi máy. Kém chính xác hơn."
+ },
+ "Best balance of quality and speed. Good default. Non-commercial use only.": {
+  "日本語": "品質と速度のバランスが最適。標準の選択肢に最適です。非商用のみ。",
+  "Español": "El mejor equilibrio entre calidad y velocidad. Buena opción por defecto. Solo uso no comercial.",
+  "Deutsch": "Bestes Verhältnis von Qualität und Geschwindigkeit. Gute Standardwahl. Nur nichtkommerzielle Nutzung.",
+  "Français": "Meilleur équilibre qualité/vitesse. Bon choix par défaut. Usage non commercial uniquement.",
+  "한국어": "품질과 속도의 균형이 가장 좋습니다. 기본으로 좋습니다. 비상업적 용도만 가능.",
+  "中文": "质量与速度的最佳平衡。适合作为默认选择。仅限非商业用途。",
+  "العربية": "أفضل توازن بين الجودة والسرعة. خيار افتراضي جيد. للاستخدام غير التجاري فقط.",
+  "Tiếng Việt": "Cân bằng tốt nhất giữa chất lượng và tốc độ. Lựa chọn mặc định tốt. Chỉ dùng phi thương mại."
+ },
+ "Most accurate NLLB. Best with an NVIDIA GPU. Non-commercial use only.": {
+  "日本語": "最も高精度な NLLB。NVIDIA GPU での使用がおすすめです。非商用のみ。",
+  "Español": "El NLLB más preciso. Mejor con una GPU NVIDIA. Solo uso no comercial.",
+  "Deutsch": "Genauestes NLLB. Am besten mit einer NVIDIA-GPU. Nur nichtkommerzielle Nutzung.",
+  "Français": "Le NLLB le plus précis. Idéal avec un GPU NVIDIA. Usage non commercial uniquement.",
+  "한국어": "가장 정확한 NLLB입니다. NVIDIA GPU에서 가장 좋습니다. 비상업적 용도만 가능.",
+  "中文": "最准确的 NLLB。最好配合 NVIDIA GPU 使用。仅限非商业用途。",
+  "العربية": "أدق نموذج NLLB. الأفضل مع GPU من NVIDIA. للاستخدام غير التجاري فقط.",
+  "Tiếng Việt": "NLLB chính xác nhất. Tốt nhất với GPU NVIDIA. Chỉ dùng phi thương mại."
+ },
+ "Fast on any computer. Less accurate. Non-commercial use only.": {
+  "日本語": "どのコンピューターでも高速。精度は低めです。非商用のみ。",
+  "Español": "Rápida en cualquier equipo. Menos precisa. Solo uso no comercial.",
+  "Deutsch": "Schnell auf jedem Computer. Weniger genau. Nur nichtkommerzielle Nutzung.",
+  "Français": "Rapide sur tout ordinateur. Moins précis. Usage non commercial uniquement.",
+  "한국어": "어떤 컴퓨터에서도 빠릅니다. 정확도는 낮습니다. 비상업적 용도만 가능.",
+  "中文": "在任何电脑上都很快。准确度较低。仅限非商业用途。",
+  "العربية": "سريع على أي كمبيوتر. أقل دقة. للاستخدام غير التجاري فقط.",
+  "Tiếng Việt": "Nhanh trên mọi máy. Kém chính xác hơn. Chỉ dùng phi thương mại."
+ },
+ "About 180 languages. Free for commercial use (Apache 2.0). Best with an NVIDIA GPU.": {
+  "日本語": "約 180 言語に対応。商用でも無料 (Apache 2.0)。NVIDIA GPU での使用がおすすめです。",
+  "Español": "Unos 180 idiomas. Gratis para uso comercial (Apache 2.0). Mejor con una GPU NVIDIA.",
+  "Deutsch": "Etwa 180 Sprachen. Kostenlos für kommerzielle Nutzung (Apache 2.0). Am besten mit einer NVIDIA-GPU.",
+  "Français": "Environ 180 langues. Gratuit pour un usage commercial (Apache 2.0). Idéal avec un GPU NVIDIA.",
+  "한국어": "약 180개 언어를 지원합니다. 상업적 용도로도 무료(Apache 2.0). NVIDIA GPU에서 가장 좋습니다.",
+  "中文": "约 180 种语言。商业用途免费（Apache 2.0）。最好配合 NVIDIA GPU 使用。",
+  "العربية": "نحو 180 لغة. مجاني للاستخدام التجاري (Apache 2.0). الأفضل مع GPU من NVIDIA.",
+  "Tiếng Việt": "Khoảng 180 ngôn ngữ. Miễn phí cho mục đích thương mại (Apache 2.0). Tốt nhất với GPU NVIDIA."
+ },
+ "NVIDIA GPU ({gpu}) – transcription runs on the GPU.": {
+  "日本語": "NVIDIA GPU ({gpu}) – 文字起こしは GPU で実行されます。",
+  "Español": "GPU NVIDIA ({gpu}): la transcripción se ejecuta en la GPU.",
+  "Deutsch": "NVIDIA-GPU ({gpu}) – die Transkription läuft auf der GPU.",
+  "Français": "GPU NVIDIA ({gpu}) – la transcription s'exécute sur le GPU.",
+  "한국어": "NVIDIA GPU({gpu}) – 받아쓰기가 GPU에서 실행됩니다.",
+  "中文": "NVIDIA GPU（{gpu}）——转录在 GPU 上运行。",
+  "العربية": "GPU من NVIDIA ({gpu}) – يعمل التفريغ على GPU.",
+  "Tiếng Việt": "GPU NVIDIA ({gpu}) – phiên âm chạy trên GPU."
+ },
+ "Mac ({chip}) – transcription runs on the CPU.": {
+  "日本語": "Mac ({chip}) – 文字起こしは CPU で実行されます。",
+  "Español": "Mac ({chip}): la transcripción se ejecuta en la CPU.",
+  "Deutsch": "Mac ({chip}) – die Transkription läuft auf der CPU.",
+  "Français": "Mac ({chip}) – la transcription s'exécute sur le CPU.",
+  "한국어": "Mac({chip}) – 받아쓰기가 CPU에서 실행됩니다.",
+  "中文": "Mac（{chip}）——转录在 CPU 上运行。",
+  "العربية": "Mac ({chip}) – يعمل التفريغ على CPU.",
+  "Tiếng Việt": "Mac ({chip}) – phiên âm chạy trên CPU."
+ },
+ "No NVIDIA GPU found – transcription runs on the CPU.": {
+  "日本語": "NVIDIA GPU が見つかりません – 文字起こしは CPU で実行されます。",
+  "Español": "No se encontró ninguna GPU NVIDIA: la transcripción se ejecuta en la CPU.",
+  "Deutsch": "Keine NVIDIA-GPU gefunden – die Transkription läuft auf der CPU.",
+  "Français": "Aucun GPU NVIDIA trouvé – la transcription s'exécute sur le CPU.",
+  "한국어": "NVIDIA GPU를 찾을 수 없습니다 – 받아쓰기가 CPU에서 실행됩니다.",
+  "中文": "未找到 NVIDIA GPU——转录在 CPU 上运行。",
+  "العربية": "لم يتم العثور على GPU من NVIDIA – يعمل التفريغ على CPU.",
+  "Tiếng Việt": "Không tìm thấy GPU NVIDIA – phiên âm chạy trên CPU."
+ },
+ "Not set up yet.": {
+  "日本語": "まだ設定されていません。",
+  "Español": "Aún no está configurado.",
+  "Deutsch": "Noch nicht eingerichtet.",
+  "Français": "Pas encore configuré.",
+  "한국어": "아직 설정되지 않았습니다.",
+  "中文": "尚未设置。",
+  "العربية": "لم يُعدّ بعد.",
+  "Tiếng Việt": "Chưa được thiết lập."
+ },
+ "Environment can't start: {error}": {
+  "日本語": "環境を起動できません: {error}",
+  "Español": "El entorno no puede iniciarse: {error}",
+  "Deutsch": "Die Umgebung kann nicht starten: {error}",
+  "Français": "L'environnement ne peut pas démarrer : {error}",
+  "한국어": "환경을 시작할 수 없습니다: {error}",
+  "中文": "环境无法启动：{error}",
+  "العربية": "لا يمكن بدء البيئة: {error}",
+  "Tiếng Việt": "Không thể khởi động môi trường: {error}"
+ },
+ "Environment is incomplete: {error}": {
+  "日本語": "環境が不完全です: {error}",
+  "Español": "El entorno está incompleto: {error}",
+  "Deutsch": "Die Umgebung ist unvollständig: {error}",
+  "Français": "L'environnement est incomplet : {error}",
+  "한국어": "환경이 완전하지 않습니다: {error}",
+  "中文": "环境不完整：{error}",
+  "العربية": "البيئة غير مكتملة: {error}",
+  "Tiếng Việt": "Môi trường chưa đầy đủ: {error}"
+ },
+ "Set up the transcription environment first.": {
+  "日本語": "先に文字起こし環境を設定してください。",
+  "Español": "Configura primero el entorno de transcripción.",
+  "Deutsch": "Richten Sie zuerst die Transkriptionsumgebung ein.",
+  "Français": "Configurez d'abord l'environnement de transcription.",
+  "한국어": "먼저 받아쓰기 환경을 설정하세요.",
+  "中文": "请先设置转录环境。",
+  "العربية": "أعدّ بيئة التفريغ أولًا.",
+  "Tiếng Việt": "Hãy thiết lập môi trường phiên âm trước."
+ },
+ "Rendering the timeline's audio…": {
+  "日本語": "タイムラインのオーディオをレンダリング中…",
+  "Español": "Renderizando el audio de la línea de tiempo…",
+  "Deutsch": "Ton der Timeline wird gerendert…",
+  "Français": "Rendu de l'audio de la timeline…",
+  "한국어": "타임라인 오디오 렌더링 중…",
+  "中文": "正在渲染时间线音频…",
+  "العربية": "جارٍ تصيير صوت الخط الزمني…",
+  "Tiếng Việt": "Đang kết xuất âm thanh của timeline…"
+ },
+ "Loading the model…": {
+  "日本語": "モデルを読み込み中…",
+  "Español": "Cargando el modelo…",
+  "Deutsch": "Modell wird geladen…",
+  "Français": "Chargement du modèle…",
+  "한국어": "모델 불러오는 중…",
+  "中文": "正在加载模型…",
+  "العربية": "جارٍ تحميل النموذج…",
+  "Tiếng Việt": "Đang tải mô hình…"
+ },
+ "Building subtitles…": {
+  "日本語": "字幕を作成中…",
+  "Español": "Creando subtítulos…",
+  "Deutsch": "Untertitel werden erstellt…",
+  "Français": "Création des sous-titres…",
+  "한국어": "자막 만드는 중…",
+  "中文": "正在生成字幕…",
+  "العربية": "جارٍ بناء الترجمات…",
+  "Tiếng Việt": "Đang dựng phụ đề…"
+ },
+ "Transcribing… {done} of {total}": {
+  "日本語": "文字起こし中… {done} / {total}",
+  "Español": "Transcribiendo… {done} de {total}",
+  "Deutsch": "Wird transkribiert… {done} von {total}",
+  "Français": "Transcription… {done} sur {total}",
+  "한국어": "받아쓰는 중… {done}/{total}",
+  "中文": "正在转录… {done} / {total}",
+  "العربية": "جارٍ التفريغ… {done} من {total}",
+  "Tiếng Việt": "Đang phiên âm… {done}/{total}"
+ },
+ "Loading the translation model…": {
+  "日本語": "翻訳モデルを読み込み中…",
+  "Español": "Cargando el modelo de traducción…",
+  "Deutsch": "Übersetzungsmodell wird geladen…",
+  "Français": "Chargement du modèle de traduction…",
+  "한국어": "번역 모델 불러오는 중…",
+  "中文": "正在加载翻译模型…",
+  "العربية": "جارٍ تحميل نموذج الترجمة…",
+  "Tiếng Việt": "Đang tải mô hình dịch…"
+ },
+ "Translating to {name}… {pct}%": {
+  "日本語": "{name} に翻訳中… {pct}%",
+  "Español": "Traduciendo a {name}… {pct} %",
+  "Deutsch": "Übersetzung ins {name}… {pct} %",
+  "Français": "Traduction en {name}… {pct} %",
+  "한국어": "{name}(으)로 번역 중… {pct}%",
+  "中文": "正在翻译为{name}… {pct}%",
+  "العربية": "جارٍ الترجمة إلى {name}… {pct}%",
+  "Tiếng Việt": "Đang dịch sang {name}… {pct}%"
+ },
+ "Translating to {name} with {provider}…": {
+  "日本語": "{provider} で {name} に翻訳中…",
+  "Español": "Traduciendo a {name} con {provider}…",
+  "Deutsch": "Übersetzung ins {name} mit {provider}…",
+  "Français": "Traduction en {name} avec {provider}…",
+  "한국어": "{provider}(으)로 {name} 번역 중…",
+  "中文": "正在用 {provider} 翻译为{name}…",
+  "العربية": "جارٍ الترجمة إلى {name} باستخدام {provider}…",
+  "Tiếng Việt": "Đang dịch sang {name} bằng {provider}…"
+ },
+ "Working out which language each part is in…": {
+  "日本語": "各部分の言語を判別中…",
+  "Español": "Averiguando en qué idioma está cada parte…",
+  "Deutsch": "Es wird ermittelt, in welcher Sprache jeder Teil ist…",
+  "Français": "Détermination de la langue de chaque partie…",
+  "한국어": "각 부분의 언어를 파악하는 중…",
+  "中文": "正在判断每部分使用的语言…",
+  "العربية": "جارٍ تحديد لغة كل جزء…",
+  "Tiếng Việt": "Đang xác định ngôn ngữ của từng phần…"
+ },
+ "Transcribing on the GPU…": {
+  "日本語": "GPU で文字起こし中…",
+  "Español": "Transcribiendo en la GPU…",
+  "Deutsch": "Transkription auf der GPU…",
+  "Français": "Transcription sur le GPU…",
+  "한국어": "GPU에서 받아쓰는 중…",
+  "中文": "正在 GPU 上转录…",
+  "العربية": "جارٍ التفريغ على GPU…",
+  "Tiếng Việt": "Đang phiên âm trên GPU…"
+ },
+ "Transcribing on the CPU…": {
+  "日本語": "CPU で文字起こし中…",
+  "Español": "Transcribiendo en la CPU…",
+  "Deutsch": "Transkription auf der CPU…",
+  "Français": "Transcription sur le CPU…",
+  "한국어": "CPU에서 받아쓰는 중…",
+  "中文": "正在 CPU 上转录…",
+  "العربية": "جارٍ التفريغ على CPU…",
+  "Tiếng Việt": "Đang phiên âm trên CPU…"
+ },
+ "Transcribing with Parakeet on the CPU…": {
+  "日本語": "Parakeet と CPU で文字起こし中…",
+  "Español": "Transcribiendo con Parakeet en la CPU…",
+  "Deutsch": "Transkription mit Parakeet auf der CPU…",
+  "Français": "Transcription avec Parakeet sur le CPU…",
+  "한국어": "CPU에서 Parakeet로 받아쓰는 중…",
+  "中文": "正在 CPU 上用 Parakeet 转录…",
+  "العربية": "جارٍ التفريغ باستخدام Parakeet على CPU…",
+  "Tiếng Việt": "Đang phiên âm bằng Parakeet trên CPU…"
+ },
+ "Reading the audio…": {
+  "日本語": "オーディオを読み込み中…",
+  "Español": "Leyendo el audio…",
+  "Deutsch": "Ton wird gelesen…",
+  "Français": "Lecture de l'audio…",
+  "한국어": "오디오 읽는 중…",
+  "中文": "正在读取音频…",
+  "العربية": "جارٍ قراءة الصوت…",
+  "Tiếng Việt": "Đang đọc âm thanh…"
+ },
+ "Translating on the GPU…": {
+  "日本語": "GPU で翻訳中…",
+  "Español": "Traduciendo en la GPU…",
+  "Deutsch": "Übersetzung auf der GPU…",
+  "Français": "Traduction sur le GPU…",
+  "한국어": "GPU에서 번역 중…",
+  "中文": "正在 GPU 上翻译…",
+  "العربية": "جارٍ الترجمة على GPU…",
+  "Tiếng Việt": "Đang dịch trên GPU…"
+ },
+ "Translating on the CPU…": {
+  "日本語": "CPU で翻訳中…",
+  "Español": "Traduciendo en la CPU…",
+  "Deutsch": "Übersetzung auf der CPU…",
+  "Français": "Traduction sur le CPU…",
+  "한국어": "CPU에서 번역 중…",
+  "中文": "正在 CPU 上翻译…",
+  "العربية": "جارٍ الترجمة على CPU…",
+  "Tiếng Việt": "Đang dịch trên CPU…"
+ },
+ "Detected language: {language} ({pct}).": {
+  "日本語": "検出された言語: {language} ({pct})。",
+  "Español": "Idioma detectado: {language} ({pct}).",
+  "Deutsch": "Erkannte Sprache: {language} ({pct}).",
+  "Français": "Langue détectée : {language} ({pct}).",
+  "한국어": "감지된 언어: {language}({pct}).",
+  "中文": "检测到的语言：{language}（{pct}）。",
+  "العربية": "اللغة المكتشفة: {language} ({pct}).",
+  "Tiếng Việt": "Ngôn ngữ phát hiện: {language} ({pct})."
+ },
+ "Languages heard: {languages}": {
+  "日本語": "聞き取った言語: {languages}",
+  "Español": "Idiomas oídos: {languages}",
+  "Deutsch": "Erkannte Sprachen: {languages}",
+  "Français": "Langues entendues : {languages}",
+  "한국어": "들린 언어: {languages}",
+  "中文": "听到的语言：{languages}",
+  "العربية": "اللغات المسموعة: {languages}",
+  "Tiếng Việt": "Các ngôn ngữ nghe được: {languages}"
+ },
+ "The engine crashed on the GPU; trying again on the CPU…": {
+  "日本語": "エンジンが GPU でクラッシュしました。CPU で再試行しています…",
+  "Español": "El motor falló en la GPU; se vuelve a intentar en la CPU…",
+  "Deutsch": "Die Engine ist auf der GPU abgestürzt; neuer Versuch auf der CPU…",
+  "Français": "Le moteur a planté sur le GPU ; nouvel essai sur le CPU…",
+  "한국어": "엔진이 GPU에서 멈췄습니다. CPU에서 다시 시도하는 중…",
+  "中文": "引擎在 GPU 上崩溃；正在 CPU 上重试…",
+  "العربية": "تعطل المحرك على GPU؛ جارٍ المحاولة مرة أخرى على CPU…",
+  "Tiếng Việt": "Công cụ bị lỗi trên GPU; đang thử lại trên CPU…"
+ },
+ "The engine reported an error.": {
+  "日本語": "エンジンがエラーを報告しました。",
+  "Español": "El motor informó de un error.",
+  "Deutsch": "Die Engine hat einen Fehler gemeldet.",
+  "Français": "Le moteur a signalé une erreur.",
+  "한국어": "엔진에서 오류를 보고했습니다.",
+  "中文": "引擎报告了错误。",
+  "العربية": "أبلغ المحرك عن خطأ.",
+  "Tiếng Việt": "Công cụ báo lỗi."
+ },
+ "The engine stopped unexpectedly.": {
+  "日本語": "エンジンが予期せず停止しました。",
+  "Español": "El motor se detuvo inesperadamente.",
+  "Deutsch": "Die Engine wurde unerwartet beendet.",
+  "Français": "Le moteur s'est arrêté de manière inattendue.",
+  "한국어": "엔진이 예기치 않게 중지되었습니다.",
+  "中文": "引擎意外停止。",
+  "العربية": "توقف المحرك بشكل غير متوقع.",
+  "Tiếng Việt": "Công cụ dừng đột ngột."
+ },
+ "The transcription engine stopped unexpectedly.": {
+  "日本語": "文字起こしエンジンが予期せず停止しました。",
+  "Español": "El motor de transcripción se detuvo inesperadamente.",
+  "Deutsch": "Die Transkriptions-Engine wurde unerwartet beendet.",
+  "Français": "Le moteur de transcription s'est arrêté de manière inattendue.",
+  "한국어": "받아쓰기 엔진이 예기치 않게 중지되었습니다.",
+  "中文": "转录引擎意外停止。",
+  "العربية": "توقف محرك التفريغ بشكل غير متوقع.",
+  "Tiếng Việt": "Công cụ phiên âm dừng đột ngột."
+ },
+ "The translation engine stopped unexpectedly.": {
+  "日本語": "翻訳エンジンが予期せず停止しました。",
+  "Español": "El motor de traducción se detuvo inesperadamente.",
+  "Deutsch": "Die Übersetzungs-Engine wurde unerwartet beendet.",
+  "Français": "Le moteur de traduction s'est arrêté de manière inattendue.",
+  "한국어": "번역 엔진이 예기치 않게 중지되었습니다.",
+  "中文": "翻译引擎意外停止。",
+  "العربية": "توقف محرك الترجمة بشكل غير متوقع.",
+  "Tiếng Việt": "Công cụ dịch dừng đột ngột."
+ },
+ "No speech was found in the timeline's audio.": {
+  "日本語": "タイムラインのオーディオに音声が見つかりませんでした。",
+  "Español": "No se encontró voz en el audio de la línea de tiempo.",
+  "Deutsch": "Im Ton der Timeline wurde keine Sprache gefunden.",
+  "Français": "Aucune parole trouvée dans l'audio de la timeline.",
+  "한국어": "타임라인 오디오에서 음성을 찾지 못했습니다.",
+  "中文": "时间线音频中未找到语音。",
+  "العربية": "لم يتم العثور على كلام في صوت الخط الزمني.",
+  "Tiếng Việt": "Không tìm thấy giọng nói trong âm thanh của timeline."
+ },
+ "Mixed languages need a Whisper model – get one on the Setup tab.": {
+  "日本語": "複数言語には Whisper モデルが必要です – 「セットアップ」タブで入手してください。",
+  "Español": "Los idiomas mixtos necesitan un modelo Whisper: consíguelo en la pestaña Configuración.",
+  "Deutsch": "Gemischte Sprachen benötigen ein Whisper-Modell – holen Sie eines auf dem Tab „Einrichtung“.",
+  "Français": "Les langues mélangées nécessitent un modèle Whisper – obtenez-en un dans l'onglet Configuration.",
+  "한국어": "여러 언어에는 Whisper 모델이 필요합니다 – 설정 탭에서 받으세요.",
+  "中文": "混合语言需要 Whisper 模型——请在“设置”标签页获取。",
+  "العربية": "تحتاج اللغات المختلطة إلى نموذج Whisper – احصل عليه من تبويب الإعداد.",
+  "Tiếng Việt": "Nhiều ngôn ngữ cần mô hình Whisper – hãy tải ở thẻ Thiết lập."
+ },
+ "Open a timeline in Resolve first.": {
+  "日本語": "先に Resolve でタイムラインを開いてください。",
+  "Español": "Abre primero una línea de tiempo en Resolve.",
+  "Deutsch": "Öffnen Sie zuerst eine Timeline in Resolve.",
+  "Français": "Ouvrez d'abord une timeline dans Resolve.",
+  "한국어": "먼저 Resolve에서 타임라인을 여세요.",
+  "中文": "请先在 Resolve 中打开时间线。",
+  "العربية": "افتح خطًا زمنيًا في Resolve أولًا.",
+  "Tiếng Việt": "Hãy mở một timeline trong Resolve trước."
+ },
+ "Resolve is already rendering. Wait for it to finish, then try again.": {
+  "日本語": "Resolve は既にレンダリング中です。終わるまで待ってから、もう一度お試しください。",
+  "Español": "Resolve ya está renderizando. Espera a que termine y vuelve a intentarlo.",
+  "Deutsch": "Resolve rendert bereits. Warten Sie, bis es fertig ist, und versuchen Sie es erneut.",
+  "Français": "Resolve effectue déjà un rendu. Attendez qu'il se termine, puis réessayez.",
+  "한국어": "Resolve가 이미 렌더링 중입니다. 끝날 때까지 기다린 후 다시 시도하세요.",
+  "中文": "Resolve 正在渲染。请等待完成后重试。",
+  "العربية": "يقوم Resolve بالتصيير بالفعل. انتظر حتى ينتهي، ثم حاول مرة أخرى.",
+  "Tiếng Việt": "Resolve đang kết xuất. Hãy chờ xong rồi thử lại."
+ },
+ "Resolve refused the audio render format.": {
+  "日本語": "Resolve がオーディオのレンダリング形式を拒否しました。",
+  "Español": "Resolve rechazó el formato de renderizado de audio.",
+  "Deutsch": "Resolve hat das Audio-Renderformat abgelehnt.",
+  "Français": "Resolve a refusé le format de rendu audio.",
+  "한국어": "Resolve가 오디오 렌더 형식을 거부했습니다.",
+  "中文": "Resolve 拒绝了音频渲染格式。",
+  "العربية": "رفض Resolve تنسيق تصيير الصوت.",
+  "Tiếng Việt": "Resolve đã từ chối định dạng kết xuất âm thanh."
+ },
+ "Resolve refused the audio render settings.": {
+  "日本語": "Resolve がオーディオのレンダリング設定を拒否しました。",
+  "Español": "Resolve rechazó los ajustes de renderizado de audio.",
+  "Deutsch": "Resolve hat die Audio-Rendereinstellungen abgelehnt.",
+  "Français": "Resolve a refusé les paramètres de rendu audio.",
+  "한국어": "Resolve가 오디오 렌더 설정을 거부했습니다.",
+  "中文": "Resolve 拒绝了音频渲染设置。",
+  "العربية": "رفض Resolve إعدادات تصيير الصوت.",
+  "Tiếng Việt": "Resolve đã từ chối cài đặt kết xuất âm thanh."
+ },
+ "Resolve couldn't add the audio render job.": {
+  "日本語": "Resolve がオーディオのレンダリングジョブを追加できませんでした。",
+  "Español": "Resolve no pudo añadir el trabajo de renderizado de audio.",
+  "Deutsch": "Resolve konnte den Audio-Renderauftrag nicht hinzufügen.",
+  "Français": "Resolve n'a pas pu ajouter la tâche de rendu audio.",
+  "한국어": "Resolve가 오디오 렌더 작업을 추가하지 못했습니다.",
+  "中文": "Resolve 无法添加音频渲染任务。",
+  "العربية": "تعذر على Resolve إضافة مهمة تصيير الصوت.",
+  "Tiếng Việt": "Resolve không thể thêm tác vụ kết xuất âm thanh."
+ },
+ "Resolve didn't start rendering the timeline audio.": {
+  "日本語": "Resolve がタイムラインのオーディオのレンダリングを開始しませんでした。",
+  "Español": "Resolve no empezó a renderizar el audio de la línea de tiempo.",
+  "Deutsch": "Resolve hat nicht mit dem Rendern des Timeline-Tons begonnen.",
+  "Français": "Resolve n'a pas lancé le rendu de l'audio de la timeline.",
+  "한국어": "Resolve가 타임라인 오디오 렌더링을 시작하지 않았습니다.",
+  "中文": "Resolve 未开始渲染时间线音频。",
+  "العربية": "لم يبدأ Resolve تصيير صوت الخط الزمني.",
+  "Tiếng Việt": "Resolve không bắt đầu kết xuất âm thanh timeline."
+ },
+ "Resolve couldn't import the subtitle file.": {
+  "日本語": "Resolve が字幕ファイルを読み込めませんでした。",
+  "Español": "Resolve no pudo importar el archivo de subtítulos.",
+  "Deutsch": "Resolve konnte die Untertiteldatei nicht importieren.",
+  "Français": "Resolve n'a pas pu importer le fichier de sous-titres.",
+  "한국어": "Resolve가 자막 파일을 가져오지 못했습니다.",
+  "中文": "Resolve 无法导入字幕文件。",
+  "العربية": "تعذر على Resolve استيراد ملف الترجمة.",
+  "Tiếng Việt": "Resolve không thể nhập tệp phụ đề."
+ },
+ "Resolve couldn't add a subtitle track.": {
+  "日本語": "Resolve が字幕トラックを追加できませんでした。",
+  "Español": "Resolve no pudo añadir una pista de subtítulos.",
+  "Deutsch": "Resolve konnte keine Untertitelspur hinzufügen.",
+  "Français": "Resolve n'a pas pu ajouter de piste de sous-titres.",
+  "한국어": "Resolve가 자막 트랙을 추가하지 못했습니다.",
+  "中文": "Resolve 无法添加字幕轨道。",
+  "العربية": "تعذر على Resolve إضافة مسار ترجمة.",
+  "Tiếng Việt": "Resolve không thể thêm track phụ đề."
+ },
+ "Resolve imported the subtitles but didn't place them.": {
+  "日本語": "Resolve は字幕を読み込みましたが、配置しませんでした。",
+  "Español": "Resolve importó los subtítulos, pero no los colocó.",
+  "Deutsch": "Resolve hat die Untertitel importiert, aber nicht platziert.",
+  "Français": "Resolve a importé les sous-titres mais ne les a pas placés.",
+  "한국어": "Resolve가 자막을 가져왔지만 배치하지 않았습니다.",
+  "中文": "Resolve 已导入字幕，但未放置。",
+  "العربية": "استورد Resolve الترجمات لكنه لم يضعها.",
+  "Tiếng Việt": "Resolve đã nhập phụ đề nhưng không đặt chúng."
+ },
+ "Resolve couldn't export the timeline.": {
+  "日本語": "Resolve がタイムラインを書き出せませんでした。",
+  "Español": "Resolve no pudo exportar la línea de tiempo.",
+  "Deutsch": "Resolve konnte die Timeline nicht exportieren.",
+  "Français": "Resolve n'a pas pu exporter la timeline.",
+  "한국어": "Resolve가 타임라인을 내보내지 못했습니다.",
+  "中文": "Resolve 无法导出时间线。",
+  "العربية": "تعذر على Resolve تصدير الخط الزمني.",
+  "Tiếng Việt": "Resolve không thể xuất timeline."
+ },
+ "Resolve didn't import the new timeline.": {
+  "日本語": "Resolve が新しいタイムラインを読み込みませんでした。",
+  "Español": "Resolve no importó la nueva línea de tiempo.",
+  "Deutsch": "Resolve hat die neue Timeline nicht importiert.",
+  "Français": "Resolve n'a pas importé la nouvelle timeline.",
+  "한국어": "Resolve가 새 타임라인을 가져오지 않았습니다.",
+  "中文": "Resolve 未导入新时间线。",
+  "العربية": "لم يستورد Resolve الخط الزمني الجديد.",
+  "Tiếng Việt": "Resolve không nhập timeline mới."
+ },
+ "English": {
+  "日本語": "英語",
+  "Español": "Inglés",
+  "Deutsch": "Englisch",
+  "Français": "Anglais",
+  "한국어": "영어",
+  "中文": "英语",
+  "العربية": "الإنجليزية",
+  "Tiếng Việt": "Tiếng Anh"
+ },
+ "Spanish": {
+  "日本語": "スペイン語",
+  "Español": "Español",
+  "Deutsch": "Spanisch",
+  "Français": "Espagnol",
+  "한국어": "스페인어",
+  "中文": "西班牙语",
+  "العربية": "الإسبانية",
+  "Tiếng Việt": "Tiếng Tây Ban Nha"
+ },
+ "French": {
+  "日本語": "フランス語",
+  "Español": "Francés",
+  "Deutsch": "Französisch",
+  "Français": "Français",
+  "한국어": "프랑스어",
+  "中文": "法语",
+  "العربية": "الفرنسية",
+  "Tiếng Việt": "Tiếng Pháp"
+ },
+ "German": {
+  "日本語": "ドイツ語",
+  "Español": "Alemán",
+  "Deutsch": "Deutsch",
+  "Français": "Allemand",
+  "한국어": "독일어",
+  "中文": "德语",
+  "العربية": "الألمانية",
+  "Tiếng Việt": "Tiếng Đức"
+ },
+ "Italian": {
+  "日本語": "イタリア語",
+  "Español": "Italiano",
+  "Deutsch": "Italienisch",
+  "Français": "Italien",
+  "한국어": "이탈리아어",
+  "中文": "意大利语",
+  "العربية": "الإيطالية",
+  "Tiếng Việt": "Tiếng Ý"
+ },
+ "Portuguese": {
+  "日本語": "ポルトガル語",
+  "Español": "Portugués",
+  "Deutsch": "Portugiesisch",
+  "Français": "Portugais",
+  "한국어": "포르투갈어",
+  "中文": "葡萄牙语",
+  "العربية": "البرتغالية",
+  "Tiếng Việt": "Tiếng Bồ Đào Nha"
+ },
+ "Dutch": {
+  "日本語": "オランダ語",
+  "Español": "Neerlandés",
+  "Deutsch": "Niederländisch",
+  "Français": "Néerlandais",
+  "한국어": "네덜란드어",
+  "中文": "荷兰语",
+  "العربية": "الهولندية",
+  "Tiếng Việt": "Tiếng Hà Lan"
+ },
+ "Swedish": {
+  "日本語": "スウェーデン語",
+  "Español": "Sueco",
+  "Deutsch": "Schwedisch",
+  "Français": "Suédois",
+  "한국어": "스웨덴어",
+  "中文": "瑞典语",
+  "العربية": "السويدية",
+  "Tiếng Việt": "Tiếng Thụy Điển"
+ },
+ "Polish": {
+  "日本語": "ポーランド語",
+  "Español": "Polaco",
+  "Deutsch": "Polnisch",
+  "Français": "Polonais",
+  "한국어": "폴란드어",
+  "中文": "波兰语",
+  "العربية": "البولندية",
+  "Tiếng Việt": "Tiếng Ba Lan"
+ },
+ "Russian": {
+  "日本語": "ロシア語",
+  "Español": "Ruso",
+  "Deutsch": "Russisch",
+  "Français": "Russe",
+  "한국어": "러시아어",
+  "中文": "俄语",
+  "العربية": "الروسية",
+  "Tiếng Việt": "Tiếng Nga"
+ },
+ "Ukrainian": {
+  "日本語": "ウクライナ語",
+  "Español": "Ucraniano",
+  "Deutsch": "Ukrainisch",
+  "Français": "Ukrainien",
+  "한국어": "우크라이나어",
+  "中文": "乌克兰语",
+  "العربية": "الأوكرانية",
+  "Tiếng Việt": "Tiếng Ukraina"
+ },
+ "Turkish": {
+  "日本語": "トルコ語",
+  "Español": "Turco",
+  "Deutsch": "Türkisch",
+  "Français": "Turc",
+  "한국어": "튀르키예어",
+  "中文": "土耳其语",
+  "العربية": "التركية",
+  "Tiếng Việt": "Tiếng Thổ Nhĩ Kỳ"
+ },
+ "Arabic": {
+  "日本語": "アラビア語",
+  "Español": "Árabe",
+  "Deutsch": "Arabisch",
+  "Français": "Arabe",
+  "한국어": "아랍어",
+  "中文": "阿拉伯语",
+  "العربية": "العربية",
+  "Tiếng Việt": "Tiếng Ả Rập"
+ },
+ "Hindi": {
+  "日本語": "ヒンディー語",
+  "Español": "Hindi",
+  "Deutsch": "Hindi",
+  "Français": "Hindi",
+  "한국어": "힌디어",
+  "中文": "印地语",
+  "العربية": "الهندية",
+  "Tiếng Việt": "Tiếng Hindi"
+ },
+ "Japanese": {
+  "日本語": "日本語",
+  "Español": "Japonés",
+  "Deutsch": "Japanisch",
+  "Français": "Japonais",
+  "한국어": "일본어",
+  "中文": "日语",
+  "العربية": "اليابانية",
+  "Tiếng Việt": "Tiếng Nhật"
+ },
+ "Korean": {
+  "日本語": "韓国語",
+  "Español": "Coreano",
+  "Deutsch": "Koreanisch",
+  "Français": "Coréen",
+  "한국어": "한국어",
+  "中文": "韩语",
+  "العربية": "الكورية",
+  "Tiếng Việt": "Tiếng Hàn"
+ },
+ "Chinese": {
+  "日本語": "中国語",
+  "Español": "Chino",
+  "Deutsch": "Chinesisch",
+  "Français": "Chinois",
+  "한국어": "중국어",
+  "中文": "中文",
+  "العربية": "الصينية",
+  "Tiếng Việt": "Tiếng Trung"
+ },
+ "Indonesian": {
+  "日本語": "インドネシア語",
+  "Español": "Indonesio",
+  "Deutsch": "Indonesisch",
+  "Français": "Indonésien",
+  "한국어": "인도네시아어",
+  "中文": "印尼语",
+  "العربية": "الإندونيسية",
+  "Tiếng Việt": "Tiếng Indonesia"
+ },
+ "Vietnamese": {
+  "日本語": "ベトナム語",
+  "Español": "Vietnamita",
+  "Deutsch": "Vietnamesisch",
+  "Français": "Vietnamien",
+  "한국어": "베트남어",
+  "中文": "越南语",
+  "العربية": "الفيتنامية",
+  "Tiếng Việt": "Tiếng Việt"
+ },
+ "Couldn't convert the subtitles: {error}": {
+  "日本語": "字幕を変換できませんでした: {error}",
+  "Español": "No se pudieron convertir los subtítulos: {error}",
+  "Deutsch": "Die Untertitel konnten nicht umgewandelt werden: {error}",
+  "Français": "Impossible de convertir les sous-titres : {error}",
+  "한국어": "자막을 변환할 수 없습니다: {error}",
+  "中文": "无法转换字幕：{error}",
+  "العربية": "تعذر تحويل الترجمات: {error}",
+  "Tiếng Việt": "Không thể chuyển đổi phụ đề: {error}"
+ },
+ "Resolve Studio transcribes the timeline itself – nothing to install or download here, and it tells the speakers apart. The transcription stays with the timeline in Resolve too.": {
+  "日本語": "Resolve Studio がタイムラインを自ら文字起こしします – ここでインストールやダウンロードは不要で、話者も聞き分けます。文字起こしは Resolve のタイムラインにも残ります。",
+  "Español": "Resolve Studio transcribe la línea de tiempo por sí mismo: no hay nada que instalar ni descargar aquí, y distingue a los hablantes. La transcripción también queda con la línea de tiempo en Resolve.",
+  "Deutsch": "Resolve Studio transkribiert die Timeline selbst – hier muss nichts installiert oder heruntergeladen werden, und es unterscheidet die Sprecher. Die Transkription bleibt auch in Resolve bei der Timeline.",
+  "Français": "Resolve Studio transcrit lui-même la timeline – rien à installer ni à télécharger ici, et il distingue les intervenants. La transcription reste aussi avec la timeline dans Resolve.",
+  "한국어": "Resolve Studio가 타임라인을 직접 전사합니다 – 여기서 설치하거나 내려받을 것이 없고, 화자도 구분합니다. 전사 내용은 Resolve의 타임라인에도 남습니다.",
+  "中文": "Resolve Studio 自己转录时间线——这里无需安装或下载任何东西，而且能区分说话人。转录也会保留在 Resolve 的时间线中。",
+  "العربية": "يقوم Resolve Studio بنسخ الخط الزمني بنفسه – لا حاجة لتثبيت أو تنزيل أي شيء هنا، ويميّز بين المتحدثين. ويبقى النص المنسوخ مع الخط الزمني في Resolve أيضًا.",
+  "Tiếng Việt": "Resolve Studio tự chép lời dòng thời gian – không cần cài đặt hay tải gì ở đây, và nó phân biệt được người nói. Bản chép lời cũng được giữ cùng dòng thời gian trong Resolve."
+ },
+ "Resolve transcribes the timeline itself, telling the speakers apart, and the subtitles go on subtitle track 1.": {
+  "日本語": "Resolve がタイムラインを自ら文字起こしして話者を聞き分け、字幕は字幕トラック 1 に配置されます。",
+  "Español": "Resolve transcribe la línea de tiempo por sí mismo, distinguiendo a los hablantes, y los subtítulos van a la pista de subtítulos 1.",
+  "Deutsch": "Resolve transkribiert die Timeline selbst, unterscheidet die Sprecher, und die Untertitel kommen auf Untertitelspur 1.",
+  "Français": "Resolve transcrit lui-même la timeline en distinguant les intervenants, et les sous-titres vont sur la piste de sous-titres 1.",
+  "한국어": "Resolve가 화자를 구분하며 타임라인을 직접 전사하고, 자막은 자막 트랙 1에 들어갑니다.",
+  "中文": "Resolve 自己转录时间线并区分说话人，字幕放到字幕轨道 1。",
+  "العربية": "يقوم Resolve بنسخ الخط الزمني بنفسه مع التمييز بين المتحدثين، وتوضع الترجمات على مسار الترجمة 1.",
+  "Tiếng Việt": "Resolve tự chép lời dòng thời gian, phân biệt người nói, và phụ đề được đặt trên rãnh phụ đề 1."
+ },
+ "Name who's speaking": {
+  "日本語": "話者名を入れる",
+  "Español": "Nombrar a quien habla",
+  "Deutsch": "Sprecher benennen",
+  "Français": "Nommer qui parle",
+  "한국어": "말하는 사람 이름 표시",
+  "中文": "标出说话人",
+  "العربية": "تسمية المتحدث",
+  "Tiếng Việt": "Ghi tên người nói"
+ },
+ "Each subtitle is one person's words either way. Ticked, the first line of each turn starts with their name – \"Speaker 1:\", or what you named them in Resolve.": {
+  "日本語": "いずれにしても 1 つの字幕は 1 人の発言だけです。オンにすると、発言の番ごとに最初の行が話者名で始まります – 「Speaker 1:」、または Resolve で付けた名前です。",
+  "Español": "En cualquier caso, cada subtítulo contiene las palabras de una sola persona. Si lo marcas, la primera línea de cada turno empieza con su nombre: «Speaker 1:» o el nombre que le diste en Resolve.",
+  "Deutsch": "Jeder Untertitel enthält so oder so nur die Worte einer Person. Angehakt beginnt die erste Zeile jedes Redebeitrags mit dem Namen – „Speaker 1:“ oder wie Sie die Person in Resolve genannt haben.",
+  "Français": "Chaque sous-titre ne contient de toute façon que les paroles d'une seule personne. Cochée, la première ligne de chaque prise de parole commence par son nom – « Speaker 1: », ou le nom que vous lui avez donné dans Resolve.",
+  "한국어": "어느 쪽이든 자막 하나에는 한 사람의 말만 들어갑니다. 켜면 각 발언의 첫 줄이 이름으로 시작합니다 – \"Speaker 1:\" 또는 Resolve에서 붙인 이름입니다.",
+  "中文": "无论如何，每条字幕都只含一个人的话。勾选后，每轮发言的第一行以其名字开头——\"Speaker 1:\"，或你在 Resolve 中给的名字。",
+  "العربية": "كل ترجمة تحوي كلام شخص واحد في الحالتين. عند التحديد، يبدأ السطر الأول من كل دور باسمه – \"Speaker 1:\" أو الاسم الذي أعطيته له في Resolve.",
+  "Tiếng Việt": "Dù thế nào mỗi phụ đề cũng chỉ là lời của một người. Khi đánh dấu, dòng đầu của mỗi lượt nói bắt đầu bằng tên người đó – \"Speaker 1:\", hoặc tên bạn đặt trong Resolve."
+ },
+ "Resolve already has a transcription": {
+  "日本語": "Resolve に文字起こしがすでにあります",
+  "Español": "Resolve ya tiene una transcripción",
+  "Deutsch": "Resolve hat schon eine Transkription",
+  "Français": "Resolve a déjà une transcription",
+  "한국어": "Resolve에 이미 전사가 있습니다",
+  "中文": "Resolve 已有转录",
+  "العربية": "لدى Resolve نسخ نصي بالفعل",
+  "Tiếng Việt": "Resolve đã có bản chép lời"
+ },
+ "Resolve already has a transcription of '{name}'.\n\nUse it as it is – with any speaker names you gave there – or transcribe the timeline again, which picks up edits made since and replaces Resolve's copy.": {
+  "日本語": "Resolve には「{name}」の文字起こしがすでにあります。\n\nそのまま使うか(Resolve で付けた話者名も含めて)、タイムラインをもう一度文字起こしするか選んでください。もう一度行うと、その後の編集が反映され、Resolve 側の文字起こしは置き換えられます。",
+  "Español": "Resolve ya tiene una transcripción de «{name}».\n\nÚsala tal cual, con los nombres de hablantes que le hayas dado allí, o vuelve a transcribir la línea de tiempo, lo que recoge las ediciones hechas desde entonces y reemplaza la copia de Resolve.",
+  "Deutsch": "Resolve hat schon eine Transkription von „{name}“.\n\nVerwenden Sie sie so, wie sie ist – mit den Sprechernamen, die Sie dort vergeben haben –, oder transkribieren Sie die Timeline erneut. Das übernimmt die Änderungen seitdem und ersetzt die Kopie in Resolve.",
+  "Français": "Resolve a déjà une transcription de « {name} ».\n\nUtilisez-la telle quelle – avec les noms d'intervenants que vous y avez donnés – ou transcrivez à nouveau la timeline, ce qui prend en compte les modifications faites depuis et remplace la copie de Resolve.",
+  "한국어": "Resolve에 '{name}'의 전사가 이미 있습니다.\n\n그대로 사용하거나(Resolve에서 붙인 화자 이름 포함) 타임라인을 다시 전사하세요. 다시 전사하면 그 뒤의 편집이 반영되고 Resolve의 전사는 바뀝니다.",
+  "中文": "Resolve 已有“{name}”的转录。\n\n可以直接使用（包括你在那里起的说话人名字），也可以重新转录时间线——这样会包含之后的修改，并替换 Resolve 中的那份。",
+  "العربية": "لدى Resolve بالفعل نسخ نصي لـ '{name}'.\n\nاستخدمه كما هو – مع أي أسماء متحدثين أعطيتها هناك – أو انسخ الخط الزمني من جديد، وهذا يلتقط التعديلات التي جرت منذ ذلك الحين ويستبدل نسخة Resolve.",
+  "Tiếng Việt": "Resolve đã có bản chép lời của '{name}'.\n\nDùng nguyên như vậy – kèm tên người nói bạn đã đặt ở đó – hoặc chép lời dòng thời gian lại, cách này lấy các chỉnh sửa từ đó đến nay và thay bản của Resolve."
+ },
+ "Use Resolve's transcription": {
+  "日本語": "Resolve の文字起こしを使う",
+  "Español": "Usar la transcripción de Resolve",
+  "Deutsch": "Transkription von Resolve verwenden",
+  "Français": "Utiliser la transcription de Resolve",
+  "한국어": "Resolve의 전사 사용",
+  "中文": "使用 Resolve 的转录",
+  "العربية": "استخدام نسخ Resolve",
+  "Tiếng Việt": "Dùng bản chép lời của Resolve"
+ },
+ "Transcribe again": {
+  "日本語": "もう一度文字起こし",
+  "Español": "Volver a transcribir",
+  "Deutsch": "Erneut transkribieren",
+  "Français": "Transcrire à nouveau",
+  "한국어": "다시 전사",
+  "中文": "重新转录",
+  "العربية": "النسخ من جديد",
+  "Tiếng Việt": "Chép lời lại"
+ },
+ "Resolve's transcription hears one language per timeline. For mixed languages, choose a Whisper model.": {
+  "日本語": "Resolve の文字起こしはタイムラインごとに 1 つの言語を聞き取ります。複数の言語が混ざる場合は Whisper モデルを選んでください。",
+  "Español": "La transcripción de Resolve oye un solo idioma por línea de tiempo. Para idiomas mezclados, elige un modelo Whisper.",
+  "Deutsch": "Die Transkription von Resolve hört eine Sprache pro Timeline. Für gemischte Sprachen wählen Sie ein Whisper-Modell.",
+  "Français": "La transcription de Resolve entend une seule langue par timeline. Pour des langues mélangées, choisissez un modèle Whisper.",
+  "한국어": "Resolve의 전사는 타임라인마다 한 언어만 듣습니다. 여러 언어가 섞였다면 Whisper 모델을 고르세요.",
+  "中文": "Resolve 的转录每条时间线只听一种语言。混合语言请选择 Whisper 模型。",
+  "العربية": "نسخ Resolve يسمع لغة واحدة لكل خط زمني. للغات المختلطة، اختر نموذج Whisper.",
+  "Tiếng Việt": "Bản chép lời của Resolve chỉ nghe một ngôn ngữ mỗi dòng thời gian. Với nhiều ngôn ngữ lẫn nhau, hãy chọn mô hình Whisper."
+ },
+ "Resolve's own transcription needs DaVinci Resolve Studio 21.1 or later.": {
+  "日本語": "Resolve 自身の文字起こしには DaVinci Resolve Studio 21.1 以降が必要です。",
+  "Español": "La transcripción propia de Resolve necesita DaVinci Resolve Studio 21.1 o posterior.",
+  "Deutsch": "Die eigene Transkription von Resolve braucht DaVinci Resolve Studio 21.1 oder neuer.",
+  "Français": "La transcription de Resolve lui-même nécessite DaVinci Resolve Studio 21.1 ou ultérieur.",
+  "한국어": "Resolve 자체 전사에는 DaVinci Resolve Studio 21.1 이상이 필요합니다.",
+  "中文": "Resolve 自带的转录需要 DaVinci Resolve Studio 21.1 或更高版本。",
+  "العربية": "يتطلب نسخ Resolve الخاص DaVinci Resolve Studio 21.1 أو أحدث.",
+  "Tiếng Việt": "Tính năng chép lời của chính Resolve cần DaVinci Resolve Studio 21.1 trở lên."
+ },
+ "Resolve is transcribing the timeline… {time}": {
+  "日本語": "Resolve がタイムラインを文字起こし中… {time}",
+  "Español": "Resolve está transcribiendo la línea de tiempo… {time}",
+  "Deutsch": "Resolve transkribiert die Timeline… {time}",
+  "Français": "Resolve transcrit la timeline… {time}",
+  "한국어": "Resolve가 타임라인을 전사하는 중… {time}",
+  "中文": "Resolve 正在转录时间线… {time}",
+  "العربية": "يقوم Resolve بنسخ الخط الزمني… {time}",
+  "Tiếng Việt": "Resolve đang chép lời dòng thời gian… {time}"
+ },
+ "{count} subtitles ({spoken}) – {audio} min of audio in {took} min, transcribed by Resolve.": {
+  "日本語": "字幕 {count} 件({spoken}) – {audio} 分の音声を {took} 分で、Resolve が文字起こし。",
+  "Español": "{count} subtítulos ({spoken}): {audio} min de audio en {took} min, transcritos por Resolve.",
+  "Deutsch": "{count} Untertitel ({spoken}) – {audio} Min. Audio in {took} Min., transkribiert von Resolve.",
+  "Français": "{count} sous-titres ({spoken}) – {audio} min d'audio en {took} min, transcrits par Resolve.",
+  "한국어": "자막 {count}개({spoken}) – 오디오 {audio}분을 {took}분 만에 Resolve가 전사.",
+  "中文": "{count} 条字幕（{spoken}）——{audio} 分钟音频，用时 {took} 分钟，由 Resolve 转录。",
+  "العربية": "{count} ترجمة ({spoken}) – {audio} دقيقة من الصوت في {took} دقيقة، نسخها Resolve.",
+  "Tiếng Việt": "{count} phụ đề ({spoken}) – {audio} phút âm thanh trong {took} phút, do Resolve chép lời."
+ },
+ "{count} subtitles ({spoken}) – {audio} min of audio in {took} min, transcribed by Resolve. Saved: {path}": {
+  "日本語": "字幕 {count} 件({spoken}) – {audio} 分の音声を {took} 分で、Resolve が文字起こし。保存先: {path}",
+  "Español": "{count} subtítulos ({spoken}): {audio} min de audio en {took} min, transcritos por Resolve. Guardado: {path}",
+  "Deutsch": "{count} Untertitel ({spoken}) – {audio} Min. Audio in {took} Min., transkribiert von Resolve. Gespeichert: {path}",
+  "Français": "{count} sous-titres ({spoken}) – {audio} min d'audio en {took} min, transcrits par Resolve. Enregistré : {path}",
+  "한국어": "자막 {count}개({spoken}) – 오디오 {audio}분을 {took}분 만에 Resolve가 전사. 저장됨: {path}",
+  "中文": "{count} 条字幕（{spoken}）——{audio} 分钟音频，用时 {took} 分钟，由 Resolve 转录。已保存：{path}",
+  "العربية": "{count} ترجمة ({spoken}) – {audio} دقيقة من الصوت في {took} دقيقة، نسخها Resolve. حُفظ: {path}",
+  "Tiếng Việt": "{count} phụ đề ({spoken}) – {audio} phút âm thanh trong {took} phút, do Resolve chép lời. Đã lưu: {path}"
+ },
+ "{count} subtitles ({spoken}, {n} speakers) – {audio} min of audio in {took} min, transcribed by Resolve.": {
+  "日本語": "字幕 {count} 件({spoken}、話者 {n} 人) – {audio} 分の音声を {took} 分で、Resolve が文字起こし。",
+  "Español": "{count} subtítulos ({spoken}, {n} hablantes): {audio} min de audio en {took} min, transcritos por Resolve.",
+  "Deutsch": "{count} Untertitel ({spoken}, {n} Sprecher) – {audio} Min. Audio in {took} Min., transkribiert von Resolve.",
+  "Français": "{count} sous-titres ({spoken}, {n} intervenants) – {audio} min d'audio en {took} min, transcrits par Resolve.",
+  "한국어": "자막 {count}개({spoken}, 화자 {n}명) – 오디오 {audio}분을 {took}분 만에 Resolve가 전사.",
+  "中文": "{count} 条字幕（{spoken}，{n} 位说话人）——{audio} 分钟音频，用时 {took} 分钟，由 Resolve 转录。",
+  "العربية": "{count} ترجمة ({spoken}، {n} متحدثين) – {audio} دقيقة من الصوت في {took} دقيقة، نسخها Resolve.",
+  "Tiếng Việt": "{count} phụ đề ({spoken}, {n} người nói) – {audio} phút âm thanh trong {took} phút, do Resolve chép lời."
+ },
+ "{count} subtitles ({spoken}, {n} speakers) – {audio} min of audio in {took} min, transcribed by Resolve. Saved: {path}": {
+  "日本語": "字幕 {count} 件({spoken}、話者 {n} 人) – {audio} 分の音声を {took} 分で、Resolve が文字起こし。保存先: {path}",
+  "Español": "{count} subtítulos ({spoken}, {n} hablantes): {audio} min de audio en {took} min, transcritos por Resolve. Guardado: {path}",
+  "Deutsch": "{count} Untertitel ({spoken}, {n} Sprecher) – {audio} Min. Audio in {took} Min., transkribiert von Resolve. Gespeichert: {path}",
+  "Français": "{count} sous-titres ({spoken}, {n} intervenants) – {audio} min d'audio en {took} min, transcrits par Resolve. Enregistré : {path}",
+  "한국어": "자막 {count}개({spoken}, 화자 {n}명) – 오디오 {audio}분을 {took}분 만에 Resolve가 전사. 저장됨: {path}",
+  "中文": "{count} 条字幕（{spoken}，{n} 位说话人）——{audio} 分钟音频，用时 {took} 分钟，由 Resolve 转录。已保存：{path}",
+  "العربية": "{count} ترجمة ({spoken}، {n} متحدثين) – {audio} دقيقة من الصوت في {took} دقيقة، نسخها Resolve. حُفظ: {path}",
+  "Tiếng Việt": "{count} phụ đề ({spoken}, {n} người nói) – {audio} phút âm thanh trong {took} phút, do Resolve chép lời. Đã lưu: {path}"
+ },
+ "The timeline changed in Resolve before it could be transcribed - start again.": {
+  "日本語": "文字起こしの前に Resolve でタイムラインが変わりました - もう一度始めてください。",
+  "Español": "La línea de tiempo cambió en Resolve antes de poder transcribirla; vuelve a empezar.",
+  "Deutsch": "Die Timeline hat sich in Resolve geändert, bevor sie transkribiert werden konnte – bitte neu starten.",
+  "Français": "La timeline a changé dans Resolve avant d'avoir pu être transcrite – recommencez.",
+  "한국어": "전사하기 전에 Resolve에서 타임라인이 바뀌었습니다 - 다시 시작하세요.",
+  "中文": "在转录之前 Resolve 中的时间线变了——请重新开始。",
+  "العربية": "تغيّر الخط الزمني في Resolve قبل أن يُنسخ - ابدأ من جديد.",
+  "Tiếng Việt": "Dòng thời gian trong Resolve đã đổi trước khi kịp chép lời - hãy bắt đầu lại."
+ },
+ "Resolve's transcription doesn't take that language - choose Auto-detect or another.": {
+  "日本語": "Resolve の文字起こしはその言語に対応していません - 自動検出か別の言語を選んでください。",
+  "Español": "La transcripción de Resolve no admite ese idioma; elige Detección automática u otro.",
+  "Deutsch": "Die Transkription von Resolve nimmt diese Sprache nicht – wählen Sie Automatisch erkennen oder eine andere.",
+  "Français": "La transcription de Resolve n'accepte pas cette langue – choisissez Détection automatique ou une autre.",
+  "한국어": "Resolve의 전사는 그 언어를 받지 않습니다 - 자동 감지나 다른 언어를 고르세요.",
+  "中文": "Resolve 的转录不支持该语言——请选择自动检测或其他语言。",
+  "العربية": "نسخ Resolve لا يقبل تلك اللغة - اختر الاكتشاف التلقائي أو لغة أخرى.",
+  "Tiếng Việt": "Bản chép lời của Resolve không nhận ngôn ngữ đó - hãy chọn Tự phát hiện hoặc ngôn ngữ khác."
+ },
+ "Resolve couldn't transcribe the timeline.": {
+  "日本語": "Resolve はタイムラインを文字起こしできませんでした。",
+  "Español": "Resolve no pudo transcribir la línea de tiempo.",
+  "Deutsch": "Resolve konnte die Timeline nicht transkribieren.",
+  "Français": "Resolve n'a pas pu transcrire la timeline.",
+  "한국어": "Resolve가 타임라인을 전사하지 못했습니다.",
+  "中文": "Resolve 无法转录时间线。",
+  "العربية": "لم يتمكن Resolve من نسخ الخط الزمني.",
+  "Tiếng Việt": "Resolve không chép lời được dòng thời gian."
+ },
+ "Resolve found no speech in the timeline's audio.": {
+  "日本語": "Resolve はタイムラインの音声に話し声を見つけませんでした。",
+  "Español": "Resolve no encontró voz en el audio de la línea de tiempo.",
+  "Deutsch": "Resolve hat im Ton der Timeline keine Sprache gefunden.",
+  "Français": "Resolve n'a trouvé aucune parole dans l'audio de la timeline.",
+  "한국어": "Resolve가 타임라인 오디오에서 말소리를 찾지 못했습니다.",
+  "中文": "Resolve 在时间线的音频中没有找到语音。",
+  "العربية": "لم يجد Resolve كلامًا في صوت الخط الزمني.",
+  "Tiếng Việt": "Resolve không tìm thấy lời nói trong âm thanh của dòng thời gian."
+ },
+ "Resolve didn't give Buddy the timeline to transcribe.": {
+  "日本語": "Resolve が文字起こしするタイムラインを Buddy に渡しませんでした。",
+  "Español": "Resolve no le dio a Buddy la línea de tiempo para transcribir.",
+  "Deutsch": "Resolve hat Buddy die Timeline zum Transkribieren nicht gegeben.",
+  "Français": "Resolve n'a pas donné à Buddy la timeline à transcrire.",
+  "한국어": "Resolve가 전사할 타임라인을 Buddy에 주지 않았습니다.",
+  "中文": "Resolve 没有把要转录的时间线交给 Buddy。",
+  "العربية": "لم يعطِ Resolve الخط الزمني لـ Buddy لنسخه.",
+  "Tiếng Việt": "Resolve không đưa cho Buddy dòng thời gian để chép lời."
+ },
+ "Resolve didn't answer.": {
+  "日本語": "Resolve が応答しませんでした。",
+  "Español": "Resolve no respondió.",
+  "Deutsch": "Resolve hat nicht geantwortet.",
+  "Français": "Resolve n'a pas répondu.",
+  "한국어": "Resolve가 응답하지 않았습니다.",
+  "中文": "Resolve 没有响应。",
+  "العربية": "لم يستجب Resolve.",
+  "Tiếng Việt": "Resolve không phản hồi."
+ },
+ "Buddy couldn't find the Python it runs on, so it can't ask Resolve to transcribe.": {
+  "日本語": "Buddy が動いている Python が見つからないため、Resolve に文字起こしを頼めません。",
+  "Español": "Buddy no encontró el Python con el que funciona, así que no puede pedirle a Resolve que transcriba.",
+  "Deutsch": "Buddy hat das Python, mit dem es läuft, nicht gefunden und kann Resolve deshalb nicht um die Transkription bitten.",
+  "Français": "Buddy n'a pas trouvé le Python sur lequel il tourne, il ne peut donc pas demander à Resolve de transcrire.",
+  "한국어": "Buddy가 실행 중인 Python을 찾지 못해 Resolve에 전사를 요청할 수 없습니다.",
+  "中文": "Buddy 找不到它运行所用的 Python，因此无法请 Resolve 转录。",
+  "العربية": "لم يجد Buddy بايثون الذي يعمل عليه، لذا لا يمكنه أن يطلب من Resolve النسخ.",
+  "Tiếng Việt": "Buddy không tìm thấy Python mà nó đang chạy, nên không thể nhờ Resolve chép lời."
+ },
+ "Resolve didn't finish transcribing the timeline in time.": {
+  "日本語": "Resolve は時間内にタイムラインの文字起こしを終えませんでした。",
+  "Español": "Resolve no terminó de transcribir la línea de tiempo a tiempo.",
+  "Deutsch": "Resolve hat die Timeline nicht rechtzeitig fertig transkribiert.",
+  "Français": "Resolve n'a pas fini de transcrire la timeline à temps.",
+  "한국어": "Resolve가 제시간에 타임라인 전사를 끝내지 못했습니다.",
+  "中文": "Resolve 没能及时完成时间线的转录。",
+  "العربية": "لم ينتهِ Resolve من نسخ الخط الزمني في الوقت المحدد.",
+  "Tiếng Việt": "Resolve không chép lời xong dòng thời gian kịp thời."
+ },
+ "Buddy's helper couldn't reach Resolve. In Resolve, set Preferences > System > General > \"External scripting using\" to Local, then try again.": {
+  "日本語": "Buddy の補助プロセスが Resolve に接続できませんでした。Resolve で「環境設定」>「システム」>「一般」>「外部スクリプトに使用」を「ローカル」にしてから、もう一度お試しください。",
+  "Español": "El asistente de Buddy no pudo conectar con Resolve. En Resolve, ajusta Preferencias > Sistema > General > «Scripting externo mediante» a Local y vuelve a intentarlo.",
+  "Deutsch": "Buddys Hilfsprozess hat Resolve nicht erreicht. Stellen Sie in Resolve Einstellungen > System > Allgemein > „Externes Scripting über“ auf Lokal und versuchen Sie es erneut.",
+  "Français": "Le processus d'aide de Buddy n'a pas pu joindre Resolve. Dans Resolve, réglez Préférences > Système > Général > « Scripts externes via » sur Local, puis réessayez.",
+  "한국어": "Buddy의 보조 프로세스가 Resolve에 연결하지 못했습니다. Resolve에서 환경설정 > 시스템 > 일반 > \"외부 스크립팅 사용\"을 로컬로 설정한 뒤 다시 시도하세요.",
+  "中文": "Buddy 的辅助进程无法连接 Resolve。请在 Resolve 中把 偏好设置 > 系统 > 常规 >“外部脚本使用”设为“本地”，然后重试。",
+  "العربية": "تعذّر على العملية المساعدة في Buddy الوصول إلى Resolve. في Resolve، اضبط التفضيلات > النظام > عام > \"External scripting using\" على Local، ثم حاول مرة أخرى.",
+  "Tiếng Việt": "Tiến trình phụ của Buddy không kết nối được Resolve. Trong Resolve, đặt Preferences > System > General > \"External scripting using\" thành Local rồi thử lại."
+ },
+ "Add to the timeline when done": {
+  "日本語": "完了したらタイムラインに追加",
+  "Español": "Añadir a la línea de tiempo al terminar",
+  "Deutsch": "Nach dem Transkribieren in die Timeline einfügen",
+  "Français": "Ajouter à la timeline une fois terminé",
+  "한국어": "완료되면 타임라인에 추가",
+  "中文": "完成后添加到时间线",
+  "العربية": "الإضافة إلى المخطط الزمني عند الانتهاء",
+  "Tiếng Việt": "Thêm vào timeline khi xong"
+ },
+ "Add to timeline": {
+  "日本語": "タイムラインに追加",
+  "Español": "Añadir a la línea de tiempo",
+  "Deutsch": "In die Timeline einfügen",
+  "Français": "Ajouter à la timeline",
+  "한국어": "타임라인에 추가",
+  "中文": "添加到时间线",
+  "العربية": "إضافة إلى المخطط الزمني",
+  "Tiếng Việt": "Thêm vào timeline"
+ },
+ "Puts these subtitles on subtitle track 1 of the timeline they were made from": {
+  "日本語": "この字幕を、作成元のタイムラインの字幕トラック 1 に配置します",
+  "Español": "Pone estos subtítulos en la pista de subtítulos 1 de la línea de tiempo de la que salieron",
+  "Deutsch": "Legt diese Untertitel auf Untertitelspur 1 der Timeline, aus der sie stammen",
+  "Français": "Place ces sous-titres sur la piste de sous-titres 1 de la timeline dont ils proviennent",
+  "한국어": "이 자막을 만들어진 타임라인의 자막 트랙 1에 넣습니다",
+  "中文": "将这些字幕放到其来源时间线的字幕轨道 1",
+  "العربية": "يضع هذه الترجمات على مسار الترجمة 1 في المخطط الزمني الذي أُنشئت منه",
+  "Tiếng Việt": "Đặt các phụ đề này lên track phụ đề 1 của timeline đã tạo ra chúng"
+ },
+ "Done – saved as an SRT file.": {
+  "日本語": "完了 – SRT ファイルとして保存しました。",
+  "Español": "Listo: guardado como archivo SRT.",
+  "Deutsch": "Fertig – als SRT-Datei gespeichert.",
+  "Français": "Terminé – enregistré en fichier SRT.",
+  "한국어": "완료 – SRT 파일로 저장했습니다.",
+  "中文": "完成 – 已保存为 SRT 文件。",
+  "العربية": "تم – حُفظ كملف SRT.",
+  "Tiếng Việt": "Xong – đã lưu thành tệp SRT."
+ },
+ "Renders the timeline's audio, transcribes it on this computer, and saves the subtitles as an SRT file.": {
+  "日本語": "タイムラインのオーディオをレンダリングし、このコンピューターで文字起こしして、字幕を SRT ファイルとして保存します。",
+  "Español": "Renderiza el audio de la línea de tiempo, lo transcribe en este ordenador y guarda los subtítulos como archivo SRT.",
+  "Deutsch": "Rendert den Ton der Timeline, transkribiert ihn auf diesem Computer und speichert die Untertitel als SRT-Datei.",
+  "Français": "Rend l'audio de la timeline, le transcrit sur cet ordinateur et enregistre les sous-titres en fichier SRT.",
+  "한국어": "타임라인의 오디오를 렌더링하고 이 컴퓨터에서 받아쓴 뒤 자막을 SRT 파일로 저장합니다.",
+  "中文": "渲染时间线的音频，在这台电脑上转录，并将字幕保存为 SRT 文件。",
+  "العربية": "يصيّر صوت المخطط الزمني ويفرّغه نصيًا على هذا الحاسوب ويحفظ الترجمات كملف SRT.",
+  "Tiếng Việt": "Kết xuất âm thanh của timeline, phiên âm trên máy này và lưu phụ đề thành tệp SRT."
+ },
+ "Resolve transcribes the timeline itself, telling the speakers apart, and the subtitles are saved as an SRT file.": {
+  "日本語": "Resolve がタイムラインを自ら文字起こしして話者を聞き分け、字幕は SRT ファイルとして保存されます。",
+  "Español": "Resolve transcribe la línea de tiempo por sí mismo, distinguiendo a los hablantes, y los subtítulos se guardan como archivo SRT.",
+  "Deutsch": "Resolve transkribiert die Timeline selbst, unterscheidet die Sprecher, und die Untertitel werden als SRT-Datei gespeichert.",
+  "Français": "Resolve transcrit lui-même la timeline en distinguant les intervenants, et les sous-titres sont enregistrés en fichier SRT.",
+  "한국어": "Resolve가 타임라인을 직접 받아쓰며 화자를 구분하고, 자막은 SRT 파일로 저장됩니다.",
+  "中文": "Resolve 自行转录时间线并区分说话人，字幕保存为 SRT 文件。",
+  "العربية": "يفرّغ Resolve المخطط الزمني نصيًا بنفسه مع التمييز بين المتحدثين، وتُحفظ الترجمات كملف SRT.",
+  "Tiếng Việt": "Resolve tự phiên âm timeline, phân biệt người nói, và phụ đề được lưu thành tệp SRT."
+ },
+ "These subtitles are from '{timeline}'. Open it in Resolve to add them there – '{name}' is open now.": {
+  "日本語": "この字幕は「{timeline}」のものです。追加するには Resolve でそのタイムラインを開いてください – 今は「{name}」が開いています。",
+  "Español": "Estos subtítulos son de '{timeline}'. Ábrela en Resolve para añadirlos allí; ahora está abierta '{name}'.",
+  "Deutsch": "Diese Untertitel stammen aus '{timeline}'. Öffne sie in Resolve, um sie dort einzufügen – gerade ist '{name}' geöffnet.",
+  "Français": "Ces sous-titres viennent de « {timeline} ». Ouvrez-la dans Resolve pour les y ajouter – « {name} » est ouverte pour l'instant.",
+  "한국어": "이 자막은 '{timeline}'에서 만든 것입니다. 거기에 추가하려면 Resolve에서 해당 타임라인을 여세요 – 지금은 '{name}'이(가) 열려 있습니다.",
+  "中文": "这些字幕来自“{timeline}”。请在 Resolve 中打开它再添加 – 当前打开的是“{name}”。",
+  "العربية": "هذه الترجمات من '{timeline}'. افتحه في Resolve لإضافتها إليه – المفتوح الآن هو '{name}'.",
+  "Tiếng Việt": "Các phụ đề này từ '{timeline}'. Hãy mở nó trong Resolve để thêm vào đó – hiện đang mở '{name}'."
+ },
+ "Another timeline is open": {
+  "日本語": "別のタイムラインが開いています",
+  "Español": "Hay otra línea de tiempo abierta",
+  "Deutsch": "Eine andere Timeline ist geöffnet",
+  "Français": "Une autre timeline est ouverte",
+  "한국어": "다른 타임라인이 열려 있습니다",
+  "中文": "打开的是另一条时间线",
+  "العربية": "مخطط زمني آخر مفتوح",
+  "Tiếng Việt": "Đang mở một timeline khác"
+ },
+ "Subtitle track {n} was switched off in Resolve, so Buddy switched it on.": {
+  "日本語": "Resolve で字幕トラック {n} がオフになっていたため、Buddy がオンにしました。",
+  "Español": "La pista de subtítulos {n} estaba desactivada en Resolve, así que Buddy la activó.",
+  "Deutsch": "Untertitelspur {n} war in Resolve ausgeschaltet, deshalb hat Buddy sie eingeschaltet.",
+  "Français": "La piste de sous-titres {n} était désactivée dans Resolve, Buddy l'a donc activée.",
+  "한국어": "Resolve에서 자막 트랙 {n}이(가) 꺼져 있어 Buddy가 켰습니다.",
+  "中文": "Resolve 中的字幕轨道 {n} 已关闭，因此 Buddy 将其打开了。",
+  "العربية": "كان مسار الترجمة {n} متوقفًا في Resolve، لذا شغّله Buddy.",
+  "Tiếng Việt": "Rãnh phụ đề {n} đang tắt trong Resolve nên Buddy đã bật nó lên."
+ },
+ "Subtitle track {n} was locked in Resolve, so Buddy unlocked it.": {
+  "日本語": "Resolve で字幕トラック {n} がロックされていたため、Buddy がロックを解除しました。",
+  "Español": "La pista de subtítulos {n} estaba bloqueada en Resolve, así que Buddy la desbloqueó.",
+  "Deutsch": "Untertitelspur {n} war in Resolve gesperrt, deshalb hat Buddy sie entsperrt.",
+  "Français": "La piste de sous-titres {n} était verrouillée dans Resolve, Buddy l'a donc déverrouillée.",
+  "한국어": "Resolve에서 자막 트랙 {n}이(가) 잠겨 있어 Buddy가 잠금을 해제했습니다.",
+  "中文": "Resolve 中的字幕轨道 {n} 已锁定，因此 Buddy 将其解锁了。",
+  "العربية": "كان مسار الترجمة {n} مقفلًا في Resolve، لذا ألغى Buddy قفله.",
+  "Tiếng Việt": "Rãnh phụ đề {n} đang bị khóa trong Resolve nên Buddy đã mở khóa."
+ },
+ "Onto subtitle track 1, so ST1 has to be the destination track in Resolve (its patch lit red in the track headers). If it already has subtitles, you're asked before they're replaced. Unticked, the subtitles are saved as an SRT file only.": {
+  "日本語": "字幕トラック 1 に追加します。そのため、Resolve で ST1 が宛先トラック（トラックヘッダーでパッチが赤く点灯）になっている必要があります。すでに字幕がある場合は、置き換える前に確認されます。オフにすると、字幕は SRT ファイルとしてのみ保存されます。",
+  "Español": "En la pista de subtítulos 1, así que ST1 tiene que ser la pista de destino en Resolve (su parche iluminado en rojo en los encabezados de pista). Si ya tiene subtítulos, se te preguntará antes de reemplazarlos. Sin marcar, los subtítulos solo se guardan como archivo SRT.",
+  "Deutsch": "Auf Untertitelspur 1 – ST1 muss daher in Resolve die Zielspur sein (ihr Patch leuchtet in den Spurköpfen rot). Hat sie schon Untertitel, wirst du vor dem Ersetzen gefragt. Nicht angehakt, werden die Untertitel nur als SRT-Datei gespeichert.",
+  "Français": "Sur la piste de sous-titres 1 : ST1 doit donc être la piste de destination dans Resolve (son patch allumé en rouge dans les en-têtes de piste). Si elle contient déjà des sous-titres, on vous demande avant de les remplacer. Décoché, les sous-titres sont seulement enregistrés en fichier SRT.",
+  "한국어": "자막 트랙 1에 넣으므로, Resolve에서 ST1이 대상 트랙이어야 합니다(트랙 헤더에서 패치가 빨간색으로 켜짐). 이미 자막이 있으면 바꾸기 전에 묻습니다. 체크하지 않으면 자막은 SRT 파일로만 저장됩니다.",
+  "中文": "放到字幕轨道 1 上，因此 ST1 必须是 Resolve 中的目标轨道（轨道头中其接线显示为红色）。如果轨道上已有字幕，替换前会先询问你。不勾选时，字幕只保存为 SRT 文件。",
+  "العربية": "على مسار الترجمة 1، لذا يجب أن يكون ST1 هو مسار الوجهة في Resolve (يضيء مقبسه بالأحمر في رؤوس المسارات). إذا كانت عليه ترجمات بالفعل، فسيُطلب منك التأكيد قبل استبدالها. عند إلغاء التحديد، تُحفظ الترجمات كملف SRT فقط.",
+  "Tiếng Việt": "Vào rãnh phụ đề 1, nên ST1 phải là rãnh đích trong Resolve (ô patch của nó sáng đỏ ở phần đầu rãnh). Nếu rãnh đã có phụ đề, bạn sẽ được hỏi trước khi thay thế. Khi bỏ chọn, phụ đề chỉ được lưu thành tệp SRT."
+ },
+ "Resolve imported the subtitles but didn't place them. Check that ST1 is the destination subtitle track in Resolve (its patch lit red in the track headers).": {
+  "日本語": "Resolve は字幕を読み込みましたが、配置しませんでした。Resolve で ST1 が字幕の宛先トラック（トラックヘッダーでパッチが赤く点灯）になっているか確認してください。",
+  "Español": "Resolve importó los subtítulos, pero no los colocó. Comprueba que ST1 sea la pista de subtítulos de destino en Resolve (su parche iluminado en rojo en los encabezados de pista).",
+  "Deutsch": "Resolve hat die Untertitel importiert, aber nicht platziert. Prüfe, ob ST1 in Resolve die Ziel-Untertitelspur ist (ihr Patch leuchtet in den Spurköpfen rot).",
+  "Français": "Resolve a importé les sous-titres mais ne les a pas placés. Vérifiez que ST1 est la piste de sous-titres de destination dans Resolve (son patch allumé en rouge dans les en-têtes de piste).",
+  "한국어": "Resolve가 자막을 가져왔지만 배치하지 않았습니다. Resolve에서 ST1이 자막 대상 트랙인지 확인하세요(트랙 헤더에서 패치가 빨간색으로 켜짐).",
+  "中文": "Resolve 已导入字幕，但未放置。请检查 ST1 是否为 Resolve 中的目标字幕轨道（轨道头中其接线显示为红色）。",
+  "العربية": "استورد Resolve الترجمات لكنه لم يضعها. تحقّق من أن ST1 هو مسار الترجمة الوجهة في Resolve (يضيء مقبسه بالأحمر في رؤوس المسارات).",
+  "Tiếng Việt": "Resolve đã nhập phụ đề nhưng không đặt chúng. Hãy kiểm tra ST1 có phải là rãnh phụ đề đích trong Resolve không (ô patch của nó sáng đỏ ở phần đầu rãnh)."
+ },
+ "Resolve put the subtitles on subtitle track {n}, its destination track, so they were taken off again. Make ST1 the destination (click its patch in the track headers) and try again – the SRT file is saved.": {
+  "日本語": "Resolve が字幕を宛先トラックである字幕トラック {n} に配置したため、取り除きました。ST1 を宛先にして（トラックヘッダーでパッチをクリック）、もう一度お試しください。SRT ファイルは保存されています。",
+  "Español": "Resolve puso los subtítulos en la pista de subtítulos {n}, su pista de destino, así que se quitaron de nuevo. Haz de ST1 el destino (haz clic en su parche en los encabezados de pista) y vuelve a intentarlo; el archivo SRT está guardado.",
+  "Deutsch": "Resolve hat die Untertitel auf Untertitelspur {n} gelegt, seine Zielspur, deshalb wurden sie wieder entfernt. Mach ST1 zum Ziel (klick in den Spurköpfen auf ihren Patch) und versuch es noch einmal – die SRT-Datei ist gespeichert.",
+  "Français": "Resolve a placé les sous-titres sur la piste de sous-titres {n}, sa piste de destination, ils ont donc été retirés. Faites de ST1 la destination (cliquez sur son patch dans les en-têtes de piste) et réessayez – le fichier SRT est enregistré.",
+  "한국어": "Resolve가 자막을 대상 트랙인 자막 트랙 {n}에 넣어서 다시 제거했습니다. ST1을 대상으로 지정하고(트랙 헤더에서 패치 클릭) 다시 시도하세요. SRT 파일은 저장되어 있습니다.",
+  "中文": "Resolve 把字幕放到了其目标轨道——字幕轨道 {n} 上，因此已将其移除。请把 ST1 设为目标（在轨道头中点击其接线）后重试——SRT 文件已保存。",
+  "العربية": "وضع Resolve الترجمات على مسار الترجمة {n}، وهو مسار الوجهة لديه، لذا أُزيلت مرة أخرى. اجعل ST1 هو الوجهة (انقر على مقبسه في رؤوس المسارات) وحاول مجددًا – ملف SRT محفوظ.",
+  "Tiếng Việt": "Resolve đã đặt phụ đề vào rãnh phụ đề {n}, rãnh đích của nó, nên chúng đã được gỡ ra. Hãy đặt ST1 làm đích (bấm vào ô patch của nó ở phần đầu rãnh) rồi thử lại – tệp SRT đã được lưu."
+ },
+ "Video track {track} already has {n} clip(s) where the subtitles go, and Resolve won't put Text+ over them. Choose an empty video track – track {empty} is.": {
+  "日本語": "ビデオトラック {track} には字幕が入る位置にすでに {n} 個のクリップがあり、Resolve はその上に Text+ を置きません。空のビデオトラックを選んでください。トラック {empty} が空いています。",
+  "Español": "La pista de vídeo {track} ya tiene {n} clip(s) donde van los subtítulos, y Resolve no pone Text+ encima. Elige una pista de vídeo vacía: la pista {empty} lo está.",
+  "Deutsch": "Videospur {track} hat schon {n} Clip(s) dort, wo die Untertitel hinkommen, und Resolve legt kein Text+ darüber. Wähle eine leere Videospur – Spur {empty} ist leer.",
+  "Français": "La piste vidéo {track} a déjà {n} clip(s) là où vont les sous-titres, et Resolve ne met pas de Text+ par-dessus. Choisissez une piste vidéo vide – la piste {empty} l'est.",
+  "한국어": "비디오 트랙 {track}에는 자막이 들어갈 자리에 이미 클립 {n}개가 있고, Resolve는 그 위에 Text+를 놓지 않습니다. 빈 비디오 트랙을 선택하세요. 트랙 {empty}가 비어 있습니다.",
+  "中文": "视频轨道 {track} 上字幕要放的位置已有 {n} 个片段，Resolve 不会把 Text+ 放在它们上面。请选择一条空的视频轨道——轨道 {empty} 是空的。",
+  "العربية": "يحتوي مسار الفيديو {track} بالفعل على {n} مقطع حيث توضع الترجمات، ولن يضع Resolve مقاطع Text+ فوقها. اختر مسار فيديو فارغًا – المسار {empty} فارغ.",
+  "Tiếng Việt": "Rãnh video {track} đã có {n} clip ở chỗ phụ đề sẽ đặt, và Resolve sẽ không đặt Text+ đè lên chúng. Hãy chọn một rãnh video trống – rãnh {empty} đang trống."
+ },
+ "Installed and verified ({versions}).": {
+  "日本語": "インストール済み・検証済み ({versions})。",
+  "Español": "Instalado y verificado ({versions}).",
+  "Deutsch": "Installiert und geprüft ({versions}).",
+  "Français": "Installé et vérifié ({versions}).",
+  "한국어": "설치 및 검증 완료 ({versions}).",
+  "中文": "已安装并验证（{versions}）。",
+  "العربية": "مثبّت ومُتحقَّق منه ({versions}).",
+  "Tiếng Việt": "Đã cài đặt và xác minh ({versions})."
+ },
+ "Installed and verified.": {
+  "日本語": "インストール済み・検証済み。",
+  "Español": "Instalado y verificado.",
+  "Deutsch": "Installiert und geprüft.",
+  "Français": "Installé et vérifié.",
+  "한국어": "설치 및 검증 완료.",
+  "中文": "已安装并验证。",
+  "العربية": "مثبّت ومُتحقَّق منه.",
+  "Tiếng Việt": "Đã cài đặt và xác minh."
+ },
+ "Installs faster-whisper into Buddy's own folder ({root}), built from the Python Buddy runs on. Download: {size}. Every package is checked against its published hash, and Windows Defender scans the result.": {
+  "日本語": "faster-whisper を Buddy 専用のフォルダー ({root}) に、Buddy が動作している Python を元にインストールします。ダウンロード: {size}。すべてのパッケージを公開されているハッシュで照合し、Windows Defender で結果をスキャンします。",
+  "Español": "Instala faster-whisper en la carpeta propia de Buddy ({root}), creado a partir del Python con el que funciona Buddy. Descarga: {size}. Cada paquete se comprueba con su hash publicado y Windows Defender analiza el resultado.",
+  "Deutsch": "Installiert faster-whisper in Buddys eigenen Ordner ({root}), aufgebaut aus dem Python, mit dem Buddy läuft. Download: {size}. Jedes Paket wird gegen seinen veröffentlichten Hash geprüft, und Windows Defender scannt das Ergebnis.",
+  "Français": "Installe faster-whisper dans le dossier propre à Buddy ({root}), à partir du Python sur lequel tourne Buddy. Téléchargement : {size}. Chaque paquet est vérifié avec son empreinte publiée, et Windows Defender analyse le résultat.",
+  "한국어": "faster-whisper를 Buddy 전용 폴더({root})에, Buddy가 실행되는 Python으로 설치합니다. 다운로드: {size}. 모든 패키지를 공개된 해시와 대조하고, Windows Defender로 결과를 검사합니다.",
+  "中文": "将 faster-whisper 安装到 Buddy 自己的文件夹（{root}），基于 Buddy 所运行的 Python 构建。下载：{size}。每个包都会与其公布的哈希核对，并由 Windows Defender 扫描结果。",
+  "العربية": "يثبّت faster-whisper في مجلد Buddy الخاص ({root})، مبنيًا من Python الذي يعمل عليه Buddy. التنزيل: {size}. تُطابَق كل حزمة مع بصمتها المنشورة، ويفحص Windows Defender النتيجة.",
+  "Tiếng Việt": "Cài faster-whisper vào thư mục riêng của Buddy ({root}), dựng từ Python mà Buddy đang chạy. Dung lượng tải: {size}. Mỗi gói được đối chiếu với mã băm đã công bố, và Windows Defender quét kết quả."
+ },
+ "Reinstall engine": {
+  "日本語": "エンジンを再インストール",
+  "Español": "Reinstalar el motor",
+  "Deutsch": "Engine neu installieren",
+  "Français": "Réinstaller le moteur",
+  "한국어": "엔진 다시 설치",
+  "中文": "重新安装引擎",
+  "العربية": "إعادة تثبيت المحرك",
+  "Tiếng Việt": "Cài lại công cụ"
+ },
+ "Ready, but installed before Buddy checked every download – Reinstall replaces it with a verified copy.": {
+  "日本語": "準備完了。ただし、Buddy がすべてのダウンロードを検証する前にインストールされたものです – 再インストールすると検証済みのものに置き換わります。",
+  "Español": "Listo, pero se instaló antes de que Buddy comprobara cada descarga: Reinstalar lo sustituye por una copia verificada.",
+  "Deutsch": "Bereit, aber installiert, bevor Buddy jeden Download geprüft hat – Neu installieren ersetzt es durch eine geprüfte Kopie.",
+  "Français": "Prêt, mais installé avant que Buddy vérifie chaque téléchargement – Réinstaller le remplace par une copie vérifiée.",
+  "한국어": "준비되었지만 Buddy가 모든 다운로드를 검증하기 전에 설치된 것입니다 – 다시 설치하면 검증된 사본으로 바뀝니다.",
+  "中文": "已就绪，但它是在 Buddy 检查每个下载之前安装的 – “重新安装”会将其替换为经过验证的副本。",
+  "العربية": "جاهز، لكنه ثُبّت قبل أن يتحقق Buddy من كل تنزيل – تستبدله «إعادة التثبيت» بنسخة مُتحقَّق منها.",
+  "Tiếng Việt": "Đã sẵn sàng, nhưng được cài trước khi Buddy kiểm tra mọi bản tải – Cài lại sẽ thay bằng bản đã xác minh."
+ },
+ "Verified": {
+  "日本語": "検証済み",
+  "Español": "Verificado",
+  "Deutsch": "Geprüft",
+  "Français": "Vérifié",
+  "한국어": "검증됨",
+  "中文": "已验证",
+  "العربية": "مُتحقَّق منه",
+  "Tiếng Việt": "Đã xác minh"
+ },
+ "Not verified": {
+  "日本語": "未検証",
+  "Español": "Sin verificar",
+  "Deutsch": "Nicht geprüft",
+  "Français": "Non vérifié",
+  "한국어": "검증 안 됨",
+  "中文": "未验证",
+  "العربية": "غير مُتحقَّق منه",
+  "Tiếng Việt": "Chưa xác minh"
+ },
+ "Every file matches the checksum Buddy expects for this model.": {
+  "日本語": "すべてのファイルが、このモデルについて Buddy が想定するチェックサムと一致します。",
+  "Español": "Cada archivo coincide con la suma de comprobación que Buddy espera para este modelo.",
+  "Deutsch": "Jede Datei passt zu der Prüfsumme, die Buddy für dieses Modell erwartet.",
+  "Français": "Chaque fichier correspond à la somme de contrôle que Buddy attend pour ce modèle.",
+  "한국어": "모든 파일이 이 모델에 대해 Buddy가 예상하는 체크섬과 일치합니다.",
+  "中文": "每个文件都与 Buddy 对该模型预期的校验和一致。",
+  "العربية": "يطابق كل ملف المجموع الاختباري الذي يتوقعه Buddy لهذا النموذج.",
+  "Tiếng Việt": "Mọi tệp đều khớp với mã kiểm tra Buddy mong đợi cho mô hình này."
+ },
+ "These files aren't exactly the ones Buddy expects for this model – an older download, or a copy from somewhere else. Model files hold no code, so it can still be used; re-download it for a verified copy.": {
+  "日本語": "これらのファイルは、このモデルについて Buddy が想定するものと完全には一致しません – 以前のダウンロードか、別の場所からのコピーです。モデルファイルにはコードが含まれないので引き続き使えますが、検証済みのコピーにするには再ダウンロードしてください。",
+  "Español": "Estos archivos no son exactamente los que Buddy espera para este modelo: una descarga anterior o una copia de otro sitio. Los archivos de modelo no contienen código, así que se puede seguir usando; vuelve a descargarlo para tener una copia verificada.",
+  "Deutsch": "Diese Dateien sind nicht genau die, die Buddy für dieses Modell erwartet – ein älterer Download oder eine Kopie von anderswo. Modelldateien enthalten keinen Code, es lässt sich also weiter nutzen; lade es neu herunter, um eine geprüfte Kopie zu haben.",
+  "Français": "Ces fichiers ne sont pas exactement ceux que Buddy attend pour ce modèle – un ancien téléchargement, ou une copie venue d'ailleurs. Les fichiers de modèle ne contiennent pas de code, il reste donc utilisable ; retéléchargez-le pour une copie vérifiée.",
+  "한국어": "이 파일은 이 모델에 대해 Buddy가 예상하는 파일과 정확히 같지 않습니다 – 예전 다운로드이거나 다른 곳에서 가져온 사본입니다. 모델 파일에는 코드가 없으므로 계속 쓸 수 있지만, 검증된 사본을 원하면 다시 내려받으세요.",
+  "中文": "这些文件与 Buddy 对该模型预期的文件并不完全一致 – 是较早的下载，或来自别处的副本。模型文件不含代码，因此仍可使用；重新下载即可获得经过验证的副本。",
+  "العربية": "ليست هذه الملفات هي نفسها التي يتوقعها Buddy لهذا النموذج تمامًا – تنزيل أقدم، أو نسخة من مكان آخر. لا تحتوي ملفات النماذج على شيفرة، لذا يمكن استخدامه؛ أعد تنزيله لتحصل على نسخة مُتحقَّق منها.",
+  "Tiếng Việt": "Các tệp này không hoàn toàn đúng như Buddy mong đợi cho mô hình này – một bản tải cũ hơn, hoặc bản sao từ nơi khác. Tệp mô hình không chứa mã nên vẫn dùng được; hãy tải lại để có bản đã xác minh."
+ },
+ "Re-download ({size})": {
+  "日本語": "再ダウンロード ({size})",
+  "Español": "Volver a descargar ({size})",
+  "Deutsch": "Neu herunterladen ({size})",
+  "Français": "Retélécharger ({size})",
+  "한국어": "다시 내려받기 ({size})",
+  "中文": "重新下载（{size}）",
+  "العربية": "إعادة التنزيل ({size})",
+  "Tiếng Việt": "Tải lại ({size})"
+ },
+ "Downloads a verified copy into Buddy's folder.": {
+  "日本語": "検証済みのコピーを Buddy のフォルダーにダウンロードします。",
+  "Español": "Descarga una copia verificada en la carpeta de Buddy.",
+  "Deutsch": "Lädt eine geprüfte Kopie in Buddys Ordner herunter.",
+  "Français": "Télécharge une copie vérifiée dans le dossier de Buddy.",
+  "한국어": "검증된 사본을 Buddy 폴더로 내려받습니다.",
+  "中文": "将经过验证的副本下载到 Buddy 的文件夹。",
+  "العربية": "ينزّل نسخة مُتحقَّقًا منها إلى مجلد Buddy.",
+  "Tiếng Việt": "Tải bản đã xác minh vào thư mục của Buddy."
+ },
+ "Removing the old environment (the models are kept) …": {
+  "日本語": "古い環境を削除しています（モデルは残します）…",
+  "Español": "Eliminando el entorno antiguo (los modelos se conservan)…",
+  "Deutsch": "Die alte Umgebung wird entfernt (die Modelle bleiben) …",
+  "Français": "Suppression de l'ancien environnement (les modèles sont conservés)…",
+  "한국어": "이전 환경을 지우는 중(모델은 유지)…",
+  "中文": "正在删除旧环境（保留模型）…",
+  "العربية": "جارٍ حذف البيئة القديمة (تُحفظ النماذج)…",
+  "Tiếng Việt": "Đang xóa môi trường cũ (giữ lại các mô hình)…"
+ },
+ "Installing: {packages} – every file checked against its published hash": {
+  "日本語": "インストール中: {packages} – すべてのファイルを公開されているハッシュで照合",
+  "Español": "Instalando: {packages}: cada archivo se comprueba con su hash publicado",
+  "Deutsch": "Installiere: {packages} – jede Datei gegen ihren veröffentlichten Hash geprüft",
+  "Français": "Installation : {packages} – chaque fichier vérifié avec son empreinte publiée",
+  "한국어": "설치 중: {packages} – 모든 파일을 공개된 해시와 대조",
+  "中文": "正在安装：{packages} – 每个文件都与其公布的哈希核对",
+  "العربية": "جارٍ التثبيت: {packages} – يُطابَق كل ملف مع بصمته المنشورة",
+  "Tiếng Việt": "Đang cài: {packages} – mọi tệp được đối chiếu với mã băm đã công bố"
+ },
+ "Checking the environment with Windows Defender …": {
+  "日本語": "Windows Defender で環境を検査しています…",
+  "Español": "Comprobando el entorno con Windows Defender…",
+  "Deutsch": "Die Umgebung wird mit Windows Defender geprüft …",
+  "Français": "Vérification de l'environnement avec Windows Defender…",
+  "한국어": "Windows Defender로 환경을 검사하는 중…",
+  "中文": "正在用 Windows Defender 检查环境…",
+  "العربية": "جارٍ فحص البيئة باستخدام Windows Defender…",
+  "Tiếng Việt": "Đang kiểm tra môi trường bằng Windows Defender…"
+ },
+ "Windows Defender scanned the transcription engine and found no threats.": {
+  "日本語": "Windows Defender で文字起こしエンジンをスキャンし、脅威は見つかりませんでした。",
+  "Español": "Windows Defender analizó el motor de transcripción y no encontró amenazas.",
+  "Deutsch": "Windows Defender hat die Transkriptions-Engine gescannt und keine Bedrohungen gefunden.",
+  "Français": "Windows Defender a analysé le moteur de transcription et n'a trouvé aucune menace.",
+  "한국어": "Windows Defender가 전사 엔진을 검사했으며 위협을 찾지 못했습니다.",
+  "中文": "Windows Defender 已扫描转录引擎，未发现威胁。",
+  "العربية": "فحص Windows Defender محرك النسخ ولم يجد أي تهديدات.",
+  "Tiếng Việt": "Windows Defender đã quét công cụ chép lời và không phát hiện mối đe dọa nào."
+ },
+ "Windows Defender isn't on this PC, so it couldn't scan the transcription engine.": {
+  "日本語": "この PC には Windows Defender がないため、文字起こしエンジンをスキャンできませんでした。",
+  "Español": "Windows Defender no está en este PC, así que no pudo analizar el motor de transcripción.",
+  "Deutsch": "Auf diesem PC ist kein Windows Defender, daher konnte die Transkriptions-Engine nicht gescannt werden.",
+  "Français": "Windows Defender n'est pas sur ce PC, il n'a donc pas pu analyser le moteur de transcription.",
+  "한국어": "이 PC에 Windows Defender가 없어 전사 엔진을 검사하지 못했습니다.",
+  "中文": "此电脑上没有 Windows Defender，因此无法扫描转录引擎。",
+  "العربية": "Windows Defender غير موجود على هذا الحاسوب، لذا تعذّر فحص محرك النسخ.",
+  "Tiếng Việt": "Máy này không có Windows Defender nên không quét được công cụ chép lời."
+ },
+ "Windows Defender couldn't scan the transcription engine: {error}": {
+  "日本語": "Windows Defender で文字起こしエンジンをスキャンできませんでした: {error}",
+  "Español": "Windows Defender no pudo analizar el motor de transcripción: {error}",
+  "Deutsch": "Windows Defender konnte die Transkriptions-Engine nicht scannen: {error}",
+  "Français": "Windows Defender n'a pas pu analyser le moteur de transcription : {error}",
+  "한국어": "Windows Defender가 전사 엔진을 검사하지 못했습니다: {error}",
+  "中文": "Windows Defender 无法扫描转录引擎：{error}",
+  "العربية": "تعذّر على Windows Defender فحص محرك النسخ: {error}",
+  "Tiếng Việt": "Windows Defender không quét được công cụ chép lời: {error}"
+ },
+ "Windows Defender couldn't scan the transcription engine (it may be turned off for another antivirus, code {code}).": {
+  "日本語": "Windows Defender で文字起こしエンジンをスキャンできませんでした（別のウイルス対策ソフトのためにオフになっている可能性があります。コード {code}）。",
+  "Español": "Windows Defender no pudo analizar el motor de transcripción (puede estar desactivado por otro antivirus, código {code}).",
+  "Deutsch": "Windows Defender konnte die Transkriptions-Engine nicht scannen (er ist vielleicht für ein anderes Antivirenprogramm abgeschaltet, Code {code}).",
+  "Français": "Windows Defender n'a pas pu analyser le moteur de transcription (il est peut-être désactivé au profit d'un autre antivirus, code {code}).",
+  "한국어": "Windows Defender가 전사 엔진을 검사하지 못했습니다(다른 백신 때문에 꺼져 있을 수 있음, 코드 {code}).",
+  "中文": "Windows Defender 无法扫描转录引擎（可能因其他杀毒软件而被关闭，代码 {code}）。",
+  "العربية": "تعذّر على Windows Defender فحص محرك النسخ (ربما أُوقف لصالح برنامج مكافحة فيروسات آخر، الرمز {code}).",
+  "Tiếng Việt": "Windows Defender không quét được công cụ chép lời (có thể đã bị tắt vì một phần mềm diệt virus khác, mã {code})."
+ },
+ "Windows Defender flagged the transcription engine's download, so it was deleted and won't be used. Nothing was run.": {
+  "日本語": "Windows Defender がダウンロードした文字起こしエンジンを検出したため、削除して使用しません。何も実行されていません。",
+  "Español": "Windows Defender marcó la descarga del motor de transcripción, así que se eliminó y no se usará. No se ejecutó nada.",
+  "Deutsch": "Windows Defender hat den Download der Transkriptions-Engine beanstandet, deshalb wurde er gelöscht und wird nicht verwendet. Es wurde nichts ausgeführt.",
+  "Français": "Windows Defender a signalé le téléchargement du moteur de transcription : il a été supprimé et ne sera pas utilisé. Rien n'a été exécuté.",
+  "한국어": "Windows Defender가 내려받은 전사 엔진을 위협으로 표시해 삭제했으며 사용하지 않습니다. 아무것도 실행되지 않았습니다.",
+  "中文": "Windows Defender 标记了下载的转录引擎，因此已将其删除且不会使用。未运行任何内容。",
+  "العربية": "رصد Windows Defender تنزيل محرك النسخ، لذا حُذف ولن يُستخدم. لم يُشغَّل أي شيء.",
+  "Tiếng Việt": "Windows Defender đã gắn cờ bản tải công cụ chép lời nên nó đã bị xóa và sẽ không được dùng. Không có gì được chạy."
+ },
+ "Checking {name} ({size} GB) …": {
+  "日本語": "{name} を検査しています（{size} GB）…",
+  "Español": "Comprobando {name} ({size} GB)…",
+  "Deutsch": "{name} wird geprüft ({size} GB) …",
+  "Français": "Vérification de {name} ({size} Go)…",
+  "한국어": "{name} 확인 중({size}GB)…",
+  "中文": "正在检查 {name}（{size} GB）…",
+  "العربية": "جارٍ فحص {name} ‏({size} غ.ب)…",
+  "Tiếng Việt": "Đang kiểm tra {name} ({size} GB)…"
+ },
+ "Buddy has no checksums for {model}, so it won't download it.": {
+  "日本語": "Buddy には {model} のチェックサムがないため、ダウンロードしません。",
+  "Español": "Buddy no tiene sumas de comprobación para {model}, así que no lo descargará.",
+  "Deutsch": "Buddy hat keine Prüfsummen für {model} und lädt es deshalb nicht herunter.",
+  "Français": "Buddy n'a pas de sommes de contrôle pour {model}, il ne le téléchargera donc pas.",
+  "한국어": "Buddy에 {model}의 체크섬이 없어 내려받지 않습니다.",
+  "中文": "Buddy 没有 {model} 的校验和，因此不会下载它。",
+  "العربية": "لا يملك Buddy مجاميع اختبارية لـ {model}، لذا لن ينزّله.",
+  "Tiếng Việt": "Buddy không có mã kiểm tra cho {model} nên sẽ không tải nó."
+ },
+ "The {model} download didn't match what Buddy expects ({problem}), so it was deleted and won't be used. Try again – if it keeps happening, the model's files on the server have changed.": {
+  "日本語": "ダウンロードした {model} が Buddy の想定と一致しなかったため（{problem}）、削除して使用しません。もう一度お試しください – 繰り返し起きる場合は、サーバー上のモデルのファイルが変わっています。",
+  "Español": "La descarga de {model} no coincidía con lo que Buddy espera ({problem}), así que se eliminó y no se usará. Inténtalo de nuevo; si sigue pasando, los archivos del modelo en el servidor han cambiado.",
+  "Deutsch": "Der Download von {model} passte nicht zu dem, was Buddy erwartet ({problem}), deshalb wurde er gelöscht und wird nicht verwendet. Versuche es erneut – passiert es immer wieder, haben sich die Dateien des Modells auf dem Server geändert.",
+  "Français": "Le téléchargement de {model} ne correspondait pas à ce que Buddy attend ({problem}) : il a été supprimé et ne sera pas utilisé. Réessayez – si cela se reproduit, les fichiers du modèle sur le serveur ont changé.",
+  "한국어": "내려받은 {model}이(가) Buddy가 예상한 것과 맞지 않아({problem}) 삭제했으며 사용하지 않습니다. 다시 시도하세요 – 계속 그렇다면 서버의 모델 파일이 바뀐 것입니다.",
+  "中文": "下载的 {model} 与 Buddy 的预期不符（{problem}），因此已删除且不会使用。请重试 – 如果反复出现，说明服务器上的模型文件已更改。",
+  "العربية": "لم يطابق تنزيل {model} ما يتوقعه Buddy ‏({problem})، لذا حُذف ولن يُستخدم. حاول مجددًا – وإن تكرر ذلك فقد تغيّرت ملفات النموذج على الخادم.",
+  "Tiếng Việt": "Bản tải {model} không khớp với những gì Buddy mong đợi ({problem}) nên đã bị xóa và sẽ không được dùng. Hãy thử lại – nếu vẫn xảy ra, các tệp của mô hình trên máy chủ đã thay đổi."
+ },
+ "The locked packages don't fit together:\n{output}": {
+  "日本語": "ロックされたパッケージの組み合わせが合いません:\n{output}",
+  "Español": "Los paquetes fijados no encajan entre sí:\n{output}",
+  "Deutsch": "Die festgelegten Pakete passen nicht zusammen:\n{output}",
+  "Français": "Les paquets verrouillés ne s'accordent pas :\n{output}",
+  "한국어": "고정된 패키지가 서로 맞지 않습니다:\n{output}",
+  "中文": "锁定的包彼此不兼容：\n{output}",
+  "العربية": "الحزم المثبّتة لا تتوافق معًا:\n{output}",
+  "Tiếng Việt": "Các gói đã khóa không khớp với nhau:\n{output}"
+ },
+ "Moves it to the Recycle Bin.": {
+  "日本語": "ごみ箱に移動します。",
+  "Español": "Lo mueve a la Papelera de reciclaje.",
+  "Deutsch": "Verschiebt es in den Papierkorb.",
+  "Français": "Le déplace dans la Corbeille.",
+  "한국어": "휴지통으로 옮깁니다.",
+  "中文": "将其移到回收站。",
+  "العربية": "ينقله إلى سلة المحذوفات.",
+  "Tiếng Việt": "Chuyển nó vào Thùng rác."
+ },
+ "Buddy stops using this copy. Its files are left where they are.": {
+  "日本語": "Buddy はこのコピーを使わなくなります。ファイルはそのまま残ります。",
+  "Español": "Buddy deja de usar esta copia. Sus archivos se quedan donde están.",
+  "Deutsch": "Buddy nutzt diese Kopie nicht mehr. Ihre Dateien bleiben, wo sie sind.",
+  "Français": "Buddy cesse d'utiliser cette copie. Ses fichiers restent où ils sont.",
+  "한국어": "Buddy가 이 사본을 더 이상 쓰지 않습니다. 파일은 그대로 남습니다.",
+  "中文": "Buddy 将不再使用这个副本。其文件保留在原处。",
+  "العربية": "يتوقف Buddy عن استخدام هذه النسخة. تبقى ملفاتها في مكانها.",
+  "Tiếng Việt": "Buddy ngừng dùng bản sao này. Các tệp vẫn ở nguyên chỗ."
+ },
+ "Installed – your copy: {where}": {
+  "日本語": "インストール済み – 自分のコピー: {where}",
+  "Español": "Instalado – tu copia: {where}",
+  "Deutsch": "Installiert – Ihre Kopie: {where}",
+  "Français": "Installé – votre copie : {where}",
+  "한국어": "설치됨 – 내 사본: {where}",
+  "中文": "已安装 —— 你的副本：{where}",
+  "العربية": "مثبّت – نسختك: {where}",
+  "Tiếng Việt": "Đã cài – bản sao của bạn: {where}"
+ },
+ "Found: {where}": {
+  "日本語": "見つかりました: {where}",
+  "Español": "Encontrado: {where}",
+  "Deutsch": "Gefunden: {where}",
+  "Français": "Trouvé : {where}",
+  "한국어": "찾음: {where}",
+  "中文": "已找到：{where}",
+  "العربية": "تم العثور عليه: {where}",
+  "Tiếng Việt": "Đã tìm thấy: {where}"
+ },
+ "Not installed": {
+  "日本語": "未インストール",
+  "Español": "Sin instalar",
+  "Deutsch": "Nicht installiert",
+  "Français": "Non installé",
+  "한국어": "설치 안 됨",
+  "中文": "未安装",
+  "العربية": "غير مثبّت",
+  "Tiếng Việt": "Chưa cài"
+ },
+ "Subtitles is busy – downloads and installs wait until it's done.": {
+  "日本語": "Subtitles は処理中です – ダウンロードとインストールは終わるまで待ちます。",
+  "Español": "Subtitles está ocupado – las descargas e instalaciones esperan a que termine.",
+  "Deutsch": "Subtitles ist beschäftigt – Downloads und Installationen warten, bis es fertig ist.",
+  "Français": "Subtitles est occupé – les téléchargements et installations attendent qu'il ait fini.",
+  "한국어": "Subtitles가 작업 중입니다 – 다운로드와 설치는 끝날 때까지 기다립니다.",
+  "中文": "Subtitles 正忙 —— 下载和安装会等它完成。",
+  "العربية": "Subtitles مشغول – تنتظر التنزيلات وعمليات التثبيت حتى ينتهي.",
+  "Tiếng Việt": "Subtitles đang bận – việc tải và cài sẽ chờ đến khi xong."
+ },
+ "Subtitles is busy – try again when it's done.": {
+  "日本語": "Subtitles は処理中です – 終わってからもう一度試してください。",
+  "Español": "Subtitles está ocupado – inténtalo de nuevo cuando termine.",
+  "Deutsch": "Subtitles ist beschäftigt – versuchen Sie es erneut, wenn es fertig ist.",
+  "Français": "Subtitles est occupé – réessayez quand il aura fini.",
+  "한국어": "Subtitles가 작업 중입니다 – 끝난 뒤 다시 시도하세요.",
+  "中文": "Subtitles 正忙 —— 完成后再试。",
+  "العربية": "Subtitles مشغول – حاول مجددًا عند انتهائه.",
+  "Tiếng Việt": "Subtitles đang bận – hãy thử lại khi xong."
+ },
+ "A faster-whisper model you already have (it contains model.bin).": {
+  "日本語": "すでに持っている faster-whisper モデル(model.bin を含む)。",
+  "Español": "Un modelo faster-whisper que ya tienes (contiene model.bin).",
+  "Deutsch": "Ein faster-whisper-Modell, das Sie schon haben (es enthält model.bin).",
+  "Français": "Un modèle faster-whisper que vous avez déjà (il contient model.bin).",
+  "한국어": "이미 가지고 있는 faster-whisper 모델(model.bin 포함).",
+  "中文": "你已有的 faster-whisper 模型（包含 model.bin）。",
+  "العربية": "نموذج faster-whisper لديك بالفعل (يحتوي على model.bin).",
+  "Tiếng Việt": "Một mô hình faster-whisper bạn đã có (chứa model.bin)."
+ },
+ "An NLLB-200 or MADLAD-400 model you already have (it contains model.bin and tokenizer.json).": {
+  "日本語": "すでに持っている NLLB-200 または MADLAD-400 モデル(model.bin と tokenizer.json を含む)。",
+  "Español": "Un modelo NLLB-200 o MADLAD-400 que ya tienes (contiene model.bin y tokenizer.json).",
+  "Deutsch": "Ein NLLB-200- oder MADLAD-400-Modell, das Sie schon haben (es enthält model.bin und tokenizer.json).",
+  "Français": "Un modèle NLLB-200 ou MADLAD-400 que vous avez déjà (il contient model.bin et tokenizer.json).",
+  "한국어": "이미 가지고 있는 NLLB-200 또는 MADLAD-400 모델(model.bin과 tokenizer.json 포함).",
+  "中文": "你已有的 NLLB-200 或 MADLAD-400 模型（包含 model.bin 和 tokenizer.json）。",
+  "العربية": "نموذج NLLB-200 أو MADLAD-400 لديك بالفعل (يحتوي على model.bin وtokenizer.json).",
+  "Tiếng Việt": "Một mô hình NLLB-200 hoặc MADLAD-400 bạn đã có (chứa model.bin và tokenizer.json)."
+ },
+ "Speech to text for Subtitles and Dailies – it all runs on this computer.": {
+  "日本語": "Subtitles と Dailies の音声のテキスト化 – すべてこのコンピューター上で動きます。",
+  "Español": "De voz a texto para Subtitles y Dailies – todo se ejecuta en este ordenador.",
+  "Deutsch": "Sprache zu Text für Subtitles und Dailies – alles läuft auf diesem Computer.",
+  "Français": "La parole en texte pour Subtitles et Dailies – tout s'exécute sur cet ordinateur.",
+  "한국어": "Subtitles와 Dailies의 음성 텍스트 변환 – 모두 이 컴퓨터에서 실행됩니다.",
+  "中文": "为 Subtitles 和 Dailies 将语音转为文字 —— 全部在这台电脑上运行。",
+  "العربية": "تحويل الكلام إلى نص لـ Subtitles وDailies – كل ذلك يعمل على هذا الكمبيوتر.",
+  "Tiếng Việt": "Chuyển giọng nói thành chữ cho Subtitles và Dailies – tất cả chạy trên máy này."
+ },
+ "Subtitles' AI translation uses the Chat assistant's model.": {
+  "日本語": "Subtitles の AI 翻訳はチャットアシスタントのモデルを使います。",
+  "Español": "La traducción con IA de Subtitles usa el modelo del Asistente de chat.",
+  "Deutsch": "Die KI-Übersetzung von Subtitles nutzt das Modell des Chat-Assistenten.",
+  "Français": "La traduction par IA de Subtitles utilise le modèle de l'Assistant de discussion.",
+  "한국어": "Subtitles의 AI 번역은 채팅 도우미의 모델을 씁니다.",
+  "中文": "Subtitles 的 AI 翻译使用聊天助手的模型。",
+  "العربية": "تستخدم ترجمة Subtitles بالذكاء الاصطناعي نموذج مساعد الدردشة.",
+  "Tiếng Việt": "Bản dịch AI của Subtitles dùng mô hình của Trợ lý trò chuyện."
+ },
+ "Subtitles in other languages, on this computer or with the Chat assistant's model.": {
+  "日本語": "ほかの言語の字幕を、このコンピューター上で、またはチャットアシスタントのモデルで。",
+  "Español": "Subtítulos en otros idiomas, en este ordenador o con el modelo del Asistente de chat.",
+  "Deutsch": "Untertitel in anderen Sprachen, auf diesem Computer oder mit dem Modell des Chat-Assistenten.",
+  "Français": "Des sous-titres dans d'autres langues, sur cet ordinateur ou avec le modèle de l'Assistant de discussion.",
+  "한국어": "다른 언어의 자막을 이 컴퓨터에서 또는 채팅 도우미의 모델로.",
+  "中文": "其他语言的字幕，在这台电脑上或用聊天助手的模型生成。",
+  "العربية": "ترجمات بلغات أخرى، على هذا الكمبيوتر أو بنموذج مساعد الدردشة.",
+  "Tiếng Việt": "Phụ đề bằng ngôn ngữ khác, trên máy này hoặc với mô hình của Trợ lý trò chuyện."
+ },
+ "Your clips' audio is transcribed on this computer – or by Resolve Studio's own transcription, when you pick it.": {
+  "日本語": "クリップの音声はこのコンピューター上で文字起こしされます – Resolve Studio 独自の文字起こしを選んだ場合はそちらで行われます。",
+  "Español": "El audio de tus clips se transcribe en este ordenador – o con la transcripción propia de Resolve Studio, si la eliges.",
+  "Deutsch": "Der Ton Ihrer Clips wird auf diesem Computer transkribiert – oder von Resolve Studios eigener Transkription, wenn Sie diese wählen.",
+  "Français": "L'audio de vos clips est transcrit sur cet ordinateur – ou par la transcription propre de Resolve Studio, si vous la choisissez.",
+  "한국어": "클립의 오디오는 이 컴퓨터에서 전사됩니다 – Resolve Studio 자체 전사를 고르면 그쪽에서 합니다.",
+  "中文": "你的片段音频在这台电脑上转写 —— 选择 Resolve Studio 自带转写时则由它完成。",
+  "العربية": "يُنسخ صوت مقاطعك على هذا الكمبيوتر – أو بخاصية النسخ في Resolve Studio نفسه، عندما تختارها.",
+  "Tiếng Việt": "Âm thanh của các clip được phiên âm trên máy này – hoặc bằng tính năng phiên âm riêng của Resolve Studio, khi bạn chọn nó."
+ },
+ "Translation models run on this computer. AI translation sends the subtitles to the Chat assistant's model instead.": {
+  "日本語": "翻訳モデルはこのコンピューター上で動きます。AI 翻訳では代わりに字幕をチャットアシスタントのモデルに送ります。",
+  "Español": "Los modelos de traducción se ejecutan en este ordenador. La traducción con IA envía los subtítulos al modelo del Asistente de chat.",
+  "Deutsch": "Übersetzungsmodelle laufen auf diesem Computer. Die KI-Übersetzung sendet die Untertitel stattdessen an das Modell des Chat-Assistenten.",
+  "Français": "Les modèles de traduction s'exécutent sur cet ordinateur. La traduction par IA envoie plutôt les sous-titres au modèle de l'Assistant de discussion.",
+  "한국어": "번역 모델은 이 컴퓨터에서 실행됩니다. AI 번역은 대신 자막을 채팅 도우미의 모델로 보냅니다.",
+  "中文": "翻译模型在这台电脑上运行。AI 翻译则会把字幕发送给聊天助手的模型。",
+  "العربية": "تعمل نماذج الترجمة على هذا الكمبيوتر. أما الترجمة بالذكاء الاصطناعي فترسل الترجمات إلى نموذج مساعد الدردشة.",
+  "Tiếng Việt": "Các mô hình dịch chạy trên máy này. Bản dịch AI thì gửi phụ đề tới mô hình của Trợ lý trò chuyện."
+ },
+ "{label} removed.": {
+  "日本語": "{label} を削除しました。",
+  "Español": "{label} quitado.",
+  "Deutsch": "{label} entfernt.",
+  "Français": "{label} retiré.",
+  "한국어": "{label}을(를) 제거했습니다.",
+  "中文": "已移除 {label}。",
+  "العربية": "تمت إزالة {label}.",
+  "Tiếng Việt": "Đã gỡ {label}."
+ },
+ "Removed {label}.": {
+  "日本語": "{label} を削除しました。",
+  "Español": "Se quitó {label}.",
+  "Deutsch": "{label} wurde entfernt.",
+  "Français": "{label} a été retiré.",
+  "한국어": "{label}을(를) 제거했습니다.",
+  "中文": "已移除 {label}。",
+  "العربية": "أُزيل {label}.",
+  "Tiếng Việt": "Đã gỡ {label}."
+ },
+ "{label} goes to the Recycle Bin. You can download it again from here.": {
+  "日本語": "{label} はごみ箱に移動します。ここからまたダウンロードできます。",
+  "Español": "{label} irá a la Papelera de reciclaje. Puedes volver a descargarlo desde aquí.",
+  "Deutsch": "{label} kommt in den Papierkorb. Sie können es von hier erneut herunterladen.",
+  "Français": "{label} ira dans la Corbeille. Vous pourrez le retélécharger d'ici.",
+  "한국어": "{label}은(는) 휴지통으로 이동합니다. 여기서 다시 내려받을 수 있습니다.",
+  "中文": "{label} 将移到回收站。你可以从这里重新下载。",
+  "العربية": "سينتقل {label} إلى سلة المحذوفات. يمكنك تنزيله مجددًا من هنا.",
+  "Tiếng Việt": "{label} sẽ vào Thùng rác. Bạn có thể tải lại từ đây."
+ },
+ "Buddy stops using your copy of {label}. Its files are left where they are.": {
+  "日本語": "Buddy は {label} の自分のコピーを使わなくなります。ファイルはそのまま残ります。",
+  "Español": "Buddy deja de usar tu copia de {label}. Sus archivos se quedan donde están.",
+  "Deutsch": "Buddy nutzt Ihre Kopie von {label} nicht mehr. Ihre Dateien bleiben, wo sie sind.",
+  "Français": "Buddy cesse d'utiliser votre copie de {label}. Ses fichiers restent où ils sont.",
+  "한국어": "Buddy가 {label}의 내 사본을 더 이상 쓰지 않습니다. 파일은 그대로 남습니다.",
+  "中文": "Buddy 将不再使用你的 {label} 副本。其文件保留在原处。",
+  "العربية": "يتوقف Buddy عن استخدام نسختك من {label}. تبقى ملفاتها في مكانها.",
+  "Tiếng Việt": "Buddy ngừng dùng bản sao {label} của bạn. Các tệp vẫn ở nguyên chỗ."
+ },
+ "Moves it to the Trash.": {
+  "日本語": "ごみ箱に移動します。",
+  "Español": "Lo mueve a la Papelera.",
+  "Deutsch": "Verschiebt es in den Papierkorb.",
+  "Français": "Le déplace dans la Corbeille.",
+  "한국어": "휴지통으로 옮깁니다.",
+  "中文": "将其移到废纸篓。",
+  "العربية": "ينقله إلى سلة المهملات.",
+  "Tiếng Việt": "Chuyển nó vào Thùng rác."
+ },
+ "{label} goes to the Trash. You can download it again from here.": {
+  "日本語": "{label} はごみ箱に移動します。ここからまたダウンロードできます。",
+  "Español": "{label} irá a la Papelera. Puedes volver a descargarlo desde aquí.",
+  "Deutsch": "{label} kommt in den Papierkorb. Sie können es von hier erneut herunterladen.",
+  "Français": "{label} ira dans la Corbeille. Vous pourrez le retélécharger d'ici.",
+  "한국어": "{label}은(는) 휴지통으로 이동합니다. 여기서 다시 내려받을 수 있습니다.",
+  "中文": "{label} 将移到废纸篓。你可以从这里重新下载。",
+  "العربية": "سينتقل {label} إلى سلة المهملات. يمكنك تنزيله مجددًا من هنا.",
+  "Tiếng Việt": "{label} sẽ vào Thùng rác. Bạn có thể tải lại từ đây."
+ },
+ "Installs faster-whisper into Buddy's own folder ({root}), built from the Python Buddy runs on. Download: {size}. Every package is checked against its published hash.": {
+  "日本語": "faster-whisper を Buddy 専用のフォルダー ({root}) に、Buddy が動作している Python を元にインストールします。ダウンロード: {size}。すべてのパッケージを公開されているハッシュで照合します。",
+  "Español": "Instala faster-whisper en la carpeta propia de Buddy ({root}), creada a partir del Python con el que funciona Buddy. Descarga: {size}. Cada paquete se comprueba con su hash publicado.",
+  "Deutsch": "Installiert faster-whisper in Buddys eigenen Ordner ({root}), aufgebaut auf dem Python, mit dem Buddy läuft. Download: {size}. Jedes Paket wird mit seinem veröffentlichten Hash geprüft.",
+  "Français": "Installe faster-whisper dans le dossier propre de Buddy ({root}), à partir du Python sur lequel Buddy tourne. Téléchargement : {size}. Chaque paquet est vérifié par rapport à son hachage publié.",
+  "한국어": "Buddy 전용 폴더({root})에 Buddy가 실행 중인 Python을 바탕으로 faster-whisper를 설치합니다. 다운로드: {size}. 모든 패키지를 공개된 해시와 대조합니다.",
+  "中文": "将 faster-whisper 安装到 Buddy 自己的文件夹（{root}），基于 Buddy 运行所用的 Python。下载：{size}。每个软件包都会与其公布的哈希比对。",
+  "العربية": "يثبّت faster-whisper في مجلد Buddy الخاص ({root})، مبنيًا على Python الذي يعمل عليه Buddy. التنزيل: {size}. يُطابق كل حزمة مع البصمة المنشورة لها.",
+  "Tiếng Việt": "Cài faster-whisper vào thư mục riêng của Buddy ({root}), dựng từ Python mà Buddy đang chạy. Tải xuống: {size}. Mọi gói đều được đối chiếu với mã băm đã công bố."
+ },
+ "Change where models download to": {
+  "日本語": "モデルのダウンロード先を変更",
+  "Español": "Cambiar dónde se descargan los modelos",
+  "Deutsch": "Ändern, wohin Modelle geladen werden",
+  "Français": "Changer l'endroit où les modèles sont téléchargés",
+  "한국어": "모델을 받을 위치 바꾸기",
+  "中文": "更改模型的下载位置",
+  "العربية": "تغيير مكان تنزيل النماذج",
+  "Tiếng Việt": "Đổi nơi tải mô hình về"
+ }
+}

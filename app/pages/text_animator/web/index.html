@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Animation</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="animation.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page">
+    <header class="page-head">
+        <h1 class="page-title">Animation</h1>
+    </header>
+
+    <!-- The kind of animation. Presets: Text+ captions' word highlight (the
+         other Text+ tools are on Subtitles). Titles: hooks composed into animated titles. Zoom: zooms
+         on the selected clip. -->
+    <nav class="tabs" role="tablist" id="sections">
+        <button type="button" role="tab" data-tab="previews" aria-selected="true">Previews</button>
+        <button type="button" role="tab" data-tab="editor" aria-selected="false">Editor</button>
+        <button type="button" role="tab" data-tab="favorites" aria-selected="false">Favorites</button>
+        <button type="button" role="tab" data-tab="textplus" aria-selected="false">Presets</button>
+        <button type="button" role="tab" data-tab="titles" aria-selected="false">Titles</button>
+        <button type="button" role="tab" data-tab="zoom" aria-selected="false">Zoom</button>
+        <button type="button" role="tab" data-tab="transitions" aria-selected="false">Transitions</button>
+    </nav>
+
+    <!-- ------------------------------------------- Previews and Favorites -->
+    <!-- One panel for both: Favorites is Previews narrowed to the hearted. -->
+    <section class="panel pv" id="panel-previews" data-tabs="previews favorites">
+        <!-- The chosen preset, how it goes on, and the clips it goes on. -->
+        <div class="card pv-apply">
+            <div class="pv-chosen">
+                <div class="pv-stage pv-stage-lg" id="chosen-stage"></div>
+                <div class="pv-chosen-meta">
+                    <span class="muted small">Chosen preset</span>
+                    <span class="pv-chosen-name" id="chosen-name" translate="no"></span>
+                    <span class="muted small" id="chosen-sub"></span>
+                </div>
+            </div>
+            <div class="pv-options">
+                <label class="pv-opt" id="way-row"><span class="muted small">Put on</span>
+                    <div class="segmented" id="way">
+                        <button type="button" data-way="both">In &amp; Out</button>
+                        <button type="button" data-way="in">In</button>
+                        <button type="button" data-way="out">Out</button>
+                    </div>
+                </label>
+                <label class="pv-opt"><span class="muted small">Speed</span>
+                    <div class="segmented" id="speed">
+                        <button type="button" data-speed="0.5">0.5×</button>
+                        <button type="button" data-speed="1">1×</button>
+                        <button type="button" data-speed="1.5">1.5×</button>
+                        <button type="button" data-speed="2">2×</button>
+                    </div>
+                </label>
+                <!-- Which way a preset that moves across the frame goes (motion.turned). -->
+                <label class="pv-opt" id="direction-row"><span class="muted small">Direction</span>
+                    <div class="segmented" id="direction">
+                        <button type="button" data-direction="own" title="The way it was made">Own</button>
+                        <button type="button" data-direction="left" title="Moves left" aria-label="Left">←</button>
+                        <button type="button" data-direction="right" title="Moves right" aria-label="Right">→</button>
+                        <button type="button" data-direction="up" title="Moves up" aria-label="Up">↑</button>
+                        <button type="button" data-direction="down" title="Moves down" aria-label="Down">↓</button>
+                    </div>
+                </label>
+                <!-- Text+ only: line by line, word by word or letter by letter (units.py). -->
+                <label class="pv-opt"><span class="muted small">Animate by</span>
+                    <div class="segmented" id="unit">
+                        <button type="button" data-unit="clip">Clip</button>
+                        <button type="button" data-unit="lines">Line</button>
+                        <button type="button" data-unit="words">Word</button>
+                        <button type="button" data-unit="letters">Letter</button>
+                    </div>
+                </label>
+                <label class="pv-opt" id="stagger-row"><span class="muted small">Stagger</span>
+                    <div class="segmented" id="stagger">
+                        <button type="button" data-stagger="0.03">0.03s</button>
+                        <button type="button" data-stagger="0.05">0.05s</button>
+                        <button type="button" data-stagger="0.08">0.08s</button>
+                        <button type="button" data-stagger="0.12">0.12s</button>
+                        <button type="button" data-stagger="0.2">0.2s</button>
+                        <button type="button" data-stagger="0.3">0.3s</button>
+                    </div>
+                </label>
+                <label class="pv-opt" id="order-row"><span class="muted small">Order</span>
+                    <select class="field" id="order">
+                        <option value="forward">First to last</option>
+                        <option value="reverse">Last to first</option>
+                        <option value="middle">From the middle</option>
+                        <option value="edges">From the edges</option>
+                        <option value="random">Random</option>
+                    </select>
+                </label>
+            </div>
+            <div class="pv-target">
+                <div class="pv-sel" id="selection"></div>
+                <div class="row pv-reframed" id="reframed" hidden>
+                    <span class="muted small" id="reframed-text"></span>
+                    <button type="button" class="btn" id="update">Update framing</button>
+                </div>
+                <div class="row pv-go">
+                    <button type="button" class="btn ghost" id="remove">Remove</button>
+                    <button type="button" class="btn accent" id="apply">Apply to selected</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- The presets scroll on their own; the card above stays put. -->
+        <div class="pv-scroll">
+        <div class="pv-bar">
+            <input class="field pv-search" id="q" type="search" placeholder="Search presets" autocomplete="off">
+            <div class="segmented" id="packs"></div>
+            <div class="segmented" id="kinds"></div>
+            <div class="spacer"></div>
+            <label class="pv-play muted small">Play
+                <div class="segmented" id="play">
+                    <button type="button" data-play="all">All</button>
+                    <button type="button" data-play="hover">On hover</button>
+                </div>
+            </label>
+        </div>
+
+        <div id="groups" class="pv-groups"></div>
+        </div>
+    </section>
+
+    <!-- --------------------------------------------------------- Editor -->
+    <section class="panel ed" id="panel-editor" hidden>
+        <!-- Which preset, what it's called and how it's made. -->
+        <div class="card ed-head">
+            <label class="ed-field"><span class="muted small">Preset</span>
+                <select class="field" id="ed-base" aria-label="Preset to edit"></select>
+            </label>
+            <label class="ed-field ed-name"><span class="muted small">Name</span>
+                <input class="field" id="ed-name" type="text" maxlength="60" autocomplete="off" placeholder="Untitled">
+            </label>
+            <div class="ed-field"><span class="muted small">Kind</span>
+                <div class="segmented" id="ed-kind"></div>
+            </div>
+            <label class="ed-field"><span class="muted small">Length</span>
+                <span class="ed-dur"><input class="field" id="ed-dur" type="number" min="0.2" max="10" step="0.1"><span class="muted small">s</span></span>
+            </label>
+            <div class="spacer"></div>
+            <div class="row ed-save">
+                <button type="button" class="btn ghost" id="ed-revert">Revert</button>
+                <button type="button" class="btn ghost" id="ed-delete" hidden>Delete</button>
+                <button type="button" class="btn" id="ed-update" hidden>Save changes</button>
+                <button type="button" class="btn accent" id="ed-saveas">Save as preset</button>
+            </div>
+        </div>
+
+        <div class="ed-main">
+            <!-- What's drawn, playing exactly as it'll move. -->
+            <div class="card ed-view">
+                <div class="pv-stage ed-stage" id="ed-stage"></div>
+                <div class="row ed-transport">
+                    <button type="button" class="btn icon" id="ed-play" title="Play or pause"></button>
+                    <span class="muted small ed-time" id="ed-time"></span>
+                </div>
+                <p class="warn ed-kind-note" id="ed-kind-note"></p>
+                <div class="ed-try">
+                    <div class="pv-sel" id="ed-selection"></div>
+                    <button type="button" class="btn" id="ed-apply">Apply to selected</button>
+                    <p class="muted small ed-note">As it is now, saved or not, with the Put on, Speed and Animate by chosen on Previews.</p>
+                </div>
+            </div>
+
+            <!-- The curves: one channel to edit, the others faint behind it. -->
+            <div class="card ed-graph-card">
+                <div class="row ed-tools">
+                    <div class="segmented" id="ed-channels"></div>
+                    <span class="ed-frame" id="ed-frame" title="The playhead's frame"></span>
+                    <div class="spacer"></div>
+                    <!-- One clip selected: the curves at its length, or the preset's own. -->
+                    <div class="segmented" id="ed-view" aria-label="Timing shown" hidden></div>
+                    <button type="button" class="btn ghost" id="ed-fit" title="Fit the curve to the graph">Fit</button>
+                    <button type="button" class="btn icon ghost" id="ed-undo" title="Undo (Ctrl+Z)"></button>
+                    <button type="button" class="btn icon ghost" id="ed-redo" title="Redo (Ctrl+Y)"></button>
+                </div>
+                <div class="ed-graph-wrap" id="ed-graph-wrap">
+                    <svg class="ed-graph" id="ed-graph" tabindex="0" aria-label="Spline editor"></svg>
+                    <!-- What can be done to the selected keys, beside them. -->
+                    <div class="ed-keymenu" id="ed-keymenu" role="toolbar" aria-label="Selected keys" hidden></div>
+                </div>
+                <p class="muted small ed-hint">Drag a key or its handles. Ctrl-click keys, or drag across empty space, to select several (Shift or Ctrl adds to them), then drag one to move them all. Hold Shift while dragging keys to move them only in time. Selected keys get a menu of their own. Double-click the curve to add a key; Delete removes the selected ones. Alt-drag a handle to break it from its partner. Drag along the time bar at the top to move the playhead. Click the channels above to show several at once, each in its own colour: keys of different channels can be selected together and moved as one, and a key dragged near another channel's key snaps to its time (hold Ctrl to drag freely). Right-click a channel to change its colour.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- -------------------------------------------------------- Presets -->
+    <!-- Highlight: the word being said gets a box and a colour, timed by
+         Transcribe's word timings (highlight.py, highlight_resolve.py). -->
+    <section class="panel hl" id="panel-textplus" hidden>
+        <div class="card hl-card">
+            <div class="hl-view">
+                <div class="hl-player">
+                    <div class="pv-stage hl-stage" id="hl-stage" aria-hidden="true">
+                        <div class="hl-caption" id="hl-caption"><div class="hl-box" id="hl-box"></div></div>
+                    </div>
+                    <div class="row hl-transport">
+                        <button type="button" class="btn icon ghost" id="hl-play" title="Play or pause the preview (Space)"></button>
+                        <span class="muted small hl-time" id="hl-time" translate="no"></span>
+                    </div>
+                </div>
+                <div class="hl-meta">
+                    <span class="pv-chosen-name">Word highlight</span>
+                    <span class="muted small">The word being said lights up, then hands on to the next one.
+                        Each word is timed from Transcribe's transcript of the timeline when there is one,
+                        otherwise the words share the clip's time evenly.</span>
+                </div>
+            </div>
+            <div class="hl-options">
+                <label class="pv-opt"><span class="muted small">Look</span>
+                    <div class="segmented" id="hl-look">
+                        <button type="button" data-look="both">Box &amp; colour</button>
+                        <button type="button" data-look="box">Box</button>
+                        <button type="button" data-look="color">Colour</button>
+                    </div>
+                </label>
+                <div class="pv-opt" id="hl-box-row"><span class="muted small">Highlight colour</span>
+                    <button type="button" class="btn hl-color" id="hl-box-color" data-key="box_color"></button>
+                </div>
+                <div class="pv-opt" id="hl-word-row"><span class="muted small">Word colour</span>
+                    <button type="button" class="btn hl-color" id="hl-word-color" data-key="word_color"></button>
+                </div>
+                <label class="pv-opt" id="hl-shape-row"><span class="muted small">Corners</span>
+                    <div class="segmented" id="hl-shape">
+                        <button type="button" data-shape="square">Square</button>
+                        <button type="button" data-shape="rounded">Rounded</button>
+                        <button type="button" data-shape="pill">Round</button>
+                    </div>
+                </label>
+                <label class="pv-opt"><span class="muted small">Move</span>
+                    <div class="segmented" id="hl-move">
+                        <button type="button" data-move="slide">Slide</button>
+                        <button type="button" data-move="jump">Jump</button>
+                    </div>
+                </label>
+                <label class="pv-opt"><span class="muted small">Pop</span>
+                    <div class="segmented" id="hl-pop">
+                        <button type="button" data-pop="off">Off</button>
+                        <button type="button" data-pop="small">Small</button>
+                        <button type="button" data-pop="big">Big</button>
+                    </div>
+                </label>
+            </div>
+            <div class="pv-target">
+                <div class="pv-sel" id="hl-selection"></div>
+                <div class="row pv-go">
+                    <button type="button" class="btn ghost" id="hl-remove">Remove</button>
+                    <button type="button" class="btn accent" id="hl-apply">Highlight selected</button>
+                </div>
+            </div>
+        </div>
+        <!-- One caption selected: its words along its length, to time by hand. -->
+        <div class="card hl-timing" id="hl-timing" hidden>
+            <div class="row hl-timing-head">
+                <span class="strong">Word timing</span>
+                <span class="chip" id="hl-clip-name" translate="no"></span>
+                <span class="muted small" id="hl-timing-source"></span>
+                <div class="spacer"></div>
+                <button type="button" class="btn icon ghost" id="hl-undo" title="Undo (Ctrl+Z)"></button>
+                <button type="button" class="btn icon ghost" id="hl-redo" title="Redo (Ctrl+Y)"></button>
+                <button type="button" class="btn ghost" id="hl-reset" title="Back to the timing Highlight works out">Reset</button>
+                <button type="button" class="btn" id="hl-at-playhead"
+                        title="The selected word starts where Resolve's playhead is; the next word is selected">Start at playhead</button>
+                <button type="button" class="btn accent" id="hl-set">Apply timing</button>
+            </div>
+            <div class="hl-strip" id="hl-strip" tabindex="0" aria-label="Word timing">
+                <div class="hl-ruler" id="hl-ruler" title="Click or drag to move the preview there"></div>
+                <div class="hl-lane" id="hl-lane"></div>
+                <div class="hl-head" id="hl-head"></div>
+                <div class="hl-resolve-head" id="hl-resolve-head" title="Resolve's playhead" hidden></div>
+            </div>
+            <p class="muted small hl-hint">Drag a word to move where it starts – Shift-drag moves the words after it too.
+                Click a word, then ← → nudge it a frame. Or park Resolve's playhead where a word is said and press
+                Start at playhead. Apply timing puts it on the caption, and it stays with it.</p>
+        </div>
+        <p class="muted small hl-foot">Select Text+ captions in Resolve's timeline – Subtitle conversion on the
+            Subtitles page makes them, one per subtitle. Font styling, layout and word-by-word tools are tabs there too.</p>
+    </section>
+    <!-- --------------------------------------------------------- Titles -->
+    <!-- Dynamic titles: a hook typed in, composed into a styled, animated title
+         (titles/composer.py) and edited on the frame itself: Python sends the layout
+         as numbers, the page draws it (titles_svg.js) and plays it (titles_motion.js),
+         and Place puts it on as one Text+ clip (titles/titles_resolve.py). titles.js. -->
+    <section class="panel ti" id="panel-titles" hidden>
+        <div class="ti-studio">
+            <aside class="card ti-rail">
+                <div class="ti-hd">Looks</div>
+                <div class="ti-looks" id="ti-looks" role="listbox" aria-label="Looks"></div>
+            </aside>
+            <div class="card ti-center">
+                <div class="ti-hook">
+                    <input type="text" class="field ti-text" id="ti-text" maxlength="200" spellcheck="true"
+                           placeholder="3 secrets nobody tells you" aria-label="Title text">
+                    <div class="ti-words-row">
+                        <div class="ti-words" id="ti-words"></div>
+                        <div class="ti-sugg" id="ti-sugg"></div>
+                    </div>
+                </div>
+                <div class="ti-vtools">
+                    <span class="muted small">Behind</span>
+                    <div class="segmented ti-seg" id="ti-back">
+                        <button type="button" data-v="dark">Dark</button>
+                        <button type="button" data-v="light">Light</button>
+                        <button type="button" data-v="checker">Checker</button>
+                    </div>
+                    <span class="muted small">Guides</span>
+                    <div class="segmented ti-seg" id="ti-guides">
+                        <button type="button" data-v="safe">Title safe</button>
+                        <button type="button" data-v="thirds">Thirds</button>
+                    </div>
+                    <span class="spacer"></span>
+                    <span class="muted small ti-mono" id="ti-frame" translate="no"></span>
+                    <button type="button" class="btn icon ghost" id="ti-refresh" title="Read the timeline again - after switching timelines or projects in Resolve"></button>
+                </div>
+                <div class="ti-stage-wrap" id="ti-stage-wrap">
+                    <div class="ti-stage" id="ti-stage" data-back="dark">
+                        <div class="ti-title" id="ti-title"></div>
+                        <svg class="ti-over" id="ti-over" aria-label="The title on the frame"></svg>
+                    </div>
+                    <div class="ti-ftb" id="ti-ftb" hidden></div>
+                </div>
+                <div class="ti-transport">
+                    <button type="button" class="btn icon" id="ti-play" title="Play (Space)"></button>
+                    <button type="button" class="btn icon ti-toggle" id="ti-loop" title="Loop" aria-pressed="true"></button>
+                    <span class="ti-mono" id="ti-tc" translate="no"></span>
+                    <span class="muted small" id="ti-phase"></span>
+                    <div class="segmented ti-seg ti-units" id="ti-units" aria-label="Show times in">
+                        <button type="button" data-v="s" title="Show every time in seconds">Seconds</button>
+                        <button type="button" data-v="f" title="Show every time in frames, at the timeline's frame rate">Frames</button>
+                    </div>
+                </div>
+            </div>
+            <aside class="card ti-insp">
+                <div class="ti-hd" id="ti-insp-hd">Inspector</div>
+                <div class="ti-insp-body" id="ti-insp"></div>
+            </aside>
+        </div>
+        <!-- The dock: a lane per word, and the entrance's curves. Folds to a strip. -->
+        <div class="ti-dock" id="ti-dock">
+            <section class="card ti-tl">
+                <div class="ti-hd">
+                    <button type="button" class="btn ghost small ti-fold" id="ti-fold" title="Fold the timeline and curves away">▾</button>
+                    Timeline <span class="muted" id="ti-tl-sub"></span>
+                    <span class="spacer"></span>
+                    <span class="ti-hctl muted small ti-len" title="How long the title is on screen">Length
+                        <button type="button" class="btn ghost small ti-step" data-len="-1">−</button>
+                        <input type="number" class="field ti-num ti-len-v" min="1" max="10" step="0.1" aria-label="Length in seconds">
+                        <span class="ti-len-u">s</span>
+                        <button type="button" class="btn ghost small ti-step" data-len="1">+</button></span>
+                    <label class="ti-hctl muted small">Stagger
+                        <input type="range" id="ti-stagger" min="0" max="0.5" step="0.01">
+                        <span class="ti-mono" id="ti-stagger-v"></span></label>
+                    <button type="button" class="btn ghost small" id="ti-even" title="Every word's entrance back on the stagger, and its exit back with the others">Even out</button>
+                    <button type="button" class="btn ghost small ti-expand" data-x="tl"></button>
+                </div>
+                <div class="ti-lanes" id="ti-lanes">
+                    <div class="ti-ruler" id="ti-ruler"></div>
+                    <div class="ti-rows" id="ti-rows"></div>
+                </div>
+            </section>
+            <section class="card ti-cv">
+                <div class="ti-hd">Curves
+                    <div class="segmented ti-seg ti-cv-io" id="ti-cv-io" aria-label="Edit the entrance or the exit">
+                        <button type="button" data-v="in" title="Edit how words come in">In</button>
+                        <button type="button" data-v="out">Out</button>
+                    </div>
+                    <span class="muted" id="ti-cv-sub"></span><span class="spacer"></span>
+                    <span class="ti-chs" id="ti-chs"></span>
+                    <button type="button" class="btn ghost small ti-expand" data-x="cv"></button></div>
+                <div class="ti-cv-wrap"><svg id="ti-curves" tabindex="0" aria-label="Curves"><title>Click a key to select it - Shift or Ctrl adds more, or drag a box round several (Ctrl+A: all). Drag to move them; with one selected, drag its handles. Double-click to add a key; Delete removes the selected ones.</title></svg></div>
+                <div class="ti-cv-foot">
+                    <span class="muted small">Shape</span>
+                    <div class="segmented ti-seg" id="ti-cv-shape">
+                        <button type="button" data-v="linear">Linear</button>
+                        <button type="button" data-v="out">Ease out</button>
+                        <button type="button" data-v="inout">In-out</button>
+                        <button type="button" data-v="over">Overshoot</button>
+                        <button type="button" data-v="bounce">Bounce</button>
+                    </div>
+                    <span class="muted small">Length</span>
+                    <input type="number" class="field ti-num" id="ti-cv-frames" min="1" max="96">
+                    <span class="muted small">frames</span>
+                    <span class="spacer"></span>
+                    <button type="button" class="btn ghost small" id="ti-cv-fit" title="Fit the scale to the curves">Fit</button>
+                    <button type="button" class="btn ghost small" id="ti-cv-reset" title="Back to the built-in curve">Reset</button>
+                </div>
+            </section>
+        </div>
+        <div class="ti-strip" id="ti-strip" hidden>
+            <button type="button" class="btn ghost small" id="ti-unfold" title="Show the timeline and curves">▸ Timeline and curves</button>
+            <div class="ti-mini" id="ti-mini" title="Drag to scrub"></div>
+            <span class="ti-hctl muted small ti-len" title="How long the title is on screen">Length
+                        <button type="button" class="btn ghost small ti-step" data-len="-1">−</button>
+                        <input type="number" class="field ti-num ti-len-v" min="1" max="10" step="0.1" aria-label="Length in seconds">
+                        <span class="ti-len-u">s</span>
+                        <button type="button" class="btn ghost small ti-step" data-len="1">+</button></span>
+        </div>
+        <div class="ti-foot">
+            <button type="button" class="btn icon ghost" id="ti-undo" title="Undo (Ctrl+Z)"></button>
+            <button type="button" class="btn icon ghost" id="ti-redo" title="Redo (Ctrl+Y)"></button>
+            <button type="button" class="btn" id="ti-save-look">Save as my look</button>
+            <span class="muted small" id="ti-changes"></span>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost" id="ti-reset-all" title="Every change back to how the look comes (Shift-click: ask first)">Reset all</button>
+            <span class="muted small" id="ti-where"></span>
+            <button type="button" class="btn accent" id="ti-place">Place title</button>
+        </div>
+    </section>
+    <!-- ----------------------------------------------------------- Zoom -->
+    <!-- The one clip selected in Resolve, playing here, its zooms on a track
+         under it (zoom.py, zoom_resolve.py, zoom_player.py). -->
+    <section class="panel zm" id="panel-zoom" hidden>
+        <div class="empty" id="zm-empty">
+            <span class="strong" id="zm-empty-title">Select a clip in Resolve's timeline</span>
+            <span id="zm-empty-text">One video clip or still – or an adjustment clip, to zoom everything under it. It plays here, and its zooms go on a track under it.</span>
+            <!-- Several clips selected, zooms copied: they can all take them at once. -->
+            <div class="zm-paste-many" id="zm-paste-many" hidden>
+                <span id="zm-paste-many-text"></span>
+                <div class="row zm-paste-buttons">
+                    <button type="button" class="btn" id="zm-paste-same" title="Each zoom at the same moment in every clip">Paste at the same times</button>
+                    <button type="button" class="btn accent" id="zm-paste-stretch" title="Each clip's zooms spread over its own length">Paste stretched to each clip</button>
+                </div>
+            </div>
+        </div>
+        <div class="card zm-card" id="zm-card" hidden>
+            <div class="row zm-top">
+                <span class="strong">Zooms</span>
+                <span class="chip" id="zm-clip" translate="no"></span>
+                <span class="muted small" id="zm-status"></span>
+                <div class="spacer"></div>
+                <button type="button" class="btn icon ghost" id="zm-undo" title="Undo (Ctrl+Z)"></button>
+                <button type="button" class="btn icon ghost" id="zm-redo" title="Redo (Ctrl+Y)"></button>
+                <button type="button" class="btn ghost" id="zm-copy" title="Keep these zooms to paste onto other clips">Copy zooms</button>
+                <button type="button" class="btn ghost" id="zm-paste" title="The copied zooms onto this clip, in place of these">Paste zooms</button>
+                <button type="button" class="btn ghost" id="zm-remove" title="Take every zoom off the clip">Remove zooms</button>
+                <button type="button" class="btn accent" id="zm-apply">Apply zooms</button>
+            </div>
+            <div class="zm-main">
+                <div class="zm-viewer">
+                    <div class="zm-stage" id="zm-stage">
+                        <img class="zm-img" id="zm-img" alt="">
+                        <!-- Graded: the picture through the clip's grade from Resolve (a LUT). -->
+                        <canvas class="zm-lut" id="zm-lut"></canvas>
+                        <div class="zm-ghosts" id="zm-ghosts"></div>
+                        <div class="zm-frame" id="zm-frame" hidden>
+                            <span class="zm-frame-num" id="zm-frame-num" translate="no"></span>
+                            <span class="zm-corner" data-corner="nw"></span>
+                            <span class="zm-corner" data-corner="ne"></span>
+                            <span class="zm-corner" data-corner="sw"></span>
+                            <span class="zm-corner" data-corner="se"></span>
+                        </div>
+                        <span class="zm-note" id="zm-note"></span>
+                    </div>
+                    <div class="row zm-transport">
+                        <button type="button" class="btn icon ghost" id="zm-play" title="Play or pause (Space)"></button>
+                        <button type="button" class="btn icon ghost" id="zm-back" title="Back a frame (←)" aria-label="Back a frame">‹</button>
+                        <button type="button" class="btn icon ghost" id="zm-fwd" title="On a frame (→)" aria-label="On a frame">›</button>
+                        <span class="muted small zm-time" id="zm-time" translate="no"></span>
+                        <div class="spacer"></div>
+                        <button type="button" class="btn icon ghost" id="zm-regrade" title="Get the grade from Resolve again – after you've changed it there" hidden></button>
+                        <div class="segmented" id="zm-graded-box">
+                            <button type="button" id="zm-graded" aria-pressed="false" title="Show the clip with its grade from Resolve – colour only, close to Resolve's. Resolve shows its Color page for a moment to hand the grade over.">Graded</button>
+                        </div>
+                        <div class="segmented" id="zm-view">
+                            <button type="button" data-view="result" title="The clip as it'll look">Result</button>
+                            <button type="button" data-view="framing" title="The whole picture, with the selected zoom's framing to drag">Framing</button>
+                        </div>
+                    </div>
+                    <!-- An adjustment clip: what the player shows in its place. -->
+                    <span class="muted small" id="zm-under" hidden></span>
+                </div>
+                <div class="zm-side">
+                    <span class="muted small">Add a zoom at the playhead</span>
+                    <div class="zm-kinds" id="zm-kinds"></div>
+                    <div class="zm-edit" id="zm-edit" hidden>
+                        <span class="strong" id="zm-kind-name"></span>
+                        <!-- A pan's or follow's framings: which one the box and Zoom set. -->
+                        <div class="row zm-points" id="zm-points-row" hidden>
+                            <span class="muted small">Framing</span>
+                            <span class="small zm-scale-text" id="zm-point-name" translate="no"></span>
+                            <button type="button" class="btn ghost" id="zm-point-add" title="A framing where the playhead is">Add framing</button>
+                            <button type="button" class="btn ghost" id="zm-point-del">Delete framing</button>
+                        </div>
+                        <label class="zm-scale"><span class="muted small">Zoom</span>
+                            <input type="range" id="zm-scale" min="1.02" max="4" step="0.01">
+                            <span class="small zm-scale-text" id="zm-scale-text" translate="no"></span>
+                        </label>
+                        <label class="zm-scale" title="Turns the picture as it zooms in (anticlockwise)"><span class="muted small">Tilt</span>
+                            <input type="range" id="zm-tilt" min="-20" max="20" step="0.5">
+                            <span class="small zm-scale-text" id="zm-tilt-text" translate="no"></span>
+                        </label>
+                        <label class="zm-scale" title="A jolt as it lands, dying away"><span class="muted small">Shake</span>
+                            <input type="range" id="zm-shake" min="0" max="1" step="0.05">
+                            <span class="small zm-scale-text" id="zm-shake-text" translate="no"></span>
+                        </label>
+                        <label class="zm-scale" id="zm-bounce-row" title="How far past it goes before settling"><span class="muted small">Bounce</span>
+                            <input type="range" id="zm-bounce" min="0" max="1" step="0.05">
+                            <span class="small zm-scale-text" id="zm-bounce-text" translate="no"></span>
+                        </label>
+                        <label class="zm-scale" id="zm-period-row" title="Seconds from one pulse to the next"><span class="muted small">Beat</span>
+                            <input type="range" id="zm-period" min="0.15" max="2" step="0.05">
+                            <span class="small zm-scale-text" id="zm-period-text" translate="no"></span>
+                        </label>
+                        <div class="zm-scale" id="zm-steps-row"><span class="muted small">Steps</span>
+                            <div class="segmented" id="zm-steps">
+                                <button type="button" data-steps="2">2</button>
+                                <button type="button" data-steps="3">3</button>
+                                <button type="button" data-steps="4">4</button>
+                                <button type="button" data-steps="5">5</button>
+                            </div>
+                        </div>
+                        <label class="zm-check"><input type="checkbox" id="zm-blur"><span>Motion blur</span></label>
+                        <span class="muted small" id="zm-times"></span>
+                        <button type="button" class="btn ghost" id="zm-delete">Delete zoom</button>
+                    </div>
+                </div>
+            </div>
+            <div class="hl-strip zm-track" id="zm-track" tabindex="0" aria-label="Zooms">
+                <div class="hl-ruler" id="zm-ruler" title="Click or drag to move the playhead"></div>
+                <div class="hl-lane" id="zm-lane"></div>
+                <div class="hl-head zm-line" id="zm-line"></div>
+            </div>
+            <p class="muted small zm-hint">Drag a zoom to move it, its ends to change when it starts and stops, and the dots
+                on top to change how long it takes to zoom in and out. In Framing, drag the box to choose where it zooms
+                to, and its corners for how far – a pan or follow has a box for each framing it moves through, and a
+                numbered mark on its block for when. Alt + scroll over the track zooms it in time; scroll then moves
+                along it. Apply zooms puts them on the clip.</p>
+        </div>
+    </section>
+
+    <!-- Transitions: Buddy's seamless motion transitions on the cuts in the
+         selection (transition.py, transition_resolve.py). -->
+    <section class="panel tr" id="panel-transitions" hidden>
+        <div class="card tr-card">
+            <div class="row tr-top">
+                <span class="strong">Transitions</span>
+                <span class="muted small tr-where" id="tr-where"></span>
+                <div class="spacer"></div>
+                <label class="pv-play muted small">Play
+                    <div class="segmented" id="tr-play">
+                        <button type="button" data-play="all">All</button>
+                        <button type="button" data-play="hover">On hover</button>
+                    </div>
+                </label>
+                <button type="button" class="btn ghost" id="tr-remove" title="Take the transitions off the cuts">Remove</button>
+                <button type="button" class="btn accent" id="tr-apply">Apply</button>
+            </div>
+            <div class="tr-options">
+                <div class="tr-opt"><span class="muted small">Feel</span>
+                    <div class="segmented" id="tr-feel">
+                        <button type="button" data-feel="ease" title="Smooth in and out">Ease</button>
+                        <button type="button" data-feel="hit" title="A long run-up and a sharp strike at the cut">Hit</button>
+                        <button type="button" data-feel="swing" title="Pulls back first, overshoots after">Swing</button>
+                        <button type="button" data-feel="bounce" title="Speeds in, lands and bounces">Bounce</button>
+                    </div>
+                </div>
+                <div class="tr-opt" id="tr-color-box" hidden><span class="muted small">Colour</span>
+                    <div class="segmented tr-colors" id="tr-color">
+                        <button type="button" data-color="warm" title="Warm"><span class="tr-swatch" style="background:#ff8c26"></span></button>
+                        <button type="button" data-color="cool" title="Cool"><span class="tr-swatch" style="background:#4d9eff"></span></button>
+                        <button type="button" data-color="rose" title="Rose"><span class="tr-swatch" style="background:#ff6199"></span></button>
+                        <button type="button" data-color="white" title="White"><span class="tr-swatch" style="background:#ffffff"></span></button>
+                        <button type="button" id="tr-color-any" title="Any colour…"><span class="tr-swatch tr-swatch-any"></span></button>
+                    </div>
+                </div>
+                <label class="tr-opt tr-slider"><span class="muted small">Length</span>
+                    <input type="range" id="tr-length" min="0.2" max="3" step="0.05">
+                    <span class="small tr-value" id="tr-length-text" translate="no"></span>
+                </label>
+                <label class="tr-opt tr-slider" title="How far it zooms, whips, spins or shakes – how bright the light gets, how wide a wipe's colour band is, or how thick the lines round split-screen pieces are"><span class="muted small">Amount</span>
+                    <input type="range" id="tr-amount" min="0.25" max="2" step="0.05">
+                    <span class="small tr-value" id="tr-amount-text" translate="no"></span>
+                </label>
+                <label class="tr-opt tr-slider" title="Motion blur, strongest where it moves fastest"><span class="muted small">Blur</span>
+                    <input type="range" id="tr-blur" min="0" max="1" step="0.05">
+                    <span class="small tr-value" id="tr-blur-text" translate="no"></span>
+                </label>
+            </div>
+        </div>
+        <!-- The card above stays put; only the transitions scroll (see .tr-scroll). -->
+        <div class="tr-scroll">
+            <div class="tr-grid" id="tr-grid"></div>
+            <p class="muted small tr-hint">Select the clips on both sides of a cut in Resolve's timeline – or one clip, for
+                the cuts at its ends. A transition uses the clips' unused frames past the cut; with too few it's made
+                shorter. Apply puts the chosen one on, in place of any there.</p>
+        </div>
+    </section>
+</main>
+<script src="animation.js"></script>
+<script src="transitions.js"></script>
+<script src="titles_motion.js"></script>
+<script src="titles_svg.js"></script>
+<script src="titles.js"></script>
+</body>
+</html>

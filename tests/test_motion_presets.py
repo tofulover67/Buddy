@@ -1,0 +1,1388 @@
+"""Animation > Previews: the motion presets (pages/text_animator/motion.py) and
+putting them on clips (motion_resolve.py) against a fake Fusion comp that wires
+the way Studio 21.1 did when driven live: a Merge slotted in front of MediaOut
+over a timeline-sized canvas, each channel a BezierSpline written whole with
+SetKeyFrames, Center through an XYPath, and every change followed by the
+ExportFusionComp + ImportFusionComp round trip the Edit page needs."""
+
+import copy
+import math
+import re
+import unittest
+from unittest import mock
+
+import _paths  # noqa: F401
+from pages.text_animator import framing, motion, motion_resolve as mr
+
+PRESETS = {p["id"]: p for p in motion.load()}
+
+
+# ------------------------------------------------------------ fake Fusion --
+
+class Output:
+    def __init__(self, tool, name="Output"):
+        self.tool, self.name = tool, name
+
+    def GetTool(self):
+        return self.tool
+
+    def GetConnectedInputs(self):
+        """The inputs, on any tool of the comp, that read from this output."""
+        found = [i for t in self.tool.comp.tools.values() for i in t.inputs.values() if i.source is self]
+        return dict(enumerate(found, 1))
+
+
+class Input:
+    def __init__(self, tool, name):
+        self.tool, self.name, self.source, self.value, self.expression = tool, name, None, None, None
+
+    def GetTool(self):
+        return self.tool
+
+    def SetExpression(self, text):
+        self.expression = text
+
+    def GetExpression(self):
+        return self.expression
+
+    def ConnectTo(self, output):
+        self.source = output
+        return True
+
+    def GetConnectedOutput(self):
+        return self.source
+
+
+class Tool:
+    def __init__(self, comp, reg_id, name):
+        self.__dict__.update(comp=comp, reg_id=reg_id, name=name, inputs={}, data={}, keyframes=None,
+                             Output=Output(self), Value=Output(self, "Value"))
+
+    def __getattr__(self, name):
+        if name[0].isupper():
+            return self.inputs.setdefault(name, Input(self, name))
+        raise AttributeError(name)
+
+    def GetAttrs(self, key=None):
+        attrs = {"TOOLS_RegID": self.reg_id, "TOOLS_Name": self.name}
+        return attrs[key] if key else attrs
+
+    def SetAttrs(self, attrs):
+        if "TOOLS_Name" in attrs:
+            self.comp.rename(self, attrs["TOOLS_Name"])
+
+    def SetInput(self, name, value, *_):
+        getattr(self, name).value = value
+
+    def GetInput(self, name, *_):
+        inp = getattr(self, name)
+        if name in ("StyledText", "Text") and inp.source is not None and inp.source.tool.Text.source is not None:
+            # One text modifier behind another: this read froze Resolve for good (21.1).
+            self.comp.chain_reads.append((self.reg_id, name))
+            raise AssertionError(f"read {self.reg_id}.{name} through a chain of text modifiers")
+        return inp.value
+
+    def ConnectInput(self, name, tool):
+        getattr(self, name).ConnectTo(tool.Output)
+        return True
+
+    def GetData(self, key):
+        return self.data.get(key)
+
+    def SetData(self, key, value):
+        self.data[key] = value
+
+    def SetKeyFrames(self, table, replace):
+        self.__dict__["keyframes"] = dict(table)
+
+    def AddModifier(self, name, reg_id):
+        inp = getattr(self, name)
+        if inp.source is not None and name in ("StyledText", "Text"):
+            # Measured on 21.1: the text modifier already there is deleted, and the words read back ''.
+            inp.source.tool.Delete()
+            inp.value = ""
+        mod = self.comp.AddTool(reg_id)
+        inp.ConnectTo(mod.Output)
+        return True
+
+    def Delete(self):
+        self.comp.tools.pop(self.name, None)
+        for tool in self.comp.tools.values():
+            for inp in tool.inputs.values():
+                if inp.source is not None and inp.source.tool is self:
+                    inp.source = None
+
+
+class Comp:
+    def __init__(self, upstream="MediaIn", frames=None, size=(1920, 1080)):
+        self.tools, self.counts, self.locked, self.frames, self.size = {}, {}, 0, frames, size
+        self.chain_reads = []       # reads of a Text+'s words through chained text modifiers: there must be none
+        head = self.AddTool(upstream)
+        self.AddTool("MediaOut").ConnectInput("Input", head)
+
+    def AddTool(self, reg_id, *_):
+        n = self.counts[reg_id] = self.counts.get(reg_id, 0) + 1
+        tool = Tool(self, reg_id, f"{reg_id}{n}")
+        self.tools[tool.name] = tool
+        return tool
+
+    def rename(self, tool, name):
+        self.tools.pop(tool.name)
+        tool.__dict__["name"] = name
+        self.tools[name] = tool
+
+    def FindTool(self, name):
+        return self.tools.get(name)
+
+    def GetToolList(self, _selected, reg_id=None):
+        found = [t for t in self.tools.values() if reg_id in (None, t.reg_id)]
+        return dict(enumerate(found, 1))
+
+    def GetAttrs(self):
+        attrs = {"COMPN_RenderStart": 0.0}
+        if self.frames:
+            attrs["COMPN_RenderEnd"] = float(self.frames - 1)
+        return attrs
+
+    def GetPrefs(self, key):
+        return {"Comp.FrameFormat.Width": self.size[0], "Comp.FrameFormat.Height": self.size[1]}[key]
+
+    def Lock(self): self.locked += 1
+    def Unlock(self): self.locked -= 1
+    def StartUndo(self, _name): pass
+    def EndUndo(self, _keep): pass
+
+
+class Item:
+    """A timeline clip. Without a comp, AddFusionComp makes one at `size` -
+    the source's size, the way Resolve does (a 641x479 still, a 4K clip)."""
+
+    def __init__(self, comp=None, name="clip", size=(1920, 1080), **inspector):
+        self.comps = [comp] if comp else []
+        self.names = [f"Composition {i + 1}" for i in range(len(self.comps))]
+        self.name, self.size, self.reloads, self.deleted = name, size, 0, []
+        self.exported = {}          # path -> a copy of the comp, as the file would hold it
+        self.refuse_delete = False
+        self.props = {"ZoomX": 1.0, "ZoomY": 1.0, "ZoomGang": True, "Pan": 0.0, "Tilt": 0.0,
+                      "RotationAngle": 0.0, "AnchorPointX": 0.0, "AnchorPointY": 0.0, "FlipX": False,
+                      "FlipY": False, "CropLeft": 0.0, "CropRight": 0.0, "CropTop": 0.0, "CropBottom": 0.0,
+                      "CropSoftness": 0.0, "CropRetain": False, "Scaling": 0, **inspector}
+
+    def GetProperty(self, key=None):
+        return dict(self.props) if key is None else self.props.get(key)
+
+    def SetProperty(self, key, value):
+        self.props[key] = value
+        return True
+
+    def GetName(self): return self.name
+    def GetFusionCompCount(self): return len(self.comps)
+    def GetFusionCompByIndex(self, i): return self.comps[i - 1]
+    def GetFusionCompNameList(self): return list(self.names)
+    def LoadFusionCompByName(self, name): return self.comps[self.names.index(name)]
+
+    def AddFusionComp(self):
+        self.comps.append(Comp(size=self.size))
+        self.names.append(self._fresh_name())
+        return self.comps[-1]
+
+    def _fresh_name(self):
+        n = 1
+        while f"Composition {n}" in self.names:
+            n += 1
+        return f"Composition {n}"
+
+    def ExportFusionComp(self, path, index):
+        with open(path, "w") as f:
+            f.write("Composition {}")
+        self.exported[path] = copy.deepcopy(self.comps[index - 1])
+        return True
+
+    def ImportFusionComp(self, path):
+        # As Resolve does: a new comp, added after the others.
+        self.reloads += 1
+        self.comps.append(copy.deepcopy(self.exported[path]))
+        self.names.append(self._fresh_name())
+        return self.comps[-1]
+
+    def DeleteFusionCompByName(self, name):
+        if self.refuse_delete or len(self.comps) == 1 or name not in self.names:
+            return False            # never the last one (Studio 21.1)
+        i = self.names.index(name)
+        self.deleted.append(name)
+        del self.comps[i], self.names[i]
+        return True
+
+    def RenameFusionCompByName(self, old, new):
+        if old not in self.names or new in self.names:
+            return False
+        self.names[self.names.index(old)] = new
+        return True
+
+
+def chain(comp):
+    """Tool names from MediaOut back up the Input/Foreground chain."""
+    names, tool = [], comp.FindTool("MediaOut1")
+    while tool is not None:
+        names.append(tool.name)
+        inp = tool.inputs.get("Input") or tool.inputs.get("Foreground")
+        tool = inp.source.tool if inp and inp.source else None
+    return names
+
+
+def carrier(inp):
+    """The carrier an input plays its keys from through its expression, or None."""
+    if not inp.expression:
+        return None
+    return inp.tool.comp.FindTool(inp.expression.split(":", 1)[0])
+
+
+def curve(inp):
+    """The keyframes on the spline feeding an input - straight, or through the
+    carrier its expression reads - or None."""
+    held = carrier(inp)
+    if held is not None:
+        inp = held.Angle
+    return inp.source.tool.keyframes if inp.source else None
+
+
+def values(keys):
+    return {f: k["value"] for f, k in keys.items()}
+
+
+# ------------------------------------------------------------------ tests --
+
+class PresetData(unittest.TestCase):
+    def test_every_preset_loads_whole(self):
+        self.assertEqual(len(PRESETS), 112)
+        for p in PRESETS.values():
+            for c in "xyrso":
+                self.assertEqual(len(p[c]), motion.SAMPLES, (p["id"], c))
+            self.assertIn(p["kind"], motion.KINDS)
+            self.assertIn(p["pack"], [k["id"] for k in motion.PACKS])
+
+    def test_each_kind_has_its_moves(self):
+        for p in PRESETS.values():
+            found = motion.moves(p)
+            want = {motion.KIND_IN_OUT: {"in", "out"}, motion.KIND_EMPHASIS: {"emphasis"},
+                    motion.KIND_OUT: {"out"}, motion.KIND_LOOP: {"loop"},
+                    motion.KIND_WHOLE: {"whole"}}[p["kind"]]
+            self.assertEqual(set(found), want, p["id"])
+
+    def test_pop_overshoot_is_one_move(self):
+        # Pop's scale passes through 1 on its way to settling.
+        self.assertEqual(motion.moves(PRESETS["pop"])["in"], (0, 10))
+
+
+class Fitting(unittest.TestCase):
+    def test_every_move_stays_within_tolerance_of_its_samples(self):
+        for p in PRESETS.values():
+            for move, (a, b) in motion.moves(p).items():
+                for name, (c, value) in motion._CHANNELS.items():
+                    points = [(float(k), value(p[c][k])) for k in range(a, b + 1)]
+                    keys = {t: {"value": v, "lh": lh, "rh": rh}
+                            for t, v, lh, rh in motion.fit(points, motion.TOLERANCE[name])}
+                    for t, v in points:
+                        self.assertLessEqual(abs(motion.evaluate(keys, t) - v), motion.TOLERANCE[name] + 1e-6,
+                                             (p["id"], move, name, t))
+
+    def test_far_fewer_keys_than_samples(self):
+        keys = samples = 0
+        for p in PRESETS.values():
+            plan = motion.plan(p, 120, 24)
+            for name, channel in plan.items():
+                if name not in motion._CHANNELS:
+                    continue
+                keys += len(channel)
+                samples += sum(b - a + 1 for a, b in (motion.moves(p)[m] for m, *_ in plan["moves"]))
+        self.assertLess(keys, samples * 0.4)
+
+    def test_an_ease_is_a_few_keys_with_handles(self):
+        slide = motion.plan(PRESETS["slide"], 120, 24)["Center.X"]
+        self.assertLessEqual(len(slide), 8)             # an In and an Out, a few keys each
+        first, second = list(slide.values())[:2]
+        self.assertIsNone(first["lh"])
+        self.assertIsNotNone(first["rh"])
+        self.assertIsNotNone(second["lh"])
+
+    def test_a_turn_gets_a_key(self):
+        # Pop overshoots to 1.22: a key sits on the peak - its true top,
+        # between two samples (motion_presets.json's baked keys).
+        size = values(motion.plan(PRESETS["pop"], 120, 24, way="in")["Size"])
+        self.assertAlmostEqual(max(size.values()), 1.22, delta=0.01)
+        self.assertGreaterEqual(max(size.values()), max(PRESETS["pop"]["s"]) - 1e-9)
+
+    def test_keys_are_smooth_except_a_sharp_hit(self):
+        # The curve Drop + bounce had: a spike between samples and a kink.
+        for p in PRESETS.values():
+            for name, channel in motion.plan(p, 120, 24).items():
+                if name not in motion._CHANNELS:
+                    continue
+                frames = sorted(channel)
+                for before, f, after in zip(frames, frames[1:], frames[2:]):
+                    k = channel[f]
+                    if not (k["lh"] and k["rh"]):
+                        continue
+                    left = (k["value"] - k["lh"][1]) / (f - k["lh"][0])
+                    right = (k["rh"][1] - k["value"]) / (k["rh"][0] - f)
+                    step_in = k["value"] - channel[before]["value"]
+                    step_out = channel[after]["value"] - k["value"]
+                    if step_in * step_out < 0 and abs(left - right) > 1e-6:
+                        continue            # a sharp hit (a bounce on the floor) keeps its corner
+                    # the same slope both sides (to the handles' rounding)
+                    self.assertAlmostEqual(left, right, delta=max(1e-4, 0.01 * abs(left)), msg=(p["id"], name, f))
+
+
+    def test_no_curve_bulges_past_its_samples(self):
+        for p in PRESETS.values():
+            for move, (a, b) in motion.moves(p).items():
+                for name, (c, value) in motion._CHANNELS.items():
+                    points = [(float(k), value(p[c][k])) for k in range(a, b + 1)]
+                    keys = {t: {"value": v, "lh": lh, "rh": rh}
+                            for t, v, lh, rh in motion.fit(points, motion.TOLERANCE[name])}
+                    frames = sorted(keys)
+                    for f0, f1 in zip(frames, frames[1:]):
+                        span = [v for t, v in points if f0 <= t <= f1]
+                        for i in range(1, 20):
+                            v = motion.evaluate(keys, f0 + (f1 - f0) * i / 20)
+                            self.assertGreaterEqual(v, min(span) - 2 * motion.TOLERANCE[name], (p["id"], move, name, f0))
+                            self.assertLessEqual(v, max(span) + 2 * motion.TOLERANCE[name], (p["id"], move, name, f0))
+
+    def test_a_peak_gets_level_handles(self):
+        # Drop + bounce's hop off the floor tops out on a key with level handles.
+        y = motion.plan(PRESETS["drop"], 120, 24, way="in")["Center.Y"]
+        frames = sorted(y)
+        top = max(frames[1:-1], key=lambda f: y[f]["value"] if f > frames[1] else -1)
+        lh, rh = y[top]["lh"], y[top]["rh"]
+        self.assertAlmostEqual(lh[1], y[top]["value"], places=4)
+        self.assertAlmostEqual(rh[1], y[top]["value"], places=4)
+
+    def test_stretching_a_move_keeps_its_shape(self):
+        short = motion.plan(PRESETS["whip"], 120, 24, way="in")["Center.X"]
+        long = motion.plan(PRESETS["whip"], 120, 24, way="in", speed=0.5)["Center.X"]
+        self.assertEqual(len(short), len(long))
+        for (f1, k1), (f2, k2) in zip(short.items(), long.items()):
+            self.assertAlmostEqual(k1["value"], k2["value"])
+            self.assertAlmostEqual(f2, f1 * 2, delta=0.01)
+
+
+class Planning(unittest.TestCase):
+    def test_in_from_the_first_frame_out_to_the_last(self):
+        keys = motion.plan(PRESETS["pop"], 120, 24)
+        size = values(keys["Size"])
+        self.assertEqual(min(size), 0)
+        self.assertEqual(max(size), 119)
+        self.assertEqual(size[0], 0.0)          # starts invisible
+        self.assertEqual(size[119], 0.0)        # and ends so
+        self.assertEqual([m for m, *_ in keys["moves"]], ["in", "out"])
+
+    def test_only_the_channels_that_move(self):
+        self.assertEqual({k for k in motion.plan(PRESETS["pop"], 120, 24) if k != "moves"}, {"Size"})
+        self.assertEqual({k for k in motion.plan(PRESETS["whip"], 120, 24) if k != "moves"}, {"Center.X"})
+
+    def test_just_the_in_or_just_the_out(self):
+        only_in = motion.plan(PRESETS["pop"], 120, 24, way="in")["Size"]
+        self.assertLess(max(only_in), 30)
+        only_out = motion.plan(PRESETS["pop"], 120, 24, way="out")["Size"]
+        self.assertGreater(min(only_out), 90)
+
+    def test_speed(self):
+        normal = motion.plan(PRESETS["pop"], 120, 24, way="in")["moves"][0]
+        double = motion.plan(PRESETS["pop"], 120, 24, way="in", speed=2)["moves"][0]
+        self.assertAlmostEqual(double[2], normal[2] / 2, delta=1)
+
+    def test_a_short_clip_squeezes_both_moves_in(self):
+        keys = motion.plan(PRESETS["css-animate-rollIn-card"], 20, 24)
+        for frames in (v for k, v in keys.items() if k != "moves"):
+            self.assertGreaterEqual(min(frames), 0)
+            self.assertLessEqual(max(frames), 19)
+
+    def test_emphasis_at_the_playhead_or_mid_clip(self):
+        tada = PRESETS["css-animate-tada-card"]
+        at = motion.plan(tada, 240, 24, at=100)["moves"][0]
+        self.assertEqual(at[1], 100)
+        middle = motion.plan(tada, 240, 24)["moves"][0]
+        self.assertAlmostEqual((middle[1] + middle[2]) / 2, 239 / 2, delta=1)
+        late = motion.plan(tada, 240, 24, at=235)["moves"][0]
+        self.assertLessEqual(late[2], 239)      # kept inside the clip
+
+    def test_values_are_fusion_units(self):
+        whip = values(motion.plan(PRESETS["whip"], 120, 24)["Center.X"])
+        self.assertAlmostEqual(whip[0], -0.5)   # a whole frame to the left of centre
+        swing = values(motion.plan(PRESETS["swing"], 120, 24)["Angle"])
+        self.assertAlmostEqual(swing[0], 25)    # clockwise -25 in the data is Fusion's +25
+
+    def test_view_has_the_timing_bar(self):
+        v = motion.view(PRESETS["pop"])
+        self.assertEqual(v["segs"][0][0], 0)
+        self.assertEqual(v["segs"][-1][1], 1)
+        self.assertEqual(v["previewKeys"], motion.keys_of(PRESETS["pop"]))
+
+    def test_builtin_previews_follow_the_curves_applied_in_resolve(self):
+        for preset in PRESETS.values():
+            preview = motion.view(preset)["previewKeys"]
+            planned = motion.plan(preset, 120, 24)
+            for name, (channel, convert) in motion._CHANNELS.items():
+                if name not in planned:
+                    continue
+                for n, (move, _first, _last, start, end) in enumerate(planned["moves"]):
+                    a, b = motion.moves(preset)[move]
+                    # A Loop's later passes carry on from where the one before ended (Turn).
+                    add = n * (preset[channel][b] - preset[channel][a]) if move == "loop" else 0
+                    for step in range(21):
+                        fraction = step / 20
+                        sample = a + (b - a) * fraction
+                        frame = start + (end - start) * fraction
+                        expected = convert(motion.evaluate_keys(preview[channel], sample) + add)
+                        actual = motion.evaluate(planned[name], frame)
+                        self.assertAlmostEqual(actual, expected, delta=motion.TOLERANCE[name],
+                                               msg=(preset["id"], move, name, sample))
+
+    def test_a_loop_fills_the_clip_end_to_end(self):
+        float_ = PRESETS["float"]                                            # 3 s a cycle
+        keys = motion.plan(float_, 240, 24)                                  # 10 s: three passes
+        passes = keys["moves"]
+        self.assertEqual([m for m, *_ in passes], ["loop"] * 3)
+        self.assertEqual(passes[0][3], 0)
+        self.assertAlmostEqual(passes[-1][4], 239)
+        for (_m, _a, _b, _f, end), (_m2, _a2, _b2, start, _e) in zip(passes, passes[1:]):
+            self.assertAlmostEqual(end, start)                               # one after the other, no gap
+        y = keys["Center.Y"]
+        self.assertEqual(min(y), 0)
+        self.assertEqual(max(y), 239)
+        self.assertAlmostEqual(y[0]["value"], 0.5)                           # starts and ends at rest
+        self.assertAlmostEqual(y[239]["value"], 0.5)
+        joint = y[round(passes[1][3], 3)]
+        self.assertIsNotNone(joint["lh"])                                    # where two passes meet: one key,
+        self.assertIsNotNone(joint["rh"])                                    # arriving and leaving
+        short = motion.plan(float_, 30, 24)["moves"]                         # shorter than a cycle: one, squeezed
+        self.assertEqual(len(short), 1)
+        self.assertAlmostEqual(short[0][4], 29)
+
+    def test_a_turn_carries_on_from_one_pass_to_the_next(self):
+        angle = motion.plan(PRESETS["turn"], 241, 24)["Angle"]              # 2 s a turn, 10 s: five
+        self.assertAlmostEqual(angle[0]["value"], 0)
+        self.assertAlmostEqual(angle[240]["value"], -1800)                   # Fusion's angle runs the other way
+        values_ = [angle[f]["value"] for f in sorted(angle)]
+        self.assertEqual(values_, sorted(values_, reverse=True))             # never jumps back
+
+    def test_a_whole_clip_move_runs_first_frame_to_last_at_any_speed(self):
+        push = PRESETS["push-in"]
+        for speed in (0.5, 1, 2):
+            keys = motion.plan(push, 300, 24, speed=speed)
+            self.assertEqual(keys["moves"], [("whole", 0, 299, 0.0, 299.0)])
+            size = values(keys["Size"])
+            self.assertAlmostEqual(size[0], 1.0)
+            self.assertAlmostEqual(size[299], 1.15)
+        pan = motion.plan(PRESETS["pan"], 300, 24, direction="up")
+        self.assertNotIn("Center.X", pan)
+        self.assertLess(values(pan["Center.Y"])[0], 0.5)                      # starts low, travels up
+        self.assertEqual(motion.heading(PRESETS["pan"]), "right")
+
+    def test_turning_about_a_corner(self):
+        # Hinge in turns about the frame's bottom-left corner: that corner stays put.
+        hinge = PRESETS["css-animate-rotateDownLeft"]
+        for k in range(0, 15):
+            a = math.radians(hinge["r"][k])
+            corner = (-64.0, 36.0)
+            centre = (hinge["x"][k], hinge["y"][k])
+            # The corner, turned with the clip about its centre, lands where it started.
+            dx, dy = corner
+            x = centre[0] + dx * math.cos(a) - dy * math.sin(a)
+            y = centre[1] + dx * math.sin(a) + dy * math.cos(a)
+            self.assertAlmostEqual(x, corner[0], delta=0.5)
+            self.assertAlmostEqual(y, corner[1], delta=0.5)
+
+    def test_long_loops_stop_at_the_most(self):
+        moves = motion.plan(PRESETS["vibrate"], 24 * 60 * 20, 24)["moves"]  # 20 minutes of 0.5 s
+        self.assertEqual(len(moves), motion.MAX_LOOPS)
+
+    def test_headings(self):
+        heading = lambda pid: motion.heading(PRESETS[pid])
+        self.assertEqual(heading("whip"), "right")                           # comes in from the left
+        self.assertEqual(heading("drop"), "down")
+        self.assertEqual(heading("rise"), "up")
+        self.assertEqual(heading("css-animate-hinge-card"), "down")          # an Out: the way it leaves
+        self.assertEqual(heading("css-animate-shake-card"), "left")          # an Emphasis: the way it goes first
+        self.assertIsNone(heading("pop"))                                    # only grows
+        self.assertIsNone(heading("handheld"))                               # said so in the data
+        self.assertEqual(motion.view(PRESETS["whip"])["heading"], "right")
+
+    def test_direction_mirrors_or_turns_the_move(self):
+        whip = PRESETS["whip"]
+        own = values(motion.plan(whip, 120, 24)["Center.X"])
+        self.assertEqual(motion.plan(whip, 120, 24, direction="own"), motion.plan(whip, 120, 24))
+        self.assertEqual(motion.plan(whip, 120, 24, direction="right"), motion.plan(whip, 120, 24))
+        back = values(motion.plan(whip, 120, 24, direction="left")["Center.X"])
+        self.assertEqual(sorted(back), sorted(own))
+        for f in own:
+            self.assertAlmostEqual(back[f] - 0.5, 0.5 - own[f])               # from the right instead
+        down = motion.plan(whip, 120, 24, direction="down")
+        self.assertNotIn("Center.X", down)
+        y = values(down["Center.Y"])
+        self.assertAlmostEqual(y[0], 1.5)                                    # a whole frame above, and in
+        self.assertAlmostEqual(y[119], -0.5)                                 # ...out at the bottom
+        up = values(motion.plan(whip, 120, 24, direction="up")["Center.Y"])
+        self.assertAlmostEqual(up[0], -0.5)
+
+    def test_direction_turns_rotation_with_a_mirror(self):
+        roll = PRESETS["css-animate-rollIn-card"]
+        own = motion.plan(roll, 120, 24)["Angle"]
+        back = motion.plan(roll, 120, 24, direction="left")["Angle"]
+        self.assertAlmostEqual(back[0]["value"], -own[0]["value"])           # rolls the other way
+        down = motion.plan(roll, 120, 24, direction="down")["Angle"]
+        self.assertAlmostEqual(down[0]["value"], own[0]["value"])            # a quarter turn keeps it
+
+    def test_a_quarter_turn_swaps_width_and_height(self):
+        slide = PRESETS["blur-slide"]                                    # stretched along the way it moves
+        down = motion.plan(slide, 120, 24, direction="down")
+        self.assertAlmostEqual(max(values(down["Height"]).values()), 2.5, delta=0.01)
+        self.assertAlmostEqual(min(values(down["Width"]).values()), 0.2, delta=0.01)
+        back = motion.plan(slide, 120, 24, direction="left")             # mirrored: still along it
+        self.assertAlmostEqual(max(values(back["Width"]).values()), 2.5, delta=0.01)
+
+    def test_presets_without_blur_or_squash_rest_there(self):
+        for pid in ("pop", "whip", "css-animate-tada-card"):
+            p = PRESETS[pid]
+            self.assertLess(max(abs(v) for v in p["b"]), 1e-9)
+            self.assertLess(max(abs(v - 1) for v in p["w"] + p["h"]), 1e-9)
+            self.assertFalse({"Blur", "Width", "Height"} & set(motion.plan(p, 120, 24)))
+
+    def test_puff_and_vanish_blur_as_they_scale(self):
+        puff, vanish = PRESETS["css-magic-puffIn-card"], PRESETS["css-magic-vanishIn-card"]
+        self.assertAlmostEqual(puff["b"][0], 0.4)
+        self.assertAlmostEqual(vanish["b"][0], 6.0)
+        self.assertAlmostEqual(vanish["b"][20], 0.0)
+
+    def test_a_product_of_two_channels(self):
+        size = {0: {"value": 0.0, "lh": None, "rh": (4, 1.0)}, 12: {"value": 1.0, "lh": (8, 1.0), "rh": None}}
+        width = {0: {"value": 2.0, "lh": None, "rh": (4, 1.0)}, 12: {"value": 1.0, "lh": (8, 1.0), "rh": None}}
+        both = motion.product(size, width)
+        for f in (0, 3, 6, 9, 12):
+            self.assertAlmostEqual(motion.evaluate(both, f), motion.evaluate(size, f) * motion.evaluate(width, f),
+                                   delta=0.03)
+        self.assertIs(motion.product(None, width), width)
+
+    def test_a_wipe_turns_with_direction(self):
+        wipe = PRESETS["wipe"]
+        self.assertEqual(motion.heading(wipe), "right")                  # from the left
+        down = motion.plan(wipe, 120, 24, direction="down")
+        self.assertEqual(down["mask"]["axis"], "y")
+        self.assertAlmostEqual(list(down["Reveal"].values())[0]["value"], -1.0)
+        back = motion.plan(wipe, 120, 24, direction="left")
+        self.assertEqual(back["mask"]["axis"], "x")
+        self.assertAlmostEqual(list(back["Reveal"].values())[0]["value"], 1.0)   # from the right
+        self.assertIsNone(motion.heading(PRESETS["iris"]))
+
+    def test_a_reveal_drawn_without_a_mask_is_a_wipe(self):
+        keys = {"m": [[0, -1.0, None, [5, 0.0]], [15, 0.0, [10, 0.0], None], [40, 0.0, None, None]]}
+        mine = motion.from_keys("saved-1", "Mine", "In", 1.0, keys)
+        self.assertEqual(motion.mask_of(mine), {"shape": "wipe", "axis": "x", "soft": 0.04})
+        kept = motion.from_keys("saved-2", "Mine", "In", 1.0, keys, mask={"shape": "iris", "soft": 0.1})
+        self.assertEqual(motion.mask_of(kept)["shape"], "iris")
+
+    def test_a_small_move_keeps_its_size_turned(self):
+        vibrate = PRESETS["vibrate"]
+        turned = motion.turned(vibrate, "up")
+        self.assertEqual(max(map(abs, turned["y"])), max(map(abs, vibrate["x"])))  # pixels, not a share of the frame
+
+    def test_a_preset_that_stays_put_has_no_direction(self):
+        pop = PRESETS["pop"]
+        self.assertIs(motion.turned(pop, "left"), pop)
+
+    def test_preview_at_selected_speed_matches_resolve_frames(self):
+        # The live 24 fps project exposed this: Pop at 2x reaches nearly
+        # full size on frame one, although an unspeeded browser preview does not.
+        preset = PRESETS["pop"]
+        preview = motion.view(preset)["previewKeys"]["s"]
+        applied = motion.plan(preset, 60, 24, speed=2)["Size"]
+        for frame in range(8):
+            sample = frame * 2 * motion.LAST / (preset["dur"] * 24)
+            self.assertAlmostEqual(motion.evaluate_keys(preview, sample),
+                                   motion.evaluate(applied, frame), places=5)
+
+
+class Scaling(unittest.TestCase):
+    def test_modes_from_the_clip_or_else_the_project(self):
+        self.assertEqual(mr.scaling_mode(0, "scaleToFit"), mr.FIT)
+        self.assertEqual(mr.scaling_mode(0, "scaleToCrop"), mr.FILL)
+        self.assertEqual(mr.scaling_mode(0, "centerCrop"), mr.CROP)
+        self.assertEqual(mr.scaling_mode(3, "scaleToFit"), mr.FILL)      # the clip's own wins
+        self.assertEqual(mr.scaling_mode(None, None), mr.FIT)
+
+    def test_fit_scale(self):
+        self.assertAlmostEqual(mr.fit_scale(641, 479, 1920, 1080, mr.FIT), 1080 / 479)
+        self.assertAlmostEqual(mr.fit_scale(641, 479, 1920, 1080, mr.FILL), 1920 / 641)
+        self.assertEqual(mr.fit_scale(3840, 2160, 1920, 1080, mr.FIT), 0.5)
+        self.assertEqual(mr.fit_scale(641, 479, 1920, 1080, mr.CROP), 1.0)
+        self.assertEqual(mr.fit_scale(1920, 1080, 1920, 1080, mr.FIT), 1.0)
+
+
+class OnClips(unittest.TestCase):
+    def put(self, item, pid="css-animate-rollIn-card", clip_frames=120, at=None, canvas=(1920, 1080)):
+        planned = []
+
+        def plan_for(frames, ratio, a):
+            planned.append((frames, ratio, a))
+            return motion.plan(PRESETS[pid], frames, 24 * ratio, at=a)
+        mr.apply(item, pid, plan_for, clip_frames, at, canvas, mr.FIT, mr.read_inspector(item), {"way": "both"})
+        return planned
+
+    def test_a_still_gets_a_comp_a_merge_and_the_round_trip(self):
+        item = Item()
+        self.put(item)
+        comp = item.comps[0]
+        self.assertEqual(chain(comp), ["MediaOut1", "BuddyMotion", "MediaIn1"])
+        merge = comp.FindTool("BuddyMotion")
+        self.assertEqual(merge.Background.source.tool.name, "BuddyMotionCanvas")
+        self.assertEqual(comp.FindTool("BuddyMotionCanvas").inputs["TopLeftAlpha"].value, 0)
+        self.assertTrue(curve(merge.Angle) and curve(merge.Blend))
+        path = merge.Center.source.tool
+        self.assertEqual(path.reg_id, "XYPath")
+        self.assertTrue(curve(path.X))
+        self.assertEqual(merge.GetData(mr.TAG), "css-animate-rollIn-card")
+        self.assertEqual(item.reloads, 1)
+        self.assertEqual(comp.locked, 0)
+
+    def test_squash_goes_on_a_transform_in_front_of_the_merge(self):
+        item = Item()
+        self.put(item, "jelly-pop")
+        comp = item.comps[0]
+        self.assertEqual(chain(comp), ["MediaOut1", "BuddyMotion", "BuddyMotionSquash", "MediaIn1"])
+        squash = comp.FindTool("BuddyMotionSquash")
+        self.assertEqual(squash.UseSizeAndAspect.value, 0)
+        width = curve(squash.XSize) or curve(carrier(squash.XSize).Angle if carrier(squash.XSize) else squash.XSize)
+        self.assertAlmostEqual(max(k[1] for k in width.values()), 1.25, delta=0.03)   # Jelly pop's widest
+        self.assertTrue(curve(squash.YSize))
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(chain(item.comps[0]), ["MediaOut1", "MediaIn1"])
+        self.assertEqual(sorted(t.reg_id for t in item.comps[0].tools.values()), ["MediaIn", "MediaOut"])
+
+    def test_blur_goes_on_after_the_merge_in_frame_pixels(self):
+        item = Item(size=(3840, 2160))
+        self.put(item, "focus", canvas=(1920, 1080))
+        comp = item.comps[0]
+        self.assertEqual(chain(comp), ["MediaOut1", "BuddyMotionBlur", "BuddyMotion", "MediaIn1"])
+        blur = curve(comp.FindTool("BuddyMotionBlur").XBlurSize)
+        # 6 half-units of a 1920-wide frame, as Fusion's Blur sizes it
+        self.assertAlmostEqual(blur[min(blur)][1], 6 * 1920 / 64 / mr.BLUR_SPREAD)
+        self.assertAlmostEqual(blur[max(blur)][1], 6 * 1920 / 64 / mr.BLUR_SPREAD)
+        self.put(item, "pop")                                            # another preset: no blur left
+        self.assertEqual(chain(item.comps[-1]), ["MediaOut1", "BuddyMotion", "MediaIn1"])
+        self.assertEqual(len(item.comps[-1].GetToolList(False, "Blur")), 0)
+        self.put(item, "focus")
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(chain(item.comps[-1]), ["MediaOut1", "MediaIn1"])
+
+    def test_a_wipe_goes_on_the_merges_mask_and_comes_off(self):
+        item = Item()
+        self.put(item, "wipe")
+        comp = item.comps[0]
+        merge = comp.FindTool("BuddyMotion")
+        mask = merge.EffectMask.source.tool
+        self.assertEqual((mask.name, mask.reg_id), ("BuddyMotionMask", "RectangleMask"))
+        self.assertAlmostEqual(mask.SoftEdge.value, 0.02)
+        x = curve(mask.Center.source.tool.X)
+        # No picture bounds to read here: the whole frame, its edge off one side
+        # at the start and off the other at the end (a frame and room apart).
+        span = 1 + 2 * (0.02 * 1.5 + 0.01)
+        self.assertAlmostEqual(x[min(x)][1], 0.5 - span, places=4)
+        self.assertAlmostEqual(x[max(x)][1], 0.5 + span, places=4)
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(sorted(t.reg_id for t in item.comps[0].tools.values()), ["MediaIn", "MediaOut"])
+
+    def test_an_iris_and_a_split_size_their_mask(self):
+        item = Item()
+        self.put(item, "iris")
+        mask = item.comps[0].FindTool("BuddyMotionMask")
+        self.assertEqual(mask.reg_id, "EllipseMask")
+        width = curve(mask.Width)
+        self.assertAlmostEqual(width[min(width)][1], 0.0)                 # closed
+        self.assertGreater(max(k[1] for k in width.values()), 1.14)          # past the corners
+        self.assertEqual(curve(mask.Width), curve(mask.Height))           # round
+        item = Item()
+        self.put(item, "split")
+        mask = item.comps[0].FindTool("BuddyMotionMask")
+        self.assertTrue(curve(mask.Width))
+        self.assertIsNone(mask.Height.source)
+
+    def test_the_reveal_goes_over_the_clips_own_picture(self):
+        # A Text+ reports its ink's bounds: the mask covers those, not the frame.
+        class Dod:
+            def GetDoD(self, _time):
+                return {1: 760.0, 2: 500.0, 3: 1160.0, 4: 580.0}
+        tool = type("T", (), {"Output": Dod()})()
+        comp = Comp()
+        box = mr._content_box(comp, tool, 1920, 1080, {"size": 1.0, "centre": (0.0, 0.0)}, (1920, 1080))
+        self.assertAlmostEqual(box[0], 0.5)
+        self.assertAlmostEqual(box[2], 400 / 1920)
+        self.assertAlmostEqual(box[3], 80 / 1080)
+        self.assertEqual(mr._content_box(comp, object(), 1920, 1080, {"size": 1.0, "centre": (0, 0)}, (1920, 1080)),
+                         (0.5, 0.5, 1.0, 1.0))                            # can't tell: the whole frame
+
+    def test_tracking_keys_a_text_plus_spacing_and_gives_it_back(self):
+        item = Item(Comp(upstream="TextPlus"))
+        tp = item.comps[0].FindTool("TextPlus1")
+        tp.SetInput("CharacterSpacing", 1.2)                             # the title's own
+        self.put(item, "tracking-in")
+        tp = item.comps[-1].FindTool("TextPlus1")
+        spacing = curve(tp.CharacterSpacing)
+        self.assertAlmostEqual(spacing[min(spacing)][1], 1.2 + 0.35)       # spread at the start
+        self.assertAlmostEqual(spacing[max(spacing)][1], 1.2 + 0.35)       # ...and the end
+        self.assertAlmostEqual(min(k[1] for k in spacing.values()), 1.2)   # its own between
+        self.put(item, "pop")                                            # another preset: spacing back
+        tp = item.comps[-1].FindTool("TextPlus1")
+        self.assertIsNone(tp.CharacterSpacing.source)
+        self.assertAlmostEqual(tp.CharacterSpacing.value, 1.2)
+        self.put(item, "tracking-in")
+        self.assertTrue(mr.remove(item))
+        tp = item.comps[-1].FindTool("TextPlus1")
+        self.assertIsNone(tp.CharacterSpacing.source)
+        self.assertAlmostEqual(tp.CharacterSpacing.value, 1.2)
+
+    def test_tracking_does_nothing_without_a_text_plus(self):
+        item = Item()
+        self.put(item, "tracking-in")
+        self.assertFalse([t for t in item.comps[0].tools.values() if t.reg_id == "BezierSpline"
+                          and any(i.source for i in [])])
+        self.assertEqual(chain(item.comps[0]), ["MediaOut1", "BuddyMotion", "MediaIn1"])
+
+    def test_trails_sweep_split_and_flip_go_on_and_come_off(self):
+        for pid, names in (("trail-slide", {"BuddyMotionEcho", "BuddyMotionEchoLate1", "BuddyMotionEchoCanvas"}),
+                           ("shine", {"BuddyMotionShine", "BuddyMotionShineLight", "BuddyMotionShineBand"}),
+                           ("color-split", {"BuddyMotionSplit", "BuddyMotionSplitR", "BuddyMotionSplitRed"}),
+                           ("flip", {"BuddyMotionFlip"}),
+                           ("glitch", {"BuddyMotionSplit", "BuddyMotionSquash"})):
+            item = Item()
+            self.put(item, pid)
+            comp = item.comps[0]
+            self.assertTrue(names <= set(comp.tools), (pid, sorted(comp.tools)))
+            self.assertTrue(mr.remove(item))
+            self.assertEqual(sorted(t.reg_id for t in item.comps[0].tools.values()), ["MediaIn", "MediaOut"], pid)
+
+    def test_trails_are_copies_further_behind_and_fainter(self):
+        item = Item()
+        self.put(item, "trail-slide")
+        comp = item.comps[0]
+        self.assertEqual(chain(comp)[:2], ["MediaOut1", "BuddyMotionEcho"])
+        delays = [comp.FindTool(f"BuddyMotionEchoLate{i}").Delay.value for i in (1, 2, 3, 4)]
+        self.assertEqual(delays, sorted(delays))
+        self.assertAlmostEqual(delays[0], 0.04 * 24)                      # 0.04 s at 24 fps
+        blend = [max(k[1] for k in curve(comp.FindTool(f"BuddyMotionEcho{i}").Blend).values()) for i in (1, 2)]
+        self.assertAlmostEqual(blend[0], 0.6)
+        self.assertAlmostEqual(blend[1], 0.36)
+
+    def test_the_colour_split_keeps_one_alpha(self):
+        item = Item()
+        self.put(item, "color-split")
+        comp = item.comps[0]
+        red, green = comp.FindTool("BuddyMotionSplitRed"), comp.FindTool("BuddyMotionSplitGreen")
+        self.assertEqual((red.ToGreen.value, red.ToBlue.value, red.ToAlpha.value), (mr.BLACK,) * 3)
+        self.assertIsNone(green.ToAlpha.value)                            # the green copy's alpha stays
+        x = curve(comp.FindTool("BuddyMotionSplitR").Center.source.tool.X)
+        self.assertAlmostEqual(max(k[1] for k in x.values()), 0.5 + 4 / 64, places=3)
+
+    def test_flip_corners(self):
+        flat = motion.flip_corners(0, 0, 16 / 9)
+        self.assertEqual(flat["TopLeft"], (0.0, 1.0))
+        self.assertEqual(flat["BottomRight"], (1.0, 0.0))
+        edge = motion.flip_corners(90, 0, 16 / 9)                         # side on: no width left
+        self.assertAlmostEqual(edge["TopLeft"][0], 0.5)
+        self.assertAlmostEqual(edge["TopRight"][0], 0.5)
+        fold = motion.flip_corners(0, 60, 16 / 9, pivot="top")            # turned about its top edge
+        self.assertAlmostEqual(fold["TopLeft"][1], 1.0)
+        self.assertLess(fold["BottomLeft"][1], 1.0)
+        self.assertGreater(fold["BottomLeft"][1], 0.0)
+        turned = motion.flip_corners(30, 0, 16 / 9)                       # the far side smaller
+        near = turned["TopLeft"][1] - turned["BottomLeft"][1]
+        far = turned["TopRight"][1] - turned["BottomRight"][1]
+        self.assertGreater(near, far)
+
+    def test_a_held_mask_stays_on_at_rest(self):
+        keys = motion.plan(PRESETS["line-rise"], 120, 24)
+        self.assertIn("Reveal", keys)                                    # on, though it never moves
+        self.assertEqual({round(k["value"], 6) for k in keys["Reveal"].values()}, {0.0})
+        self.assertTrue(keys["mask"]["hold"])
+        self.assertNotIn("Reveal", motion.plan(PRESETS["pop"], 120, 24))
+        item = Item()
+        self.put(item, "line-rise")
+        mask = item.comps[0].FindTool("BuddyMotionMask")
+        x = curve(mask.Center.source.tool.X)
+        self.assertEqual({round(k[1], 6) for k in x.values()}, {0.5})     # over the picture, all along
+
+    def test_blinds_are_slats_each_masking_the_next(self):
+        item = Item()
+        self.put(item, "blinds")
+        comp = item.comps[0]
+        slats = [comp.FindTool(f"BuddyMotionMask{i}") for i in range(1, 7)]
+        self.assertTrue(all(slats))
+        self.assertIs(comp.FindTool("BuddyMotion").EffectMask.source.tool, slats[0])
+        for upper, lower in zip(slats, slats[1:]):
+            self.assertIs(upper.EffectMask.source.tool, lower)
+        self.assertEqual(slats[0].Angle.value, -90.0)                    # running down: level slats
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(sorted(t.reg_id for t in item.comps[0].tools.values()), ["MediaIn", "MediaOut"])
+
+    def test_an_angled_wipe_runs_both_ways_at_once(self):
+        item = Item()
+        self.put(item, "diagonal-wipe")
+        mask = item.comps[0].FindTool("BuddyMotionMask")
+        self.assertAlmostEqual(mask.Angle.value, -30.0)
+        path = mask.Center.source.tool
+        x, y = curve(path.X), curve(path.Y)
+        self.assertLess(x[min(x)][1], 0.5)                               # from up and to the left...
+        self.assertGreater(y[min(y)][1], 0.5)
+        self.assertGreater(x[max(x)][1], 0.5)                            # ...off down and to the right
+        self.assertLess(y[max(y)][1], 0.5)
+
+    def test_the_keys_go_on_the_spline_with_their_handles(self):
+        item = Item()
+        self.put(item, "slide")
+        x = curve(item.comps[0].FindTool("BuddyMotion").Center.source.tool.X)
+        self.assertEqual(len(x), len(motion.plan(PRESETS["slide"], 120, 24)["Center.X"]))
+        first = x[min(x)]
+        self.assertEqual(set(first), {1, "RH"})
+        self.assertEqual(set(first["RH"]), {1, 2})
+
+    def test_the_canvas_is_the_timelines_and_the_clip_is_fitted_to_it(self):
+        still = Item(size=(641, 479))
+        self.put(still, "css-animate-rollIn-card")      # no Size keys
+        comp = still.comps[0]
+        canvas = comp.FindTool("BuddyMotionCanvas")
+        self.assertEqual((canvas.Width.value, canvas.Height.value), (1920, 1080))
+        self.assertEqual(canvas.UseFrameFormatSettings.value, 0)
+        self.assertAlmostEqual(comp.FindTool("BuddyMotion").Size.value, 1080 / 479)
+
+        big = Item(size=(3840, 2160))
+        self.put(big, "pop")                            # Size keys, and their handles, halved
+        size = curve(big.comps[0].FindTool("BuddyMotion").Size)
+        peak = max(size.values(), key=lambda k: k[1])
+        self.assertAlmostEqual(peak[1], max(PRESETS["pop"]["keys"]["s"], key=lambda k: k[1])[1] * 0.5)
+        plain = motion.plan(PRESETS["pop"], 120, 24)["Size"]
+        frame = next(f for f, k in plain.items() if k["lh"])
+        lh = plain[frame]["lh"]
+        # A handle goes to Fusion as its offset from the key, heights halved too.
+        self.assertAlmostEqual(size[frame]["LH"][1], lh[0] - frame)
+        self.assertAlmostEqual(size[frame]["LH"][2], (lh[1] - plain[frame]["value"]) * 0.5)
+
+    def test_a_text_plus_keeps_its_comp_and_its_template(self):
+        item = Item(Comp(upstream="TextPlus"))
+        self.put(item, "pop")
+        self.assertEqual(chain(item.comps[0]), ["MediaOut1", "BuddyMotion", "TextPlus1"])
+        self.assertIsNone(item.comps[0].FindTool("BuddyMotion").Size.value)   # already the timeline's size
+
+    def test_keys_go_in_the_comps_own_frames(self):
+        # 29.97 fps footage on a 24 fps timeline: a 56-frame clip, a 69-frame comp.
+        item = Item(Comp(frames=69))
+        planned = self.put(item, "pop", clip_frames=56, at=28)
+        frames, ratio, at = planned[0]
+        self.assertEqual(frames, 69)
+        self.assertAlmostEqual(ratio, 69 / 56)
+        self.assertAlmostEqual(at, 28 * 69 / 56)
+        size = curve(item.comps[0].FindTool("BuddyMotion").Size)
+        self.assertEqual(max(size), 68)         # the Out ends on the comp's last frame
+        # ...and the In lasts as long on screen: 14 timeline frames.
+        self.assertAlmostEqual(motion.plan(PRESETS["pop"], 69, 24 * 69 / 56)["moves"][0][2] / (69 / 56), 14, delta=1)
+
+    def test_applying_again_replaces_instead_of_stacking(self):
+        item = Item()
+        self.put(item)
+        self.put(item, "pop")
+        comp = item.comps[0]
+        self.assertEqual(len(comp.GetToolList(False, "Merge")), 1)
+        self.assertEqual(len(comp.GetToolList(False, "Background")), 1)
+        self.assertEqual(len(comp.GetToolList(False, "XYPath")), 0)     # Pop only scales
+        self.assertEqual(len(comp.GetToolList(False, "BezierSpline")), 1)
+        self.assertEqual(chain(comp)[-1], "MediaIn1")
+
+    def test_remove_puts_a_users_comp_back(self):
+        item = Item(Comp(upstream="TextPlus"))
+        self.put(item)
+        self.assertTrue(mr.remove(item))
+        comp = item.comps[0]
+        self.assertEqual(chain(comp), ["MediaOut1", "TextPlus1"])
+        self.assertEqual(sorted(t.reg_id for t in comp.tools.values()), ["MediaOut", "TextPlus"])
+        self.assertEqual(item.names, ["Composition 1"])     # each import replaced the one before
+
+    def test_remove_keeps_a_tool_the_person_put_after_the_merge_in_the_chain(self):
+        item = Item(Comp(upstream="TextPlus"))
+        self.put(item)
+        comp = item.comps[0]
+        glow = comp.AddTool("Glow")                                     # put in Fusion between the Merge and MediaOut1
+        glow.ConnectInput("Input", comp.FindTool("BuddyMotion"))
+        comp.FindTool("MediaOut1").ConnectInput("Input", glow)
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(chain(item.comps[0]), ["MediaOut1", "Glow1", "TextPlus1"])
+
+    def test_remove_wires_media_out_when_the_merge_fed_nothing_readable(self):
+        item = Item(Comp(upstream="TextPlus"))
+        self.put(item)
+        comp = item.comps[0]
+        comp.FindTool("MediaOut1").Input.ConnectTo(None)                # nothing reads the Merge's picture
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(chain(item.comps[0]), ["MediaOut1", "TextPlus1"])
+
+    def test_remove_leaves_a_comp_buddy_made_passing_straight_through(self):
+        # Resolve won't delete a clip's last composition.
+        item = Item()
+        self.put(item, "pop")
+        self.assertTrue(mr.remove(item))
+        self.assertEqual(chain(item.comps[0]), ["MediaOut1", "MediaIn1"])
+        self.assertEqual(item.names, ["Composition 1"])
+        self.assertEqual(item.reloads, 2)
+
+    def test_remove_without_a_preset_does_nothing(self):
+        item = Item(Comp())
+        self.assertFalse(mr.remove(item))
+        self.assertFalse(mr.remove(Item()))
+
+    def test_several_compositions_are_left_alone(self):
+        item = Item(Comp())
+        item.comps.append(Comp())
+        item.names.append("Composition 2")
+        with self.assertRaises(RuntimeError):
+            self.put(item, "pop")
+
+    def test_apply_again_and_again_on_the_comp_that_plays(self):
+        # Each round trip's import is a new comp; the one it came from goes,
+        # so the next Apply finds one comp, with the preset in it.
+        item = Item()
+        for pid in ("pop", "whip", "slide"):
+            self.put(item, pid)
+            self.assertEqual(item.names, ["Composition 1"])
+        self.assertEqual(item.comps[0].FindTool("BuddyMotion").GetData(mr.TAG), "slide")
+        self.assertTrue(mr._has_motion(item))
+        self.assertTrue(mr.remove(item))
+        self.assertFalse(mr._has_motion(item))
+        self.assertEqual(len(item.comps), 1)
+
+    def test_a_clip_buddy_1_1_36_left_two_comps_on(self):
+        # The comp the preset was built in, and the imported copy that plays.
+        item = Item()
+        self.put(item, "pop")
+        stale = copy.deepcopy(item.comps[0])
+        item.comps.insert(0, stale)
+        item.names = ["Composition 1", "Composition 2"]
+        playing = item.comps[1]
+        playing.FindTool("BuddyMotion").SetData(mr.TAG, "whip")
+        self.assertEqual(mr._motion_comp(item)[1], playing)        # the newest, not comp 1
+        self.put(item, "slide")                                     # no "several compositions"
+        self.assertEqual(len(item.comps), 1)                        # both old ones gone
+        self.assertEqual(item.comps[0].FindTool("BuddyMotion").GetData(mr.TAG), "slide")
+
+    def test_a_delete_resolve_turns_down_leaves_a_comp_the_next_apply_passes_over(self):
+        item = Item()
+        self.put(item, "pop")
+        item.refuse_delete = True
+        self.put(item, "whip")
+        self.assertEqual(len(item.comps), 2)
+        item.refuse_delete = False
+        self.put(item, "slide")
+        self.assertEqual(len(item.comps), 1)
+        self.assertEqual(item.comps[0].FindTool("BuddyMotion").GetData(mr.TAG), "slide")
+
+    def test_a_failed_apply_leaves_the_clip_as_it_was(self):
+        item = Item(Pan=40.0)
+        self.put(item, "whip")
+        before = chain(item.comps[0])
+        props = dict(item.props)
+        with mock.patch.object(mr, "_key", side_effect=RuntimeError("couldn't connect a keyframe curve")):
+            with self.assertRaises(RuntimeError):
+                self.put(item, "pop")
+        self.assertEqual(len(item.comps), 1)
+        comp = item.comps[0]
+        self.assertEqual(comp.FindTool("BuddyMotion").GetData(mr.TAG), "whip")    # the old preset is still on
+        self.assertEqual(chain(comp), before)
+        self.assertTrue(curve(comp.FindTool("BuddyMotion").Center.source.tool.X))
+        self.assertEqual(item.props, props)
+
+    def test_a_failed_remove_leaves_the_preset_on(self):
+        item = Item()
+        self.put(item, "pop")
+        with mock.patch.object(mr, "_take_out", side_effect=RuntimeError("boom")):
+            with self.assertRaises(RuntimeError):
+                mr.remove(item)
+        self.assertEqual(len(item.comps), 1)
+        self.assertEqual(item.comps[0].FindTool("BuddyMotion").GetData(mr.TAG), "pop")
+
+    def test_a_one_frame_clip_is_turned_away_untouched(self):
+        with self.assertRaises(ValueError):
+            motion.plan(PRESETS["pop"], 1, 24)
+        item = Item()
+        with self.assertRaises(RuntimeError):
+            self.put(item, "pop", clip_frames=1)
+        self.assertEqual(item.comps, [])                            # no comp added for nothing
+        two = motion.plan(PRESETS["pop"], 2, 24)["Size"]
+        self.assertLessEqual(max(two), 1)                           # nothing past the last frame
+
+
+def play(expression, time, start, end):
+    """The comp frame a trim-following expression plays its keys at, worked out
+    the way Fusion would: comp.RenderStart/End are the trimmed clip's."""
+    mapping = expression.split('GetValue("Angle", ', 1)[1][:-1]
+    mapping = mapping.replace("comp.RenderStart", "RS").replace("comp.RenderEnd", "RE")
+    return eval(mapping, {"iif": lambda c, a, b: a if c else b, "time": time, "RS": start, "RE": end})
+
+
+class Trimming(unittest.TestCase):
+    """An In and an Out ride the clip's ends after it's trimmed in the Edit page.
+    The ranges are what Studio 21.1 showed for a 5 s still: 0-119, 0-95 with a
+    second off the end, 24-95 with a second off the start too."""
+
+    def setUp(self):
+        self.item = Item(name="still")
+        mr.apply(self.item, "pop", lambda n, r, a: motion.plan(PRESETS["pop"], n, 24 * r, at=a), 120, None,
+                 (1920, 1080), mr.FIT, mr.read_inspector(self.item), {"way": "both"})
+        self.merge = self.item.comps[0].FindTool("BuddyMotion")
+        self.expr = self.merge.Size.expression
+        self.keys = curve(self.merge.Size)
+        self.size = lambda c: motion.evaluate({f: {"value": k[1], "lh": None, "rh": None} for f, k in self.keys.items()}, c)
+
+    def test_untrimmed_it_plays_as_laid_out(self):
+        for t in range(120):
+            self.assertAlmostEqual(play(self.expr, t, 0, 119), t)
+
+    def test_a_trimmed_end_brings_the_out_with_it(self):
+        for back in range(8):                       # the Out's last frames land on the new end
+            self.assertAlmostEqual(play(self.expr, 95 - back, 0, 95), 119 - back)
+        for t in range(10):                         # the In is where it was
+            self.assertAlmostEqual(play(self.expr, t, 0, 95), t)
+        self.assertAlmostEqual(self.size(play(self.expr, 95, 0, 95)), 0.0)   # gone by the last frame, as before
+
+    def test_a_trimmed_start_brings_the_in_with_it(self):
+        for k in range(10):
+            self.assertAlmostEqual(play(self.expr, 24 + k, 24, 95), k)
+        self.assertEqual(self.size(play(self.expr, 24, 24, 95)), 0.0)   # starts from nothing, as before
+        self.assertAlmostEqual(play(self.expr, 95, 24, 95), 119)
+
+    def test_a_longer_clip_holds_still_between_and_never_replays_the_in(self):
+        in_end = next(last for name, _f, _l, _first, last in motion.plan(PRESETS["pop"], 120, 24)["moves"] if name == "in")
+        for t in range(int(in_end) + 1, 288):                      # the Out starts at 288.92
+            c = play(self.expr, t, 0, 299)
+            self.assertGreaterEqual(c, in_end)
+            self.assertAlmostEqual(self.size(c), 1.0, places=3)
+        self.assertAlmostEqual(play(self.expr, 299, 0, 299), 119)
+
+    def test_a_clip_trimmed_shorter_than_its_moves_squeezes_both(self):
+        frames = [play(self.expr, t, 40, 49) for t in range(40, 50)]
+        self.assertAlmostEqual(frames[0], 0)
+        self.assertAlmostEqual(frames[-1], 119)
+        self.assertEqual(frames, sorted(frames))
+        self.assertAlmostEqual(play(self.expr, 40, 40, 40), 0)           # a single frame: no division by nothing
+
+    def test_only_what_read_back_right_goes_in_the_expression(self):
+        # time, comp.RenderStart/End, iif, numbers and Tool:GetValue - nothing
+        # untried (an expression on a point input crashed Resolve 21.1).
+        words = set(re.findall(r"[A-Za-z_][A-Za-z_.]*", self.expr))
+        self.assertLessEqual(words, {"BuddyMotionKeysSize:GetValue", "BuddyMotionKeysSize", "GetValue", "Angle",
+                                     "iif", "time", "comp.RenderStart", "comp.RenderEnd"})
+        self.assertNotIn("e+", self.expr)
+
+    def test_the_keys_sit_on_carriers_off_the_flow(self):
+        comp = self.item.comps[0]
+        self.assertEqual(chain(comp), ["MediaOut1", "BuddyMotion", "MediaIn1"])
+        carrier = comp.FindTool("BuddyMotionKeysSize")
+        self.assertEqual(carrier.reg_id, "Transform")
+        self.assertTrue(carrier.Angle.source)                   # the spline
+        self.assertIsNone(self.merge.Size.source)               # the Merge only reads it
+
+    def test_a_move_follows_the_trims_through_the_motion_path(self):
+        item = Item()
+        mr.apply(item, "whip", lambda n, r, a: motion.plan(PRESETS["whip"], n, 24 * r, at=a), 120, None,
+                 (1920, 1080), mr.FIT, mr.read_inspector(item), {"way": "both"})
+        path = item.comps[0].FindTool("BuddyMotion").Center.source.tool
+        self.assertEqual(path.reg_id, "XYPath")                 # no expression on the point itself
+        self.assertIsNone(item.comps[0].FindTool("BuddyMotion").Center.expression)
+        for axis in ("X", "Y"):
+            self.assertTrue(getattr(path, axis).expression.startswith(f"BuddyMotionKeys{axis}:"))
+        self.assertAlmostEqual(play(path.X.expression, 95, 0, 95), 119)
+
+    def test_applying_again_and_removing_leave_no_stray_carriers(self):
+        comp = lambda: self.item.comps[0]
+        mr.apply(self.item, "whip", lambda n, r, a: motion.plan(PRESETS["whip"], n, 24 * r, at=a), 120, None,
+                 (1920, 1080), mr.FIT, mr.read_inspector(self.item), {"way": "both"})
+        names = sorted(n for n in comp().tools if n.startswith(mr.CARRIER))
+        self.assertEqual(names, ["BuddyMotionKeysX", "BuddyMotionKeysY"])          # Pop's Size carrier went
+        self.assertTrue(mr.remove(self.item))
+        self.assertEqual([n for n in comp().tools if n.startswith(mr.CARRIER)], [])
+        self.assertEqual(sorted(t.reg_id for t in comp().tools.values()), ["MediaIn", "MediaOut"])
+
+    def test_an_emphasis_stays_on_the_frames_it_went_on(self):
+        item = Item()
+        tada = "css-animate-tada-card"
+        mr.apply(item, tada, lambda n, r, a: motion.plan(PRESETS[tada], n, 24 * r, at=a), 120, 30,
+                 (1920, 1080), mr.FIT, mr.read_inspector(item), {"way": "both"})
+        merge = item.comps[0].FindTool("BuddyMotion")
+        keyed = [getattr(merge, n) for n in ("Size", "Angle") if getattr(merge, n).source or getattr(merge, n).expression]
+        self.assertTrue(keyed)
+        for inp in keyed:
+            self.assertIsNone(inp.expression)
+        self.assertIsNone(mr.time_map(0, 120, 0, 0))
+
+
+class EditedKeys(unittest.TestCase):
+    """The Editor's keys (motion.keys_of / from_keys) and plan() laying them."""
+
+    def test_every_preset_opens_as_keys_and_saves_back_the_same(self):
+        # An unedited preset saved from the Editor moves as the original.
+        for p in PRESETS.values():
+            keys = motion.keys_of(p)
+            self.assertEqual(set(keys), set(motion.CHANNELS))
+            for c, rows in keys.items():
+                self.assertEqual((rows[0][0], rows[-1][0]), (0.0, float(motion.LAST)), (p["id"], c))
+            copy_ = motion.from_keys("saved-x", p["label"], p["kind"], p["dur"], keys)
+            self.assertEqual(motion.moves(copy_), motion.moves(p), p["id"])
+            self.assertEqual(motion.plan(copy_, 120, 24)["moves"], motion.plan(p, 120, 24)["moves"], p["id"])
+            for c in motion.CHANNELS:
+                for k in range(motion.SAMPLES):
+                    self.assertAlmostEqual(copy_[c][k], p[c][k], delta=motion.KEY_TOLERANCE[c] * 1.5, msg=(p["id"], c, k))
+
+    def test_a_hold_between_moves_is_exactly_at_rest(self):
+        keys = motion.keys_of(PRESETS["pop"])["s"]
+        for t in range(11, 33):
+            self.assertAlmostEqual(motion.evaluate_keys(keys, t), 1.0, places=9)
+
+    def test_a_key_added_on_the_curve_leaves_it_as_it_was(self):
+        keys = motion.keys_of(PRESETS["pop"])["s"]
+        more = motion.split_at(keys, 3.3)
+        self.assertEqual(len(more), len(keys) + 1)
+        for i in range(401):
+            self.assertAlmostEqual(motion.evaluate_keys(more, i / 10), motion.evaluate_keys(keys, i / 10), places=9)
+        self.assertEqual(motion.split_at(more, 3.3), more)          # one there already
+
+    def test_cut_keeps_the_part_between(self):
+        keys = motion.keys_of(PRESETS["pop"])["s"]
+        part = motion.cut(keys, 2, 30)
+        self.assertEqual((part[0][0], part[-1][0]), (2, 30))
+        self.assertIsNone(part[0][2])
+        self.assertIsNone(part[-1][3])
+        for t in (2, 5.5, 9, 20):
+            self.assertAlmostEqual(motion.evaluate_keys(part, t), motion.evaluate_keys(keys, t), places=9)
+
+    def test_what_comes_back_from_the_page_is_made_safe(self):
+        keys = motion.clean_keys({
+            "s": [[30, 1.0, [35, 1.0], [25, 2.0]], [10, "x", None, None], [10, 0.5, None, [99, 0.4]],
+                  ["bad"], [55, 1e9, None, None]],
+            "o": "junk",
+        })
+        s = keys["s"]
+        self.assertEqual([k[0] for k in s], [0.0, 10.0, 30.0, 40.0])     # sorted, one per time, ends added
+        self.assertEqual(s[1][1], 0.5)                                    # the later row for t=10 wins
+        self.assertLessEqual(s[1][3][0], 30.0)                            # a handle stays inside its neighbours
+        self.assertLessEqual(s[2][2][0], 30.0)                            # ...and on its own side
+        self.assertGreaterEqual(s[2][3][0], 30.0)
+        self.assertIsNone(s[0][2])
+        self.assertLessEqual(abs(s[-1][1]), 10000)                        # no wild values
+        self.assertEqual(keys["o"], [[0.0, 1.0, None, None], [40.0, 1.0, None, None]])   # held at rest
+        self.assertEqual(keys["x"][0][1], 0.0)
+
+    def test_plan_lays_the_drawn_keys_themselves(self):
+        # A hand-drawn In: scale 0 -> 1.3 -> 1 over samples 0..10, then rest,
+        # and an Out of opacity over 30..40.
+        keys = {"s": [[0, 0.0, None, [2, 0.5]], [6, 1.3, [5, 1.3], [7, 1.3]], [10, 1.0, [9, 1.0], None],
+                      [40, 1.0, None, None]],
+                "o": [[0, 1.0, None, None], [30, 1.0, None, [33, 1.0]], [40, 0.0, [37, 0.0], None]]}
+        p = motion.from_keys("saved-1", "Mine", motion.KIND_IN_OUT, 1.0, keys)
+        self.assertEqual(motion.moves(p), {"in": (0, 10), "out": (30, 40)})
+        plan = motion.plan(p, 120, 24)
+        size, blend = plan["Size"], plan["Blend"]
+        # The In: 10 samples of a 1 s preset at 24 fps is 6 frames - keys at 0, 3.6, 6.
+        self.assertEqual(sorted(size)[:3], [0.0, 3.6, 6.0])
+        self.assertEqual(size[3.6]["value"], 1.3)
+        self.assertEqual(size[3.6]["lh"], (3.0, 1.3))                     # handles come along, stretched
+        self.assertEqual(max(blend), 119.0)
+        self.assertEqual(blend[119.0]["value"], 0.0)
+
+    def test_an_in_or_an_out_takes_only_its_part_of_the_curve(self):
+        keys = motion.keys_of(PRESETS["pop"])                            # an In and an Out
+        only_in = motion.from_keys("saved-1", "In", motion.KIND_IN, 2.4, keys)
+        self.assertEqual(set(motion.moves(only_in)), {"in"})
+        plan = motion.plan(only_in, 120, 24, way="both")                 # Put on doesn't bring the Out back
+        self.assertEqual([m for m, *_ in plan["moves"]], ["in"])
+        self.assertLess(max(plan["Size"]), 30)
+        only_out = motion.from_keys("saved-2", "Out", motion.KIND_OUT, 2.4, keys)
+        plan = motion.plan(only_out, 120, 24)
+        self.assertEqual([m for m, *_ in plan["moves"]], ["out"])
+        self.assertGreater(min(plan["Size"]), 90)
+        self.assertIn(motion.KIND_IN, motion.KINDS)
+
+    def test_every_built_in_preset_is_cleanly_keyed(self):
+        """A key on every peak and valley, one only, with no curve passing the
+        keys either side of it, and no corner except where it turns back (a
+        hit: Drop's floor). The 41 samples alone put two keys on Heart beat's
+        first thump and missed the bottom of its valley."""
+        unit = {"x": 64.0, "y": 36.0, "r": 1.0, "s": 0.01, "o": 0.01,        # 1% of the frame, 1 degree, 1%
+                "b": 0.1, "w": 0.01, "h": 0.01, "m": 0.01, "k": 0.01,         # 3 px of blur at 1080p, 1%
+                "e": 0.01, "l": 0.01, "c": 0.1, "f": 1.0, "g": 1.0}
+        for p in PRESETS.values():
+            self.assertEqual(set(p["keys"]), set(motion.CHANNELS), p["id"])
+            for c, keys in p["keys"].items():
+                where = (p["id"], c)
+                for k0, k1 in zip(keys, keys[1:]):
+                    lo, hi = min(k0[1], k1[1]), max(k0[1], k1[1])
+                    for i in range(1, 60):
+                        v = motion.evaluate_keys([k0, k1], k0[0] + (k1[0] - k0[0]) * i / 60)
+                        self.assertLessEqual(v, hi + 0.25 * unit[c], (where, k0[0], "rises past its keys"))
+                        self.assertGreaterEqual(v, lo - 0.25 * unit[c], (where, k0[0], "dips past its keys"))
+                for a, b, prev, nxt in zip(keys[1:], keys[2:], keys, keys[3:]):
+                    if abs(a[1] - b[1]) < 0.15 * unit[c] and b[0] - a[0] <= 2.5:
+                        peak = min(a[1], b[1]) > max(prev[1], nxt[1]) + 0.5 * unit[c]
+                        dip = max(a[1], b[1]) < min(prev[1], nxt[1]) - 0.5 * unit[c]
+                        self.assertFalse(peak or dip, (where, a[0], "two keys on one peak"))
+                for k in keys[1:-1]:
+                    if not (k[2] and k[3]) or k[0] - k[2][0] <= 1e-9 or k[3][0] - k[0] <= 1e-9:
+                        continue
+                    left = (k[1] - k[2][1]) / unit[c] / (k[0] - k[2][0])
+                    right = (k[3][1] - k[1]) / unit[c] / (k[3][0] - k[0])
+                    bend = abs(math.degrees(math.atan(left) - math.atan(right)))
+                    self.assertTrue(bend <= 12 or left * right < 0, (where, k[0], f"a corner of {bend:.0f} degrees"))
+
+    def test_heart_beat_peaks_and_valley_each_have_a_key_on_them(self):
+        s = PRESETS["css-animate-heartBeat-card"]["keys"]["s"]
+        inner = [k for k in s if 12 < k[0] < 23]
+        self.assertEqual(len(inner), 3)                              # peak, valley, peak
+        first, valley, second = inner
+        self.assertAlmostEqual(first[1], 1.3, delta=0.01)
+        self.assertAlmostEqual(second[1], 1.3, delta=0.01)
+        self.assertAlmostEqual(valley[1], 1.0, delta=0.01)
+        curve = [motion.evaluate_keys(s, first[0] + (second[0] - first[0]) * i / 400) for i in range(401)]
+        self.assertAlmostEqual(min(curve), valley[1], places=6)       # the valley's key is its bottom
+        for k in inner:                                               # level handles: smooth turns
+            self.assertAlmostEqual(k[2][1], k[1], places=6)
+            self.assertAlmostEqual(k[3][1], k[1], places=6)
+
+    def test_drop_bounces_land_on_the_floor_and_never_stall(self):
+        # Drawn by hand in motion_presets.json: 41 samples fell short of the
+        # floor and hung for two samples at each bounce's top.
+        drop = PRESETS["drop"]
+        y = drop["keys"]["y"]
+        hits = [k for k in y if k[0] <= 10 and k[1] == 0.0 and k[0] > 0]
+        self.assertEqual([k[0] for k in hits], [4.0, 8.0, 10.0])
+        peaks, last = [], 0.0
+        for a, b in ((4, 8), (8, 10)):          # each bounce: up once, down once, no stall
+            values = [motion.evaluate_keys(y, a + (b - a) * i / 200) for i in range(201)]
+            steps = [q - p for p, q in zip(values, values[1:])]
+            turns = sum(1 for s, t in zip(steps, steps[1:]) if s < 0 <= t)
+            self.assertEqual(turns, 1, (a, b))
+            peaks.append(-min(values))
+        self.assertGreater(peaks[0], peaks[1])      # each lower than the one before
+        self.assertEqual(motion.moves(drop), {"in": (0, 10), "out": (32, 40)})
+        plan = motion.plan(drop, 120, 24)               # what Fusion gets is these keys
+        self.assertIn(0.5, [round(k["value"], 5) for f, k in plan["Center.Y"].items() if f < 15])
+
+    def test_a_saved_preset_plays_its_own_curve_on_the_tiles(self):
+        p = motion.from_keys("saved-1", "Mine", motion.KIND_IN_OUT, 2.0, {"x": [[0, -64, None, None], [20, 0, None, None]]})
+        v = motion.view(p)
+        self.assertEqual(v["keys"]["x"][0][1], -64.0)
+        self.assertEqual(v["pack"], "Saved")
+        self.assertEqual(motion.view(PRESETS["pop"])["keys"], PRESETS["pop"]["keys"])   # built-in ones' baked keys
+
+
+class Framing(unittest.TestCase):
+    """The Inspector's framing goes into the comp; the Inspector goes neutral."""
+
+    def put(self, item, pid="pop"):
+        mr.apply(item, pid, lambda n, r, a: motion.plan(PRESETS[pid], n, 24 * r, at=a), 120, None,
+                 (1920, 1080), mr.FIT, mr.read_inspector(item), {"way": "both", "speed": 1.0})
+
+    def test_the_framing_goes_in_and_the_inspector_goes_neutral(self):
+        item = Item(ZoomX=0.5, ZoomY=0.5, Pan=-300.0, Tilt=120.0, RotationAngle=15.0)
+        self.put(item, "whip")
+        merge = item.comps[0].FindTool("BuddyMotion")
+        self.assertAlmostEqual(merge.Size.value, 0.5)              # a 1920x1080 clip: fit 1 x zoom
+        self.assertAlmostEqual(merge.Angle.value, 15.0)
+        x = curve(merge.Center.source.tool.X)
+        settled = max(f for f in x if f < 60)                       # where the In comes to rest
+        self.assertAlmostEqual(x[settled][1], 0.5 - 300 / 1920)     # Whip lands where it was placed
+        y = curve(merge.Center.source.tool.Y)
+        self.assertAlmostEqual(y[min(y)][1], 0.5 + 120 / 1080)
+        self.assertTrue(framing.is_neutral(item.props))
+        self.assertEqual(item.props["ZoomX"], 1.0)
+
+    def test_a_crop_comes_in_ahead_of_the_move(self):
+        item = Item(CropLeft=100.0, CropTop=40.0)
+        self.put(item)
+        comp = item.comps[0]
+        self.assertEqual(chain(comp), ["MediaOut1", "BuddyMotion", "BuddyMotionCrop", "MediaIn1"])
+        crop = comp.FindTool("BuddyMotionCrop")
+        self.assertEqual((crop.XOffset.value, crop.YOffset.value), (100.0, 0.0))
+        self.assertEqual((crop.XSize.value, crop.YSize.value), (1820.0, 1040.0))
+        self.assertEqual(item.props["CropLeft"], 0.0)
+
+    def test_a_soft_crop_stays_in_the_inspector(self):
+        item = Item(CropLeft=100.0, CropSoftness=8.0)
+        self.put(item)
+        self.assertIsNone(item.comps[0].FindTool("BuddyMotionCrop"))
+        self.assertEqual(item.props["CropLeft"], 100.0)
+
+    def test_uneven_zoom_and_flip_get_a_shape_step(self):
+        item = Item(ZoomGang=False, ZoomX=0.25, ZoomY=0.5, FlipX=True)
+        self.put(item)
+        shape = item.comps[0].FindTool("BuddyMotionShape")
+        self.assertEqual(shape.FlipVert.value, 1)
+        self.assertAlmostEqual(shape.XSize.value, 0.5)
+        self.assertAlmostEqual(shape.YSize.value, 1.0)
+
+    def test_reframing_after_goes_on_top_and_remove_puts_it_all_back(self):
+        item = Item(ZoomX=0.5, ZoomY=0.5, Pan=100.0)
+        self.put(item)
+        item.props.update(Pan=-50.0)                                # re-framed in the Inspector
+        self.put(item)                                              # Update framing / Apply again
+        merge = item.comps[0].FindTool("BuddyMotion")
+        self.assertAlmostEqual(merge.Center.value[1], 0.5 + 50 / 1920)   # -50 + 100
+        self.assertEqual(item.props["Pan"], 0.0)
+        self.assertTrue(mr.remove(item))
+        self.assertAlmostEqual(item.props["Pan"], 50.0)
+        self.assertAlmostEqual(item.props["ZoomX"], 0.5)
+
+    def test_remove_puts_the_exact_original_back(self):
+        item = Item(ZoomX=0.8, ZoomY=0.8, Pan=33.0, AnchorPointX=12.5, RotationAngle=-7.0)
+        self.put(item, "css-animate-rollIn-card")
+        self.assertTrue(mr.remove(item))
+        for key, want in (("ZoomX", 0.8), ("Pan", 33.0), ("AnchorPointX", 12.5), ("RotationAngle", -7.0)):
+            self.assertEqual(item.props[key], want)
+
+
+class SelectionSummary(unittest.TestCase):
+    """What the Animation page reads every couple of seconds."""
+
+    def summary(self, *clips):
+        class Timeline:
+            def GetName(self): return "T"
+            def GetSetting(self, key): return "24" if key == "timelineFrameRate" else ""
+            def GetSelectedClips(self): return list(clips)
+
+        project = type("Project", (), {"GetCurrentTimeline": lambda self: Timeline()})()
+        return mr.summary(type("Controller", (), {"current_project": lambda self: project})())
+
+    def clip(self, name, frames, kind="Still"):
+        item = Item(name=name)
+        pool = type("Pool", (), {"GetClipProperty": lambda self, key: kind})()
+        item.GetMediaPoolItem = lambda: pool
+        item.GetTrackTypeAndIndex = lambda: ("video", 1)
+        item.GetStart = lambda: 0
+        item.GetDuration = lambda: frames
+        return item
+
+    def test_one_clip_gives_the_editor_its_length(self):
+        s = self.summary(self.clip("still.png", 120))
+        self.assertEqual(s["clip"], {"name": "still.png", "frames": 120})
+        self.assertEqual(s["fps"], 24.0)
+
+    def test_several_clips_give_none(self):
+        self.assertIsNone(self.summary(self.clip("a", 120), self.clip("b", 48))["clip"])
+        self.assertIsNone(self.summary()["clip"])
+
+
+class Shapes(unittest.TestCase):
+    def test_the_tiles_follow_the_selection(self):
+        self.assertEqual(mr.preview_shape({}), "card")
+        self.assertEqual(mr.preview_shape({mr.NOT_VIDEO: 3}), "card")
+        self.assertEqual(mr.preview_shape({mr.IMAGE: 1}), "photo")
+        self.assertEqual(mr.preview_shape({mr.TITLE: 2, mr.IMAGE: 1}), "title")
+        self.assertEqual(mr.preview_shape({mr.VIDEO: 1, mr.OTHER: 1}), "clip")
+        self.assertEqual(mr.preview_shape({mr.IMAGE: 1, mr.VIDEO: 1}), "photo")   # a tie: the first
+
+
+if __name__ == "__main__":
+    unittest.main()
