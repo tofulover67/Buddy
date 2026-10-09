@@ -1,0 +1,230 @@
+# Publishes one GitHub release with both installers - BuddySetup-<version>.exe
+# for Windows and Buddy-<version>.pkg for macOS - whenever the VERSION file on
+# main changes: bump the number (even from GitHub's web editor) to release.
+# The tests run first, on both platforms (tests.yml); nothing is published if
+# either fails, and an existing release for the same version is never replaced.
+# Editing this file runs it too - how to retry a version whose run failed.
+#
+# It builds from the repo alone on clean machines:
+#   app        buddy.zip, once - both installers wrap this same file - and
+#              the two update manifests (build_update_manifest.py). buddy.zip,
+#              Buddy.py and the manifests go on the release too: they're what
+#              a running Buddy updates itself from (app/core/updater.py).
+#   windows    build_installer.py compiles installer/Buddy.iss with Inno Setup.
+#   mac        build_mac_installer.py makes the .pkg with pkgbuild/productbuild,
+#              which every macOS has.
+#
+# Every job up to "publish" has a read-only token - they are the ones that
+# run pip-installed packages, Inno Setup and the repo's own code - and hands
+# its files over; only "publish", which runs nothing of the repo's or its
+# packages', can write to the release. Every action is pinned to a reviewed
+# commit (the comment gives the release it is): update one by looking up the
+# new tag's commit, never by pointing at a tag that can move.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - VERSION
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      skip: ${{ steps.exists.outputs.skip }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # The token isn't left in .git/config; only the gh step gets it (GH_TOKEN).
+          persist-credentials: false
+
+      - name: Read VERSION
+        id: version
+        run: |
+          v="$(tr -d '[:space:]' < VERSION)"
+          if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "VERSION must look like 1.2.3 (got '$v')"
+            exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Version $v"
+
+      - name: Skip if this version is already released
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "v${{ steps.version.outputs.version }} already exists - bump VERSION to release again."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  tests:
+    name: Tests
+    needs: version
+    if: needs.version.outputs.skip == 'false'
+    uses: ./.github/workflows/tests.yml
+
+  app:
+    name: buddy.zip
+    needs: [version, tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0          # the tags: what changed since the last release
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+
+      - name: Build buddy.zip
+        run: python build_buddy_zip.py
+
+      - name: Write the update manifests
+        run: |
+          python build_update_manifest.py --platform windows
+          python build_update_manifest.py --platform mac
+
+      - name: Hand the files on
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: app-files
+          path: |
+            buddy.zip
+            Buddy.py
+            dist/buddy-update-windows.json
+            dist/buddy-update-mac.json
+          if-no-files-found: error
+          retention-days: 3
+
+  windows:
+    name: Windows installer
+    needs: [version, app]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+
+      # A warning, not a stop: PyPI's advisory data for the lowest version each
+      # requirement allows (the floors in installer/requirements.txt).
+      - name: Check the dependency floors for known advisories
+        continue-on-error: true
+        shell: pwsh
+        run: python tools/check_dependencies.py
+
+      - name: Fetch buddy.zip
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: app-files
+          path: .
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = @("$env:ProgramFiles\Inno Setup 7\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 7\ISCC.exe",
+                    "$env:ProgramFiles\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe") |
+                  Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) { choco install innosetup -y --no-progress }
+
+      - name: Build the installer
+        shell: pwsh
+        run: python build_installer.py --keep-zip
+
+      - name: Hand the installer on
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-installer
+          path: dist/BuddySetup-${{ needs.version.outputs.version }}.exe
+          if-no-files-found: error
+          retention-days: 3
+
+  mac:
+    name: macOS installer
+    needs: [version, app]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.13"
+
+      - name: Fetch buddy.zip
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: app-files
+          path: .
+
+      - name: Build the installer
+        run: python build_mac_installer.py --keep-zip
+
+      - name: Hand the installer on
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mac-installer
+          path: dist/Buddy-${{ needs.version.outputs.version }}.pkg
+          if-no-files-found: error
+          retention-days: 3
+
+  publish:
+    name: Publish
+    needs: [version, app, windows, mac]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: files
+          merge-multiple: true
+
+      - name: Publish the release
+        working-directory: files
+        run: |
+          v="${{ needs.version.outputs.version }}"
+          exe="BuddySetup-$v.exe"
+          pkg="Buddy-$v.pkg"
+          exe_sha="$(sha256sum "$exe" | cut -d ' ' -f 1)"
+          pkg_sha="$(sha256sum "$pkg" | cut -d ' ' -f 1)"
+          cat > notes.md <<EOF
+          **Windows:** download $exe below and double-click it. Windows may say "Windows protected your PC" (the installer isn't code-signed): click More info > Run anyway.
+
+          **macOS:** download $pkg below and open it. The installer isn't signed, so macOS blocks it the first time: open System Settings > Privacy & Security and click Open Anyway. It installs Python and the packages Buddy needs if the Mac doesn't have them yet.
+
+          Then open DaVinci Resolve and choose Workspace > Scripts > Buddy. Only ever download Buddy from this page.
+
+          SHA-256, to check a download:
+          - $exe: \`$exe_sha\` - in PowerShell, \`Get-FileHash $exe\`
+          - $pkg: \`$pkg_sha\` - in Terminal, \`shasum -a 256 $pkg\`
+          EOF
+          # buddy.zip, Buddy.py and the manifests: for Buddy's own Update button.
+          gh release create "v$v" "$exe" "$pkg" buddy.zip Buddy.py dist/buddy-update-windows.json dist/buddy-update-mac.json \
+            --title "Buddy $v" --notes-file notes.md --generate-notes --target "$GITHUB_SHA"
