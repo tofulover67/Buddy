@@ -82,12 +82,29 @@
         "Add individual files or whole folders (or drag them in), recursively picking up all supported media beneath them",
         "Each asset is tracked by a stable id rather than its path, so it survives being moved later",
         "All media view: filter by type (Image/Audio/Video/Other), live text search, optional grouping by shared source folder",
+        "By description (All media): type what a picture, a clip or a sound is of - \"rain on a window\", \"a crowd cheering\" - and the library is listed closest first, by what's in the files, not their names. More like this lists what looks or sounds nearest one asset",
         "By folder view: every asset bucketed by the folder it was added from, with Expand all / Collapse all",
         "Projects view: named lists that link into the shared library; Add from library picks existing assets with a search",
         "Preview shows images, decoded audio waveforms (click or drag to seek, Space to play) and video with a scrub bar; missing files are flagged",
         "Imports selected assets (or a whole folder as a new sub-bin) into the open project's Media Pool in one click",
         "Find it / Moved it? re-points an asset whose file moved, without losing its project links"
-      ]
+      ],
+      "notes": "By description runs a model on this computer (EmbeddingGemma 2 in Buddy's own llama.cpp), set up once from the page: a download of about 885 MB. Nothing is uploaded. The library is indexed in the background; stills are read directly, footage and compressed sound need ffmpeg installed (plain WAV files don't). [[win:On a PC with a graphics card of its own the model can run on the card - a further 32 MB download offered on the page.]]"
+    },
+    "footage_search": {
+      "name": "Footage Search",
+      "summary": "Find a shot in the Media Pool by describing it, and get footage suggested for each line of a transcript.",
+      "needs_resolve": true,
+      "capabilities": [
+        "Index the open project's Media Pool footage and stills: a frame every couple of seconds is looked at, on this computer",
+        "Search: type what the shot shows - \"a drone shot over water\", \"two people shaking hands\" - and get the nearest moments, each with its clip, the time into it and the frame",
+        "Find in Media Pool opens the clip's bin in Resolve and selects the clip",
+        "Place puts five seconds of the clip, from the moment found, on the timeline at the playhead - picture only, on a track above V1 that's free there, or a new one",
+        "B-roll: reads the latest transcript Subtitles made and suggests three moments of footage for each line; Place puts one over its line",
+        "A clip is indexed once, by its file: it's found again in any project that uses the same file, and re-read only if the file changes",
+        "The folder button keeps the open project's index in a folder you choose (the job's folder on the media drive) instead of Buddy's own: one file that travels with the job, and on another computer or drive letter its entries are taken over for the same files"
+      ],
+      "notes": "Runs a model on this computer (EmbeddingGemma 2 in Buddy's own llama.cpp), set up once from the page: a download of about 885 MB. Nothing is uploaded. Reading footage needs ffmpeg installed. Camera raw formats ffmpeg can't read, image sequences and offline clips aren't indexed. It finds what a frame shows, not what's said - for words, use Subtitles. Place never moves or replaces what's already on the timeline. [[win:On a PC with a graphics card of its own it can run on the card - a further 32 MB download offered on the page, many times faster; Settings > Footage Search switches that off.]]"
     },
     "image_importer": {
       "name": "Image Importer",

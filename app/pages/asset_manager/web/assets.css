@@ -15,6 +15,19 @@
     padding: 10px 12px; border-bottom: var(--bw) solid var(--card-border);
 }
 .search { width: 200px; min-width: 120px; flex: 0 1 200px; }
+.search.wide { flex: 1 1 200px; max-width: 340px; }
+#describe[aria-pressed="true"] { color: var(--accent-text); border-color: var(--accent-text); }
+/* By description: where the model, the index or a search stands, under the toolbar. */
+.describe-bar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;
+    padding: 6px 12px; border-bottom: var(--bw) solid var(--card-border);
+    font-size: var(--fs-sm); color: var(--text-dim);
+}
+.describe-bar[hidden] { display: none; }
+.describe-bar .say { flex: 1 1 200px; min-width: 0; overflow-wrap: anywhere; }
+.describe-bar .say.bad { color: var(--danger-text); }
+.describe-bar .chip { max-width: 100%; }
+.describe-bar .chip .x { border: 0; background: none; padding: 0 0 0 4px; cursor: pointer; color: inherit; font: inherit; }
 .project-select { min-width: 160px; max-width: 260px; cursor: pointer; }
 .segmented button { padding-left: 10px; padding-right: 10px; }
 

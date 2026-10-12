@@ -15,13 +15,21 @@ Also: drag files or folders straight in, thumbnails of images in the
 preview, a waveform you can click and drag to seek, video with a scrub bar,
 projects created and renamed in place, and Add from library with search.
 
+All media's search finds by name - or, with By description on, by what's
+typed describing the picture, footage or sound itself (core/media_search:
+a model on this computer, set up once from the page). The library is put in
+its index in the background, new assets as they're added; More like this
+finds what's nearest an asset. The list is then the closest first, not sorted.
+
 Protocol:
     to the view    state, list, projects, preview, frame, waveform, media,
-                   playhead, playing, available, log, alert, toast
+                   playhead, playing, available, log, alert, toast, describe
     from the view  view, sort, filter, project, select, add_files,
                    add_folder, import_selected, locate, open_folder, refresh,
                    remove, new_project, rename_project, delete_project,
-                   list_available, link_existing, play, seek, volume
+                   list_available, link_existing, play, seek, volume,
+                   describe, describe_setup, describe_cancel, describe_index,
+                   describe_stop, similar
 """
 
 from __future__ import annotations
@@ -36,6 +44,10 @@ from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QFileDialog
 
 from core.i18n import tr, tr_filter
+from core.media_search import extract as search_extract
+from core.media_search import model as search_model
+from core.media_search import store as search_store
+from core.media_search_ui import MediaSearch
 from core.resolve_bridge import ResolveConnectionError
 from core.web_page import WebToolPage
 
@@ -51,6 +63,8 @@ SCAN_COVER_MS = 200       # ... and the busy overlay goes up after this long
 # Chromium draws these straight from the file; anything else (TIFF) is
 # sent as a scaled copy.
 WEB_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".bmp"}
+FOUND_LIMIT = 60          # by description: this many at most, closest first...
+FOUND_WITHIN = 0.08       # ... and none this much less like it than the closest
 
 
 class AssetManagerPage(AssetSettingsMixin, WebToolPage):
@@ -69,6 +83,12 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         self.list_view = "all"
         self.sorts = {v: {"column": library_view.SORT_NAME, "reverse": False} for v in VIEWS}
         self.filter = {"category": "All", "search": ""}
+        self.describe = bool(self.settings.get("search_by_description", False))
+        self.similar = None         # the asset others are being found like
+        self._found = None          # asset ids by description, closest first - None: the list as it is
+        self._finding = False
+        self._counted = None        # (assets in the index, assets waiting), until the library or the index changes
+        self._was_ready = self._was_indexing = False
         self.project_id = None
         self._nodes = []
         self._preview_id = None
@@ -84,6 +104,8 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         self.media.position.connect(lambda pos, dur: self.emit("playhead", {"position": pos, "duration": dur}))
         self.media.playing.connect(lambda on: self.emit("playing", on))
         self.media.failed.connect(self._media_failed)
+        self.search = MediaSearch(self)
+        self.search.changed.connect(self._search_changed)
         self._pick_default_project()
 
     def web_ready(self):
@@ -92,10 +114,15 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         self._push_projects()
         self._push_list()
         self._show_preview(self._preview_id)
+        self._push_describe()
 
     def on_shown(self):
         # Files come and go while the page is elsewhere.
         self._push_list(recheck=True)
+        if self.describe:
+            self._counted = None            # they may have changed, too
+            self._index_library()
+            self._push_describe()
         if self._load_warnings:
             warnings, self._load_warnings = self._load_warnings, []
             self.emit("alert", {"title": self.display_name, "text": "\n\n".join(warnings)})
@@ -107,12 +134,19 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
 
     def on_app_quitting(self):
         self.media.shutdown()
+        self.search.close()
+        self.search.indexer.stop()
+
+    def working_on(self):
+        return self.search.busy() if self.describe else None
 
     # --------------------------------------------------------------- view --
 
     def _push_state(self):
+        similar = self.library.assets.get(self.similar)
         self.emit("state", {"view": self.list_view, "filter": self.filter, "categories": CATEGORIES,
-                            "sorts": self.sorts})
+                            "sorts": self.sorts, "describe": self.describe,
+                            "similar": {"id": similar["id"], "name": similar["name"]} if similar else None})
 
     def _add_log(self, text, kind="info"):
         """text: a sentence, or a list of whole sentences (each translated
@@ -143,7 +177,10 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
             project = self.projects.projects.get(self.project_id)
             return [assets[a] for a in project["asset_ids"] if a in assets] if project else []
         if self.list_view == "all":
-            return library_view.matching(assets.values(), self.filter["category"], self.filter["search"])
+            if self._found is not None:
+                return library_view.matching([assets[a] for a in self._found if a in assets], self.filter["category"])
+            return library_view.matching(assets.values(), self.filter["category"],
+                                         "" if self._describing() else self.filter["search"])
         return list(assets.values())
 
     def _exists(self, path):
@@ -164,12 +201,16 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
             self._exists_cache = {}
         sort = self.sorts[self.list_view]
         include = bool(self.settings.get("include_folders_in_sort", True))
-        self._nodes = library_view.build(
-            self._assets_for_view(), sort=sort["column"], reverse=sort["reverse"],
-            include_folders_in_sort=include,
-            always_bucket=self.list_view == "folders",
-            flat=self.list_view == "all" and not self.settings.get("group_all_media_by_folder", True),
-            exists=self._exists)
+        found = self.list_view == "all" and self._found is not None
+        if found:               # closest first, as found: not sorted, not grouped
+            self._nodes = [library_view.asset_row(a, self._exists) for a in self._assets_for_view()]
+        else:
+            self._nodes = library_view.build(
+                self._assets_for_view(), sort=sort["column"], reverse=sort["reverse"],
+                include_folders_in_sort=include,
+                always_bucket=self.list_view == "folders",
+                flat=self.list_view == "all" and not self.settings.get("group_all_media_by_folder", True),
+                exists=self._exists)
         rows = [n for node in self._nodes for n in (node["children"] if node["type"] == "folder" else [node])]
         reveal_ids = set(reveal)              # once: in the comprehension it was made again for every row
         self.emit("list", {
@@ -180,7 +221,125 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
             "library_total": len(self.library.assets),
             "project": self.project_id if self.list_view == "projects" else None,
             "reveal": [r["id"] for r in rows if r["id"] in reveal_ids],
+            "found": found,
         })
+
+    # ---------------------------------------------- search by description --
+
+    def _describing(self):
+        """All media is being searched by description: on, and set up."""
+        return self.describe and self.search.state()["ready"]
+
+    def _library_paths(self):
+        """{the index's name for a file: asset id} for every asset that can
+        be found by description: a picture, footage or sound whose file is there."""
+        return {search_store.key(a["path"]): a["id"] for a in self.library.assets.values()
+                if search_extract.kind_of(a["path"]) and self._exists(a["path"])}
+
+    def _counts(self, fresh=False):
+        """(assets in the index, assets still to go in). Asking looks at
+        every file, so the answer is kept until something changes (fresh) -
+        not asked again at each step of the index filling, when the page
+        shows how far that is instead."""
+        if self._counted is None or fresh:
+            states = list(self.search.store.state(list(self._library_paths())).values())
+            self._counted = (states.count("done"), states.count("new"))
+        return self._counted
+
+    def _push_describe(self):
+        state = self.search.state()
+        indexed, waiting = self._counts() if self.describe and state["ready"] else (0, 0)
+        self.emit("describe", {**state, "on": self.describe, "indexed": indexed, "waiting": waiting,
+                               "library": indexed + waiting, "finding": self._finding})
+
+    def _index_library(self):
+        if self._describing():
+            self.search.index(list(self._library_paths()))
+
+    def _search_changed(self):
+        """Set up or the index moved on."""
+        state = self.search.state()
+        ready, indexing = state["ready"], state["index"]["running"]
+        if self.describe and ready and not self._was_ready:
+            self._index_library()                   # just set up: the library goes in
+            indexing = self.search.indexer.status()["running"]
+        ended = self._was_indexing and not indexing
+        self._was_ready, self._was_indexing = ready, indexing
+        if ended:
+            self._counts(fresh=True)
+            self._find()                            # more can be found now
+        self._push_describe()
+
+    def _find(self):
+        """All media's list by description - what's typed, or like `similar` -
+        looked up off this thread; the list is redrawn when it's back."""
+        query = self.filter["search"].strip()
+        similar = self.library.assets.get(self.similar)
+        if not self._describing() or not (query or similar):
+            self.search.forget_find()
+            self._found, self._finding = None, False
+            return
+        category = self.filter["category"]
+        paths = {k: i for k, i in self._library_paths().items()
+                 if i != self.similar and (category == "All" or self.library.assets[i].get("category") == category)}
+        store = self.search.store
+
+        def look():
+            vector = store.vector_of(similar["path"]) if similar else search_model.embed_texts([query])[0]
+            return [] if vector is None else store.search(vector, paths=list(paths), limit=FOUND_LIMIT)
+
+        def done(hits, error):
+            self._finding = False
+            if error is not None:
+                self._add_log(str(error), "error")
+                hits = []
+            self._found = [paths[h.path] for h in hits if h.score >= hits[0].score - FOUND_WITHIN and h.path in paths]
+            self._push_list()
+            self._push_describe()
+
+        self._finding = True
+        self.search.find(look, done)
+        self._push_describe()
+
+    def on_describe(self, payload):
+        self.describe = bool((payload or {}).get("on"))
+        self.settings["search_by_description"] = self.describe
+        self.settings.save()
+        if not self.describe:
+            self.similar = None
+        self._was_ready = self.search.state()["ready"]
+        self._index_library()
+        self._find()
+        self._push_state()
+        self._push_list()
+        self._push_describe()
+
+    def on_describe_setup(self, _payload):
+        self.search.set_up(self)
+
+    def on_describe_cancel(self, _payload):
+        self.search.cancel_set_up()
+
+    def on_describe_index(self, _payload):
+        self._exists_cache = {}
+        self._counted = None
+        self._index_library()
+        self._push_describe()
+
+    def on_describe_stop(self, _payload):
+        self.search.indexer.stop()
+
+    def on_similar(self, payload):
+        """More like this: the list becomes what's nearest an asset - or,
+        with no id, goes back to what's typed."""
+        asset_id = (payload or {}).get("id")
+        self.similar = asset_id if asset_id in self.library.assets and self._describing() else None
+        if self.similar:
+            self.list_view = "all"
+            self.filter = {"category": "All", "search": ""}
+        self._find()
+        self._push_state()
+        self._push_list()
 
     # --------------------------------------------------------- navigation --
 
@@ -208,6 +367,9 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         category = payload.get("category", self.filter["category"])
         self.filter = {"category": category if category in CATEGORIES else "All",
                        "search": str(payload.get("search", self.filter["search"]))[:200]}
+        if "search" in payload and self.filter["search"].strip():
+            self.similar = None             # typing again: no longer "like that one"
+        self._find()
         self._push_state()   # the page highlights the type chosen from this
         self._push_list()
 
@@ -312,13 +474,20 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         self._add_log(parts, "success" if added or linked else "info")
         self._push_projects()
         self._push_list(reveal=touched)
+        if added and self.describe:
+            self._index_library()
+            self._counts(fresh=True)
+            self._push_describe()
 
     def _hidden_by_filter(self, asset_ids):
         """How many of these the All media view's type and search leave out."""
         if self.list_view != "all":
             return 0
         assets = [self.library.assets[a] for a in dict.fromkeys(asset_ids) if a in self.library.assets]
-        shown = library_view.matching(assets, self.filter["category"], self.filter["search"])
+        if self._found is not None:
+            return sum(1 for a in assets if a["id"] not in self._found)
+        shown = library_view.matching(assets, self.filter["category"],
+                                      "" if self._describing() else self.filter["search"])
         return len(assets) - len(shown)
 
     @staticmethod
@@ -438,6 +607,7 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         if path:
             self.library.update_path(asset["id"], os.path.normpath(path))
             self.library.save()
+            self._counted = None
             self._add_log(f"Pointed '{asset['name']}' at its new location.", "success")
             self._push_list()
             self._show_preview(asset["id"])
@@ -481,6 +651,11 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
                 self.projects.unlink_asset_everywhere(asset_id)
             self.library.save()
             self.projects.save()
+            if self.similar in ids:
+                self.similar = None
+                self._find()
+                self._push_state()
+            self._counted = None
             self._add_log("Removed 1 asset from the library." if len(ids) == 1
                           else f"Removed {len(ids)} assets from the library.")
         if self._preview_id in ids:

@@ -1,6 +1,8 @@
 """Asset Manager: the list rules (library_view, no Qt), the web page against
 a library in a temp folder - never the real ~/.asset_manager - with a fake
-Media Pool, and the preview's waveform decoded from a generated WAV."""
+Media Pool, and the preview's waveform decoded from a generated WAV. Search
+by description runs against an index in the temp folder, with the model
+stood in for: nothing is downloaded or run."""
 
 import math
 import os
@@ -165,6 +167,21 @@ class PageTests(unittest.TestCase):
             patch = mock.patch.object(dm, name, value)
             patch.start()
             self.addCleanup(patch.stop)
+        # Search by description's index, in the temp folder too; no model.
+        from core.media_search import indexer, model
+        from core.media_search import store as search_store
+        self.search_store = search_store.Store(os.path.join(self._tmp.name, "index.sqlite"), model=model.NAME)
+        self.index = indexer.Indexer(self.search_store, ffmpeg=lambda: None)
+        self.model_ready = False
+        for target, name, value in (
+                (indexer, "_SHARED", self.index), (model, "supported", lambda: True),
+                (model, "ready", lambda: (self.model_ready, "" if self.model_ready else "Not set up.")),
+                (model, "missing", lambda: [] if self.model_ready else [type("D", (), {"size": 885_000_000})()]),
+                (model, "extras", lambda: []), (model, "gpu", lambda: ""),
+                (model, "embed_texts", lambda texts, timeout=0: [self.vector_for(t) for t in texts])):
+            patch = mock.patch.object(target, name, value)
+            patch.start()
+            self.addCleanup(patch.stop)
         from pages.asset_manager.page import AssetManagerPage
         self.host = Host()
         self.page = AssetManagerPage(self.host)
@@ -185,6 +202,102 @@ class PageTests(unittest.TestCase):
 
     def last(self, name):
         return [p for n, p in self.events if n == name][-1]
+
+    # ------------------------------------------- search by description --
+
+    @staticmethod
+    def vector(*head):
+        from core.media_search import store as search_store
+        return list(head) + [0.0] * (search_store.DIM - len(head))
+
+    def vector_for(self, text):
+        """What the stand-in model makes of a description: drums, strings or a logo."""
+        return self.vector(*((1, 0, 0) if "drum" in text else (0, 1, 0) if "string" in text else (0, 0, 1)))
+
+    def described(self):
+        """The three media files in the library and in the index - one.wav
+        drums, two.wav drums with some strings, logo.png a logo - with the
+        model 'set up' and By description on."""
+        from core.media_search import store as search_store
+        self.page.on_files_dropped([self.media])
+        one, two, logo = self.files[:3]
+        self.search_store.put(one, "audio", [search_store.Piece(search_store.KIND_SOUND, self.vector(1, 0, 0), 0, 1)])
+        self.search_store.put(two, "audio", [search_store.Piece(search_store.KIND_SOUND, self.vector(0.95, 0.31, 0), 0, 1)])
+        self.search_store.put(logo, "image", [search_store.Piece(search_store.KIND_IMAGE, self.vector(0, 0, 1))])
+        self.model_ready = True
+        self.page.on_describe({"on": True})
+
+    def found(self):
+        """The list's names once the search under way is back."""
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline and (self.page._finding or self.page._found is None):
+            self.app.processEvents()
+            time.sleep(0.01)
+        listing = self.last("list")
+        self.assertTrue(listing["found"])
+        return [n["name"] for n in listing["nodes"]]
+
+    def test_search_is_by_name_until_by_description_is_switched_on(self):
+        self.page.on_files_dropped([self.media])
+        self.page.on_filter({"search": "two"})
+        self.assertFalse(self.last("state")["describe"])
+        listing = self.last("list")
+        self.assertEqual((listing["total"], listing["found"]), (1, False))
+
+    def test_switched_on_before_set_up_it_says_what_set_up_downloads_and_still_searches_names(self):
+        self.page.on_files_dropped([self.media])
+        self.page.on_describe({"on": True})
+        shown = self.last("describe")
+        self.assertEqual((shown["on"], shown["ready"], shown["download_mb"]), (True, False, 885))
+        self.assertTrue(self.host.tool["search_by_description"])            # kept for next time
+        self.page.on_filter({"search": "logo"})
+        self.assertEqual((self.last("list")["total"], self.last("list")["found"]), (1, False))
+
+    def test_a_description_lists_the_closest_first_whatever_the_names(self):
+        self.described()
+        shown = self.last("describe")
+        self.assertEqual((shown["ready"], shown["indexed"], shown["waiting"], shown["library"]), (True, 3, 0, 3))
+        self.page.on_filter({"search": "a drum roll"})
+        self.assertEqual(self.found(), ["one.wav", "two.wav"])              # the logo is nothing like it: left out
+        self.page.on_filter({"search": "slow strings"})
+        self.assertEqual(self.found(), ["two.wav"])
+        self.page.on_filter({"search": "a drum roll", "category": "Image"})
+        self.assertEqual(self.found(), ["logo.png"])                        # only pictures: the closest there is
+        self.page.on_filter({"search": "", "category": "All"})
+        self.assertFalse(self.last("list")["found"])                        # nothing typed: the library as it is
+        self.assertEqual(self.last("list")["total"], 3)
+
+    def test_more_like_this_lists_what_is_nearest_an_asset(self):
+        self.described()
+        ids = {a["name"]: a["id"] for a in self.page.library.assets.values()}
+        self.page.on_similar({"id": ids["one.wav"]})
+        self.assertEqual(self.last("state")["similar"], {"id": ids["one.wav"], "name": "one.wav"})
+        self.assertEqual(self.found(), ["two.wav"])                         # not itself, and not the logo
+        self.page.on_filter({"search": "slow strings"})                     # typing again leaves "like that one"
+        self.assertIsNone(self.last("state")["similar"])
+        self.assertEqual(self.found(), ["two.wav"])
+        self.page.on_similar({"id": None})
+        self.assertIsNone(self.page.similar)
+
+    def test_new_assets_are_queued_for_the_index_and_other_files_never_wait(self):
+        self.described()
+        extra = os.path.join(self.media, "Music", "three.wav")
+        make_wav(extra)
+        notes = os.path.join(self.media, "notes.txt")
+        with mock.patch.object(self.index, "add", return_value=1) as add:
+            self.page._add_paths([extra, notes])                            # as Add files… with All files would
+        queued = add.call_args[0][0]
+        self.assertIn(os.path.normcase(extra), queued)
+        self.assertNotIn(os.path.normcase(notes), queued)                   # not media: never "waiting"
+        self.assertEqual(self.last("describe")["waiting"], 1)
+
+    def test_switching_it_off_goes_back_to_names(self):
+        self.described()
+        self.page.on_filter({"search": "a drum roll"})
+        self.found()
+        self.page.on_describe({"on": False})
+        listing = self.last("list")
+        self.assertEqual((listing["found"], listing["total"]), (False, 0))  # no name has "a drum roll" in it
 
     def test_drop_a_folder_then_import_it_as_a_bin(self):
         self.page.on_files_dropped([self.media])

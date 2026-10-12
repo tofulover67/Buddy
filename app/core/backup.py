@@ -51,6 +51,7 @@ SKIP_IN_BUDDY = {
     "generative/venv", "generative/models", "generative/gpu", "generative/work",
     "ask_buddy/llama.cpp", "ask_buddy/models",
     "audio_assistant/peaks", "audio_assistant/renders", "audit/renders",
+    "media_search",                                 # the search index: made again from the files
     "model_folders.json",                           # drives this PC has
     "crash.log", "crash_trail.log", PENDING, BEFORE,
     # In the tools' folders (core/tool_dirs.py): an account's keys, and backups of their own.

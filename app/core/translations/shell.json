@@ -4679,5 +4679,25 @@
   "中文": "不包括：模型和 AI 引擎（会重新下载）、Web 的登录和浏览数据，以及你的 Buddy Network 账户（账户 › 迁移到另一台电脑 可迁移）。你的 AI 服务商 API 密钥按输入原样包含在内——请把文件放在私密的地方。",
   "العربية": "لا يشمل: النماذج ومحركات الذكاء الاصطناعي (تُنزّل من جديد)، وتسجيلات الدخول وبيانات التصفح في Web، وحساب Buddy Network (الحساب › الانتقال إلى كمبيوتر آخر ينقله). مفاتيح API لمزودي الذكاء الاصطناعي موجودة فيه كما كتبتها – احفظ الملف في مكان خاص.",
   "Tiếng Việt": "Không gồm: mô hình và engine AI (sẽ tải lại), đăng nhập và dữ liệu duyệt web của Web, và tài khoản Buddy Network (Tài khoản › Chuyển sang PC khác để chuyển nó). Khóa API của các nhà cung cấp AI nằm trong đó đúng như bạn đã nhập – hãy cất tệp ở nơi riêng tư."
+ },
+ "Footage Search": {
+  "日本語": "映像検索",
+  "Español": "Búsqueda de metraje",
+  "Deutsch": "Materialsuche",
+  "Français": "Recherche de rushes",
+  "한국어": "영상 검색",
+  "中文": "视频素材搜索",
+  "العربية": "البحث في اللقطات",
+  "Tiếng Việt": "Tìm cảnh quay"
+ },
+ "The index of the pictures, footage and sound Buddy has looked at": {
+  "日本語": "Buddy が確認した画像・映像・音のインデックス",
+  "Español": "El índice de las imágenes, el metraje y los sonidos que Buddy ha examinado",
+  "Deutsch": "Der Index der Bilder, des Materials und der Töne, die Buddy angesehen hat",
+  "Français": "L'index des images, des rushes et des sons que Buddy a examinés",
+  "한국어": "Buddy가 살펴본 그림, 영상, 소리의 색인",
+  "中文": "Buddy 已查看过的图片、视频素材和声音的索引",
+  "العربية": "فهرس الصور واللقطات والأصوات التي فحصها Buddy",
+  "Tiếng Việt": "Chỉ mục hình ảnh, cảnh quay và âm thanh mà Buddy đã xem"
  }
 }

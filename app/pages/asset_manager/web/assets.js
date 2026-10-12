@@ -9,8 +9,9 @@
 const $ = id => document.getElementById(id);
 const {el, icon, send} = Buddy;
 
-let state = {view: "all", filter: {category: "All", search: ""}, categories: [], sorts: {}};
-let list = {nodes: [], total: 0, missing: 0, library_total: 0};
+let state = {view: "all", filter: {category: "All", search: ""}, categories: [], sorts: {}, describe: false, similar: null};
+let list = {nodes: [], total: 0, missing: 0, library_total: 0, found: false};
+let describe = null;         // By description: the model, the index and a search under way (Python's "describe")
 let projects = {current: null, items: []};
 let preview = null;          // the asset shown, or {multi: n}
 let media = {id: null, kind: null, bars: [], progress: 0, position: 0, duration: 0, playing: false, frame: null, failed: null};
@@ -25,6 +26,7 @@ const fmtTime = ms => {
 };
 
 $("refresh").append(icon("refresh"));
+$("describe").append(icon("spark"));
 $("play").append(icon("play"));
 for (const b of document.querySelectorAll("[data-action]")) b.addEventListener("click", () => send(b.dataset.action));
 for (const b of document.querySelectorAll(".views [data-view]")) {
@@ -36,8 +38,46 @@ for (const b of document.querySelectorAll(".views [data-view]")) {
 let searchTimer = 0;
 $("search").addEventListener("input", () => {
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => send("filter", {search: $("search").value}), 150);
+    // A description is looked up by a model: not at every letter.
+    searchTimer = setTimeout(() => send("filter", {search: $("search").value}), state.describe ? 450 : 150);
 });
+$("describe").onclick = () => { clearSelection(); send("describe", {on: !state.describe}); };
+
+/* By description's strip: what's needed before it works, how far the index
+   is, and what the list is showing. */
+function drawDescribe() {
+    const bar = $("describe-bar"), d = describe;
+    bar.hidden = !(state.view === "all" && state.describe && d);
+    if (bar.hidden) return;
+    const say = (text, bad) => el(`span.say${bad ? ".bad" : ""}`, {text});
+    const button = (text, message, kind) => el(`button.btn${kind || ".ghost"}`, {type: "button", text, onclick: () => send(message)});
+    const parts = [];
+    if (state.similar) {
+        parts.push(el("span.chip", {}, [el("span", {text: "Like"}), " ", el("span", {text: state.similar.name, translate: "no"}),
+            el("button.x", {type: "button", "aria-label": "Clear", text: "×", onclick: () => send("similar", {id: null})})]));
+    }
+    const i = d.index;
+    if (!d.supported) parts.push(say(d.why, true));
+    else if (d.setting_up) parts.push(say(d.setup_text || "Setting up…"), button("Cancel", "describe_cancel"));
+    else if (!d.ready) {
+        parts.push(say(d.setup_error || `Describe what you're looking for and Buddy finds the pictures, footage and sounds that match. It needs a model that runs on this computer – a one-time download of ${d.download_mb} MB.`, !!d.setup_error),
+                   button("Set up…", "describe_setup", ".accent"));
+    } else if (i.running) {
+        parts.push(say(i.total > 1 ? `Getting your library ready to search: ${i.done} of ${i.total} – ${i.current}`
+                                   : `Getting your library ready to search – ${i.current}`), button("Stop", "describe_stop"));
+    } else if (i.error) parts.push(say(i.error, true), button("Try again", "describe_index"));
+    else if (d.finding) parts.push(say("Searching…"));
+    else {
+        let text = list.found ? "Closest first." : d.waiting
+            ? `${d.indexed} of ${d.library} assets can be found by description.`
+            : "Type what you're looking for – “rain on a window”, “a crowd cheering”.";
+        if (d.waiting && !d.ffmpeg) text = `${d.indexed} of ${d.library} assets can be found by description. Footage and most sound files need ffmpeg installed to be read.`;
+        parts.push(say(text));
+        if (d.waiting && d.ffmpeg) parts.push(button("Index the rest", "describe_index"));
+        if (d.faster_mb) parts.push(button(`Use the graphics card (${d.faster_mb} MB)`, "describe_setup"));
+    }
+    bar.replaceChildren(...parts);
+}
 $("expand-all").onclick = () => { for (const n of list.nodes) if (n.type === "folder") expanded.add(n.path); drawList(); };
 $("collapse-all").onclick = () => { expanded.clear(); drawList(); };
 $("project-select").onchange = e => { clearSelection(); send("project", {id: e.target.value}); };
@@ -74,6 +114,10 @@ function drawToolbar() {
     }
     for (const b of cats.querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.cat === state.filter.category));
     if (document.activeElement !== $("search")) $("search").value = state.filter.search;
+    $("describe").setAttribute("aria-pressed", String(!!state.describe));
+    $("search").placeholder = state.describe ? "Describe what you're looking for" : "Search names";
+    $("search").classList.toggle("wide", !!state.describe);
+    drawDescribe();
     const sel = $("project-select");
     sel.replaceChildren(...(projects.items.length
         ? projects.items.map(p => el("option", {value: p.id, text: `${p.name}  (${p.count})`, translate: "no", selected: p.id === projects.current}))
@@ -148,6 +192,7 @@ function clickRow(e, key) {
 }
 
 function sortHeader(label, column, cls) {
+    if (list.found) return el(`th.${cls}`, {text: label});      // closest first: not sorted
     const sort = state.sorts[state.view] || {};
     const active = sort.column === column;
     return el(`th.${cls}.sortable`, {onclick: () => send("sort", {column}), title: `Sort by ${label.toLowerCase()}`},
@@ -170,6 +215,10 @@ function emptyList() {
             el("div.small", {text: "Drag in the music, sound effects, logos and footage you reuse – or add them."}),
             el("div.row", {}, [el("button.btn.accent", {text: "Add files…", onclick: () => send("add_files")}),
                                el("button.btn", {text: "Add folder…", onclick: () => send("add_folder")})])]);
+    }
+    if (list.found) {
+        return el("div.empty", {}, [el("div.strong", {text: "Nothing like that yet"}),
+            el("div.small", {text: "Only assets Buddy has already looked at can be found by description."})]);
     }
     return el("div.empty", {}, [el("div.strong", {text: "Nothing matches"}),
         el("div.small", {text: "Try another type, or a different search."})]);
@@ -442,6 +491,9 @@ function drawInfo() {
         p.missing ? el("button.btn.accent", {type: "button", text: "Find it…", onclick: () => send("locate", {id: p.id})}) : null,
         el("button.btn", {type: "button", text: "Open folder", disabled: p.missing, onclick: () => send("open_folder", {id: p.id})}),
         !p.missing ? el("button.btn.ghost", {type: "button", text: "Moved it?", title: "Point this asset at a different file", onclick: () => send("locate", {id: p.id})}) : null,
+        !p.missing && state.describe && describe && describe.ready
+            ? el("button.btn.ghost", {type: "button", text: "More like this", title: "Find assets that look or sound like this one",
+                                      onclick: () => { clearSelection(); send("similar", {id: p.id}); }}) : null,
     ].filter(Boolean));
 }
 
@@ -474,7 +526,8 @@ function availableDialog(d) {
     });
 }
 
-Buddy.on("state", s => { state = s; drawToolbar(); drawFooter(); });
+Buddy.on("state", s => { const was = state.describe; state = s; drawToolbar(); drawFooter(); if (was !== s.describe) drawInfo(); });
+Buddy.on("describe", d => { const was = describe && describe.ready; describe = d; drawDescribe(); if (was !== d.ready) drawInfo(); });
 Buddy.on("projects", p => { projects = p; drawToolbar(); });
 Buddy.on("list", l => {
     list = l;
@@ -490,6 +543,7 @@ Buddy.on("list", l => {
     for (const n of l.nodes) if (n.type === "folder" && n.children.some(c => reveal.has(c.id))) expanded.add(n.path);
     drawList([...reveal]);
     drawFooter();
+    drawDescribe();
 });
 Buddy.on("preview", p => {
     preview = p;

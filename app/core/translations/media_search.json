@@ -1,0 +1,203 @@
+{
+ "_comment": "Media search. English -> each language; see core/i18n.py.",
+ "Set up search by description": {
+  "日本語": "説明での検索をセットアップ",
+  "Español": "Configurar la búsqueda por descripción",
+  "Deutsch": "Suche nach Beschreibung einrichten",
+  "Français": "Installer la recherche par description",
+  "한국어": "설명으로 검색 설정하기",
+  "中文": "设置按描述搜索",
+  "العربية": "إعداد البحث بالوصف",
+  "Tiếng Việt": "Thiết lập tìm theo mô tả"
+ },
+ "• The part of EmbeddingGemma 2 that reads pictures and sound, {mb} MB – from huggingface.co/ggml-org, checked against its published checksum. Apache 2.0 licence.": {
+  "日本語": "• EmbeddingGemma 2 の画像と音声を読み取る部分、{mb} MB – huggingface.co/ggml-org から取得し、公開されているチェックサムと照合します。Apache 2.0 ライセンス。",
+  "Español": "• La parte de EmbeddingGemma 2 que lee imágenes y sonido, {mb} MB – de huggingface.co/ggml-org, comprobada con su suma de verificación publicada. Licencia Apache 2.0.",
+  "Deutsch": "• Der Teil von EmbeddingGemma 2, der Bilder und Ton liest, {mb} MB – von huggingface.co/ggml-org, mit der veröffentlichten Prüfsumme abgeglichen. Apache-2.0-Lizenz.",
+  "Français": "• La partie d'EmbeddingGemma 2 qui lit les images et le son, {mb} Mo – depuis huggingface.co/ggml-org, vérifiée avec sa somme de contrôle publiée. Licence Apache 2.0.",
+  "한국어": "• EmbeddingGemma 2에서 그림과 소리를 읽는 부분, {mb} MB – huggingface.co/ggml-org에서 받아 공개된 체크섬과 대조합니다. Apache 2.0 라이선스.",
+  "中文": "• EmbeddingGemma 2 中读取图像和声音的部分，{mb} MB – 来自 huggingface.co/ggml-org，已与其公布的校验和核对。Apache 2.0 许可。",
+  "العربية": "• الجزء من EmbeddingGemma 2 الذي يقرأ الصور والصوت، {mb} MB – من huggingface.co/ggml-org، ويُتحقق منه بمجموع التحقق المنشور. رخصة Apache 2.0.",
+  "Tiếng Việt": "• Phần của EmbeddingGemma 2 đọc hình ảnh và âm thanh, {mb} MB – từ huggingface.co/ggml-org, được đối chiếu với mã kiểm tra đã công bố. Giấy phép Apache 2.0."
+ },
+ "• EmbeddingGemma 2, {mb} MB – Google's embedding model, from huggingface.co/ggml-org, checked against its published checksum. Apache 2.0 licence.": {
+  "日本語": "• EmbeddingGemma 2、{mb} MB – Google の埋め込みモデル。huggingface.co/ggml-org から取得し、公開されているチェックサムと照合します。Apache 2.0 ライセンス。",
+  "Español": "• EmbeddingGemma 2, {mb} MB – el modelo de embeddings de Google, de huggingface.co/ggml-org, comprobado con su suma de verificación publicada. Licencia Apache 2.0.",
+  "Deutsch": "• EmbeddingGemma 2, {mb} MB – Googles Embedding-Modell, von huggingface.co/ggml-org, mit der veröffentlichten Prüfsumme abgeglichen. Apache-2.0-Lizenz.",
+  "Français": "• EmbeddingGemma 2, {mb} Mo – le modèle d'embedding de Google, depuis huggingface.co/ggml-org, vérifié avec sa somme de contrôle publiée. Licence Apache 2.0.",
+  "한국어": "• EmbeddingGemma 2, {mb} MB – Google의 임베딩 모델. huggingface.co/ggml-org에서 받아 공개된 체크섬과 대조합니다. Apache 2.0 라이선스.",
+  "中文": "• EmbeddingGemma 2，{mb} MB – Google 的嵌入模型，来自 huggingface.co/ggml-org，已与其公布的校验和核对。Apache 2.0 许可。",
+  "العربية": "• EmbeddingGemma 2، {mb} MB – نموذج التضمين من Google، من huggingface.co/ggml-org، ويُتحقق منه بمجموع التحقق المنشور. رخصة Apache 2.0.",
+  "Tiếng Việt": "• EmbeddingGemma 2, {mb} MB – mô hình nhúng của Google, từ huggingface.co/ggml-org, được đối chiếu với mã kiểm tra đã công bố. Giấy phép Apache 2.0."
+ },
+ "It all goes in {folder}. Nothing else is installed, and the model only ever runs on this computer – your media is never uploaded.": {
+  "日本語": "すべて {folder} に保存されます。ほかには何もインストールされず、モデルはこのコンピューター上でのみ動作します – メディアがアップロードされることはありません。",
+  "Español": "Todo va en {folder}. No se instala nada más, y el modelo solo se ejecuta en este ordenador: tus medios nunca se suben.",
+  "Deutsch": "Alles kommt nach {folder}. Sonst wird nichts installiert, und das Modell läuft nur auf diesem Computer – Ihre Medien werden nie hochgeladen.",
+  "Français": "Tout va dans {folder}. Rien d'autre n'est installé, et le modèle ne s'exécute que sur cet ordinateur – vos médias ne sont jamais envoyés.",
+  "한국어": "모두 {folder}에 저장됩니다. 그 밖에는 아무것도 설치되지 않으며, 모델은 이 컴퓨터에서만 실행됩니다 – 미디어는 절대 업로드되지 않습니다.",
+  "中文": "全部保存在 {folder}。不会安装其他任何内容，模型只在这台电脑上运行 – 您的媒体绝不会被上传。",
+  "العربية": "كل ذلك يُحفظ في {folder}. لا يُثبَّت أي شيء آخر، ولا يعمل النموذج إلا على هذا الحاسوب – ولا تُرفع وسائطك أبدًا.",
+  "Tiếng Việt": "Tất cả nằm trong {folder}. Không cài thêm gì khác, và mô hình chỉ chạy trên máy tính này – phương tiện của bạn không bao giờ bị tải lên."
+ },
+ "There's no llama.cpp build for this computer, so searching by description can't run here.": {
+  "日本語": "このコンピューター用の llama.cpp ビルドがないため、説明での検索はここでは動作しません。",
+  "Español": "No hay una versión de llama.cpp para este ordenador, así que la búsqueda por descripción no puede funcionar aquí.",
+  "Deutsch": "Für diesen Computer gibt es keinen llama.cpp-Build, daher kann die Suche nach Beschreibung hier nicht laufen.",
+  "Français": "Il n'existe pas de version de llama.cpp pour cet ordinateur, la recherche par description ne peut donc pas fonctionner ici.",
+  "한국어": "이 컴퓨터용 llama.cpp 빌드가 없어서 설명으로 검색을 여기서 실행할 수 없습니다.",
+  "中文": "没有适用于这台电脑的 llama.cpp 版本，因此按描述搜索无法在此运行。",
+  "العربية": "لا توجد نسخة من llama.cpp لهذا الحاسوب، لذا لا يمكن تشغيل البحث بالوصف هنا.",
+  "Tiếng Việt": "Không có bản llama.cpp cho máy tính này, nên tìm theo mô tả không chạy được ở đây."
+ },
+ "Searching by description isn't set up yet.": {
+  "日本語": "説明での検索はまだセットアップされていません。",
+  "Español": "La búsqueda por descripción aún no está configurada.",
+  "Deutsch": "Die Suche nach Beschreibung ist noch nicht eingerichtet.",
+  "Français": "La recherche par description n'est pas encore installée.",
+  "한국어": "설명으로 검색이 아직 설정되지 않았습니다.",
+  "中文": "按描述搜索尚未设置。",
+  "العربية": "لم يُعدّ البحث بالوصف بعد.",
+  "Tiếng Việt": "Tìm theo mô tả chưa được thiết lập."
+ },
+ "Downloading EmbeddingGemma 2's picture and sound half… {done} of {total} MB": {
+  "日本語": "EmbeddingGemma 2 の画像・音声部分をダウンロード中… {done} / {total} MB",
+  "Español": "Descargando la parte de imagen y sonido de EmbeddingGemma 2… {done} de {total} MB",
+  "Deutsch": "Der Bild- und Tonteil von EmbeddingGemma 2 wird heruntergeladen … {done} von {total} MB",
+  "Français": "Téléchargement de la partie image et son d'EmbeddingGemma 2… {done} sur {total} Mo",
+  "한국어": "EmbeddingGemma 2의 그림·소리 부분 내려받는 중… {done} / {total} MB",
+  "中文": "正在下载 EmbeddingGemma 2 的图像和声音部分… {done} / {total} MB",
+  "العربية": "جارٍ تنزيل جزء الصور والصوت من EmbeddingGemma 2… {done} من {total} MB",
+  "Tiếng Việt": "Đang tải phần hình ảnh và âm thanh của EmbeddingGemma 2… {done} / {total} MB"
+ },
+ "Setting up search": {
+  "日本語": "検索をセットアップ中",
+  "Español": "Configurando la búsqueda",
+  "Deutsch": "Suche wird eingerichtet",
+  "Français": "Installation de la recherche",
+  "한국어": "검색 설정 중",
+  "中文": "正在设置搜索",
+  "العربية": "جارٍ إعداد البحث",
+  "Tiếng Việt": "Đang thiết lập tìm kiếm"
+ },
+ "Indexing media": {
+  "日本語": "メディアをインデックス化中",
+  "Español": "Indexando medios",
+  "Deutsch": "Medien werden indexiert",
+  "Français": "Indexation des médias",
+  "한국어": "미디어 색인 중",
+  "中文": "正在为媒体建立索引",
+  "العربية": "جارٍ فهرسة الوسائط",
+  "Tiếng Việt": "Đang lập chỉ mục phương tiện"
+ },
+ "Use the graphics card ({mb} MB)": {
+  "日本語": "グラフィックカードを使う ({mb} MB)",
+  "Español": "Usar la tarjeta gráfica ({mb} MB)",
+  "Deutsch": "Grafikkarte verwenden ({mb} MB)",
+  "Français": "Utiliser la carte graphique ({mb} Mo)",
+  "한국어": "그래픽 카드 사용 ({mb} MB)",
+  "中文": "使用显卡 ({mb} MB)",
+  "العربية": "استخدام بطاقة الرسومات ({mb} MB)",
+  "Tiếng Việt": "Dùng card đồ họa ({mb} MB)"
+ },
+ "Running on {card}.": {
+  "日本語": "{card} で動作中。",
+  "Español": "Funcionando en {card}.",
+  "Deutsch": "Läuft auf {card}.",
+  "Français": "Fonctionne sur {card}.",
+  "한국어": "{card}에서 실행 중입니다.",
+  "中文": "正在 {card} 上运行。",
+  "العربية": "يعمل على {card}.",
+  "Tiếng Việt": "Đang chạy trên {card}."
+ },
+ "The graphics card couldn't run it, so the processor is doing the work.": {
+  "日本語": "グラフィックカードでは動かせなかったため、プロセッサーで処理しています。",
+  "Español": "La tarjeta gráfica no pudo ejecutarlo, así que el trabajo lo hace el procesador.",
+  "Deutsch": "Die Grafikkarte konnte es nicht ausführen, daher übernimmt der Prozessor die Arbeit.",
+  "Français": "La carte graphique n'a pas pu l'exécuter, c'est donc le processeur qui fait le travail.",
+  "한국어": "그래픽 카드로 실행할 수 없어 프로세서가 작업하고 있습니다.",
+  "中文": "显卡无法运行它，因此由处理器来完成。",
+  "العربية": "تعذر على بطاقة الرسومات تشغيله، لذا يقوم المعالج بالعمل.",
+  "Tiếng Việt": "Card đồ họa không chạy được, nên bộ xử lý đang làm việc này."
+ },
+ "Run search on the graphics card": {
+  "日本語": "検索をグラフィックカードで実行",
+  "Español": "Ejecutar la búsqueda en la tarjeta gráfica",
+  "Deutsch": "Suche auf der Grafikkarte ausführen",
+  "Français": "Exécuter la recherche sur la carte graphique",
+  "한국어": "그래픽 카드에서 검색 실행",
+  "中文": "在显卡上运行搜索",
+  "العربية": "تشغيل البحث على بطاقة الرسومات",
+  "Tiếng Việt": "Chạy tìm kiếm trên card đồ họa"
+ },
+ "• llama.cpp for the graphics card, {mb} MB – runs the model on your graphics card instead of the processor, several times faster. MIT licence, from the llama.cpp project's GitHub releases, checked against its published checksum. Used only if this computer has a graphics card of its own.": {
+  "日本語": "• グラフィックカード用の llama.cpp、{mb} MB – モデルをプロセッサーではなくグラフィックカードで実行し、数倍速くなります。MIT ライセンス。llama.cpp プロジェクトの GitHub リリースから取得し、公開されているチェックサムと照合します。このコンピューターに独立したグラフィックカードがある場合にのみ使われます。",
+  "Español": "• llama.cpp para la tarjeta gráfica, {mb} MB – ejecuta el modelo en tu tarjeta gráfica en lugar del procesador, varias veces más rápido. Licencia MIT, de las versiones de GitHub del proyecto llama.cpp, comprobado con su suma de verificación publicada. Solo se usa si este ordenador tiene una tarjeta gráfica propia.",
+  "Deutsch": "• llama.cpp für die Grafikkarte, {mb} MB – führt das Modell auf der Grafikkarte statt auf dem Prozessor aus, um ein Mehrfaches schneller. MIT-Lizenz, aus den GitHub-Releases des llama.cpp-Projekts, mit der veröffentlichten Prüfsumme abgeglichen. Wird nur verwendet, wenn dieser Computer eine eigene Grafikkarte hat.",
+  "Français": "• llama.cpp pour la carte graphique, {mb} Mo – exécute le modèle sur votre carte graphique plutôt que sur le processeur, plusieurs fois plus vite. Licence MIT, depuis les versions GitHub du projet llama.cpp, vérifié avec sa somme de contrôle publiée. Utilisé uniquement si cet ordinateur possède une carte graphique dédiée.",
+  "한국어": "• 그래픽 카드용 llama.cpp, {mb} MB – 모델을 프로세서 대신 그래픽 카드에서 실행해 몇 배 빨라집니다. MIT 라이선스. llama.cpp 프로젝트의 GitHub 릴리스에서 받아 공개된 체크섬과 대조합니다. 이 컴퓨터에 별도의 그래픽 카드가 있을 때만 사용됩니다.",
+  "中文": "• 用于显卡的 llama.cpp，{mb} MB – 在显卡而不是处理器上运行模型，速度快数倍。MIT 许可，来自 llama.cpp 项目的 GitHub 发布页，已与其公布的校验和核对。仅当这台电脑有独立显卡时才会使用。",
+  "العربية": "• llama.cpp لبطاقة الرسومات، {mb} MB – يشغّل النموذج على بطاقة الرسومات بدل المعالج، أسرع بعدة مرات. رخصة MIT، من إصدارات مشروع llama.cpp على GitHub، ويُتحقق منه بمجموع التحقق المنشور. لا يُستخدم إلا إذا كان في هذا الحاسوب بطاقة رسومات مستقلة.",
+  "Tiếng Việt": "• llama.cpp cho card đồ họa, {mb} MB – chạy mô hình trên card đồ họa thay vì bộ xử lý, nhanh hơn nhiều lần. Giấy phép MIT, từ các bản phát hành GitHub của dự án llama.cpp, được đối chiếu với mã kiểm tra đã công bố. Chỉ dùng nếu máy tính này có card đồ họa rời."
+ },
+ "Downloading llama.cpp for the graphics card… {done} of {total} MB": {
+  "日本語": "グラフィックカード用の llama.cpp をダウンロード中… {done} / {total} MB",
+  "Español": "Descargando llama.cpp para la tarjeta gráfica… {done} de {total} MB",
+  "Deutsch": "llama.cpp für die Grafikkarte wird heruntergeladen … {done} von {total} MB",
+  "Français": "Téléchargement de llama.cpp pour la carte graphique… {done} sur {total} Mo",
+  "한국어": "그래픽 카드용 llama.cpp 내려받는 중… {done} / {total} MB",
+  "中文": "正在下载用于显卡的 llama.cpp… {done} / {total} MB",
+  "العربية": "جارٍ تنزيل llama.cpp لبطاقة الرسومات… {done} من {total} MB",
+  "Tiếng Việt": "Đang tải llama.cpp cho card đồ họa… {done} / {total} MB"
+ },
+ "Use the graphics card for search by description": {
+  "日本語": "説明での検索にグラフィックカードを使う",
+  "Español": "Usar la tarjeta gráfica para la búsqueda por descripción",
+  "Deutsch": "Grafikkarte für die Suche nach Beschreibung verwenden",
+  "Français": "Utiliser la carte graphique pour la recherche par description",
+  "한국어": "설명으로 검색에 그래픽 카드 사용",
+  "中文": "按描述搜索时使用显卡",
+  "العربية": "استخدام بطاقة الرسومات للبحث بالوصف",
+  "Tiếng Việt": "Dùng card đồ họa cho tìm theo mô tả"
+ },
+ "Several times faster than the processor, on a computer with a graphics card of its own. Switch it off if Resolve needs all of the card's memory. Asset Manager's search follows this too.": {
+  "日本語": "独立したグラフィックカードがあるコンピューターでは、プロセッサーより数倍速くなります。Resolve がカードのメモリをすべて必要とする場合はオフにしてください。アセットマネージャーの検索もこの設定に従います。",
+  "Español": "Varias veces más rápido que el procesador, en un ordenador con tarjeta gráfica propia. Desactívalo si Resolve necesita toda la memoria de la tarjeta. La búsqueda del Gestor de recursos también sigue este ajuste.",
+  "Deutsch": "Um ein Mehrfaches schneller als der Prozessor, auf einem Computer mit eigener Grafikkarte. Schalten Sie es aus, wenn Resolve den gesamten Speicher der Karte braucht. Die Suche im Asset-Manager richtet sich ebenfalls danach.",
+  "Français": "Plusieurs fois plus rapide que le processeur, sur un ordinateur doté d'une carte graphique dédiée. Désactivez-le si Resolve a besoin de toute la mémoire de la carte. La recherche du Gestionnaire de ressources suit aussi ce réglage.",
+  "한국어": "별도의 그래픽 카드가 있는 컴퓨터에서는 프로세서보다 몇 배 빠릅니다. Resolve가 카드의 메모리를 모두 써야 한다면 끄세요. 에셋 매니저의 검색도 이 설정을 따릅니다.",
+  "中文": "在有独立显卡的电脑上，比处理器快数倍。如果 Resolve 需要占用显卡的全部内存，请将其关闭。素材管理器的搜索也遵循此设置。",
+  "العربية": "أسرع من المعالج بعدة مرات على حاسوب فيه بطاقة رسومات مستقلة. أوقفه إذا احتاج Resolve إلى كامل ذاكرة البطاقة. ويتبع بحث مدير الأصول هذا الإعداد أيضًا.",
+  "Tiếng Việt": "Nhanh hơn bộ xử lý nhiều lần, trên máy tính có card đồ họa rời. Hãy tắt nếu Resolve cần toàn bộ bộ nhớ của card. Tìm kiếm của Trình quản lý tài nguyên cũng theo thiết lập này."
+ },
+ "Several times faster than the processor, on a computer with a graphics card of its own. Switch it off if Resolve needs all of the card's memory. Footage Search follows this too.": {
+  "日本語": "独立したグラフィックカードがあるコンピューターでは、プロセッサーより数倍速くなります。Resolve がカードのメモリをすべて必要とする場合はオフにしてください。映像検索もこの設定に従います。",
+  "Español": "Varias veces más rápido que el procesador, en un ordenador con tarjeta gráfica propia. Desactívalo si Resolve necesita toda la memoria de la tarjeta. La Búsqueda de metraje también sigue este ajuste.",
+  "Deutsch": "Um ein Mehrfaches schneller als der Prozessor, auf einem Computer mit eigener Grafikkarte. Schalten Sie es aus, wenn Resolve den gesamten Speicher der Karte braucht. Die Materialsuche richtet sich ebenfalls danach.",
+  "Français": "Plusieurs fois plus rapide que le processeur, sur un ordinateur doté d'une carte graphique dédiée. Désactivez-le si Resolve a besoin de toute la mémoire de la carte. La Recherche de rushes suit aussi ce réglage.",
+  "한국어": "별도의 그래픽 카드가 있는 컴퓨터에서는 프로세서보다 몇 배 빠릅니다. Resolve가 카드의 메모리를 모두 써야 한다면 끄세요. 영상 검색도 이 설정을 따릅니다.",
+  "中文": "在有独立显卡的电脑上，比处理器快数倍。如果 Resolve 需要占用显卡的全部内存，请将其关闭。视频素材搜索也遵循此设置。",
+  "العربية": "أسرع من المعالج بعدة مرات على حاسوب فيه بطاقة رسومات مستقلة. أوقفه إذا احتاج Resolve إلى كامل ذاكرة البطاقة. ويتبع «البحث في اللقطات» هذا الإعداد أيضًا.",
+  "Tiếng Việt": "Nhanh hơn bộ xử lý nhiều lần, trên máy tính có card đồ họa rời. Hãy tắt nếu Resolve cần toàn bộ bộ nhớ của card. Tìm cảnh quay cũng theo thiết lập này."
+ },
+ "Running on": {
+  "日本語": "動作中のデバイス",
+  "Español": "Funciona en",
+  "Deutsch": "Läuft auf",
+  "Français": "Fonctionne sur",
+  "한국어": "실행 장치",
+  "中文": "运行于",
+  "العربية": "يعمل على",
+  "Tiếng Việt": "Đang chạy trên"
+ },
+ "Couldn't write the index in {folder}: {error}": {
+  "日本語": "{folder} のインデックスに書き込めませんでした: {error}",
+  "Español": "No se pudo escribir el índice en {folder}: {error}",
+  "Deutsch": "Der Index in {folder} konnte nicht geschrieben werden: {error}",
+  "Français": "Impossible d'écrire l'index dans {folder} : {error}",
+  "한국어": "{folder}의 색인에 쓸 수 없습니다: {error}",
+  "中文": "无法写入 {folder} 中的索引：{error}",
+  "العربية": "تعذرت كتابة الفهرس في {folder}: {error}",
+  "Tiếng Việt": "Không thể ghi chỉ mục trong {folder}: {error}"
+ }
+}

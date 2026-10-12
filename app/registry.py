@@ -55,6 +55,7 @@ REGISTRY = [
     ("Automation", _tool("automation", "Automation", "Automation", "pages.automation.page", "AutomationPage", mac=True)),
 
     ("Media & Assets", _tool("asset_manager", "Asset Manager", "Media & Assets", "pages.asset_manager.page", "AssetManagerPage", mac=True)),
+    ("Media & Assets", _tool("footage_search", "Footage Search", "Media & Assets", "pages.footage_search.page", "FootageSearchPage")),
     ("Media & Assets", _tool("image_importer", "Image Importer", "Media & Assets", "pages.image_importer.page", "ImageImporterPage", mac=True)),
     ("Media & Assets", _tool("svg_importer", "SVG Importer", "Media & Assets", "pages.svg_importer.page", "SVGImporterPage", mac=True)),
     # Batch Clip Renamer and Media Relink, as its two tabs - both checked on a Mac.

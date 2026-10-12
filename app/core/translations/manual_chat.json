@@ -2980,16 +2980,6 @@
   "العربية": "ينقل الملف إلى سلة المحذوفات.",
   "Tiếng Việt": "Chuyển tệp vào Thùng rác."
  },
- "runs Ask Buddy's search model": {
-  "日本語": "Ask Buddy の検索モデルを動かします",
-  "Español": "ejecuta el modelo de búsqueda de Ask Buddy",
-  "Deutsch": "führt das Suchmodell von Ask Buddy aus",
-  "Français": "exécute le modèle de recherche d'Ask Buddy",
-  "한국어": "Ask Buddy의 검색 모델을 실행",
-  "中文": "运行 Ask Buddy 的搜索模型",
-  "العربية": "يشغّل نموذج البحث في Ask Buddy",
-  "Tiếng Việt": "chạy mô hình tìm kiếm của Ask Buddy"
- },
  "release {release}": {
   "日本語": "リリース {release}",
   "Español": "versión {release}",
@@ -3229,5 +3219,45 @@
   "中文": "放到别处——例如与 LM Studio 或其他应用共享的文件夹。",
   "العربية": "احفظها في مكان آخر – مثل مجلد يشاركه LM Studio أو تطبيق آخر.",
   "Tiếng Việt": "Lưu ở nơi khác – chẳng hạn thư mục dùng chung với LM Studio hoặc ứng dụng khác."
+ },
+ "runs Buddy's search models": {
+  "日本語": "Buddy の検索モデルを動かします",
+  "Español": "ejecuta los modelos de búsqueda de Buddy",
+  "Deutsch": "führt Buddys Suchmodelle aus",
+  "Français": "exécute les modèles de recherche de Buddy",
+  "한국어": "Buddy의 검색 모델을 실행",
+  "中文": "运行 Buddy 的搜索模型",
+  "العربية": "يشغّل نماذج البحث في Buddy",
+  "Tiếng Việt": "chạy các mô hình tìm kiếm của Buddy"
+ },
+ "EmbeddingGemma 2 – pictures and sound": {
+  "日本語": "EmbeddingGemma 2 – 画像と音声",
+  "Español": "EmbeddingGemma 2 – imágenes y sonido",
+  "Deutsch": "EmbeddingGemma 2 – Bilder und Ton",
+  "Français": "EmbeddingGemma 2 – images et son",
+  "한국어": "EmbeddingGemma 2 – 그림과 소리",
+  "中文": "EmbeddingGemma 2 – 图像和声音",
+  "العربية": "EmbeddingGemma 2 – الصور والصوت",
+  "Tiếng Việt": "EmbeddingGemma 2 – hình ảnh và âm thanh"
+ },
+ "{name} goes to the Recycle Bin. Asset Manager's and Footage Search's search by description need it – their Set up downloads it again.": {
+  "日本語": "{name} はごみ箱に移動します。アセットマネージャーと映像検索の「説明で検索」に必要です – それぞれのセットアップで再ダウンロードできます。",
+  "Español": "{name} irá a la Papelera de reciclaje. La búsqueda por descripción del Gestor de recursos y de la Búsqueda de metraje lo necesita – su Configurar lo vuelve a descargar.",
+  "Deutsch": "{name} kommt in den Papierkorb. Die Suche nach Beschreibung im Asset-Manager und in der Materialsuche braucht die Datei – deren Einrichten lädt sie erneut herunter.",
+  "Français": "{name} ira dans la Corbeille. La recherche par description du Gestionnaire de ressources et de la Recherche de rushes en a besoin – leur installation le retélécharge.",
+  "한국어": "{name}은(는) 휴지통으로 이동합니다. 에셋 매니저와 영상 검색의 설명으로 검색에 필요합니다 – 각 도구의 설정하기로 다시 내려받을 수 있습니다.",
+  "中文": "{name} 将移到回收站。素材管理器和视频素材搜索的按描述搜索需要它 —— 它们的“设置”会重新下载。",
+  "العربية": "سينتقل {name} إلى سلة المحذوفات. يحتاج إليه البحث بالوصف في مدير الأصول والبحث في اللقطات – ويعيد «إعداد» فيهما تنزيله.",
+  "Tiếng Việt": "{name} sẽ vào Thùng rác. Tìm theo mô tả của Trình quản lý tài nguyên và Tìm cảnh quay cần nó – Thiết lập của chúng sẽ tải lại."
+ },
+ "{name} goes to the Trash. Asset Manager's and Footage Search's search by description need it – their Set up downloads it again.": {
+  "日本語": "{name} はごみ箱に移動します。アセットマネージャーと映像検索の「説明で検索」に必要です – それぞれのセットアップで再ダウンロードできます。",
+  "Español": "{name} irá a la Papelera. La búsqueda por descripción del Gestor de recursos y de la Búsqueda de metraje lo necesita – su Configurar lo vuelve a descargar.",
+  "Deutsch": "{name} kommt in den Papierkorb. Die Suche nach Beschreibung im Asset-Manager und in der Materialsuche braucht die Datei – deren Einrichten lädt sie erneut herunter.",
+  "Français": "{name} ira dans la Corbeille. La recherche par description du Gestionnaire de ressources et de la Recherche de rushes en a besoin – leur installation le retélécharge.",
+  "한국어": "{name}은(는) 휴지통으로 이동합니다. 에셋 매니저와 영상 검색의 설명으로 검색에 필요합니다 – 각 도구의 설정하기로 다시 내려받을 수 있습니다.",
+  "中文": "{name} 将移到废纸篓。素材管理器和视频素材搜索的按描述搜索需要它 —— 它们的“设置”会重新下载。",
+  "العربية": "سينتقل {name} إلى سلة المهملات. يحتاج إليه البحث بالوصف في مدير الأصول والبحث في اللقطات – ويعيد «إعداد» فيهما تنزيله.",
+  "Tiếng Việt": "{name} sẽ vào Thùng rác. Tìm theo mô tả của Trình quản lý tài nguyên và Tìm cảnh quay cần nó – Thiết lập của chúng sẽ tải lại."
  }
 }

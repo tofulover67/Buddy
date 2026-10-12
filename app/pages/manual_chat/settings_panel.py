@@ -126,12 +126,12 @@ class _PinnedCheckJob(QThread):
 
     done = Signal()
 
-    def __init__(self, path):
+    def __init__(self, path, item=None):
         super().__init__()
-        self.path = path
+        self.path, self.item = path, item
 
     def run(self):
-        local_llama.is_pinned_copy(self.path)
+        local_llama.is_pinned_copy(self.path, self.item)
         self.done.emit()
 
 
@@ -396,19 +396,28 @@ class ChatSettingsMixin:
         chosen = emb.chosen_model_file(self.settings)
         busy = getattr(self, "_embed_job", None) is not None
         files = local_llama.model_files()
-        for path in files:
-            pinned = path.name == local_llama.EMBEDDING_GEMMA.name
-            verified = pinned and local_llama.pinned_copy_known(path)
+        # Buddy's own downloads, by file name: (the download, its name, the tools that use it).
+        media_tools = ["Asset Manager", "Footage Search"]
+        own = {local_llama.EMBEDDING_GEMMA.name: (local_llama.EMBEDDING_GEMMA, "EmbeddingGemma", ["Ask Buddy"]),
+               local_llama.EMBEDDING_GEMMA_2.name: (local_llama.EMBEDDING_GEMMA_2, "EmbeddingGemma 2", media_tools),
+               local_llama.EMBEDDING_GEMMA_2_MEDIA.name: (local_llama.EMBEDDING_GEMMA_2_MEDIA,
+                                                          "EmbeddingGemma 2 – pictures and sound", media_tools)}
+        # llama.cpp loads the picture-and-sound half beside its model: not a model to pick, but a file to show.
+        media_half = local_llama.MODELS_DIR / local_llama.EMBEDDING_GEMMA_2_MEDIA.name
+        for path in [*files, *([media_half] if local_llama.is_gguf(media_half) else [])]:
+            item, label, tools = own.get(path.name, (None, path.name, ["Ask Buddy"]))
+            pinned = item is not None
+            verified = pinned and local_llama.pinned_copy_known(path, item)
             if verified is None:                # not checked yet: checked off the UI thread, then shown
-                self._check_pinned(path)
+                self._check_pinned(path, item)
             in_use = backend in (emb.BACKEND_AUTO, emb.BACKEND_BUDDY) and chosen == path
             try:
                 size = path.stat().st_size
             except OSError:
                 size = 0
             rows.append({
-                "id": f"gguf:{path.name}", "label": "EmbeddingGemma" if pinned else path.name, "raw": True,
-                "kind": "Search", "sub": ["Search", "Ask Buddy", *(["in use"] if in_use else [])],
+                "id": f"gguf:{path.name}", "label": label, "raw": True,
+                "kind": "Search", "sub": ["Search", *tools, *(["in use"] if in_use else [])],
                 "size": _size_text(size), "bytes": size, "where": "local", "note": str(path),
                 "chip": ({"text": "Verified", "tone": "ok", "tip": "Exactly the file Buddy downloads, checksum and all."}
                          if verified else
@@ -431,12 +440,14 @@ class ChatSettingsMixin:
         runtime = local_llama.server_exe()
         build = local_llama.runtime_download()
         if runtime is not None or build is not None:
-            size = local_llama.folder_size(local_llama.RUNTIME_DIR) if runtime else 0
+            # An earlier Buddy's release keeps running until a Set up fetches this one's.
+            folder = local_llama.runtime_dir() or local_llama.RUNTIME_DIR
+            size = local_llama.folder_size(folder) if runtime else 0
             rows.append({
                 "id": "llama.cpp", "label": "llama.cpp", "raw": True, "kind": "Engine",
-                "sub": ["Engine", "runs Ask Buddy's search model", f"release {local_llama.RELEASE}"],
+                "sub": ["Engine", "runs Buddy's search models", f"release {folder.name if runtime else local_llama.RELEASE}"],
                 "size": _size_text(size) if runtime else f"{build.mb} MB", "bytes": size,
-                "where": "local" if runtime else "missing", "note": str(local_llama.RUNTIME_DIR) if runtime else "",
+                "where": "local" if runtime else "missing", "note": str(folder) if runtime else "",
                 "chip": ({"text": "Installed", "tone": "ok",
                           "tip": "Checked against its published checksum when it was downloaded."
                                  if sys.platform == "darwin" else
@@ -446,10 +457,10 @@ class ChatSettingsMixin:
             })
         return rows
 
-    def _check_pinned(self, path):
+    def _check_pinned(self, path, item=None):
         if getattr(self, "_pinned_job", None) is not None:
             return
-        job = _outliving(_PinnedCheckJob(path))
+        job = _outliving(_PinnedCheckJob(path, item))
         job.done.connect(self._on_pinned_checked)
         job.finished.connect(self._pinned_job_finished)
         self._pinned_job = job
@@ -737,15 +748,23 @@ class ChatSettingsMixin:
             dialog.exec()
 
     def _remove_model_file(self, name, ui):
-        path = next((p for p in local_llama.model_files() if p.name == name), None)
+        media = [local_llama.MODELS_DIR / item.name for item in local_llama.MEDIA_SEARCH_FILES]
+        path = next((p for p in [*local_llama.model_files(), *media] if p.name == name and p.is_file()), None)
         if path is None:
             return
-        if not ui.confirm("Remove the model?", tr(f"{name} goes to the Trash. Semantic search needs an "
-                                                  "embedding model – Set up downloads EmbeddingGemma again."
-                                                  if sys.platform == "darwin" else
-                                                  f"{name} goes to the Recycle Bin. Semantic search needs an "
-                                                  "embedding model – Set up downloads EmbeddingGemma again."),
-                          ok="Remove", danger=True):
+        if path in media:
+            text = tr(f"{name} goes to the Trash. Asset Manager's and Footage Search's search by description need "
+                      "it – their Set up downloads it again."
+                      if sys.platform == "darwin" else
+                      f"{name} goes to the Recycle Bin. Asset Manager's and Footage Search's search by description "
+                      "need it – their Set up downloads it again.")
+        else:
+            text = tr(f"{name} goes to the Trash. Semantic search needs an "
+                      "embedding model – Set up downloads EmbeddingGemma again."
+                      if sys.platform == "darwin" else
+                      f"{name} goes to the Recycle Bin. Semantic search needs an "
+                      "embedding model – Set up downloads EmbeddingGemma again.")
+        if not ui.confirm("Remove the model?", text, ok="Remove", danger=True):
             return
         local_llama.stop_all()                  # a running server holds the file open
         try:

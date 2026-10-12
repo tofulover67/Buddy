@@ -12,10 +12,19 @@ calls LlamaServer.ensure() from the agent's worker thread.
             (Apple's builds use Metal too), from ggml-org's GitHub releases.
             Checked against its SHA-256 before it's unpacked, unpacked into
             a staging folder and renamed into place, so a failed or
-            cancelled download never leaves half a runtime.
-  Models    GGUF files in MODELS_DIR - put there by hand, or the one
-            download offered (EmbeddingGemma, which the manual bundle's
-            vectors are built with).
+            cancelled download never leaves half a runtime. A release an
+            earlier Buddy installed keeps running EmbeddingGemma until Set
+            up fetches this one (server_exe); only media search, whose
+            model older releases can't read, waits for it (runtime_current).
+            On a Windows PC with a graphics card of its own, media search
+            can run on the card instead: the same release built for Vulkan
+            (GPU_RUNTIMES), kept beside the CPU build, which stays what
+            Ask Buddy's search runs on and what media search goes back to
+            if the card can't run it.
+  Models    GGUF files in MODELS_DIR - put there by hand, or the downloads
+            offered: EmbeddingGemma, which the manual bundle's vectors are
+            built with, and EmbeddingGemma 2 with its picture-and-sound
+            half, which media search (core/media_search) runs.
   Server    llama-server, started on demand on 127.0.0.1 at a free port,
             with a random API key so nothing else on the machine (a web
             page included - it allows any origin) can use it. One per
@@ -51,7 +60,7 @@ from core import defender, model_folders
 
 from .ask_folder import ASK_BUDDY_DIR
 
-RELEASE = "b11312"
+RELEASE = "b11559"
 RELEASE_URL = "https://github.com/ggml-org/llama.cpp/releases/download/" + RELEASE + "/"
 
 ROOT = Path(ASK_BUDDY_DIR)
@@ -83,14 +92,29 @@ class Download:
 # (platform.system(), platform.machine()) -> the release's archive for it.
 RUNTIMES = {
     ("Windows", "AMD64"): Download(RELEASE_URL + f"llama-{RELEASE}-bin-win-cpu-x64.zip", f"llama-{RELEASE}-bin-win-cpu-x64.zip",
-                                   19265352, "d2d966c23e4d097d70633f9d92e4931245b575be7a5409201d8f352493f0e702", "llama.cpp"),
+                                   19501338, "1228f133868c02a424bcf663a688e66d8c7d5499077649f305188f756f584377", "llama.cpp"),
     ("Windows", "ARM64"): Download(RELEASE_URL + f"llama-{RELEASE}-bin-win-cpu-arm64.zip", f"llama-{RELEASE}-bin-win-cpu-arm64.zip",
-                                   12108942, "1822a499587503423f65cc9348253d6f883c799116becdb36baa3f9e14390c2d", "llama.cpp"),
+                                   12371743, "37fc76d2e63bf97adb710c43ef0b985159282a830909f67009ab983d28ada487", "llama.cpp"),
     ("Darwin", "arm64"): Download(RELEASE_URL + f"llama-{RELEASE}-bin-macos-arm64.tar.gz", f"llama-{RELEASE}-bin-macos-arm64.tar.gz",
-                                  11820971, "3ceea603e48367ab694822f7304e6880817337f942f9672321411932c76c46f2", "llama.cpp"),
+                                  12105699, "c6cfeaa709b8d2e47e8a50f6833d22071f7ee7079b0b1a6d704e482afe6ee2c6", "llama.cpp"),
     ("Darwin", "x86_64"): Download(RELEASE_URL + f"llama-{RELEASE}-bin-macos-x64.tar.gz", f"llama-{RELEASE}-bin-macos-x64.tar.gz",
-                                   11375343, "c78ebb522375db1675d5df252b0a36dbec8822425852673a5f22c8c9eaa23b86", "llama.cpp"),
+                                   11597115, "630d5ab669876748b4f715def6b1cbbc2a8cf836ca8310cb9e4585d5f61fe8d4", "llama.cpp"),
 }
+
+# The same release built for Vulkan, which runs a model on the graphics card
+# whoever made it. Only media search uses it (gpu_server_exe): 13 times the
+# CPU build's frames a second on an RTX 5070 Ti, the same vectors to three
+# decimal places (measured 2026-10-12). x64 only - the one it's been run on.
+GPU_RUNTIMES = {
+    ("Windows", "AMD64"): Download(RELEASE_URL + f"llama-{RELEASE}-bin-win-vulkan-x64.zip",
+                                   f"llama-{RELEASE}-bin-win-vulkan-x64.zip", 32084119,
+                                   "bf2fb2a7fc5d7669ccabbb6de3f6dd6b54058f213b32e731abc62b590f8566dc",
+                                   "llama.cpp for the graphics card"),
+}
+GPU_RUNTIME_DIR = ROOT / "llama.cpp" / (RELEASE + "-vulkan")
+# A card of its own, by what its name says: the graphics built into a processor
+# reports the PC's whole memory as its own and is no faster than the processor.
+_OWN_CARDS = ("nvidia", "geforce", "rtx", "gtx", "quadro", "radeon rx", "radeon pro", "intel(r) arc", "arc(tm)")
 
 # The embedding model the manual bundle is built with, as llama.cpp's own
 # conversion (Ollama's copy is a GGUF llama.cpp can't load). Q8_0 matches the
@@ -99,6 +123,20 @@ EMBEDDING_GEMMA = Download(
     "https://huggingface.co/ggml-org/embeddinggemma-300M-GGUF/resolve/main/embeddinggemma-300M-Q8_0.gguf",
     "embeddinggemma-300M-Q8_0.gguf", 333590944,
     "b5ce9d77a3fc4b3b39ccb5643c36777911cc4eb46a66962eadfa3f5f60490d63", "EmbeddingGemma")
+
+# Media search's model (core/media_search): text, pictures and sound in one
+# vector space - not the manual's, so never what Ask Buddy's search is guessed
+# to use (embedder.chosen_model_file). Its text half, and the half that reads
+# pictures and sound, which llama.cpp loads beside it (--mmproj). Pinned to one
+# revision of the repo, so the files can't change under their checksums.
+_GEMMA_2_URL = "https://huggingface.co/ggml-org/embeddinggemma-2-GGUF/resolve/bfcd298762cc34d0357ece5ebdd31791a3a374d8/"
+EMBEDDING_GEMMA_2 = Download(
+    _GEMMA_2_URL + "embeddinggemma-2-Q8_0.gguf", "embeddinggemma-2-Q8_0.gguf", 309855456,
+    "2188ac1deca4b77dffefd603c2776a9d76d9d74ec01841392982ebb840b09135", "EmbeddingGemma 2")
+EMBEDDING_GEMMA_2_MEDIA = Download(
+    _GEMMA_2_URL + "mmproj-embeddinggemma-2-Q8_0.gguf", "mmproj-embeddinggemma-2-Q8_0.gguf", 554821024,
+    "c4a8a52691ecef40618438928bdf9e68379b854e24166f292592353db0aab64f", "EmbeddingGemma 2's picture and sound half")
+MEDIA_SEARCH_FILES = (EMBEDDING_GEMMA_2, EMBEDDING_GEMMA_2_MEDIA)
 
 
 class LlamaError(Exception):
@@ -122,15 +160,87 @@ def runtime_download() -> Download | None:
     return RUNTIMES.get(_machine())
 
 
-def server_exe() -> Path | None:
-    """llama-server, if the runtime is installed."""
+def _exe_in(folder: Path) -> Path | None:
     name = "llama-server.exe" if os.name == "nt" else "llama-server"
-    if not RUNTIME_DIR.is_dir():
+    if not folder.is_dir():
         return None
-    for path in (RUNTIME_DIR / name, *RUNTIME_DIR.glob(f"*/{name}")):
+    for path in (folder / name, *folder.glob(f"*/{name}")):
         if path.is_file():
             return path
     return None
+
+
+def _older_runtimes() -> list[Path]:
+    """Release folders (b11312) an earlier Buddy left beside this one's, newest first."""
+    try:
+        found = [p for p in RUNTIME_DIR.parent.iterdir()
+                 if p.is_dir() and p != RUNTIME_DIR and re.fullmatch(r"b\d+", p.name)]
+    except OSError:
+        return []
+    return sorted(found, key=lambda p: int(p.name[1:]), reverse=True)
+
+
+def server_exe() -> Path | None:
+    """llama-server, if a runtime is installed: this release's, else the one
+    an earlier Buddy installed - an update never takes semantic search away."""
+    for folder in (RUNTIME_DIR, *_older_runtimes()):
+        exe = _exe_in(folder)
+        if exe:
+            return exe
+    return None
+
+
+def gpu_runtime_download() -> Download | None:
+    """The Vulkan build's archive for this machine, or None where there's none."""
+    return GPU_RUNTIMES.get(_machine())
+
+
+def gpu_server_exe() -> Path | None:
+    """The Vulkan build's llama-server, if it's installed."""
+    return _exe_in(GPU_RUNTIME_DIR)
+
+
+_GPU_DEVICE = {}        # the Vulkan build's exe -> (device, its name), asked once
+
+
+def pick_device(listing: str) -> tuple[str, str] | None:
+    """(device, name) of the graphics card to run on, from llama-server
+    --list-devices' output ("  Vulkan0: NVIDIA GeForce RTX 5070 Ti (15995
+    MiB, 15227 MiB free)") - the first that's a card of its own; None when
+    there's only the processor's built-in graphics."""
+    for line in listing.splitlines():
+        found = re.match(r"\s*(Vulkan\d+):\s*(.+?)\s*\(\d+ MiB", line)
+        if found and any(word in found.group(2).lower() for word in _OWN_CARDS):
+            return found.group(1), found.group(2)
+    return None
+
+
+def gpu_device() -> tuple[str, str] | None:
+    """(device, name) the Vulkan build would run on here, or None: not
+    installed, or no graphics card of its own. Asked of it once (a second or so)."""
+    exe = gpu_server_exe()
+    if exe is None:
+        return None
+    if str(exe) not in _GPU_DEVICE:
+        try:
+            flags = 0x08000000 if os.name == "nt" else 0               # CREATE_NO_WINDOW
+            done = subprocess.run([str(exe), "--list-devices"], cwd=str(exe.parent), capture_output=True, timeout=10,
+                                  stdin=subprocess.DEVNULL, creationflags=flags)
+            _GPU_DEVICE[str(exe)] = pick_device((done.stdout + done.stderr).decode("utf-8", "replace"))
+        except (OSError, subprocess.SubprocessError):
+            _GPU_DEVICE[str(exe)] = None
+    return _GPU_DEVICE[str(exe)]
+
+
+def runtime_dir() -> Path | None:
+    """The release folder server_exe() runs from, or None."""
+    return next((folder for folder in (RUNTIME_DIR, *_older_runtimes()) if _exe_in(folder)), None)
+
+
+def runtime_current() -> bool:
+    """Whether the installed runtime is this release - what media search's
+    model needs; an older one can't read it."""
+    return _exe_in(RUNTIME_DIR) is not None
 
 
 def model_files() -> list[Path]:
@@ -165,7 +275,7 @@ def own_models(folder: Path, own_folder: bool) -> list[Path]:
     Buddy's own folder every model file in it - each was put there for
     Buddy - and from one picked to share with other apps only Buddy's
     download, leaving theirs."""
-    names = {EMBEDDING_GEMMA.name}
+    names = {EMBEDDING_GEMMA.name, *(item.name for item in MEDIA_SEARCH_FILES)}
     out = [p for p in folder.glob("*.gguf") if own_folder or p.name in names]
     return out + [p for p in (folder / VERIFIED_FILE,) if own_folder and p.exists()]
 
@@ -317,15 +427,40 @@ def defender_scan(folder: Path) -> tuple[str, str]:
 def install_runtime(progress: Progress | None = None, cancelled: Callable[[], bool] | None = None) -> tuple[Path, str]:
     """Downloads, checks and unpacks llama.cpp for this machine: (its
     llama-server, what Windows Defender said of it)."""
-    progress = progress or (lambda *_a: None)
-    exe = server_exe()
+    exe = _exe_in(RUNTIME_DIR)
     if exe:
         return exe, ""
     item = runtime_download()
     if item is None:
         raise LlamaError(f"There's no llama.cpp build for this computer ({' '.join(_machine())}).")
-    archive = download(item, RUNTIME_DIR.parent / item.name, progress, cancelled)
-    staging = RUNTIME_DIR.with_name(RUNTIME_DIR.name + ".unpacking")
+    exe, note = _install(item, RUNTIME_DIR, progress, cancelled)
+    stop_all()                                  # one still running holds an older release's files open
+    for folder in _older_runtimes():
+        shutil.rmtree(folder, ignore_errors=True)
+    return exe, note
+
+
+def install_gpu_runtime(progress: Progress | None = None, cancelled: Callable[[], bool] | None = None) -> tuple[Path, str]:
+    """The same for the Vulkan build, beside the CPU one."""
+    exe = gpu_server_exe()
+    if exe:
+        return exe, ""
+    item = gpu_runtime_download()
+    if item is None:
+        raise LlamaError(f"There's no llama.cpp build for this computer's graphics card ({' '.join(_machine())}).")
+    exe, note = _install(item, GPU_RUNTIME_DIR, progress, cancelled)
+    for folder in GPU_RUNTIME_DIR.parent.glob("b*-vulkan"):         # an earlier release's
+        if folder != GPU_RUNTIME_DIR:
+            shutil.rmtree(folder, ignore_errors=True)
+    return exe, note
+
+
+def _install(item: Download, target: Path, progress: Progress | None, cancelled) -> tuple[Path, str]:
+    """A llama.cpp archive downloaded, checked, scanned and unpacked into
+    `target`: (its llama-server, what Windows Defender said of it)."""
+    progress = progress or (lambda *_a: None)
+    archive = download(item, target.parent / item.name, progress, cancelled)
+    staging = target.with_name(target.name + ".unpacking")
     shutil.rmtree(staging, ignore_errors=True)
     try:
         if archive.suffix == ".zip":
@@ -346,14 +481,14 @@ def install_runtime(progress: Progress | None = None, cancelled: Callable[[], bo
         if verdict == SCAN_THREAT:
             raise LlamaError("Windows Defender flagged the llama.cpp download, so it was deleted and won't be used. "
                              "Nothing was run.")
-        shutil.rmtree(RUNTIME_DIR, ignore_errors=True)
-        os.replace(staging, RUNTIME_DIR)
+        shutil.rmtree(target, ignore_errors=True)
+        os.replace(staging, target)
     except (OSError, zipfile.BadZipFile, tarfile.TarError) as exc:
         raise LlamaError(f"Couldn't unpack llama.cpp: {exc}") from exc
     finally:
         shutil.rmtree(staging, ignore_errors=True)
         archive.unlink(missing_ok=True)
-    exe = server_exe()
+    exe = _exe_in(target)
     if exe is None:
         raise LlamaError("llama.cpp was unpacked, but its llama-server wasn't in it.")
     if os.name != "nt":
@@ -431,10 +566,11 @@ _SERVERS: dict[tuple, "LlamaServer"] = {}
 class LlamaServer:
     """llama-server for one model, started when first needed."""
 
-    def __init__(self, model: Path, embedding: bool = True, extra: tuple[str, ...] = ()):
+    def __init__(self, model: Path, embedding: bool = True, extra: tuple[str, ...] = (), exe: Path | None = None):
         self.model = Path(model)
         self.embedding = embedding
         self.extra = tuple(extra)
+        self.exe = Path(exe) if exe else None       # another build's llama-server (the Vulkan one); None: server_exe()
         self.key = secrets.token_urlsafe(24)
         self.port = 0
         self.process: subprocess.Popen | None = None
@@ -456,7 +592,7 @@ class LlamaServer:
             self._touch()
             if self.running():
                 return self.base_url
-            exe = server_exe()
+            exe = self.exe if self.exe is not None and self.exe.is_file() else server_exe()
             if exe is None:
                 raise LlamaError("llama.cpp isn't set up yet – Settings > AI > Manual search > Set up.")
             if not self.model.is_file():
@@ -554,14 +690,33 @@ class LlamaServer:
                 process.kill()
 
 
-def server_for(model: Path, embedding: bool = True) -> LlamaServer:
-    """The one server for this model, made the first time it's asked for."""
-    key = (str(Path(model).resolve()), embedding)
+def server_for(model: Path, embedding: bool = True, mmproj: Path | None = None, gpu: bool = False) -> LlamaServer:
+    """The one server for this model, made the first time it's asked for.
+    mmproj: the file that lets it read pictures and sound, loaded beside it.
+    gpu: run by the Vulkan build on the graphics card gpu_device() names -
+    another server than the CPU build's for the same model."""
+    key = (str(Path(model).resolve()), embedding, str(Path(mmproj).resolve()) if mmproj else "", bool(gpu))
     with _LOCK:
         server = _SERVERS.get(key)
         if server is None:
-            server = _SERVERS[key] = LlamaServer(Path(model), embedding)
+            extra = ("--mmproj", str(mmproj)) if mmproj else ()
+            exe = None
+            if gpu:
+                device, exe = gpu_device(), gpu_server_exe()
+                if device is None or exe is None:
+                    raise LlamaError("There's no graphics card set up to run it on.")
+                # Every layer on that one card - not shared out over the processor's graphics too.
+                extra += ("-ngl", "99", "--device", device[0])
+            server = _SERVERS[key] = LlamaServer(Path(model), embedding, extra, exe)
         return server
+
+
+def stop_model(model: Path):
+    """Stops every server running this model - the CPU build's and the graphics card's."""
+    with _LOCK:
+        servers = [s for s in _SERVERS.values() if s.model == Path(model)]
+    for server in servers:
+        server.stop()
 
 
 def stop_all():

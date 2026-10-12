@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Footage Search</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <link rel="stylesheet" href="footage.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page">
+    <header class="page-head">
+        <h1 class="page-title">Footage Search</h1>
+        <nav class="tabs views" role="tablist">
+            <button type="button" role="tab" data-tab="search">Search</button>
+            <button type="button" role="tab" data-tab="broll">B-roll</button>
+        </nav>
+    </header>
+
+    <section class="card status" id="status">
+        <div class="status-actions" id="status-actions"></div>
+        <div class="status-text">
+            <div class="strong" id="project"></div>
+            <div class="muted small" id="index-line"></div>
+        </div>
+    </section>
+
+    <section class="card pane" id="pane-search">
+        <div class="toolbar">
+            <input class="field query" id="query" type="search" autocomplete="off" spellcheck="false"
+                   placeholder="Describe the shot you're looking for">
+        </div>
+        <div class="scroll" id="results"></div>
+    </section>
+
+    <section class="card pane" id="pane-broll" hidden>
+        <div class="toolbar">
+            <span class="muted small" id="broll-note"></span>
+            <div class="spacer"></div>
+            <button type="button" class="btn ghost" id="reload">Read the latest transcript</button>
+        </div>
+        <div class="scroll" id="lines"></div>
+    </section>
+</main>
+<script src="footage.js"></script>
+</body>
+</html>

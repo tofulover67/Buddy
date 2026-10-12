@@ -26,10 +26,13 @@
             <div class="toolbar" id="toolbar-all">
                 <div class="segmented" id="categories" role="group" aria-label="Type"></div>
                 <input class="field search" id="search" type="search" placeholder="Search names" autocomplete="off" spellcheck="false">
+                <button type="button" class="btn ghost icon" id="describe" aria-pressed="false" aria-label="Search by description"
+                        title="Search by description: find pictures, footage and sounds by what's in them, not by their names"></button>
                 <div class="spacer"></div>
                 <button type="button" class="btn ghost" data-action="add_files">Add files…</button>
                 <button type="button" class="btn ghost" data-action="add_folder">Add folder…</button>
             </div>
+            <div class="describe-bar" id="describe-bar" hidden></div>
             <div class="toolbar" id="toolbar-folders" hidden>
                 <span class="muted small">Every asset, grouped by the folder it's in.</span>
                 <div class="spacer"></div>

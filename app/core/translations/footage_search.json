@@ -1,0 +1,563 @@
+{
+ "_comment": "Footage Search. English -> each language; see core/i18n.py.",
+ "B-roll": {
+  "日本語": "Bロール",
+  "Español": "B-roll",
+  "Deutsch": "B-Roll",
+  "Français": "B-roll",
+  "한국어": "B롤",
+  "中文": "辅助镜头",
+  "العربية": "لقطات B-roll",
+  "Tiếng Việt": "B-roll"
+ },
+ "Describe the shot you're looking for": {
+  "日本語": "探しているショットを説明してください",
+  "Español": "Describe el plano que buscas",
+  "Deutsch": "Beschreiben Sie die Einstellung, die Sie suchen",
+  "Français": "Décrivez le plan que vous cherchez",
+  "한국어": "찾는 장면을 설명하세요",
+  "中文": "描述您要找的镜头",
+  "العربية": "صِف اللقطة التي تبحث عنها",
+  "Tiếng Việt": "Mô tả cảnh bạn đang tìm"
+ },
+ "Read the latest transcript": {
+  "日本語": "最新の文字起こしを読み込む",
+  "Español": "Leer la última transcripción",
+  "Deutsch": "Neuestes Transkript lesen",
+  "Français": "Lire la dernière transcription",
+  "한국어": "최신 받아쓴 글 읽기",
+  "中文": "读取最新的转写稿",
+  "العربية": "قراءة أحدث نص مفرّغ",
+  "Tiếng Việt": "Đọc bản chép lời mới nhất"
+ },
+ "Reading the Media Pool…": {
+  "日本語": "メディアプールを読み込み中…",
+  "Español": "Leyendo el Grupo de medios…",
+  "Deutsch": "Media Pool wird gelesen …",
+  "Français": "Lecture du Pool de médias…",
+  "한국어": "미디어 풀 읽는 중…",
+  "中文": "正在读取媒体池…",
+  "العربية": "جارٍ قراءة مجمع الوسائط…",
+  "Tiếng Việt": "Đang đọc Media Pool…"
+ },
+ "Finding footage by describing it needs a model that runs on this computer – a one-time download of {mb} MB.": {
+  "日本語": "映像を説明で探すには、このコンピューター上で動くモデルが必要です – 初回のみ {mb} MB をダウンロードします。",
+  "Español": "Encontrar metraje describiéndolo necesita un modelo que se ejecuta en este ordenador: una descarga única de {mb} MB.",
+  "Deutsch": "Um Material per Beschreibung zu finden, braucht es ein Modell, das auf diesem Computer läuft – ein einmaliger Download von {mb} MB.",
+  "Français": "Trouver des rushes en les décrivant nécessite un modèle qui s'exécute sur cet ordinateur – un téléchargement unique de {mb} Mo.",
+  "한국어": "설명으로 영상을 찾으려면 이 컴퓨터에서 실행되는 모델이 필요합니다 – 한 번만 {mb} MB를 내려받습니다.",
+  "中文": "通过描述查找视频素材需要一个在这台电脑上运行的模型 – 仅需一次性下载 {mb} MB。",
+  "العربية": "العثور على اللقطات بوصفها يحتاج إلى نموذج يعمل على هذا الحاسوب – تنزيل لمرة واحدة بحجم {mb} MB.",
+  "Tiếng Việt": "Tìm cảnh quay bằng cách mô tả cần một mô hình chạy trên máy tính này – tải một lần {mb} MB."
+ },
+ "Reading footage needs ffmpeg installed on this computer – Buddy doesn't come with it.": {
+  "日本語": "映像を読み取るには、このコンピューターに ffmpeg がインストールされている必要があります – Buddy には付属していません。",
+  "Español": "Para leer el metraje hace falta tener ffmpeg instalado en este ordenador: Buddy no lo incluye.",
+  "Deutsch": "Zum Lesen von Material muss ffmpeg auf diesem Computer installiert sein – Buddy bringt es nicht mit.",
+  "Français": "La lecture des rushes nécessite ffmpeg installé sur cet ordinateur – Buddy ne le fournit pas.",
+  "한국어": "영상을 읽으려면 이 컴퓨터에 ffmpeg가 설치되어 있어야 합니다 – Buddy에는 들어 있지 않습니다.",
+  "中文": "读取视频素材需要在这台电脑上安装 ffmpeg – Buddy 不自带它。",
+  "العربية": "قراءة اللقطات تحتاج إلى تثبيت ffmpeg على هذا الحاسوب – فهو لا يأتي مع Buddy.",
+  "Tiếng Việt": "Đọc cảnh quay cần cài ffmpeg trên máy tính này – Buddy không kèm sẵn."
+ },
+ "Indexing {done} of {total} – {name}": {
+  "日本語": "インデックス化中 {done} / {total} – {name}",
+  "Español": "Indexando {done} de {total} – {name}",
+  "Deutsch": "Indexierung {done} von {total} – {name}",
+  "Français": "Indexation {done} sur {total} – {name}",
+  "한국어": "색인 중 {done} / {total} – {name}",
+  "中文": "正在建立索引 {done} / {total} – {name}",
+  "العربية": "جارٍ فهرسة {done} من {total} – {name}",
+  "Tiếng Việt": "Đang lập chỉ mục {done} / {total} – {name}"
+ },
+ "Indexing {done} of {total} – {name} ({percent}%)": {
+  "日本語": "インデックス化中 {done} / {total} – {name} ({percent}%)",
+  "Español": "Indexando {done} de {total} – {name} ({percent}%)",
+  "Deutsch": "Indexierung {done} von {total} – {name} ({percent}%)",
+  "Français": "Indexation {done} sur {total} – {name} ({percent} %)",
+  "한국어": "색인 중 {done} / {total} – {name} ({percent}%)",
+  "中文": "正在建立索引 {done} / {total} – {name} ({percent}%)",
+  "العربية": "جارٍ فهرسة {done} من {total} – {name} ({percent}%)",
+  "Tiếng Việt": "Đang lập chỉ mục {done} / {total} – {name} ({percent}%)"
+ },
+ "{indexed} of {clips} indexed.": {
+  "日本語": "{clips} 個中 {indexed} 個をインデックス化済み。",
+  "Español": "{indexed} de {clips} indexados.",
+  "Deutsch": "{indexed} von {clips} indexiert.",
+  "Français": "{indexed} sur {clips} indexés.",
+  "한국어": "{clips}개 중 {indexed}개 색인됨.",
+  "中文": "已为 {clips} 个中的 {indexed} 个建立索引。",
+  "العربية": "تمت فهرسة {indexed} من {clips}.",
+  "Tiếng Việt": "Đã lập chỉ mục {indexed} / {clips}."
+ },
+ "No footage or stills in this project's Media Pool yet.": {
+  "日本語": "このプロジェクトのメディアプールには、まだ映像もスチルもありません。",
+  "Español": "Todavía no hay metraje ni imágenes fijas en el Grupo de medios de este proyecto.",
+  "Deutsch": "Im Media Pool dieses Projekts gibt es noch kein Material und keine Standbilder.",
+  "Français": "Pas encore de rushes ni d'images fixes dans le Pool de médias de ce projet.",
+  "한국어": "이 프로젝트의 미디어 풀에는 아직 영상이나 스틸이 없습니다.",
+  "中文": "此项目的媒体池中还没有视频素材或静帧。",
+  "العربية": "لا توجد لقطات أو صور ثابتة في مجمع الوسائط لهذا المشروع بعد.",
+  "Tiếng Việt": "Media Pool của dự án này chưa có cảnh quay hay ảnh tĩnh nào."
+ },
+ "{count} couldn't be read.": {
+  "日本語": "{count} 個は読み取れませんでした。",
+  "Español": "{count} no se pudieron leer.",
+  "Deutsch": "{count} konnten nicht gelesen werden.",
+  "Français": "{count} n'ont pas pu être lus.",
+  "한국어": "{count}개는 읽을 수 없었습니다.",
+  "中文": "{count} 个无法读取。",
+  "العربية": "تعذرت قراءة {count}.",
+  "Tiếng Việt": "{count} mục không đọc được."
+ },
+ "{count} offline.": {
+  "日本語": "{count} 個はオフラインです。",
+  "Español": "{count} sin conexión.",
+  "Deutsch": "{count} offline.",
+  "Français": "{count} hors ligne.",
+  "한국어": "{count}개는 오프라인입니다.",
+  "中文": "{count} 个离线。",
+  "العربية": "{count} غير متصلة.",
+  "Tiếng Việt": "{count} mục ngoại tuyến."
+ },
+ "{count} more are in a format Buddy can't read.": {
+  "日本語": "ほかに {count} 個は、Buddy が読み取れない形式です。",
+  "Español": "{count} más están en un formato que Buddy no puede leer.",
+  "Deutsch": "{count} weitere liegen in einem Format vor, das Buddy nicht lesen kann.",
+  "Français": "{count} autres sont dans un format que Buddy ne peut pas lire.",
+  "한국어": "그 밖에 {count}개는 Buddy가 읽을 수 없는 형식입니다.",
+  "中文": "另有 {count} 个的格式 Buddy 无法读取。",
+  "العربية": "{count} أخرى بتنسيق لا يستطيع Buddy قراءته.",
+  "Tiếng Việt": "{count} mục khác ở định dạng Buddy không đọc được."
+ },
+ "Index 1 clip": {
+  "日本語": "1 個のクリップをインデックス化",
+  "Español": "Indexar 1 clip",
+  "Deutsch": "1 Clip indexieren",
+  "Français": "Indexer 1 clip",
+  "한국어": "클립 1개 색인하기",
+  "中文": "为 1 个片段建立索引",
+  "العربية": "فهرسة مقطع واحد",
+  "Tiếng Việt": "Lập chỉ mục 1 clip"
+ },
+ "Index {count} clips": {
+  "日本語": "{count} 個のクリップをインデックス化",
+  "Español": "Indexar {count} clips",
+  "Deutsch": "{count} Clips indexieren",
+  "Français": "Indexer {count} clips",
+  "한국어": "클립 {count}개 색인하기",
+  "中文": "为 {count} 个片段建立索引",
+  "العربية": "فهرسة {count} مقاطع",
+  "Tiếng Việt": "Lập chỉ mục {count} clip"
+ },
+ "Read the Media Pool again": {
+  "日本語": "メディアプールを再読み込み",
+  "Español": "Volver a leer el Grupo de medios",
+  "Deutsch": "Media Pool erneut lesen",
+  "Français": "Relire le Pool de médias",
+  "한국어": "미디어 풀 다시 읽기",
+  "中文": "重新读取媒体池",
+  "العربية": "إعادة قراءة مجمع الوسائط",
+  "Tiếng Việt": "Đọc lại Media Pool"
+ },
+ "Find in Media Pool": {
+  "日本語": "メディアプールで表示",
+  "Español": "Buscar en el Grupo de medios",
+  "Deutsch": "Im Media Pool zeigen",
+  "Français": "Afficher dans le Pool de médias",
+  "한국어": "미디어 풀에서 찾기",
+  "中文": "在媒体池中查找",
+  "العربية": "البحث في مجمع الوسائط",
+  "Tiếng Việt": "Tìm trong Media Pool"
+ },
+ "Place": {
+  "日本語": "配置",
+  "Español": "Colocar",
+  "Deutsch": "Platzieren",
+  "Français": "Placer",
+  "한국어": "배치",
+  "中文": "放置",
+  "العربية": "وضع",
+  "Tiếng Việt": "Đặt"
+ },
+ "Puts a few seconds from here on the timeline, at the playhead, on a track above V1": {
+  "日本語": "ここから数秒分を、タイムラインの再生ヘッド位置、V1 より上のトラックに配置します",
+  "Español": "Coloca unos segundos desde aquí en la línea de tiempo, en el cabezal, en una pista por encima de V1",
+  "Deutsch": "Legt ein paar Sekunden ab hier in die Timeline, am Abspielkopf, auf eine Spur über V1",
+  "Français": "Place quelques secondes à partir d'ici sur la timeline, à la tête de lecture, sur une piste au-dessus de V1",
+  "한국어": "여기서부터 몇 초를 타임라인의 재생 헤드 위치, V1 위 트랙에 놓습니다",
+  "中文": "把从这里开始的几秒放到时间线的播放头处，位于 V1 上方的轨道",
+  "العربية": "يضع بضع ثوانٍ من هنا على الخط الزمني عند رأس التشغيل، على مسار فوق V1",
+  "Tiếng Việt": "Đặt vài giây từ đây lên timeline, tại đầu phát, trên một track phía trên V1"
+ },
+ "Puts it on the timeline over this line, on a track above V1": {
+  "日本語": "タイムラインのこのセリフの位置、V1 より上のトラックに配置します",
+  "Español": "Lo coloca en la línea de tiempo sobre esta frase, en una pista por encima de V1",
+  "Deutsch": "Legt es in der Timeline über diese Zeile, auf eine Spur über V1",
+  "Français": "Le place sur la timeline au-dessus de cette phrase, sur une piste au-dessus de V1",
+  "한국어": "타임라인에서 이 대사 위, V1 위 트랙에 놓습니다",
+  "中文": "把它放到时间线上这句话的位置，位于 V1 上方的轨道",
+  "العربية": "يضعه على الخط الزمني فوق هذا السطر، على مسار فوق V1",
+  "Tiếng Việt": "Đặt nó lên timeline ở trên câu này, trên một track phía trên V1"
+ },
+ "Describe a shot to find it": {
+  "日本語": "ショットを説明して探す",
+  "Español": "Describe un plano para encontrarlo",
+  "Deutsch": "Beschreiben Sie eine Einstellung, um sie zu finden",
+  "Français": "Décrivez un plan pour le trouver",
+  "한국어": "장면을 설명해서 찾기",
+  "中文": "描述一个镜头来找到它",
+  "العربية": "صِف لقطة للعثور عليها",
+  "Tiếng Việt": "Mô tả một cảnh để tìm nó"
+ },
+ "“A drone shot over water”, “two people shaking hands”, “a close-up of hands typing”. Only indexed clips can be found.": {
+  "日本語": "「水上のドローンショット」「握手する二人」「タイピングする手のクローズアップ」など。見つかるのはインデックス化済みのクリップだけです。",
+  "Español": "“Un plano de dron sobre el agua”, “dos personas dándose la mano”, “un primer plano de manos escribiendo”. Solo se pueden encontrar los clips indexados.",
+  "Deutsch": "„Eine Drohnenaufnahme über Wasser“, „zwei Menschen beim Händeschütteln“, „eine Nahaufnahme tippender Hände“. Nur indexierte Clips werden gefunden.",
+  "Français": "« Un plan de drone au-dessus de l'eau », « deux personnes se serrant la main », « un gros plan de mains qui tapent ». Seuls les clips indexés peuvent être trouvés.",
+  "한국어": "“물 위의 드론 숏”, “악수하는 두 사람”, “타이핑하는 손의 클로즈업”. 색인된 클립만 찾을 수 있습니다.",
+  "中文": "“水面上的航拍镜头”“两个人握手”“打字的手部特写”。只有已建立索引的片段才能找到。",
+  "العربية": "«لقطة بطائرة مسيّرة فوق الماء»، «شخصان يتصافحان»، «لقطة مقرّبة ليدين تكتبان». لا يمكن العثور إلا على المقاطع المفهرسة.",
+  "Tiếng Việt": "“Cảnh flycam trên mặt nước”, “hai người bắt tay”, “cận cảnh đôi tay đang gõ phím”. Chỉ tìm được các clip đã lập chỉ mục."
+ },
+ "Nothing like that in the indexed clips": {
+  "日本語": "インデックス化済みのクリップに、それに近いものはありません",
+  "Español": "No hay nada parecido en los clips indexados",
+  "Deutsch": "Nichts Ähnliches in den indexierten Clips",
+  "Français": "Rien de tel dans les clips indexés",
+  "한국어": "색인된 클립에 비슷한 것이 없음",
+  "中文": "已建立索引的片段中没有类似内容",
+  "العربية": "لا شيء مشابه في المقاطع المفهرسة",
+  "Tiếng Việt": "Không có gì giống vậy trong các clip đã lập chỉ mục"
+ },
+ "Try describing what's in the picture another way.": {
+  "日本語": "映っているものを別の言い方で説明してみてください。",
+  "Español": "Prueba a describir de otra forma lo que aparece en la imagen.",
+  "Deutsch": "Beschreiben Sie anders, was im Bild zu sehen ist.",
+  "Français": "Essayez de décrire autrement ce que montre l'image.",
+  "한국어": "화면에 보이는 것을 다른 말로 설명해 보세요.",
+  "中文": "试着换一种方式描述画面中的内容。",
+  "العربية": "جرّب وصف ما في الصورة بطريقة أخرى.",
+  "Tiếng Việt": "Hãy thử mô tả những gì có trong hình theo cách khác."
+ },
+ "No transcript yet": {
+  "日本語": "文字起こしはまだありません",
+  "Español": "Todavía no hay transcripción",
+  "Deutsch": "Noch kein Transkript",
+  "Français": "Pas encore de transcription",
+  "한국어": "아직 받아쓴 글이 없음",
+  "中文": "还没有转写稿",
+  "العربية": "لا يوجد نص مفرّغ بعد",
+  "Tiếng Việt": "Chưa có bản chép lời"
+ },
+ "Transcribe the timeline in Subtitles first. Buddy then suggests footage for what's said, line by line.": {
+  "日本語": "まず「字幕」でタイムラインを文字起こししてください。その後、話されている内容に合う映像を Buddy が 1 行ずつ提案します。",
+  "Español": "Primero transcribe la línea de tiempo en Subtítulos. Después Buddy sugiere metraje para lo que se dice, frase a frase.",
+  "Deutsch": "Transkribieren Sie zuerst die Timeline in Untertitel. Buddy schlägt dann Zeile für Zeile Material zu dem vor, was gesagt wird.",
+  "Français": "Transcrivez d'abord la timeline dans Sous-titres. Buddy propose ensuite des rushes pour ce qui est dit, phrase par phrase.",
+  "한국어": "먼저 자막에서 타임라인을 받아쓰세요. 그러면 Buddy가 말한 내용에 맞는 영상을 한 줄씩 제안합니다.",
+  "中文": "请先在“字幕”中转写时间线。之后 Buddy 会逐句为所说的内容推荐视频素材。",
+  "العربية": "فرّغ الخط الزمني في «الترجمة المرئية» أولًا. بعدها يقترح Buddy لقطات لما يُقال، سطرًا بسطر.",
+  "Tiếng Việt": "Hãy chép lời timeline trong Phụ đề trước. Sau đó Buddy gợi ý cảnh quay cho những gì được nói, từng câu một."
+ },
+ "Transcript:": {
+  "日本語": "文字起こし:",
+  "Español": "Transcripción:",
+  "Deutsch": "Transkript:",
+  "Français": "Transcription :",
+  "한국어": "받아쓴 글:",
+  "中文": "转写稿：",
+  "العربية": "النص المفرّغ:",
+  "Tiếng Việt": "Bản chép lời:"
+ },
+ "Nothing indexed to suggest.": {
+  "日本語": "提案できるインデックス化済みの映像がありません。",
+  "Español": "No hay nada indexado que sugerir.",
+  "Deutsch": "Nichts Indexiertes zum Vorschlagen.",
+  "Français": "Rien d'indexé à proposer.",
+  "한국어": "제안할 색인된 영상이 없습니다.",
+  "中文": "没有已建立索引的内容可推荐。",
+  "العربية": "لا شيء مفهرس لاقتراحه.",
+  "Tiếng Việt": "Chưa có gì được lập chỉ mục để gợi ý."
+ },
+ "Index the Media Pool's clips above, then read the transcript again.": {
+  "日本語": "上でメディアプールのクリップをインデックス化してから、文字起こしを読み込み直してください。",
+  "Español": "Indexa arriba los clips del Grupo de medios y vuelve a leer la transcripción.",
+  "Deutsch": "Indexieren Sie oben die Clips des Media Pools und lesen Sie dann das Transkript erneut.",
+  "Français": "Indexez ci-dessus les clips du Pool de médias, puis relisez la transcription.",
+  "한국어": "위에서 미디어 풀의 클립을 색인한 다음 받아쓴 글을 다시 읽으세요.",
+  "中文": "请先在上方为媒体池的片段建立索引，然后重新读取转写稿。",
+  "العربية": "افهرس مقاطع مجمع الوسائط أعلاه، ثم اقرأ النص المفرّغ مجددًا.",
+  "Tiếng Việt": "Hãy lập chỉ mục các clip của Media Pool ở trên, rồi đọc lại bản chép lời."
+ },
+ "Connect to Resolve to search its Media Pool.": {
+  "日本語": "メディアプールを検索するには Resolve に接続してください。",
+  "Español": "Conéctate a Resolve para buscar en su Grupo de medios.",
+  "Deutsch": "Verbinden Sie sich mit Resolve, um dessen Media Pool zu durchsuchen.",
+  "Français": "Connectez-vous à Resolve pour rechercher dans son Pool de médias.",
+  "한국어": "미디어 풀을 검색하려면 Resolve에 연결하세요.",
+  "中文": "请连接到 Resolve 以搜索其媒体池。",
+  "العربية": "اتصل بـ Resolve للبحث في مجمع الوسائط.",
+  "Tiếng Việt": "Hãy kết nối với Resolve để tìm trong Media Pool của nó."
+ },
+ "Could not read the Media Pool: {t_error}": {
+  "日本語": "メディアプールを読み込めませんでした: {t_error}",
+  "Español": "No se pudo leer el Grupo de medios: {t_error}",
+  "Deutsch": "Der Media Pool konnte nicht gelesen werden: {t_error}",
+  "Français": "Impossible de lire le Pool de médias : {t_error}",
+  "한국어": "미디어 풀을 읽을 수 없습니다: {t_error}",
+  "中文": "无法读取媒体池：{t_error}",
+  "العربية": "تعذرت قراءة مجمع الوسائط: {t_error}",
+  "Tiếng Việt": "Không thể đọc Media Pool: {t_error}"
+ },
+ "Couldn't find it in the Media Pool: {t_error}": {
+  "日本語": "メディアプールで見つけられませんでした: {t_error}",
+  "Español": "No se pudo encontrar en el Grupo de medios: {t_error}",
+  "Deutsch": "Im Media Pool nicht gefunden: {t_error}",
+  "Français": "Introuvable dans le Pool de médias : {t_error}",
+  "한국어": "미디어 풀에서 찾을 수 없습니다: {t_error}",
+  "中文": "无法在媒体池中找到它：{t_error}",
+  "العربية": "تعذر العثور عليه في مجمع الوسائط: {t_error}",
+  "Tiếng Việt": "Không tìm thấy trong Media Pool: {t_error}"
+ },
+ "Selected in the Media Pool, in {bin}.": {
+  "日本語": "メディアプールの {bin} で選択しました。",
+  "Español": "Seleccionado en el Grupo de medios, en {bin}.",
+  "Deutsch": "Im Media Pool ausgewählt, in {bin}.",
+  "Français": "Sélectionné dans le Pool de médias, dans {bin}.",
+  "한국어": "미디어 풀의 {bin}에서 선택했습니다.",
+  "中文": "已在媒体池的 {bin} 中选中。",
+  "العربية": "تم تحديده في مجمع الوسائط، في {bin}.",
+  "Tiếng Việt": "Đã chọn trong Media Pool, ở {bin}."
+ },
+ "Selected in the Media Pool.": {
+  "日本語": "メディアプールで選択しました。",
+  "Español": "Seleccionado en el Grupo de medios.",
+  "Deutsch": "Im Media Pool ausgewählt.",
+  "Français": "Sélectionné dans le Pool de médias.",
+  "한국어": "미디어 풀에서 선택했습니다.",
+  "中文": "已在媒体池中选中。",
+  "العربية": "تم تحديده في مجمع الوسائط.",
+  "Tiếng Việt": "Đã chọn trong Media Pool."
+ },
+ "Couldn't place it: {t_error}": {
+  "日本語": "配置できませんでした: {t_error}",
+  "Español": "No se pudo colocar: {t_error}",
+  "Deutsch": "Konnte nicht platziert werden: {t_error}",
+  "Français": "Impossible de le placer : {t_error}",
+  "한국어": "배치할 수 없습니다: {t_error}",
+  "中文": "无法放置：{t_error}",
+  "العربية": "تعذر وضعه: {t_error}",
+  "Tiếng Việt": "Không thể đặt: {t_error}"
+ },
+ "Placed on V{track}.": {
+  "日本語": "V{track} に配置しました。",
+  "Español": "Colocado en V{track}.",
+  "Deutsch": "Auf V{track} platziert.",
+  "Français": "Placé sur V{track}.",
+  "한국어": "V{track}에 배치했습니다.",
+  "中文": "已放置在 V{track}。",
+  "العربية": "تم وضعه على V{track}.",
+  "Tiếng Việt": "Đã đặt trên V{track}."
+ },
+ "The open Resolve project changed. Refresh Footage Search first.": {
+  "日本語": "開いている Resolve プロジェクトが変わりました。先に映像検索を更新してください。",
+  "Español": "El proyecto abierto en Resolve ha cambiado. Actualiza primero la Búsqueda de metraje.",
+  "Deutsch": "Das in Resolve geöffnete Projekt hat sich geändert. Aktualisieren Sie zuerst die Materialsuche.",
+  "Français": "Le projet ouvert dans Resolve a changé. Actualisez d'abord la Recherche de rushes.",
+  "한국어": "열려 있는 Resolve 프로젝트가 바뀌었습니다. 먼저 영상 검색을 새로 고치세요.",
+  "中文": "打开的 Resolve 项目已更改。请先刷新“视频素材搜索”。",
+  "العربية": "تغيّر مشروع Resolve المفتوح. حدّث «البحث في اللقطات» أولًا.",
+  "Tiếng Việt": "Dự án Resolve đang mở đã thay đổi. Hãy làm mới Tìm cảnh quay trước."
+ },
+ "Resolve wouldn't add a video track for it.": {
+  "日本語": "Resolve がそのためのビデオトラックを追加しませんでした。",
+  "Español": "Resolve no quiso añadir una pista de vídeo para ello.",
+  "Deutsch": "Resolve hat dafür keine Videospur hinzugefügt.",
+  "Français": "Resolve n'a pas voulu ajouter de piste vidéo pour cela.",
+  "한국어": "Resolve가 이를 위한 비디오 트랙을 추가하지 않았습니다.",
+  "中文": "Resolve 没有为它添加视频轨道。",
+  "العربية": "لم يُضف Resolve مسار فيديو له.",
+  "Tiếng Việt": "Resolve không thêm track video cho nó."
+ },
+ "Resolve didn't place the clip.": {
+  "日本語": "Resolve がクリップを配置しませんでした。",
+  "Español": "Resolve no colocó el clip.",
+  "Deutsch": "Resolve hat den Clip nicht platziert.",
+  "Français": "Resolve n'a pas placé le clip.",
+  "한국어": "Resolve가 클립을 배치하지 않았습니다.",
+  "中文": "Resolve 没有放置该片段。",
+  "العربية": "لم يضع Resolve المقطع.",
+  "Tiếng Việt": "Resolve không đặt clip."
+ },
+ "Resolve put the clip somewhere else, so it was taken off again.": {
+  "日本語": "Resolve がクリップを別の場所に置いたため、取り除きました。",
+  "Español": "Resolve puso el clip en otro sitio, así que se ha vuelto a quitar.",
+  "Deutsch": "Resolve hat den Clip an eine andere Stelle gelegt, daher wurde er wieder entfernt.",
+  "Français": "Resolve a placé le clip ailleurs, il a donc été retiré.",
+  "한국어": "Resolve가 클립을 다른 곳에 놓아서 다시 뺐습니다.",
+  "中文": "Resolve 把片段放到了别处，所以已将其移除。",
+  "العربية": "وضع Resolve المقطع في مكان آخر، لذا أُزيل مجددًا.",
+  "Tiếng Việt": "Resolve đặt clip ở chỗ khác, nên nó đã được gỡ ra."
+ },
+ "That clip isn't in the Media Pool any more.": {
+  "日本語": "そのクリップはもうメディアプールにありません。",
+  "Español": "Ese clip ya no está en el Grupo de medios.",
+  "Deutsch": "Dieser Clip ist nicht mehr im Media Pool.",
+  "Français": "Ce clip n'est plus dans le Pool de médias.",
+  "한국어": "그 클립은 더 이상 미디어 풀에 없습니다.",
+  "中文": "该片段已不在媒体池中。",
+  "العربية": "لم يعد ذلك المقطع في مجمع الوسائط.",
+  "Tiếng Việt": "Clip đó không còn trong Media Pool nữa."
+ },
+ "Open a project in Resolve first.": {
+  "日本語": "先に Resolve でプロジェクトを開いてください。",
+  "Español": "Abre primero un proyecto en Resolve.",
+  "Deutsch": "Öffnen Sie zuerst ein Projekt in Resolve.",
+  "Français": "Ouvrez d'abord un projet dans Resolve.",
+  "한국어": "먼저 Resolve에서 프로젝트를 여세요.",
+  "中文": "请先在 Resolve 中打开项目。",
+  "العربية": "افتح مشروعًا في Resolve أولًا.",
+  "Tiếng Việt": "Hãy mở một dự án trong Resolve trước."
+ },
+ "Connect Buddy to Resolve first.": {
+  "日本語": "先に Buddy を Resolve に接続してください。",
+  "Español": "Conecta primero Buddy a Resolve.",
+  "Deutsch": "Verbinden Sie Buddy zuerst mit Resolve.",
+  "Français": "Connectez d'abord Buddy à Resolve.",
+  "한국어": "먼저 Buddy를 Resolve에 연결하세요.",
+  "中文": "请先将 Buddy 连接到 Resolve。",
+  "العربية": "صِل Buddy بـ Resolve أولًا.",
+  "Tiếng Việt": "Hãy kết nối Buddy với Resolve trước."
+ },
+ "Index kept in {folder}.": {
+  "日本語": "インデックスの保存先: {folder}。",
+  "Español": "Índice guardado en {folder}.",
+  "Deutsch": "Index liegt in {folder}.",
+  "Français": "Index conservé dans {folder}.",
+  "한국어": "색인 보관 위치: {folder}.",
+  "中文": "索引保存在 {folder}。",
+  "العربية": "الفهرس محفوظ في {folder}.",
+  "Tiếng Việt": "Chỉ mục được lưu trong {folder}."
+ },
+ "Where this project's index is kept": {
+  "日本語": "このプロジェクトのインデックスの保存先",
+  "Español": "Dónde se guarda el índice de este proyecto",
+  "Deutsch": "Wo der Index dieses Projekts liegt",
+  "Français": "Où l'index de ce projet est conservé",
+  "한국어": "이 프로젝트의 색인 보관 위치",
+  "中文": "此项目索引的保存位置",
+  "العربية": "مكان حفظ فهرس هذا المشروع",
+  "Tiếng Việt": "Nơi lưu chỉ mục của dự án này"
+ },
+ "Keep this project's index": {
+  "日本語": "このプロジェクトのインデックスの保存先",
+  "Español": "Guardar el índice de este proyecto",
+  "Deutsch": "Index dieses Projekts aufbewahren",
+  "Français": "Conserver l'index de ce projet",
+  "한국어": "이 프로젝트의 색인 보관",
+  "中文": "此项目的索引保存在",
+  "العربية": "حفظ فهرس هذا المشروع",
+  "Tiếng Việt": "Lưu chỉ mục của dự án này"
+ },
+ "In Buddy's folder": {
+  "日本語": "Buddy のフォルダー",
+  "Español": "En la carpeta de Buddy",
+  "Deutsch": "In Buddys Ordner",
+  "Français": "Dans le dossier de Buddy",
+  "한국어": "Buddy 폴더에",
+  "中文": "Buddy 的文件夹中",
+  "العربية": "في مجلد Buddy",
+  "Tiếng Việt": "Trong thư mục của Buddy"
+ },
+ "In a folder you choose…": {
+  "日本語": "選択したフォルダー…",
+  "Español": "En una carpeta que elijas…",
+  "Deutsch": "In einem Ordner Ihrer Wahl…",
+  "Français": "Dans un dossier de votre choix…",
+  "한국어": "직접 고른 폴더에…",
+  "中文": "您选择的文件夹中…",
+  "العربية": "في مجلد تختاره…",
+  "Tiếng Việt": "Trong thư mục bạn chọn…"
+ },
+ "In another folder…": {
+  "日本語": "別のフォルダー…",
+  "Español": "En otra carpeta…",
+  "Deutsch": "In einem anderen Ordner…",
+  "Français": "Dans un autre dossier…",
+  "한국어": "다른 폴더에…",
+  "中文": "其他文件夹中…",
+  "العربية": "في مجلد آخر…",
+  "Tiếng Việt": "Trong thư mục khác…"
+ },
+ "Keep this project's index in…": {
+  "日本語": "このプロジェクトのインデックスの保存先…",
+  "Español": "Guardar el índice de este proyecto en…",
+  "Deutsch": "Index dieses Projekts aufbewahren in…",
+  "Français": "Conserver l'index de ce projet dans…",
+  "한국어": "이 프로젝트의 색인을 보관할 위치…",
+  "中文": "将此项目的索引保存在…",
+  "العربية": "حفظ فهرس هذا المشروع في…",
+  "Tiếng Việt": "Lưu chỉ mục của dự án này trong…"
+ },
+ "This project's index is kept in {folder}, which isn't there now.": {
+  "日本語": "このプロジェクトのインデックスは {folder} に保存されていますが、現在そのフォルダーが見つかりません。",
+  "Español": "El índice de este proyecto se guarda en {folder}, que ahora no está disponible.",
+  "Deutsch": "Der Index dieses Projekts liegt in {folder}, das gerade nicht vorhanden ist.",
+  "Français": "L'index de ce projet est conservé dans {folder}, qui est introuvable pour le moment.",
+  "한국어": "이 프로젝트의 색인은 {folder}에 보관되어 있는데, 지금은 그 폴더가 없습니다.",
+  "中文": "此项目的索引保存在 {folder}，但该文件夹现在不存在。",
+  "العربية": "فهرس هذا المشروع محفوظ في {folder}، وهو غير موجود الآن.",
+  "Tiếng Việt": "Chỉ mục của dự án này được lưu trong {folder}, hiện không có ở đó."
+ },
+ "Stop indexing first.": {
+  "日本語": "先にインデックス化を停止してください。",
+  "Español": "Detén primero la indexación.",
+  "Deutsch": "Stoppen Sie zuerst die Indexierung.",
+  "Français": "Arrêtez d'abord l'indexation.",
+  "한국어": "먼저 색인을 중지하세요.",
+  "中文": "请先停止建立索引。",
+  "العربية": "أوقف الفهرسة أولًا.",
+  "Tiếng Việt": "Hãy dừng lập chỉ mục trước."
+ },
+ "Couldn't use that folder for the index: {error}": {
+  "日本語": "そのフォルダーをインデックスに使用できませんでした: {error}",
+  "Español": "No se pudo usar esa carpeta para el índice: {error}",
+  "Deutsch": "Dieser Ordner konnte nicht für den Index verwendet werden: {error}",
+  "Français": "Impossible d'utiliser ce dossier pour l'index : {error}",
+  "한국어": "그 폴더를 색인에 사용할 수 없습니다: {error}",
+  "中文": "无法将该文件夹用于索引：{error}",
+  "العربية": "تعذر استخدام ذلك المجلد للفهرس: {error}",
+  "Tiếng Việt": "Không thể dùng thư mục đó cho chỉ mục: {error}"
+ },
+ "This project's index is now kept in {folder}.": {
+  "日本語": "このプロジェクトのインデックスは {folder} に保存されるようになりました。",
+  "Español": "El índice de este proyecto se guarda ahora en {folder}.",
+  "Deutsch": "Der Index dieses Projekts liegt jetzt in {folder}.",
+  "Français": "L'index de ce projet est désormais conservé dans {folder}.",
+  "한국어": "이제 이 프로젝트의 색인은 {folder}에 보관됩니다.",
+  "中文": "此项目的索引现在保存在 {folder}。",
+  "العربية": "فهرس هذا المشروع محفوظ الآن في {folder}.",
+  "Tiếng Việt": "Chỉ mục của dự án này giờ được lưu trong {folder}."
+ },
+ "This project's index is now kept in Buddy's folder.": {
+  "日本語": "このプロジェクトのインデックスは Buddy のフォルダーに保存されるようになりました。",
+  "Español": "El índice de este proyecto se guarda ahora en la carpeta de Buddy.",
+  "Deutsch": "Der Index dieses Projekts liegt jetzt in Buddys Ordner.",
+  "Français": "L'index de ce projet est désormais conservé dans le dossier de Buddy.",
+  "한국어": "이제 이 프로젝트의 색인은 Buddy 폴더에 보관됩니다.",
+  "中文": "此项目的索引现在保存在 Buddy 的文件夹中。",
+  "العربية": "فهرس هذا المشروع محفوظ الآن في مجلد Buddy.",
+  "Tiếng Việt": "Chỉ mục của dự án này giờ được lưu trong thư mục của Buddy."
+ },
+ "Couldn't open the index: {error}": {
+  "日本語": "インデックスを開けませんでした: {error}",
+  "Español": "No se pudo abrir el índice: {error}",
+  "Deutsch": "Der Index konnte nicht geöffnet werden: {error}",
+  "Français": "Impossible d'ouvrir l'index : {error}",
+  "한국어": "색인을 열 수 없습니다: {error}",
+  "中文": "无法打开索引：{error}",
+  "العربية": "تعذر فتح الفهرس: {error}",
+  "Tiếng Việt": "Không thể mở chỉ mục: {error}"
+ }
+}

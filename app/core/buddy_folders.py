@@ -41,6 +41,7 @@ FOLDERS = {
     "audio_assistant": ("Audio Assistant", "Waveforms and renders"),
     "audit": ("Audit", "Renders it checks"),
     "dailies": ("Dailies", "Transcripts"),
+    "media_search": ("Search by description", "The index of the pictures, footage and sound Buddy has looked at"),
     "web": ("Web", "Browsing data: cookies, sign-ins, cache"),
     "web-profiles": ("Web profiles", "Each other profile's browsing data"),
     "web-history": ("Web history", "The pages visited, by profile"),

@@ -169,7 +169,9 @@ class BuddyEmbedder(Embedder):
     def __init__(self, model_path: Path | None):
         self.model_path = Path(model_path) if model_path else None
         name = self.model_path.stem if self.model_path else ""
-        self.model_name = EMBED_MODEL if "embeddinggemma" in name.lower() else name
+        # EmbeddingGemma 2 is another model: its vectors aren't the bundle's.
+        first = "embeddinggemma" in name.lower() and not name.lower().startswith("embeddinggemma-2")
+        self.model_name = EMBED_MODEL if first else name
         self.label = ("Buddy's own EmbeddingGemma" if self.model_name == EMBED_MODEL
                       else f"Buddy's own {self.model_path.name}" if self.model_path else "Buddy's own model")
 
@@ -196,13 +198,15 @@ class BuddyEmbedder(Embedder):
 def chosen_model_file(settings) -> Path | None:
     """The models folder's file to embed with: the one picked in Settings
     if it's still there, else the first whose name says it embeds - a chat
-    model dropped in beside it is never guessed to be one."""
+    model dropped in beside it is never guessed to be one, nor media
+    search's model, whose vectors aren't the manual's."""
     files = local_llama.model_files()
     picked = (settings.get("embed_model_file") or "").strip()
     for path in files:
         if path.name == picked:
             return path
-    return next((p for p in files if "embed" in p.name.lower()), None)
+    media = {item.name for item in local_llama.MEDIA_SEARCH_FILES}
+    return next((p for p in files if "embed" in p.name.lower() and p.name not in media), None)
 
 
 def from_settings(settings) -> Embedder | None:

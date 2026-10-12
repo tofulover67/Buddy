@@ -1359,5 +1359,165 @@
   "中文": "{count} 个未显示——被上方的类型或搜索隐藏了。",
   "العربية": "{count} غير ظاهرة – يخفيها النوع أو البحث في الأعلى.",
   "Tiếng Việt": "{count} mục không hiển thị – loại hoặc tìm kiếm phía trên đang ẩn chúng."
+ },
+ "Search by description": {
+  "日本語": "説明で検索",
+  "Español": "Buscar por descripción",
+  "Deutsch": "Nach Beschreibung suchen",
+  "Français": "Rechercher par description",
+  "한국어": "설명으로 검색",
+  "中文": "按描述搜索",
+  "العربية": "البحث بالوصف",
+  "Tiếng Việt": "Tìm theo mô tả"
+ },
+ "Search by description: find pictures, footage and sounds by what's in them, not by their names": {
+  "日本語": "説明で検索: 画像・映像・音を、名前ではなく内容で探します",
+  "Español": "Buscar por descripción: encuentra imágenes, metraje y sonidos por lo que contienen, no por su nombre",
+  "Deutsch": "Nach Beschreibung suchen: Bilder, Material und Töne nach ihrem Inhalt finden, nicht nach ihrem Namen",
+  "Français": "Rechercher par description : trouvez images, rushes et sons par leur contenu, pas par leur nom",
+  "한국어": "설명으로 검색: 그림, 영상, 소리를 이름이 아니라 내용으로 찾습니다",
+  "中文": "按描述搜索：按内容而不是名称查找图片、视频素材和声音",
+  "العربية": "البحث بالوصف: اعثر على الصور واللقطات والأصوات بمحتواها لا بأسمائها",
+  "Tiếng Việt": "Tìm theo mô tả: tìm hình ảnh, cảnh quay và âm thanh theo nội dung, không theo tên"
+ },
+ "Describe what you're looking for": {
+  "日本語": "探しているものを説明してください",
+  "Español": "Describe lo que buscas",
+  "Deutsch": "Beschreiben Sie, was Sie suchen",
+  "Français": "Décrivez ce que vous cherchez",
+  "한국어": "찾는 것을 설명하세요",
+  "中文": "描述您要找的内容",
+  "العربية": "صِف ما تبحث عنه",
+  "Tiếng Việt": "Mô tả thứ bạn đang tìm"
+ },
+ "Like": {
+  "日本語": "類似:",
+  "Español": "Parecido a",
+  "Deutsch": "Ähnlich wie",
+  "Français": "Semblable à",
+  "한국어": "비슷한 것:",
+  "中文": "类似于",
+  "العربية": "مشابه لـ",
+  "Tiếng Việt": "Giống"
+ },
+ "Describe what you're looking for and Buddy finds the pictures, footage and sounds that match. It needs a model that runs on this computer – a one-time download of {mb} MB.": {
+  "日本語": "探しているものを説明すると、Buddy が一致する画像・映像・音を見つけます。このコンピューター上で動くモデルが必要です – 初回のみ {mb} MB をダウンロードします。",
+  "Español": "Describe lo que buscas y Buddy encuentra las imágenes, el metraje y los sonidos que coinciden. Necesita un modelo que se ejecuta en este ordenador: una descarga única de {mb} MB.",
+  "Deutsch": "Beschreiben Sie, was Sie suchen, und Buddy findet die passenden Bilder, das Material und die Töne. Dafür braucht es ein Modell, das auf diesem Computer läuft – ein einmaliger Download von {mb} MB.",
+  "Français": "Décrivez ce que vous cherchez et Buddy trouve les images, les rushes et les sons correspondants. Il faut un modèle qui s'exécute sur cet ordinateur – un téléchargement unique de {mb} Mo.",
+  "한국어": "찾는 것을 설명하면 Buddy가 맞는 그림, 영상, 소리를 찾아 줍니다. 이 컴퓨터에서 실행되는 모델이 필요합니다 – 한 번만 {mb} MB를 내려받습니다.",
+  "中文": "描述您要找的内容，Buddy 会找出相符的图片、视频素材和声音。这需要一个在这台电脑上运行的模型 – 仅需一次性下载 {mb} MB。",
+  "العربية": "صِف ما تبحث عنه وسيعثر Buddy على الصور واللقطات والأصوات المطابقة. يحتاج ذلك إلى نموذج يعمل على هذا الحاسوب – تنزيل لمرة واحدة بحجم {mb} MB.",
+  "Tiếng Việt": "Mô tả thứ bạn đang tìm và Buddy sẽ tìm hình ảnh, cảnh quay và âm thanh phù hợp. Cần một mô hình chạy trên máy tính này – tải một lần {mb} MB."
+ },
+ "Getting your library ready to search: {done} of {total} – {name}": {
+  "日本語": "ライブラリを検索できるよう準備中: {done} / {total} – {name}",
+  "Español": "Preparando tu biblioteca para la búsqueda: {done} de {total} – {name}",
+  "Deutsch": "Bibliothek wird für die Suche vorbereitet: {done} von {total} – {name}",
+  "Français": "Préparation de votre bibliothèque pour la recherche : {done} sur {total} – {name}",
+  "한국어": "라이브러리를 검색할 수 있게 준비하는 중: {done} / {total} – {name}",
+  "中文": "正在让素材库可供搜索：{done} / {total} – {name}",
+  "العربية": "جارٍ تجهيز مكتبتك للبحث: {done} من {total} – {name}",
+  "Tiếng Việt": "Đang chuẩn bị thư viện để tìm kiếm: {done} / {total} – {name}"
+ },
+ "Getting your library ready to search – {name}": {
+  "日本語": "ライブラリを検索できるよう準備中 – {name}",
+  "Español": "Preparando tu biblioteca para la búsqueda – {name}",
+  "Deutsch": "Bibliothek wird für die Suche vorbereitet – {name}",
+  "Français": "Préparation de votre bibliothèque pour la recherche – {name}",
+  "한국어": "라이브러리를 검색할 수 있게 준비하는 중 – {name}",
+  "中文": "正在让素材库可供搜索 – {name}",
+  "العربية": "جارٍ تجهيز مكتبتك للبحث – {name}",
+  "Tiếng Việt": "Đang chuẩn bị thư viện để tìm kiếm – {name}"
+ },
+ "Closest first.": {
+  "日本語": "近い順に表示しています。",
+  "Español": "Los más parecidos primero.",
+  "Deutsch": "Die ähnlichsten zuerst.",
+  "Français": "Les plus proches en premier.",
+  "한국어": "가장 가까운 것부터 보여 줍니다.",
+  "中文": "最接近的排在前面。",
+  "العربية": "الأقرب أولًا.",
+  "Tiếng Việt": "Gần nhất xếp trước."
+ },
+ "{indexed} of {library} assets can be found by description.": {
+  "日本語": "{library} 個中 {indexed} 個のアセットを説明で検索できます。",
+  "Español": "{indexed} de {library} recursos se pueden encontrar por descripción.",
+  "Deutsch": "{indexed} von {library} Assets lassen sich nach Beschreibung finden.",
+  "Français": "{indexed} ressources sur {library} peuvent être trouvées par description.",
+  "한국어": "에셋 {library}개 중 {indexed}개를 설명으로 찾을 수 있습니다.",
+  "中文": "{library} 个素材中有 {indexed} 个可以按描述找到。",
+  "العربية": "يمكن العثور على {indexed} من {library} من الأصول بالوصف.",
+  "Tiếng Việt": "Có thể tìm {indexed} trong {library} tài nguyên theo mô tả."
+ },
+ "Type what you're looking for – “rain on a window”, “a crowd cheering”.": {
+  "日本語": "探しているものを入力してください – 「窓を打つ雨」「歓声を上げる群衆」など。",
+  "Español": "Escribe lo que buscas: “lluvia en una ventana”, “una multitud vitoreando”.",
+  "Deutsch": "Geben Sie ein, was Sie suchen – „Regen an einem Fenster“, „eine jubelnde Menge“.",
+  "Français": "Saisissez ce que vous cherchez – « pluie sur une vitre », « une foule qui acclame ».",
+  "한국어": "찾는 것을 입력하세요 – “창문에 내리는 비”, “환호하는 군중”.",
+  "中文": "输入您要找的内容 – “窗上的雨”“欢呼的人群”。",
+  "العربية": "اكتب ما تبحث عنه – «مطر على نافذة»، «حشد يهتف».",
+  "Tiếng Việt": "Nhập thứ bạn đang tìm – “mưa trên cửa sổ”, “đám đông reo hò”."
+ },
+ "{indexed} of {library} assets can be found by description. Footage and most sound files need ffmpeg installed to be read.": {
+  "日本語": "{library} 個中 {indexed} 個のアセットを説明で検索できます。映像とほとんどの音声ファイルを読み取るには ffmpeg のインストールが必要です。",
+  "Español": "{indexed} de {library} recursos se pueden encontrar por descripción. Para leer el metraje y la mayoría de los archivos de sonido hace falta tener ffmpeg instalado.",
+  "Deutsch": "{indexed} von {library} Assets lassen sich nach Beschreibung finden. Für Material und die meisten Tondateien muss ffmpeg installiert sein.",
+  "Français": "{indexed} ressources sur {library} peuvent être trouvées par description. Les rushes et la plupart des fichiers son nécessitent ffmpeg pour être lus.",
+  "한국어": "에셋 {library}개 중 {indexed}개를 설명으로 찾을 수 있습니다. 영상과 대부분의 소리 파일을 읽으려면 ffmpeg가 설치되어 있어야 합니다.",
+  "中文": "{library} 个素材中有 {indexed} 个可以按描述找到。读取视频素材和大多数声音文件需要安装 ffmpeg。",
+  "العربية": "يمكن العثور على {indexed} من {library} من الأصول بالوصف. تحتاج اللقطات ومعظم ملفات الصوت إلى تثبيت ffmpeg لقراءتها.",
+  "Tiếng Việt": "Có thể tìm {indexed} trong {library} tài nguyên theo mô tả. Cảnh quay và hầu hết tệp âm thanh cần cài ffmpeg để đọc."
+ },
+ "Index the rest": {
+  "日本語": "残りをインデックス化",
+  "Español": "Indexar el resto",
+  "Deutsch": "Rest indexieren",
+  "Français": "Indexer le reste",
+  "한국어": "나머지 색인하기",
+  "中文": "为其余部分建立索引",
+  "العربية": "فهرسة البقية",
+  "Tiếng Việt": "Lập chỉ mục phần còn lại"
+ },
+ "Nothing like that yet": {
+  "日本語": "それに近いものはまだありません",
+  "Español": "Todavía no hay nada parecido",
+  "Deutsch": "Noch nichts Ähnliches",
+  "Français": "Rien de tel pour l'instant",
+  "한국어": "아직 비슷한 것이 없음",
+  "中文": "还没有类似的内容",
+  "العربية": "لا شيء مشابه بعد",
+  "Tiếng Việt": "Chưa có gì giống vậy"
+ },
+ "Only assets Buddy has already looked at can be found by description.": {
+  "日本語": "説明で検索できるのは、Buddy がすでに確認したアセットだけです。",
+  "Español": "Solo se pueden encontrar por descripción los recursos que Buddy ya ha examinado.",
+  "Deutsch": "Nur Assets, die Buddy bereits angesehen hat, lassen sich nach Beschreibung finden.",
+  "Français": "Seules les ressources que Buddy a déjà examinées peuvent être trouvées par description.",
+  "한국어": "Buddy가 이미 살펴본 에셋만 설명으로 찾을 수 있습니다.",
+  "中文": "只有 Buddy 已经查看过的素材才能按描述找到。",
+  "العربية": "لا يمكن العثور بالوصف إلا على الأصول التي سبق أن فحصها Buddy.",
+  "Tiếng Việt": "Chỉ những tài nguyên Buddy đã xem mới tìm được theo mô tả."
+ },
+ "More like this": {
+  "日本語": "これに似たもの",
+  "Español": "Más como este",
+  "Deutsch": "Mehr davon",
+  "Français": "Plus comme ceci",
+  "한국어": "이와 비슷한 것 더 보기",
+  "中文": "更多类似内容",
+  "العربية": "المزيد مثل هذا",
+  "Tiếng Việt": "Thêm cái giống thế này"
+ },
+ "Find assets that look or sound like this one": {
+  "日本語": "これに見た目や音が似ているアセットを探します",
+  "Español": "Busca recursos que se vean o suenen como este",
+  "Deutsch": "Assets finden, die so aussehen oder klingen wie dieses",
+  "Français": "Trouver des ressources qui ressemblent à celle-ci, à l'image ou au son",
+  "한국어": "이것과 비슷하게 보이거나 들리는 에셋 찾기",
+  "中文": "查找看起来或听起来与此相似的素材",
+  "العربية": "ابحث عن أصول تشبه هذا شكلًا أو صوتًا",
+  "Tiếng Việt": "Tìm tài nguyên trông hoặc nghe giống cái này"
  }
 }

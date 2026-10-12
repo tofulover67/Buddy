@@ -20,8 +20,9 @@ played. Here only this process waits; Buddy waits on a pipe, GIL free.
 
 Only jobs named in JOBS run - Buddy's Qt-free modules, nothing else. All
 are reads but Dailies' apply, which writes the review notes, Audit's
-Go to, which moves the playhead, and its fixes, and Generative's swap and
-add, which put a cleaned still or a cut-out in the Media Pool.
+Go to, which moves the playhead, and its fixes, Generative's swap and
+add, which put a cleaned still or a cut-out in the Media Pool, and Footage
+Search's place, which puts a found clip on the timeline.
 """
 
 import json
@@ -43,6 +44,10 @@ JOBS = {
     # process's scan found, and the write is just as held while Resolve plays.
     "dailies.apply": ("pages.dailies.resolve_ext", "apply_by_id"),
     "dailies.reveal": ("pages.dailies.resolve_ext", "reveal_by_id"),
+    "footage.scan": ("pages.footage_search.resolve_ext", "scan"),
+    "footage.reveal": ("pages.footage_search.resolve_ext", "reveal"),
+    # Footage Search's Place: one clip onto a track above V1, only when the person presses it.
+    "footage.place": ("pages.footage_search.resolve_ext", "place"),
     "resolve.where": ("core.resolve_where", "where"),
     "stills.markers": ("pages.stills_exporter.resolve_ext", "timeline_markers"),
     "chapters.markers": ("pages.youtube_chapters.resolve_ext", "read_current"),

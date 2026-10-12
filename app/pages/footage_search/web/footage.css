@@ -1,0 +1,43 @@
+/* Footage Search's layout. Colours come from buddy.css's theme variables. */
+
+.page { gap: 10px; overflow: hidden; }
+.page-head { flex-wrap: wrap; }
+.views { border-bottom: 0; }
+
+.status { flex: none; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; }
+.status-text { flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.status-text > div { overflow-wrap: anywhere; }
+.status-text .bad { color: var(--danger-text); }
+.status-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.pane { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.pane[hidden] { display: none; }
+.toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 10px 12px; border-bottom: var(--bw) solid var(--card-border);
+}
+.query { flex: 1 1 260px; min-width: 0; }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; }
+
+/* A moment found: its frame, where it is, what to do with it. */
+.shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.shot {
+    display: flex; flex-direction: column; min-width: 0; overflow: hidden;
+    border: var(--bw) solid var(--card-border); border-radius: var(--r-md); background: var(--surface);
+}
+.shot .frame { aspect-ratio: 16 / 9; background: var(--raised-bg); display: grid; place-items: center; overflow: hidden; }
+.shot .frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.shot .frame .icon-svg { width: 32px; height: 32px; color: var(--text-dim); }
+.shot .meta { padding: 8px 10px 4px; min-width: 0; }
+.shot .name { font-weight: 700; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shot .where { font-size: var(--fs-xs); color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shot .acts { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 10px 10px; }
+.shot .acts .btn { flex: 1 1 auto; }
+
+/* B-roll: a line of the transcript, then the moments suggested for it. */
+.line { padding: 4px 0 16px; }
+.line + .line { border-top: var(--bw) solid color-mix(in srgb, var(--card-border) 60%, transparent); padding-top: 14px; }
+.said { display: flex; gap: 10px; align-items: baseline; margin-bottom: 8px; min-width: 0; }
+.said .time { flex: none; color: var(--text-dim); font-variant-numeric: tabular-nums; font-size: var(--fs-sm); }
+.said .text { color: var(--text-strong); overflow-wrap: anywhere; }
+.line .shots { grid-template-columns: repeat(auto-fill, minmax(170px, 240px)); }

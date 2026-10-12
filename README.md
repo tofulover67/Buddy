@@ -18,12 +18,13 @@ Buddy's integrated tools include the following:
 - Audio Assistant (new; an easier alternative to the Fairlight page for a clip's audio. Its Timeline tab mirrors the audio tracks with each clip's waveform, and sets clip volume, pan, fades, loudness to a target, Voice Isolation and the Dialogue Leveler, and a volume curve drawn on the clip that becomes Resolve keyframes. Buddy's own effects - rumble, hum, noise, de-esser, clarity, gate - heard before and after, then baked into a WAV beside the media; ducking under speech and riding a voice as editable curves; beat markers; the whole mix to a loudness target under a true-peak ceiling; an automixer for podcasts and interviews (each mic up only while its person talks, opening just before they start); and Fit to length, which ends a song on its own ending at the length wanted by cutting or repeating whole bars where the edit can't be heard)
 - Audit (new; checks the open timeline before delivery - missing media and fonts, black gaps, flash frames, things turned off, unfinished titles, to-do markers, hard-to-read subtitles, frame rates, enlarged pictures - with one-click fixes, and Check sound: the mix's clipping, true peaks and loudness against a delivery target, and each clip's recording for clipping, dropouts, one-sided stereo, phase and pops)
 - Automation (new; named lists of steps from Buddy's tools that run one after another while you do something else - Create bins, Import a folder, Make proxies, Put the bin on a timeline, Sync, Sync external audio, Collapse and Shift from Project Setup, Transcribe the timeline from Subtitles, Check the timeline from Audit, and Save a version / Remove gaps from Command Center. Each step keeps its options; some - the folder to import, say - can be asked when it runs instead. A failed step stops the run and says why, with Resume from that step, and a notification says when it's finished. See `pages/automation/` and each tool's `automation.py`)
-- Asset Manager (a library of the images, audio and video you reuse, with per-project lists)
+- Asset Manager (a library of the images, audio and video you reuse, with per-project lists. Its search can go by description instead of name - "rain on a window", "a crowd cheering" - and More like this finds what looks or sounds nearest an asset; see Search by description below)
 - Buddy Network (an anonymous chat between Buddy users; see Buddy Network below)
 - Color Palette Manager (palettes, generators, colours from images and contrast checks. Never touches your project)
 - Command Center (new; system-wide hot keys - or a Run button - for markers, jumping between them, copying the timecode or the frame, clip colours, Animation presets, saving a timeline version and removing gaps (experimental). Hot keys are Windows-only for now (`core/hotkeys.py`): a Mac has the Run buttons, and hot keys there need a version of their own (macOS asks for permission); see `pages/command_center/actions.py`)
 - Essentials (new; a calculator that also does timecode, data rate, aspect ratio, a countdown timer, notes kept per project and a world clock; see `pages/essentials/`)
 - Dailies (named source tapes, continuous Media Pool review, notes and metadata. Windows only for now - on a Mac it's a placeholder until it's been checked there)
+- Footage Search (new; find a shot in the Media Pool by describing it - "a drone shot over water" - as the moments nearest to it, each with its clip, time and frame, to select in the Media Pool or place on the timeline; and B-roll, which suggests footage for each line of the latest transcript. Windows only for now - on a Mac it's a placeholder until it's been checked there. See Search by description below and `pages/footage_search/`)
 - Games (new; Pong, Snake, Minesweeper, Solitaire, Falling blocks, 2048, Breakout, Sudoku, Checkers and Chess - Checkers and Chess against the computer or a friend; each pauses itself when you look away and keeps its best scores. Never touches your project; see `pages/games/`)
 - Generative (new; takes things out of stills on this computer, nothing uploaded. Remove: paint over what shouldn't be there and it's filled with what would be behind it, or remove the background - the subject is found by itself and saved on transparency, its edge fixed with Add and Subtract brushes. Separate: the subject and a clean background with it taken out, as two layers. Brush size and feather, Alt + scroll wheel for the size; stills open from a file or from Resolve, and can be swapped back into their Media Pool clip. See Generative below and `pages/generative/`)
 - Image Importer (images into a bin straight from the clipboard: a copied image, copied files, or an image URL)
@@ -167,8 +168,9 @@ releases are (see `app/core/updater.py`, which says where a signature would go).
 Settings > General > Backup writes one .zip of Buddy's settings and what's been
 made in it - every tool's settings, Ask Buddy's chats and instructions,
 transcripts and subtitles, palettes, time entries, Web's bookmarks and history.
-Models and AI engines (downloaded again), web sign-ins and browsing data, and
-the Buddy Network account (Account > Move to another PC moves it) are left out.
+Models and AI engines (downloaded again), search by description's index (made
+again from the files), web sign-ins and browsing data, and the Buddy Network
+account (Account > Move to another PC moves it) are left out.
 AI providers' API keys go in as Buddy keeps them: on Windows locked to the
 Windows account, so on another PC they're typed in again; on a Mac as typed,
 so keep the file private.
@@ -419,6 +421,68 @@ it, and labelled to match.
   prompts they run with are computed once and shipped in
   `pages/generative/data/`, so their 8 GB and 11 GB text encoders are never
   downloaded.
+
+## Search by description
+
+Asset Manager and Footage Search find pictures, footage and sound by what's
+in them: type a description and get the closest matches first. A model on
+this computer does it - Google's EmbeddingGemma 2, which puts text, pictures
+and sound in one space so a description lands beside what it describes - run
+by the same llama.cpp Ask Buddy's manual search uses. Nothing is uploaded.
+The code is `core/media_search/`; the manual's own search stays on the first
+EmbeddingGemma, whose vectors its index is built with.
+
+- **One-time setup**, from either tool's page: about 885 MB into
+  `~/.buddy/ask_buddy/` - the model (310 MB), the half of it that reads
+  pictures and sound (555 MB) and, if the installed one is older, llama.cpp
+  (20 MB). Each file is pinned and checked against its published checksum
+  (`pages/manual_chat/local_llama.py`); Apache 2.0 and MIT licences. An
+  llama.cpp from an earlier Buddy keeps running the manual's search until
+  then.
+- **The index** is one file, `~/.buddy/media_search/index.sqlite`, about
+  2 KB for each still, frame or window of sound. A file is read once,
+  whichever tool asked, and again only if it changes: a still as itself,
+  footage as a frame every two seconds (further apart in a long clip, 300
+  frames at most; frames that look the same as the last are skipped), sound
+  as 30-second windows. Of footage it's the keyframe at or before each
+  moment that's read - nothing more is decoded, and only that part of the
+  file is read - four at a time. Indexing runs in the background and picks
+  up where it stopped.
+- **A project's own index**: Footage Search's folder button keeps the open
+  project's index in a folder you choose instead - the job's folder on the
+  media drive - as one file, `Buddy footage index.sqlite`. What the project
+  already had indexed is copied over, not read again. On another computer,
+  or with the drive under another letter, its entries are taken over for
+  the same files where they are there (same name and size). Which folder a
+  project uses is kept in Footage Search's settings, per project; Asset
+  Manager's library stays in Buddy's own index.
+- **Speed**: on a desktop CPU the model takes a third of a second a frame
+  and 30 seconds of sound a second - footage goes in at about 5 to 8 times
+  real time. On a Windows PC with a graphics card of its own it can run on
+  the card: one more download, llama.cpp's Vulkan build (32 MB, pinned and
+  checked like the rest), offered on both pages. On an RTX 5070 Ti that's 38
+  frames a second against 3, with vectors that agree to three decimal places
+  - 4K footage at about 30 times real time, reading the frames now the
+  slower half. If the card can't run it, it goes back to the processor and
+  says so; Settings > Footage Search (or Asset Manager) switches the card
+  off. Ask Buddy's manual search stays on the CPU build either way.
+- **ffmpeg** (your own install, the one Project Setup uses) reads footage
+  and compressed sound. Without it stills and plain WAV files are still
+  indexed. Camera raw that ffmpeg can't read and image sequences aren't.
+- **Asset Manager**: the button beside the search box switches All media's
+  search to By description. The library goes into the index as it's added.
+- **Footage Search**: Index reads the open project's Media Pool clips.
+  Search lists the moments nearest a description; Find in Media Pool selects
+  the clip in Resolve, and Place puts five seconds from that moment on the
+  timeline at the playhead. B-roll reads the newest transcript Subtitles
+  made and suggests three moments for each line; Place puts one over its
+  line. Place is the only thing that changes your project: picture only, on
+  a track above V1 that's free there (or a new one), and taken off again if
+  Resolve lands it anywhere else. It finds what a frame shows, not what's
+  said.
+- **Not yet tested** on a Mac, nor against a running Resolve by anything but
+  hand - the Resolve calls are tested against a stand-in. The graphics card
+  has been run on one NVIDIA card, on Windows x64.
 
 ## Ask Buddy
 
