@@ -66,6 +66,7 @@ from pages.text_animator.subtitle_engine import (
     SubtitleExtractor,
     TextPlusGenerator,
     get_top_most_unpopulated_video_track_index,
+    normalize_line_breaks,
 )
 
 from . import drt
@@ -184,6 +185,25 @@ class TranscribeController:
             return list(tl.GetItemListInTrack("subtitle", index) or [])
         except Exception:
             return []
+
+    def track_subtitles(self, index: int = 1) -> tuple[str, list[tuple[float, float, str]]]:
+        """The open timeline's name, and the subtitles on subtitle track
+        `index` as (start, end, text) in time order - seconds from the
+        timeline's first frame, as an SRT counts them, and the text's lines
+        as they're shown. A subtitle's text is its clip's name."""
+        project = self._project()
+        tl = self._timeline(project)
+        fps, first = self._fps(tl, project), int(tl.GetStartFrame())
+        cues = []
+        for item in self._subtitle_items(tl, index):
+            try:
+                text = normalize_line_breaks(item.GetName() or "").strip()
+                start, end = int(item.GetStart()), int(item.GetEnd())
+            except Exception:
+                continue
+            if text:
+                cues.append(((start - first) / fps, (end - first) / fps, text))
+        return str(tl.GetName() or ""), sorted(cues)
 
     # ------------------------------------------------------------ render
 

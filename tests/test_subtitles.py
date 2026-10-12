@@ -216,6 +216,74 @@ class TranslationTests(unittest.TestCase):
         self.assertEqual(st._tidy("Hola,  mundo.", "spa_Latn"), "Hola, mundo.")
 
 
+class FollowingTests(unittest.TestCase):
+    """Translating subtitles that already exist: the translation follows them,
+    subtitle for subtitle, whatever the Subtitles tab is set to."""
+
+    SOURCE = [(0.0, 2.0, "Good morning everyone,\nand welcome back"), (2.1, 4.0, "to the channel. Today"),
+              (4.0, 6.5, "we're looking at the\nnew camera."), (8.0, 9.0, "Let's go!")]
+
+    @staticmethod
+    def follow(source, translations, lang="spa_Latn", cjk=False):
+        segments = [{"start": s, "end": e, "text": " ".join(t.split())} for s, e, t in source]
+        sentences = st.sentences_from_segments(segments)
+        max_chars, max_lines = st.shape_of(source)
+        style = st.Style(max_chars=max_chars, max_lines=max_lines, cjk=cjk, wide=cjk)
+        return st.followed_cues(sentences, translations, source, style, lang)
+
+    def test_each_subtitle_keeps_its_times_and_its_part_of_the_sentence(self):
+        cues = self.follow(self.SOURCE, ["Buenos días a todos, y bienvenidos de nuevo al canal.",
+                                         "Hoy vemos la cámara nueva.", "¡Vamos!"])
+        self.assertEqual([(c.start, c.end) for c in cues], [(s, e) for s, e, _t in self.SOURCE])
+        self.assertEqual([c.text.replace("\n", " ") for c in cues],
+                         ["Buenos días a todos, y bienvenidos de", "nuevo al canal. Hoy", "vemos la cámara nueva.", "¡Vamos!"])
+        self.assertEqual(st.shape_of(self.SOURCE), (22, 2))
+        for c in cues:                                    # no more lines than the source has
+            self.assertLessEqual(c.text.count("\n"), 1)
+
+    def test_a_word_a_subtitle_stays_a_word_a_subtitle(self):
+        words = [(i * 0.5, i * 0.5 + 0.5, w) for i, w in enumerate("We are looking at the new camera today.".split())]
+        cues = self.follow(words, ["Hoy miramos la cámara nueva."])           # five words for eight
+        self.assertEqual([c.text for c in cues], ["Hoy", "miramos", "la", "cámara", "nueva."])
+        self.assertEqual((cues[0].start, cues[-1].end), (0.0, 4.0))
+        for a, b in zip(cues, cues[1:]):
+            self.assertEqual(a.end, b.start)              # a word shown over the subtitles it stands for
+        longer = self.follow(words[:3], ["Estamos mirando con mucha atención."])
+        self.assertEqual([(c.start, c.end) for c in longer], [(s, e) for s, e, _t in words[:3]])
+        self.assertFalse([c for c in longer if "\n" in c.text])               # one line, as the source is
+
+    def test_random_translations_lose_nothing_and_stay_on_the_sources_times(self):
+        rnd = random.Random(11)
+        for _ in range(400):
+            cjk = rnd.random() < 0.4
+            words = random_words(rnd, rnd.randint(1, 60))
+            source = st.build_cues([{"start": 0, "end": 0, "text": "", "words": words}],
+                                   st.Style(max_chars=rnd.choice([1, 5, 12, 24, 42]), max_lines=rnd.choice([1, 2])))
+            source = [(c.start, c.end, c.text) for c in source]
+            sentences = st.sentences_from_segments([{"start": 0, "end": 0, "text": "", "words": words}])
+            pool, joiner = (JAPANESE, "") if cjk else (LATIN, " ")
+            trans = ["" if rnd.random() < 0.05 else
+                     joiner.join(rnd.choice(pool) for _ in range(rnd.randint(1, 45))).strip() for _ in sentences]
+            lang = "jpn_Jpan" if cjk else "spa_Latn"
+            max_chars, max_lines = st.shape_of(source)
+            cues = st.followed_cues(sentences, trans, source,
+                                    st.Style(max_chars=max_chars, max_lines=max_lines, cjk=cjk, wide=cjk), lang)
+            want = "".join(re.sub(r"\s+", "", st._tidy(x, lang)) for x in trans)
+            self.assertEqual(want, "".join(re.sub(r"\s+", "", c.text) for c in cues))
+            starts, ends = {s for s, _e, _t in source}, {e for _s, e, _t in source}
+            for c in cues:
+                self.assertIn(c.start, starts)
+                self.assertIn(c.end, ends)
+                self.assertTrue(c.text.strip())
+                self.assertLess(c.text.count("\n"), max_lines)
+            for a, b in zip(cues, cues[1:]):
+                self.assertLessEqual(a.end, b.start + 1e-9)
+
+    def test_the_sources_shape_counts_full_width_characters_wide(self):
+        self.assertEqual(st.shape_of([(0, 1, "今日は新しい"), (1, 2, "カメラ")]), (15, 1))
+        self.assertEqual(st.shape_of([]), (1, 1))
+
+
 class SrtTests(unittest.TestCase):
     def test_round_trip(self):
         cues = [st.Cue(i * 2.5, i * 2.5 + 2, f"line {i}\nsecond, {i}") for i in range(50)]

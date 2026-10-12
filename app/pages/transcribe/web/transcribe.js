@@ -232,9 +232,10 @@ function drawTranslateButtons() {
     if (!TR) return;
     const free = !JOB.kind;
     const last = $("tr-last");
-    last.disabled = !(TR.ready && free && TR.last && TR.targets.length);
-    last.title = !TR.last ? "Transcribe a timeline first." : !TR.targets.length ? "Choose the languages first." : `Translate '${TR.last}'`;
-    last.textContent = TR.last ? `Translate "${TR.last}"` : "Translate last transcript";
+    // TR.name: what there is to translate - the timeline open in Resolve; TR.tip says what of it, or why not.
+    last.disabled = !(TR.ready && free && TR.name && TR.targets.length);
+    last.title = TR.name && !TR.targets.length ? "Choose the languages first." : TR.tip;
+    last.textContent = TR.name ? `Translate "${TR.name}"` : "Translate this timeline";
     $("tr-srt").disabled = !(TR.ready && free && TR.targets.length);
     $("choose-targets").disabled = !free;
 }

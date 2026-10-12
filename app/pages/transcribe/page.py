@@ -38,15 +38,19 @@ to timeline" places it later, on the timeline it was made from). If track 1
 already has subtitles the user chooses: replace them (the count is shown),
 or keep the SRT file only. Nothing is overwritten without that choice.
 
-Translate: the last transcript - or any SRT - becomes one SRT per chosen
+Translate: the open timeline's subtitles (read off subtitle track 1, or
+Buddy's own transcript of them while they still match it - see
+on_translate_last), or any SRT, become one SRT per chosen
 language, saved to a folder the user picks - and, unless the user turns it
 off, a NEW timeline: a copy of the current one with a subtitle track per
 language, the original language first (resolve_ext.timeline_with_subtitles,
 drt.py). The timeline they started from is never changed. Three engines:
 NLLB-200 or MADLAD-400 on this computer (worker.py translate, in the venv),
 or the language model Ask Buddy is set up with (ai_translate.py, in
-Buddy's own interpreter). Whole sentences are translated, then re-cut
-into cues (see subtitles.py).
+Buddy's own interpreter). Whole sentences are translated, then cut where
+the subtitles being translated cut them: each translated subtitle keeps the
+times of the one it translates, and the source's own line width and count -
+not the Subtitles tab's (subtitles.followed_cues).
 
 Subtitle Conversion: each subtitle on a subtitle track becomes a Text+
 clip on a video track, ready to style on the Animation page
@@ -85,6 +89,7 @@ Protocol:
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 import uuid
@@ -119,6 +124,8 @@ RECHECK_SECONDS = 10
 TABS = ("subtitles", "translate", "convert", *TEXT_PLUS_TABS, "setup")
 _WHILE_BUSY = {"stop", "tab", "answer", "option", "mixed", "tr_option", "targets", "refresh_timeline",
                "show_files", "save_srt", "choose_folder", "rescan", "conv_option"}
+NO_TIMELINE = {"name": "", "subtitles": 0}      # subtitles: how many on subtitle track 1
+NO_SUBTITLES = "This timeline has no subtitles yet – transcribe it first, or translate an SRT file."
 
 
 class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebToolPage):
@@ -145,6 +152,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         self._log = []
         self._asks = {}
         self.timeline_text, self.timeline_ok = "Not read yet.", False
+        self._open = dict(NO_TIMELINE)   # the timeline open in Resolve, as last read
         # Resolve Studio 21.1+'s own transcription (TranscribeController.own_transcription).
         self.own = {"available": False, "uid": "", "existing": False}
         # Subtitle Conversion: from which subtitle track onto which video track.
@@ -357,17 +365,46 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
                 status = "MADLAD-400 translates into about 180 languages, on this computer. Free for commercial use."
             else:
                 status = "NLLB-200 translates into any of 200 languages, on this computer. Free for non-commercial use."
-        last = s.get("last_transcript") or {}
-        has_last = bool(last.get("transcript")) and Path(last.get("transcript", "")).is_file()
+        name, tip = self._translate_offer()
         self.emit("translate", {
             "engines": options, "engine": chosen, "status": status, "ready": ready,
             "targets": [{"code": c, "name": L.name_of(c)} for c in s.get("translate_targets", []) or []],
             "folder": str(Path(self._output_dir())),
             "auto": bool(s.get("translate_auto", False)),
             "timeline": bool(s.get("translate_timeline", True)),
-            "last": last.get("name") if has_last else "",
+            "name": name, "tip": tip,
             "can_show": bool(self._last_output_dir),
         })
+
+    def _last_transcript(self) -> dict:
+        """The last transcript made, if its file is still there."""
+        last = self.settings.get("last_transcript") or {}
+        return last if last.get("transcript") and Path(last["transcript"]).is_file() else {}
+
+    @staticmethod
+    def _of_timeline(last, name) -> bool:
+        """Whether this transcript was made from the timeline called `name`.
+        One saved before transcripts said which has only its file's name:
+        the timeline's, made safe for a file, and when it was made."""
+        made_from = last.get("timeline") or re.sub(r" \d{4}-\d{2}-\d{2} \d{6}$", "", last.get("name") or "")
+        return bool(name) and made_from in (name, jobs._safe_name(name))
+
+    def _translate_offer(self) -> tuple[str, str]:
+        """What the Translate button offers: (the name on it, its tooltip) -
+        no name when there's nothing to translate, and the tooltip says why.
+        It's the timeline open in Resolve: its subtitles, or the transcript
+        made of it when that wasn't added to it. Only with no timeline to
+        read is it the last transcript whatever it's of - into SRT files."""
+        last, name = self._last_transcript(), self._open["name"]
+        if not name:
+            if last:
+                return last.get("name") or "transcript", "Translates the last transcript Buddy made."
+            return "", "Transcribe a timeline first."
+        if self._open["subtitles"]:
+            return name, "Translates the subtitles on this timeline's subtitle track 1."
+        if self._of_timeline(last, name):
+            return name, "Translates the transcript Buddy made of this timeline."
+        return "", NO_SUBTITLES
 
     def _push_job(self):
         refresh_open(self.tool_id)
@@ -421,6 +458,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
     def _read_timeline(self):
         controller = self.host.controller if getattr(self.host, "connected", False) else None
         available = self.own["available"]
+        self._open = dict(NO_TIMELINE)
         if controller is None:
             self.timeline_text, self.timeline_ok = "Not connected to Resolve.", False
             self.own = {"available": False, "uid": "", "existing": False}
@@ -439,8 +477,10 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
                 self.timeline_text = (f"{info.name} · {info.duration_seconds / 60:.1f} min · "
                                       f"starts {info.start_timecode}{extra}")
                 self.timeline_ok = True
+                self._open = {"name": info.name, "subtitles": info.subtitle_items_on_track1}
             self._read_tracks(controller)
         self._push_timeline()
+        self._push_translate()      # its button is for the timeline that's open
         self._push_convert()
         if self.own["available"] != available:   # the Model menu gains or loses Resolve's own
             self._push_options()
@@ -637,7 +677,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         self._add_log(f"{summary} Saved: {result['srt']}", "ok")
         self.settings["last_transcript"] = {
             "transcript": result["transcript"], "name": result["name"], "srt": result["srt"],
-            "language": result.get("language") or "",
+            "timeline": self._run_timeline, "language": result.get("language") or "",
             "languages": sorted(heard, key=heard.get, reverse=True) if len(heard) > 1 else []}
         self.settings.save()
         if self.settings.get("translate_auto") and self.settings.get("translate_targets") and self._auto is None:
@@ -894,9 +934,65 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         self._ask("language", {"prompt": prompt, "value": self.settings.get("srt_language") or "eng_Latn"}, chosen)
 
     def on_translate_last(self, _payload=None):
-        last = self.settings.get("last_transcript") or {}
-        if last.get("transcript"):
-            self._translate_transcript(last)
+        """The Translate button: the subtitles of the timeline open in
+        Resolve - never a transcript of some other timeline, since the new
+        timeline is a copy of the open one. They're read from subtitle
+        track 1 as they are now, edits included; Buddy's own transcript of
+        them is used instead while they still match it word for word (it
+        has the word timings, and each sentence's language)."""
+        if self.job is not None:
+            return
+        shown, last = self._open["name"], self._last_transcript()
+        self._read_timeline()
+        name = self._open["name"]
+        if not name:                     # no timeline to read: the last transcript, into SRT files
+            return self._translate_transcript(last) if last else None
+        if shown and name != shown:
+            return self._alert(f"'{name}' is open in Resolve now, not '{shown}'. Press Translate again "
+                               "to translate it.", "Another timeline is open")
+        cues = []
+        if self._open["subtitles"]:
+            self.host.set_busy(True, "Reading the timeline's subtitles…")
+            try:
+                _name, cues = TranscribeController(self.host.ensure_connected()).track_subtitles(1)
+            except (ResolveConnectionError, TranscribeResolveError) as exc:
+                return self._alert(str(exc), "Translate")
+            finally:
+                self.host.set_busy(False)
+        if cues and not self._same_subtitles(last, cues):
+            return self._translate_subtitles(name, cues, last)
+        if last and (cues or self._of_timeline(last, name)):
+            return self._translate_transcript(last)
+        self._alert(NO_SUBTITLES, "Translate")
+
+    @staticmethod
+    def _same_subtitles(last, cues) -> bool:
+        """Whether the subtitles on the timeline are this transcript's, word
+        for word - not edited since, and not another timeline's."""
+        try:
+            text = Path(last["srt"]).read_text(encoding="utf-8-sig", errors="replace")
+        except (OSError, KeyError, TypeError):
+            return False
+        made = [" ".join(c["text"].split()) for c in st.parse_srt(text)]
+        return bool(made) and made == [" ".join(text.split()) for _start, _end, text in cues]
+
+    def _translate_subtitles(self, name, cues, last):
+        """The subtitles on the timeline called `name`: cues, as
+        TranscribeController.track_subtitles reads them."""
+        def with_engine(engine):
+            def go(source):
+                segments = [{"start": start, "end": end, "text": " ".join(text.split())} for start, end, text in cues]
+                sentences = st.sentences_from_segments(segments, cjk=source in L.NO_SPACE_CODES)
+                self._run_translation(sentences, source, engine, jobs._safe_name(name), cues)
+
+            # Subtitles don't say what language they're in. Buddy's transcript of
+            # this timeline does (unless several were spoken); otherwise it's asked.
+            known = self._of_timeline(last, name) and not last.get("languages")
+            source = L.WHISPER_TO_NLLB.get(last.get("language") or "") if known else None
+            if source:
+                return go(source)
+            self._ask_language(f"The subtitles in {name} are in:", go)
+        self._engine(False, with_engine)
 
     def _translate_transcript(self, last, quiet=False):
         if self.job is not None:
@@ -910,8 +1006,19 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
             self._add_log(f"Couldn't read the transcript: {exc}", "error")
             return None
 
+    @staticmethod
+    def _srt_cues(path) -> list:
+        """An SRT file's subtitles as (start, end, text), their lines as
+        shown - none if it can't be read."""
+        try:
+            text = Path(path).read_text(encoding="utf-8-sig", errors="replace")
+        except OSError:
+            return []
+        return [(c["start"], c["end"], c["text"]) for c in st.parse_srt(text, keep_lines=True)]
+
     def _translate_with(self, last, engine, quiet):
-        original = last.get("srt") or str(jobs.OUTPUT_DIR / f"{last.get('name')}.srt")
+        # The subtitles the transcript was cut into: the translation follows them.
+        original = self._srt_cues(last.get("srt") or str(jobs.OUTPUT_DIR / f"{last.get('name')}.srt"))
         name = last.get("name") or "transcript"
         spoken = last.get("languages") or []
         if len(spoken) > 1:
@@ -944,7 +1051,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
             # Parakeet on its own doesn't say which language it heard.
             if quiet:
                 return self._add_log("Didn't translate automatically: the spoken language wasn't detected "
-                                     "(install a Whisper model to detect it). Use Translate last transcript.",
+                                     "(install a Whisper model to detect it). Translate it on the Translate tab.",
                                      "error")
             return self._ask_language("Which language is the transcript in?", go)
         if source is None:
@@ -964,22 +1071,29 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
             if not path:
                 return
             try:
-                segments = st.parse_srt(Path(path).read_text(encoding="utf-8-sig", errors="replace"))
+                text = Path(path).read_text(encoding="utf-8-sig", errors="replace")
             except OSError as exc:
                 return self._alert(f"Couldn't read {path}:\n{exc}", "Translate")
+            segments = st.parse_srt(text)
             if not segments:
                 return self._alert("That file has no subtitles in it.", "Translate")
+            cues = [(c["start"], c["end"], c["text"]) for c in st.parse_srt(text, keep_lines=True)]
 
             # An SRT doesn't say what language it's in - ask, remembering the answer.
             def go(source):
                 sentences = st.sentences_from_segments(segments, cjk=source in L.NO_SPACE_CODES)
-                self._run_translation(sentences, source, engine, Path(path).stem, path)
+                self._run_translation(sentences, source, engine, Path(path).stem, cues)
             self._ask_language(f"The subtitles in {Path(path).name} are in:", go)
         self._engine(False, with_engine)
 
-    def _run_translation(self, sentences, source, engine, base_name, original_srt="", sources=None, label=""):
-        """original_srt: the subtitles being translated, for the new
-        timeline's first track. sources: an NLLB code per sentence (mixed
+    def _run_translation(self, sentences, source, engine, base_name, cues, sources=None, label=""):
+        """cues: the subtitles being translated, (start, end, text) with
+        their lines as shown. The translation follows them - a translated
+        subtitle for each, at the same times, its lines no wider or more
+        than theirs (st.followed_cues) - and they're the new timeline's
+        first track. How the Subtitles tab is set (characters per line,
+        lines) plays no part, unless there are none to follow: a transcript
+        whose SRT has gone. sources: an NLLB code per sentence (mixed
         languages - no target is skipped then, since the others still need
         it); label: how to name the source languages."""
         if self.job is not None:
@@ -1000,16 +1114,19 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
             how = plan.model_label(engine["id"])
         self._add_log(f"Translating '{base_name}' ({len(sentences)} sentences) from {label} into {names} with {how}…")
         self._last_output_dir = self._output_dir()
-        self._translating = {"source": source, "srt": original_srt, "label": label}
+        self._translating = {"source": source, "label": label, "cues": cues}
         s = self.settings
-        max_chars, max_lines = int(s.get("max_chars", 42)), int(s.get("max_lines", 2))
+        if cues:
+            max_chars, max_lines = st.shape_of(cues)
+        else:
+            max_chars, max_lines = int(s.get("max_chars", 42)), int(s.get("max_lines", 2))
         if engine["family"] == "ai":
             job = jobs.AITranslateJob(self._ai_client(), self._ai_name(), sentences, label if sources else source,
                                       targets, s.get("hotwords", ""), max_chars, max_lines, base_name,
-                                      self._last_output_dir)
+                                      self._last_output_dir, follow=cues)
         else:
             job = jobs.TranslateJob(sentences, source, targets, engine["dir"], max_chars, max_lines, base_name,
-                                    self._last_output_dir, family=engine["family"], sources=sources)
+                                    self._last_output_dir, family=engine["family"], sources=sources, follow=cues)
         self.result = None
         self._begin("translate", job, self._on_translated)
 
@@ -1028,11 +1145,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         language on subtitle track 1 and a track per translation."""
         tracks = []
         source = self._translating or {}
-        try:
-            text = Path(source.get("srt") or "").read_text(encoding="utf-8-sig", errors="replace")
-            original = [(c["start"], c["end"], c["text"]) for c in st.parse_srt(text, keep_lines=True)]
-        except OSError:
-            original = []
+        original = list(source.get("cues") or [])
         if original:
             tracks.append(drt.Track(source.get("label") or L.name_of(source.get("source", "")) or "Original", original))
         tracks += [drt.Track(f["language"], f["timed"]) for f in files if f.get("timed")]

@@ -335,7 +335,10 @@ Instagram, TikTok or YouTube Shorts shaded over it.
   after; the render job is removed. Resolve only lets scripts place subtitles
   on subtitle track 1, so if that track already has subtitles Buddy asks
   before replacing them, or keeps just the SRT file.
-- **Translate**: Translate Last Transcript (or Translate an SRT File...)
+- **Translate**: Translate this timeline translates the subtitles of the
+  timeline open in Resolve - the ones on its subtitle track 1, as they are
+  now, edits made in Resolve included (a timeline with none has to be
+  transcribed first) - and Translate an SRT File... any SRT file. Either
   writes one SRT per chosen language to a folder you pick - or
   automatically after each transcription. Three engines, picked under
   Translate > Model:
@@ -353,8 +356,13 @@ Instagram, TikTok or YouTube Shorts shaded over it.
     Needs no local engine. A cloud model gets the transcript's text under
     your own key (and may charge for it) - Buddy asks once per provider,
     and never sends it during an automatic translation until you have.
-  Whole sentences are translated, then re-cut into timed subtitles; Chinese
-  and Japanese are wrapped by character with native punctuation. Import the
+  Whole sentences are translated, then each is cut where the subtitles
+  being translated cut it: every translated subtitle is on screen exactly
+  when the one it translates is, with no more lines than the originals use
+  and lines no wider than their widest (wider only if the translation
+  wouldn't fit otherwise). The Subtitles tab's characters per line and lines
+  are for transcribing and don't shape a translation. Chinese and Japanese
+  are wrapped by character with native punctuation. Import the
   files onto other subtitle tracks yourself (File > Import > Subtitle) -
   scripts can only place subtitles on track 1.
 

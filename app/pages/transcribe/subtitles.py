@@ -30,6 +30,13 @@ result is split back into cues across that sentence's own time span -
 each break placed where the source had spoken the same share of its
 text, snapped to a real gap between two source words.
 
+That's for text with no subtitles of its own yet. Where the subtitles being
+translated exist - on a timeline, in an SRT - the translation follows them
+instead (followed_cues): sentences are translated whole all the same, but
+each translated subtitle keeps the times of the one it translates, and the
+lines take the source's shape (shape_of), not the Style the user has set
+for transcribing.
+
 Chinese, Japanese and Cantonese are written without spaces, in
 full-width characters: with Style.cjk set, words are joined as Whisper
 spaced them (not with a space each) and lines are wrapped per character,
@@ -46,8 +53,10 @@ cue or sentence.
 
 from __future__ import annotations
 
+import bisect
 import math
 import re
+import unicodedata
 from dataclasses import dataclass, replace
 
 SENTENCE_END = (".", "?", "!", "…", "。", "？", "！")
@@ -667,6 +676,146 @@ def translated_cues(sentences: list[Sentence], translations: list[str],
         pieces = _split_translation(text, sentence.end - sentence.start, style)
         raw.extend(_time_pieces(sentence, pieces))
     return _finish(raw, style)
+
+
+# ------------------------------------------------ following the source
+
+
+def shape_of(cues) -> tuple[int, int]:
+    """(max_chars, max_lines) of subtitles that already exist - (start, end,
+    text), their lines as shown: the widest line, and the most lines any of
+    them has. A full-width character counts as 1 / CJK_WIDTH, so the width
+    means the same whatever script the translation is written in."""
+    widest, lines = 1.0, 1
+    for _start, _end, text in cues:
+        shown = [line.strip() for line in text.split("\n") if line.strip()]
+        lines = max(lines, len(shown))
+        for line in shown:
+            widest = max(widest, sum(1 / CJK_WIDTH if unicodedata.east_asian_width(ch) in "WF" else 1
+                                     for ch in line))
+    return round(widest), lines
+
+
+def _wrap_like(text: str, style: Style) -> str:
+    """Wrapped as the source subtitles are: never onto more lines than they
+    use, and no wider than their widest line - unless the translation is too
+    long for that, when its lines grow rather than multiply."""
+    if style.max_lines <= 1:
+        return text
+    width = style.line_chars
+    while True:
+        out = wrap(text, width, style.max_lines, style.cjk)
+        if out.count("\n") < style.max_lines:
+            return out
+        width += max(1, width // 8)
+
+
+def _cue_at(time: float, cues, starts) -> int:
+    """Index of the cue on screen at `time`, or of the nearest one."""
+    i = max(0, bisect.bisect_right(starts, time) - 1)
+    if time > cues[i][1] and i + 1 < len(cues) and cues[i + 1][0] - time < time - cues[i][1]:
+        i += 1
+    return i
+
+
+def _nearest(wanted: list[float], marks: list[float], cost=lambda j: 0.0) -> list[int]:
+    """For each of wanted (shares of a text, rising), the index of the mark
+    nearest it - rising too, and leaving a mark for each still to come.
+    cost(j) is added for a mark that's a worse place than its distance says
+    (negative: a better one)."""
+    cuts, prev = [], -1
+    for k, share in enumerate(wanted):
+        last = len(marks) - (len(wanted) - k)
+        cuts.append(min(range(prev + 1, last + 1), key=lambda j: abs(marks[j] - share) + cost(j)))
+        prev = cuts[-1]
+    return cuts
+
+
+def _follow_sentence(sentence: Sentence, text: str, cues, starts, cjk: bool) -> list[list]:
+    """A translated sentence cut where the source cues cut the sentence:
+    [first cue, last cue, text] per piece, the cues by index. A break goes
+    where the source had shown the same share of the sentence, moved to
+    punctuation when some is near. Every cue gets a piece of its own while
+    the translation has the words for it; with fewer (one word a cue,
+    into a language that says it in less), a word spans several cues."""
+    held = []       # [cue, characters of the sentence it shows]
+    for w in sentence.words:
+        i = max(_cue_at((w["start"] + w["end"]) / 2, cues, starts), held[-1][0] if held else 0)
+        if held and held[-1][0] == i:
+            held[-1][1] += len(w["text"]) + 1
+        else:
+            held.append([i, len(w["text"]) + 1])
+    units, joiner = _units(text, cjk)
+    if not held or not units:
+        return []
+    total, acc, shares = sum(n for _i, n in held), 0, []
+    for _i, n in held[:-1]:
+        acc += n
+        shares.append(acc / total)          # where each source cue ends, but the last
+    pos, acc = [], 0
+    for k, u in enumerate(units):
+        acc += len(u) + (len(joiner) if k else 0)
+        pos.append(acc)
+    marks = [p / pos[-1] for p in pos[:-1]]     # where the translation can break: after each unit but the last
+
+    def cost(j):
+        """A break after units[j], in shares of an average piece."""
+        c = 0.0
+        if units[j].endswith(CLAUSE_END + SENTENCE_END) or (joiner == "" and _good_break(units, j + 1)):
+            c -= 0.25
+        if joiner == "" and _forbidden_break(units, j + 1):
+            c += 1.0
+        elif joiner == "" and _inside_latin(units, j + 1):
+            c += 0.5
+        return c / len(held)
+
+    if len(marks) >= len(shares):
+        edges = [0] + [c + 1 for c in _nearest(shares, marks, cost)] + [len(units)]
+        pieces = [[i, i, joiner.join(units[a:b]).strip()] for (i, _n), a, b in zip(held, edges, edges[1:])]
+    else:
+        edges = [0] + [c + 1 for c in _nearest(marks, shares)] + [len(held)]
+        pieces = [[held[a][0], held[b - 1][0], u.strip()] for u, a, b in zip(units, edges, edges[1:])]
+    # A piece that came out empty (a CJK space on its own): its cues go to a neighbour.
+    out, first = [], None
+    for piece in pieces:
+        if not piece[2]:
+            if out:
+                out[-1][1] = piece[1]
+            elif first is None:
+                first = piece[0]
+            continue
+        if first is not None:
+            piece[0], first = first, None
+        out.append(piece)
+    return out
+
+
+def followed_cues(sentences: list[Sentence], translations: list[str], cues, style: Style,
+                  lang: str = "") -> list[Cue]:
+    """The translation of subtitles that already exist - `cues`, (start, end,
+    text) - subtitle for subtitle: each translated one is on screen exactly
+    when the one it translates is. Sentences are still translated whole;
+    the translation is then cut where the source subtitles cut the sentence
+    (_follow_sentence), and a subtitle holding the end of one sentence and
+    the start of the next holds both again. style: the source's own shape
+    (shape_of), for the lines - how the user has the Subtitles tab set
+    plays no part."""
+    cues = sorted(cues, key=lambda c: (c[0], c[1]))
+    starts = [c[0] for c in cues]
+    groups = []     # [first cue, last cue, text]
+    if not cues:
+        return []
+    for sentence, text in zip(sentences, translations):
+        text = _tidy(text or "", lang)
+        if not text:
+            continue
+        for first, last, piece in _follow_sentence(sentence, text, cues, starts, style.cjk):
+            if groups and first <= groups[-1][1]:
+                groups[-1][1] = max(groups[-1][1], last)
+                groups[-1][2] += " " + piece
+            else:
+                groups.append([first, last, piece])
+    return [Cue(cues[a][0], cues[b][1], _wrap_like(text, style)) for a, b, text in groups]
 
 
 # ------------------------------------------------------------ SRT input

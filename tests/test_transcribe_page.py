@@ -151,9 +151,13 @@ class FakeResolve:
     converted = []
     own = {"available": False, "uid": "", "existing": False}   # Resolve Studio 21.1+'s own transcription
     open_timeline = "Interview"
+    track = []                           # subtitle track 1: (start, end, text)
 
     def __init__(self, controller):
         pass
+
+    def track_subtitles(self, index=1):
+        return FakeResolve.open_timeline, list(FakeResolve.track)
 
     def own_transcription(self):
         return dict(FakeResolve.own)
@@ -221,7 +225,7 @@ class PageTests(unittest.TestCase):
         FakeResolve.existing, FakeResolve.placed = 0, []
         FakeResolve.timeline, FakeResolve.empty, FakeResolve.subtitles, FakeResolve.converted = "Interview", 4, 12, []
         FakeResolve.own = {"available": False, "uid": "", "existing": False}
-        FakeResolve.open_timeline = "Interview"
+        FakeResolve.open_timeline, FakeResolve.track = "Interview", []
         self._patch(page_mod.TranscribePage, "_settings_path", lambda s: tmp / "settings.json")
         self._patch(page_mod.jobs, "ProbeJob", FakeProbe)
         for name in ("TranscribeJob", "TranslateJob", "AITranslateJob", "SetupJob"):
@@ -408,6 +412,70 @@ class PageTests(unittest.TestCase):
         self.page.on_answer({"id": ask["id"], "ok": True})
         self.assertEqual(len(FakeJob.made), 1)
         self.assertEqual(self.page.settings.get("ai_consent_anthropic"), "anthropic")
+
+    def _transcribed(self, timeline, name, text="Hello there."):
+        """A transcript Buddy made earlier of `timeline`, as settings keep it."""
+        transcript, srt = self.tmp / f"{name}.json", self.tmp / f"{name}.srt"
+        transcript.write_text('{"segments": [{"start": 0, "end": 2, "text": "%s"}]}' % text, encoding="utf-8")
+        srt.write_text(f"1\n00:00:00,000 --> 00:00:02,000\n{text}\n", encoding="utf-8")
+        self.page.settings["last_transcript"] = {"transcript": str(transcript), "name": name, "srt": str(srt),
+                                                 "timeline": timeline, "language": "en", "languages": []}
+        self.page.settings["translate_targets"] = ["jpn_Jpan"]
+
+    def test_translate_is_for_the_open_timeline_not_the_last_transcript(self):
+        self.page._rescan()
+        self._transcribed("Old test", "Old test 2026-01-01 090000")
+        self.page.on_option({"key": "max_chars", "value": 1})    # a word a subtitle, for transcribing
+        self.page.on_shown()                                     # 'Interview' is open, with no subtitles
+        offer = self.last("translate")
+        self.assertEqual((offer["name"], offer["tip"]), ("", self.page_mod.NO_SUBTITLES))
+        self.page.on_translate_last()
+        self.assertEqual(FakeJob.made, [])                       # the old transcript isn't put on this timeline
+        self.assertEqual(self.last("alert")["text"], self.page_mod.NO_SUBTITLES)
+
+        FakeResolve.existing = 2
+        FakeResolve.track = [(0.0, 2.0, "Good morning."), (2.0, 4.0, "Shall we\nstart?")]
+        self.page.on_refresh_timeline()
+        self.assertEqual(self.last("translate")["name"], "Interview")
+        self.page.on_translate_last()
+        ask = self.last("ask")                                   # subtitles don't say their language
+        self.assertEqual((ask["kind"], ask["prompt"]), ("language", "The subtitles in Interview are in:"))
+        self.page.on_answer({"id": ask["id"], "ok": True, "value": "eng_Latn"})
+        job = FakeJob.made[-1]
+        self.assertEqual([s.text for s in job.args[0]], ["Good morning.", "Shall we start?"])
+        self.assertEqual(job.args[6], "Interview")               # what the SRT files are named after
+        self.assertEqual(self.page._translating["cues"], FakeResolve.track)   # the new timeline's first track
+        # The translation follows those subtitles - their times, their widest line (13) and
+        # their two lines - not how the Subtitles tab is set, however that is.
+        self.assertEqual(job.kwargs["follow"], FakeResolve.track)
+        self.assertEqual(job.args[4:6], (13, 2))
+
+    def test_translate_uses_the_transcript_while_the_timeline_still_has_its_subtitles(self):
+        self.page._rescan()
+        self._transcribed("Interview", "Interview 2026-01-01 090000")
+        self.page.settings["translate_timeline"] = False
+        self.page.on_shown()
+        self.assertEqual(self.last("translate")["name"], "Interview")       # made of it, though not added to it
+        FakeResolve.existing, FakeResolve.track = 1, [(0.0, 2.0, "Hello there.")]
+        self.page.on_translate_last()
+        self.assertEqual(FakeJob.made[-1].args[6], "Interview 2026-01-01 090000")
+        self.assertEqual(FakeJob.made[-1].kwargs["follow"], [(0.0, 2.0, "Hello there.")])   # its own subtitles
+        FakeJob.made[-1].succeed({"files": [], "seconds": 1})
+
+        FakeResolve.track = [(0.0, 2.0, "Hello, Tess.")]         # corrected in Resolve since
+        self.page.on_translate_last()
+        self.assertEqual([s.text for s in FakeJob.made[-1].args[0]], ["Hello, Tess."])
+        self.assertFalse([p for n, p in self.events if n == "ask"])           # the transcript says it's English
+
+    def test_translate_stops_if_another_timeline_was_opened_meanwhile(self):
+        self.page._rescan()
+        self._transcribed("Interview", "Interview 2026-01-01 090000")
+        self.page.on_shown()
+        FakeResolve.open_timeline = "Trailer"
+        self.page.on_translate_last()
+        self.assertEqual(FakeJob.made, [])
+        self.assertIn("'Trailer' is open in Resolve now, not 'Interview'", self.last("alert")["text"])
+        self.assertEqual(self.last("translate")["name"], "")     # and the button is Trailer's now
 
     def test_consent_to_cloud_translation_belongs_to_the_address(self):
         from pages.manual_chat.llm import LLMClient

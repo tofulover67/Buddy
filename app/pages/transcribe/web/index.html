@@ -126,7 +126,7 @@
             <label class="check"><input type="checkbox" id="tr-timeline"> Also make a new timeline with a subtitle track for each language</label>
             <label class="check"><input type="checkbox" id="tr-auto"> Translate automatically after each transcription</label>
             <div class="row wrap">
-                <button type="button" class="btn accent" data-action="translate_last" id="tr-last">Translate last transcript</button>
+                <button type="button" class="btn accent" data-action="translate_last" id="tr-last">Translate this timeline</button>
                 <button type="button" class="btn" data-action="translate_srt" id="tr-srt">Translate an SRT file…</button>
                 <div class="spacer"></div>
                 <button type="button" class="btn ghost" data-action="show_files" id="tr-show">Show files</button>
@@ -134,6 +134,9 @@
             <p class="muted small note">Each language becomes its own SRT file. With the new timeline on, Buddy also copies
                 the current timeline as "&lt;name&gt; (Subtitles)" with every language on its own subtitle track – ready to
                 export them all from Deliver. The timeline you're on isn't changed.</p>
+            <p class="muted small note">A translation follows the subtitles it's made from: each translated subtitle is on screen
+                exactly when its original is, with no more lines and no wider than the originals. The Subtitles tab's
+                characters per line and lines are for transcribing only.</p>
         </section>
 
         <section class="card result" id="result-translate" hidden>

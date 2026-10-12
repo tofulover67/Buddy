@@ -2470,6 +2470,86 @@
   "العربية": "مخطط زمني آخر مفتوح",
   "Tiếng Việt": "Đang mở một timeline khác"
  },
+ "Translate this timeline": {
+  "日本語": "このタイムラインを翻訳",
+  "Español": "Traducir esta línea de tiempo",
+  "Deutsch": "Diese Timeline übersetzen",
+  "Français": "Traduire cette timeline",
+  "한국어": "이 타임라인 번역",
+  "中文": "翻译此时间线",
+  "العربية": "ترجمة هذا الخط الزمني",
+  "Tiếng Việt": "Dịch timeline này"
+ },
+ "Translates the subtitles on this timeline's subtitle track 1.": {
+  "日本語": "このタイムラインの字幕トラック 1 にある字幕を翻訳します。",
+  "Español": "Traduce los subtítulos de la pista de subtítulos 1 de esta línea de tiempo.",
+  "Deutsch": "Übersetzt die Untertitel auf Untertitelspur 1 dieser Timeline.",
+  "Français": "Traduit les sous-titres de la piste de sous-titres 1 de cette timeline.",
+  "한국어": "이 타임라인의 자막 트랙 1에 있는 자막을 번역합니다.",
+  "中文": "翻译此时间线字幕轨道 1 上的字幕。",
+  "العربية": "يترجم الترجمات الموجودة على مسار الترجمة 1 في هذا الخط الزمني.",
+  "Tiếng Việt": "Dịch các phụ đề trên track phụ đề 1 của timeline này."
+ },
+ "Translates the transcript Buddy made of this timeline.": {
+  "日本語": "Buddy がこのタイムラインから作成した文字起こしを翻訳します。",
+  "Español": "Traduce la transcripción que Buddy hizo de esta línea de tiempo.",
+  "Deutsch": "Übersetzt die Transkription, die Buddy von dieser Timeline erstellt hat.",
+  "Français": "Traduit la transcription que Buddy a faite de cette timeline.",
+  "한국어": "Buddy가 이 타임라인을 받아쓴 내용을 번역합니다.",
+  "中文": "翻译 Buddy 为此时间线生成的转录。",
+  "العربية": "يترجم التفريغ الذي أنشأه Buddy لهذا الخط الزمني.",
+  "Tiếng Việt": "Dịch bản phiên âm Buddy đã tạo từ timeline này."
+ },
+ "Translates the last transcript Buddy made.": {
+  "日本語": "Buddy が最後に作成した文字起こしを翻訳します。",
+  "Español": "Traduce la última transcripción que hizo Buddy.",
+  "Deutsch": "Übersetzt die letzte Transkription, die Buddy erstellt hat.",
+  "Français": "Traduit la dernière transcription faite par Buddy.",
+  "한국어": "Buddy가 마지막으로 받아쓴 내용을 번역합니다.",
+  "中文": "翻译 Buddy 上次生成的转录。",
+  "العربية": "يترجم آخر تفريغ أنشأه Buddy.",
+  "Tiếng Việt": "Dịch bản phiên âm gần nhất Buddy đã tạo."
+ },
+ "This timeline has no subtitles yet – transcribe it first, or translate an SRT file.": {
+  "日本語": "このタイムラインにはまだ字幕がありません – 先に文字起こしするか、SRT ファイルを翻訳してください。",
+  "Español": "Esta línea de tiempo aún no tiene subtítulos: transcríbela primero o traduce un archivo SRT.",
+  "Deutsch": "Diese Timeline hat noch keine Untertitel – transkribieren Sie sie zuerst oder übersetzen Sie eine SRT-Datei.",
+  "Français": "Cette timeline n'a pas encore de sous-titres – transcrivez-la d'abord, ou traduisez un fichier SRT.",
+  "한국어": "이 타임라인에는 아직 자막이 없습니다 – 먼저 받아쓰거나 SRT 파일을 번역하세요.",
+  "中文": "此时间线还没有字幕 – 请先转录，或翻译一个 SRT 文件。",
+  "العربية": "لا يحتوي هذا الخط الزمني على ترجمات بعد – فرّغه أولًا، أو ترجم ملف SRT.",
+  "Tiếng Việt": "Timeline này chưa có phụ đề – hãy phiên âm trước, hoặc dịch một tệp SRT."
+ },
+ "'{name}' is open in Resolve now, not '{shown}'. Press Translate again to translate it.": {
+  "日本語": "Resolve で今開いているのは「{shown}」ではなく「{name}」です。翻訳するには、もう一度「翻訳」を押してください。",
+  "Español": "Ahora en Resolve está abierta '{name}', no '{shown}'. Pulsa Traducir de nuevo para traducirla.",
+  "Deutsch": "In Resolve ist jetzt „{name}“ geöffnet, nicht „{shown}“. Klicken Sie erneut auf Übersetzen, um sie zu übersetzen.",
+  "Français": "C'est « {name} » qui est ouverte dans Resolve à présent, et non « {shown} ». Cliquez à nouveau sur Traduire pour la traduire.",
+  "한국어": "지금 Resolve에 열려 있는 것은 '{shown}'이(가) 아니라 '{name}'입니다. 번역하려면 번역을 다시 누르세요.",
+  "中文": "Resolve 中当前打开的是“{name}”，而不是“{shown}”。再按一次“翻译”即可翻译它。",
+  "العربية": "المفتوح الآن في Resolve هو '{name}' وليس '{shown}'. اضغط على «ترجمة» مرة أخرى لترجمته.",
+  "Tiếng Việt": "Resolve hiện đang mở '{name}', không phải '{shown}'. Nhấn Dịch lần nữa để dịch nó."
+ },
+ "A translation follows the subtitles it's made from: each translated subtitle is on screen exactly when its original is, with no more lines and no wider than the originals. The Subtitles tab's characters per line and lines are for transcribing only.": {
+  "日本語": "翻訳は元の字幕に従います。翻訳された各字幕は元の字幕とまったく同じタイミングで表示され、行数も行の幅も元の字幕を超えません。「字幕」タブの 1 行あたりの文字数と行数は文字起こし専用です。",
+  "Español": "La traducción sigue los subtítulos de los que parte: cada subtítulo traducido aparece exactamente cuando lo hace su original, sin más líneas ni más ancho que los originales. Los caracteres por línea y las líneas de la pestaña Subtítulos son solo para transcribir.",
+  "Deutsch": "Eine Übersetzung folgt den Untertiteln, aus denen sie entsteht: Jeder übersetzte Untertitel ist genau dann zu sehen, wenn sein Original es ist, mit nicht mehr Zeilen und nicht breiter als die Originale. Zeichen pro Zeile und Zeilen auf dem Tab „Untertitel“ gelten nur fürs Transkribieren.",
+  "Français": "Une traduction suit les sous-titres dont elle est issue : chaque sous-titre traduit s'affiche exactement en même temps que son original, sans plus de lignes ni plus de largeur que les originaux. Les caractères par ligne et les lignes de l'onglet Sous-titres ne servent qu'à la transcription.",
+  "한국어": "번역은 원본 자막을 그대로 따릅니다. 번역된 각 자막은 원본과 정확히 같은 시간에 표시되며, 줄 수와 줄 너비가 원본을 넘지 않습니다. 자막 탭의 줄당 글자 수와 줄 수는 받아쓰기에만 쓰입니다.",
+  "中文": "翻译会跟随原字幕：每条译文字幕与其原文字幕的显示时间完全相同，行数和行宽都不超过原字幕。“字幕”选项卡中的每行字符数和行数仅用于转录。",
+  "العربية": "تتبع الترجمة الترجمات المصدر: يظهر كل سطر مترجم في الوقت نفسه تمامًا الذي يظهر فيه أصله، دون أسطر أكثر ولا عرض أكبر من الأصل. عدد الأحرف في السطر وعدد الأسطر في تبويب الترجمات خاصّان بالتفريغ فقط.",
+  "Tiếng Việt": "Bản dịch bám theo các phụ đề gốc: mỗi phụ đề đã dịch hiển thị đúng lúc phụ đề gốc của nó hiển thị, không nhiều dòng hơn và không rộng hơn bản gốc. Số ký tự mỗi dòng và số dòng ở thẻ Phụ đề chỉ dùng cho việc phiên âm."
+ },
+ "Reading the timeline's subtitles…": {
+  "日本語": "タイムラインの字幕を読み込み中…",
+  "Español": "Leyendo los subtítulos de la línea de tiempo…",
+  "Deutsch": "Untertitel der Timeline werden gelesen…",
+  "Français": "Lecture des sous-titres de la timeline…",
+  "한국어": "타임라인의 자막을 읽는 중…",
+  "中文": "正在读取时间线的字幕…",
+  "العربية": "جارٍ قراءة ترجمات الخط الزمني…",
+  "Tiếng Việt": "Đang đọc phụ đề của timeline…"
+ },
  "Subtitle track {n} was switched off in Resolve, so Buddy switched it on.": {
   "日本語": "Resolve で字幕トラック {n} がオフになっていたため、Buddy がオンにしました。",
   "Español": "La pista de subtítulos {n} estaba desactivada en Resolve, así que Buddy la activó.",

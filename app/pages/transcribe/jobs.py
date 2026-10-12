@@ -316,14 +316,20 @@ def style_for(style: st.Style, language) -> st.Style:
 
 
 def write_srts(sentences: list[st.Sentence], translations: dict, targets: list[str],
-                max_chars: int, max_lines: int, base_name: str, out_dir: Path) -> list[dict]:
-    """One SRT per target language, cut and timed from its translations."""
+                max_chars: int, max_lines: int, base_name: str, out_dir: Path, follow=None) -> list[dict]:
+    """One SRT per target language, cut and timed from its translations.
+    follow: the subtitles being translated, (start, end, text) - each
+    translated one then keeps the times of the one it translates
+    (st.followed_cues), with max_chars and max_lines theirs (st.shape_of)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
     for code in targets:
         style = st.Style(max_chars=max_chars, max_lines=max_lines, cjk=code in L.NO_SPACE_CODES,
                          wide=code in L.CJK_CODES)
-        cues = st.translated_cues(sentences, translations[code], style, code)
+        if follow:
+            cues = st.followed_cues(sentences, translations[code], follow, style, code)
+        else:
+            cues = st.translated_cues(sentences, translations[code], style, code)
         path = out_dir / f"{base_name} - {L.name_of(code)}.srt"
         path.write_text(st.to_srt(cues), encoding="utf-8")
         written.append({"path": str(path), "language": L.name_of(code), "cues": len(cues),
@@ -342,11 +348,12 @@ class TranslateJob(QThread):
 
     def __init__(self, sentences: list[st.Sentence], source: str, targets: list[str],
                  model_dir: str, max_chars: int, max_lines: int, base_name: str, out_dir: str,
-                 family: str = "nllb", sources=None):
-        """sources: an NLLB code per sentence, for a mixed-language transcript."""
+                 family: str = "nllb", sources=None, follow=None):
+        """sources: an NLLB code per sentence, for a mixed-language transcript.
+        follow: see write_srts."""
         super().__init__()
         self.sentences, self.source, self.targets = sentences, source, targets
-        self.sources = sources
+        self.sources, self.follow = sources, follow
         self.model_dir, self.max_chars, self.max_lines = model_dir, max_chars, max_lines
         self.base_name, self.out_dir = base_name, Path(out_dir)
         self.family = family
@@ -387,7 +394,7 @@ class TranslateJob(QThread):
                 raise RuntimeError(error or "The translation engine stopped unexpectedly.")
             result = json.loads(job_out.read_text(encoding="utf-8"))
             written = write_srts(self.sentences, result["translations"], self.targets,
-                                  self.max_chars, self.max_lines, self.base_name, self.out_dir)
+                                  self.max_chars, self.max_lines, self.base_name, self.out_dir, self.follow)
             self.progress.emit(100)
             where = "GPU" if result.get("device") == "cuda" else "CPU"
             self.succeeded.emit({"files": written, "where": f"on the {where}",
@@ -418,8 +425,10 @@ class AITranslateJob(QThread):
 
     def __init__(self, client, provider_name: str, sentences: list[st.Sentence], source: str,
                  targets: list[str], glossary: str, max_chars: int, max_lines: int,
-                 base_name: str, out_dir: str):
+                 base_name: str, out_dir: str, follow=None):
+        """follow: see write_srts."""
         super().__init__()
+        self.follow = follow
         self.client, self.provider_name = client, provider_name
         self.sentences, self.source, self.targets, self.glossary = sentences, source, targets, glossary
         self.max_chars, self.max_lines = max_chars, max_lines
@@ -451,7 +460,7 @@ class AITranslateJob(QThread):
                     self.client, texts, L.name_of(self.source), name, self.glossary,
                     progress=progress, cancelled=lambda: self._cancel)
             written = write_srts(self.sentences, translations, self.targets,
-                                  self.max_chars, self.max_lines, self.base_name, self.out_dir)
+                                  self.max_chars, self.max_lines, self.base_name, self.out_dir, self.follow)
             self.progress.emit(100)
             self.succeeded.emit({"files": written, "where": f"with {self.provider_name}",
                                  "seconds": time.time() - t0})

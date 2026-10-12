@@ -59,6 +59,27 @@ class OccupiedTrackTests(unittest.TestCase):
         self.assertEqual(TranscribeController._clips_in_the_way(tl, 5, [(0, 99999)]), 0)     # a track to come
 
 
+class ReadingTests(unittest.TestCase):
+    """The subtitles on a track, for translating: timed from the timeline's first
+    frame as an SRT's are, in time order, with Resolve's line separator a newline."""
+
+    class Open(Timeline):
+        def GetName(self):
+            return "Interview"
+
+        def GetStartFrame(self):
+            return 86400
+
+        def GetSetting(self, key):
+            return "24"
+
+    def test_a_tracks_subtitles_as_timed_text(self):
+        tl = self.Open([[]], [Item(86448, 86496, "Shall we start?"), Item(86400, 86436, "Good morning."),
+                             Item(86500, 86510, "  ")])
+        self.assertEqual(controller(tl).track_subtitles(1),
+                         ("Interview", [(0.0, 1.5, "Good morning."), (2.0, 4.0, "Shall we\nstart?")]))
+
+
 class CountTests(unittest.TestCase):
     def test_a_clip_without_its_words_isnt_counted_and_is_said(self):
         gen = TextPlusGenerator(None)
