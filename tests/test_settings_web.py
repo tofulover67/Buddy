@@ -152,18 +152,29 @@ class ToolSectionTests(unittest.TestCase):
         from pages.asset_manager.settings_panel import AssetSettingsMixin
 
         class Page(AssetSettingsMixin):
-            settings, pushed = Mem(), []
+            settings, pushed, described = Mem(), [], []
 
             def _push_list(self):
                 self.pushed.append(True)
 
+            def _push_describe(self):
+                self.described.append(True)
+
         page = Page()
-        self.assertEqual(set(kinds(page.settings_fields())), {"include_folders_in_sort", "group_all_media_by_folder"})
+        self.assertEqual(set(kinds(page.settings_fields())),
+                         {"include_folders_in_sort", "group_all_media_by_folder", "search_use_gpu"})
         page.on_setting("include_folders_in_sort", False, UI())
         self.assertIs(page.settings["include_folders_in_sort"], False)
         self.assertEqual(len(page.pushed), 1)
         page.on_setting("unknown", True, UI())
         self.assertNotIn("unknown", page.settings)
+        # The graphics card is search by description's own setting, shared with Footage Search: not this tool's.
+        from core.media_search import model
+        with mock.patch.object(model, "set_use_gpu") as set_use_gpu:
+            page.on_setting("search_use_gpu", False, UI())
+        set_use_gpu.assert_called_once_with(False)
+        self.assertNotIn("search_use_gpu", page.settings)
+        self.assertEqual(len(page.described), 1)
 
     def test_project_setup(self):
         from pages.project_setup.settings_panel import ProjectSetupSettingsMixin
