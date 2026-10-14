@@ -1794,6 +1794,7 @@ class BuddyNetworkPage(NetworkSettingsMixin, ImageMixin, GifSearchMixin, Profile
     def _send_checked(self, text, target):
         if target[0] != self.room_id:
             return   # the room changed while they were deciding
+        self.achieve("messages", 1)
         room = self.rooms.get(self.room_id)
         if room and room["kind"] == "dm":
             other = room["other"]

@@ -132,6 +132,27 @@ class ToolPage(QWidget):
     def models_moved(self):
         """Its models folder changed (and what moved has moved): look again."""
 
+    def achieve(self, stat, amount=1):
+        """This tool did `amount` more of `stat` (a count in
+        core/achievements.py STATS - "proxies", "presets"...): the
+        achievements count it, and the pet hears. Never raises - a tool's
+        work is never undone by its tally."""
+        record = getattr(self.host, "record_stat", None)
+        if record is not None:
+            try:
+                record(stat, amount)
+            except Exception:  # noqa: BLE001
+                pass
+
+    def achieve_peak(self, stat, value):
+        """A peak stat's latest reading ("tracked_seconds"): kept if it's the largest yet."""
+        record = getattr(self.host, "record_peak", None)
+        if record is not None:
+            try:
+                record(stat, value)
+            except Exception:  # noqa: BLE001
+                pass
+
     def on_app_quitting(self):
         """Optional hook: called once, before the shell actually tears
         itself down - both on a normal close and when the tray's Quit

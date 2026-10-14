@@ -38,6 +38,8 @@ from core.theme import (
 )
 from core import desktop_layout
 from core import link_bar
+from core.achievements import Achievements
+from core.render_watch import RenderWatch
 from core import nav_layout
 from core.announcements_window import AnnouncementsDialog
 from core.announcements import SEEN_KEY, AnnouncementChecker
@@ -493,7 +495,25 @@ class ShellWindow(QMainWindow):
 
         self.pages = {}
         self._connect_worker = None
+        # What's been done with the tools, and the badges for it
+        # (core/achievements.py) - before the pages, which report to it
+        # (ToolPage.achieve) and show it (Pets, Achievements).
+        self.achievements = Achievements()
+        self.achievements.on_unlock.append(self._on_achievements_unlocked)
         self._init_ui()
+        # Not tools: the pet on the desktop and the achievements' page, with
+        # pages in Settings (under General) and nowhere else (core/settings_dialog.py
+        # tools() takes `extras`).
+        from pages.pets.page import Pets
+        from pages.achievements.page import AchievementsSettings
+        self.pets = Pets(self)
+        self.extras = [self.pets, AchievementsSettings(self)]
+        # Renders finishing and clips graded in Resolve, read every so often
+        # (core/render_watch.py); and a day with Buddy counts, once an hour.
+        self.render_watch = RenderWatch(self, self)
+        self.achievements.touch_day()
+        self._day_timer = QTimer(self, interval=3600 * 1000, timeout=self.achievements.touch_day)
+        self._day_timer.start()
         # The orb next to "Buddy" (core/announcements.py): on by default,
         # off with one checkbox in Settings.
         self.announcements = AnnouncementChecker(self.shared_settings, self._network_server_url, self)
@@ -535,9 +555,30 @@ class ShellWindow(QMainWindow):
         self.announcements.start()
         self.updates.start()
         self.backups.start()
-        load_warnings = getattr(self.shared_settings, "load_warnings", None)
+        self.render_watch.start()
+        load_warnings = list(getattr(self.shared_settings, "load_warnings", None) or [])
+        load_warnings += self.achievements.load_warnings
         if load_warnings:
             alert(self, "Settings", "\n\n".join(load_warnings))
+
+    # ----------------------------------------------------------- achievements --
+    def record_stat(self, stat, amount=1):
+        """A tool did `amount` more of a stat (ToolPage.achieve)."""
+        self.achievements.record(stat, amount)
+
+    def record_peak(self, stat, value):
+        self.achievements.peak(stat, value)
+
+    def _on_achievements_unlocked(self, unlocked):
+        """Badges just earned: a notification (unless Achievements' settings
+        turn it off), and the pet celebrates."""
+        pets = getattr(self, "pets", None)
+        if pets is not None:
+            pets.celebrate(unlocked)
+        if not self.tool_settings("achievements", {"notify": True}).get("notify", True):
+            return
+        for a in unlocked[:3]:
+            self.notify("Achievement unlocked", f"{tr(a['title'])} – {tr(a['text'])}")
 
     # ------------------------------------------------------------ ShellHost API --
     def ensure_connected(self):
@@ -1044,6 +1085,8 @@ class ShellWindow(QMainWindow):
         if keep_in_tray and not self._quitting:
             event.ignore()
             self.hide()
+            for dialog in SettingsDialog.on_screen():    # Settings goes with the window; the pet stays
+                dialog.close()
             self._update_tray_show_action()
             if not self.shared_settings.get("_tray_notice_shown", False):
                 self.tray_icon.showMessage(
@@ -1081,7 +1124,7 @@ class ShellWindow(QMainWindow):
         if self._pages_told_quitting:
             return
         self._pages_told_quitting = True
-        for page in self.pages.values():
+        for page in [*self.pages.values(), *getattr(self, "extras", [])]:
             try:
                 page.on_app_quitting()
             except Exception:
@@ -1870,19 +1913,26 @@ class ShellWindow(QMainWindow):
     # ------------------------------------------------------------ settings --
     def open_settings(self, tool_id=None):
         """The Settings window - on General, or on a tool's own page (its
-        right-click Settings)."""
+        right-click Settings). A window of its own rather than a modal one:
+        the pet can still be dragged about, and Buddy used, while it's
+        open (what changes there applies as it's changed). Asked for again
+        while open, the one on screen comes to the front."""
+        tool_id = tool_id if ShellWindow.has_settings(self, tool_id) else None
+        open_now = next(iter(SettingsDialog.on_screen()), None)
+        if open_now is not None:
+            open_now.open_page(tool_id)
+            return
         current_page = (self.pages.get(self._current_tool_id) if self._layout == "desktop"
                         else self.stack.front())
-        dialog = SettingsDialog(self, self.shared_settings, self._on_settings_applied, current_page,
-                                open_tool=tool_id if ShellWindow.has_settings(self, tool_id) else None)
-        dialog.exec()
+        dialog = SettingsDialog(self, self.shared_settings, self._on_settings_applied, current_page, open_tool=tool_id)
         # A child of this window: without this, every Settings ever opened
         # stays behind, hidden, with a live web view, until Buddy quits.
-        dialog.deleteLater()
+        dialog.finished.connect(dialog.deleteLater)
+        dialog.show()
 
     def has_settings(self, tool_id):
         """True if a tool has a page of its own in Settings."""
-        page = self.pages.get(tool_id)
+        page = self.pages.get(tool_id) or next((e for e in getattr(self, "extras", []) if e.tool_id == tool_id), None)
         if page is None:
             return False
         try:

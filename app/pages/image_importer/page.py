@@ -114,6 +114,7 @@ class ImageImporterPage(WebToolPage):
 
     def _stage(self, path, source):
         self.staging.add(path, source)
+        self.achieve("images", 1)
         self._add_log(f"Added {os.path.basename(path)} ({source.lower()}).")
 
     # ------------------------------------------------------------ adding --

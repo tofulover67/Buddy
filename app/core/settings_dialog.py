@@ -175,6 +175,22 @@ class SettingsDialog(WebDialog):
         self._timer.stop()
         super().done(result)
 
+    @staticmethod
+    def on_screen() -> list:
+        """The Settings windows open right now (one, in practice) - counting
+        one still loading its page before it shows. Settings is shown with
+        show(), not exec(): a window of its own, so the rest of Buddy - the
+        pet - keeps taking the mouse while it's open."""
+        out = []
+        for dialog in list(_OPEN):
+            try:
+                dialog.isVisible()
+            except RuntimeError:        # already destroyed
+                _OPEN.remove(dialog)
+                continue
+            out.append(dialog)
+        return out
+
     def web_ready(self):
         self.push()
 
@@ -186,6 +202,9 @@ class SettingsDialog(WebDialog):
         tools = list(pages.values()) if isinstance(pages, dict) else []
         if self.active_page is not None and self.active_page not in tools:
             tools.append(self.active_page)
+        # The shell's extras - the pet, the achievements (pages/pets/,
+        # pages/achievements/): pages here and nowhere else.
+        tools.extend(getattr(self.main_window, "extras", None) or [])
         return tools
 
     def tool(self, section):
@@ -523,6 +542,18 @@ class SettingsDialog(WebDialog):
             self._opened = True
             data["open"] = self._first_page(pages)
         self.emit("settings", data)
+
+    def open_page(self, tool_id=None):
+        """Settings is already on screen and asked for again - for a tool's
+        own page, or just Settings: goes there (or stays put) and comes
+        to the front."""
+        if tool_id:
+            self.open_tool = tool_id
+            pages = self.pages()
+            self.emit("settings", {"groups": sf.GROUPS, "pages": pages, "open": self._first_page(pages), "goto": True})
+        self.show()
+        self.raise_()
+        self.activateWindow()
 
     def refresh_soon(self, owner=None):
         self._dirty.add(owner)

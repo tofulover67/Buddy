@@ -682,6 +682,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         self.settings.save()
         if self.settings.get("translate_auto") and self.settings.get("translate_targets") and self._auto is None:
             self._pending_translate = dict(self.settings.get("last_transcript"))
+        self.achieve("transcripts", 1)
         self.result = {"ok": True, "kind": "transcribe", "srt": result["srt"], "summary": summary, "placed": 0,
                        "timeline": self._run_timeline, "placing": True,
                        "message": "Adding the subtitles to the timeline…"}

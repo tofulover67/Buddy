@@ -598,7 +598,8 @@ class WebWindow(_ReadyToShow, WebSurface, QWidget):
 
 class WebDialog(_ReadyToShow, WebSurface, QDialog):
     """A modal window drawn by a web page - exec() it, once. host gives the theme
-    (the shell); parent is the window it sits over."""
+    (the shell); parent is the window it sits over. (Settings is the one
+    shown with show() instead, so the pet stays usable: core/settings_dialog.py.)"""
 
     transparent = False
 

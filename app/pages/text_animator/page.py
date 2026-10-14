@@ -624,6 +624,7 @@ class AnimationPage(WebToolPage):
             self._push_state()
             if error is None:
                 self._read_after()
+                self.achieve("presets", result["applied"])
             done(*apply_summary(preset, result, error))
 
         self._start("apply", lambda c: motion_resolve.run_apply(c, preset, plan_for, options=options), finished)
@@ -649,6 +650,7 @@ class AnimationPage(WebToolPage):
             self._push_state()
             return self.emit("alert", {"title": "Couldn't apply the preset", "text": str(error)})
         applied, failed = result["applied"], result["failed"]
+        self.achieve("presets", applied)
         skipped = sum(result["skipped"].values())
         if not applied and not failed:
             text = ("Only audio or subtitle clips are selected – they can't take a motion preset."
@@ -1017,6 +1019,7 @@ class AnimationPage(WebToolPage):
             self._push_state()
             return self.emit("alert", {"title": "Couldn't put the zooms on", "text": str(error)})
         n, short = result["applied"], result["empty"]
+        self.achieve("zooms", n)
         if not n:
             text = ("The selected clips are all shorter than where the zooms start." if short
                     else "None of the selected clips took the zooms.")
@@ -1088,6 +1091,7 @@ class AnimationPage(WebToolPage):
             self._push_state()
             return self.emit("alert", {"title": "Couldn't put the transitions on", "text": str(error)})
         n, short = result["applied"], result["shorter"]
+        self.achieve("transitions", n)
         if n:
             text = "The transition is on the cut." if n == 1 else f"The transition is on {n} cuts."
             if short:

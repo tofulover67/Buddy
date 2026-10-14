@@ -208,6 +208,7 @@ class AuditPage(AuditAutomationMixin, WebToolPage):
             self._push_state()
             return self._auto_scanned(self.problem) if self._auto is not None else None
         self.scan, self.checked_at = scan, time.time()
+        self.achieve("audits", 1)
         self._run_checks()
         if self._auto is not None:
             self._auto_scanned("")

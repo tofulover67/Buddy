@@ -267,6 +267,7 @@ class BatchClipRenamerPage(WebToolPage):
 
         if done:
             self._undo = {"items": done, "where": where}
+            self.achieve("renamed", len(done))
             self._add_log(f"Renamed 1 clip in {where}." if len(done) == 1
                           else f"Renamed {len(done)} clips in {where}.", "success")
         if failed:

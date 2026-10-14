@@ -38,6 +38,11 @@ Buddy's integrated tools include the following:
 
 The sidebar can be reordered and tools hidden from Settings.
 
+Two more things live in Settings (under General) rather than in the sidebar: a **pet**,
+a small companion in a see-through window of its own that floats over Resolve,
+and **achievements**, badges for what's done with the tools and for what
+Resolve does while Buddy is open. See Pets and achievements below.
+
 The bug button in the header (and on the desktop layout's taskbar) sends a
 bug report - what went wrong, up to six screenshots, and Buddy's, the
 system's and Resolve's versions - to the Buddy Network server, with Buddy
@@ -560,6 +565,66 @@ messages (end-to-end encrypted) and a buddies list. Anonymous by design: no
 email or sign-up, and the server keeps no IP addresses. Buddy connects to the
 public server by default; `server/README.md` covers running your own.
 
+## Pets and achievements
+
+Two pages under General in Settings - not tabs in the sidebar - that make using
+Buddy a little more fun, and both are off to the side of the work: nothing
+they do touches a project or leaves the computer. They're the shell's
+`extras` (`core/shell_window.py`), which `core/settings_dialog.py` lists
+beside the tools, with two field kinds of their own (the pet gallery and the
+badge cards, `core/settings_form.py`).
+
+**Achievements** (`core/achievements.py`, `pages/achievements/`) count what's
+done with the tools and hand out badges for it, in families of tiers - First
+proxy at 1, Proxy pipeline at 100, Proxy factory at 1000 - each worth 10,
+25, 50 or 100 points, with a level every 100 points. A tool reports in one
+line (`ToolPage.achieve("proxies", 12)`, `pages/base.py`); what Resolve does
+on its own - render jobs finishing in the Deliver page, clips being graded,
+how big and how long the open timeline is - is read every so often through
+the Resolve reader's own process (`core/resolve_stats.py`,
+`core/render_watch.py`), so a playing timeline never holds Buddy up. A render
+counts when a job the watcher saw queued or rendering has finished, so one
+that finished while Buddy was closed doesn't; "graded" is the nearest the
+scripting API comes to a grade being applied - more than one node on the
+clip, or a first node whose colour isn't neutral. An unlock shows a
+notification (off on the page), the page marks it New until it's been
+looked at, and Reset achievements… starts everything over. The counts
+live in `~/.buddy/tools/achievements/achievements.json`.
+
+**Pets** (`pages/pets/`) puts a small animal on the desktop, in a frameless
+see-through always-on-top window of its own (`pet_window.py`) that floats
+over Resolve and stays when Buddy's window is in the tray. What it does
+moment to moment is `behaviour.py` (no Qt, tested): it walks along the
+bottom of the screen, sits, blinks, dozes off after a while with nothing
+happening in Buddy, types on a little laptop while any tool is working
+(`ToolPage.working_on`), and jumps with confetti when an achievement
+unlocks, saying which. A click pats it - counted - and opens a speech bubble
+with a field that asks Ask Buddy: the question goes to the chat and Buddy's
+window comes to the front on it. A right-click offers Pets, Achievements and
+Hide; a drag (handed to the OS as a system move) puts it anywhere, and it
+walks along that height from then on. The pictures are one SVG per species
+(`web/sprites.js`, animated by `web/sprites.css`), shared by the window and
+the gallery on the Settings page: the blob - a tall blue dome with stacked
+eyes and a wide grin, which hops along instead of walking - from the start,
+then, two achievements apart from 3 on, the robot (a screen for a face),
+Shroomy the toadstool, Poof the cloud, Blaze the flame, Spike the cactus,
+Cheddar the cheese, Crumb the cookie, Nutty the acorn, Pebble the rock and
+Snappy the crab. Hovering the
+pet shows a pill with Ask Buddy and Open Buddy; the rest of the window's
+see-through room lets clicks through (on Windows, the native window's
+transparent-for-input style, toggled as the mouse comes and goes). On a Mac the
+window is a plain frameless window rather than a tool window, which would
+hide whenever Buddy isn't the front app.
+
+**Skins** (`pages/pets/skins.py`). Each pet has a few looks, drawn by the
+same sprites: Classic; a colour of its own (Mint for the blob, Gold for the
+robot...); a colour of your own, picked on the page, which tints the pet; and
+the accessories every pet can wear - shades, a top hat, a bow tie, a crown.
+All free. The Pets page ends with Support Buddy: a "Donate to support" button
+that opens the donation page on Buddy's owner's website (`DONATE_URL` in
+`pages/pets/page.py`; with none set there's no button). Nothing in Buddy is
+unlocked by paying.
+
 ## Layout
 
 ```
@@ -640,7 +705,9 @@ Free to use for anything, including paid work, and free to change and share.
 What you can't do is sell it: charging for Buddy or a modified copy, or for a
 product or service whose value comes mainly from it, isn't allowed. The
 [licence](LICENSE) is MIT with the Commons Clause, which is source-available
-rather than OSI "open source". The Open Sans font keeps its own SIL Open Font
+rather than OSI "open source". Buddy is free in full, the pets' skins included;
+the Pets page offers a donation to Buddy's owner, and nothing is unlocked by
+paying. The Open Sans font keeps its own SIL Open Font
 License (`app/assets/fonts/OFL.txt`). Some Animation presets are modelled on
 animate.css and Magic Animations, both MIT; their notices are in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

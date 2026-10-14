@@ -160,9 +160,10 @@ class LinkBarThemeTests(_Shell):
 class DialogTests(_Shell):
     def test_every_tools_pages_in_the_rails_order(self):
         pages = self.dialog().pages()
+        # ...with the shell's extras - the pet, the achievements - at the end of General.
         self.assertEqual([p["id"] for p in pages],
-                         ["general", "window", "backup", "appearance", "ai_library", "ai_chat", "ai_translation", "ai_privacy",
-                          "plain", "smart", "about"])
+                         ["general", "window", "backup", "pets", "achievements", "appearance", "ai_library", "ai_chat",
+                          "ai_translation", "ai_privacy", "plain", "smart", "about"])
         plain = next(p for p in pages if p["id"] == "plain")
         self.assertEqual(plain["fields"][0]["key"], "tick")      # its name is the page's title already
         self.assertEqual({p["owner"] for p in pages if p["group"] == "ai"}, {"shell", "smart"})

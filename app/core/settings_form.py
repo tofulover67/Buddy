@@ -34,6 +34,14 @@ ToolPage.settings_fields() and handling on_setting() / on_settings_action()
     models    rows, [filters] - a list of models (see models())
     storage   total, parts [{label, bytes, tone}], [path] - disk used, as a bar
     progress  text, value (0-100, None = still working), [stop] (an action)
+    pets      key, items [{id, name, need, unlocked, chosen}], state - the
+              pet gallery (pages/pets/web/sprites.js draws them); a click on
+              an unlocked one sets key to its id
+    skins     key, species, items [{id, name, chosen}] - the
+              chosen pet's skins (pages/pets/skins.py); a click on one
+               sets key to its id
+    achievements  items (core/achievements.py progress()), summary - the
+              badges, as cards in their groups
 
 Any field may carry "error" (shown under it) and "indent". Everything a
 field shows goes into the page as text; only a hint's "html" is HTML, and
@@ -145,6 +153,24 @@ def status(label, value, tone="", hint_text=None, raw=False):
 def link(label, page, hint_text=None):
     """A button that opens another page of Settings, by its id."""
     return {"kind": "link", "label": label, "page": page, "hint": hint_text}
+
+
+def pets(key, items, state="idle"):
+    """The pet gallery: items [{id, name, need, unlocked, chosen}]; state is
+    what the chosen one is drawn doing."""
+    return {"kind": "pets", "key": key, "items": items, "state": state}
+
+
+def skins(key, species, items, colour="#7c5cff"):
+    """The chosen pet\'s skins: items [{id, name, chosen}];
+    a click on one sets key to its id. colour: the one its
+    "custom" skin is drawn in."""
+    return {"kind": "skins", "key": key, "species": species, "items": items, "colour": colour}
+
+
+def achievements(items, summary):
+    """The badges (core/achievements.py progress() and summary()), as cards in their groups."""
+    return {"kind": "achievements", "items": items, "summary": summary}
 
 
 def models(rows, filters=False):

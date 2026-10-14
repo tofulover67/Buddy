@@ -297,6 +297,8 @@ class GamesPage(WebToolPage):
             return
         entry = self.record[level]
         key = "won" if won else "lost"
+        if won:
+            self.achieve("games_won", 1)
         entry[key] = min(MAX_COUNT, entry[key] + 1)
         self.settings["pong_record"] = self.record
         self.settings.save()
@@ -319,6 +321,7 @@ class GamesPage(WebToolPage):
         level, seconds = payload.get("level"), clean_seconds(payload.get("seconds"))
         if level not in MINES_LEVELS or seconds is None:
             return
+        self.achieve("games_won", 1)
         if level not in self.mines_best or seconds < self.mines_best[level]:
             self.mines_best[level] = seconds
             self.settings["mines_best"] = dict(self.mines_best)
@@ -331,6 +334,7 @@ class GamesPage(WebToolPage):
         mode = f"draw{draw}" if draw in (1, 3) and not isinstance(draw, bool) else None
         if mode is None or seconds is None:
             return
+        self.achieve("games_won", 1)
         entry = self.solitaire_stats.get(mode, {"won": 0, "best": 0})
         self.solitaire_stats[mode] = {"won": min(MAX_COUNT, entry["won"] + 1),
                                       "best": seconds if not entry["best"] or seconds < entry["best"] else entry["best"]}
@@ -359,6 +363,7 @@ class GamesPage(WebToolPage):
         level, seconds = payload.get("level"), clean_seconds(payload.get("seconds"))
         if level not in SUDOKU_LEVELS or seconds is None:
             return
+        self.achieve("games_won", 1)
         entry = self.sudoku_stats.get(level, {"won": 0, "best": 0})
         self.sudoku_stats[level] = {"won": min(MAX_COUNT, entry["won"] + 1),
                                     "best": seconds if not entry["best"] or seconds < entry["best"] else entry["best"]}
@@ -407,6 +412,7 @@ class GamesPage(WebToolPage):
         if won:
             entry["won"] = min(MAX_COUNT, entry["won"] + 1)
             entry["dist"][taken - 1] = min(MAX_COUNT, entry["dist"][taken - 1] + 1)
+            self.achieve("games_won", 1)
         entry["streak"] = min(MAX_COUNT, entry["streak"])
         entry["best"] = max(entry["best"], entry["streak"])
         self.words_stats[mode] = entry
@@ -422,6 +428,8 @@ class GamesPage(WebToolPage):
             return
         entry = self.board_records[game][level]
         entry[outcome] = min(MAX_COUNT, entry[outcome] + 1)
+        if outcome == "won":
+            self.achieve("games_won", 1)
         self.settings[f"{game}_record"] = {lv: dict(v) for lv, v in self.board_records[game].items()}
         self.settings.save()
         self.emit(f"{game}_record", self.board_records[game])

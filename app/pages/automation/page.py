@@ -358,6 +358,8 @@ class AutomationPage(WebToolPage):
         if a is not None:
             a["last"] = {"when": time.strftime("%Y-%m-%d %H:%M"), "ok": ok, "text": text, "took": took}
             self._save()
+        if ok:
+            self.achieve("automations", 1)      # first, so the run's own notification is the one left showing
         self._notify(r.automation["name"] if r is not None else "Automation", ok, text)
         self._push()
 

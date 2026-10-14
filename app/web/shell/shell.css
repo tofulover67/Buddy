@@ -530,3 +530,50 @@ body.window { background: var(--surface); }
     background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--text-strong); font-weight: 700;
 }
 .bug-drop[hidden] { display: none; }
+
+/* ------------------------------------------- General: the pet gallery and the badges -- */
+/* (core/settings_form.py "pets" and "achievements" fields; pages/pets/, pages/achievements/) */
+
+.set-pet-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.set-pet {
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 8px;
+    border: var(--bw) solid var(--card-border); border-radius: var(--r-lg, 12px);
+    background: var(--raised-bg, transparent); cursor: pointer; font: inherit; color: var(--text); text-align: center;
+}
+.set-pet:hover:not(:disabled) { border-color: var(--field-focus-border); }
+.set-pet.chosen { border-color: var(--accent-bg); box-shadow: 0 0 0 1px var(--accent-bg) inset; }
+.set-pet.locked { cursor: default; opacity: .7; }
+.set-pet.locked .pet-sprite { filter: grayscale(1) contrast(.8); opacity: .75; }
+.set-pet .pet-sprite { width: 84px; height: 65px; }
+.set-pet-name { font-weight: 700; color: var(--text-strong); }
+.set-pet-note { font-size: var(--fs-xs); color: var(--text-dim); min-height: 1.2em; }
+.set-pet-note.ok { color: var(--success, var(--accent-text)); }
+
+.set-achievements { gap: 14px; }
+.set-ach-head { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 6px; }
+.set-ach-group-title { margin: 0; font-size: var(--fs-md); font-weight: 700; color: var(--text-strong); }
+.set-ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.set-ach {
+    display: grid; grid-template-columns: 40px 1fr; gap: 3px 10px; align-items: start; position: relative;
+    padding: 10px 12px; border: var(--bw) solid var(--card-border); border-radius: var(--r-lg, 12px);
+    background: var(--raised-bg, transparent);
+}
+.set-ach.todo { opacity: .78; }
+.set-ach.todo .set-medal { filter: grayscale(1); opacity: .55; }
+.set-ach.done { border-color: color-mix(in srgb, var(--accent-bg) 55%, var(--card-border)); }
+.set-ach.new::after {
+    content: "New"; position: absolute; top: 8px; right: 10px; font-size: var(--fs-xs); font-weight: 700;
+    padding: 1px 7px; border-radius: var(--r-full, 999px); background: var(--accent-bg); color: var(--accent-fg);
+}
+.set-medal { grid-row: 1 / span 3; width: 40px; height: 48px; }
+.set-ach-title { font-weight: 700; color: var(--text-strong); padding-right: 40px; }
+.set-ach-text { font-size: var(--fs-sm); color: var(--text); line-height: 1.35; }
+.set-ach-foot { display: flex; align-items: center; gap: 8px; margin-top: 3px; font-size: var(--fs-xs); color: var(--text-dim); }
+.set-ach-bar { flex: 1 1 auto; height: 5px; border-radius: 3px; background: var(--field-bg); overflow: hidden; }
+.set-ach-bar > i { display: block; height: 100%; background: var(--accent-bg); border-radius: 3px; }
+.set-ach-nums, .set-ach-when { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.set-ach-points { margin-left: auto; font-weight: 700; color: var(--text-strong); white-space: nowrap; }
+.set-skin-gallery { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.set-skin .pet-sprite { width: 72px; height: 56px; }
+/* A hat or a crown rises above the sprite's box: the card lets it (a button clips by default). */
+.set-pet { overflow: visible; padding-top: 16px; }

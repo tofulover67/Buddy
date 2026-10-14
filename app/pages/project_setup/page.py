@@ -488,6 +488,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             log(f"Couldn't create the bins: {error}", "error")
             return
         if created:
+            self.achieve("bins", created)
             log("Created 1 bin in the Media Pool." if created == 1 else f"Created {created} bins in the Media Pool.", "success")
             self.emit("toast", {"text": "Created 1 bin" if created == 1 else f"Created {created} bins"})
         if failed:
@@ -576,6 +577,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             self._refresh_tab(connect=False)
             return
         n = result["imported"]
+        self.achieve("imported", n)
         log(f"Imported 1 clip into '{result['bin']}', matching the folder's structure." if n == 1
             else f"Imported {n} clips into '{result['bin']}', matching the folder's structure.",
             "success" if n else "warn")
@@ -953,6 +955,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             timeline = otio_engine.import_rebuilt(controller, result, workdir, base_name,
                                                   "(Synced)", "assembled.otio")
             self._gap_targets.add(self._sync_key(controller, timeline))
+            self.achieve("syncs", 1)
             return sync_report.assemble(stats, method, timeline.GetTrackCount("video"),
                                         timeline.GetTrackCount("audio"), timeline.GetName(), warnings)
 
@@ -1470,6 +1473,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             lines = [(f"Proxy {where}: {len(render_list)} to render, {len(existing_list)} already have files.", "info")]
             if payload.get("note"):
                 lines.append((payload["note"], "warn"))
+            self.achieve("proxies", sum(1 for r in results if r["ok"]))
             lines.extend(proxy.render_report(results))
             lines.extend(proxy.link_report(linked, refused, existing_linked, redone=len(stale),
                                            refused_existing=refused_existing))

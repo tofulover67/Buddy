@@ -1241,6 +1241,7 @@ class GenerativePage(WebToolPage):
                 self.emit("toast", {"text": error})
                 return self._push()
             self.doc.update(saved=result["path"], dirty=False)
+            self.achieve("cleaned", 1)
             self.emit("toast", {"text": f"Saved {os.path.basename(result['path'])}"})
             self._push()
             if then == "swap":
@@ -1446,6 +1447,7 @@ class GenerativePage(WebToolPage):
             if len(saved) == len(order):
                 self._done()
                 doc["layers"] = saved
+                self.achieve("cleaned", 1)
                 names = " and ".join(os.path.basename(p) for p in saved.values())
                 self.emit("toast", {"text": f"Saved {names}"})
                 self._push()

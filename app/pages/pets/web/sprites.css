@@ -1,0 +1,138 @@
+/* How a pet moves (sprites.js draws it): the holder's data-state picks the
+   animation, data-facing flips it. Shared by the pet's window and the Pets
+   tab. Everything animates on the parts' own transforms, so a sprite's
+   attributes stay as drawn. */
+
+.pet-sprite { display: block; width: 100%; height: 100%; position: relative; }
+.pet-sprite svg { width: 100%; height: 100%; overflow: visible; display: block; transform-origin: 50% 100%; }
+.pet-sprite[data-facing="-1"] svg { transform: scaleX(-1); }
+
+.pet-sprite .fx { display: none; }
+.pet-sprite .rig { transform-box: view-box; transform-origin: 65px 96px; animation: pet-breathe 2.8s ease-in-out infinite; }
+.pet-sprite .eye { transform-box: fill-box; transform-origin: 50% 50%; animation: pet-blink 4.6s infinite; }
+.pet-sprite .eye.r { animation-delay: .05s; }
+.pet-sprite .leg { transform-box: fill-box; transform-origin: 50% 0; }
+.pet-sprite .tail { transform-box: fill-box; transform-origin: 100% 100%; animation: pet-wag 2.2s ease-in-out infinite; }
+.pet-sprite .wing { transform-box: fill-box; transform-origin: 50% 100%; }
+.pet-sprite .flicker { transform-box: fill-box; transform-origin: 50% 100%; animation: pet-flicker .55s ease-in-out infinite alternate; }
+.pet-sprite .cap { transform-box: fill-box; transform-origin: 50% 100%; }
+[data-state="happy"] .cap, [data-state="cheer"] .cap { animation: pet-tip .6s ease-in-out infinite; }
+/* Without feet, the cloud and the flame drift along instead of stepping;
+   the cactus, the cheese, the cookie and the rock shuffle (squish) along. */
+.pet-sprite[data-species="poof"][data-state="walk"] .rig,
+.pet-sprite[data-species="blaze"][data-state="walk"] .rig { animation: pet-drift-along .9s ease-in-out infinite; }
+.pet-sprite[data-species="spike"][data-state="walk"] .rig,
+.pet-sprite[data-species="cheddar"][data-state="walk"] .rig,
+.pet-sprite[data-species="crumb"][data-state="walk"] .rig,
+.pet-sprite[data-species="pebble"][data-state="walk"] .rig { animation: pet-squish .5s ease-in-out infinite; }
+/* The crab's legs scuttle, and its claws snap when it's pleased. */
+.pet-sprite .legs { transform-box: fill-box; transform-origin: 50% 0; }
+[data-state="walk"] .legs { animation: pet-scuttle .18s ease-in-out infinite alternate; }
+.pet-sprite .claw { transform-box: fill-box; transform-origin: 50% 100%; }
+[data-state="happy"] .claw, [data-state="cheer"] .claw { animation: pet-snap .3s ease-in-out infinite alternate; }
+.pet-sprite .stalks, .pet-sprite .sprout { transform-box: fill-box; transform-origin: 50% 100%; }
+[data-state="happy"] .sprout, [data-state="cheer"] .sprout { animation: pet-tip .6s ease-in-out infinite; }
+.pet-sprite .arm { transform-box: fill-box; transform-origin: 0 50%; }
+.pet-sprite .arm-l { transform-origin: 100% 50%; }
+.pet-sprite .antenna { transform-box: fill-box; transform-origin: 50% 50%; animation: pet-pulse 1.6s ease-in-out infinite; }
+.pet-sprite .lamp { animation: pet-pulse 1.1s ease-in-out infinite; }
+.pet-sprite .z { font: 700 11px var(--font); fill: #cfd6e6; stroke: rgba(0, 0, 0, .35); stroke-width: .6px; paint-order: stroke; }
+
+/* Walking: a quick bob, legs swinging in pairs (the blob, legless, squishes along). */
+[data-state="walk"] .rig { animation: pet-bob .46s ease-in-out infinite; }
+[data-state="walk"] .leg.l1, [data-state="walk"] .leg.l4 { animation: pet-step .46s ease-in-out infinite; }
+[data-state="walk"] .leg.l2, [data-state="walk"] .leg.l3 { animation: pet-step .46s ease-in-out infinite reverse; }
+[data-state="walk"] .wing { animation: pet-flap .46s ease-in-out infinite; }
+[data-state="walk"] .tail { animation: pet-wag .9s ease-in-out infinite; }
+.pet-sprite[data-species="blob"][data-state="walk"] .rig { animation: pet-squish .5s ease-in-out infinite; }
+.pet-sprite[data-species="blob"][data-state="walk"] .arm { animation: pet-wave .5s ease-in-out infinite; }
+
+/* Sitting: lower, legs tucked. */
+[data-state="sit"] .rig { animation: pet-breathe 3.2s ease-in-out infinite; transform: scaleY(.92); }
+[data-state="sit"] .leg { transform: scaleY(.5); }
+
+/* Asleep: eyes shut, slow breathing, z's drifting up. */
+[data-state="sleep"] .rig { animation: pet-breathe 4.4s ease-in-out infinite; transform: scaleY(.9); }
+[data-state="sleep"] .leg { transform: scaleY(.5); }
+[data-state="sleep"] .eye { animation: none; transform: scaleY(.12); }
+.pet-sprite .mouth { transform-box: fill-box; transform-origin: 50% 50%; }
+[data-state="sleep"] .mouth { transform: scaleY(.25); }
+[data-state="cheer"] .mouth, [data-state="happy"] .mouth { transform: scale(1.15, 1.3); }
+[data-state="sleep"] .tail { animation: none; }
+[data-state="sleep"] .fx-zzz { display: block; }
+[data-state="sleep"] .z { animation: pet-drift 2.4s ease-out infinite; opacity: 0; }
+[data-state="sleep"] .z2 { animation-delay: .8s; }
+[data-state="sleep"] .z3 { animation-delay: 1.6s; }
+
+/* Working: a laptop in front, a paw tapping. */
+[data-state="work"] .fx-laptop { display: block; }
+[data-state="work"] .leg.l3, [data-state="work"] .leg.l2 { animation: pet-tap .22s ease-in-out infinite; }
+[data-state="work"] .screen { animation: pet-pulse 1.3s ease-in-out infinite; }
+/* The robot needs no laptop: its own screen fills with lines of code,
+   stepping up a line at a time (seven lines, then the same seven again). */
+.pet-sprite[data-species="robot"][data-state="work"] .fx-laptop { display: none; }
+.pet-sprite[data-species="robot"][data-state="work"] .eye,
+.pet-sprite[data-species="robot"][data-state="work"] .mouth { display: none; }
+.pet-sprite[data-species="robot"][data-state="work"] .fx-code { display: block; }
+.pet-sprite .code { transform-box: view-box; }
+.pet-sprite[data-species="robot"][data-state="work"] .code { animation: pet-code 1.4s steps(7, end) infinite; }
+@keyframes pet-code { 0% { transform: translateY(0); } 100% { transform: translateY(-31.5px); } }
+
+/* Patted: hearts, a little hop, an arm waving. */
+[data-state="happy"] .fx-hearts { display: block; }
+[data-state="happy"] .fx-hearts path { transform-box: fill-box; transform-origin: 50% 100%; animation: pet-float 1.6s ease-out infinite; }
+[data-state="happy"] .fx-hearts .h2 { animation-delay: .4s; }
+[data-state="happy"] .fx-hearts .h3 { animation-delay: .8s; }
+[data-state="happy"] .rig { animation: pet-hop .55s ease-out infinite; }
+[data-state="happy"] .arm-r { animation: pet-wave .5s ease-in-out infinite; }
+[data-state="happy"] .tail { animation: pet-wag .5s ease-in-out infinite; }
+
+/* An achievement: jumping, confetti, both arms up. */
+[data-state="cheer"] .fx-confetti { display: block; }
+[data-state="cheer"] .fx-confetti .c { transform-box: fill-box; transform-origin: 50% 50%; animation: pet-confetti 1.4s ease-in infinite; }
+[data-state="cheer"] .fx-confetti .c2, [data-state="cheer"] .fx-confetti .c6 { animation-delay: .3s; }
+[data-state="cheer"] .fx-confetti .c3, [data-state="cheer"] .fx-confetti .c7 { animation-delay: .6s; }
+[data-state="cheer"] .fx-confetti .c4, [data-state="cheer"] .fx-confetti .c8 { animation-delay: .9s; }
+[data-state="cheer"] .rig { animation: pet-jump .7s ease-in-out infinite; }
+[data-state="cheer"] .wing { animation: pet-flap .35s ease-in-out infinite; }
+[data-state="cheer"] .arm { animation: pet-wave .35s ease-in-out infinite; }
+[data-state="cheer"] .tail { animation: pet-wag .4s ease-in-out infinite; }
+
+@keyframes pet-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.03) translateY(-.5px); } }
+@keyframes pet-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes pet-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+@keyframes pet-step { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(16deg); } }
+@keyframes pet-wag { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(10deg); } }
+@keyframes pet-flap { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.55); } }
+@keyframes pet-squish { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(.94, 1.08) translateY(-3px); } }
+@keyframes pet-drift { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-16px); } }
+@keyframes pet-tap { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes pet-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes pet-float { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px) scale(1.1); } }
+@keyframes pet-wave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-22deg); } }
+@keyframes pet-flicker { 0% { transform: scale(1, 1) skewX(0); } 100% { transform: scale(1.04, .96) skewX(-3deg); } }
+@keyframes pet-tip { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-7deg) translateY(-2px); } }
+@keyframes pet-scuttle { 0% { transform: skewX(-6deg); } 100% { transform: skewX(6deg); } }
+@keyframes pet-snap { 0% { transform: scale(1, 1); } 100% { transform: scale(1.12, .82); } }
+@keyframes pet-drift-along { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-4px) rotate(2deg); } }
+@keyframes pet-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-7px) scaleY(1.04); } }
+@keyframes pet-jump { 0%, 100% { transform: translateY(0) scaleY(1); } 30% { transform: translateY(-14px) scaleY(1.06); } 60% { transform: translateY(0) scaleY(.94); } }
+@keyframes pet-confetti { 0% { opacity: 0; transform: translateY(-10px) rotate(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(70px) rotate(260deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .pet-sprite *, .pet-sprite .rig, .pet-sprite .eye { animation-duration: 0s !important; }
+}
+
+/* Asleep, the eyes really close: a pet drawn with eye whites loses them and
+   the pupils, and shows the closed lids sprites.js drew for it (a pet
+   without whites, the robot, narrows its own eyes - the rule above). The
+   mouth goes to a quiet line with nothing showing through it. */
+.pet-sprite .lid { display: none; }
+[data-state="sleep"] .has-lids .eyeball, [data-state="sleep"] .has-lids .eye { display: none; }
+[data-state="sleep"] .has-lids .lid { display: block; }
+[data-state="sleep"] .tongue, [data-state="sleep"] .teeth { display: none; }
+[data-state="sleep"] .blush { opacity: .5; }
+/* The crab's eye stalks shrink and its closed eyes come to rest on the shell. */
+.pet-sprite .lid { transform-box: fill-box; transform-origin: 50% 50%; }
+.pet-sprite[data-species="snappy"][data-state="sleep"] .stalks { transform: scaleY(.3); }
+.pet-sprite[data-species="snappy"][data-state="sleep"] .lid { transform: translateY(10px); }

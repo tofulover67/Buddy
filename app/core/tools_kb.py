@@ -109,7 +109,11 @@ def _tool_ids(page_cls) -> list:
     return [getattr(page_cls, "tool_id", None), *getattr(page_cls, "SUB_TOOLS", ())]
 
 
-def _availability(tool_id: str, registry) -> str:
+def _availability(tool_id: str, registry, builtin=False) -> str:
+    """builtin: part of the shell itself, not a tool in the registry (the
+    pet, the achievements - pages in Settings): always there."""
+    if builtin:
+        return AVAILABLE
     if registry is None:
         return UNKNOWN
     for _category, page_cls in registry:
@@ -129,7 +133,7 @@ def load_tools(registry=None) -> list[ToolInfo]:
             capabilities=[_here(c) for c in entry.get("capabilities") or []],
             needs_resolve=bool(entry.get("needs_resolve", True)),
             notes=_here(entry.get("notes", "")),
-            availability=_availability(tool_id, registry),
+            availability=_availability(tool_id, registry, bool(entry.get("builtin"))),
         )
         for tool_id, entry in raw.items()
     ]

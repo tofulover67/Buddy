@@ -331,6 +331,37 @@
       ],
       "notes": "Never touches Resolve or the network."
     },
+    "pets": {
+      "name": "Pets",
+      "summary": "A small companion on the desktop, outside Buddy's window - a blob to start with, then a robot, a toadstool, a cloud, a flame, a cactus, a cheese, a cookie, an acorn, a rock and a crab, earned one by one - that walks along the bottom of the screen, reacts to what Buddy and you do, and asks Ask Buddy when clicked. Not a tab: its page is Settings > General > Pets.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Lives in a small see-through window of its own that floats over Resolve and every other app, always on top, and stays on the desktop when Buddy's window is closed to the [[win:tray]][[mac:menu bar]]; Show the pet on the desktop in Settings > General > Pets (or Hide pet on the pet's own right-click menu)",
+        "Walks along the bottom of the screen (It walks about can be turned off), sits, blinks, dozes off when nothing has happened in Buddy for a while (Falls asleep after: never, 5, 15, 30 minutes or 1 hour; a click or any tool doing something wakes it), types on a little laptop while any tool is working, and jumps with confetti when an achievement is unlocked, saying which one",
+        "Hover it for a small pill with Ask Buddy (opens the question field) and Open Buddy (brings Buddy's window to the front); the rest of the see-through window lets clicks through to what's behind it",
+        "Click it to pat it (counted towards the Good pet and Best friend achievements) - a speech bubble opens with a field that asks Ask Buddy: type a question and press Enter, and Buddy's window comes to the front on Ask Buddy with the question sent. With 'A click on the pet opens a field that asks Ask Buddy' off, a pat just gets a word back",
+        "Right-click it for Pets…, Achievements… and Hide pet; drag it anywhere on any screen and it stays at that height, walking along it; where it stands is remembered between runs",
+        "Eleven species, earned two achievements apart: Blob from the start (a tall blue dome with stacked eyes and a wide grin, no legs - it hops along), Robot with 3 (a rounded screen head with a smiling face), Shroomy with 5 (a red-capped toadstool), Poof with 7 (a cloud that drifts), Blaze with 9 (a flickering flame), Spike with 11 (a cactus), Cheddar with 13 (a wedge of cheese), Crumb with 15 (a cookie with a bite out of it), Nutty with 17 (an acorn), Pebble with 19 (a rock with a sprout and a plaster) and Snappy with 21 (a crab with claws that snap); chosen in the gallery on Settings > General > Pets, which also takes a name of up to 24 characters and Small, Medium or Large",
+        "Settings > General > Pets also shows the level, points and achievements the pet grows with, and links to the Achievements page",
+        "Skins: each pet has Classic (free), a colour of its own (Mint for the blob, Gold for the robot, Blue cap for Shroomy...), Your colour (a colour picked on the page that tints the pet) and the accessories every pet can wear - shades, a top hat, a bow tie, a crown. All free. The page ends with Support Buddy: a Donate to support button that opens Buddy's donation page in the browser; nothing in Buddy is unlocked by paying"
+      ],
+      "notes": "Never touches Resolve or the internet. On a Mac the window is a plain frameless window, so it stays when Buddy isn't the front app.",
+      "builtin": true
+    },
+    "achievements": {
+      "name": "Achievements",
+      "summary": "Badges earned by using Buddy's tools - 58 of them in tiers, each worth points that make a level - with how far along each one is; renders finishing and clips graded in Resolve count too while Buddy is open. Not a tab: its page is Settings > General > Achievements.",
+      "needs_resolve": false,
+      "capabilities": [
+        "A card for each achievement, in groups - Renders, Colour, Editing, Media, Workflow, Buddy, Games - with its progress bar (37 / 100), the day it was unlocked, and New on the ones unlocked since the page was last looked at; the level, points and how many are unlocked at the top",
+        "Families of tiers worth 10, 25, 50 and 100 points: proxies rendered with Project Setup (1, 100, 1000), renders finished in Resolve's Deliver page while Buddy is open (1, 25, 100), a render that took 30 minutes / 3 hours, 10 / 100 hours of rendering in all, clips graded while Buddy is open (1, 100, 1000), a timeline with 500 / 2000 clips, a timeline 90 minutes long, Animation presets on clips (1, 50, 500), zooms on 25 clips, transitions on 25 cuts, timelines transcribed (1, 25), 10 audio effects baked, 5 chapter lists copied, 50 stills exported, 50 bins created, 500 clips imported, 250 renamed, 100 relinked, 25 SVG/Lottie files converted, 100 images imported, 10 pictures cleaned with Generative, 10 shots placed with Footage Search, timelines checked with Audit (10, 100), automations run to the end (1, 25), 100 Command Center hot keys, 10 multicam syncs, questions asked (10, 100), 10 palettes, 50 Buddy Network messages, 100 / 1000 hours tracked, Buddy used on 7 / 30 / 100 different days, 25 downloads with Web, the pet patted 50 / 500 times, 10 / 25 / 50 achievements unlocked, games won in Games (1, 25, 100)",
+        "The level (one every 100 points) is what the pet (Settings > General > Pets) grows with, and new species unlock by the number of achievements",
+        "What Resolve does on its own is read every so often while Buddy is connected (never holding Buddy up): a render job counts when one the watcher saw queued or rendering is complete, so renders finished while Buddy was closed don't count; a clip counts as graded when it has more than one node, or its first node's colour isn't neutral - the nearest Resolve's scripting comes to saying a grade was applied; a long timeline is looked at up to 600 clips",
+        "A notification when an achievement unlocks (the page's checkbox turns it off), and Reset achievements… there, which starts every count over"
+      ],
+      "notes": "Counts live in ~/.buddy/tools/achievements/achievements.json. Nothing is sent anywhere.",
+      "builtin": true
+    },
     "transcribe": {
       "name": "Subtitles",
       "summary": "Transcribes the current timeline's dialogue into subtitles on the timeline (Whisper or NVIDIA Parakeet, running locally), and translates subtitles into other languages (NLLB-200 or MADLAD-400 locally, or Ask Buddy's AI model), and turns them into styled, placed and animated Text+. Formerly called Transcribe; its first tab is still Transcribe.",

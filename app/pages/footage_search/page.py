@@ -407,6 +407,7 @@ class FootageSearchPage(FootageSettingsMixin, WebToolPage):
         if error is not None:
             self.emit("toast", {"text": f"Couldn't place it: {error}"})
         else:
+            self.achieve("placed", 1)
             self.emit("toast", {"text": f"Placed on V{result['track']}."})
 
     def _connected_for(self, clip_id):

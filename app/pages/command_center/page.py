@@ -358,6 +358,8 @@ class CommandCenterPage(WebToolPage):
         self._push_state()
 
     def _said(self, b, text, ok, from_keys):
+        if ok:
+            self.achieve("hotkeys", 1)
         self.recent = ([{"when": time.strftime("%H:%M:%S"), "text": text, "ok": bool(ok),
                          "what": actions.summary(b["action"], self._options_for(b), dict(self._presets()))}]
                        + self.recent)[:RECENT]

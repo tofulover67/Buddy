@@ -65,6 +65,9 @@ JOBS = {
     "generative.swap": ("pages.generative.resolve_ext", "swap"),
     "generative.add": ("pages.generative.resolve_ext", "add"),
     "generative.add_sequence": ("pages.generative.resolve_ext", "add_sequence"),
+    # The achievements' look at Resolve (core/render_watch.py): render jobs and the open timeline.
+    "stats.renders": ("core.resolve_stats", "render_jobs"),
+    "stats.timeline": ("core.resolve_stats", "timeline_facts"),
 }
 # Reads failing this many times in a row, with Resolve itself not answering
 # (_alive): the connection's gone (Resolve closed or restarted) - this

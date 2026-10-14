@@ -84,6 +84,8 @@ REGISTRY = [
     ("Essentials", _tool("essentials", "Essentials", "Essentials", "pages.essentials.page", "EssentialsPage", mac=True)),
 
     ("Games", _tool("games", "Games", "Games", "pages.games.page", "GamesPage", mac=True)),
+    # The pet on the desktop (pages/pets/) and the achievements (pages/achievements/)
+    # aren't tabs: they're pages in Settings, built by the shell (its `extras`).
 
     # "" = a plain line above it instead of a heading.
     ("", BuddyNetworkPage),

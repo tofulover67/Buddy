@@ -199,6 +199,10 @@ class TimeTrackerPage(TrackerSettingsMixin, WebToolPage):
 
     def _changed(self):
         self._push_data()
+        try:    # the total tracked, for the achievements (core/achievements.py "tracked_seconds")
+            self.achieve_peak("tracked_seconds", int(sum(self.data_mgr.duration_seconds(e) for e in self.data_mgr.entries)))
+        except Exception:  # noqa: BLE001 - a tally never breaks tracking
+            pass
 
     def _push_tick(self):
         engine = self.engine

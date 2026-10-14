@@ -1,0 +1,59 @@
+/* The pet's window: see-through, the pet standing at the bottom and the
+   speech bubble above it (pet_window.py makes room for it). */
+
+html, body, .pet-main { background: transparent !important; overflow: hidden; }
+.pet-main { position: relative; width: 100%; height: 100%; border-radius: 0; }
+
+.stage {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: var(--pet-w, 166px); height: var(--pet-h, 128px);
+    cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.stage.dragging { cursor: grabbing; }
+
+/* A pet with no bubble up gets its pointer events on the picture only. */
+.pet-main:not(.bubble-open) { pointer-events: none; }
+.pet-main:not(.bubble-open) .stage { pointer-events: auto; }
+
+.bubble {
+    position: absolute; left: 50%; bottom: calc(var(--pet-h, 128px) + 12px); transform: translateX(-50%);
+    width: 280px; max-width: calc(100% - 8px);
+    background: var(--bubble-bg, var(--card-bg)); color: var(--bubble-fg, var(--text-strong));
+    border: var(--bw) solid var(--bubble-border, var(--card-border));
+    border-radius: var(--bubble-radius, 14px); box-shadow: var(--card-shadow, 0 6px 24px rgba(0,0,0,.35));
+    padding: 10px 12px; font-size: var(--fs-md);
+    animation: bubble-in .18s ease-out;
+}
+.bubble-tail {
+    position: absolute; left: 50%; bottom: -8px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg);
+    background: inherit; border-right: inherit; border-bottom: inherit; border-radius: 2px;
+}
+.bubble-text { font-weight: 600; line-height: 1.35; }
+.bubble-text:empty { display: none; }
+.bubble-text.cheer { color: var(--accent-text, var(--accent-bg)); }
+.bubble-ask { display: flex; gap: 6px; margin-top: 6px; }
+.bubble-text:empty + .bubble-ask { margin-top: 0; }
+.bubble-ask .field { flex: 1 1 auto; min-width: 0; }
+.bubble-ask .btn { flex: none; }
+.bubble .name { margin-top: 6px; font-size: var(--fs-xs); color: var(--text-dim); }
+
+/* Hovered: a small pill of actions above the pet (where the bubble goes). */
+.pill {
+    position: absolute; left: 50%; bottom: calc(var(--pet-h, 128px) + 10px); transform: translateX(-50%);
+    display: flex; gap: 2px; padding: 4px;
+    background: var(--pop-bg, var(--card-bg)); border: var(--bw) solid var(--pop-border, var(--card-border));
+    border-radius: var(--r-full, 999px); box-shadow: var(--pop-shadow, 0 6px 20px rgba(0,0,0,.35));
+    animation: bubble-in .15s ease-out;
+}
+.pill button {
+    width: 36px; height: 32px; border: 0; border-radius: var(--r-full, 999px); background: transparent;
+    color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.pill button:hover { background: var(--pop-hover-bg, var(--btn-hover-bg)); color: var(--pop-hover-fg, var(--text-strong)); }
+.pill svg { width: 18px; height: 18px; fill: currentColor; }
+.pill button + button { border-left: var(--bw) solid var(--pop-border, var(--card-border)); border-radius: 0 999px 999px 0; }
+.pill button:first-child { border-radius: 999px 0 0 999px; }
+.stage.hover .pet-sprite { animation: pet-notice .5s ease-in-out; }
+@keyframes pet-notice { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-4deg); } 70% { transform: rotate(4deg); } }
+
+@keyframes bubble-in { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }

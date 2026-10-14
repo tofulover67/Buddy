@@ -377,6 +377,8 @@ class MediaRelinkPage(WebToolPage):
                 relinked -= unchanged
         finally:
             self.host.set_busy(False)
+        if relinked > 0:
+            self.achieve("relinked", relinked)
         parts = ["Relinked 1 clip." if relinked == 1 else f"Relinked {relinked} clips."]
         if skipped:
             parts.append(f"{skipped} had no file chosen yet and were skipped.")

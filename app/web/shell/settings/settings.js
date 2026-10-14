@@ -192,6 +192,90 @@ const FIELDS = {
     },
 };
 
+/* The pet gallery (pages/pets/): each species drawn by sprites.js; a click
+   on an earned one chooses it. */
+FIELDS.pets = (f, s) => el("div.set-row.set-pets", {"data-key": f.key}, [
+    el("div.set-pet-gallery", {}, f.items.map(p => {
+        const note = p.chosen ? "Your pet" : p.unlocked ? "Unlocked" : `Unlocks with ${p.need} achievements`;
+        const card = el(`button.set-pet${p.chosen ? ".chosen" : ""}${p.unlocked ? "" : ".locked"}`, {
+            type: "button", disabled: !p.unlocked, "aria-pressed": String(p.chosen), "data-key": p.id,
+            title: p.unlocked ? p.name : `Unlocks with ${p.need} achievements`,
+            onclick: () => { if (p.unlocked && !p.chosen) set(s, f.key, p.id); },
+        }, [
+            el("div.pet-sprite", {"data-state": p.chosen ? (f.state || "idle") : "sit", "data-facing": "1"}),
+            el("div.set-pet-name", {text: p.name}),
+            el(`div.set-pet-note${p.chosen || p.unlocked ? ".ok" : ""}`, {text: note}),
+        ]);
+        if (typeof Sprites !== "undefined") Sprites.render(card.querySelector(".pet-sprite"), p.id, p.skin || "classic", p.colour);
+        return card;
+    })),
+]);
+
+/* The chosen pet's skins (pages/pets/skins.py), all free: a click chooses one. */
+FIELDS.skins = (f, s) => el("div.set-row.set-skins", {"data-key": f.key}, [
+    el("div.set-pet-gallery.set-skin-gallery", {}, f.items.map(k => {
+        const card = el(`button.set-pet.set-skin${k.chosen ? ".chosen" : ""}`, {
+            type: "button", "aria-pressed": String(k.chosen), "data-key": k.id, title: k.name,
+            onclick: () => { if (!k.chosen) set(s, f.key, k.id); },
+        }, [
+            el("div.pet-sprite", {"data-state": "idle", "data-facing": "1"}),
+            el("div.set-pet-name", {text: k.name}),
+            el(`div.set-pet-note${k.chosen ? ".ok" : ""}`, {text: k.chosen ? "Wearing" : ""}),
+        ]);
+        if (typeof Sprites !== "undefined") Sprites.render(card.querySelector(".pet-sprite"), f.species, k.id, f.colour);
+        return card;
+    })),
+]);
+
+/* The achievements (pages/achievements/): a card each, in their groups. */
+function medal(points) {
+    const colour = points >= 100 ? "#9fd8ff" : points >= 50 ? "#f2c14e" : points >= 25 ? "#c9d1dc" : "#d08a4e";
+    const dark = points >= 100 ? "#5fa9e0" : points >= 50 ? "#c99a2a" : points >= 25 ? "#8d97a5" : "#9a5f2e";
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 44 52");
+    svg.setAttribute("class", "set-medal");
+    svg.setAttribute("aria-hidden", "true");
+    svg.innerHTML = `<path d="M12 2h8l4 10-8 14L8 12z" fill="${dark}"/><path d="M24 2h8l4 10-8 14-8-14z" fill="${colour}"/>`
+        + `<circle cx="22" cy="34" r="14" fill="${colour}" stroke="${dark}" stroke-width="2"/>`
+        + `<path d="M22 26l2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.2-4.1 5.8-.8z" fill="${dark}"/>`;
+    return svg;
+}
+
+function dateText(iso) {
+    try {
+        return new Date(iso).toLocaleDateString(document.documentElement.lang || undefined,
+                                                {year: "numeric", month: "short", day: "numeric"});
+    } catch (_err) {
+        return (iso || "").slice(0, 10);
+    }
+}
+
+function achievementCard(a) {
+    const foot = a.done
+        ? [el("span.set-ach-when", {text: `Unlocked ${dateText(a.when)}`})]
+        : [el("div.set-ach-bar", {}, [el("i", {style: `width:${a.pct}%`})]),
+           el("span.set-ach-nums", {translate: "no", text: `${a.value_text} / ${a.goal_text}`})];
+    return el(`div.set-ach${a.done ? ".done" : ".todo"}${a.new ? ".new" : ""}`, {"data-key": a.id}, [
+        medal(a.points),
+        el("div.set-ach-title", {text: a.title}),
+        el("div.set-ach-text", {text: a.text}),
+        el("div.set-ach-foot", {}, [...foot, el("span.set-ach-points", {text: `${a.points} points`})]),
+    ]);
+}
+
+FIELDS.achievements = f => {
+    const groups = [...new Set(f.items.map(a => a.group))];
+    return el("div.set-row.set-achievements", {}, groups.map(g => {
+        const items = f.items.filter(a => a.group === g);
+        const done = items.filter(a => a.done).length;
+        return el("div.set-ach-group", {}, [
+            el("div.set-ach-head", {}, [el("h3.set-ach-group-title", {text: g}),
+                                        el("span.set-hint", {translate: "no", text: `${done} / ${items.length}`})]),
+            el("div.set-ach-grid", {}, items.map(achievementCard)),
+        ]);
+    }));
+};
+
 /* A select's value comes back as the type Python sent (numbers stay numbers). */
 function decode(f, text) {
     const match = f.options.find(o => String(o.value) === text);
@@ -227,7 +311,7 @@ function fieldTexts(f) {
     const out = [f.label, f.text, f.hint, f.tooltip, f.total];
     if (f.kind === "hint" && f.html) out[1] = "";
     for (const o of f.options || []) out.push(o.label);
-    for (const b of f.items || []) out.push(b.label, b.tooltip);
+    for (const b of f.items || []) out.push(b.label, b.tooltip, b.title, b.text, b.name);
     for (const p of f.parts || []) out.push(p.label);
     return out.filter(Boolean);
 }
@@ -432,7 +516,9 @@ Buddy.on("settings", data => {
     const scroll = form.scrollTop;
 
     DATA = data;
-    if (data.open && !pageById(current)) current = data.open;
+    // data.open: where to start; with data.goto, where to go now (Settings
+    // was asked for a tool's page while already open).
+    if (data.open && (data.goto || !pageById(current))) current = data.open;
     if (!pageById(current)) current = (DATA.pages[0] || {}).id;
     const page = pageById(current);
     if (page) lastInGroup[page.group] = current;

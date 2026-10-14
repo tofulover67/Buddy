@@ -1435,6 +1435,7 @@ class WebBrowserPage(ToolPage):
         self.history = downloads_log.trim(self.history)
         self._save_timer.start()
         if completed:
+            self.achieve("downloads", 1)
             self.emit("toast", {"text": tr("Saved {name}").replace("{name}", record["name"]), "id": record["id"]})
             wanted = record.pop("to_resolve", False)
             media = downloads_log.kind_of(record["name"]) in ("video", "audio", "image")

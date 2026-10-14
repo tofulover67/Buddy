@@ -556,6 +556,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._ask_to_read_project()
 
         self._pending_question = question
+        self.achieve("questions", 1)
         sent, self.pictures = self.pictures, []
         self._pending_pictures = len(sent)
         self._append(YOU, question, images=[p.preview for p in sent], raw=True,

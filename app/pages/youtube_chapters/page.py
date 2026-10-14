@@ -218,6 +218,7 @@ class YouTubeChaptersPage(WebToolPage):
         self.emit("toast", {"text": "Copied 1 chapter – paste it into the video's description." if count == 1
                             else f"Copied {count} chapters – paste them into the video's description."})
         self._add_log(f"Copied {count} chapter lines.")
+        self.achieve("chapters", 1)
 
     def on_browse(self, _payload=None):
         folder = QFileDialog.getExistingDirectory(self, tr("Save chapters to"), self.settings.get("folder") or "")

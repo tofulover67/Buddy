@@ -1474,6 +1474,7 @@ class AudioAssistantPage(WebToolPage):
             self.emit("fx_done", {"id": uid, "new": None})
             return self.emit("alert", {"title": "Couldn't put the processed audio in", "text": str(error)})
         new = placed["id"]
+        self.achieve("audio_fx", 1)
         if placed.get("replaced"):
             self._remap(placed["replaced"], new)
         if undo is not None:

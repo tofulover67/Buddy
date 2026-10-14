@@ -356,6 +356,7 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         if error:
             return self._alert(tr(error))
         self.data_mgr.palettes[name] = []
+        self.achieve("palettes", 1)
         folder = (payload or {}).get("folder")
         if folder in self.data_mgr.palette_folders:
             self.data_mgr.move_palette_to_folder(name, folder)
@@ -845,6 +846,7 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         if error:
             return self._alert(tr(error))
         self.data_mgr.palettes[name] = list(self.extracted)
+        self.achieve("palettes", 1)
         self.current, self.expanded = name, True
         self._save_palettes()
         self._toast(tr("Created '{name}'").format(name=name), show=name)

@@ -328,6 +328,7 @@ class StillsExporterPage(WebToolPage):
                 return
             self.grabbed = []
             self._push_grabbed()
+        self.achieve("stills", count)
         self.emit("toast", {"text": "Exported 1 still" if count == 1 else f"Exported {count} stills", "open_folder": True})
 
     def on_open_folder(self, _payload=None):

@@ -138,11 +138,27 @@ class WebLifetimeTests(unittest.TestCase):
                 gc.enable()
 
     def test_open_settings_leaves_no_dialog_behind(self):
+        # Settings is a window of its own (show(), not exec()): open_settings()
+        # returns at once, and the window is closed a moment later.
         for _ in range(2):
             close_when_shown(self.shell, SettingsDialog)
             ShellWindow.open_settings(self.shell)
+            for _tick in range(200):            # until it has shown and been closed
+                if not SettingsDialog.on_screen():
+                    break
+                _wait(50)
         QApplication.sendPostedEvents(None, QEvent.DeferredDelete)
         self.assertEqual(self.shell.findChildren(SettingsDialog), [])
+
+    def test_open_settings_twice_is_one_window(self):
+        ShellWindow.open_settings(self.shell)
+        ShellWindow.open_settings(self.shell)
+        try:
+            self.assertEqual(len(self.shell.findChildren(SettingsDialog)), 1)
+        finally:
+            for dialog in self.shell.findChildren(SettingsDialog):
+                dialog.done(QDialog.Rejected)
+            QApplication.sendPostedEvents(None, QEvent.DeferredDelete)
 
 
 @unittest.skipUnless(HAVE_WEB, "PySide6 with QtWebEngine not installed")
@@ -233,7 +249,7 @@ class ShellWindowLifetimeTests(unittest.TestCase):
     def test_settings_is_freed_once_closed(self):
         QTimer.singleShot(1500, lambda: [d.reject() for d in self.win.findChildren(SettingsDialog)])
         self.win.open_settings()
-        _wait(300)   # deleteLater runs from the event loop
+        _wait(2000)   # rejected at 1.5 s; deleteLater runs from the event loop
         self.assertEqual(self.win.findChildren(SettingsDialog), [])
 
 
