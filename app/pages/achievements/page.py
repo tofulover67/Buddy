@@ -37,7 +37,7 @@ class AchievementsSettings(QObject):
         self.ach = getattr(host, "achievements", None) or Achievements()
         self.ach.on_change.append(self._changed)
         self._fresh = set()         # unlocked and not yet seen when the page was built
-        self._fresh_at = 0.0
+        self._fresh_at = None        # when _fresh was worked out (time.monotonic(), which can start near 0 on a fresh machine)
 
     def _changed(self):
         refresh_open(self.tool_id)
@@ -46,7 +46,7 @@ class AchievementsSettings(QObject):
         """The badges for the page: what's unlocked since the page was last
         looked at is marked new for a while, and counts as seen now."""
         now = time.monotonic()
-        if now - self._fresh_at > NEW_FOR_S:
+        if self._fresh_at is None or now - self._fresh_at > NEW_FOR_S:
             self._fresh = set(self.ach.unlocked) - set(self.ach.seen)
             self._fresh_at = now
             self.ach.mark_seen()
@@ -82,6 +82,6 @@ class AchievementsSettings(QObject):
     def on_settings_action(self, action, ui):
         if action == "reset" and ui.confirm("Reset achievements?", "Every achievement and every count starts over. "
                                             "This can't be undone.", ok="Reset", danger=True):
-            self._fresh, self._fresh_at = set(), 0.0
+            self._fresh, self._fresh_at = set(), None
             self.ach.reset()
             ui.status("Achievements reset.")

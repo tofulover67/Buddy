@@ -9,6 +9,7 @@ import json
 import os
 import re
 import tempfile
+import time
 import unittest
 
 import _paths  # noqa: F401
@@ -308,7 +309,7 @@ class PageTests(_Temp):
         self.assertEqual(self.host.achievements.summary()["new"], 0)        # seen, once the page was built
         again = next(i for i in self.field(page, "achievements")["items"] if i["id"] == "proxy_1")
         self.assertTrue(again["new"])                                       # still marked while it's fresh
-        page._fresh_at = 0.0                                                # long ago
+        page._fresh_at = time.monotonic() - page_mod.NEW_FOR_S - 1          # long ago
         later = next(i for i in self.field(page, "achievements")["items"] if i["id"] == "proxy_1")
         self.assertFalse(later["new"])
         infos = {f["label"]: f["text"] for f in page.settings_pages()[0]["fields"] if f["kind"] == "info"}
