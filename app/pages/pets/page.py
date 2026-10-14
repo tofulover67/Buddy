@@ -191,7 +191,7 @@ class Pets(QObject):
         return True
 
     def colour_of(self, species) -> str:
-        """The colour of your own this species wears when its skin is Your colour."""
+        """The colour of your own this species wears when its skin is Your tint."""
         return self.values["colours"].get(species, skins_mod.DEFAULT_COLOUR)
 
     def _set_colour(self, colour) -> bool:
@@ -323,7 +323,7 @@ class Pets(QObject):
             sf.line(),
             sf.heading("Skins"),
             sf.skins("skin", species, skins, colour=self.colour_of(species)),
-            sf.color("colour", "Your colour", self.colour_of(species)),
+            sf.color("colour", "Your tint", self.colour_of(species)),
             sf.hint("Picking a colour puts it on the chosen pet: its main colour becomes it, with the darker "
                     "parts a darker shade of it.", indent=True),
             sf.line(),

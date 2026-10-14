@@ -14,7 +14,7 @@ from .behaviour import SPECIES
 
 CLASSIC = "classic"
 # The accessories every pet can wear, in the order the gallery shows them.
-ACCESSORIES = [("shades", "Shades"), ("tophat", "Top hat"), ("bow", "Bow tie"), ("crown", "Crown")]
+ACCESSORIES = [("shades", "Sunglasses"), ("tophat", "Top hat"), ("bow", "Bow tie"), ("crown", "Crown")]
 # Each species' own colour (id, name) - sprites.js says what it recolours.
 COLOURS = {
     "blob": ("mint", "Mint"),
@@ -43,7 +43,7 @@ def skins_for(species) -> list:
     colour = COLOURS.get(species)
     if colour:
         out.append(colour)
-    out.append((CUSTOM, "Your colour"))
+    out.append((CUSTOM, "Your tint"))
     out.extend(ACCESSORIES)
     return out
 
