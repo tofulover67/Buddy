@@ -177,7 +177,7 @@ class SVGImporterPage(WebToolPage):
 
     def _set_result(self, result):
         self._result = result
-        if result.get("ok"):
+        if result and result.get("ok"):
             self.achieve("svgs", result.get("count") or 1)
         self.emit("result", result)
 

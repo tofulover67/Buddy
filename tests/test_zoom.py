@@ -402,7 +402,7 @@ class AdjustmentTests(unittest.TestCase):
 class PageTests(unittest.TestCase):
     def test_apply_only_sends_what_it_should(self):
         from pages.text_animator.page import AnimationPage
-        Page = type("Page", (), {n: getattr(AnimationPage, n) for n in ("on_zm_apply", "_done_zoom")})
+        Page = type("Page", (), {n: getattr(AnimationPage, n) for n in ("on_zm_apply", "_done_zoom", "achieve")})
         page = Page()
         page.started = []
         page._start = lambda what, job, done: page.started.append(what)
@@ -414,7 +414,7 @@ class PageTests(unittest.TestCase):
 
     def page(self):
         from pages.text_animator.page import AnimationPage
-        names = ("_zm_clipboard", "on_zm_copy", "on_zm_paste", "on_zm_paste_many", "_done_paste")
+        names = ("_zm_clipboard", "on_zm_copy", "on_zm_paste", "on_zm_paste_many", "_done_paste", "achieve")
         page = type("Page", (), {n: getattr(AnimationPage, n) for n in names})()
         page.settings, page.emitted, page.started, page.working = {}, [], [], "paste"
         page._save = page.settings.__setitem__

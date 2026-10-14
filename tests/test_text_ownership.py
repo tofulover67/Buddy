@@ -628,7 +628,7 @@ class WhatPreviewsSays(unittest.TestCase):
         self.assertEqual(apply_summary(preset, held, None), (held_note(1), True))      # not "it isn't a Text+"
 
     def done_apply(self, result):
-        Page = type("Page", (), {"_done_apply": AnimationPage._done_apply})
+        Page = type("Page", (), {"_done_apply": AnimationPage._done_apply, "achieve": AnimationPage.achieve})
         page = Page()
         page.said = []
         page.emit = lambda name, payload=None: page.said.append((name, payload.get("title") or payload["text"]))

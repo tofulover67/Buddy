@@ -525,7 +525,7 @@ class CutTests(unittest.TestCase):
 class PageTests(unittest.TestCase):
     def page(self):
         from pages.text_animator.page import AnimationPage
-        names = ("on_tr_option", "on_tr_apply", "_done_tr_apply", "on_tr_remove", "_done_tr_remove")
+        names = ("on_tr_option", "on_tr_apply", "_done_tr_apply", "on_tr_remove", "_done_tr_remove", "achieve")
         page = type("Page", (), {n: getattr(AnimationPage, n) for n in names})()
         page.settings, page.emitted, page.started, page.working = {}, [], [], "transition"
         page._save = page.settings.__setitem__

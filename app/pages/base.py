@@ -137,7 +137,7 @@ class ToolPage(QWidget):
         core/achievements.py STATS - "proxies", "presets"...): the
         achievements count it, and the pet hears. Never raises - a tool's
         work is never undone by its tally."""
-        record = getattr(self.host, "record_stat", None)
+        record = getattr(getattr(self, "host", None), "record_stat", None)
         if record is not None:
             try:
                 record(stat, amount)
@@ -146,7 +146,7 @@ class ToolPage(QWidget):
 
     def achieve_peak(self, stat, value):
         """A peak stat's latest reading ("tracked_seconds"): kept if it's the largest yet."""
-        record = getattr(self.host, "record_peak", None)
+        record = getattr(getattr(self, "host", None), "record_peak", None)
         if record is not None:
             try:
                 record(stat, value)
