@@ -1,22 +1,41 @@
-/* The pet's window: see-through, the pet standing at the bottom and the
-   speech bubble above it (pet_window.py makes room for it). */
+/* The pet's window: see-through, the pet standing near the bottom - the
+   room under it and to either side is for it to swing into when it's
+   held (--pet-below) - and the speech bubble above it (pet_window.py
+   makes room for it). */
 
 html, body, .pet-main { background: transparent !important; overflow: hidden; }
 .pet-main { position: relative; width: 100%; height: 100%; border-radius: 0; }
 
 .stage {
-    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    position: absolute; left: 50%; bottom: var(--pet-below, 0px); transform: translateX(-50%);
     width: var(--pet-w, 166px); height: var(--pet-h, 128px);
     cursor: pointer; user-select: none; -webkit-user-select: none;
 }
 .stage.dragging { cursor: grabbing; }
 
+/* Held or in the air, the pet swings and stretches about its scruff (the
+   transform and its origin are pet.js's, from Python's "pose"); landing,
+   it squashes from its feet - deeper the harder it came down. */
+.pose, .squash { position: absolute; inset: 0; }
+.pose { transform-origin: 50% 28%; }
+.squash { transform-origin: 50% 100%; }
+.squash.landing { animation: pet-land .3s ease-out; }
+@keyframes pet-land {
+    0%, 100% { transform: none; }
+    30% { transform: scale(var(--land-sx, 1.15), var(--land-sy, .8)); }
+    65% { transform: scale(.97, 1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .squash.landing { animation: none; }
+}
+
 /* A pet with no bubble up gets its pointer events on the picture only. */
 .pet-main:not(.bubble-open) { pointer-events: none; }
 .pet-main:not(.bubble-open) .stage { pointer-events: auto; }
 
+/* --shift: slid back onto the screen when the window hangs off its edge (pet.js fitRoom). */
 .bubble {
-    position: absolute; left: 50%; bottom: calc(var(--pet-h, 128px) + 12px); transform: translateX(-50%);
+    position: absolute; left: calc(50% + var(--shift, 0px)); bottom: calc(var(--pet-below, 0px) + var(--pet-h, 128px) + 12px); transform: translateX(-50%);
     width: 280px; max-width: calc(100% - 8px);
     background: var(--bubble-bg, var(--card-bg)); color: var(--bubble-fg, var(--text-strong));
     border: var(--bw) solid var(--bubble-border, var(--card-border));
@@ -25,7 +44,7 @@ html, body, .pet-main { background: transparent !important; overflow: hidden; }
     animation: bubble-in .18s ease-out;
 }
 .bubble-tail {
-    position: absolute; left: 50%; bottom: -8px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg);
+    position: absolute; left: calc(50% - var(--shift, 0px)); bottom: -8px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg);
     background: inherit; border-right: inherit; border-bottom: inherit; border-radius: 2px;
 }
 .bubble-text { font-weight: 600; line-height: 1.35; }
@@ -39,7 +58,7 @@ html, body, .pet-main { background: transparent !important; overflow: hidden; }
 
 /* Hovered: a small pill of actions above the pet (where the bubble goes). */
 .pill {
-    position: absolute; left: 50%; bottom: calc(var(--pet-h, 128px) + 10px); transform: translateX(-50%);
+    position: absolute; left: calc(50% + var(--shift, 0px)); bottom: calc(var(--pet-below, 0px) + var(--pet-h, 128px) + 10px); transform: translateX(-50%);
     display: flex; gap: 2px; padding: 4px;
     background: var(--pop-bg, var(--card-bg)); border: var(--bw) solid var(--pop-border, var(--card-border));
     border-radius: var(--r-full, 999px); box-shadow: var(--pop-shadow, 0 6px 20px rgba(0,0,0,.35));
@@ -55,5 +74,8 @@ html, body, .pet-main { background: transparent !important; overflow: hidden; }
 .pill button:first-child { border-radius: 999px 0 0 999px; }
 .stage.hover .pet-sprite { animation: pet-notice .5s ease-in-out; }
 @keyframes pet-notice { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-4deg); } 70% { transform: rotate(4deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .stage.hover .pet-sprite { animation: none; }       /* sprites.css stills only what's inside the sprite */
+}
 
 @keyframes bubble-in { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }

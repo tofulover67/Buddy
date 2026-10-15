@@ -30,15 +30,25 @@
   "العربية": "النقل إلى موقع جديد",
   "Tiếng Việt": "Chuyển đến vị trí mới"
  },
- "Scan the project for clips whose files have gone missing, then search a folder to find them. Clips that already work are never touched, even if a file with the same name turns up.": {
-  "日本語": "プロジェクト内でファイルが見つからなくなったクリップをスキャンし、フォルダーを検索して見つけます。正常に動作しているクリップは、同じ名前のファイルが見つかっても一切変更しません。",
-  "Español": "Busca en el proyecto los clips cuyos archivos han desaparecido y luego busca en una carpeta para encontrarlos. Los clips que ya funcionan nunca se tocan, aunque aparezca un archivo con el mismo nombre.",
-  "Deutsch": "Durchsuchen Sie das Projekt nach Clips, deren Dateien fehlen, und suchen Sie sie dann in einem Ordner. Funktionierende Clips werden nie verändert, selbst wenn eine Datei mit demselben Namen auftaucht.",
-  "Français": "Analysez le projet pour trouver les clips dont les fichiers ont disparu, puis recherchez-les dans un dossier. Les clips qui fonctionnent déjà ne sont jamais modifiés, même si un fichier du même nom apparaît.",
-  "한국어": "프로젝트에서 파일이 사라진 클립을 검사한 다음 폴더를 검색해 찾습니다. 이미 정상인 클립은 같은 이름의 파일이 나타나더라도 절대 건드리지 않습니다.",
-  "中文": "扫描项目中文件丢失的片段，然后搜索文件夹找到它们。已经正常的片段绝不会被改动，即使出现了同名文件。",
-  "العربية": "افحص المشروع بحثًا عن المقاطع التي فُقدت ملفاتها، ثم ابحث في مجلد للعثور عليها. لا يتم المساس بالمقاطع التي تعمل بالفعل أبدًا، حتى لو ظهر ملف بالاسم نفسه.",
-  "Tiếng Việt": "Quét dự án để tìm các clip bị mất tệp, rồi tìm trong một thư mục để tìm lại chúng. Các clip đang hoạt động sẽ không bao giờ bị động đến, kể cả khi xuất hiện tệp trùng tên."
+ "Scan for clips whose files have gone missing, then search a folder to find them. Clips that already work are never touched, even if a file with the same name turns up.": {
+  "日本語": "ファイルが見つからなくなったクリップをスキャンし、フォルダーを検索して見つけます。正常に動作しているクリップは、同じ名前のファイルが見つかっても一切変更しません。",
+  "Español": "Escanea en busca de clips cuyos archivos han desaparecido y luego busca en una carpeta para encontrarlos. Los clips que ya funcionan nunca se tocan, aunque aparezca un archivo con el mismo nombre.",
+  "Deutsch": "Scannen Sie nach Clips, deren Dateien fehlen, und durchsuchen Sie dann einen Ordner, um sie zu finden. Funktionierende Clips werden nie verändert, selbst wenn eine Datei mit demselben Namen auftaucht.",
+  "Français": "Lancez une analyse pour trouver les clips dont les fichiers ont disparu, puis recherchez-les dans un dossier. Les clips qui fonctionnent déjà ne sont jamais modifiés, même si un fichier du même nom apparaît.",
+  "한국어": "파일이 사라진 클립을 검사한 다음 폴더를 검색해 찾습니다. 이미 정상인 클립은 같은 이름의 파일이 나타나더라도 절대 건드리지 않습니다.",
+  "中文": "扫描文件丢失的片段，然后搜索文件夹找到它们。已经正常的片段绝不会被改动，即使出现了同名文件。",
+  "العربية": "افحص بحثًا عن المقاطع التي فُقدت ملفاتها، ثم ابحث في مجلد للعثور عليها. لا يتم المساس بالمقاطع التي تعمل بالفعل أبدًا، حتى لو ظهر ملف بالاسم نفسه.",
+  "Tiếng Việt": "Quét để tìm các clip bị mất tệp, rồi tìm trong một thư mục để tìm lại chúng. Các clip đang hoạt động sẽ không bao giờ bị động đến, kể cả khi xuất hiện tệp trùng tên."
+ },
+ "If you don't know which folder they're in, search the whole drive.": {
+  "日本語": "どのフォルダーにあるか分からない場合は、ドライブ全体を検索してください。",
+  "Español": "Si no sabes en qué carpeta están, busca en toda la unidad.",
+  "Deutsch": "Wenn Sie nicht wissen, in welchem Ordner sie liegen, durchsuchen Sie das ganze Laufwerk.",
+  "Français": "Si vous ne savez pas dans quel dossier ils se trouvent, recherchez dans tout le disque.",
+  "한국어": "어느 폴더에 있는지 모르면 드라이브 전체를 검색하세요.",
+  "中文": "如果不知道它们在哪个文件夹，可以搜索整个驱动器。",
+  "العربية": "إذا كنت لا تعرف المجلد الذي توجد فيه، فابحث في محرك الأقراص بالكامل.",
+  "Tiếng Việt": "Nếu bạn không biết chúng nằm trong thư mục nào, hãy tìm trong toàn bộ ổ đĩa."
  },
  "Point clips at a copy of their media somewhere else – a new drive, or off a server onto a local SSD - even clips that work now. Scan, search the new location, tick the clips to move, then relink.": {
   "日本語": "クリップの参照先を別の場所にあるメディアのコピーに変更します – 新しいドライブや、サーバーからローカル SSD へなど – 今正常に動作しているクリップも対象です。スキャンして新しい場所を検索し、移動するクリップにチェックを付けてから再リンクしてください。",
@@ -70,15 +80,15 @@
   "العربية": "إعادة الفحص",
   "Tiếng Việt": "Quét lại"
  },
- "Search a folder…": {
-  "日本語": "フォルダーを検索…",
-  "Español": "Buscar en una carpeta…",
-  "Deutsch": "Ordner durchsuchen…",
-  "Français": "Rechercher dans un dossier…",
-  "한국어": "폴더 검색…",
-  "中文": "搜索文件夹…",
-  "العربية": "البحث في مجلد…",
-  "Tiếng Việt": "Tìm trong thư mục…"
+ "Search a folder or drive…": {
+  "日本語": "フォルダーまたはドライブを検索…",
+  "Español": "Buscar en una carpeta o unidad…",
+  "Deutsch": "Ordner oder Laufwerk durchsuchen…",
+  "Français": "Rechercher dans un dossier ou un disque…",
+  "한국어": "폴더 또는 드라이브 검색…",
+  "中文": "搜索文件夹或驱动器…",
+  "العربية": "البحث في مجلد أو محرك أقراص…",
+  "Tiếng Việt": "Tìm trong thư mục hoặc ổ đĩa…"
  },
  "Only clips that need attention": {
   "日本語": "対応が必要なクリップのみ",
@@ -630,15 +640,15 @@
   "العربية": "افحص المشروع أولًا، حتى تكون هناك مقاطع للبحث عن ملفاتها.",
   "Tiếng Việt": "Hãy quét dự án trước để có clip cần tìm tệp."
  },
- "Choose the folder to search": {
-  "日本語": "検索するフォルダーを選択",
-  "Español": "Elige la carpeta en la que buscar",
-  "Deutsch": "Zu durchsuchenden Ordner wählen",
-  "Français": "Choisissez le dossier à parcourir",
-  "한국어": "검색할 폴더 선택",
-  "中文": "选择要搜索的文件夹",
-  "العربية": "اختر المجلد المراد البحث فيه",
-  "Tiếng Việt": "Chọn thư mục để tìm"
+ "Choose a folder – or a whole drive – to search": {
+  "日本語": "検索するフォルダー (またはドライブ全体) を選択",
+  "Español": "Elige una carpeta – o una unidad entera – en la que buscar",
+  "Deutsch": "Zu durchsuchenden Ordner – oder ein ganzes Laufwerk – wählen",
+  "Français": "Choisissez un dossier – ou un disque entier – à parcourir",
+  "한국어": "검색할 폴더(또는 드라이브 전체) 선택",
+  "中文": "选择要搜索的文件夹——或整个驱动器",
+  "العربية": "اختر مجلدًا – أو محرك أقراص بالكامل – للبحث فيه",
+  "Tiếng Việt": "Chọn một thư mục – hoặc cả ổ đĩa – để tìm"
  },
  "Searched {folder}: 1 match found.": {
   "日本語": "{folder} を検索しました: 1 件一致しました。",
@@ -660,6 +670,26 @@
   "العربية": "تم البحث في {folder}: تم العثور على {count} مطابقات.",
   "Tiếng Việt": "Đã tìm trong {folder}: tìm thấy {count} kết quả khớp."
  },
+ "Searched all of {drive} – 1 match found.": {
+  "日本語": "{drive} 全体を検索しました – 1 件一致しました。",
+  "Español": "Búsqueda en todo {drive} – 1 coincidencia encontrada.",
+  "Deutsch": "{drive} komplett durchsucht – 1 Treffer gefunden.",
+  "Français": "Recherche dans tout {drive} – 1 correspondance trouvée.",
+  "한국어": "{drive} 전체 검색 – 일치 항목 1개를 찾았습니다.",
+  "中文": "已搜索整个 {drive}——找到 1 个匹配项。",
+  "العربية": "تم البحث في {drive} بالكامل – تم العثور على مطابقة واحدة.",
+  "Tiếng Việt": "Đã tìm trong toàn bộ {drive} – tìm thấy 1 kết quả khớp."
+ },
+ "Searched all of {drive} – {count} matches found.": {
+  "日本語": "{drive} 全体を検索しました – {count} 件一致しました。",
+  "Español": "Búsqueda en todo {drive} – {count} coincidencias encontradas.",
+  "Deutsch": "{drive} komplett durchsucht – {count} Treffer gefunden.",
+  "Français": "Recherche dans tout {drive} – {count} correspondances trouvées.",
+  "한국어": "{drive} 전체 검색 – 일치 항목 {count}개를 찾았습니다.",
+  "中文": "已搜索整个 {drive}——找到 {count} 个匹配项。",
+  "العربية": "تم البحث في {drive} بالكامل – تم العثور على {count} مطابقات.",
+  "Tiếng Việt": "Đã tìm trong toàn bộ {drive} – tìm thấy {count} kết quả khớp."
+ },
  "{count} with more than one file of that name (pick which).": {
   "日本語": "{count} 個は同じ名前のファイルが複数あります (どれか選択してください)。",
   "Español": "{count} con más de un archivo con ese nombre (elige cuál).",
@@ -669,6 +699,46 @@
   "中文": "{count} 个有多个同名文件（请选择）。",
   "العربية": "{count} لديها أكثر من ملف بهذا الاسم (اختر أيها).",
   "Tiếng Việt": "{count} có nhiều tệp trùng tên (hãy chọn một)."
+ },
+ "Couldn't open 1 folder, so it wasn't searched.": {
+  "日本語": "1 個のフォルダーを開けなかったため、検索していません。",
+  "Español": "No se pudo abrir 1 carpeta, así que no se buscó en ella.",
+  "Deutsch": "1 Ordner konnte nicht geöffnet werden und wurde daher nicht durchsucht.",
+  "Français": "Impossible d'ouvrir 1 dossier : il n'a pas été parcouru.",
+  "한국어": "폴더 1개를 열 수 없어 검색하지 않았습니다.",
+  "中文": "有 1 个文件夹无法打开，因此未搜索。",
+  "العربية": "تعذر فتح مجلد واحد، لذا لم يتم البحث فيه.",
+  "Tiếng Việt": "Không thể mở 1 thư mục nên chưa tìm trong đó."
+ },
+ "Couldn't open {count} folders, so they weren't searched.": {
+  "日本語": "{count} 個のフォルダーを開けなかったため、検索していません。",
+  "Español": "No se pudieron abrir {count} carpetas, así que no se buscó en ellas.",
+  "Deutsch": "{count} Ordner konnten nicht geöffnet werden und wurden daher nicht durchsucht.",
+  "Français": "Impossible d'ouvrir {count} dossiers : ils n'ont pas été parcourus.",
+  "한국어": "폴더 {count}개를 열 수 없어 검색하지 않았습니다.",
+  "中文": "有 {count} 个文件夹无法打开，因此未搜索。",
+  "العربية": "تعذر فتح {count} مجلدات، لذا لم يتم البحث فيها.",
+  "Tiếng Việt": "Không thể mở {count} thư mục nên chưa tìm trong đó."
+ },
+ "Folders that couldn't be opened: {folders}": {
+  "日本語": "開けなかったフォルダー: {folders}",
+  "Español": "Carpetas que no se pudieron abrir: {folders}",
+  "Deutsch": "Ordner, die nicht geöffnet werden konnten: {folders}",
+  "Français": "Dossiers impossibles à ouvrir : {folders}",
+  "한국어": "열 수 없었던 폴더: {folders}",
+  "中文": "无法打开的文件夹：{folders}",
+  "العربية": "المجلدات التي تعذر فتحها: {folders}",
+  "Tiếng Việt": "Các thư mục không mở được: {folders}"
+ },
+ "Folders that couldn't be opened: {folders} (and {count} more)": {
+  "日本語": "開けなかったフォルダー: {folders} (ほか {count} 個)",
+  "Español": "Carpetas que no se pudieron abrir: {folders} (y {count} más)",
+  "Deutsch": "Ordner, die nicht geöffnet werden konnten: {folders} (und {count} weitere)",
+  "Français": "Dossiers impossibles à ouvrir : {folders} (et {count} autres)",
+  "한국어": "열 수 없었던 폴더: {folders} (외 {count}개)",
+  "中文": "无法打开的文件夹：{folders}（另有 {count} 个）",
+  "العربية": "المجلدات التي تعذر فتحها: {folders} (و{count} أخرى)",
+  "Tiếng Việt": "Các thư mục không mở được: {folders} (và {count} thư mục khác)"
  },
  "Couldn't search that folder: {error}": {
   "日本語": "そのフォルダーを検索できませんでした: {error}",
@@ -999,5 +1069,25 @@
   "中文": "Resolve 不允许 Buddy 重新链接图像序列（{count}）——请在 Resolve 中右键点击它们 › Relink Selected Clips 重新链接。",
   "العربية": "لا يسمح Resolve لـ Buddy بإعادة ربط تسلسلات الصور ({count}) – أعد ربطها في Resolve: انقر بزر الماوس الأيمن › Relink Selected Clips.",
   "Tiếng Việt": "Resolve không cho Buddy liên kết lại chuỗi ảnh ({count}) – hãy liên kết lại trong Resolve: nhấp chuột phải › Relink Selected Clips."
+ },
+ "Entire project": {
+  "日本語": "プロジェクト全体",
+  "Español": "Todo el proyecto",
+  "Deutsch": "Gesamtes Projekt",
+  "Français": "Tout le projet",
+  "한국어": "프로젝트 전체",
+  "中文": "整个项目",
+  "العربية": "المشروع بالكامل",
+  "Tiếng Việt": "Toàn bộ dự án"
+ },
+ "Shift-click to select a range": {
+  "日本語": "Shift キーを押しながらクリックすると範囲を選択できます",
+  "Español": "Mayús + clic para seleccionar un intervalo",
+  "Deutsch": "Umschalt-Klick wählt einen Bereich aus",
+  "Français": "Maj-clic pour sélectionner une plage",
+  "한국어": "Shift를 누른 채 클릭하면 범위를 선택합니다",
+  "中文": "按住 Shift 点击可选择一个范围",
+  "العربية": "انقر مع Shift لتحديد نطاق",
+  "Tiếng Việt": "Shift-bấm để chọn một dải"
  }
 }

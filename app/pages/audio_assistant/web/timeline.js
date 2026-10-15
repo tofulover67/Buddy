@@ -259,7 +259,8 @@ const xOf = frame => (frame - TL.start) * ppf - scroller.scrollLeft;
 const frameAt = x => TL.start + (x + scroller.scrollLeft) / ppf;
 
 function setZoom(next, anchorX) {
-    if (!TL) return;
+    // No width while Sound Design shows: left as it was, for the ResizeObserver once it's back.
+    if (!TL || !scroller.clientWidth) return;
     const anchor = ppf > 0 ? frameAt(anchorX) : TL.start;
     const lo = fitPpf();
     ppf = Math.min(MAX_PPF, Math.max(lo, next));
@@ -344,7 +345,7 @@ function onScreen(h) {
 const yAt = e => e.clientY - $("inner").getBoundingClientRect().top;
 
 function draw() {
-    if (!TL) return;
+    if (!TL || !scroller.clientWidth) return;      // hidden: the last picture stays until it shows
     const c = colours();
     const w = scroller.clientWidth, h = RULER_H + TL.tracks.length * LANE_H;
     $("inner").style.height = `${h}px`;
@@ -990,7 +991,7 @@ canvas.addEventListener("mousemove", e => {
         : clipAt(e.offsetX, y) ? "pointer" : "default";
 });
 addEventListener("keydown", e => {
-    if (e.target.closest("input, select, textarea")) return;
+    if (e.target.closest("input, select, textarea") || $("panel-timeline").hidden) return;     // not on Sound Design
     if ((e.key === "Delete" || e.key === "Backspace") && KEYSEL && CLIPS[KEYSEL.id]) {
         e.preventDefault();
         return deleteKeys(CLIPS[KEYSEL.id]);

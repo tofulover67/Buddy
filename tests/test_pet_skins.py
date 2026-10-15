@@ -1,7 +1,9 @@
 """The pets' skins (pages/pets/skins.py) - all free - and the Pets page
-wearing and offering them, with its Donate button."""
+wearing and offering them, with its Donate button; and the sprites they
+dress (web/sprites.js and sprites.css), read as text."""
 
 import os
+import re
 import tempfile
 import unittest
 from unittest import mock
@@ -50,6 +52,95 @@ class SkinTests(unittest.TestCase):
                                             "poof": 3, "blaze": "crown"}),
                          {"blob": "mint", "blaze": "crown"})
         self.assertEqual(skins.clean_colours({"blob": "#abcdef", "robot": "red", "cat": "#000000"}), {"blob": "#ABCDEF"})
+
+
+class SpriteTests(unittest.TestCase):
+    """What sprites.css does with each state, checked against what sprites.js
+    draws - the numbers, not the picture."""
+
+    WEB = _paths.APP / "pages" / "pets" / "web"
+
+    # Where each body ends over its legs, read off the drawing - what's
+    # below it is the foot that shows (the acorn's nut curves on down to 92
+    # between its legs, but is at about 90 over each).
+    BODY_BOTTOM = {"robot": 84, "shroomy": 90, "nutty": 90}
+
+    def setUp(self):
+        self.js = (self.WEB / "sprites.js").read_text(encoding="utf-8")
+        self.css = (self.WEB / "sprites.css").read_text(encoding="utf-8")
+
+    def rule(self, selector):
+        m = re.search(re.escape(selector) + r"\s*\{([^}]*)\}", self.css)
+        self.assertIsNotNone(m, selector)
+        return m.group(1)
+
+    def keyframes(self, name):
+        m = re.search(r"@keyframes " + re.escape(name) + r"\s*\{(.*?)\}\s*\}", self.css, re.S)
+        self.assertIsNotNone(m, name)
+        return m.group(1)
+
+    def drawing(self, species):
+        m = re.search(r"\n        " + species + r"\(rig\) \{(.*?)\n            return \[([^\]]*)\];", self.js, re.S)
+        self.assertIsNotNone(m, species)
+        legs = [tuple(map(float, r)) for r in
+                re.findall(r'rect\(([\d.]+), ([\d.]+), ([\d.]+), ([\d.]+), [^,]+, [\d.]+, "leg l\d"\)', m.group(1))]
+        return legs, [float(n) for n in m.group(2).split(",")]
+
+    def test_a_pet_with_legs_sits_down_onto_them_with_its_feet_on_the_ground(self):
+        with_legs = 0
+        for species in behaviour.SPECIES:
+            legs, said = self.drawing(species)
+            if not legs:
+                continue
+            with self.subTest(species):
+                with_legs += 1
+                self.assertTrue(all(y + h == 96 for _x, y, _w, h in legs))      # drawn standing on the ground line
+                self.assertEqual(len(said), 3)                                    # head x, head top, how far it sits down
+                # It sits down by about half of the foot that shows under
+                # its body, so a couple of units of foot still show.
+                shows = 96 - self.BODY_BOTTOM[species]
+                self.assertTrue(0 < said[2] <= shows / 2)
+                self.assertGreaterEqual(shows - said[2], 2)
+        self.assertGreaterEqual(with_legs, 3)                                     # the robot, the toadstool, the acorn
+        for state in ("sit", "sleep"):
+            with self.subTest(state):
+                # The rest comes down by the tuck, the legs go up by as much
+                # (so the feet stay put), and the breathing keeps the tuck -
+                # an animation's transform would otherwise replace it.
+                rig = self.rule(f'[data-state="{state}"] .rig')
+                self.assertIn("translateY(var(--tuck", rig)
+                self.assertIn("var(--tuck", self.keyframes(re.search(r"animation:\s*([\w-]+)", rig).group(1)))
+                legs = self.rule(f'[data-state="{state}"] .leg, [data-state="{state}"] .legs')
+                self.assertIn("translateY(calc(-1 * var(--tuck", legs)
+                self.assertNotIn("scale", legs)
+        self.assertIn('svg.style.setProperty("--tuck"', self.js)
+
+    def test_picked_up_thrown_and_dizzy_are_drawn(self):
+        for state in ("held", "fly", "dizzy"):
+            with self.subTest(state):
+                self.assertIn(f'[data-state="{state}"] .rig', self.css)
+        for state in ("held", "fly"):
+            with self.subTest(state):
+                self.assertIn(f'[data-state="{state}"] .shadow', self.css)                  # off the ground
+                self.assertIn(f'[data-state="{state}"] .gasp', self.css)
+        self.assertIn("display: none", self.rule('[data-state="held"] .shadow, [data-state="fly"] .shadow'))
+        self.assertIn('"fx fx-dizzy"', self.js)
+        self.assertIn("display: block", self.rule('[data-state="dizzy"] .fx-dizzy'))
+        self.assertIn("display: none", self.rule(".pet-sprite .fx"))                              # and only then
+        # Held, it swings from the top of its head - the same place the
+        # pet's window is told it's held by.
+        self.assertIn("transform-origin: var(--head-x", self.rule('[data-state="held"] .rig'))
+        self.assertIn("holder.dataset.headX = headX", self.js)
+        self.assertIn("holder.dataset.headTop = headTop", self.js)
+        # Picked up or thrown, the arms swing from the shoulder - the start
+        # of each arm's line, so every arm is drawn from there - not in
+        # behind the body.
+        arms = re.findall(r'path\("([^"]*)", "none", "arm arm-[lr]"', self.js)
+        self.assertGreaterEqual(len(arms), 20)
+        for d in arms:
+            self.assertRegex(d, r"^M\d")
+        self.assertIn('arm.style.setProperty("--shoulder"', self.js)
+        self.assertIn("transform-origin: var(--shoulder)", self.rule('[data-state="held"] .arm, [data-state="fly"] .arm'))
 
 
 @unittest.skipUnless(HAVE_QT, "PySide6 not installed")

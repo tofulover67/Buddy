@@ -2,12 +2,15 @@
 fake Resolve timeline (never a real project), what levels.py asks of it for each
 control, the child process, how peaks.py folds decoded audio into the waveform
 bytes and loudness the page draws, and keys.py's volume keys - the curve, and the
-timeline files they go to and come from Resolve in."""
+timeline files they go to and come from Resolve in. And the page's tabs: Timeline
+and Sound Design, in Buddy's Chromium engine."""
 
+import json
 import sys
+import time
 import unittest
 
-import _paths  # noqa: F401
+import _paths
 
 try:
     import numpy as np
@@ -16,6 +19,18 @@ try:
     HAVE_DEPS = True
 except ImportError:  # pragma: no cover - numpy or PySide6 missing
     HAVE_DEPS = False
+
+
+def qt_app():
+    """The process's Qt application, made if there's none yet: a QApplication set up
+    for web views, as TabTests' needs one and a bare QCoreApplication made first by
+    another test can't be swapped for one."""
+    from PySide6.QtCore import QCoreApplication, Qt
+    from PySide6.QtWidgets import QApplication
+    if QCoreApplication.instance() is None:
+        QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        qt_app.made = QApplication([])
+    return QCoreApplication.instance()
 
 
 # ------------------------------------------------------------ fake Resolve --
@@ -980,9 +995,9 @@ class RefreshAndQuitTests(unittest.TestCase):
         import tempfile
         import time
         from unittest import mock
-        from PySide6.QtCore import QCoreApplication, QObject, Signal
+        from PySide6.QtCore import QObject, Signal
 
-        app = QCoreApplication.instance() or QCoreApplication([])     # noqa: F841 - _stream's event loop needs one
+        qt_app()                                                      # _stream's event loop needs one
 
         class Stalled(QObject):
             """A decoder that starts and then sends nothing at all."""
@@ -1004,6 +1019,139 @@ class RefreshAndQuitTests(unittest.TestCase):
             os.remove(path)
         self.assertEqual(why, "Stopped.")
         self.assertLess(time.monotonic() - began, 1.5)          # not STALL_MS (20 s)
+
+
+# ---------------------------------------------------------------- the tabs --
+
+def _timeline(tl_id):
+    """A made-up timeline as page.py sends it: ten minutes, two tracks, a clip on each."""
+    start = 86400
+    clip = lambda i: {"id": f"{tl_id}-c{i}", "name": "A001.wav", "start": start + 100, "end": start + 24 * 500,
+                      "offset": 0, "volume": 0, "pan": 0, "fade_in": 0, "fade_out": 0, "enabled": True,
+                      "peaks": None}
+    return {"id": tl_id, "fps": 24, "start": start, "end": start + 24 * 600, "drop_frame": False, "markers": [],
+            "tracks": [{"index": i, "name": f"Track {i}", "kind": "mono", "enabled": True, "locked": False,
+                        "clips": [clip(i)]} for i in (1, 2)]}
+
+
+@unittest.skipUnless(HAVE_DEPS, "numpy / PySide6 not installed")
+class TabTests(unittest.TestCase):
+    """index.html in a web view, no Resolve: the page opens on Timeline, Sound Design
+    is a placeholder of its own, and the tracks come back at their width after it -
+    even when the timeline was read while it showed."""
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: F401
+        except ImportError:  # pragma: no cover - PySide6 without its web engine
+            raise unittest.SkipTest("QtWebEngine not installed")
+        from PySide6.QtWidgets import QApplication
+        cls.app = qt_app()
+        if not isinstance(cls.app, QApplication):     # another file's test made a bare one
+            raise unittest.SkipTest("a QCoreApplication was made first; a web view needs a QApplication")
+
+    def setUp(self):
+        from PySide6.QtCore import QEventLoop, QTimer, QUrl
+        from PySide6.QtWebEngineWidgets import QWebEngineView
+        from shiboken6 import delete
+        self.view = QWebEngineView()
+        self.addCleanup(delete, self.view)
+        self.view.resize(1000, 700)
+        loop, loaded = QEventLoop(), []
+        self.view.loadFinished.connect(lambda ok: (loaded.append(ok), loop.quit()))
+        self.view.setUrl(QUrl.fromLocalFile(str(_paths.APP / "pages" / "audio_assistant" / "web" / "index.html")))
+        self.view.show()
+        QTimer.singleShot(10000, loop.quit)
+        loop.exec()
+        self.assertEqual(loaded, [True])
+
+    def js(self, body):
+        from PySide6.QtCore import QEventLoop, QTimer
+        loop, result = QEventLoop(), []
+        self.view.page().runJavaScript("JSON.stringify((() => {" + body + "})())", 0,
+                                       lambda value: (result.append(value), loop.quit()))
+        QTimer.singleShot(5000, loop.quit)
+        loop.exec()
+        self.assertTrue(result, "JavaScript timed out")
+        return json.loads(result[0])
+
+    def until(self, expr):
+        """Waits (5 s at most) for a JavaScript expression to come true."""
+        from PySide6.QtCore import QEventLoop, QTimer
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if self.js(f"return !!({expr});"):
+                return
+            loop = QEventLoop()
+            QTimer.singleShot(50, loop.quit)
+            loop.exec()
+        self.fail("Timed out waiting for " + expr)
+
+    def click(self, tab):
+        self.js(f"document.querySelector('#tabs [data-tab={tab}]').click(); return true;")
+
+    def shown(self):
+        return self.js("""return {
+            selected: [...document.querySelectorAll('#tabs button')].filter(b => b.getAttribute('aria-selected') === 'true')
+                          .map(b => b.dataset.tab),
+            timeline: !document.getElementById('panel-timeline').hidden,
+            sound: !document.getElementById('panel-sound-design').hidden};""")
+
+    # The tracks drawn the width of their box, fitted to it unless zoomed in.
+    DRAWN = ("scroller.clientWidth > 0 && canvas.style.width === scroller.clientWidth + 'px'"
+             " && (!fit || Math.abs(ppf - fitPpf()) < 1e-9)")
+
+    def receive(self, name, payload):
+        self.js(f"Buddy.receive({json.dumps(name)}, {json.dumps(payload)}); return true;")
+
+    def test_it_opens_on_timeline_and_sound_design_has_a_panel_of_its_own(self):
+        self.assertEqual(self.js("return [...document.querySelectorAll('#tabs button')].map(b => b.textContent);"),
+                         ["Timeline", "Sound Design"])
+        self.assertEqual(self.shown(), {"selected": ["timeline"], "timeline": True, "sound": False})
+        self.click("sound-design")
+        self.assertEqual(self.shown(), {"selected": ["sound-design"], "timeline": False, "sound": True})
+        self.assertIn("Coming soon.", self.js("return document.getElementById('panel-sound-design').textContent;"))
+        self.click("timeline")
+        self.assertEqual(self.shown(), {"selected": ["timeline"], "timeline": True, "sound": False})
+
+    def settle(self):
+        """Waits a few frames: the ResizeObserver's run after a tab switch has happened."""
+        self.js("window.__frames = 0; requestAnimationFrame(() => requestAnimationFrame(() =>"
+                " requestAnimationFrame(() => { window.__frames = 1; }))); return true;")
+        self.until("window.__frames === 1")
+
+    def test_the_tracks_come_back_where_they_were(self):
+        self.receive("timeline", _timeline("tl-1"))
+        self.until(self.DRAWN)
+        self.js("setZoom(ppf * 20, 0); scroller.scrollLeft = 3000; return true;")
+        self.until(f"!fit && Math.round(scroller.scrollLeft) === 3000 && {self.DRAWN}")
+        zoom, width = self.js("return [ppf, canvas.width];")
+        self.click("sound-design")
+        self.receive("timeline", _timeline("tl-1"))                # read again meanwhile
+        self.settle()
+        self.assertEqual(self.js("return canvas.width;"), width)    # the last picture kept, not shrunk to nothing
+        self.click("timeline")
+        self.settle()
+        self.until(self.DRAWN)
+        self.assertEqual(self.js("return [ppf, Math.round(scroller.scrollLeft)];"), [zoom, 3000])
+
+    def test_a_timeline_read_while_sound_design_shows_is_fitted_once_back(self):
+        self.click("sound-design")
+        self.receive("timeline", _timeline("tl-2"))
+        self.click("timeline")
+        self.until(f"fit && ppf > 0 && {self.DRAWN}")
+
+    def test_keys_leave_the_timeline_alone_while_it_is_hidden(self):
+        self.receive("timeline", _timeline("tl-1"))
+        self.receive("selection", {"ids": ["tl-1-c1"], "from_resolve": False})
+        escape = "document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));"
+        self.click("sound-design")
+        self.js(escape + "return true;")
+        self.assertEqual(self.js("return [...SEL];"), ["tl-1-c1"])
+        self.click("timeline")
+        self.js(escape + "return true;")
+        self.assertEqual(self.js("return [...SEL];"), [])
 
 
 if __name__ == "__main__":

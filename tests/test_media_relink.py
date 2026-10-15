@@ -4,14 +4,17 @@ a temp folder - never a real Resolve."""
 
 import os
 import json
+import sys
 import tempfile
 import time
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 import _paths  # noqa: F401
-from pages.media_relink import relink_rows, resolve_ext
-from pages.media_relink.relink_engine import MatchStatus, SearchCancelled, build_file_index
+from pages.media_relink import relink_engine, relink_rows, resolve_ext
+from pages.media_relink.relink_engine import (MatchStatus, SearchCancelled, build_file_index, skip_folder,
+                                              wanted_names)
 from pages.media_relink.relink_rows import MODE_FIX, MODE_RELOCATE
 
 try:
@@ -28,6 +31,30 @@ def touch(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, "w").close()
     return path
+
+
+def can_symlink():
+    """Windows makes symbolic links only for an administrator or with
+    Developer Mode on."""
+    with tempfile.TemporaryDirectory() as folder:
+        try:
+            os.symlink(folder, os.path.join(folder, "link"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+def scandir_failing_at(*folders, error=PermissionError):
+    """os.scandir, except that the folders given can't be opened - chmod
+    can't make a folder unreadable on Windows."""
+    real = os.scandir
+    failing = {os.path.normcase(f) for f in folders}
+
+    def scandir(path):
+        if os.path.normcase(os.fspath(path)) in failing:
+            raise error(13, "Access is denied", path)
+        return real(path)
+    return mock.patch("pages.media_relink.relink_engine.os.scandir", side_effect=scandir)
 
 
 class Clip:
@@ -183,19 +210,97 @@ class RuleTests(Base):
         build_file_index(self.new, progress=seen.append)
         self.assertEqual(seen[-1], 4)
 
-    def test_index_reports_missing_or_unreadable_folders(self):
+    def test_only_the_wanted_names_are_indexed(self):
+        seen = []
+        index = build_file_index(self.new, progress=seen.append, wanted={"b002.mov", "c003.mov"})
+        self.assertEqual(sorted(index), ["b002.mov", "c003.mov"])
+        self.assertEqual(len(index["c003.mov"]), 2)
+        self.assertEqual(seen[-1], 4)                  # every file is still looked at
+        rows, _ = self.rows()
+        wanted = wanted_names(r["old_path"] for r in rows)
+        self.assertEqual(relink_rows.apply_search(rows, build_file_index(self.new, wanted=wanted), MODE_FIX), (1, 1))
+
+    def test_wanted_names_take_a_sequence_by_its_first_frame_too(self):
+        self.assertEqual(wanted_names(["D:/Footage/R[0010-0012].jpg", "", "D:/Footage/A001.MOV"]),
+                         {"r[0010-0012].jpg", "r0010.jpg", "a001.mov"})
+
+
+class DriveSearchTests(unittest.TestCase):
+    """A search of a whole drive: its trash and system folders, folders
+    nobody may open, and links back into it."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.drive = os.path.join(self._tmp.name, "Drive")
+        self.found = [touch(os.path.join(self.drive, "Footage", "Day1", "B002.mov")),
+                      touch(os.path.join(self.drive, "footage 2", "B002.MOV")),
+                      # Not at the top of a drive, so not Windows' own.
+                      touch(os.path.join(self.drive, "Windows", "B002.mov"))]
+        for system in ("$RECYCLE.BIN/S-1-5-21/B002.mov", "System Volume Information/B002.mov",
+                       ".Spotlight-V100/Store/B002.mov", ".Trashes/501/B002.mov",
+                       "Footage/.fseventsd/B002.mov"):
+            touch(os.path.join(self.drive, *system.split("/")))
+
+    def test_trash_and_system_folders_are_not_searched(self):
+        seen = []
+        index = build_file_index(self.drive, progress=seen.append)
+        self.assertEqual(index["b002.mov"], self.found)
+        self.assertEqual(seen[-1], 3)
+
+    def test_a_folder_that_cant_be_opened_is_skipped_and_counted(self):
+        locked = os.path.join(self.drive, "footage 2")
+        gone = os.path.join(self.drive, "Windows")
+        unreadable = []
+        with scandir_failing_at(locked):
+            with scandir_failing_at(gone, error=FileNotFoundError):
+                index = build_file_index(self.drive, unreadable=unreadable)
+            with self.assertRaises(PermissionError):       # the folder chosen still fails
+                build_file_index(locked)
+        self.assertEqual(index["b002.mov"], self.found[:1])
+        self.assertEqual(unreadable, [locked, gone])
+
+    def test_a_missing_folder_is_still_an_error(self):
         with self.assertRaises(NotADirectoryError):
-            build_file_index(os.path.join(self.tmp, "missing"))
+            build_file_index(os.path.join(self.drive, "missing"))
 
-        unreadable = PermissionError("Access denied")
+    def test_the_systems_own_folders_only_at_the_top_of_a_drive(self):
+        skipped = [("C:\\", "C:\\Windows"), ("C:\\", "C:\\Program Files (x86)"), ("D:\\", "D:\\programdata"),
+                   ("C:/", "C:/Recovery"), ("/", "/System"), ("/", "/Volumes"), ("/", "/Library"),
+                   ("D:\\Footage", "D:\\Footage\\$RECYCLE.BIN"), ("D:\\", "D:\\$Recycle.Bin"),
+                   ("/Volumes/Footage", "/Volumes/Footage/.Spotlight-V100"), ("/", "/Users/you/.Trash")]
+        searched = [("D:\\Footage", "D:\\Footage\\Windows"), ("C:\\", "C:\\Users\\Tess\\Windows"),
+                    ("C:\\", "C:\\Users"), ("/", "/Users"), ("/Volumes/Footage", "/Volumes/Footage/System"),
+                    ("/Users/you", "/Users/you/Library"), ("D:\\", "D:\\Footage")]
+        for root, folder in skipped:
+            self.assertTrue(skip_folder(root, folder), (root, folder))
+        for root, folder in searched:
+            self.assertFalse(skip_folder(root, folder), (root, folder))
 
-        def failing_walk(_root, onerror):
-            yield self.new, [], ["B002.mov"]
-            onerror(unreadable)
+    @unittest.skipUnless(can_symlink(), "this account can't make symbolic links")
+    def test_symbolic_links_are_not_followed(self):
+        os.symlink(os.path.join(self.drive, "Footage"), os.path.join(self.drive, "Shortcut"),
+                   target_is_directory=True)
+        os.symlink(self.drive, os.path.join(self.drive, "Footage", "Loop"), target_is_directory=True)
+        self.assertEqual(build_file_index(self.drive)["b002.mov"], self.found)
 
-        with mock.patch("pages.media_relink.relink_engine.os.walk", side_effect=failing_walk):
-            with self.assertRaises(PermissionError):
-                build_file_index(self.new)
+    @unittest.skipUnless(sys.platform == "win32", "directory junctions are Windows'")
+    def test_junctions_are_not_followed(self):
+        import _winapi
+        junction = os.path.join(self.drive, "Application Data")
+        _winapi.CreateJunction(os.path.join(self.drive, "Footage"), junction)
+        self.addCleanup(os.rmdir, junction)            # the junction, not what it points at
+        self.assertEqual(build_file_index(self.drive)["b002.mov"], self.found)
+
+    def test_a_junction_is_known_before_python_3_12(self):
+        # No DirEntry.is_junction() yet: the entry's reparse tag says.
+        def entry(**stat):
+            return SimpleNamespace(is_symlink=lambda: False,
+                                   stat=lambda follow_symlinks: SimpleNamespace(**stat))
+        self.assertTrue(relink_engine._is_link(entry(st_reparse_tag=0xA0000003)))
+        self.assertFalse(relink_engine._is_link(entry(st_reparse_tag=0x9000601A)))   # a OneDrive folder
+        self.assertFalse(relink_engine._is_link(entry(st_reparse_tag=0)))
+        self.assertFalse(relink_engine._is_link(entry()))                          # a Mac's: no tag at all
 
 
 # ------------------------------------------------------------------ page --
@@ -452,6 +557,51 @@ class PageTests(Base):
     def test_search_needs_a_scan_first(self):
         self.page.on_search(None)
         self.assertEqual(self.last("alert")["title"], "Scan first")
+
+    def test_a_search_says_which_folders_it_couldnt_open(self):
+        self.page.on_scan(None)
+        locked = os.path.join(self.new, "Day2")
+        with scandir_failing_at(locked):
+            self.search(self.new)
+        rows = self.last("rows")
+        self.assertEqual(rows["summary_parts"], ["Searched SSD: 2 matches found.",
+                                                 "Couldn't open 1 folder, so it wasn't searched."])
+        self.assertEqual(rows["counts"]["ambiguous"], 0)          # C003 only in Day1 now
+        log = [e["text"] for e in self.last("log")]
+        self.assertIn(f"Folders that couldn't be opened: {locked}", log)
+
+        self.page._search = {"mode": MODE_FIX, "folder": self.new, "seen": 0, "stopping": False}
+        self.page._on_search_done({}, [f"D:\\Locked{i}" for i in range(8)])
+        self.assertIn("Couldn't open 8 folders, so they weren't searched.", self.last("rows")["summary_parts"])
+        self.assertIn("Folders that couldn't be opened: D:\\Locked0; D:\\Locked1; D:\\Locked2; D:\\Locked3; "
+                      "D:\\Locked4 (and 3 more)", [e["text"] for e in self.last("log")])
+
+    def test_a_whole_drive_is_named_by_its_drive(self):
+        self.page.on_scan(None)
+        self.page._search = {"mode": MODE_FIX, "folder": os.path.abspath(os.sep), "seen": 0, "stopping": False}
+        self.page._on_search_done(build_file_index(self.new), [])
+        self.assertRegex(self.last("rows")["summary_parts"][0], r"^Searched all of \S.* – 1 match found\.$")
+        self.assertEqual(self.page_mod._drive_name("D:\\"), "D:")
+        self.assertEqual(self.page_mod._drive_name("\\\\server\\share"), "\\\\server\\share")
+        # A Mac's own disk by its name, from its link in /Volumes.
+        volumes = mock.MagicMock()
+        volumes.__enter__.return_value = [
+            SimpleNamespace(name="Footage", path="/Volumes/Footage", is_symlink=lambda: False),
+            SimpleNamespace(name="Macintosh HD", path="/Volumes/Macintosh HD", is_symlink=lambda: True)]
+        with mock.patch.object(self.page_mod.sys, "platform", "darwin"), \
+                mock.patch.object(self.page_mod.os, "scandir", return_value=volumes), \
+                mock.patch.object(self.page_mod.os.path, "realpath", side_effect=lambda p: "/"):
+            self.assertEqual(self.page_mod._drive_name("/"), "Macintosh HD")
+
+    def test_the_search_keeps_only_the_clips_names(self):
+        self.page.on_scan(None)
+        with mock.patch.object(self.page_mod, "_SearchWorker") as worker, \
+                mock.patch.object(self.page_mod.QFileDialog, "getExistingDirectory", return_value=self.new):
+            self.page.on_search(None)
+        folder, wanted, _parent = worker.call_args.args
+        self.assertEqual(folder, os.path.normpath(self.new))
+        self.assertEqual(wanted, {"a001.mov", "b002.mov", "c003.mov", "d004.mov"})
+        self.page._search = self.page._worker = None
 
     def test_scope_switch_rescans_and_clears_matches_in_both_modes(self):
         pool = self.host.controller.project.GetMediaPool()

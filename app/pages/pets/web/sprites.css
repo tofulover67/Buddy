@@ -47,13 +47,17 @@
 .pet-sprite[data-species="blob"][data-state="walk"] .rig { animation: pet-squish .5s ease-in-out infinite; }
 .pet-sprite[data-species="blob"][data-state="walk"] .arm { animation: pet-wave .5s ease-in-out infinite; }
 
-/* Sitting: lower, legs tucked. */
-[data-state="sit"] .rig { animation: pet-breathe 3.2s ease-in-out infinite; transform: scaleY(.92); }
-[data-state="sit"] .leg { transform: scaleY(.5); }
+/* Sitting: it comes down onto its legs - the feet stay where they are on
+   the ground and the rest settles over them by the species' own --tuck
+   (sprites.js sets it; nothing for a pet without legs). The breathing
+   carries the tuck too, or the animation would put it back up. */
+[data-state="sit"] .rig { animation: pet-rest 3.2s ease-in-out infinite; transform: translateY(var(--tuck, 0px)); }
+[data-state="sit"] .leg, [data-state="sit"] .legs { transform: translateY(calc(-1 * var(--tuck, 0px))); }
 
-/* Asleep: eyes shut, slow breathing, z's drifting up. */
-[data-state="sleep"] .rig { animation: pet-breathe 4.4s ease-in-out infinite; transform: scaleY(.9); }
-[data-state="sleep"] .leg { transform: scaleY(.5); }
+/* Asleep: settled the same way, eyes shut, slow breathing, z's drifting up. */
+[data-state="sleep"] .rig { animation: pet-rest 4.4s ease-in-out infinite; transform: translateY(var(--tuck, 0px)); }
+[data-state="sleep"] .leg, [data-state="sleep"] .legs { transform: translateY(calc(-1 * var(--tuck, 0px))); }
+[data-state="sleep"] .fx-zzz { transform: translateY(var(--tuck, 0px)); }
 [data-state="sleep"] .eye { animation: none; transform: scaleY(.12); }
 .pet-sprite .mouth { transform-box: fill-box; transform-origin: 50% 50%; }
 [data-state="sleep"] .mouth { transform: scaleY(.25); }
@@ -98,6 +102,73 @@
 [data-state="cheer"] .arm { animation: pet-wave .35s ease-in-out infinite; }
 [data-state="cheer"] .tail { animation: pet-wag .4s ease-in-out infinite; }
 
+/* Picked up (the pet's window holds it by the top of its head): dangling
+   from there with a little wriggle, legs kicking in turn, arms flailing,
+   eyes wide, an "o" of surprise and no shadow under it. */
+[data-state="held"] .rig { transform-origin: var(--head-x, 65px) var(--head-top, 20px); animation: pet-dangle .35s ease-in-out infinite alternate; }
+[data-state="held"] .leg.l1, [data-state="held"] .leg.l4 { animation: pet-kick .3s ease-in-out infinite alternate; }
+[data-state="held"] .leg.l2, [data-state="held"] .leg.l3 { animation: pet-kick .3s ease-in-out infinite alternate-reverse; }
+[data-state="held"] .legs { animation: pet-scuttle .1s ease-in-out infinite alternate; }
+[data-state="held"] .arm-r { animation: pet-flail-r .3s ease-in-out infinite alternate; }
+[data-state="held"] .arm-l { animation: pet-flail-l .26s ease-in-out infinite alternate; }
+[data-state="held"] .wing { animation: pet-flap .2s ease-in-out infinite; }
+[data-state="held"] .tail { animation: pet-wag .25s ease-in-out infinite; }
+
+/* Thrown, or falling: arms up and flailing, legs splayed and kicking,
+   mouth wide open, no shadow and no breathing - the window moves it. */
+[data-state="fly"] .rig { animation: none; }
+[data-state="fly"] .arm-r { transform: rotate(-60deg); animation: pet-fling-r .24s ease-in-out infinite alternate; }
+[data-state="fly"] .arm-l { transform: rotate(60deg); animation: pet-fling-l .28s ease-in-out infinite alternate; }
+[data-state="fly"] .leg.l1, [data-state="fly"] .leg.l4 { transform: rotate(22deg); animation: pet-splay-l .22s ease-in-out infinite alternate; }
+[data-state="fly"] .leg.l2, [data-state="fly"] .leg.l3 { transform: rotate(-22deg); animation: pet-splay-r .22s ease-in-out infinite alternate-reverse; }
+[data-state="fly"] .legs { animation: pet-scuttle .12s ease-in-out infinite alternate; }
+[data-state="fly"] .wing { animation: pet-flap .16s ease-in-out infinite; }
+[data-state="fly"] .tail { animation: pet-wag .2s ease-in-out infinite; }
+[data-state="fly"] .gasp { transform: scale(1.25); }
+/* The crab's arms carry its claws, drawn apart, so they stay put and the
+   claws snap instead. */
+.pet-sprite[data-species="snappy"][data-state="held"] .arm,
+.pet-sprite[data-species="snappy"][data-state="fly"] .arm { animation: none; transform: none; }
+[data-state="held"] .claw, [data-state="fly"] .claw { animation: pet-snap .14s ease-in-out infinite alternate; }
+/* The cactus's arms are drawn up already - raised further, they'd fold
+   over its head - so they wave about where they are. */
+.pet-sprite[data-species="spike"]:is([data-state="held"], [data-state="fly"]) .arm-r { transform: none; animation: pet-kick .26s ease-in-out infinite alternate; }
+.pet-sprite[data-species="spike"]:is([data-state="held"], [data-state="fly"]) .arm-l { transform: none; animation: pet-kick .3s ease-in-out infinite alternate-reverse; }
+
+/* Both: the arms swing from the shoulder, where sprites.js found each
+   one starts (--shoulder) - turned about the middle of their ends, they'd
+   go in behind the body. The eyes go wide (the whites grow, the pupils
+   shrink - the robot's arcs just stretch) and the mouth is an "o"
+   sprites.js drew. */
+[data-state="held"] .arm, [data-state="fly"] .arm { transform-box: view-box; transform-origin: var(--shoulder); }
+.pet-sprite .eyeball, .pet-sprite .gasp { transform-box: fill-box; transform-origin: 50% 50%; }
+.pet-sprite .gasp { display: none; }
+[data-state="held"] .gasp, [data-state="fly"] .gasp { display: block; }
+[data-state="held"] :is(.mouth, .tongue, .teeth), [data-state="fly"] :is(.mouth, .tongue, .teeth) { display: none; }
+[data-state="held"] .eye, [data-state="fly"] .eye { animation: none; transform: scale(.8); }
+[data-state="held"] .eyeball, [data-state="fly"] .eyeball { transform: scale(1.12); }
+[data-state="held"] .rig:not(.has-lids) .eye, [data-state="fly"] .rig:not(.has-lids) .eye { transform: scale(1.1, 1.5); }
+[data-state="held"] .shadow, [data-state="fly"] .shadow { display: none; }
+
+/* Dizzy, after a hard landing: stars going round over its head, eyes
+   squeezed shut, a small "o", swaying slowly where it stands. Without
+   motion the three stars stand still, spread round the ring. */
+[data-state="dizzy"] .rig { animation: pet-sway 1.8s ease-in-out infinite; }
+[data-state="dizzy"] .has-squint :is(.eyeball, .eye) { display: none; }
+.pet-sprite .squint { display: none; }
+[data-state="dizzy"] .squint { display: block; }
+[data-state="dizzy"] :is(.mouth, .tongue, .teeth) { display: none; }
+[data-state="dizzy"] .gasp { display: block; transform: scale(.7); }
+[data-state="dizzy"] .fx-dizzy { display: block; }
+.pet-sprite .orbit { transform-box: fill-box; transform-origin: 50% 50%; }
+.pet-sprite .orbit.o1 { transform: translate(0, 4.5px) scale(1.15); }
+.pet-sprite .orbit.o2 { transform: translate(-13px, -2.2px) scale(.9); }
+.pet-sprite .orbit.o3 { transform: translate(13px, -2.2px) scale(.9); }
+[data-state="dizzy"] .orbit { animation: pet-orbit 1.2s linear infinite; }
+[data-state="dizzy"] .orbit.o1 { animation-delay: -.3s; }
+[data-state="dizzy"] .orbit.o2 { animation-delay: -.7s; }
+[data-state="dizzy"] .orbit.o3 { animation-delay: -1.1s; }
+
 @keyframes pet-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.03) translateY(-.5px); } }
 @keyframes pet-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
 @keyframes pet-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
@@ -118,6 +189,27 @@
 @keyframes pet-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-7px) scaleY(1.04); } }
 @keyframes pet-jump { 0%, 100% { transform: translateY(0) scaleY(1); } 30% { transform: translateY(-14px) scaleY(1.06); } 60% { transform: translateY(0) scaleY(.94); } }
 @keyframes pet-confetti { 0% { opacity: 0; transform: translateY(-10px) rotate(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(70px) rotate(260deg); } }
+@keyframes pet-rest { 0%, 100% { transform: scaleY(1) translateY(var(--tuck, 0px)); } 50% { transform: scaleY(1.03) translateY(var(--tuck, 0px)); } }
+@keyframes pet-dangle { 0% { transform: rotate(-4deg); } 100% { transform: rotate(4deg); } }
+@keyframes pet-kick { 0% { transform: rotate(-18deg); } 100% { transform: rotate(18deg); } }
+@keyframes pet-flail-r { 0% { transform: rotate(-40deg); } 100% { transform: rotate(5deg); } }
+@keyframes pet-flail-l { 0% { transform: rotate(40deg); } 100% { transform: rotate(-5deg); } }
+@keyframes pet-fling-r { 0% { transform: rotate(-75deg); } 100% { transform: rotate(-45deg); } }
+@keyframes pet-fling-l { 0% { transform: rotate(75deg); } 100% { transform: rotate(45deg); } }
+@keyframes pet-splay-l { 0% { transform: rotate(12deg); } 100% { transform: rotate(34deg); } }
+@keyframes pet-splay-r { 0% { transform: rotate(-12deg); } 100% { transform: rotate(-34deg); } }
+@keyframes pet-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+/* Round an ellipse over the head (front low and larger, back high, smaller and fainter). */
+@keyframes pet-orbit {
+    0%, 100% { transform: translate(15px, 0) scale(1); opacity: 1; }
+    12.5% { transform: translate(10.6px, 3.2px) scale(1.08); }
+    25% { transform: translate(0, 4.5px) scale(1.15); }
+    37.5% { transform: translate(-10.6px, 3.2px) scale(1.08); }
+    50% { transform: translate(-15px, 0) scale(1); opacity: 1; }
+    62.5% { transform: translate(-10.6px, -3.2px) scale(.9); }
+    75% { transform: translate(0, -4.5px) scale(.8); opacity: .55; }
+    87.5% { transform: translate(10.6px, -3.2px) scale(.9); }
+}
 
 @media (prefers-reduced-motion: reduce) {
     .pet-sprite *, .pet-sprite .rig, .pet-sprite .eye { animation-duration: 0s !important; }

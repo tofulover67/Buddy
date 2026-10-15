@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
 """
 Media Relink (a tab on Media Manager) - finds this project's clips a new file to point at: offline
-clips from a folder you choose, or any clips when media moves to a new
-drive - from the open bin, the open timeline, the selected clips or the
-whole project. A web page (core/web_page.py): the view is web/index.html +
-relink.js.
+clips from a folder you choose (or a whole drive), or any clips when media
+moves to a new drive - from the open bin, the open timeline, the selected
+clips or the whole project. A web page (core/web_page.py): the view is
+web/index.html + relink.js.
 
 Nothing is relinked until you say so: a folder search only proposes a
 match per clip (by filename, case-insensitive - relink_engine.py), shown in
 the table, and a clip with several same-named files asks you to pick. The
 rules for which clips each mode may touch are in relink_rows.py.
 
-The folder search runs on a worker thread (walking a big network share can
-take minutes), with its progress and a Cancel in the page. Every Resolve
-call - the scan and ReplaceClip - stays on the main thread.
+The folder search runs on a worker thread (walking a big network share or
+a whole drive can take minutes), with its progress and a Cancel in the
+page. It keeps only the filenames the clips could match, and folders it
+can't open are left out and counted in the summary rather than ending the
+search. Every Resolve call - the scan and ReplaceClip - stays on the main
+thread.
 
 A relink is believed only once the Media Pool, read again afterwards, says
 so: Resolve has answered ReplaceClip with True and kept the old file.
@@ -31,6 +34,7 @@ Protocol:
 from __future__ import annotations
 
 import os
+import sys
 import time
 
 from PySide6.QtCore import QThread, Signal
@@ -41,25 +45,44 @@ from core.resolve_bridge import ResolveConnectionError
 from core.web_page import WebToolPage
 
 from . import relink_rows, resolve_ext
-from .relink_engine import SearchCancelled, build_file_index, sequence_first_frame
+from .relink_engine import SearchCancelled, build_file_index, sequence_first_frame, wanted_names
 from .relink_rows import MODE_FIX, MODE_RELOCATE, MODES
 
 LOG_LIMIT = 60
 PROGRESS_EVERY_SECONDS = 0.2
+UNREADABLE_LOGGED = 5     # folders a search couldn't open, named in the Activity log
+
+
+def _drive_name(root):
+    """A whole drive as the summary names it: D: - or a Mac's own disk
+    ("/") by the name Finder shows, from its link in /Volumes."""
+    if root.rstrip("\\/"):
+        return root.rstrip("\\/")
+    if sys.platform == "darwin":
+        try:
+            with os.scandir("/Volumes") as volumes:
+                for entry in volumes:
+                    if entry.is_symlink() and os.path.realpath(entry.path) == "/":
+                        return entry.name
+        except OSError:
+            pass
+    return root
 
 
 class _SearchWorker(QThread):
-    """Indexes a folder's filenames off the UI thread. Reads the disk
-    only - nothing here touches Resolve or a widget."""
+    """Indexes a folder's filenames off the UI thread - only the names in
+    wanted. Reads the disk only - nothing here touches Resolve or a
+    widget."""
 
     progressed = Signal(int)
-    finished_index = Signal(dict)
+    finished_index = Signal(dict, list)    # the index, and the folders it couldn't open
     failed = Signal(str)
     cancelled = Signal()
 
-    def __init__(self, folder, parent=None):
+    def __init__(self, folder, wanted, parent=None):
         super().__init__(parent)
         self.folder = folder
+        self.wanted = wanted
         self._stop = False
         self._last = 0.0
 
@@ -73,14 +96,16 @@ class _SearchWorker(QThread):
             self.progressed.emit(seen)
 
     def run(self):
+        unreadable = []
         try:
-            index = build_file_index(self.folder, progress=self._progress, should_stop=lambda: self._stop)
+            index = build_file_index(self.folder, progress=self._progress, should_stop=lambda: self._stop,
+                                     wanted=self.wanted, unreadable=unreadable)
         except SearchCancelled:
             self.cancelled.emit()
         except Exception as exc:  # noqa: BLE001 - an unreadable folder, a dropped share
             self.failed.emit(str(exc) or type(exc).__name__)
         else:
-            self.finished_index.emit(index)
+            self.finished_index.emit(index, unreadable)
 
 
 class MediaRelinkPage(WebToolPage):
@@ -256,12 +281,13 @@ class MediaRelinkPage(WebToolPage):
             return
         if not self._check_scanned_project(mode, controller):
             return
-        folder = QFileDialog.getExistingDirectory(self, tr("Choose the folder to search"))
+        folder = QFileDialog.getExistingDirectory(self, tr("Choose a folder – or a whole drive – to search"))
         if not folder:
             return
         folder = os.path.normpath(folder)
         self._search = {"mode": mode, "folder": folder, "seen": 0, "stopping": False}
-        self._worker = _SearchWorker(folder, self)
+        wanted = wanted_names(r["old_path"] for r in self._lists[mode]["rows"])
+        self._worker = _SearchWorker(folder, wanted, self)
         self._worker.progressed.connect(self._on_search_progress)
         self._worker.finished_index.connect(self._on_search_done)
         self._worker.failed.connect(self._on_search_failed)
@@ -291,16 +317,30 @@ class MediaRelinkPage(WebToolPage):
         self._push_state()
         return search
 
-    def _on_search_done(self, index):
+    def _on_search_done(self, index, unreadable):
         search = self._end_search()
         mode = search["mode"]
         matched, ambiguous = relink_rows.apply_search(self._lists[mode]["rows"], index, mode)
-        folder = os.path.basename(search["folder"]) or search["folder"]
-        parts = [f"Searched {folder}: 1 match found." if matched == 1
-                 else f"Searched {folder}: {matched} matches found."]
+        folder = os.path.basename(search["folder"])
+        if folder:
+            parts = [f"Searched {folder}: 1 match found." if matched == 1
+                     else f"Searched {folder}: {matched} matches found."]
+        else:   # a whole drive: D:\, or a Mac's own disk
+            drive = _drive_name(search["folder"])
+            parts = [f"Searched all of {drive} – 1 match found." if matched == 1
+                     else f"Searched all of {drive} – {matched} matches found."]
         if ambiguous:
             parts.append(f"{ambiguous} with more than one file of that name (pick which).")
-        self._summary(mode, parts,"success" if matched or ambiguous else "warn")
+        if unreadable:
+            # No permission mostly - but also a folder deleted mid-search, or a
+            # path too long for Windows - so no reason is given.
+            parts.append("Couldn't open 1 folder, so it wasn't searched." if len(unreadable) == 1
+                         else f"Couldn't open {len(unreadable)} folders, so they weren't searched.")
+            shown = "; ".join(unreadable[:UNREADABLE_LOGGED])
+            more = len(unreadable) - UNREADABLE_LOGGED
+            self._add_log(f"Folders that couldn't be opened: {shown} (and {more} more)" if more > 0
+                          else f"Folders that couldn't be opened: {shown}", "warn")
+        self._summary(mode, parts, "success" if matched or ambiguous else "warn")
         self._push_rows(mode)
 
     def _on_search_failed(self, message):

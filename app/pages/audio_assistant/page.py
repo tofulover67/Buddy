@@ -43,6 +43,9 @@ Every change but a crossfade can be undone (Undo puts back what the clips had, a
 takes a curve off or puts the one before back). Buddy can't remove a transition
 (DeleteClips refuses one), so the view asks first.
 
+Its second tab, Sound Design, is still to come: it says so and does nothing yet
+(web/tabs.js switches the tabs; the page loads on Timeline - the tab isn't saved).
+
 What Resolve 21.1's scripting can reach (tried on a duplicate timeline): a clip's
 volume, pan and pitch (SetProperties), fades in frames (SetFades), audio transitions
 (AddTransition, category "audio"), loudness normalisation to a target

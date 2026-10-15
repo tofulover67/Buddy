@@ -6,12 +6,16 @@ off when nothing happens, typing along while a tool works, and cheering
 when an achievement is unlocked (core/achievements.py). Hovering it shows
 a pill with Ask Buddy and Open Buddy; a click pats it and opens a speech
 bubble with a field that asks Ask Buddy; a right-click offers Pets,
-Achievements and Hide; it can be dragged anywhere.
+Achievements and Hide; dragged, it's picked up and dangles, and let go
+it's thrown - it bounces off the screen's edges and lands on the bottom
+(physics.py). With Physics off, a drag just moves it (the system's own
+move), anywhere, and it stays at that height.
 
 Not a tab: its page is in Settings (General > Pets - core/settings_dialog.py
 takes it from the shell's `extras`): the pet on the desktop or not, which
-one and its name, its skin, its size, whether it walks and when it falls
-asleep, whether a click opens Ask Buddy, and how far it has come. The
+one and its name, its skin, its size, whether it walks, whether it can be
+picked up and thrown, when it falls asleep, whether a click opens Ask
+Buddy, and how far it has come. The
 species (behaviour.SPECIES): the blob from the start, the rest earned with
 achievements; the gallery draws them with web/sprites.js, which the pet's
 own window draws with too. Each has a few skins (skins.py), all free; the
@@ -31,11 +35,11 @@ from core import atomic_io, settings_form as sf, tool_dirs
 from core.settings_dialog import refresh_open
 
 from . import skins as skins_mod
-from .behaviour import DEFAULT_SIZE, DEFAULT_SPECIES, SIZES, SPECIES, clean_name, unlocked_species
+from .behaviour import CARRIED, DEFAULT_SIZE, DEFAULT_SPECIES, SIZES, SPECIES, clean_name, unlocked_species
 
 SLEEP_CHOICES = (0, 5, 15, 30, 60)      # minutes; 0 = never
 DEFAULTS = {"species": DEFAULT_SPECIES, "name": "", "size": DEFAULT_SIZE, "shown": False, "walk": True,
-            "sleep_minutes": 15, "ask": True, "pos": None, "skins": {}, "colours": {}}
+            "physics": True, "sleep_minutes": 15, "ask": True, "pos": None, "skins": {}, "colours": {}}
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 # Buddy's donation page, on its website: the Pets page's "Donate to support"
 # button opens it. With none set, there's no button.
@@ -59,7 +63,7 @@ def clean_settings(raw) -> dict:
     out["species"] = raw.get("species") if raw.get("species") in SPECIES else DEFAULT_SPECIES
     out["name"] = clean_name(raw.get("name"))
     out["size"] = raw.get("size") if raw.get("size") in SIZES else DEFAULT_SIZE
-    for key in ("shown", "walk", "ask"):
+    for key in ("shown", "walk", "physics", "ask"):
         out[key] = bool(raw[key]) if isinstance(raw.get(key), bool) else DEFAULTS[key]
     minutes = raw.get("sleep_minutes")
     out["sleep_minutes"] = minutes if minutes in SLEEP_CHOICES and not isinstance(minutes, bool) else 15
@@ -143,7 +147,7 @@ class Pets(QObject):
 
     def set_value(self, key, value) -> bool:
         """One setting, checked: True if it changed."""
-        if key not in ("species", "name", "size", "walk", "sleep_minutes", "ask", "skin", "colour"):
+        if key not in ("species", "name", "size", "walk", "physics", "sleep_minutes", "ask", "skin", "colour"):
             return False
         if key == "skin":
             return self._set_skin(value)
@@ -301,19 +305,27 @@ class Pets(QObject):
         species = v["species"]
         worn = self.skin_of(species)
         skins = [{"id": sid, "name": name, "chosen": sid == worn} for sid, name in skins_mod.skins_for(species)]
+        # The chosen one is drawn doing what the pet on the desktop is doing -
+        # standing, while it's in the hand or the air: the page wouldn't see it land.
+        doing = self.window.behaviour.state if self.window is not None else "idle"
+        doing = "idle" if doing in CARRIED else doing
         fields = [
             sf.hint("A small companion that lives on your desktop, outside Buddy's window. It walks along the "
                     "bottom of the screen, dozes off when nothing happens, types along while a tool works, and "
                     "cheers when you unlock an achievement. Hover it for Ask Buddy and Open Buddy; click it to "
-                    "pat it and ask Buddy something; right-click it for more; drag it anywhere."),
+                    "pat it and ask Buddy something; right-click it for more; drag it to pick it up, and let go "
+                    "to throw it."),
             sf.check("shown", "Show the pet on the desktop", v["shown"],
                      hint_text=("It stays when Buddy is in the menu bar." if sys.platform == "darwin" else
                                 "It stays when Buddy is in the tray.")),
             sf.heading("Your pet"),
-            sf.pets("species", gallery, state=self.window.behaviour.state if self.window is not None else "idle"),
+            sf.pets("species", gallery, state=doing),
             sf.text("name", "Name", v["name"], placeholder="Give it a name"),
             sf.select("size", "Size", v["size"], [("small", "Small"), ("medium", "Medium"), ("large", "Large")]),
             sf.check("walk", "It walks about", v["walk"]),
+            sf.check("physics", "Physics: it can be picked up and thrown", v["physics"],
+                     hint_text="With it off, a drag puts it anywhere, even high up the screen, and it stays at "
+                               "that height."),
             sf.select("sleep_minutes", "Falls asleep after", v["sleep_minutes"],
                       [(0, "Never"), (5, "5 minutes"), (15, "15 minutes"), (30, "30 minutes"), (60, "1 hour")],
                       tooltip="With nothing happening in Buddy for this long, the pet dozes off. A click, or "

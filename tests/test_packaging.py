@@ -18,7 +18,8 @@ ROOT = _paths.APP.parent
 # Import name -> the pip package that provides it.
 PROVIDED_BY = {"PySide6": "pyside6", "PIL": "pillow", "fitz": "pymupdf", "pymupdf": "pymupdf",
                "pymupdf4llm": "pymupdf4llm", "numpy": "numpy", "openpyxl": "openpyxl",
-               "pynput": "pynput", "cryptography": "cryptography", "AppKit": "pyobjc-framework-cocoa"}
+               "pynput": "pynput", "cryptography": "cryptography", "AppKit": "pyobjc-framework-cocoa",
+               "objc": "pyobjc-framework-cocoa"}    # PyObjC's own module, which the Cocoa package brings
 # Not pip packages: Resolve's own scripting module, and modules that run
 # inside the transcription engine's private environment, which Buddy's own
 # Setup window installs (pages/transcribe/env_setup.py).

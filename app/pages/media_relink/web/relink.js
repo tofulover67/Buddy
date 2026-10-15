@@ -7,10 +7,13 @@
 const $ = id => document.getElementById(id);
 const {el, send} = Buddy;
 
+// Each mode's title, then its text a sentence (or two) at a time - each
+// translated on its own.
 const INTRO = {
     fix: ["Fix offline media",
           "Scan for clips whose files have gone missing, then search a folder to find them. " +
-          "Clips that already work are never touched, even if a file with the same name turns up."],
+          "Clips that already work are never touched, even if a file with the same name turns up.",
+          "If you don't know which folder they're in, search the whole drive."],
     relocate: ["Move to a new location",
                "Point clips at a copy of their media somewhere else – a new drive, or off a server onto a local SSD - " +
                "even clips that work now. Scan, search the new location, tick the clips to move, then relink."],
@@ -194,9 +197,9 @@ function draw() {
         b.setAttribute("aria-pressed", String(b.dataset.scope === state.scope));
         b.disabled = state.busy;
     }
-    const [title, text] = INTRO[mode];
+    const [title, ...text] = INTRO[mode];
     $("intro-title").textContent = title;
-    $("intro-text").textContent = text;
+    $("intro-text").replaceChildren(...sentences(text));
     $("only-offline-box").hidden = mode !== "fix";
     $("relink-all").hidden = mode !== "fix";
 

@@ -20,6 +20,26 @@
   "العربية": "المخطط الزمني",
   "Tiếng Việt": "Dòng thời gian"
  },
+ "Sound Design": {
+  "日本語": "サウンドデザイン",
+  "Español": "Diseño de sonido",
+  "Deutsch": "Sounddesign",
+  "Français": "Conception sonore",
+  "한국어": "사운드 디자인",
+  "中文": "声音设计",
+  "العربية": "تصميم الصوت",
+  "Tiếng Việt": "Thiết kế âm thanh"
+ },
+ "Coming soon.": {
+  "日本語": "近日公開予定です。",
+  "Español": "Próximamente.",
+  "Deutsch": "Demnächst verfügbar.",
+  "Français": "Bientôt disponible.",
+  "한국어": "곧 제공될 예정입니다.",
+  "中文": "即将推出。",
+  "العربية": "قريبًا.",
+  "Tiếng Việt": "Sắp ra mắt."
+ },
  "Open a timeline in Resolve": {
   "日本語": "Resolve でタイムラインを開いてください",
   "Español": "Abre una línea de tiempo en Resolve",

@@ -170,15 +170,25 @@
   "العربية": "اسأل Buddy…",
   "Tiếng Việt": "Hỏi Buddy…"
  },
- "Click to pat, right-click for more, drag to move": {
-  "日本語": "クリックでなでる、右クリックでメニュー、ドラッグで移動",
-  "Español": "Clic para acariciar, clic derecho para más, arrastra para mover",
-  "Deutsch": "Klicken zum Streicheln, Rechtsklick für mehr, Ziehen zum Verschieben",
-  "Français": "Cliquer pour caresser, clic droit pour plus, glisser pour déplacer",
-  "한국어": "클릭하여 쓰다듬기, 오른쪽 클릭으로 더 보기, 드래그하여 이동",
-  "中文": "点击抚摸，右键更多，拖动移动",
-  "العربية": "انقر للمداعبة، وانقر بزر الفأرة الأيمن للمزيد، واسحب للنقل",
-  "Tiếng Việt": "Nhấp để vuốt ve, nhấp phải để xem thêm, kéo để di chuyển"
+ "Click to pat, right-click for more, drag to pick up and let go to throw": {
+  "日本語": "クリックでなでる、右クリックでメニュー、ドラッグで持ち上げて離すと投げる",
+  "Español": "Clic para acariciar, clic derecho para más, arrastra para levantarlo y suelta para lanzarlo",
+  "Deutsch": "Klicken zum Streicheln, Rechtsklick für mehr, Ziehen zum Hochheben, Loslassen zum Werfen",
+  "Français": "Cliquer pour caresser, clic droit pour plus, glisser pour soulever, relâcher pour lancer",
+  "한국어": "클릭하여 쓰다듬기, 오른쪽 클릭으로 더 보기, 드래그하여 들어 올리고 놓아서 던지기",
+  "中文": "点击抚摸，右键更多，拖动拎起，松开扔出",
+  "العربية": "انقر للمداعبة، وانقر بزر الفأرة الأيمن للمزيد، واسحب للرفع وأفلت للرمي",
+  "Tiếng Việt": "Nhấp để vuốt ve, nhấp phải để xem thêm, kéo để nhấc lên và thả ra để ném"
+ },
+ "{name} – click to pat, right-click for more, drag to pick up and let go to throw": {
+  "日本語": "{name} – クリックでなでる、右クリックでメニュー、ドラッグで持ち上げて離すと投げる",
+  "Español": "{name} – clic para acariciar, clic derecho para más, arrastra para levantarlo y suelta para lanzarlo",
+  "Deutsch": "{name} – Klicken zum Streicheln, Rechtsklick für mehr, Ziehen zum Hochheben, Loslassen zum Werfen",
+  "Français": "{name} – cliquer pour caresser, clic droit pour plus, glisser pour soulever, relâcher pour lancer",
+  "한국어": "{name} – 클릭하여 쓰다듬기, 오른쪽 클릭으로 더 보기, 드래그하여 들어 올리고 놓아서 던지기",
+  "中文": "{name} – 点击抚摸，右键更多，拖动拎起，松开扔出",
+  "العربية": "{name} – انقر للمداعبة، وانقر بزر الفأرة الأيمن للمزيد، واسحب للرفع وأفلت للرمي",
+  "Tiếng Việt": "{name} – nhấp để vuốt ve, nhấp phải để xem thêm, kéo để nhấc lên và thả ra để ném"
  },
  "Hide pet": {
   "日本語": "ペットを隠す",
@@ -630,15 +640,15 @@
   "العربية": "سلطعون أزرق",
   "Tiếng Việt": "Cua xanh"
  },
- "A small companion that lives on your desktop, outside Buddy's window. It walks along the bottom of the screen, dozes off when nothing happens, types along while a tool works, and cheers when you unlock an achievement. Hover it for Ask Buddy and Open Buddy; click it to pat it and ask Buddy something; right-click it for more; drag it anywhere.": {
-  "日本語": "Buddyのウィンドウの外、デスクトップに住む小さな相棒です。画面の下を歩き回り、何も起きないと居眠りし、ツールが動いている間はタイピングし、実績を解除すると喜びます。マウスを重ねると Ask Buddy と Buddy を開くボタンが出ます。クリックするとなでて Buddy に質問でき、右クリックでその他のメニュー、ドラッグでどこへでも移動できます。",
-  "Español": "Un pequeño compañero que vive en tu escritorio, fuera de la ventana de Buddy. Camina por la parte baja de la pantalla, se duerme cuando no pasa nada, teclea mientras una herramienta trabaja y celebra cuando desbloqueas un logro. Pasa el ratón por encima para Ask Buddy y Abrir Buddy; haz clic para acariciarlo y preguntarle algo a Buddy; clic derecho para más; arrástralo a donde quieras.",
-  "Deutsch": "Ein kleiner Begleiter, der auf dem Desktop lebt, außerhalb von Buddys Fenster. Er läuft am unteren Bildschirmrand entlang, döst ein, wenn nichts passiert, tippt mit, während ein Werkzeug arbeitet, und jubelt, wenn du einen Erfolg freischaltest. Zeige mit der Maus darauf für Ask Buddy und Buddy öffnen; klicke, um ihn zu streicheln und Buddy etwas zu fragen; Rechtsklick für mehr; ziehe ihn, wohin du willst.",
-  "Français": "Un petit compagnon qui vit sur votre bureau, hors de la fenêtre de Buddy. Il se promène en bas de l'écran, s'assoupit quand rien ne se passe, tape au clavier pendant qu'un outil travaille et fait la fête quand vous débloquez un succès. Survolez-le pour Ask Buddy et Ouvrir Buddy ; cliquez pour le caresser et poser une question à Buddy ; clic droit pour plus ; glissez-le où vous voulez.",
-  "한국어": "Buddy 창 밖, 바탕화면에 사는 작은 친구입니다. 화면 아래를 걸어 다니고, 아무 일도 없으면 졸고, 도구가 작동하는 동안 타이핑하고, 업적을 해제하면 환호합니다. 마우스를 올리면 Ask Buddy와 Buddy 열기가 나타나고, 클릭하면 쓰다듬으며 Buddy에게 질문할 수 있고, 오른쪽 클릭으로 더 많은 메뉴를, 드래그로 어디든 옮길 수 있습니다.",
-  "中文": "一个住在桌面上、Buddy 窗口之外的小伙伴。它沿着屏幕底部走动，没事时打盹，工具运行时跟着打字，解锁成就时欢呼。悬停可使用 Ask Buddy 和打开 Buddy；点击可轻拍并向 Buddy 提问；右键查看更多；可拖到任意位置。",
-  "العربية": "رفيق صغير يعيش على سطح المكتب، خارج نافذة Buddy. يمشي على طول أسفل الشاشة، ويغفو عندما لا يحدث شيء، ويكتب أثناء عمل أداة، ويهتف عند فتح إنجاز. مرّر المؤشر فوقه لـ Ask Buddy وفتح Buddy؛ انقر لتربّت عليه وتسأل Buddy شيئًا؛ انقر بزر الفأرة الأيمن للمزيد؛ اسحبه إلى أي مكان.",
-  "Tiếng Việt": "Một người bạn nhỏ sống trên màn hình, bên ngoài cửa sổ Buddy. Nó đi dọc cạnh dưới màn hình, ngủ gật khi không có gì xảy ra, gõ phím khi một công cụ đang chạy, và reo hò khi bạn mở khóa thành tích. Rê chuột lên để dùng Ask Buddy và Mở Buddy; nhấp để vỗ về và hỏi Buddy; nhấp chuột phải để xem thêm; kéo nó đến bất cứ đâu."
+ "A small companion that lives on your desktop, outside Buddy's window. It walks along the bottom of the screen, dozes off when nothing happens, types along while a tool works, and cheers when you unlock an achievement. Hover it for Ask Buddy and Open Buddy; click it to pat it and ask Buddy something; right-click it for more; drag it to pick it up, and let go to throw it.": {
+  "日本語": "Buddyのウィンドウの外、デスクトップに住む小さな相棒です。画面の下を歩き回り、何も起きないと居眠りし、ツールが動いている間はタイピングし、実績を解除すると喜びます。マウスを重ねると Ask Buddy と Buddy を開くボタンが出ます。クリックするとなでて Buddy に質問でき、右クリックでその他のメニュー、ドラッグすると持ち上げられ、離すと投げられます。",
+  "Español": "Un pequeño compañero que vive en tu escritorio, fuera de la ventana de Buddy. Camina por la parte baja de la pantalla, se duerme cuando no pasa nada, teclea mientras una herramienta trabaja y celebra cuando desbloqueas un logro. Pasa el ratón por encima para Ask Buddy y Abrir Buddy; haz clic para acariciarlo y preguntarle algo a Buddy; clic derecho para más; arrástralo para levantarlo y suéltalo para lanzarlo.",
+  "Deutsch": "Ein kleiner Begleiter, der auf dem Desktop lebt, außerhalb von Buddys Fenster. Er läuft am unteren Bildschirmrand entlang, döst ein, wenn nichts passiert, tippt mit, während ein Werkzeug arbeitet, und jubelt, wenn du einen Erfolg freischaltest. Zeige mit der Maus darauf für Ask Buddy und Buddy öffnen; klicke, um ihn zu streicheln und Buddy etwas zu fragen; Rechtsklick für mehr; ziehe ihn, um ihn hochzuheben, und lass ihn los, um ihn zu werfen.",
+  "Français": "Un petit compagnon qui vit sur votre bureau, hors de la fenêtre de Buddy. Il se promène en bas de l'écran, s'assoupit quand rien ne se passe, tape au clavier pendant qu'un outil travaille et fait la fête quand vous débloquez un succès. Survolez-le pour Ask Buddy et Ouvrir Buddy ; cliquez pour le caresser et poser une question à Buddy ; clic droit pour plus ; faites-le glisser pour le soulever, et relâchez-le pour le lancer.",
+  "한국어": "Buddy 창 밖, 바탕화면에 사는 작은 친구입니다. 화면 아래를 걸어 다니고, 아무 일도 없으면 졸고, 도구가 작동하는 동안 타이핑하고, 업적을 해제하면 환호합니다. 마우스를 올리면 Ask Buddy와 Buddy 열기가 나타나고, 클릭하면 쓰다듬으며 Buddy에게 질문할 수 있고, 오른쪽 클릭으로 더 많은 메뉴를, 드래그하면 들어 올리고 놓으면 던질 수 있습니다.",
+  "中文": "一个住在桌面上、Buddy 窗口之外的小伙伴。它沿着屏幕底部走动，没事时打盹，工具运行时跟着打字，解锁成就时欢呼。悬停可使用 Ask Buddy 和打开 Buddy；点击可轻拍并向 Buddy 提问；右键查看更多；拖动可把它拎起来，松开就能扔出去。",
+  "العربية": "رفيق صغير يعيش على سطح المكتب، خارج نافذة Buddy. يمشي على طول أسفل الشاشة، ويغفو عندما لا يحدث شيء، ويكتب أثناء عمل أداة، ويهتف عند فتح إنجاز. مرّر المؤشر فوقه لـ Ask Buddy وفتح Buddy؛ انقر لتربّت عليه وتسأل Buddy شيئًا؛ انقر بزر الفأرة الأيمن للمزيد؛ اسحبه لترفعه، وأفلته لترميه.",
+  "Tiếng Việt": "Một người bạn nhỏ sống trên màn hình, bên ngoài cửa sổ Buddy. Nó đi dọc cạnh dưới màn hình, ngủ gật khi không có gì xảy ra, gõ phím khi một công cụ đang chạy, và reo hò khi bạn mở khóa thành tích. Rê chuột lên để dùng Ask Buddy và Mở Buddy; nhấp để vỗ về và hỏi Buddy; nhấp chuột phải để xem thêm; kéo để nhấc nó lên, và thả ra để ném nó đi."
  },
  "Picking a colour puts it on the chosen pet: its main colour becomes it, with the darker parts a darker shade of it.": {
   "日本語": "色を選ぶと、選択中のペットにその色がつきます。メインの色がその色になり、暗い部分はそれより暗い色合いになります。",
@@ -649,5 +659,45 @@
   "中文": "选择一种颜色后会应用到所选宠物：主色变为该颜色，较暗的部分则变为它更深的色调。",
   "العربية": "اختيار لون يضعه على الحيوان الأليف المختار: يصبح لونه الرئيسي هذا اللون، والأجزاء الداكنة درجة أغمق منه.",
   "Tiếng Việt": "Chọn một màu sẽ áp lên thú cưng đã chọn: màu chính trở thành màu đó, còn các phần tối thành sắc đậm hơn của nó."
+ },
+ "Click to pat, right-click for more, drag to move": {
+  "日本語": "クリックでなでる、右クリックでメニュー、ドラッグで移動",
+  "Español": "Clic para acariciar, clic derecho para más, arrastra para mover",
+  "Deutsch": "Klicken zum Streicheln, Rechtsklick für mehr, Ziehen zum Verschieben",
+  "Français": "Cliquer pour caresser, clic droit pour plus, glisser pour déplacer",
+  "한국어": "클릭하여 쓰다듬기, 오른쪽 클릭으로 더 보기, 드래그하여 이동",
+  "中文": "点击抚摸，右键更多，拖动移动",
+  "العربية": "انقر للمداعبة، وانقر بزر الفأرة الأيمن للمزيد، واسحب للنقل",
+  "Tiếng Việt": "Nhấp để vuốt ve, nhấp phải để xem thêm, kéo để di chuyển"
+ },
+ "{name} – click to pat, right-click for more, drag to move": {
+  "日本語": "{name} – クリックでなでる、右クリックでメニュー、ドラッグで移動",
+  "Español": "{name} – clic para acariciar, clic derecho para más, arrastra para mover",
+  "Deutsch": "{name} – Klicken zum Streicheln, Rechtsklick für mehr, Ziehen zum Verschieben",
+  "Français": "{name} – cliquer pour caresser, clic droit pour plus, glisser pour déplacer",
+  "한국어": "{name} – 클릭하여 쓰다듬기, 오른쪽 클릭으로 더 보기, 드래그하여 이동",
+  "中文": "{name} – 点击抚摸，右键更多，拖动移动",
+  "العربية": "{name} – انقر للمداعبة، وانقر بزر الفأرة الأيمن للمزيد، واسحب للنقل",
+  "Tiếng Việt": "{name} – nhấp để vuốt ve, nhấp phải để xem thêm, kéo để di chuyển"
+ },
+ "Physics: it can be picked up and thrown": {
+  "日本語": "物理演算：持ち上げたり投げたりできる",
+  "Español": "Física: se puede levantar y lanzar",
+  "Deutsch": "Physik: Er lässt sich hochheben und werfen",
+  "Français": "Physique : on peut le soulever et le lancer",
+  "한국어": "물리 효과: 들어 올리고 던질 수 있음",
+  "中文": "物理效果：可以拎起来扔出去",
+  "العربية": "الفيزياء: يمكن رفعه ورميه",
+  "Tiếng Việt": "Vật lý: có thể nhấc lên và ném đi"
+ },
+ "With it off, a drag puts it anywhere, even high up the screen, and it stays at that height.": {
+  "日本語": "オフにすると、ドラッグで画面の上の方を含めどこにでも置け、その高さにとどまります。",
+  "Español": "Desactivado, al arrastrarlo se queda donde lo dejes, incluso arriba en la pantalla, y se mantiene a esa altura.",
+  "Deutsch": "Ausgeschaltet setzt ein Ziehen ihn irgendwohin, auch weit oben auf dem Bildschirm, und er bleibt auf dieser Höhe.",
+  "Français": "Désactivé, un glisser le pose n'importe où, même en haut de l'écran, et il reste à cette hauteur.",
+  "한국어": "끄면 드래그로 화면 위쪽을 포함해 어디에나 둘 수 있고, 그 높이에 그대로 머뭅니다.",
+  "中文": "关闭后，拖动可以把它放在任何地方，甚至屏幕高处，它会停留在那个高度。",
+  "العربية": "عند إيقافه، يضعه السحب في أي مكان، حتى أعلى الشاشة، ويبقى على ذلك الارتفاع.",
+  "Tiếng Việt": "Khi tắt, kéo sẽ đặt nó ở bất cứ đâu, kể cả trên cao của màn hình, và nó ở nguyên độ cao đó."
  }
 }

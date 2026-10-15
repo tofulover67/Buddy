@@ -5,12 +5,17 @@
 
    Every sprite has the same named parts, which sprites.css animates by
    the holder's data-state ("idle", "walk", "sit", "sleep", "work",
-   "happy", "cheer") and flips by data-facing ("1" right, "-1" left):
-   .rig (everything that bobs), .head, .eye, .leg (.l1 .l2), .arm, and
-   the effects shown only in a state: .fx-zzz, .fx-hearts, .fx-confetti,
-   .fx-laptop.
+   "happy", "cheer", and "held", "fly", "dizzy" when it's picked up,
+   thrown and landed) and flips by data-facing ("1" right, "-1" left):
+   .rig (everything that bobs), .head, .eye, .leg (.l1 .l2), .arm, the
+   faces drawn for a moment (.lid, .squint, .gasp), and the effects shown
+   only in a state: .fx-zzz, .fx-hearts, .fx-confetti, .fx-laptop,
+   .fx-dizzy.
 
-       Sprites.render(holder, "blob")   draws (or redraws) the species
+       Sprites.render(holder, "blob")   draws (or redraws) the species, and
+                                        notes on the holder where its head
+                                        is (data-head-x, data-head-top, in
+                                        the box's units)
        Sprites.SPECIES                  the ids, in order */
 "use strict";
 
@@ -39,15 +44,19 @@ const Sprites = (() => {
     /* The parts every species gets. */
     const shadow = () => ellipse(65, 97, 34, 4, "rgba(0,0,0,.22)", "shadow");
     const heart = (x, y, s) => path(`M${x} ${y + s * .3} c ${-s} ${-s * .9}, ${-s * 1.6} ${s * .5}, 0 ${s * 1.2} c ${s * 1.6} ${-s * .7}, ${s} ${-s * 2.1}, 0 ${-s * 1.2} z`, PINK);
+    const star = (x, y, r, fill) => path("M" + [...Array(10)].map((_, i) => {
+        const a = (i * 36 - 90) * Math.PI / 180, d = i % 2 ? r * .45 : r;
+        return `${(x + d * Math.cos(a)).toFixed(1)} ${(y + d * Math.sin(a)).toFixed(1)}`;
+    }).join(" L") + " Z", fill, "", {stroke: "rgba(0,0,0,.3)", "stroke-width": .6, "stroke-linejoin": "round"});
     function fx(headX, headTop) {
-        headTop = Math.max(headTop, 26);      // the z's and hearts stay inside the box, whatever the head's height
+        const top = Math.max(headTop, 26);      // the z's and hearts stay inside the box, whatever the head's height
         const zzz = g("fx fx-zzz", [
-            node("text", {x: headX + 10, y: headTop - 2, class: "z z1", text: "z"}),
-            node("text", {x: headX + 18, y: headTop - 12, class: "z z2", text: "z"}),
-            node("text", {x: headX + 27, y: headTop - 23, class: "z z3", text: "z"}),
+            node("text", {x: headX + 10, y: top - 2, class: "z z1", text: "z"}),
+            node("text", {x: headX + 18, y: top - 12, class: "z z2", text: "z"}),
+            node("text", {x: headX + 27, y: top - 23, class: "z z3", text: "z"}),
         ]);
-        const hearts = g("fx fx-hearts", [heart(headX - 8, headTop - 6, 5), heart(headX + 14, headTop - 12, 4),
-                                           heart(headX + 2, headTop - 20, 3.5)].map((h, i) => (h.classList.add(`h${i + 1}`), h)));
+        const hearts = g("fx fx-hearts", [heart(headX - 8, top - 6, 5), heart(headX + 14, top - 12, 4),
+                                           heart(headX + 2, top - 20, 3.5)].map((h, i) => (h.classList.add(`h${i + 1}`), h)));
         const colours = ["#f6c343", "#59c3ff", "#f0567a", "#8be38a", "#c79bff", "#ffa94d", "#59c3ff", "#f6c343"];
         const confetti = g("fx fx-confetti", colours.map((c, i) =>
             rect(14 + i * 14, 18 + (i % 3) * 7, 5, 8, c, 1, `c c${i + 1}`)));
@@ -55,7 +64,12 @@ const Sprites = (() => {
             rect(96, 74, 30, 20, "#4a4f5c", 3), rect(99, 77, 24, 13, "#9fd8ff", 1, "screen"),
             rect(92, 92, 38, 4, "#6a7080", 2),
         ]);
-        return [zzz, hearts, confetti, laptop];
+        // Dizzy: three stars on one spot over the head, which sprites.css
+        // sends round it, a third of a turn apart - where the z's start, or
+        // nearer the top of a tall head (the robot's, not to cover its face).
+        const ring = Math.min(top, headTop + 10) - 2;
+        const dizzy = g("fx fx-dizzy", [1, 2, 3].map(i => g(`orbit o${i}`, [star(headX, ring, 4.2, "#f6c343")])));
+        return [zzz, hearts, confetti, laptop, dizzy];
     }
 
     /* The robot's screen while it works: its face gives way to lines of
@@ -76,6 +90,10 @@ const Sprites = (() => {
         ], {"clip-path": `url(#${id})`});
     }
 
+    /* Each draws its species into the rig and says where its head is - the
+       middle and the top, for the effects and hats over it - and, with legs,
+       how far it comes down onto them to sit (about half of what shows
+       under its body, so its feet still show). */
     const DRAW = {
         /* A tall blue dome with two stacked eyes, a wide grin and a pair of
            line arms - a cheerful, simple shape with no legs: it hops along. */
@@ -120,7 +138,7 @@ const Sprites = (() => {
                     codeFace(glow),
                 ]),
             );
-            return [65, 4];
+            return [65, 4, 6];
         },
         /* A toadstool: a red, white-spotted cap over a cream stem with the
            face on it, line arms and two little feet. */
@@ -142,7 +160,7 @@ const Sprites = (() => {
                     path("M60 82 c 3 2, 7 2, 10 0 c -3 -1, -7 -1, -10 0 z", "#f08a7a", "tongue"),
                 ]),
             );
-            return [65, 18];
+            return [65, 18, 3];
         },
         /* A cloud: puffs of pale blue with the face, line arms, no feet - it drifts. */
         poof(rig) {
@@ -275,7 +293,7 @@ const Sprites = (() => {
                     path("M61 80 c 3 2, 6 2, 9 0 c -3 -1, -6 -1, -9 0 z", "#f08a7a", "tongue"),
                 ]),
             );
-            return [65, 16];
+            return [65, 16, 3];
         },
         /* A rock with a sprout on top and a plaster on its side, line arms,
            a shy smile. No feet - it shuffles. */
@@ -324,7 +342,7 @@ const Sprites = (() => {
                     path("M60 69 c 3 2, 7 2, 10 0 c -3 -1, -7 -1, -10 0 z", "#f08a7a", "tongue"),
                 ]),
             );
-            return [65, 28];
+            return [65, 28, 2];
         },
     };
 
@@ -357,16 +375,18 @@ const Sprites = (() => {
         }
     }
 
+    /* Where an eye is, [x, y, radius]: a circle says so; an eye drawn as an
+       arc ("M52 33 q 4 -6 8 0", the robot's) is read from its numbers. */
+    function eyeAt(e) {
+        if (e.tagName === "circle") return [+e.getAttribute("cx"), +e.getAttribute("cy"), +e.getAttribute("r")];
+        const n = (e.getAttribute("d") || "").match(/-?[\d.]+/g);
+        if (!n || n.length < 6) return null;
+        const [x, y, , dy, ex] = n.map(Number);
+        return [x + ex / 2, y + dy / 2, ex / 2 + 1];
+    }
+
     function accessory(svg, rig, kind, headX, headTop) {
-        // Where the eyes are: circles say so; an eye drawn as an arc
-        // ("M52 33 q 4 -6 8 0", the robot's) is read from its numbers.
-        const eyes = [...rig.querySelectorAll(".eye")].map(e => {
-            if (e.tagName === "circle") return [+e.getAttribute("cx"), +e.getAttribute("cy"), +e.getAttribute("r")];
-            const n = (e.getAttribute("d") || "").match(/-?[\d.]+/g);
-            if (!n || n.length < 6) return null;
-            const [x, y, , dy, ex] = n.map(Number);
-            return [x + ex / 2, y + dy / 2, ex / 2 + 1];
-        }).filter(Boolean);
+        const eyes = [...rig.querySelectorAll(".eye")].map(eyeAt).filter(Boolean);
         const mouth = rig.querySelector(".mouth");
         const m = mouth ? /M\s*([\d.]+)[ ,]+([\d.]+)/.exec(mouth.getAttribute("d") || "") : null;
         const wear = g(`skin skin-${kind}`, []);
@@ -388,8 +408,8 @@ const Sprites = (() => {
                       `Q${mid} ${bR} ${mid} ${bR - 4} Q${mid} ${bL} ${mid - 3} ${bL} H${x0 + c} Q${x0} ${bL} ${x0} ${bL - c} Z`;
             const onDark = !!rig.querySelector(".face");       // the robot's screen: a pale edge so they show
             wear.setAttribute("transform", `rotate(${tilt.toFixed(1)} ${xm} ${ym})`);
-            // Nothing of the eyes shows past them - whites, pupils, lids.
-            rig.querySelectorAll(".eyeball, .eye, .lid").forEach(e => e.setAttribute("style", "display:none"));
+            // Nothing of the eyes shows past them - whites, pupils, lids, squints.
+            rig.querySelectorAll(".eyeball, .eye, .lid, .squint").forEach(e => e.setAttribute("style", "display:none"));
             wear.append(path(d, "#111", "", onDark ? {stroke: "#aab3c2", "stroke-width": 1.2} : {}),
                         path(`M${x0} ${top + 3.5} l -16 -2`, "none", "", {stroke: "#111", "stroke-width": 3, "stroke-linecap": "round"}));
         } else if (kind === "tophat") {
@@ -430,6 +450,52 @@ const Sprites = (() => {
         rig.classList.add("has-lids");
     }
 
+    /* Eyes squeezed shut, "> <", for when it's dizzy: drawn where each eye
+       white is (or each eye, the robot's arcs) in its outline colour, and
+       shown only then, when sprites.css hides the eyes. */
+    function squint(rig) {
+        const whites = [...rig.querySelectorAll(".eyeball")];
+        const eyes = (whites.length ? whites : [...rig.querySelectorAll(".eye")])
+            .map(e => [e, eyeAt(e)]).filter(([, at]) => at).sort((a, b) => a[1][0] - b[1][0]);
+        eyes.forEach(([e, [x, y, r]], i) => {
+            const w = r * .5 * (i ? -1 : 1), h = r * .5;      // the left one points right, the right one left
+            const width = Math.min(3.2, Math.max(2.2, r * .26, +e.getAttribute("stroke-width") || 0));
+            e.parentNode.insertBefore(path(`M${x - w} ${y - h} L${x + w} ${y} L${x - w} ${y + h}`, "none", "squint",
+                                           {stroke: e.getAttribute("stroke") || INK, "stroke-width": width,
+                                            "stroke-linecap": "round", "stroke-linejoin": "round"}), e);
+        });
+        if (eyes.length) rig.classList.add("has-squint");
+    }
+
+    /* Where each arm joins the body - the start of its line ("M95 60 ...") -
+       noted on it as --shoulder: picked up or thrown, sprites.css swings the
+       arms from there, so they go up and out rather than in behind the body. */
+    function shoulders(rig) {
+        for (const arm of rig.querySelectorAll(".arm")) {
+            const m = /M\s*(-?[\d.]+)[ ,]+(-?[\d.]+)/.exec(arm.getAttribute("d") || "");
+            if (m) arm.style.setProperty("--shoulder", `${m[1]}px ${m[2]}px`);
+        }
+    }
+
+    /* A surprised "o" where the mouth is, for when it's picked up or thrown:
+       filled like the mouth, or a ring in its line where the mouth is a
+       line (the robot's, the rock's). Shown only then (sprites.css). */
+    function gasp(rig) {
+        const mouth = rig.querySelector(".mouth");
+        const d = mouth ? mouth.getAttribute("d") || "" : "";
+        const n = (d.match(/-?[\d.]+/g) || []).map(Number);
+        const curve = (/^\s*M[^a-zA-Z]*([a-zA-Z])/.exec(d) || [])[1];
+        if (!/^[cq]$/.test(curve || "") || n.length < (curve === "c" ? 8 : 6)) return;
+        // From its start, across to its end ("c" ends with its 3rd point,
+        // "q" its 2nd), and down about half as far as it dips.
+        const [x, y, , dip] = n, across = curve === "c" ? n[6] : n[4];
+        const rx = Math.min(5.5, Math.max(2.6, across * .17));
+        const fill = mouth.getAttribute("fill");
+        const look = fill && fill !== "none" ? {fill}
+            : {fill: "none", stroke: mouth.getAttribute("stroke") || INK, "stroke-width": mouth.getAttribute("stroke-width") || 2.4};
+        mouth.after(node("ellipse", {cx: x + across / 2, cy: y + dip * (curve === "c" ? .38 : .25), rx, ry: rx * 1.3, class: "gasp", ...look}));
+    }
+
     function shade(hex, by) {
         const n = parseInt(hex.slice(1), 16);
         const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => Math.max(0, Math.min(255, Math.round(v * by))));
@@ -462,8 +528,19 @@ const Sprites = (() => {
         holder.dataset.stamp = stamp;
         const svg = node("svg", {viewBox: "0 0 130 100", xmlns: NS, "aria-hidden": "true"});
         const rig = g("rig", []);
-        const [headX, headTop] = DRAW[species](rig);
+        const [headX, headTop, tuck = 0] = DRAW[species](rig);
         lids(rig);
+        squint(rig);
+        gasp(rig);
+        shoulders(rig);
+        // sprites.css sits it down onto its legs by --tuck and, picked up,
+        // swings it from the top of its head; the pet's window reads where
+        // that is off the holder, to hold it there.
+        svg.style.setProperty("--tuck", `${tuck}px`);
+        svg.style.setProperty("--head-x", `${headX}px`);
+        svg.style.setProperty("--head-top", `${headTop}px`);
+        holder.dataset.headX = headX;
+        holder.dataset.headTop = headTop;
         svg.append(shadow(), rig, ...fx(headX, headTop));
         const colours = skin === "custom" ? customColours(species, colour) : (RECOLOUR[species] || {})[skin];
         if (colours) recolour(svg, colours);
