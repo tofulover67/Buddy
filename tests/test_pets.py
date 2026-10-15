@@ -872,8 +872,22 @@ class PetsTests(unittest.TestCase):
         self.assertEqual(window._anchor, (400, floor))
         self.assertEqual(self.host.tools["pets"]["pos"], {"x": 400, "y": floor})
 
+    def test_it_walks_on_from_where_it_was_left(self):
+        # Left near the screen's left edge (on the floor), not in its middle -
+        # whatever size the test's screen is.
+        left = QApplication.primaryScreen().availableGeometry().left()
+        pets, window = self.window_to_watch({"pos": {"x": left + 150, "y": 99_999}})
+        pet_w = pet_window.window_frame("medium", False)[0]
+        self.assertEqual(window._anchor[0], left + 150)
+        self.assertEqual(window.behaviour.x, 150 - pet_w // 2)                # where it walks from: where it is
+        window.behaviour.state, window.behaviour.facing = "walk", 1
+        self.mouse.return_value = QPoint(left + 1000, 5)
+        window._last_tick = self.clock[0] - 0.1
+        window._tick()
+        self.assertTrue(left + 150 <= window._anchor[0] <= left + 160)      # a step on, no jump
+
     def test_with_physics_off_a_drag_just_moves_it_and_it_stays_up(self):
-        pets, window = self.window_to_watch({"physics": False, "pos": {"x": 400, "y": 300}})
+        pets, window = self.window_to_watch({"physics": False, "walk": False, "pos": {"x": 400, "y": 300}})
         self.assertFalse(self.field(pets, "physics")["value"])
         self.mouse.return_value = QPoint(5, 5)
         window._tick()

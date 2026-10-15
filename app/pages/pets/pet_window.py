@@ -180,6 +180,7 @@ class PetWindow(WebWindow):
         self.setWindowTitle(tr("Pet"))
         self._anchor = self._start_anchor()
         self._place()
+        self._walk_from_here()          # not from the middle of the screen on its first walk
         self._tick_timer = QTimer(self, interval=TICK_MS, timeout=self._tick)
         self._tick_timer.start()
         self._work_timer = QTimer(self, interval=WORK_CHECK_MS, timeout=self._check_working)
@@ -271,6 +272,12 @@ class PetWindow(WebWindow):
         finally:
             self._placing = False
 
+    def _walk_from_here(self):
+        """Where it walks from (Behaviour.x, along its screen): where its feet are."""
+        left = self._area()[0]
+        pet_w = window_frame(self.values["size"], False)[0]
+        self.behaviour.set_x(self._anchor[0] - pet_w // 2 - left)
+
     def _room(self) -> bool:
         """Whether something is up in the room above the pet - the bubble or the pill."""
         return self._bubble or self._pill
@@ -350,9 +357,7 @@ class PetWindow(WebWindow):
         # where the window now is (in mid-air, it falls on the next tick).
         w, h = self.width(), self.height()
         self._anchor = (self.x() + w // 2, self.y() + h - room_below(self.values["size"]))
-        left = self._area()[0]
-        pet_w = window_frame(self.values["size"], False)[0]
-        self.behaviour.set_x(self._anchor[0] - pet_w // 2 - left)
+        self._walk_from_here()
         self._save_timer.start()
 
     def _save_pos(self):
@@ -553,9 +558,7 @@ class PetWindow(WebWindow):
         """Where it came to rest: the window placed, the walking room that
         screen's, the page's pose let go, and the place remembered."""
         self._place()
-        left = self._area()[0]
-        pet_w = window_frame(self.values["size"], False)[0]
-        self.behaviour.set_x(self._anchor[0] - pet_w // 2 - left)
+        self._walk_from_here()
         self._sent_pose = None
         self.emit("pose", None)
         self._push_pet()
