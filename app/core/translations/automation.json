@@ -719,5 +719,15 @@
   "中文": "删除",
   "العربية": "حذف",
   "Tiếng Việt": "Xóa"
+ },
+ "It's changed since it stopped – run it from the start.": {
+  "日本語": "停止後に変更されました。最初から実行してください。",
+  "Español": "Ha cambiado desde que se detuvo: ejecútala desde el principio.",
+  "Deutsch": "Sie wurde seit dem Abbruch geändert – starte sie von vorn.",
+  "Français": "Elle a changé depuis son arrêt – relancez-la depuis le début.",
+  "한국어": "멈춘 뒤에 바뀌었습니다. 처음부터 실행하세요.",
+  "中文": "停止后已被修改——请从头运行。",
+  "العربية": "تغيّرت منذ توقفها – شغّلها من البداية.",
+  "Tiếng Việt": "Đã thay đổi kể từ khi dừng – hãy chạy lại từ đầu."
  }
 }

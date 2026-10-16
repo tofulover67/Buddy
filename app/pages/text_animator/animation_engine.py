@@ -1347,10 +1347,10 @@ class FusionAnimationEngine:
     # The per-letter presets run on Fusion's text Follower, the modifier Resolve's own
     # "Rise Fade", "Scale Up" and "Drop In" titles are built on (Templates.drfx). Its
     # registry ID is "StyledTextFollower": AddModifier("StyledText", "Follower") attaches
-    # nothing, which is why an earlier attempt here gave up (the fix measured by
-    # github.com/samuelgursky/davinci-resolve-mcp; checked again on Studio 21.1). Once
-    # attached, the words live on the Follower's "Text" and the Text+ "StyledText" reads
-    # them from it - so taking it off puts them back first (remove_follower). Its own
+    # nothing, which is why an earlier attempt here gave up (checked again on
+    # Studio 21.1). Once attached, the words live on the Follower's "Text" and the
+    # Text+ "StyledText" reads them from it - so taking it off puts them back first
+    # (remove_follower). Its own
     # inputs animate each letter, the next one "Delay" frames after the last: "Opacity1",
     # or "CharacterSizeX" and "CharacterSizeY" together, each connected to a BezierSpline
     # like the whole-clip presets above.

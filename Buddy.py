@@ -138,11 +138,13 @@ def _extracted_app_dir(zip_path):
 
 # Old extractions pile up otherwise - one folder per zip ever launched, ~3 MB
 # each. A running Buddy keeps this file open in its own folder for as long as
-# it runs, and Windows won't rename a folder with a file open inside it: so
-# an old folder is renamed out of the way first, and only deleted if that
-# worked. A copy of Buddy still running from an older version (in the tray
-# while its zip was replaced) keeps its folder - it imports pages and runs
-# Transcribe's worker from there long after starting.
+# it runs. Windows won't rename a folder with a file open inside it: so an
+# old folder is renamed out of the way first, and only deleted if that
+# worked. A Mac renames and deletes open files without a word, so there the
+# file is also locked (flock) while Buddy runs, and a folder whose lock is
+# taken is left. A copy of Buddy still running from an older version (in the
+# tray or menu bar while its zip was replaced) keeps its folder - it imports
+# pages and runs Transcribe's worker from there long after starting.
 _IN_USE_NAME = ".in_use"
 _in_use_handle = None
 _VERSION_DIR = re.compile(r"[0-9a-f]{16}(\.deleting)?")
@@ -153,7 +155,32 @@ def _hold(cache_dir):
     try:
         _in_use_handle = open(os.path.join(cache_dir, _IN_USE_NAME), "a")
     except OSError:
-        pass
+        return
+    if os.name != "nt":
+        import fcntl
+        try:
+            fcntl.flock(_in_use_handle, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except OSError:
+            pass
+
+
+def _locked(folder):
+    """True if a running Buddy holds `folder`'s lock (macOS: see above).
+    Windows' own refusal to rename does this there."""
+    if os.name == "nt":
+        return False
+    import fcntl
+    try:
+        handle = open(os.path.join(folder, _IN_USE_NAME), "a")
+    except OSError:
+        return False     # none (nobody ever ran it) or unreadable: the rename decides
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return True
+    finally:
+        handle.close()   # closing lets the lock go
+    return False
 
 
 def _remove_old_versions(keep_dir):
@@ -168,6 +195,8 @@ def _remove_old_versions(keep_dir):
         path = os.path.join(parent, name)
         if path == keep_dir or not _VERSION_DIR.fullmatch(name) or not os.path.isdir(path):
             continue
+        if _locked(path):
+            continue       # a running Buddy's (on a Mac, where the rename below would work)
         doomed = path if name.endswith(".deleting") else path + ".deleting"
         if doomed != path:
             try:

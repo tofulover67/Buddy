@@ -343,6 +343,16 @@ class AutomationPage(WebToolPage):
         if a is None:
             return
         failed = next((i for i, s in enumerate(r.state) if s["status"] == "failed"), r.current)
+        # The steps before it are taken as done: only while they're the same
+        # steps, in the same order, ahead of the same step. It can be edited
+        # once it stops - a change there means a run from the start.
+        ran = r.automation["steps"]
+        if (a["steps"][:failed] != ran[:failed] or len(a["steps"]) <= failed
+                or a["steps"][failed]["id"] != ran[failed]["id"]):
+            return self.emit("toast", {"text": "It's changed since it stopped – run it from the start."})
+        problems = st.problems(a, self.catalog(), self._answers)
+        if problems:
+            return self.emit("toast", {"text": problems[0]})
         self._start(a, self._answers, failed)
 
     def on_dismiss(self, _payload=None):

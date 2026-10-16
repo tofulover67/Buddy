@@ -198,6 +198,7 @@ class Host:
         self.controller.resolve = Resolve(self.timeline)
         self.connected = True
         self.busy = []
+        self.pumped = []            # the busy overlay's captions, as a long job goes
         self.tools = {}
 
     def ensure_connected(self):
@@ -212,6 +213,9 @@ class Host:
 
     def set_busy(self, on, message=None):
         self.busy.append(on)
+
+    def pump_busy(self, message=None):
+        self.pumped.append(message)
 
 
 def font_file(test, ascent, descent, gap, win_ascent, win_descent, units=1000):
@@ -574,6 +578,19 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.tool(0).GetInput("Size"), 0.1)                           # other tracks untouched
         self.assertEqual(self.tool(1).GetInput("Blue1"), 1.0)
         self.assertEqual(self.host.tools["text_animator"]["font_size"], 0.2)          # remembered
+
+    def test_style_counts_the_clips_and_locks_each_comp_while_it_styles(self):
+        comps = []
+        for clip in self.host.timeline.tracks[1]:
+            comp = Comp(clip.tool)
+            clip.GetFusionCompByIndex = lambda _i, comp=comp: comp
+            comps.append(comp)
+        self.page.on_set({"name": "style_scope", "value": "track"})
+        self.page.on_set({"name": "style_track", "value": 2})
+        self.page.on_apply_style()
+        self.assertEqual(self.host.pumped, ["Applying font style… 1 of 2", "Applying font style… 2 of 2"])
+        self.assertEqual([c.calls for c in comps], [["Lock", "Unlock"]] * 2)
+        self.assertTrue(self.page._preview_timer.isActive())               # the poll is back on after
 
     def select(self, *clips):
         self.host.timeline.selected = list(clips)

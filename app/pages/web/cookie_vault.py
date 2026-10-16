@@ -185,8 +185,9 @@ class CookieVault(QObject):
                     store.setCookie(cookie, origin(cookie))
         finally:
             self._loading = False
-        if moved:
-            self.save()                        # the encrypted copy first, then the plain one goes
+        # The encrypted copy first, then the plain one goes - not if that
+        # didn't save: it's the only lasting copy, tried again next start.
+        if moved and self.save():
             for name in PLAIN_DB:
                 try:
                     os.remove(os.path.join(self.folder, name))

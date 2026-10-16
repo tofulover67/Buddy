@@ -50,7 +50,9 @@ SKIP_IN_BUDDY = {
     "transcribe/venv", "transcribe/models", "transcribe/renders", "transcribe/verified.json",
     "generative/venv", "generative/models", "generative/gpu", "generative/work",
     "ask_buddy/llama.cpp", "ask_buddy/models",
-    "audio_assistant/peaks", "audio_assistant/renders", "audit/renders",
+    "audio_assistant/peaks", "audio_assistant/renders", "audio_assistant/preview", "audio_assistant/play_along",
+    "audit/renders",
+    "daw/play_along",
     "media_search",                                 # the search index: made again from the files
     "model_folders.json",                           # drives this PC has
     "crash.log", "crash_trail.log", PENDING, BEFORE,
@@ -119,19 +121,20 @@ def allowed(tool_ids) -> list[str]:
     return list(dict.fromkeys(names))
 
 
-def roots(tool_ids) -> list[str]:
-    """allowed() - those that exist."""
-    return [n for n in allowed(tool_ids) if (home() / n).exists()]
-
-
 def files(tool_ids, leave_out: Path | None = None) -> list[tuple[Path, str]]:
     """(file, its name in the backup) for everything a backup holds.
     leave_out: a folder never taken from (where backups are written, if
     it's somewhere a backup reads)."""
     out = []
     skip = os.path.normcase(os.path.abspath(leave_out)) if leave_out else None
-    for name in roots(tool_ids):
+    for name in allowed(tool_ids):
         top = home() / name
+        if not top.exists():
+            # A damaged standalone file set aside by atomic_io.read_json():
+            # its .bak is the copy Buddy reads now.
+            if _recovered(top) and not _skipped(name):
+                out.append((_recovered(top), name))
+            continue
         if top.is_file():
             if not _skipped(name):
                 out.append((top, name))
@@ -144,7 +147,17 @@ def files(tool_ids, leave_out: Path | None = None) -> list[tuple[Path, str]]:
                 rel = f"{rel_dir}/{n}"
                 if not _skipped(rel):
                     out.append((Path(folder) / n, rel))
+                elif n.lower().endswith(".bak") and n[:-4] not in names and not _skipped(rel[:-4]):
+                    out.append((Path(folder) / n, rel[:-4]))     # recovered: see _recovered()
     return out
+
+
+def _recovered(path: Path) -> Path | None:
+    """path's .bak when path itself is gone: atomic_io.read_json() sets a
+    damaged file aside and reads its .bak, the only usable copy until the
+    next save - so a backup takes it, under the file's own name."""
+    bak = path.with_name(path.name + ".bak")
+    return bak if not path.exists() and bak.is_file() else None
 
 
 def make(dest: str | Path, tool_ids, version: str = "", progress: Progress | None = None) -> dict:

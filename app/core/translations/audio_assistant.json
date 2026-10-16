@@ -3959,5 +3959,2275 @@
   "中文": "已没有任何时间线使用这些内容。曲线时间线会从项目中删除。处理后的音频会移出媒体池，若没有其他项目使用，其文件会移到废纸篓。此操作无法撤销。",
   "العربية": "لم يعد أي مخطط زمني يستخدم هذه العناصر. تُحذف المخططات الزمنية للمنحنيات من المشروع. ويخرج الصوت المعالَج من Media Pool، ويُنقل ملفه إلى سلة المحذوفات عندما لا يستخدمه أي مشروع آخر. لا يمكن التراجع عن ذلك.",
   "Tiếng Việt": "Không còn timeline nào dùng các mục này. Timeline đường cong sẽ bị xóa khỏi dự án. Âm thanh đã xử lý được gỡ khỏi Media Pool, và tệp của nó vào Thùng rác khi không còn dự án nào khác dùng. Không thể hoàn tác."
+ },
+ "Resolve didn't turn the original clip back on, so the curve clip stays.": {
+  "日本語": "Resolve が元のクリップをオンに戻さなかったため、カーブのクリップはそのままです。",
+  "Español": "Resolve no volvió a activar el clip original, así que el clip de la curva se queda.",
+  "Deutsch": "Resolve hat den ursprünglichen Clip nicht wieder eingeschaltet, daher bleibt der Kurven-Clip.",
+  "Français": "Resolve n'a pas réactivé le clip d'origine, le clip de la courbe reste donc en place.",
+  "한국어": "Resolve가 원래 클립을 다시 켜지 않아 커브 클립은 그대로 둡니다.",
+  "中文": "Resolve 未重新启用原始片段，因此曲线片段保留。",
+  "العربية": "لم يُعِد Resolve تفعيل المقطع الأصلي، لذا يبقى مقطع المنحنى.",
+  "Tiếng Việt": "Resolve không bật lại clip gốc, nên clip đường cong vẫn được giữ."
+ },
+ "Resolve didn't turn the original clip back on, so the processed audio stays.": {
+  "日本語": "Resolve が元のクリップをオンに戻さなかったため、処理済みのオーディオはそのままです。",
+  "Español": "Resolve no volvió a activar el clip original, así que el audio procesado se queda.",
+  "Deutsch": "Resolve hat den ursprünglichen Clip nicht wieder eingeschaltet, daher bleibt das bearbeitete Audio.",
+  "Français": "Resolve n'a pas réactivé le clip d'origine, l'audio traité reste donc en place.",
+  "한국어": "Resolve가 원래 클립을 다시 켜지 않아 처리된 오디오는 그대로 둡니다.",
+  "中文": "Resolve 未重新启用原始片段，因此处理后的音频保留。",
+  "العربية": "لم يُعِد Resolve تفعيل المقطع الأصلي، لذا يبقى الصوت المعالَج.",
+  "Tiếng Việt": "Resolve không bật lại clip gốc, nên âm thanh đã xử lý vẫn được giữ."
+ },
+ "Song": {
+  "日本語": "曲",
+  "Español": "Canción",
+  "Deutsch": "Song",
+  "Français": "Morceau",
+  "한국어": "곡",
+  "中文": "歌曲",
+  "العربية": "الأغنية",
+  "Tiếng Việt": "Bài hát"
+ },
+ "Sounds": {
+  "日本語": "サウンド",
+  "Español": "Sonidos",
+  "Deutsch": "Sounds",
+  "Français": "Sons",
+  "한국어": "사운드",
+  "中文": "音效",
+  "العربية": "الأصوات",
+  "Tiếng Việt": "Âm thanh"
+ },
+ "Moments": {
+  "日本語": "モーメント",
+  "Español": "Momentos",
+  "Deutsch": "Momente",
+  "Français": "Moments",
+  "한국어": "순간",
+  "中文": "时刻",
+  "العربية": "اللحظات",
+  "Tiếng Việt": "Khoảnh khắc"
+ },
+ "Listen": {
+  "日本語": "聴く",
+  "Español": "Escuchar",
+  "Deutsch": "Anhören",
+  "Français": "Écouter",
+  "한국어": "듣기",
+  "中文": "聆听",
+  "العربية": "استمع",
+  "Tiếng Việt": "Nghe"
+ },
+ "Listen again": {
+  "日本語": "もう一度聴く",
+  "Español": "Escuchar de nuevo",
+  "Deutsch": "Erneut anhören",
+  "Français": "Réécouter",
+  "한국어": "다시 듣기",
+  "中文": "重新聆听",
+  "العربية": "استمع مرة أخرى",
+  "Tiếng Việt": "Nghe lại"
+ },
+ "Pick the music on your timeline and Buddy listens to it: its key and tempo, and the moments a sound belongs on.": {
+  "日本語": "タイムライン上の音楽を選ぶと、Buddy が聴いてキーとテンポ、サウンドを置くべきモーメントを見つけます。",
+  "Español": "Elige la música de tu línea de tiempo y Buddy la escucha: su tonalidad y su tempo, y los momentos en los que encaja un sonido.",
+  "Deutsch": "Wähle die Musik in deiner Timeline, und Buddy hört sie sich an: Tonart und Tempo und die Momente, auf die ein Sound gehört.",
+  "Français": "Choisissez la musique de votre timeline et Buddy l'écoute : sa tonalité, son tempo et les moments où placer un son.",
+  "한국어": "타임라인의 음악을 고르면 Buddy가 듣고 조성과 템포, 그리고 사운드를 넣을 순간을 찾습니다.",
+  "中文": "选择时间线上的音乐，Buddy 会聆听它：找出调性和速度，以及适合放置音效的时刻。",
+  "العربية": "اختر الموسيقى في المخطط الزمني وسيستمع إليها Buddy: مقامها وإيقاعها، واللحظات التي يناسبها صوت.",
+  "Tiếng Việt": "Chọn nhạc trên timeline và Buddy sẽ nghe: tông, nhịp độ và những khoảnh khắc nên đặt âm thanh."
+ },
+ "Place at the playhead": {
+  "日本語": "再生ヘッドに配置",
+  "Español": "Colocar en el cabezal",
+  "Deutsch": "Am Abspielkopf platzieren",
+  "Français": "Placer à la tête de lecture",
+  "한국어": "재생 헤드에 배치",
+  "中文": "放到播放头处",
+  "العربية": "ضعه عند رأس التشغيل",
+  "Tiếng Việt": "Đặt tại đầu phát"
+ },
+ "Buddy doesn't know where the playhead is yet.": {
+  "日本語": "Buddy はまだ再生ヘッドの位置を把握していません。",
+  "Español": "Buddy aún no sabe dónde está el cabezal.",
+  "Deutsch": "Buddy weiß noch nicht, wo der Abspielkopf steht.",
+  "Français": "Buddy ne sait pas encore où se trouve la tête de lecture.",
+  "한국어": "Buddy가 아직 재생 헤드 위치를 모릅니다.",
+  "中文": "Buddy 还不知道播放头在哪里。",
+  "العربية": "لا يعرف Buddy مكان رأس التشغيل بعد.",
+  "Tiếng Việt": "Buddy chưa biết đầu phát đang ở đâu."
+ },
+ "No song – C major, 120 BPM": {
+  "日本語": "曲なし – ハ長調、120 BPM",
+  "Español": "Sin canción: do mayor, 120 BPM",
+  "Deutsch": "Kein Song – C-Dur, 120 BPM",
+  "Français": "Pas de morceau – do majeur, 120 BPM",
+  "한국어": "곡 없음 – C 장조, 120 BPM",
+  "中文": "无歌曲 – C 大调，120 BPM",
+  "العربية": "بلا أغنية – دو الكبير، 120 BPM",
+  "Tiếng Việt": "Không có bài hát – Đô trưởng, 120 BPM"
+ },
+ "Listening to the song…": {
+  "日本語": "曲を聴いています…",
+  "Español": "Escuchando la canción…",
+  "Deutsch": "Hört den Song an…",
+  "Français": "Écoute du morceau…",
+  "한국어": "곡을 듣는 중…",
+  "中文": "正在聆听歌曲…",
+  "العربية": "جارٍ الاستماع إلى الأغنية…",
+  "Tiếng Việt": "Đang nghe bài hát…"
+ },
+ "There's no audio on this timeline – sounds are made in C major at 120 BPM.": {
+  "日本語": "このタイムラインにはオーディオがありません – サウンドはハ長調、120 BPM で作られます。",
+  "Español": "No hay audio en esta línea de tiempo: los sonidos se crean en do mayor a 120 BPM.",
+  "Deutsch": "Diese Timeline hat kein Audio – Sounds entstehen in C-Dur mit 120 BPM.",
+  "Français": "Cette timeline n'a pas d'audio – les sons sont créés en do majeur à 120 BPM.",
+  "한국어": "이 타임라인에는 오디오가 없습니다 – 사운드는 C 장조, 120 BPM으로 만들어집니다.",
+  "中文": "此时间线上没有音频 – 音效将以 C 大调、120 BPM 生成。",
+  "العربية": "لا يوجد صوت في هذا المخطط الزمني – تُصنع الأصوات على دو الكبير بسرعة 120 BPM.",
+  "Tiếng Việt": "Timeline này không có âm thanh – âm thanh được tạo ở Đô trưởng, 120 BPM."
+ },
+ "Press Listen to find its key, tempo and moments.": {
+  "日本語": "「聴く」を押すと、キー・テンポ・モーメントを見つけます。",
+  "Español": "Pulsa Escuchar para encontrar su tonalidad, su tempo y sus momentos.",
+  "Deutsch": "Klicke auf „Anhören“, um Tonart, Tempo und Momente zu finden.",
+  "Français": "Cliquez sur Écouter pour trouver sa tonalité, son tempo et ses moments.",
+  "한국어": "듣기를 누르면 조성, 템포, 순간을 찾습니다.",
+  "中文": "点击“聆听”以找出调性、速度和时刻。",
+  "العربية": "اضغط استمع لمعرفة مقامها وإيقاعها ولحظاتها.",
+  "Tiếng Việt": "Nhấn Nghe để tìm tông, nhịp độ và các khoảnh khắc."
+ },
+ "Buddy isn't sure of the key – it could be {key}.": {
+  "日本語": "Buddy はキーに確信がありません – {key} かもしれません。",
+  "Español": "Buddy no está seguro de la tonalidad: podría ser {key}.",
+  "Deutsch": "Buddy ist sich bei der Tonart nicht sicher – es könnte {key} sein.",
+  "Français": "Buddy n'est pas sûr de la tonalité – ce pourrait être {key}.",
+  "한국어": "Buddy가 조성을 확신하지 못합니다 – {key}일 수도 있습니다.",
+  "中文": "Buddy 不确定调性 – 也可能是 {key}。",
+  "العربية": "Buddy غير متأكد من المقام – قد يكون {key}.",
+  "Tiếng Việt": "Buddy không chắc về tông – có thể là {key}."
+ },
+ "Buddy isn't sure of the key.": {
+  "日本語": "Buddy はキーに確信がありません。",
+  "Español": "Buddy no está seguro de la tonalidad.",
+  "Deutsch": "Buddy ist sich bei der Tonart nicht sicher.",
+  "Français": "Buddy n'est pas sûr de la tonalité.",
+  "한국어": "Buddy가 조성을 확신하지 못합니다.",
+  "中文": "Buddy 不确定调性。",
+  "العربية": "Buddy غير متأكد من المقام.",
+  "Tiếng Việt": "Buddy không chắc về tông."
+ },
+ "Buddy didn't hear a steady beat – sounds keep 120 BPM, in the key it found.": {
+  "日本語": "Buddy には安定したビートが聞こえませんでした – サウンドは 120 BPM のまま、見つけたキーで作られます。",
+  "Español": "Buddy no oyó un ritmo constante: los sonidos se quedan en 120 BPM, en la tonalidad que encontró.",
+  "Deutsch": "Buddy hat keinen gleichmäßigen Beat gehört – Sounds bleiben bei 120 BPM, in der gefundenen Tonart.",
+  "Français": "Buddy n'a pas entendu de rythme régulier – les sons restent à 120 BPM, dans la tonalité trouvée.",
+  "한국어": "Buddy가 일정한 비트를 듣지 못했습니다 – 사운드는 120 BPM으로, 찾은 조성에 맞춰집니다.",
+  "中文": "Buddy 没有听到稳定的节拍 – 音效保持 120 BPM，使用找到的调性。",
+  "العربية": "لم يسمع Buddy إيقاعًا ثابتًا – تبقى الأصوات على 120 BPM، بالمقام الذي وجده.",
+  "Tiếng Việt": "Buddy không nghe thấy nhịp đều – âm thanh giữ 120 BPM, theo tông đã tìm được."
+ },
+ "Musical key": {
+  "日本語": "キー",
+  "Español": "Tonalidad",
+  "Deutsch": "Tonart",
+  "Français": "Tonalité",
+  "한국어": "조성",
+  "中文": "调性",
+  "العربية": "المقام",
+  "Tiếng Việt": "Tông"
+ },
+ "{code} · relative {key}": {
+  "日本語": "{code} · 平行調 {key}",
+  "Español": "{code} · relativa {key}",
+  "Deutsch": "{code} · parallel {key}",
+  "Français": "{code} · relative {key}",
+  "한국어": "{code} · 나란한조 {key}",
+  "中文": "{code} · 关系调 {key}",
+  "العربية": "{code} · المقام النسبي {key}",
+  "Tiếng Việt": "{code} · tông tương đối {key}"
+ },
+ "No notes heard": {
+  "日本語": "音が聞こえません",
+  "Español": "No se oyen notas",
+  "Deutsch": "Keine Töne gehört",
+  "Français": "Aucune note entendue",
+  "한국어": "들린 음 없음",
+  "中文": "未听到音符",
+  "العربية": "لم تُسمع أي نغمات",
+  "Tiếng Việt": "Không nghe thấy nốt nào"
+ },
+ "A bar is {s} s": {
+  "日本語": "1 小節は {s} 秒",
+  "Español": "Un compás dura {s} s",
+  "Deutsch": "Ein Takt dauert {s} s",
+  "Français": "Une mesure dure {s} s",
+  "한국어": "한 마디는 {s}초",
+  "中文": "一小节为 {s} 秒",
+  "العربية": "المازورة مدتها {s} ث",
+  "Tiếng Việt": "Một ô nhịp dài {s} giây"
+ },
+ "Below – one click each": {
+  "日本語": "下に – それぞれワンクリック",
+  "Español": "Abajo: un clic cada uno",
+  "Deutsch": "Unten – je ein Klick",
+  "Français": "Ci-dessous – un clic chacun",
+  "한국어": "아래 – 각각 한 번 클릭",
+  "中文": "见下方 – 各一键放置",
+  "العربية": "في الأسفل – نقرة واحدة لكل منها",
+  "Tiếng Việt": "Bên dưới – mỗi cái một cú nhấp"
+ },
+ "None found": {
+  "日本語": "見つかりません",
+  "Español": "No se encontró ninguno",
+  "Deutsch": "Keine gefunden",
+  "Français": "Aucun trouvé",
+  "한국어": "찾지 못함",
+  "中文": "未找到",
+  "العربية": "لم يُعثر على شيء",
+  "Tiếng Việt": "Không tìm thấy"
+ },
+ "In {key} at {bpm} BPM": {
+  "日本語": "{key}、{bpm} BPM",
+  "Español": "En {key} a {bpm} BPM",
+  "Deutsch": "In {key} mit {bpm} BPM",
+  "Français": "En {key} à {bpm} BPM",
+  "한국어": "{key}, {bpm} BPM",
+  "中文": "{key}，{bpm} BPM",
+  "العربية": "على {key} بسرعة {bpm} BPM",
+  "Tiếng Việt": "Ở {key}, {bpm} BPM"
+ },
+ "In C major at 120 BPM – listen to a song to match it": {
+  "日本語": "ハ長調、120 BPM – 曲を聴くと合わせられます",
+  "Español": "En do mayor a 120 BPM: escucha una canción para ajustarlo",
+  "Deutsch": "In C-Dur mit 120 BPM – hör dir einen Song an, um es anzupassen",
+  "Français": "En do majeur à 120 BPM – écoutez un morceau pour l'accorder",
+  "한국어": "C 장조, 120 BPM – 곡을 들으면 맞춰집니다",
+  "中文": "C 大调，120 BPM – 聆听一首歌曲来匹配",
+  "العربية": "على دو الكبير بسرعة 120 BPM – استمع إلى أغنية لمطابقتها",
+  "Tiếng Việt": "Ở Đô trưởng, 120 BPM – hãy nghe một bài hát để khớp"
+ },
+ "The moment": {
+  "日本語": "モーメント",
+  "Español": "El momento",
+  "Deutsch": "Der Moment",
+  "Français": "Le moment",
+  "한국어": "순간",
+  "中文": "时刻",
+  "العربية": "اللحظة",
+  "Tiếng Việt": "Khoảnh khắc"
+ },
+ "Listen to a song first – its moments show here.": {
+  "日本語": "まず曲を聴いてください – モーメントがここに表示されます。",
+  "Español": "Escucha primero una canción: sus momentos aparecen aquí.",
+  "Deutsch": "Hör dir zuerst einen Song an – seine Momente erscheinen hier.",
+  "Français": "Écoutez d'abord un morceau – ses moments s'affichent ici.",
+  "한국어": "먼저 곡을 들으세요 – 순간이 여기에 표시됩니다.",
+  "中文": "请先聆听一首歌曲 – 它的时刻会显示在这里。",
+  "العربية": "استمع إلى أغنية أولًا – تظهر لحظاتها هنا.",
+  "Tiếng Việt": "Hãy nghe một bài hát trước – các khoảnh khắc sẽ hiện ở đây."
+ },
+ "No moments without a steady beat – place sounds at the playhead instead.": {
+  "日本語": "安定したビートがないとモーメントは見つかりません – 代わりに再生ヘッドに配置してください。",
+  "Español": "Sin un ritmo constante no hay momentos: coloca los sonidos en el cabezal.",
+  "Deutsch": "Ohne gleichmäßigen Beat keine Momente – platziere Sounds stattdessen am Abspielkopf.",
+  "Français": "Sans rythme régulier, pas de moments – placez plutôt les sons à la tête de lecture.",
+  "한국어": "일정한 비트가 없으면 순간도 없습니다 – 대신 재생 헤드에 배치하세요.",
+  "中文": "没有稳定的节拍就没有时刻 – 请改为放到播放头处。",
+  "العربية": "لا لحظات دون إيقاع ثابت – ضع الأصوات عند رأس التشغيل بدلًا من ذلك.",
+  "Tiếng Việt": "Không có nhịp đều thì không có khoảnh khắc – hãy đặt âm thanh tại đầu phát."
+ },
+ "Click the strip to move the playhead there.": {
+  "日本語": "帯をクリックすると再生ヘッドがそこへ移動します。",
+  "Español": "Haz clic en la franja para mover el cabezal allí.",
+  "Deutsch": "Klicke auf den Streifen, um den Abspielkopf dorthin zu setzen.",
+  "Français": "Cliquez sur la bande pour y déplacer la tête de lecture.",
+  "한국어": "막대를 클릭하면 재생 헤드가 그곳으로 이동합니다.",
+  "中文": "点击条带可将播放头移到那里。",
+  "العربية": "انقر على الشريط لنقل رأس التشغيل إلى هناك.",
+  "Tiếng Việt": "Nhấp vào dải để di chuyển đầu phát tới đó."
+ },
+ "Buddy found no moment that stands out in this song.": {
+  "日本語": "この曲には目立つモーメントが見つかりませんでした。",
+  "Español": "Buddy no encontró ningún momento que destaque en esta canción.",
+  "Deutsch": "Buddy hat in diesem Song keinen herausragenden Moment gefunden.",
+  "Français": "Buddy n'a trouvé aucun moment marquant dans ce morceau.",
+  "한국어": "Buddy가 이 곡에서 두드러진 순간을 찾지 못했습니다.",
+  "中文": "Buddy 在这首歌中没有找到突出的时刻。",
+  "العربية": "لم يجد Buddy لحظة بارزة في هذه الأغنية.",
+  "Tiếng Việt": "Buddy không tìm thấy khoảnh khắc nổi bật nào trong bài hát này."
+ },
+ "Move the playhead here": {
+  "日本語": "再生ヘッドをここへ移動",
+  "Español": "Mover el cabezal aquí",
+  "Deutsch": "Abspielkopf hierher setzen",
+  "Français": "Déplacer la tête de lecture ici",
+  "한국어": "재생 헤드를 여기로 이동",
+  "中文": "将播放头移到这里",
+  "العربية": "انقل رأس التشغيل إلى هنا",
+  "Tiếng Việt": "Di chuyển đầu phát tới đây"
+ },
+ "How strongly it stands out": {
+  "日本語": "どれだけ際立っているか",
+  "Español": "Cuánto destaca",
+  "Deutsch": "Wie stark er heraussticht",
+  "Français": "À quel point il ressort",
+  "한국어": "얼마나 두드러지는지",
+  "中文": "突出程度",
+  "العربية": "مدى بروزها",
+  "Tiếng Việt": "Mức độ nổi bật"
+ },
+ "Drop": {
+  "日本語": "ドロップ",
+  "Español": "Drop",
+  "Deutsch": "Drop",
+  "Français": "Drop",
+  "한국어": "드롭",
+  "中文": "高潮",
+  "العربية": "الذروة",
+  "Tiếng Việt": "Drop"
+ },
+ "New section": {
+  "日本語": "新しいセクション",
+  "Español": "Nueva sección",
+  "Deutsch": "Neuer Abschnitt",
+  "Français": "Nouvelle section",
+  "한국어": "새 섹션",
+  "中文": "新段落",
+  "العربية": "قسم جديد",
+  "Tiếng Việt": "Đoạn mới"
+ },
+ "Break": {
+  "日本語": "ブレイク",
+  "Español": "Pausa",
+  "Deutsch": "Break",
+  "Français": "Break",
+  "한국어": "브레이크",
+  "中文": "间歇",
+  "العربية": "استراحة",
+  "Tiếng Việt": "Đoạn nghỉ"
+ },
+ "Last hit": {
+  "日本語": "ラストヒット",
+  "Español": "Golpe final",
+  "Deutsch": "Letzter Schlag",
+  "Français": "Dernier coup",
+  "한국어": "마지막 타격",
+  "中文": "最后一击",
+  "العربية": "الضربة الأخيرة",
+  "Tiếng Việt": "Cú đánh cuối"
+ },
+ "Riser into it": {
+  "日本語": "ライザーで入る",
+  "Español": "Riser hacia él",
+  "Deutsch": "Riser hinein",
+  "Français": "Riser jusqu'à lui",
+  "한국어": "라이저로 진입",
+  "中文": "上升音效引入",
+  "العربية": "رايزر نحوها",
+  "Tiếng Việt": "Riser dẫn vào"
+ },
+ "Impact on it": {
+  "日本語": "インパクトを置く",
+  "Español": "Impacto en él",
+  "Deutsch": "Impact darauf",
+  "Français": "Impact dessus",
+  "한국어": "임팩트 배치",
+  "中文": "冲击音效",
+  "العربية": "ضربة عليها",
+  "Tiếng Việt": "Impact tại đó"
+ },
+ "Whoosh on it": {
+  "日本語": "ウーシュを置く",
+  "Español": "Whoosh en él",
+  "Deutsch": "Whoosh darauf",
+  "Français": "Whoosh dessus",
+  "한국어": "우시 배치",
+  "中文": "嗖声音效",
+  "العربية": "صوت اندفاع عليها",
+  "Tiếng Việt": "Whoosh tại đó"
+ },
+ "Riser": {
+  "日本語": "ライザー",
+  "Español": "Riser",
+  "Deutsch": "Riser",
+  "Français": "Riser",
+  "한국어": "라이저",
+  "中文": "上升音效",
+  "العربية": "رايزر",
+  "Tiếng Việt": "Riser"
+ },
+ "Whoosh": {
+  "日本語": "ウーシュ",
+  "Español": "Whoosh",
+  "Deutsch": "Whoosh",
+  "Français": "Whoosh",
+  "한국어": "우시",
+  "中文": "嗖声",
+  "العربية": "صوت اندفاع",
+  "Tiếng Việt": "Whoosh"
+ },
+ "Rushes past – rising to its peak on the moment and away again, moving across the stereo.": {
+  "日本語": "さっと通り過ぎます – モーメントでピークに達して離れ、ステレオを横切ります。",
+  "Español": "Pasa rápido: sube hasta su punto máximo en el momento y se aleja, moviéndose por el estéreo.",
+  "Deutsch": "Rauscht vorbei – erreicht auf dem Moment seinen Höhepunkt und entfernt sich wieder, quer durchs Stereobild.",
+  "Français": "Passe en trombe – culmine sur le moment puis s'éloigne, en traversant la stéréo.",
+  "한국어": "휙 지나갑니다 – 순간에 정점에 이르고 다시 멀어지며 스테레오를 가로지릅니다.",
+  "中文": "疾驰而过 – 在那一刻达到顶峰后远去，在立体声中移动。",
+  "العربية": "يندفع مارًّا – يبلغ ذروته عند اللحظة ثم يبتعد، متنقلًا عبر الستيريو.",
+  "Tiếng Việt": "Lướt qua – lên đỉnh đúng khoảnh khắc rồi xa dần, di chuyển qua stereo."
+ },
+ "Tone": {
+  "日本語": "トーン",
+  "Español": "Tono",
+  "Deutsch": "Ton",
+  "Français": "Ton",
+  "한국어": "톤",
+  "中文": "音调",
+  "العربية": "النغمة",
+  "Tiếng Việt": "Âm sắc"
+ },
+ "Climb": {
+  "日本語": "上昇",
+  "Español": "Subida",
+  "Deutsch": "Anstieg",
+  "Français": "Montée",
+  "한국어": "상승",
+  "中文": "上升",
+  "العربية": "الصعود",
+  "Tiếng Việt": "Độ leo"
+ },
+ "Flutter": {
+  "日本語": "揺れ",
+  "Español": "Trémolo",
+  "Deutsch": "Flattern",
+  "Français": "Trémolo",
+  "한국어": "떨림",
+  "中文": "颤动",
+  "العربية": "الارتعاش",
+  "Tiếng Việt": "Độ rung"
+ },
+ "Sub": {
+  "日本語": "サブ",
+  "Español": "Sub",
+  "Deutsch": "Sub",
+  "Français": "Sub",
+  "한국어": "서브",
+  "中文": "低频",
+  "العربية": "المنخفض",
+  "Tiếng Việt": "Sub"
+ },
+ "Body": {
+  "日本語": "ボディ",
+  "Español": "Cuerpo",
+  "Deutsch": "Körper",
+  "Français": "Corps",
+  "한국어": "바디",
+  "中文": "主体",
+  "العربية": "الجسم",
+  "Tiếng Việt": "Thân"
+ },
+ "Crack": {
+  "日本語": "クラック",
+  "Español": "Chasquido",
+  "Deutsch": "Knall",
+  "Français": "Claquement",
+  "한국어": "크랙",
+  "中文": "脆响",
+  "العربية": "الطقطقة",
+  "Tiếng Việt": "Tiếng nứt"
+ },
+ "Peak at": {
+  "日本語": "ピーク位置",
+  "Español": "Pico en",
+  "Deutsch": "Höhepunkt bei",
+  "Français": "Pic à",
+  "한국어": "정점 위치",
+  "中文": "峰值位置",
+  "العربية": "الذروة عند",
+  "Tiếng Việt": "Đỉnh tại"
+ },
+ "1 bar": {
+  "日本語": "1 小節",
+  "Español": "1 compás",
+  "Deutsch": "1 Takt",
+  "Français": "1 mesure",
+  "한국어": "1마디",
+  "中文": "1 小节",
+  "العربية": "مازورة واحدة",
+  "Tiếng Việt": "1 ô nhịp"
+ },
+ "{n} bars": {
+  "日本語": "{n} 小節",
+  "Español": "{n} compases",
+  "Deutsch": "{n} Takte",
+  "Français": "{n} mesures",
+  "한국어": "{n}마디",
+  "中文": "{n} 小节",
+  "العربية": "{n} مازورات",
+  "Tiếng Việt": "{n} ô nhịp"
+ },
+ "½ beat": {
+  "日本語": "½ 拍",
+  "Español": "½ tiempo",
+  "Deutsch": "½ Schlag",
+  "Français": "½ temps",
+  "한국어": "½박",
+  "中文": "½ 拍",
+  "العربية": "نصف نبضة",
+  "Tiếng Việt": "½ phách"
+ },
+ "1 beat": {
+  "日本語": "1 拍",
+  "Español": "1 tiempo",
+  "Deutsch": "1 Schlag",
+  "Français": "1 temps",
+  "한국어": "1박",
+  "中文": "1 拍",
+  "العربية": "نبضة واحدة",
+  "Tiếng Việt": "1 phách"
+ },
+ "{n} beats": {
+  "日本語": "{n} 拍",
+  "Español": "{n} tiempos",
+  "Deutsch": "{n} Schläge",
+  "Français": "{n} temps",
+  "한국어": "{n}박",
+  "中文": "{n} 拍",
+  "العربية": "{n} نبضات",
+  "Tiếng Việt": "{n} phách"
+ },
+ "Right to left": {
+  "日本語": "右から左",
+  "Español": "De derecha a izquierda",
+  "Deutsch": "Von rechts nach links",
+  "Français": "De droite à gauche",
+  "한국어": "오른쪽에서 왼쪽",
+  "中文": "从右到左",
+  "العربية": "من اليمين إلى اليسار",
+  "Tiếng Việt": "Phải sang trái"
+ },
+ "Stays centred": {
+  "日本語": "中央のまま",
+  "Español": "Se queda en el centro",
+  "Deutsch": "Bleibt mittig",
+  "Français": "Reste au centre",
+  "한국어": "가운데 유지",
+  "中文": "保持居中",
+  "العربية": "يبقى في المنتصف",
+  "Tiếng Việt": "Giữ ở giữa"
+ },
+ "Add a riser": {
+  "日本語": "ライザーを追加",
+  "Español": "Añadir un riser",
+  "Deutsch": "Riser hinzufügen",
+  "Français": "Ajouter un riser",
+  "한국어": "라이저 추가",
+  "中文": "添加上升音效",
+  "العربية": "إضافة رايزر",
+  "Tiếng Việt": "Thêm riser"
+ },
+ "Add an impact": {
+  "日本語": "インパクトを追加",
+  "Español": "Añadir un impacto",
+  "Deutsch": "Impact hinzufügen",
+  "Français": "Ajouter un impact",
+  "한국어": "임팩트 추가",
+  "中文": "添加冲击音效",
+  "العربية": "إضافة ضربة",
+  "Tiếng Việt": "Thêm impact"
+ },
+ "Add a whoosh": {
+  "日本語": "ウーシュを追加",
+  "Español": "Añadir un whoosh",
+  "Deutsch": "Whoosh hinzufügen",
+  "Français": "Ajouter un whoosh",
+  "한국어": "우시 추가",
+  "中文": "添加嗖声",
+  "العربية": "إضافة صوت اندفاع",
+  "Tiếng Việt": "Thêm whoosh"
+ },
+ "Riser added on A{track}": {
+  "日本語": "A{track} にライザーを追加しました",
+  "Español": "Riser añadido en A{track}",
+  "Deutsch": "Riser auf A{track} hinzugefügt",
+  "Français": "Riser ajouté sur A{track}",
+  "한국어": "A{track}에 라이저를 추가했습니다",
+  "中文": "已在 A{track} 上添加上升音效",
+  "العربية": "أُضيف رايزر على A{track}",
+  "Tiếng Việt": "Đã thêm riser vào A{track}"
+ },
+ "Impact added on A{track}": {
+  "日本語": "A{track} にインパクトを追加しました",
+  "Español": "Impacto añadido en A{track}",
+  "Deutsch": "Impact auf A{track} hinzugefügt",
+  "Français": "Impact ajouté sur A{track}",
+  "한국어": "A{track}에 임팩트를 추가했습니다",
+  "中文": "已在 A{track} 上添加冲击音效",
+  "العربية": "أُضيفت ضربة على A{track}",
+  "Tiếng Việt": "Đã thêm impact vào A{track}"
+ },
+ "Whoosh added on A{track}": {
+  "日本語": "A{track} にウーシュを追加しました",
+  "Español": "Whoosh añadido en A{track}",
+  "Deutsch": "Whoosh auf A{track} hinzugefügt",
+  "Français": "Whoosh ajouté sur A{track}",
+  "한국어": "A{track}에 우시를 추가했습니다",
+  "中文": "已在 A{track} 上添加嗖声",
+  "العربية": "أُضيف صوت اندفاع على A{track}",
+  "Tiếng Việt": "Đã thêm whoosh vào A{track}"
+ },
+ "Buddy is still putting the last sound in.": {
+  "日本語": "Buddy はまだ前のサウンドを配置中です。",
+  "Español": "Buddy todavía está colocando el último sonido.",
+  "Deutsch": "Buddy fügt noch den letzten Sound ein.",
+  "Français": "Buddy est encore en train de placer le dernier son.",
+  "한국어": "Buddy가 아직 이전 사운드를 넣는 중입니다.",
+  "中文": "Buddy 仍在放入上一个音效。",
+  "العربية": "لا يزال Buddy يضع الصوت الأخير.",
+  "Tiếng Việt": "Buddy vẫn đang đặt âm thanh trước."
+ },
+ "Couldn't use that sound": {
+  "日本語": "そのサウンドを使用できませんでした",
+  "Español": "No se pudo usar ese sonido",
+  "Deutsch": "Dieser Sound ließ sich nicht verwenden",
+  "Français": "Impossible d'utiliser ce son",
+  "한국어": "그 사운드를 사용할 수 없습니다",
+  "中文": "无法使用该音效",
+  "العربية": "تعذّر استخدام ذلك الصوت",
+  "Tiếng Việt": "Không thể dùng âm thanh đó"
+ },
+ "Couldn't save the sound": {
+  "日本語": "サウンドを保存できませんでした",
+  "Español": "No se pudo guardar el sonido",
+  "Deutsch": "Der Sound konnte nicht gespeichert werden",
+  "Français": "Impossible d'enregistrer le son",
+  "한국어": "사운드를 저장할 수 없습니다",
+  "中文": "无法保存音效",
+  "العربية": "تعذّر حفظ الصوت",
+  "Tiếng Việt": "Không thể lưu âm thanh"
+ },
+ "Couldn't put the sound in": {
+  "日本語": "サウンドを配置できませんでした",
+  "Español": "No se pudo colocar el sonido",
+  "Deutsch": "Der Sound konnte nicht eingefügt werden",
+  "Français": "Impossible de placer le son",
+  "한국어": "사운드를 넣을 수 없습니다",
+  "中文": "无法放入音效",
+  "العربية": "تعذّر وضع الصوت",
+  "Tiếng Việt": "Không thể đặt âm thanh"
+ },
+ "Buddy is still processing another clip – try again in a moment.": {
+  "日本語": "Buddy はまだ別のクリップを処理中です – 少し待ってからもう一度お試しください。",
+  "Español": "Buddy todavía está procesando otro clip: inténtalo de nuevo en un momento.",
+  "Deutsch": "Buddy verarbeitet noch einen anderen Clip – versuch es gleich noch einmal.",
+  "Français": "Buddy traite encore un autre clip – réessayez dans un instant.",
+  "한국어": "Buddy가 아직 다른 클립을 처리 중입니다 – 잠시 후 다시 시도하세요.",
+  "中文": "Buddy 仍在处理另一个片段 – 请稍后再试。",
+  "العربية": "لا يزال Buddy يعالج مقطعًا آخر – حاول مرة أخرى بعد لحظة.",
+  "Tiếng Việt": "Buddy vẫn đang xử lý một clip khác – hãy thử lại sau giây lát."
+ },
+ "The sound would end before the timeline starts.": {
+  "日本語": "サウンドがタイムラインの開始前に終わってしまいます。",
+  "Español": "El sonido terminaría antes de que empiece la línea de tiempo.",
+  "Deutsch": "Der Sound würde enden, bevor die Timeline beginnt.",
+  "Français": "Le son se terminerait avant le début de la timeline.",
+  "한국어": "사운드가 타임라인 시작 전에 끝납니다.",
+  "中文": "音效会在时间线开始之前结束。",
+  "العربية": "سينتهي الصوت قبل أن يبدأ المخطط الزمني.",
+  "Tiếng Việt": "Âm thanh sẽ kết thúc trước khi timeline bắt đầu."
+ },
+ "Resolve didn't import the sound.": {
+  "日本語": "Resolve がサウンドを読み込みませんでした。",
+  "Español": "Resolve no importó el sonido.",
+  "Deutsch": "Resolve hat den Sound nicht importiert.",
+  "Français": "Resolve n'a pas importé le son.",
+  "한국어": "Resolve가 사운드를 가져오지 않았습니다.",
+  "中文": "Resolve 未导入音效。",
+  "العربية": "لم يستورد Resolve الصوت.",
+  "Tiếng Việt": "Resolve không nhập âm thanh."
+ },
+ "Resolve didn't add a track for the sound.": {
+  "日本語": "Resolve がサウンド用のトラックを追加しませんでした。",
+  "Español": "Resolve no añadió una pista para el sonido.",
+  "Deutsch": "Resolve hat keine Spur für den Sound hinzugefügt.",
+  "Français": "Resolve n'a pas ajouté de piste pour le son.",
+  "한국어": "Resolve가 사운드용 트랙을 추가하지 않았습니다.",
+  "中文": "Resolve 未为音效添加轨道。",
+  "العربية": "لم يُضف Resolve مسارًا للصوت.",
+  "Tiếng Việt": "Resolve không thêm track cho âm thanh."
+ },
+ "Resolve didn't place the sound where it belongs.": {
+  "日本語": "Resolve がサウンドを正しい位置に配置しませんでした。",
+  "Español": "Resolve no colocó el sonido donde corresponde.",
+  "Deutsch": "Resolve hat den Sound nicht an die richtige Stelle gesetzt.",
+  "Français": "Resolve n'a pas placé le son au bon endroit.",
+  "한국어": "Resolve가 사운드를 제자리에 배치하지 않았습니다.",
+  "中文": "Resolve 未将音效放到正确位置。",
+  "العربية": "لم يضع Resolve الصوت في مكانه الصحيح.",
+  "Tiếng Việt": "Resolve không đặt âm thanh đúng chỗ."
+ },
+ "The sound isn't on the open timeline any more.": {
+  "日本語": "サウンドはもう開いているタイムラインにありません。",
+  "Español": "El sonido ya no está en la línea de tiempo abierta.",
+  "Deutsch": "Der Sound ist nicht mehr in der geöffneten Timeline.",
+  "Français": "Le son n'est plus dans la timeline ouverte.",
+  "한국어": "사운드가 더 이상 열린 타임라인에 없습니다.",
+  "中文": "音效已不在打开的时间线上。",
+  "العربية": "لم يعد الصوت في المخطط الزمني المفتوح.",
+  "Tiếng Việt": "Âm thanh không còn trên timeline đang mở."
+ },
+ "Resolve didn't take the sound off.": {
+  "日本語": "Resolve がサウンドを外しませんでした。",
+  "Español": "Resolve no quitó el sonido.",
+  "Deutsch": "Resolve hat den Sound nicht entfernt.",
+  "Français": "Resolve n'a pas retiré le son.",
+  "한국어": "Resolve가 사운드를 제거하지 않았습니다.",
+  "中文": "Resolve 未移除音效。",
+  "العربية": "لم يُزل Resolve الصوت.",
+  "Tiếng Việt": "Resolve không gỡ âm thanh."
+ },
+ "Unexpected sample rate.": {
+  "日本語": "想定外のサンプルレートです。",
+  "Español": "Frecuencia de muestreo inesperada.",
+  "Deutsch": "Unerwartete Abtastrate.",
+  "Français": "Fréquence d'échantillonnage inattendue.",
+  "한국어": "예상치 못한 샘플 레이트입니다.",
+  "中文": "意外的采样率。",
+  "العربية": "معدل عينات غير متوقع.",
+  "Tiếng Việt": "Tần số lấy mẫu không như mong đợi."
+ },
+ "A sound is one or two channels.": {
+  "日本語": "サウンドは 1 または 2 チャンネルです。",
+  "Español": "Un sonido tiene uno o dos canales.",
+  "Deutsch": "Ein Sound hat einen oder zwei Kanäle.",
+  "Français": "Un son a un ou deux canaux.",
+  "한국어": "사운드는 1채널 또는 2채널입니다.",
+  "中文": "音效为一个或两个声道。",
+  "العربية": "الصوت قناة واحدة أو قناتان.",
+  "Tiếng Việt": "Một âm thanh có một hoặc hai kênh."
+ },
+ "A channel isn't whole samples.": {
+  "日本語": "チャンネルのサンプルが欠けています。",
+  "Español": "Un canal no tiene muestras completas.",
+  "Deutsch": "Ein Kanal hat keine vollständigen Samples.",
+  "Français": "Un canal n'a pas d'échantillons entiers.",
+  "한국어": "채널의 샘플이 온전하지 않습니다.",
+  "中文": "某个声道的采样不完整。",
+  "العربية": "قناة لا تحتوي على عينات كاملة.",
+  "Tiếng Việt": "Một kênh không có mẫu trọn vẹn."
+ },
+ "The channels aren't the same length.": {
+  "日本語": "チャンネルの長さが一致しません。",
+  "Español": "Los canales no tienen la misma duración.",
+  "Deutsch": "Die Kanäle sind nicht gleich lang.",
+  "Français": "Les canaux n'ont pas la même longueur.",
+  "한국어": "채널 길이가 같지 않습니다.",
+  "中文": "各声道长度不一致。",
+  "العربية": "القنوات ليست بالطول نفسه.",
+  "Tiếng Việt": "Các kênh không dài bằng nhau."
+ },
+ "That sound is too long.": {
+  "日本語": "そのサウンドは長すぎます。",
+  "Español": "Ese sonido es demasiado largo.",
+  "Deutsch": "Dieser Sound ist zu lang.",
+  "Français": "Ce son est trop long.",
+  "한국어": "그 사운드는 너무 깁니다.",
+  "中文": "该音效太长。",
+  "العربية": "ذلك الصوت طويل جدًا.",
+  "Tiếng Việt": "Âm thanh đó quá dài."
+ },
+ "The sound has gaps in it.": {
+  "日本語": "サウンドに欠けている部分があります。",
+  "Español": "El sonido tiene huecos.",
+  "Deutsch": "Der Sound hat Lücken.",
+  "Français": "Le son comporte des trous.",
+  "한국어": "사운드에 빈 곳이 있습니다.",
+  "中文": "音效中有缺失。",
+  "العربية": "في الصوت فجوات.",
+  "Tiếng Việt": "Âm thanh có chỗ bị thiếu."
+ },
+ "Timing": {
+  "日本語": "タイミング",
+  "Español": "Tiempo",
+  "Deutsch": "Timing",
+  "Français": "Minutage",
+  "한국어": "타이밍",
+  "中文": "时间",
+  "العربية": "التوقيت",
+  "Tiếng Việt": "Thời lượng"
+ },
+ "Noise": {
+  "日本語": "ノイズ",
+  "Español": "Ruido",
+  "Deutsch": "Rauschen",
+  "Français": "Bruit",
+  "한국어": "노이즈",
+  "中文": "噪声",
+  "العربية": "الضجيج",
+  "Tiếng Việt": "Tiếng nhiễu"
+ },
+ "Movement": {
+  "日本語": "動き",
+  "Español": "Movimiento",
+  "Deutsch": "Bewegung",
+  "Français": "Mouvement",
+  "한국어": "움직임",
+  "中文": "移动",
+  "العربية": "الحركة",
+  "Tiếng Việt": "Chuyển động"
+ },
+ "Echo and reverb": {
+  "日本語": "エコーとリバーブ",
+  "Español": "Eco y reverberación",
+  "Deutsch": "Echo und Hall",
+  "Français": "Écho et réverbération",
+  "한국어": "에코와 리버브",
+  "中文": "回声与混响",
+  "العربية": "الصدى والتردد",
+  "Tiếng Việt": "Tiếng vọng và vang"
+ },
+ "Build-up": {
+  "日本語": "盛り上がり",
+  "Español": "Crecimiento",
+  "Deutsch": "Aufbau",
+  "Français": "Montée",
+  "한국어": "고조",
+  "中文": "渐强",
+  "العربية": "التصاعد",
+  "Tiếng Việt": "Độ dâng"
+ },
+ "Ending": {
+  "日本語": "終わり方",
+  "Español": "Final",
+  "Deutsch": "Ende",
+  "Français": "Fin",
+  "한국어": "끝맺음",
+  "中文": "结尾",
+  "العربية": "النهاية",
+  "Tiếng Việt": "Kết thúc"
+ },
+ "Stops – the room rings on": {
+  "日本語": "止まる – 部屋の響きは残る",
+  "Español": "Se detiene: la sala sigue sonando",
+  "Deutsch": "Stoppt – der Raum klingt nach",
+  "Français": "S'arrête – la pièce résonne encore",
+  "한국어": "멈춤 – 방 울림은 남음",
+  "中文": "停止 – 房间余音继续",
+  "العربية": "يتوقف – وتبقى الغرفة تتردد",
+  "Tiếng Việt": "Dừng – tiếng vang phòng còn lại"
+ },
+ "Everything stops": {
+  "日本語": "すべて止まる",
+  "Español": "Todo se detiene",
+  "Deutsch": "Alles stoppt",
+  "Français": "Tout s'arrête",
+  "한국어": "모두 멈춤",
+  "中文": "全部停止",
+  "العربية": "يتوقف كل شيء",
+  "Tiếng Việt": "Tất cả dừng lại"
+ },
+ "Filter type": {
+  "日本語": "フィルターの種類",
+  "Español": "Tipo de filtro",
+  "Deutsch": "Filtertyp",
+  "Français": "Type de filtre",
+  "한국어": "필터 종류",
+  "中文": "滤波器类型",
+  "العربية": "نوع المرشّح",
+  "Tiếng Việt": "Loại bộ lọc"
+ },
+ "Band": {
+  "日本語": "バンド",
+  "Español": "Banda",
+  "Deutsch": "Band",
+  "Français": "Bande",
+  "한국어": "밴드",
+  "中文": "带通",
+  "العربية": "نطاق",
+  "Tiếng Việt": "Dải"
+ },
+ "High-pass": {
+  "日本語": "ハイパス",
+  "Español": "Paso alto",
+  "Deutsch": "Hochpass",
+  "Français": "Passe-haut",
+  "한국어": "하이패스",
+  "中文": "高通",
+  "العربية": "تمرير عالٍ",
+  "Tiếng Việt": "Thông cao"
+ },
+ "Low-pass": {
+  "日本語": "ローパス",
+  "Español": "Paso bajo",
+  "Deutsch": "Tiefpass",
+  "Français": "Passe-bas",
+  "한국어": "로우패스",
+  "中文": "低通",
+  "العربية": "تمرير منخفض",
+  "Tiếng Việt": "Thông thấp"
+ },
+ "Sweep from": {
+  "日本語": "スイープ開始",
+  "Español": "Barrido desde",
+  "Deutsch": "Sweep von",
+  "Français": "Balayage depuis",
+  "한국어": "스윕 시작",
+  "中文": "扫频起点",
+  "العربية": "المسح من",
+  "Tiếng Việt": "Quét từ"
+ },
+ "Sweep to": {
+  "日本語": "スイープ終了",
+  "Español": "Barrido hasta",
+  "Deutsch": "Sweep bis",
+  "Français": "Balayage jusqu'à",
+  "한국어": "스윕 끝",
+  "中文": "扫频终点",
+  "العربية": "المسح إلى",
+  "Tiếng Việt": "Quét tới"
+ },
+ "Resonance": {
+  "日本語": "レゾナンス",
+  "Español": "Resonancia",
+  "Deutsch": "Resonanz",
+  "Français": "Résonance",
+  "한국어": "레조넌스",
+  "中文": "共振",
+  "العربية": "الرنين",
+  "Tiếng Việt": "Cộng hưởng"
+ },
+ "Chord": {
+  "日本語": "コード",
+  "Español": "Acorde",
+  "Deutsch": "Akkord",
+  "Français": "Accord",
+  "한국어": "코드",
+  "中文": "和弦",
+  "العربية": "الكورد",
+  "Tiếng Việt": "Hợp âm"
+ },
+ "Octave": {
+  "日本語": "オクターブ",
+  "Español": "Octava",
+  "Deutsch": "Oktave",
+  "Français": "Octave",
+  "한국어": "옥타브",
+  "中文": "八度",
+  "العربية": "الأوكتاف",
+  "Tiếng Việt": "Quãng tám"
+ },
+ "Voices": {
+  "日本語": "ボイス数",
+  "Español": "Voces",
+  "Deutsch": "Stimmen",
+  "Français": "Voix",
+  "한국어": "보이스",
+  "中文": "声部",
+  "العربية": "الأصوات",
+  "Tiếng Việt": "Số giọng"
+ },
+ "Detune": {
+  "日本語": "デチューン",
+  "Español": "Desafinación",
+  "Deutsch": "Verstimmung",
+  "Français": "Désaccord",
+  "한국어": "디튠",
+  "中文": "失谐",
+  "العربية": "إزاحة الضبط",
+  "Tiếng Việt": "Lệch tông"
+ },
+ "Spread": {
+  "日本語": "広がり",
+  "Español": "Dispersión",
+  "Deutsch": "Streuung",
+  "Français": "Étalement",
+  "한국어": "확산",
+  "中文": "展开",
+  "العربية": "الانتشار",
+  "Tiếng Việt": "Độ trải"
+ },
+ "Filter from": {
+  "日本語": "フィルター開始",
+  "Español": "Filtro desde",
+  "Deutsch": "Filter von",
+  "Français": "Filtre depuis",
+  "한국어": "필터 시작",
+  "中文": "滤波起点",
+  "العربية": "المرشّح من",
+  "Tiếng Việt": "Bộ lọc từ"
+ },
+ "Filter to": {
+  "日本語": "フィルター終了",
+  "Español": "Filtro hasta",
+  "Deutsch": "Filter bis",
+  "Français": "Filtre jusqu'à",
+  "한국어": "필터 끝",
+  "中文": "滤波终点",
+  "العربية": "المرشّح إلى",
+  "Tiếng Việt": "Bộ lọc tới"
+ },
+ "Depth": {
+  "日本語": "深さ",
+  "Español": "Profundidad",
+  "Deutsch": "Tiefe",
+  "Français": "Profondeur",
+  "한국어": "깊이",
+  "中文": "深度",
+  "العربية": "العمق",
+  "Tiếng Việt": "Độ sâu"
+ },
+ "Starts at": {
+  "日本語": "開始",
+  "Español": "Empieza en",
+  "Deutsch": "Beginnt bei",
+  "Français": "Commence à",
+  "한국어": "시작",
+  "中文": "起始",
+  "العربية": "يبدأ عند",
+  "Tiếng Việt": "Bắt đầu ở"
+ },
+ "Ends at": {
+  "日本語": "終了",
+  "Español": "Termina en",
+  "Deutsch": "Endet bei",
+  "Français": "Finit à",
+  "한국어": "끝",
+  "中文": "结束",
+  "العربية": "ينتهي عند",
+  "Tiếng Việt": "Kết thúc ở"
+ },
+ "Pattern": {
+  "日本語": "パターン",
+  "Español": "Patrón",
+  "Deutsch": "Muster",
+  "Français": "Motif",
+  "한국어": "패턴",
+  "中文": "模式",
+  "العربية": "النمط",
+  "Tiếng Việt": "Kiểu"
+ },
+ "Pointed": {
+  "日本語": "尖った",
+  "Español": "Picudo",
+  "Deutsch": "Spitz",
+  "Français": "Pointu",
+  "한국어": "뾰족하게",
+  "中文": "尖锐",
+  "العربية": "مدبّب",
+  "Tiếng Việt": "Nhọn"
+ },
+ "Chopped": {
+  "日本語": "刻む",
+  "Español": "Cortado",
+  "Deutsch": "Zerhackt",
+  "Français": "Haché",
+  "한국어": "끊어지게",
+  "中文": "切碎",
+  "العربية": "متقطّع",
+  "Tiếng Việt": "Cắt khúc"
+ },
+ "1/8 triplet": {
+  "日本語": "8 分 3 連符",
+  "Español": "Tresillo de 1/8",
+  "Deutsch": "1/8-Triole",
+  "Français": "Triolet de croche",
+  "한국어": "8분 셋잇단",
+  "中文": "八分三连音",
+  "العربية": "ثلاثية 1/8",
+  "Tiếng Việt": "Chùm ba 1/8"
+ },
+ "Low comes up early, high holds back and rushes in at the end": {
+  "日本語": "低いと早く上がり、高いと溜めて最後に一気に来ます",
+  "Español": "Bajo sube pronto; alto se contiene y llega de golpe al final",
+  "Deutsch": "Niedrig steigt früh, hoch hält sich zurück und schießt am Ende herein",
+  "Français": "Bas monte tôt ; haut se retient et déboule à la fin",
+  "한국어": "낮으면 일찍 올라오고, 높으면 참았다가 끝에 몰아칩니다",
+  "中文": "低值时较早升起，高值时先压住、最后猛冲",
+  "العربية": "المنخفض يصعد مبكرًا، والعالي يتمهّل ثم يندفع في النهاية",
+  "Tiếng Việt": "Thấp thì lên sớm, cao thì giữ lại rồi dồn lên ở cuối"
+ },
+ "Below zero it falls instead": {
+  "日本語": "0 未満では下がります",
+  "Español": "Por debajo de cero, baja",
+  "Deutsch": "Unter null fällt er stattdessen",
+  "Français": "En dessous de zéro, il descend",
+  "한국어": "0 미만이면 대신 내려갑니다",
+  "中文": "低于零时改为下降",
+  "العربية": "تحت الصفر ينخفض بدلًا من ذلك",
+  "Tiếng Việt": "Dưới 0 thì đi xuống"
+ },
+ "Reverse swell": {
+  "日本語": "リバーススウェル",
+  "Español": "Crescendo inverso",
+  "Deutsch": "Rückwärts-Swell",
+  "Français": "Montée inversée",
+  "한국어": "리버스 스웰",
+  "中文": "反向渐强",
+  "العربية": "تصاعد معكوس",
+  "Tiếng Việt": "Dâng ngược"
+ },
+ "Swell level": {
+  "日本語": "スウェルの音量",
+  "Español": "Nivel del crescendo",
+  "Deutsch": "Swell-Pegel",
+  "Français": "Niveau de la montée",
+  "한국어": "스웰 레벨",
+  "中文": "渐强音量",
+  "العربية": "مستوى التصاعد",
+  "Tiếng Việt": "Mức dâng"
+ },
+ "The hit and its room played backwards, rushing into the moment": {
+  "日本語": "ヒットとその響きを逆再生し、モーメントへ向けて押し寄せます",
+  "Español": "El golpe y su sala, al revés, lanzándose hacia el momento",
+  "Deutsch": "Der Schlag und sein Raum rückwärts – stürmt auf den Moment zu",
+  "Français": "Le coup et sa pièce joués à l'envers, fonçant vers le moment",
+  "한국어": "타격과 그 울림을 거꾸로 재생해 순간으로 몰아칩니다",
+  "中文": "将撞击及其房间回响倒放，冲向那一刻",
+  "العربية": "الضربة وغرفتها معكوستان، تندفعان نحو اللحظة",
+  "Tiếng Việt": "Cú đánh và tiếng vang phát ngược, dồn tới khoảnh khắc"
+ },
+ "Pitch drop": {
+  "日本語": "ピッチの落ち幅",
+  "Español": "Caída de tono",
+  "Deutsch": "Tonhöhenabfall",
+  "Français": "Chute de hauteur",
+  "한국어": "피치 하강",
+  "中文": "音高下降",
+  "العربية": "هبوط الحدّة",
+  "Tiếng Việt": "Độ hạ cao độ"
+ },
+ "Drop time": {
+  "日本語": "落ちる時間",
+  "Español": "Tiempo de caída",
+  "Deutsch": "Abfallzeit",
+  "Français": "Durée de la chute",
+  "한국어": "하강 시간",
+  "中文": "下降时间",
+  "العربية": "زمن الهبوط",
+  "Tiếng Việt": "Thời gian hạ"
+ },
+ "Decay": {
+  "日本語": "減衰",
+  "Español": "Caída",
+  "Deutsch": "Ausklingen",
+  "Français": "Déclin",
+  "한국어": "감쇠",
+  "中文": "衰减",
+  "العربية": "التلاشي",
+  "Tiếng Việt": "Độ tắt"
+ },
+ "Opens at": {
+  "日本語": "開き",
+  "Español": "Se abre en",
+  "Deutsch": "Öffnet bei",
+  "Français": "S'ouvre à",
+  "한국어": "열림",
+  "中文": "起始频率",
+  "العربية": "يفتح عند",
+  "Tiếng Việt": "Mở ở"
+ },
+ "Closes to": {
+  "日本語": "閉じ",
+  "Español": "Se cierra en",
+  "Deutsch": "Schließt bis",
+  "Français": "Se ferme à",
+  "한국어": "닫힘",
+  "中文": "收至",
+  "العربية": "يغلق إلى",
+  "Tiếng Việt": "Đóng về"
+ },
+ "Root": {
+  "日本語": "ルート",
+  "Español": "Fundamental",
+  "Deutsch": "Grundton",
+  "Français": "Fondamentale",
+  "한국어": "근음",
+  "中文": "根音",
+  "العربية": "الجذر",
+  "Tiếng Việt": "Nốt gốc"
+ },
+ "Root and fifth": {
+  "日本語": "ルートと 5 度",
+  "Español": "Fundamental y quinta",
+  "Deutsch": "Grundton und Quinte",
+  "Français": "Fondamentale et quinte",
+  "한국어": "근음과 5도",
+  "中文": "根音与五度",
+  "العربية": "الجذر والخامسة",
+  "Tiếng Việt": "Gốc và quãng năm"
+ },
+ "Root, fifth, octave": {
+  "日本語": "ルート・5 度・オクターブ",
+  "Español": "Fundamental, quinta, octava",
+  "Deutsch": "Grundton, Quinte, Oktave",
+  "Français": "Fondamentale, quinte, octave",
+  "한국어": "근음, 5도, 옥타브",
+  "中文": "根音、五度、八度",
+  "العربية": "الجذر والخامسة والأوكتاف",
+  "Tiếng Việt": "Gốc, quãng năm, quãng tám"
+ },
+ "Chord in the key": {
+  "日本語": "キーのコード",
+  "Español": "Acorde de la tonalidad",
+  "Deutsch": "Akkord der Tonart",
+  "Français": "Accord de la tonalité",
+  "한국어": "조성의 코드",
+  "中文": "调内和弦",
+  "العربية": "كورد المقام",
+  "Tiếng Việt": "Hợp âm theo tông"
+ },
+ "Suspended": {
+  "日本語": "サスペンデッド",
+  "Español": "Suspendido",
+  "Deutsch": "Vorhalt (sus)",
+  "Français": "Suspendu",
+  "한국어": "서스펜디드",
+  "中文": "挂留和弦",
+  "العربية": "معلّق",
+  "Tiếng Việt": "Treo (sus)"
+ },
+ "Sine wave": {
+  "日本語": "サイン波",
+  "Español": "Onda senoidal",
+  "Deutsch": "Sinuswelle",
+  "Français": "Onde sinusoïdale",
+  "한국어": "사인파",
+  "中文": "正弦波",
+  "العربية": "موجة جيبية",
+  "Tiếng Việt": "Sóng sin"
+ },
+ "Triangle wave": {
+  "日本語": "三角波",
+  "Español": "Onda triangular",
+  "Deutsch": "Dreieckwelle",
+  "Français": "Onde triangulaire",
+  "한국어": "삼각파",
+  "中文": "三角波",
+  "العربية": "موجة مثلثية",
+  "Tiếng Việt": "Sóng tam giác"
+ },
+ "Saw wave": {
+  "日本語": "ノコギリ波",
+  "Español": "Onda de sierra",
+  "Deutsch": "Sägezahnwelle",
+  "Français": "Onde en dents de scie",
+  "한국어": "톱니파",
+  "中文": "锯齿波",
+  "العربية": "موجة منشارية",
+  "Tiếng Việt": "Sóng răng cưa"
+ },
+ "Square wave": {
+  "日本語": "矩形波",
+  "Español": "Onda cuadrada",
+  "Deutsch": "Rechteckwelle",
+  "Français": "Onde carrée",
+  "한국어": "사각파",
+  "中文": "方波",
+  "العربية": "موجة مربعة",
+  "Tiếng Việt": "Sóng vuông"
+ },
+ "White noise": {
+  "日本語": "ホワイトノイズ",
+  "Español": "Ruido blanco",
+  "Deutsch": "Weißes Rauschen",
+  "Français": "Bruit blanc",
+  "한국어": "화이트 노이즈",
+  "中文": "白噪声",
+  "العربية": "ضجيج أبيض",
+  "Tiếng Việt": "Nhiễu trắng"
+ },
+ "Pink noise": {
+  "日本語": "ピンクノイズ",
+  "Español": "Ruido rosa",
+  "Deutsch": "Rosa Rauschen",
+  "Français": "Bruit rose",
+  "한국어": "핑크 노이즈",
+  "中文": "粉红噪声",
+  "العربية": "ضجيج وردي",
+  "Tiếng Việt": "Nhiễu hồng"
+ },
+ "Brown noise": {
+  "日本語": "ブラウンノイズ",
+  "Español": "Ruido marrón",
+  "Deutsch": "Braunes Rauschen",
+  "Français": "Bruit brun",
+  "한국어": "브라운 노이즈",
+  "中文": "布朗噪声",
+  "العربية": "ضجيج بني",
+  "Tiếng Việt": "Nhiễu nâu"
+ },
+ "A hit for the moment itself – a sub boom tuned to the song's key, a body and a crack on top, ringing out in a room – with a reversed swell into it if you like.": {
+  "日本語": "モーメントそのものへのヒット – 曲のキーに合わせたサブの低音、ボディとクラック、部屋に響く余韻 – お好みで逆再生のスウェルで導入も。",
+  "Español": "Un golpe para el momento en sí: un sub afinado en la tonalidad de la canción, cuerpo y un chasquido encima, resonando en una sala, y si quieres, un crescendo inverso hacia él.",
+  "Deutsch": "Ein Schlag für den Moment selbst – ein Sub-Boom in der Tonart des Songs, Körper und ein Knall darüber, der in einem Raum nachklingt – auf Wunsch mit einem Rückwärts-Swell hinein.",
+  "Français": "Un coup pour le moment lui-même – un sub accordé sur la tonalité du morceau, un corps et un claquement par-dessus, qui résonnent dans une pièce – avec, si vous voulez, une montée inversée.",
+  "한국어": "순간 그 자체를 위한 타격 – 곡의 조성에 맞춘 서브 붐, 그 위의 바디와 크랙, 방 안에 울리는 잔향 – 원하면 리버스 스웰로 진입도.",
+  "中文": "为那一刻本身而来的一击 – 按歌曲调性调音的低频轰鸣，加上主体与脆响，在房间中回荡 – 也可以加上反向渐强引入。",
+  "العربية": "ضربة للحظة نفسها – دويّ منخفض مضبوط على مقام الأغنية، مع جسم وطقطقة فوقه، يتردد في غرفة – ومعه تصاعد معكوس إن شئت.",
+  "Tiếng Việt": "Một cú đánh cho chính khoảnh khắc – tiếng sub trầm theo tông bài hát, phần thân và tiếng nứt phía trên, vang trong một căn phòng – kèm đoạn dâng ngược nếu muốn."
+ },
+ "Builds up to the moment and stops on it – noise opening up, a tone climbing in the song's key, a flutter that speeds up with the beat.": {
+  "日本語": "モーメントに向けて盛り上がり、そこで止まります – 開いていくノイズ、曲のキーで上昇するトーン、ビートとともに速まる揺れ。",
+  "Español": "Crece hasta el momento y se detiene en él: ruido que se abre, un tono que sube en la tonalidad de la canción y un trémolo que se acelera con el ritmo.",
+  "Deutsch": "Baut sich bis zum Moment auf und stoppt dort – sich öffnendes Rauschen, ein Ton, der in der Tonart des Songs steigt, ein Flattern, das mit dem Beat schneller wird.",
+  "Français": "Monte jusqu'au moment et s'y arrête – un bruit qui s'ouvre, un son qui grimpe dans la tonalité du morceau, un trémolo qui accélère avec le rythme.",
+  "한국어": "순간을 향해 고조되다 그 지점에서 멈춥니다 – 열리는 노이즈, 곡의 조성으로 상승하는 톤, 비트에 맞춰 빨라지는 떨림.",
+  "中文": "逐渐增强直到那一刻并停在那里 – 噪声逐渐打开，音调按歌曲的调性上升，颤动随节拍加速。",
+  "العربية": "يتصاعد حتى اللحظة ويتوقف عندها – ضجيج ينفتح، ونغمة تصعد بمقام الأغنية، وارتعاش يتسارع مع الإيقاع.",
+  "Tiếng Việt": "Dâng lên tới khoảnh khắc và dừng ở đó – tiếng nhiễu mở dần, một âm leo lên theo tông bài hát, độ rung nhanh dần theo nhịp."
+ },
+ "Comes in": {
+  "日本語": "入り方",
+  "Español": "Entrada",
+  "Deutsch": "Kommt herein",
+  "Français": "Arrivée",
+  "한국어": "들어옴",
+  "中文": "进入",
+  "العربية": "الدخول",
+  "Tiếng Việt": "Vào"
+ },
+ "Goes away": {
+  "日本語": "去り方",
+  "Español": "Salida",
+  "Deutsch": "Geht weg",
+  "Français": "Départ",
+  "한국어": "사라짐",
+  "中文": "离去",
+  "العربية": "الابتعاد",
+  "Tiếng Việt": "Đi xa"
+ },
+ "Peaks at": {
+  "日本語": "ピーク",
+  "Español": "Pico en",
+  "Deutsch": "Gipfelt bei",
+  "Français": "Culmine à",
+  "한국어": "정점",
+  "中文": "峰值频率",
+  "العربية": "يبلغ الذروة عند",
+  "Tiếng Việt": "Đỉnh ở"
+ },
+ "Bends up": {
+  "日本語": "上へのベンド",
+  "Español": "Sube",
+  "Deutsch": "Biegt nach oben",
+  "Français": "Monte de",
+  "한국어": "위로 벤드",
+  "中文": "向上弯音",
+  "العربية": "ينحني صعودًا",
+  "Tiếng Việt": "Uốn lên"
+ },
+ "Bends down": {
+  "日本語": "下へのベンド",
+  "Español": "Baja",
+  "Deutsch": "Biegt nach unten",
+  "Français": "Descend de",
+  "한국어": "아래로 벤드",
+  "中文": "向下弯音",
+  "العربية": "ينحني نزولًا",
+  "Tiếng Việt": "Uốn xuống"
+ },
+ "How far": {
+  "日本語": "移動幅",
+  "Español": "Cuánto",
+  "Deutsch": "Wie weit",
+  "Français": "Jusqu'où",
+  "한국어": "이동 폭",
+  "中文": "移动幅度",
+  "العربية": "إلى أي مدى",
+  "Tiếng Việt": "Bao xa"
+ },
+ "Spin": {
+  "日本語": "回転",
+  "Español": "Giro",
+  "Deutsch": "Drehung",
+  "Français": "Rotation",
+  "한국어": "회전",
+  "中文": "旋转",
+  "العربية": "الدوران",
+  "Tiếng Việt": "Xoay"
+ },
+ "Spin speed": {
+  "日本語": "回転速度",
+  "Español": "Velocidad de giro",
+  "Deutsch": "Drehtempo",
+  "Français": "Vitesse de rotation",
+  "한국어": "회전 속도",
+  "中文": "旋转速度",
+  "العربية": "سرعة الدوران",
+  "Tiếng Việt": "Tốc độ xoay"
+ },
+ "Low arrives early, high rushes in at the last moment": {
+  "日本語": "低いと早く来て、高いと最後の瞬間に一気に来ます",
+  "Español": "Bajo llega pronto; alto irrumpe en el último momento",
+  "Deutsch": "Niedrig kommt früh, hoch stürmt im letzten Moment herein",
+  "Français": "Bas arrive tôt ; haut déboule au dernier moment",
+  "한국어": "낮으면 일찍 오고, 높으면 마지막 순간에 몰아칩니다",
+  "中文": "低值时较早到来，高值时在最后一刻冲入",
+  "العربية": "المنخفض يصل مبكرًا، والعالي يندفع في اللحظة الأخيرة",
+  "Tiếng Việt": "Thấp thì đến sớm, cao thì ập tới vào phút chót"
+ },
+ "Low lingers, high is gone at once": {
+  "日本語": "低いと余韻が残り、高いとすぐ消えます",
+  "Español": "Bajo se queda; alto se va enseguida",
+  "Deutsch": "Niedrig hallt nach, hoch ist sofort weg",
+  "Français": "Bas s'attarde ; haut disparaît aussitôt",
+  "한국어": "낮으면 머물고, 높으면 바로 사라집니다",
+  "中文": "低值时余音缭绕，高值时立即消失",
+  "العربية": "المنخفض يبقى، والعالي يختفي فورًا",
+  "Tiếng Việt": "Thấp thì còn vương, cao thì tắt ngay"
+ },
+ "High turns the rush into a whistle": {
+  "日本語": "高いとラッシュが笛のような音になります",
+  "Español": "Alto convierte el silbido en un pitido",
+  "Deutsch": "Hoch macht aus dem Rauschen ein Pfeifen",
+  "Français": "Haut transforme le souffle en sifflement",
+  "한국어": "높으면 바람 소리가 휘파람처럼 됩니다",
+  "中文": "高值时呼啸声变成哨音",
+  "العربية": "العالي يحوّل الاندفاع إلى صفير",
+  "Tiếng Việt": "Cao biến tiếng gió thành tiếng huýt"
+ },
+ "A wobble, as if it turned over as it passed": {
+  "日本語": "通り過ぎながら回転するような揺れ",
+  "Español": "Un vaivén, como si girara al pasar",
+  "Deutsch": "Ein Wabern, als drehe es sich beim Vorbeifliegen",
+  "Français": "Une oscillation, comme s'il tournoyait en passant",
+  "한국어": "지나가며 뒤집히는 듯한 흔들림",
+  "中文": "一种摇晃，仿佛经过时在翻转",
+  "العربية": "تذبذب، كأنه ينقلب وهو يمر",
+  "Tiếng Việt": "Rung lắc, như thể nó lộn vòng khi bay qua"
+ },
+ "Drive": {
+  "日本語": "ドライブ",
+  "Español": "Saturación",
+  "Deutsch": "Drive",
+  "Français": "Saturation",
+  "한국어": "드라이브",
+  "中文": "过载",
+  "العربية": "التشبّع",
+  "Tiếng Việt": "Độ méo"
+ },
+ "Low cut": {
+  "日本語": "ローカット",
+  "Español": "Corte de graves",
+  "Deutsch": "Tiefenabsenkung",
+  "Français": "Coupe-bas",
+  "한국어": "로우 컷",
+  "中文": "低切",
+  "العربية": "قطع المنخفض",
+  "Tiếng Việt": "Cắt trầm"
+ },
+ "High cut": {
+  "日本語": "ハイカット",
+  "Español": "Corte de agudos",
+  "Deutsch": "Höhenabsenkung",
+  "Français": "Coupe-haut",
+  "한국어": "하이 컷",
+  "中文": "高切",
+  "العربية": "قطع العالي",
+  "Tiếng Việt": "Cắt cao"
+ },
+ "Echo": {
+  "日本語": "エコー",
+  "Español": "Eco",
+  "Deutsch": "Echo",
+  "Français": "Écho",
+  "한국어": "에코",
+  "中文": "回声",
+  "العربية": "الصدى",
+  "Tiếng Việt": "Tiếng vọng"
+ },
+ "Echo time": {
+  "日本語": "エコーの間隔",
+  "Español": "Tiempo del eco",
+  "Deutsch": "Echozeit",
+  "Français": "Temps de l'écho",
+  "한국어": "에코 간격",
+  "中文": "回声间隔",
+  "العربية": "زمن الصدى",
+  "Tiếng Việt": "Thời gian vọng"
+ },
+ "Echo repeats": {
+  "日本語": "エコーの繰り返し",
+  "Español": "Repeticiones del eco",
+  "Deutsch": "Echo-Wiederholungen",
+  "Français": "Répétitions de l'écho",
+  "한국어": "에코 반복",
+  "中文": "回声重复",
+  "العربية": "تكرارات الصدى",
+  "Tiếng Việt": "Số lần vọng"
+ },
+ "Dotted 1/8": {
+  "日本語": "付点 8 分",
+  "Español": "Corchea con puntillo",
+  "Deutsch": "Punktierte Achtel",
+  "Français": "Croche pointée",
+  "한국어": "점8분",
+  "中文": "附点八分",
+  "العربية": "ثُمن منقوط",
+  "Tiếng Việt": "Móc đơn chấm dôi"
+ },
+ "Dotted 1/4": {
+  "日本語": "付点 4 分",
+  "Español": "Negra con puntillo",
+  "Deutsch": "Punktierte Viertel",
+  "Français": "Noire pointée",
+  "한국어": "점4분",
+  "中文": "附点四分",
+  "العربية": "ربع منقوط",
+  "Tiếng Việt": "Đen chấm dôi"
+ },
+ "Reverb": {
+  "日本語": "リバーブ",
+  "Español": "Reverberación",
+  "Deutsch": "Hall",
+  "Français": "Réverbération",
+  "한국어": "리버브",
+  "中文": "混响",
+  "العربية": "التردد",
+  "Tiếng Việt": "Độ vang"
+ },
+ "Reverb size": {
+  "日本語": "リバーブの大きさ",
+  "Español": "Tamaño de la reverberación",
+  "Deutsch": "Hallgröße",
+  "Français": "Taille de la réverbération",
+  "한국어": "리버브 크기",
+  "中文": "混响大小",
+  "العربية": "حجم التردد",
+  "Tiếng Việt": "Độ lớn vang"
+ },
+ "Reverb brightness": {
+  "日本語": "リバーブの明るさ",
+  "Español": "Brillo de la reverberación",
+  "Deutsch": "Hallhelligkeit",
+  "Français": "Brillance de la réverbération",
+  "한국어": "리버브 밝기",
+  "中文": "混响明亮度",
+  "العربية": "سطوع التردد",
+  "Tiếng Việt": "Độ sáng vang"
+ },
+ "Pre-delay": {
+  "日本語": "プリディレイ",
+  "Español": "Predelay",
+  "Deutsch": "Pre-Delay",
+  "Français": "Pré-délai",
+  "한국어": "프리딜레이",
+  "中文": "预延迟",
+  "العربية": "التأخير المسبق",
+  "Tiếng Việt": "Trễ trước"
+ },
+ "Variation": {
+  "日本語": "バリエーション",
+  "Español": "Variación",
+  "Deutsch": "Variante",
+  "Français": "Variation",
+  "한국어": "변형",
+  "中文": "变体",
+  "العربية": "التنويع",
+  "Tiếng Việt": "Biến thể"
+ },
+ "The same settings with other noise – each number is its own take": {
+  "日本語": "同じ設定で別のノイズ – 番号ごとに別のテイクです",
+  "Español": "Los mismos ajustes con otro ruido: cada número es una toma distinta",
+  "Deutsch": "Dieselben Einstellungen mit anderem Rauschen – jede Zahl ist ein eigener Take",
+  "Français": "Les mêmes réglages avec un autre bruit – chaque numéro est une prise différente",
+  "한국어": "같은 설정에 다른 노이즈 – 번호마다 다른 테이크입니다",
+  "中文": "相同设置、不同噪声 – 每个编号都是一个版本",
+  "العربية": "الإعدادات نفسها بضجيج آخر – كل رقم نسخة مختلفة",
+  "Tiếng Việt": "Cùng cài đặt với tiếng nhiễu khác – mỗi số là một bản riêng"
+ },
+ "Another variation": {
+  "日本語": "別のバリエーション",
+  "Español": "Otra variación",
+  "Deutsch": "Eine andere Variante",
+  "Français": "Une autre variation",
+  "한국어": "다른 변형",
+  "中文": "换一个变体",
+  "العربية": "تنويع آخر",
+  "Tiếng Việt": "Biến thể khác"
+ },
+ "Every setting of this sound back to how it started": {
+  "日本語": "このサウンドのすべての設定を最初に戻します",
+  "Español": "Todos los ajustes de este sonido vuelven a como empezaron",
+  "Deutsch": "Alle Einstellungen dieses Sounds zurück auf den Anfang",
+  "Français": "Tous les réglages de ce son reviennent à leur départ",
+  "한국어": "이 사운드의 모든 설정을 처음으로 되돌립니다",
+  "中文": "将此音效的所有设置恢复为初始值",
+  "العربية": "كل إعدادات هذا الصوت تعود كما بدأت",
+  "Tiếng Việt": "Mọi cài đặt của âm thanh này trở về ban đầu"
+ },
+ "Click or drag to move through the sound – dragging lets you hear it": {
+  "日本語": "クリックまたはドラッグでサウンド内を移動 – ドラッグすると聴けます",
+  "Español": "Haz clic o arrastra para moverte por el sonido; al arrastrar lo oyes",
+  "Deutsch": "Klicken oder ziehen, um durch den Sound zu gehen – beim Ziehen hörst du ihn",
+  "Français": "Cliquez ou faites glisser pour parcourir le son – en glissant, vous l'entendez",
+  "한국어": "클릭하거나 드래그해 사운드 안을 이동 – 드래그하면 들립니다",
+  "中文": "点击或拖动以在音效中移动 – 拖动时可以听到",
+  "العربية": "انقر أو اسحب للتنقل في الصوت – عند السحب تسمعه",
+  "Tiếng Việt": "Nhấp hoặc kéo để di chuyển trong âm thanh – khi kéo sẽ nghe được"
+ },
+ "Back to the start": {
+  "日本語": "先頭に戻る",
+  "Español": "Volver al principio",
+  "Deutsch": "Zurück zum Anfang",
+  "Français": "Retour au début",
+  "한국어": "처음으로",
+  "中文": "回到开头",
+  "العربية": "العودة إلى البداية",
+  "Tiếng Việt": "Về đầu"
+ },
+ "Making the sound…": {
+  "日本語": "サウンドを作成中…",
+  "Español": "Creando el sonido…",
+  "Deutsch": "Sound wird erstellt…",
+  "Français": "Création du son…",
+  "한국어": "사운드 만드는 중…",
+  "中文": "正在生成音效…",
+  "العربية": "جارٍ صنع الصوت…",
+  "Tiếng Việt": "Đang tạo âm thanh…"
+ },
+ "on the moment": {
+  "日本語": "モーメント上",
+  "Español": "en el momento",
+  "Deutsch": "auf dem Moment",
+  "Français": "sur le moment",
+  "한국어": "순간 위치",
+  "中文": "正在那一刻",
+  "العربية": "عند اللحظة",
+  "Tiếng Việt": "đúng khoảnh khắc"
+ },
+ "{n} beats before the moment": {
+  "日本語": "モーメントの {n} 拍前",
+  "Español": "{n} tiempos antes del momento",
+  "Deutsch": "{n} Schläge vor dem Moment",
+  "Français": "{n} temps avant le moment",
+  "한국어": "순간 {n}박 전",
+  "中文": "那一刻之前 {n} 拍",
+  "العربية": "قبل اللحظة بـ {n} نبضات",
+  "Tiếng Việt": "{n} phách trước khoảnh khắc"
+ },
+ "{n} beats after the moment": {
+  "日本語": "モーメントの {n} 拍後",
+  "Español": "{n} tiempos después del momento",
+  "Deutsch": "{n} Schläge nach dem Moment",
+  "Français": "{n} temps après le moment",
+  "한국어": "순간 {n}박 후",
+  "中文": "那一刻之后 {n} 拍",
+  "العربية": "بعد اللحظة بـ {n} نبضات",
+  "Tiếng Việt": "{n} phách sau khoảnh khắc"
+ },
+ "¼ beat": {
+  "日本語": "¼ 拍",
+  "Español": "¼ tiempo",
+  "Deutsch": "¼ Schlag",
+  "Français": "¼ temps",
+  "한국어": "¼박",
+  "中文": "¼ 拍",
+  "العربية": "ربع نبضة",
+  "Tiếng Việt": "¼ phách"
+ },
+ "½ bar": {
+  "日本語": "½ 小節",
+  "Español": "½ compás",
+  "Deutsch": "½ Takt",
+  "Français": "½ mesure",
+  "한국어": "½마디",
+  "中文": "½ 小节",
+  "العربية": "نصف مازورة",
+  "Tiếng Việt": "½ ô nhịp"
+ },
+ "Start from": {
+  "日本語": "スタート地点",
+  "Español": "Empezar desde",
+  "Deutsch": "Ausgangspunkt",
+  "Français": "Partir de",
+  "한국어": "시작점",
+  "中文": "从这里开始",
+  "العربية": "ابدأ من",
+  "Tiếng Việt": "Bắt đầu từ"
+ },
+ "Layers": {
+  "日本語": "レイヤー",
+  "Español": "Capas",
+  "Deutsch": "Ebenen",
+  "Français": "Couches",
+  "한국어": "레이어",
+  "中文": "层",
+  "العربية": "الطبقات",
+  "Tiếng Việt": "Lớp"
+ },
+ "Finishing": {
+  "日本語": "仕上げ",
+  "Español": "Acabado",
+  "Deutsch": "Feinschliff",
+  "Français": "Finitions",
+  "한국어": "마무리",
+  "中文": "收尾",
+  "العربية": "اللمسات الأخيرة",
+  "Tiếng Việt": "Hoàn thiện"
+ },
+ "Double-click to reset": {
+  "日本語": "ダブルクリックでリセット",
+  "Español": "Doble clic para restablecer",
+  "Deutsch": "Doppelklick zum Zurücksetzen",
+  "Français": "Double-cliquez pour réinitialiser",
+  "한국어": "더블클릭하여 재설정",
+  "中文": "双击重置",
+  "العربية": "انقر نقرًا مزدوجًا لإعادة الضبط",
+  "Tiếng Việt": "Nhấp đúp để đặt lại"
+ },
+ "Changed from how it started": {
+  "日本語": "初期状態から変更されています",
+  "Español": "Cambiado respecto al inicio",
+  "Deutsch": "Gegenüber dem Anfang geändert",
+  "Français": "Modifié depuis le départ",
+  "한국어": "처음 상태에서 바뀜",
+  "中文": "已与初始值不同",
+  "العربية": "تغيّر عمّا بدأ عليه",
+  "Tiếng Việt": "Đã khác với ban đầu"
+ },
+ "Turn this layer on or off – its settings are kept": {
+  "日本語": "このレイヤーのオン/オフ – 設定は保持されます",
+  "Español": "Activa o desactiva esta capa: sus ajustes se conservan",
+  "Deutsch": "Diese Ebene ein- oder ausschalten – ihre Einstellungen bleiben",
+  "Français": "Activer ou désactiver cette couche – ses réglages sont gardés",
+  "한국어": "이 레이어 켜기/끄기 – 설정은 유지됩니다",
+  "中文": "打开或关闭此层 – 其设置会保留",
+  "العربية": "شغّل هذه الطبقة أو أوقفها – تبقى إعداداتها",
+  "Tiếng Việt": "Bật hoặc tắt lớp này – cài đặt vẫn được giữ"
+ },
+ "This group back to how it started": {
+  "日本語": "このグループを初期状態に戻す",
+  "Español": "Este grupo vuelve a como empezó",
+  "Deutsch": "Diese Gruppe zurück auf den Anfang",
+  "Français": "Ce groupe revient à son départ",
+  "한국어": "이 그룹을 처음 상태로",
+  "中文": "将此组恢复为初始值",
+  "العربية": "هذه المجموعة تعود كما بدأت",
+  "Tiếng Việt": "Nhóm này trở về ban đầu"
+ },
+ "Starts from": {
+  "日本語": "開始レベル",
+  "Español": "Empieza desde",
+  "Deutsch": "Beginnt bei",
+  "Français": "Part de",
+  "한국어": "시작 레벨",
+  "中文": "起始音量",
+  "العربية": "يبدأ من",
+  "Tiếng Việt": "Bắt đầu từ mức"
+ },
+ "How loud it already is at its start": {
+  "日本語": "開始時点でどれだけ大きいか",
+  "Español": "Lo fuerte que ya suena al empezar",
+  "Deutsch": "Wie laut er am Anfang schon ist",
+  "Français": "Son niveau dès le début",
+  "한국어": "시작할 때 이미 얼마나 큰지",
+  "中文": "开始时就已有的音量",
+  "العربية": "مدى ارتفاعه منذ بدايته",
+  "Tiếng Việt": "Độ lớn ngay từ đầu"
+ },
+ "Vibrato": {
+  "日本語": "ビブラート",
+  "Español": "Vibrato",
+  "Deutsch": "Vibrato",
+  "Français": "Vibrato",
+  "한국어": "비브라토",
+  "中文": "颤音",
+  "العربية": "الاهتزاز",
+  "Tiếng Việt": "Rung giọng"
+ },
+ "Vibrato speed": {
+  "日本語": "ビブラートの速さ",
+  "Español": "Velocidad del vibrato",
+  "Deutsch": "Vibrato-Tempo",
+  "Français": "Vitesse du vibrato",
+  "한국어": "비브라토 속도",
+  "中文": "颤音速度",
+  "العربية": "سرعة الاهتزاز",
+  "Tiếng Việt": "Tốc độ rung giọng"
+ },
+ "Bend": {
+  "日本語": "ベンド",
+  "Español": "Inflexión",
+  "Deutsch": "Biegung",
+  "Français": "Glissement",
+  "한국어": "벤드",
+  "中文": "弯音",
+  "العربية": "الانحناء",
+  "Tiếng Việt": "Uốn"
+ },
+ "The notes slide down (or up) as they ring": {
+  "日本語": "響きながら音が下がる（または上がる）",
+  "Español": "Las notas bajan (o suben) mientras suenan",
+  "Deutsch": "Die Töne gleiten beim Klingen nach unten (oder oben)",
+  "Français": "Les notes glissent vers le bas (ou le haut) en résonnant",
+  "한국어": "울리는 동안 음이 내려갑니다(또는 올라갑니다)",
+  "中文": "音符在回响时向下（或向上）滑动",
+  "العربية": "تنزلق النغمات نزولًا (أو صعودًا) وهي ترن",
+  "Tiếng Việt": "Các nốt trượt xuống (hoặc lên) khi ngân"
+ },
+ "Ring": {
+  "日本語": "リング",
+  "Español": "Resonancia metálica",
+  "Deutsch": "Klang",
+  "Français": "Résonance",
+  "한국어": "링",
+  "中文": "金属鸣响",
+  "العربية": "الرنين المعدني",
+  "Tiếng Việt": "Tiếng ngân"
+ },
+ "A struck-metal ring on the key's notes": {
+  "日本語": "キーの音で鳴る、打たれた金属の響き",
+  "Español": "Un repique metálico en las notas de la tonalidad",
+  "Deutsch": "Ein angeschlagener Metallklang auf den Tönen der Tonart",
+  "Français": "Une résonance de métal frappé sur les notes de la tonalité",
+  "한국어": "조성의 음으로 울리는 금속 타격음",
+  "中文": "以调内音符奏出的金属敲击声",
+  "العربية": "رنين معدن مطروق على نغمات المقام",
+  "Tiếng Việt": "Tiếng kim loại bị gõ theo các nốt của tông"
+ },
+ "Metal": {
+  "日本語": "金属感",
+  "Español": "Metal",
+  "Deutsch": "Metall",
+  "Français": "Métal",
+  "한국어": "금속감",
+  "中文": "金属感",
+  "العربية": "المعدن",
+  "Tiếng Việt": "Chất kim loại"
+ },
+ "Low rings like a bell, high clangs like sheet metal": {
+  "日本語": "低いと鐘のように、高いと金属板のように鳴ります",
+  "Español": "Bajo suena como una campana; alto, como una chapa",
+  "Deutsch": "Niedrig klingt wie eine Glocke, hoch scheppert wie Blech",
+  "Français": "Bas sonne comme une cloche, haut claque comme une tôle",
+  "한국어": "낮으면 종처럼, 높으면 금속판처럼 울립니다",
+  "中文": "低值像钟声，高值像金属板的铿锵声",
+  "العربية": "المنخفض يرنّ كالجرس، والعالي يقرقع كصفيحة معدن",
+  "Tiếng Việt": "Thấp ngân như chuông, cao chát như tấm kim loại"
+ },
+ "Low end": {
+  "日本語": "低域",
+  "Español": "Graves",
+  "Deutsch": "Tiefen",
+  "Français": "Graves",
+  "한국어": "저음",
+  "中文": "低频",
+  "العربية": "الطبقة المنخفضة",
+  "Tiếng Việt": "Âm trầm"
+ },
+ "A deep rumble under it, for something big going past": {
+  "日本語": "大きなものが通り過ぎるような、下に響く深い轟き",
+  "Español": "Un retumbar grave por debajo, para algo grande que pasa",
+  "Deutsch": "Ein tiefes Grollen darunter – für etwas Großes, das vorbeizieht",
+  "Français": "Un grondement grave dessous, pour quelque chose d'énorme qui passe",
+  "한국어": "큰 것이 지나가는 듯한 깊은 우르릉 소리",
+  "中文": "其下深沉的轰鸣，像有庞然大物经过",
+  "العربية": "هدير عميق تحته، لشيء ضخم يمرّ",
+  "Tiếng Việt": "Tiếng ầm trầm bên dưới, như vật gì lớn lướt qua"
+ },
+ "Up to": {
+  "日本語": "上限",
+  "Español": "Hasta",
+  "Deutsch": "Bis",
+  "Français": "Jusqu'à",
+  "한국어": "상한",
+  "中文": "最高到",
+  "العربية": "حتى",
+  "Tiếng Việt": "Tối đa"
+ },
+ "Lo-fi": {
+  "日本語": "ローファイ",
+  "Español": "Lo-fi",
+  "Deutsch": "Lo-Fi",
+  "Français": "Lo-fi",
+  "한국어": "로파이",
+  "中文": "低保真",
+  "العربية": "جودة منخفضة",
+  "Tiếng Việt": "Lo-fi"
+ },
+ "Fewer steps of loudness – a gritty, digital edge": {
+  "日本語": "音量の段階を減らす – ざらついたデジタルな質感",
+  "Español": "Menos escalones de volumen: un borde digital y áspero",
+  "Deutsch": "Weniger Lautstärkestufen – eine körnige, digitale Kante",
+  "Français": "Moins de paliers de volume – un grain numérique",
+  "한국어": "음량 단계를 줄여 거칠고 디지털한 질감",
+  "中文": "更少的音量层级 – 粗糙的数字感",
+  "العربية": "درجات أقل للارتفاع – حافة رقمية خشنة",
+  "Tiếng Việt": "Ít bậc âm lượng hơn – chất số hóa sần sùi"
+ },
+ "Punch": {
+  "日本語": "パンチ",
+  "Español": "Pegada",
+  "Deutsch": "Druck",
+  "Français": "Punch",
+  "한국어": "펀치",
+  "中文": "冲击力",
+  "العربية": "القوة",
+  "Tiếng Việt": "Độ đanh"
+ },
+ "Squeezes it louder and denser": {
+  "日本語": "圧縮して大きく濃くします",
+  "Español": "Lo comprime: más fuerte y denso",
+  "Deutsch": "Presst ihn lauter und dichter",
+  "Français": "Le compresse, plus fort et plus dense",
+  "한국어": "압축해 더 크고 촘촘하게",
+  "中文": "压缩得更响更密",
+  "العربية": "يضغطه ليصبح أعلى وأكثف",
+  "Tiếng Việt": "Nén cho to và dày hơn"
+ },
+ "Output": {
+  "日本語": "出力",
+  "Español": "Salida",
+  "Deutsch": "Ausgabe",
+  "Français": "Sortie",
+  "한국어": "출력",
+  "中文": "输出",
+  "العربية": "الإخراج",
+  "Tiếng Việt": "Đầu ra"
+ },
+ "How loud its loudest moment is": {
+  "日本語": "最も大きい瞬間の音量",
+  "Español": "Lo fuerte que suena su momento más alto",
+  "Deutsch": "Wie laut seine lauteste Stelle ist",
+  "Français": "Le niveau de son moment le plus fort",
+  "한국어": "가장 큰 순간의 음량",
+  "中文": "最响时刻的音量",
+  "العربية": "مدى ارتفاع أعلى لحظة فيه",
+  "Tiếng Việt": "Độ lớn tại khoảnh khắc to nhất"
+ },
+ "Transpose": {
+  "日本語": "移調",
+  "Español": "Transponer",
+  "Deutsch": "Transponieren",
+  "Français": "Transposer",
+  "한국어": "조옮김",
+  "中文": "移调",
+  "العربية": "التحويل",
+  "Tiếng Việt": "Dịch giọng"
+ },
+ "Every note moved up or down from the song's key": {
+  "日本語": "すべての音を曲のキーから上下に移動します",
+  "Español": "Cada nota sube o baja desde la tonalidad de la canción",
+  "Deutsch": "Jeder Ton wird von der Tonart des Songs aus nach oben oder unten verschoben",
+  "Français": "Chaque note est déplacée vers le haut ou le bas depuis la tonalité du morceau",
+  "한국어": "모든 음을 곡의 조성에서 위아래로 옮깁니다",
+  "中文": "所有音符从歌曲调性上移或下移",
+  "العربية": "كل نغمة تُنقل صعودًا أو نزولًا عن مقام الأغنية",
+  "Tiếng Việt": "Mọi nốt được dời lên hoặc xuống so với tông bài hát"
+ },
+ "Fade in": {
+  "日本語": "フェードイン",
+  "Español": "Fundido de entrada",
+  "Deutsch": "Einblenden",
+  "Français": "Fondu d'entrée",
+  "한국어": "페이드 인",
+  "中文": "淡入",
+  "العربية": "تلاشي الدخول",
+  "Tiếng Việt": "Mờ dần vào"
+ },
+ "Fade out": {
+  "日本語": "フェードアウト",
+  "Español": "Fundido de salida",
+  "Deutsch": "Ausblenden",
+  "Français": "Fondu de sortie",
+  "한국어": "페이드 아웃",
+  "中文": "淡出",
+  "العربية": "تلاشي الخروج",
+  "Tiếng Việt": "Mờ dần ra"
+ },
+ "Backwards": {
+  "日本語": "逆再生",
+  "Español": "Al revés",
+  "Deutsch": "Rückwärts",
+  "Français": "À l'envers",
+  "한국어": "거꾸로",
+  "中文": "倒放",
+  "العربية": "معكوس",
+  "Tiếng Việt": "Phát ngược"
+ },
+ "The whole sound played in reverse – a riser becomes a downlifter": {
+  "日本語": "サウンド全体を逆再生 – ライザーがダウンリフターになります",
+  "Español": "Todo el sonido al revés: un riser se convierte en un downlifter",
+  "Deutsch": "Der ganze Sound rückwärts – aus einem Riser wird ein Downlifter",
+  "Français": "Tout le son à l'envers – un riser devient un downlifter",
+  "한국어": "사운드 전체를 거꾸로 – 라이저가 다운리프터가 됩니다",
+  "中文": "整个音效倒放 – 上升音效变成下降音效",
+  "العربية": "الصوت كله معكوسًا – يصبح الرايزر صوتًا هابطًا",
+  "Tiếng Việt": "Cả âm thanh phát ngược – riser thành downlifter"
+ },
+ "Cinematic": {
+  "日本語": "シネマティック",
+  "Español": "Cinematográfico",
+  "Deutsch": "Filmisch",
+  "Français": "Cinématique",
+  "한국어": "시네마틱",
+  "中文": "电影感",
+  "العربية": "سينمائي",
+  "Tiếng Việt": "Điện ảnh"
+ },
+ "Noise sweep": {
+  "日本語": "ノイズスイープ",
+  "Español": "Barrido de ruido",
+  "Deutsch": "Rausch-Sweep",
+  "Français": "Balayage de bruit",
+  "한국어": "노이즈 스윕",
+  "中文": "噪声扫频",
+  "العربية": "مسح الضجيج",
+  "Tiếng Việt": "Quét nhiễu"
+ },
+ "Tonal swell": {
+  "日本語": "トーンの盛り上がり",
+  "Español": "Crescendo tonal",
+  "Deutsch": "Tonaler Swell",
+  "Français": "Montée tonale",
+  "한국어": "톤 스웰",
+  "中文": "音调渐强",
+  "العربية": "تصاعد نغمي",
+  "Tiếng Việt": "Dâng theo tông"
+ },
+ "Glitchy": {
+  "日本語": "グリッチ",
+  "Español": "Glitch",
+  "Deutsch": "Glitchig",
+  "Français": "Glitch",
+  "한국어": "글리치",
+  "中文": "故障风",
+  "العربية": "متقطّع رقميًا",
+  "Tiếng Việt": "Glitch"
+ },
+ "Downlifter": {
+  "日本語": "ダウンリフター",
+  "Español": "Downlifter",
+  "Deutsch": "Downlifter",
+  "Français": "Downlifter",
+  "한국어": "다운리프터",
+  "中文": "下降音效",
+  "العربية": "صوت هابط",
+  "Tiếng Việt": "Downlifter"
+ },
+ "Deep boom": {
+  "日本語": "深いブーム",
+  "Español": "Boom profundo",
+  "Deutsch": "Tiefer Boom",
+  "Français": "Boum profond",
+  "한국어": "깊은 붐",
+  "中文": "深沉轰鸣",
+  "العربية": "دويّ عميق",
+  "Tiếng Việt": "Tiếng nổ trầm"
+ },
+ "Trailer hit": {
+  "日本語": "トレーラーヒット",
+  "Español": "Golpe de tráiler",
+  "Deutsch": "Trailer-Schlag",
+  "Français": "Coup de bande-annonce",
+  "한국어": "트레일러 히트",
+  "中文": "预告片冲击",
+  "العربية": "ضربة إعلان سينمائي",
+  "Tiếng Việt": "Cú đánh trailer"
+ },
+ "Punchy": {
+  "日本語": "パンチの効いた",
+  "Español": "Contundente",
+  "Deutsch": "Knackig",
+  "Français": "Percutant",
+  "한국어": "펀치감 있는",
+  "中文": "有力",
+  "العربية": "قويّ",
+  "Tiếng Việt": "Đanh gọn"
+ },
+ "Metallic": {
+  "日本語": "メタリック",
+  "Español": "Metálico",
+  "Deutsch": "Metallisch",
+  "Français": "Métallique",
+  "한국어": "메탈릭",
+  "中文": "金属感",
+  "العربية": "معدني",
+  "Tiếng Việt": "Kim loại"
+ },
+ "Reverse into hit": {
+  "日本語": "逆再生からヒット",
+  "Español": "Inverso hacia el golpe",
+  "Deutsch": "Rückwärts in den Schlag",
+  "Français": "Inversé vers le coup",
+  "한국어": "리버스에서 히트로",
+  "中文": "倒放冲入撞击",
+  "العربية": "معكوس نحو الضربة",
+  "Tiếng Việt": "Ngược vào cú đánh"
+ },
+ "Swish": {
+  "日本語": "スウィッシュ",
+  "Español": "Zumbido rápido",
+  "Deutsch": "Zisch",
+  "Français": "Sifflement bref",
+  "한국어": "스위시",
+  "中文": "嗖",
+  "العربية": "حفيف",
+  "Tiếng Việt": "Vút"
+ },
+ "Fly-by": {
+  "日本語": "フライバイ",
+  "Español": "Paso rasante",
+  "Deutsch": "Vorbeiflug",
+  "Français": "Passage",
+  "한국어": "플라이바이",
+  "中文": "飞掠",
+  "العربية": "مرور سريع",
+  "Tiếng Việt": "Lướt qua"
+ },
+ "Whistle": {
+  "日本語": "ホイッスル",
+  "Español": "Silbido",
+  "Deutsch": "Pfeifen",
+  "Français": "Sifflet",
+  "한국어": "휘파람",
+  "中文": "哨音",
+  "العربية": "صفير",
+  "Tiếng Việt": "Huýt sáo"
+ },
+ "Deep swoosh": {
+  "日本語": "深いスウッシュ",
+  "Español": "Barrido grave",
+  "Deutsch": "Tiefes Rauschen",
+  "Français": "Souffle grave",
+  "한국어": "깊은 스우시",
+  "中文": "深沉呼啸",
+  "العربية": "اندفاع عميق",
+  "Tiếng Việt": "Vút trầm"
+ },
+ "Nothing saved yet – set a sound up and save it to use again.": {
+  "日本語": "まだ保存されたものはありません – サウンドを作って保存すると再利用できます。",
+  "Español": "Aún no hay nada guardado: prepara un sonido y guárdalo para usarlo de nuevo.",
+  "Deutsch": "Noch nichts gespeichert – stell einen Sound ein und speichere ihn, um ihn wiederzuverwenden.",
+  "Français": "Rien d'enregistré pour l'instant – réglez un son et enregistrez-le pour le réutiliser.",
+  "한국어": "아직 저장된 것이 없습니다 – 사운드를 만들어 저장하면 다시 쓸 수 있습니다.",
+  "中文": "还没有保存任何内容 – 调好一个音效并保存，以便再次使用。",
+  "العربية": "لم يُحفظ شيء بعد – اضبط صوتًا واحفظه لتستخدمه مجددًا.",
+  "Tiếng Việt": "Chưa có gì được lưu – hãy chỉnh một âm thanh và lưu để dùng lại."
+ },
+ "The saved sound goes. Sounds already placed on a timeline stay as they are.": {
+  "日本語": "保存したサウンドは削除されます。タイムラインに配置済みのサウンドはそのままです。",
+  "Español": "El sonido guardado se elimina. Los sonidos ya colocados en una línea de tiempo se quedan como están.",
+  "Deutsch": "Der gespeicherte Sound wird gelöscht. Bereits in einer Timeline platzierte Sounds bleiben, wie sie sind.",
+  "Français": "Le son enregistré est supprimé. Les sons déjà placés sur une timeline restent tels quels.",
+  "한국어": "저장된 사운드가 삭제됩니다. 이미 타임라인에 배치된 사운드는 그대로입니다.",
+  "中文": "保存的音效将被删除。已放在时间线上的音效保持不变。",
+  "العربية": "يُحذف الصوت المحفوظ. وتبقى الأصوات الموضوعة على مخطط زمني كما هي.",
+  "Tiếng Việt": "Âm thanh đã lưu sẽ bị xóa. Những âm thanh đã đặt trên timeline vẫn giữ nguyên."
+ },
+ "Rename the sound": {
+  "日本語": "サウンドの名前を変更",
+  "Español": "Renombrar el sonido",
+  "Deutsch": "Sound umbenennen",
+  "Français": "Renommer le son",
+  "한국어": "사운드 이름 바꾸기",
+  "中文": "重命名音效",
+  "العربية": "إعادة تسمية الصوت",
+  "Tiếng Việt": "Đổi tên âm thanh"
+ },
+ "That's as many sounds as can be saved – delete some first.": {
+  "日本語": "保存できるサウンドの数の上限です – まずいくつか削除してください。",
+  "Español": "Ya hay tantos sonidos guardados como se puede: elimina algunos primero.",
+  "Deutsch": "Mehr Sounds lassen sich nicht speichern – lösche zuerst einige.",
+  "Français": "C'est le nombre maximal de sons enregistrés – supprimez-en d'abord.",
+  "한국어": "저장할 수 있는 사운드 수의 한도입니다 – 먼저 몇 개를 삭제하세요.",
+  "中文": "已达到可保存音效的上限 – 请先删除一些。",
+  "العربية": "هذا أقصى عدد من الأصوات يمكن حفظه – احذف بعضها أولًا.",
+  "Tiếng Việt": "Đã đạt số âm thanh tối đa có thể lưu – hãy xóa bớt trước."
+ },
+ "Save as a new sound": {
+  "日本語": "新しいサウンドとして保存",
+  "Español": "Guardar como sonido nuevo",
+  "Deutsch": "Als neuen Sound speichern",
+  "Français": "Enregistrer comme nouveau son",
+  "한국어": "새 사운드로 저장",
+  "中文": "另存为新音效",
+  "العربية": "احفظ كصوت جديد",
+  "Tiếng Việt": "Lưu thành âm thanh mới"
+ },
+ "Save what's set now as a new sound": {
+  "日本語": "現在の設定を新しいサウンドとして保存",
+  "Español": "Guardar lo que está puesto ahora como sonido nuevo",
+  "Deutsch": "Die aktuellen Einstellungen als neuen Sound speichern",
+  "Français": "Enregistrer les réglages actuels comme nouveau son",
+  "한국어": "지금 설정을 새 사운드로 저장",
+  "中文": "将当前设置另存为新音效",
+  "العربية": "احفظ الإعدادات الحالية كصوت جديد",
+  "Tiếng Việt": "Lưu cài đặt hiện tại thành âm thanh mới"
+ },
+ "Click to start from it – right-click to rename or delete": {
+  "日本語": "クリックでここから開始 – 右クリックで名前変更・削除",
+  "Español": "Clic para empezar desde aquí; clic derecho para renombrar o eliminar",
+  "Deutsch": "Klicken, um davon auszugehen – Rechtsklick zum Umbenennen oder Löschen",
+  "Français": "Cliquez pour partir de lui – clic droit pour renommer ou supprimer",
+  "한국어": "클릭하면 여기서 시작 – 오른쪽 클릭으로 이름 바꾸기 또는 삭제",
+  "中文": "点击以从它开始 – 右键可重命名或删除",
+  "العربية": "انقر للبدء منه – انقر بالزر الأيمن لإعادة التسمية أو الحذف",
+  "Tiếng Việt": "Nhấp để bắt đầu từ đây – nhấp phải để đổi tên hoặc xóa"
+ },
+ "Keys": {
+  "日本語": "キー",
+  "Español": "Teclas",
+  "Deutsch": "Tasten",
+  "Français": "Clavier",
+  "한국어": "건반",
+  "中文": "键盘",
+  "العربية": "المفاتيح",
+  "Tiếng Việt": "Phím đàn"
+ },
+ "Instrument": {
+  "日本語": "楽器",
+  "Español": "Instrumento",
+  "Deutsch": "Instrument",
+  "Français": "Instrument",
+  "한국어": "악기",
+  "中文": "乐器",
+  "العربية": "الآلة",
+  "Tiếng Việt": "Nhạc cụ"
+ },
+ "Pad": {
+  "日本語": "パッド",
+  "Español": "Pad",
+  "Deutsch": "Pad",
+  "Français": "Nappe",
+  "한국어": "패드",
+  "中文": "铺底",
+  "العربية": "باد",
+  "Tiếng Việt": "Pad"
+ },
+ "major": {
+  "日本語": "長調",
+  "Español": "mayor",
+  "Deutsch": "Dur",
+  "Français": "majeur",
+  "한국어": "장조",
+  "中文": "大调",
+  "العربية": "كبير",
+  "Tiếng Việt": "trưởng"
+ },
+ "minor": {
+  "日本語": "短調",
+  "Español": "menor",
+  "Deutsch": "Moll",
+  "Français": "mineur",
+  "한국어": "단조",
+  "中文": "小调",
+  "العربية": "صغير",
+  "Tiếng Việt": "thứ"
+ },
+ "BPM": {
+  "日本語": "BPM",
+  "Español": "BPM",
+  "Deutsch": "BPM",
+  "Français": "BPM",
+  "한국어": "BPM",
+  "中文": "BPM",
+  "العربية": "BPM",
+  "Tiếng Việt": "BPM"
  }
 }

@@ -291,6 +291,29 @@ class PageTests(unittest.TestCase):
         self.page.on_dismiss()
         self.assertIsNone(self.page.run)
 
+    def test_resume_after_the_steps_were_moved_runs_nothing(self):
+        a = self.make("quick", "nope", "slow")
+        self.page.on_run({"id": a["id"]})
+        self.assertTrue(_wait(lambda: self.page.run.result is not None))
+        tool = self.win.pages["tool"]
+        tool.ran.clear()
+        self.page.on_move_step({"id": a["id"], "step": a["steps"][2]["id"], "to": 0})   # slow, quick, nope
+        self.page.on_resume()
+        self.assertIn("run it from the start", self.emitted("toast")[-1]["text"])
+        self.assertFalse(self.page.run.result[0])                    # still the stopped run
+        self.assertEqual(tool.ran, [])
+
+    def test_resume_after_a_change_past_the_failed_step_still_resumes(self):
+        a = self.make("quick", "nope")
+        self.page.on_run({"id": a["id"]})
+        self.assertTrue(_wait(lambda: self.page.run.result is not None))
+        tool = self.win.pages["tool"]
+        tool.ran.clear()
+        self.page.on_add_step({"id": a["id"], "tool": "tool", "step": "quick"})
+        self.page.on_resume()
+        self.assertTrue(_wait(lambda: self.page.run.result is not None))
+        self.assertEqual([r[0] for r in tool.ran], ["nope"])
+
     def test_one_it_cant_run_says_why(self):
         a = self.make()
         self.page.on_run({"id": a["id"]})

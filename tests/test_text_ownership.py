@@ -321,7 +321,7 @@ class TheTextPlusTabs(unittest.TestCase):
     NAMES = ("on_apply_animation", "on_remove_animations", "_apply_animation_to_tool", "_animation_clip_key",
              "_preset_before", "_timeline_fps", "_comp_fps", "_record_batch_action", "_push_live_preview_action",
              "_apply_live_preview_action_part", "_apply_action", "_action_label", "on_undo", "on_redo",
-             "_apply_font_style_to_tool", "_apply_style", "_find_text_tools")
+             "_apply_font_style_to_tool", "_apply_style", "_find_text_tools", "_lock_comp")
 
     def tools(self, clips, preset="Pop (Scale)", ticked=()):
         Tools = type("Tools", (), {n: text_plus.TextPlusTools.__dict__[n] for n in self.NAMES})
@@ -329,7 +329,9 @@ class TheTextPlusTabs(unittest.TestCase):
         tools.toasts, tools.lines, tools.clips = [], [], list(clips)
         tools.emit = lambda name, payload=None: tools.toasts.append(payload["text"]) if name == "toast" else None
         tools.log = tools.lines.append
-        tools.host = type("Host", (), {"set_busy": lambda self, on, message=None: None})()
+        tools.host = type("Host", (), {"set_busy": lambda self, on, message=None: None,
+                                       "pump_busy": lambda self, message=None: None})()
+        tools._preview_timer = type("Timer", (), {"stop": lambda self: None, "start": lambda self: None})()
         tools._resolve = lambda quiet=False: object()
         tools._timeline_or_log = lambda resolve: type("TL", (), {"GetSetting": lambda self, key: "24"})()
         tools._scope_or_toast = lambda timeline, scope, track: ([(c, 1) for c in tools.clips], "the test clips")

@@ -23,6 +23,9 @@
     <nav class="tabs" role="tablist" id="tabs">
         <button type="button" role="tab" data-tab="timeline" aria-selected="true">Timeline</button>
         <button type="button" role="tab" data-tab="sound-design" aria-selected="false">Sound Design</button>
+        <!-- The Keys tab became the DAW, a tool of its own: this takes you there. -->
+        <button type="button" class="btn ghost tab-link" data-action="open_daw"
+                title="Instruments and drums to play, record and arrange over the song">Keys is now the DAW</button>
     </nav>
 
     <!-- ------------------------------------------------------ timeline -->
@@ -62,15 +65,13 @@
     </section>
 
     <!-- -------------------------------------------------- sound design -->
-    <section class="panel" id="panel-sound-design" role="tabpanel" hidden>
-        <section class="card empty">
-            <div class="strong">Sound Design</div>
-            <div>Coming soon.</div>
-        </section>
-    </section>
+    <!-- drawn by design.js the first time it shows -->
+    <section class="panel" id="panel-sound-design" role="tabpanel" hidden></section>
 </main>
 <script src="timeline.js"></script>
 <script src="tidy.js"></script>
+<script src="synth.js"></script>
+<script src="design.js"></script>
 <script src="tabs.js"></script>
 </body>
 </html>

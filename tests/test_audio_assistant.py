@@ -1058,6 +1058,9 @@ class TabTests(unittest.TestCase):
         self.view = QWebEngineView()
         self.addCleanup(delete, self.view)
         self.view.resize(1000, 700)
+        # As page.py sets it: sound may start without a click first (Sound Design's preview plays on it).
+        from PySide6.QtWebEngineCore import QWebEngineSettings
+        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.PlaybackRequiresUserGesture, False)
         loop, loaded = QEventLoop(), []
         self.view.loadFinished.connect(lambda ok: (loaded.append(ok), loop.quit()))
         self.view.setUrl(QUrl.fromLocalFile(str(_paths.APP / "pages" / "audio_assistant" / "web" / "index.html")))
@@ -1106,12 +1109,20 @@ class TabTests(unittest.TestCase):
         self.js(f"Buddy.receive({json.dumps(name)}, {json.dumps(payload)}); return true;")
 
     def test_it_opens_on_timeline_and_sound_design_has_a_panel_of_its_own(self):
-        self.assertEqual(self.js("return [...document.querySelectorAll('#tabs button')].map(b => b.textContent);"),
+        self.assertEqual(self.js("return [...document.querySelectorAll('#tabs button[data-tab]')].map(b => b.textContent);"),
                          ["Timeline", "Sound Design"])
+        # Where the Keys tab was: a button to the DAW, which it grew into.
+        # (timeline.js took Buddy.send when it loaded; with no Qt here, a send is logged.)
+        self.js("window.__sent = []; const log = console.log;"
+                " console.log = (tag, name, data) => (tag === '[Buddy.send]' ? window.__sent.push([name, data]) : log(tag, name, data));"
+                " document.querySelector('#tabs [data-action=open_daw]').click(); console.log = log; return true;")
+        self.assertEqual(self.js("return window.__sent.map(s => s[0]);"), ["open_daw"])
+        self.assertEqual(self.shown(), {"selected": ["timeline"], "timeline": True, "sound": False})
         self.assertEqual(self.shown(), {"selected": ["timeline"], "timeline": True, "sound": False})
         self.click("sound-design")
         self.assertEqual(self.shown(), {"selected": ["sound-design"], "timeline": False, "sound": True})
-        self.assertIn("Coming soon.", self.js("return document.getElementById('panel-sound-design').textContent;"))
+        self.assertEqual(self.js("return [...document.querySelectorAll('#panel-sound-design .section-title')]"
+                                 ".map(h => h.textContent);"), ["Song", "Sounds", "Moments"])
         self.click("timeline")
         self.assertEqual(self.shown(), {"selected": ["timeline"], "timeline": True, "sound": False})
 
@@ -1152,6 +1163,206 @@ class TabTests(unittest.TestCase):
         self.click("timeline")
         self.js(escape + "return true;")
         self.assertEqual(self.js("return [...SEL];"), [])
+
+    # ------------------------------------------------------- sound design --
+
+    SONG = {"id": "tl-1-c2", "bpm": 124.0, "beat_s": 0.48387, "bar_s": 1.93548, "length_s": 499.0,
+            "bars": [0.0, 1.935, 3.871, 5.806], "levels": [-30.0, -29.0, -14.0, -15.0],
+            "key": {"tonic": 9, "mode": "minor", "name": "A minor", "camelot": "8A", "relative": "C major",
+                    "clear": True, "also": None},
+            "moments": [{"t": 3.871, "bar": 2, "kind": "drop", "strength": 0.9, "frame": 86593}],
+            "start": 86500, "end": 98400, "name": "A001.wav"}
+
+    def sound_design(self):
+        tl = _timeline("tl-1")
+        for track in tl["tracks"]:
+            for clip in track["clips"]:
+                clip["media"] = {"path": rf"D:\Music\{clip['id']}.wav", "key": clip["id"]}
+        self.receive("timeline", tl)
+        self.click("sound-design")
+        self.js("window.__sent = []; Buddy.send = (name, data) => window.__sent.push([name, data]); return true;")
+
+    def test_the_song_is_guessed_and_listened_to(self):
+        self.sound_design()
+        self.until("document.querySelector('.sd-song').value === 'tl-1-c1'")       # the longest; a tie: the first
+        self.js("document.querySelector('.sd-song-row .btn').click(); return true;")
+        self.assertEqual(self.js("return window.__sent;"), [["sd_listen", {"id": "tl-1-c1"}]])
+
+    def test_what_buddy_heard_shows_and_a_moment_places_its_sound(self):
+        self.sound_design()
+        self.js("const s = document.querySelector('.sd-song'); s.value = 'tl-1-c2';"
+                " s.dispatchEvent(new Event('change')); return true;")
+        self.receive("sd_song", self.SONG)
+        tiles = self.js("return [...document.querySelectorAll('.sd-tiles .tile b')].map(b => b.textContent);")
+        self.assertEqual(tiles, ["A minor", "124 BPM", "1"])
+        self.assertEqual(self.js("return [...document.querySelectorAll('.sd-moment .sd-put')].map(b => b.textContent);"),
+                         ["Riser into it", "Impact on it"])
+        self.js("document.querySelector('.sd-moment .sd-put').click(); return true;")
+        self.until("window.__sent.length === 1")
+        name, sent = self.js("const [n, d] = window.__sent[0];"
+                             " return [n, {kind: d.kind, frame: d.frame, sync: d.sync, rate: d.rate, label: d.label,"
+                             " song: d.song, channels: d.channels.length, bpm: d.recipe.song.bpm, tonic: d.recipe.song.tonic}];")
+        self.assertEqual(name, "sd_place")
+        self.assertEqual({k: sent[k] for k in ("kind", "frame", "rate", "song", "channels", "bpm", "tonic")},
+                         {"kind": "riser", "frame": 86593, "rate": 48000, "song": "tl-1-c2", "channels": 2,
+                          "bpm": 124.0, "tonic": 9})
+        self.assertAlmostEqual(sent["sync"], 2 * 4 * 60 / 124.0, places=3)       # 2 bars: its top on the drop
+        self.assertEqual(sent["label"], "Riser 2 bars A minor 124 BPM")
+        # Placing again waits for the first to be in.
+        self.assertTrue(self.js("return document.querySelector('.sd-moment .sd-put').disabled;"))
+        self.receive("sd_placed", {"ok": True})
+        self.assertFalse(self.js("return document.querySelector('.sd-moment .sd-put').disabled;"))
+
+    def test_the_sounds_mini_timeline_scrubs_and_its_settings_are_in_groups(self):
+        self.sound_design()
+        self.until("/beats before the moment/.test(document.querySelector('.sd-readout').textContent)")
+        self.assertEqual(self.groups(), ["Timing", "Noise", "Tone", "Sub", "Flutter", "Colour", "Echo and reverb", "Output"])
+        self.assertEqual(self.js("return [...document.querySelectorAll('.sd-group')].map(g => g.classList.contains('open'));"),
+                         [True, True, True, False, False, False, False, False])
+        # A drag across the middle of it: the playhead follows - 2 bars at 120 BPM is 4 s, the moment at the end.
+        # An arrow over it (not a text cursor); left and right only while dragging.
+        cursors = self.js("""const c = document.querySelector('.sd-wave'), r = c.getBoundingClientRect();
+                   const at = f => ({clientX: r.left + r.width * f, clientY: r.top + 40, button: 0, pointerId: 1, bubbles: true});
+                   const seen = [getComputedStyle(c).cursor];
+                   c.dispatchEvent(new PointerEvent('pointerdown', at(0.25)));
+                   seen.push(getComputedStyle(c).cursor);
+                   c.dispatchEvent(new PointerEvent('pointermove', at(0.5)));
+                   c.dispatchEvent(new PointerEvent('pointerup', at(0.5)));
+                   seen.push(getComputedStyle(c).cursor); return seen;""")
+        self.assertEqual(cursors, ["default", "ew-resize", "default"])
+        text = self.js("return document.querySelector('.sd-readout').textContent;")
+        seconds = float(text.split(" s")[0])
+        self.assertGreater(seconds, 1.0)
+        self.assertIn("beats before the moment", text)
+        # The Impact's own groups, a reversed swell among its settings.
+        self.js("document.querySelector('[data-kind=impact]').click(); return true;")
+        self.assertEqual(self.groups(), ["Hit", "Sub", "Body", "Crack", "Tone", "Ring", "Colour", "Echo and reverb", "Output"])
+        self.assertIn("Reverse swell", self.js("return document.querySelector('.sd-group').textContent;"))
+
+    def groups(self):
+        return self.js("return [...document.querySelectorAll('.sd-group .group-title')].map(s => s.textContent);")
+
+    def setting(self, key):
+        """A setting's row: its slider's or list's value, and whether its group shows it's changed."""
+        return self.js(f"""const row = document.querySelector('.ctl[data-key={key}]'), box = row.closest('.sd-group');
+                           const input = row.querySelector('input, select');
+                           return [input.type === 'checkbox' ? input.checked : input.value, box.classList.contains('changed'),
+                                   box.querySelector('.sd-reset').disabled];""")
+
+    def test_a_settings_name_resets_it_and_a_groups_reset_does_the_group(self):
+        self.sound_design()
+        self.until("document.querySelector('.ctl[data-key=climb]')")
+        default = self.setting("climb")
+        self.assertEqual(default, ["12", False, True])                   # as it started: no dot, Reset greyed
+        self.js("""const r = document.querySelector('.ctl[data-key=climb] input');
+                   r.value = -5; r.dispatchEvent(new Event('input')); return true;""")
+        self.assertEqual(self.setting("climb"), ["-5", True, False])
+        self.js("document.querySelector('.ctl[data-key=climb] .ctl-label').dispatchEvent(new MouseEvent('dblclick', {bubbles: true}));"
+                " return true;")
+        self.assertEqual(self.setting("climb"), default)
+        # A list's name too.
+        self.js("""const s = document.querySelector('.ctl[data-key=wave] select');
+                   s.value = 'square'; s.dispatchEvent(new Event('change')); return true;""")
+        self.assertEqual(self.setting("wave")[:2], ["square", True])
+        self.js("document.querySelector('.ctl[data-key=wave] .ctl-label').dispatchEvent(new MouseEvent('dblclick', {bubbles: true}));"
+                " return true;")
+        self.assertEqual(self.setting("wave")[:2], ["sawtooth", False])
+        # The Tone group's Reset puts back all of it, its switch too.
+        self.js("""const set = (k, v) => { const r = document.querySelector(`.ctl[data-key=${k}] input`); r.value = v;
+                       r.dispatchEvent(new Event('input')); };
+                   set('voices', 6); set('detune', 40);
+                   const box = document.querySelector('.ctl[data-key=voices]').closest('.sd-group');
+                   const on = box.querySelector('.sd-group-head input'); on.checked = false; on.dispatchEvent(new Event('change'));
+                   return true;""")
+        self.assertTrue(self.js("return document.querySelector('.ctl[data-key=voices]').closest('.sd-group').classList.contains('off');"))
+        self.js("document.querySelector('.ctl[data-key=voices]').closest('.sd-group').querySelector('.sd-reset').click(); return true;")
+        self.assertEqual([self.setting("voices")[0], self.setting("detune")[0]], ["3", "14"])
+        self.assertFalse(self.js("return document.querySelector('.ctl[data-key=voices]').closest('.sd-group').classList.contains('off');"))
+        self.assertEqual(self.setting("voices")[1:], [False, True])
+
+    def test_a_preset_sets_its_settings_and_stays_lit_until_one_changes(self):
+        self.sound_design()
+        self.until("document.querySelector('.sd-preset')")
+        lit = "return [...document.querySelectorAll('.sd-preset')].filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.textContent);"
+        self.assertEqual(self.js(lit), ["Classic"])
+        self.js("[...document.querySelectorAll('.sd-preset')].find(b => b.textContent === 'Noise sweep').click(); return true;")
+        self.assertEqual(self.js(lit), ["Noise sweep"])
+        self.assertEqual(self.setting("air_q")[0], "3")
+        self.assertTrue(self.js("return document.querySelector('.ctl[data-key=wave]').closest('.sd-group').classList.contains('off');"))
+        self.js("""const r = document.querySelector('.ctl[data-key=air] input'); r.value = 10;
+                   r.dispatchEvent(new Event('input')); return true;""")
+        self.assertEqual(self.js(lit), [])
+        # Another preset puts the mini timeline's playhead back at the start.
+        readout = "document.querySelector('.sd-readout').textContent"
+        self.until(f"/beats before the moment/.test({readout})")
+        self.js("""const c = document.querySelector('.sd-wave'), r = c.getBoundingClientRect();
+                   const at = {clientX: r.left + r.width * 0.6, clientY: r.top + 40, button: 0, pointerId: 1, bubbles: true};
+                   c.dispatchEvent(new PointerEvent('pointerdown', at)); c.dispatchEvent(new PointerEvent('pointerup', at));
+                   return true;""")
+        self.assertFalse(self.js(f"return {readout}.startsWith('0.00 s');"))
+        self.js("[...document.querySelectorAll('.sd-preset')].find(b => b.textContent === 'Cinematic').click(); return true;")
+        self.until(f"{readout}.startsWith('0.00 s') && !/Making/.test({readout})")
+
+    def test_the_last_settings_come_back_and_saved_sounds_load_and_save(self):
+        self.sound_design()
+        self.receive("sd_library", {
+            "saved": [{"id": "s1", "name": "Big build", "kind": "riser", "values": {"climb": 20, "voices": 6}, "seed": 7},
+                      {"id": "s2", "name": "Thud", "kind": "impact", "values": {"sub": 40}, "seed": 1}],
+            "last": {"kind": "riser", "values": {"riser": {"climb": -7}}, "seed": {"riser": 3}}})
+        self.until("document.querySelector('.ctl[data-key=climb]')")
+        self.assertEqual(self.setting("climb")[0], "-7")                       # as it was left last time
+        self.assertEqual(self.js("return document.querySelector('.sd-seed').value;"), "3")
+        chips = "return [...document.querySelectorAll('.sd-saved-chip')].map(c => [c.textContent, c.getAttribute('aria-pressed')]);"
+        self.assertEqual(self.js(chips), [["Big build", "false"]])                # this sound's only
+        self.assertNotIn("null", self.js("return document.querySelector('.sd-saved').textContent;"))
+        self.js("document.querySelector('.sd-saved-chip').click(); return true;")
+        self.assertEqual([self.setting("climb")[0], self.setting("voices")[0]], ["20", "6"])
+        self.assertEqual(self.js(chips), [["Big build", "true"]])
+        self.assertEqual(self.js("return document.querySelector('.sd-seed').value;"), "7")
+        # Changed from there, then saved: always as a new sound - "Big build" itself stays as it was.
+        self.js("""const r = document.querySelector('.ctl[data-key=voices] input'); r.value = 2;
+                   r.dispatchEvent(new Event('input')); return true;""")
+        self.assertEqual(self.js(chips), [["Big build", "false"]])
+        self.assertFalse(self.js("return [...document.querySelectorAll('.sd-saved .btn')].some(b => /changes/i.test(b.textContent));"))
+        self.js("document.querySelector('.sd-save').click(); return true;")
+        self.until("document.querySelector('.modal input')")
+        self.assertEqual(self.js("return document.querySelector('.modal input').value;"), "Big build 2")
+        self.js("""const i = document.querySelector('.modal input'); i.value = 'Wide riser';
+                   [...document.querySelectorAll('.modal .btn')].find(b => b.textContent === 'Save').click(); return true;""")
+        sent = self.js("return window.__sent.filter(s => s[0] === 'sd_saved_put').map(s => [s[1].id, s[1].name, s[1].kind, s[1].seed, s[1].values.voices]);")
+        self.assertEqual(len(sent), 1)
+        self.assertNotEqual(sent[0][0], "s1")                                     # a new one...
+        self.assertEqual(sent[0][1:], ["Wide riser", "riser", 7, 2])
+        self.assertEqual([c[0] for c in self.js(chips)], ["Big build", "Wide riser"])
+        # Right-click: rename and delete, nothing that writes over it.
+        self.js("document.querySelector('.sd-saved-chip').dispatchEvent(new MouseEvent('contextmenu', {bubbles: true, clientX: 40, clientY: 40}));"
+                " return true;")
+        self.assertEqual(self.js("return [...document.querySelectorAll('.menu-pop button')].map(b => b.textContent);"),
+                         ["Rename…", "Delete"])
+        # And it places as any sound does - a saved sound's settings, onto the playhead.
+        self.js("document.querySelector('.sd-saved-chip').click(); return true;")
+        self.receive("playhead", {"frame": 86600})
+        self.js("[...document.querySelectorAll('.sd-transport .btn')].find(b => b.textContent === 'Place at the playhead').click(); return true;")
+        self.until("window.__sent.some(s => s[0] === 'sd_place')")
+        placed = self.js("const d = window.__sent.find(s => s[0] === 'sd_place')[1]; return [d.frame, d.recipe.values.climb, d.recipe.seed, 'replace' in d];")
+        self.assertEqual(placed, [86600, 20, 7, False])
+
+    def test_space_plays_and_stops_and_nothing_else(self):
+        self.sound_design()
+        self.until("/beats before the moment/.test(document.querySelector('.sd-readout').textContent)")
+        press = """const t = document.querySelector(%s); t.focus();
+                   const down = new KeyboardEvent('keydown', {key: ' ', code: 'Space', bubbles: true, cancelable: true});
+                   const up = new KeyboardEvent('keyup', {key: ' ', code: 'Space', bubbles: true, cancelable: true});
+                   t.dispatchEvent(down); t.dispatchEvent(up); return [down.defaultPrevented, up.defaultPrevented];"""
+        for target in ("'.sd-song'", "'.ctl[data-key=wave] select'", "'.sd-preset'", "'.ctl[data-key=climb] input'"):
+            with self.subTest(target):
+                self.assertEqual(self.js(press % target), [True, True])     # no list opens, no button goes
+        play = "return document.querySelector('.sd-transport .btn:not(.ghost)').textContent;"
+        self.until("document.querySelector('.sd-transport .btn:not(.ghost)').textContent === 'Play'"
+                   " || document.querySelector('.sd-transport .btn:not(.ghost)').textContent === 'Stop'")
+        before = self.js(play)
+        self.js(press % "'.sd-wave'")
+        self.until(f"document.querySelector('.sd-transport .btn:not(.ghost)').textContent !== {json.dumps(before)}")
 
 
 if __name__ == "__main__":

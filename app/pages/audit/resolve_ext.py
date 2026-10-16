@@ -270,7 +270,8 @@ def _fix_one(project, timeline, fix):
         if fix.get("clip"):
             _open(timeline, fix["clip"]["kind"], fix["clip"]["index"])
         here = dict(numeric_markers(_call(owner, "GetMarkers", default={}) or {})).get(frame)
-        if here is None or str(here.get("name") or "") != fix.get("marker", ""):
+        seen = {"name": fix.get("marker", ""), "note": fix.get("note", ""), "color": fix.get("color", "")}
+        if here is None or any(str(here.get(k) or "") != v for k, v in seen.items()):
             raise FixRefused("The marker's changed since the check – check again.")
         if not owner.DeleteMarkerAtFrame(frame):
             raise FixRefused("Resolve didn't remove the marker.")

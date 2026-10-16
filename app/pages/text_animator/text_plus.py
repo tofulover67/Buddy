@@ -1440,6 +1440,16 @@ class TextPlusTools(QObject):
                 self.log(f"  - [GetFusionCompList Error]: {err}")
         return None
 
+    def _lock_comp(self, comp: Any, lock: bool) -> None:
+        """comp.Lock() / comp.Unlock(), as the animation features do around their edits:
+        Fusion renders nothing while locked, and once on Unlock. Never raises."""
+        method = getattr(comp, "Lock" if lock else "Unlock", None)
+        if callable(method):
+            try:
+                method()
+            except Exception as err:
+                self.log(f"  - [{'Lock' if lock else 'Unlock'} Error]: {err}")
+
     def _find_text_tools(self, comp: Any) -> List[Any]:
         """Every Text+ in a comp - a Buddy title (Animation > Titles) is one per
         word, and a restyle is for all of them. [] when there's none."""
@@ -1916,10 +1926,14 @@ class TextPlusTools(QObject):
             clips, scope_desc = found
             self.log(f"[Action] Applying font style to {scope_desc}…")
             self.host.set_busy(True, "Applying font style…")
+            # Each clip is pumped below (the window would otherwise go "Not Responding"
+            # for the whole run): the poll mustn't call Resolve between two clips.
+            self._preview_timer.stop()
             try:
                 updated = scanned = 0
                 self._style_kept = 0
-                for clip, track_index in clips:
+                for n, (clip, track_index) in enumerate(clips, 1):
+                    self.host.pump_busy(f"Applying font style… {n} of {len(clips)}")
                     if clip is None:
                         continue
                     scanned += 1
@@ -1928,10 +1942,16 @@ class TextPlusTools(QObject):
                     if not text_tools:
                         continue
                     clip_name = clip.GetName() if hasattr(clip, "GetName") else "Clip"
-                    # Every Text+ of the clip: a Buddy title is one per word.
-                    styled = [self._apply_font_style_to_tool(text_tool, f"'{clip_name}' on Track {track_index}",
-                                                             force_font_only=force_font_only)
-                              for text_tool in text_tools]
+                    # Every Text+ of the clip: a Buddy title is one per word. Locked meanwhile:
+                    # unlocked, Resolve redraws after every one of the ~30 inputs set per
+                    # Text+ and holds the next call until it has (~0.3 s each, ~10 s a clip).
+                    self._lock_comp(comp, True)
+                    try:
+                        styled = [self._apply_font_style_to_tool(text_tool, f"'{clip_name}' on Track {track_index}",
+                                                                 force_font_only=force_font_only)
+                                  for text_tool in text_tools]
+                    finally:
+                        self._lock_comp(comp, False)
                     if any(styled):
                         updated += 1
                 self.log(f"Applied font style ('{face_label(*self.opts.font_face)}', size {self.opts.slider('font_size')}) "
@@ -1942,6 +1962,7 @@ class TextPlusTools(QObject):
                              "take it over; unticked after that, it goes off.")
             finally:
                 self.host.set_busy(False)
+                self._preview_timer.start()
             self.emit("toast", {"text": f"Styled {updated} Text+ clip(s)" if not self._style_kept else
                                 f"Styled {updated} Text+ clip(s). On {self._style_kept}, an outline, shadow or box stays "
                                 "that Buddy has no note of setting – tick it and apply to take it over."})

@@ -192,7 +192,8 @@ class FixTests(unittest.TestCase):
             {"frame": 5, "color": "Red", "name": "fix", "note": ""}])]),
             markers=[{"frame": 30, "color": "Blue", "name": "TODO", "note": "grade"}])
         on_timeline, on_clip = rows("todo", data)
-        self.assertEqual(on_timeline["fix"], {"do": "delete_marker", "frame": 30, "marker": "TODO"})
+        self.assertEqual(on_timeline["fix"], {"do": "delete_marker", "frame": 30, "marker": "TODO", "note": "grade",
+                                              "color": "Blue"})
         self.assertEqual(on_clip["fix"]["clip"]["start"], 86400)
         self.assertEqual(on_clip["fix"]["frame"], 5)
 
@@ -424,7 +425,7 @@ class ResolveExtTests(unittest.TestCase):
                  "then": "black"}
         done = resolve_ext.fix(controller, [
             {"do": "track_on", "kind": "audio", "index": 1},
-            {"do": "delete_marker", "frame": 12, "marker": "TODO"},
+            {"do": "delete_marker", "frame": 12, "marker": "TODO", "note": "", "color": "Red"},
             flash], data["id"])
         self.assertEqual(done, {"done": 3, "failed": []})
         self.assertTrue(self.timeline.tracks["audio"][0][0])
@@ -458,9 +459,13 @@ class ResolveExtTests(unittest.TestCase):
         self.assertFalse(self.timeline.tracks["audio"][0][0])
 
     def test_a_marker_changed_since_the_check_stays(self):
-        result = resolve_ext.fix(FakeController(self.timeline), [{"do": "delete_marker", "frame": 12, "marker": "fix"}])
-        self.assertEqual(result["done"], 0)
-        self.assertIn(12, self.timeline.markers)
+        seen = {"do": "delete_marker", "frame": 12, "marker": "TODO", "note": "", "color": "Red"}
+        for changed in ({"marker": "fix"}, {"note": "grade the sky"}, {"color": "Blue"}):
+            with self.subTest(changed):
+                result = resolve_ext.fix(FakeController(self.timeline), [{**seen, **changed}])
+                self.assertEqual(result["done"], 0)
+                self.assertIn("changed since the check", result["failed"][0])
+                self.assertIn(12, self.timeline.markers)
 
     def test_no_timeline_is_said_plainly(self):
         with self.assertRaises(resolve_ext.ResolveConnectionError) as caught:

@@ -341,16 +341,22 @@ def _marker_text(marker):
     return " – ".join(p for p in (marker["name"], marker["note"]) if p and p != "Marker")
 
 
+def _seen(marker):
+    """The marker as the check saw it: Remove takes it off only if it's still
+    this one (resolve_ext), not one edited or put there since."""
+    return {"marker": marker["name"], "note": marker["note"], "color": marker["color"]}
+
+
 def check_todo(scan):
     """A clip's marker goes to the clip's start: where on the clip it sits
     is counted from the media's own start, which Audit doesn't read."""
     rows = [_row(scan, WARNING, scan["start"] + m["frame"], "", _marker_text(m), "Timeline marker",
-                 fix={"do": "delete_marker", "frame": m["frame"], "marker": m["name"]})
+                 fix={"do": "delete_marker", "frame": m["frame"], **_seen(m)})
             for m in scan["markers"] if _todo(m)]
     for track in scan["tracks"]:
         for clip in track["items"]:
             rows += [_row(scan, WARNING, clip["start"], _where(track), _marker_text(m), "Marker on a clip",
-                          fix={"do": "delete_marker", "frame": m["frame"], "marker": m["name"],
+                          fix={"do": "delete_marker", "frame": m["frame"], **_seen(m),
                                "clip": _ref(track, clip)})
                      for m in clip.get("markers", ()) if _todo(m)]
     return rows

@@ -1280,6 +1280,16 @@
   "العربية": "جارٍ تطبيق نمط الخط…",
   "Tiếng Việt": "Đang áp dụng kiểu chữ…"
  },
+ "Applying font style… {n} of {total}": {
+  "日本語": "フォントスタイルを適用中… {n} / {total}",
+  "Español": "Aplicando estilo de fuente… {n} de {total}",
+  "Deutsch": "Schriftstil wird angewendet… {n} von {total}",
+  "Français": "Application du style de police… {n} sur {total}",
+  "한국어": "글꼴 스타일 적용 중… {n}/{total}",
+  "中文": "正在应用字体样式… 第 {n} 个，共 {total} 个",
+  "العربية": "جارٍ تطبيق نمط الخط… {n} من {total}",
+  "Tiếng Việt": "Đang áp dụng kiểu chữ… {n}/{total}"
+ },
  "No Text+ clips under the playhead": {
   "日本語": "再生ヘッドの下に Text+ クリップがありません",
   "Español": "No hay clips Text+ bajo el cabezal",

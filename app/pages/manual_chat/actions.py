@@ -405,7 +405,7 @@ def preview_set_clip_colors(controller, args) -> ProposedAction:
 
 def execute_set_clip_colors(controller, proposal, log=lambda m: None) -> str:
     """Read back, not trusted: on a title or generator SetClipColor says True and
-    nothing changes (measured by github.com/samuelgursky/davinci-resolve-mcp)."""
+    nothing changes."""
     done = unstuck = 0
     for item, color in proposal.plan:
         name = _safe(item.GetName, '')
@@ -828,7 +828,7 @@ def preview_delete_timeline_clips(controller, args) -> ProposedAction:
 
 def execute_delete_timeline_clips(controller, proposal, log=lambda m: None) -> str:
     """On Resolve 21.0, DeleteClips says False on the Fairlight page however often
-    it's asked (measured by github.com/samuelgursky/davinci-resolve-mcp); 21.1
+    it's asked; 21.1
     deletes from every page (checked here on all seven). So a refusal elsewhere
     opens the Edit page, tries once more, and goes back to the page the user was on."""
     timeline = _require_timeline(controller)

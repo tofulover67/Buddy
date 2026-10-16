@@ -159,3 +159,102 @@
 .fit-sound.heard { color: var(--emphasis); }
 
 .automix-out { display: flex; flex-direction: column; gap: 10px; }
+
+/* ------------------------------------------------------ sound design -- */
+
+.sd-card { display: flex; flex-direction: column; gap: 10px; padding: var(--card-pad); }
+.sd-head { align-items: center; flex-wrap: wrap; }
+.sd-head .segmented button { padding: 3px 12px; }
+.sd-head .btn { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; }
+.sd-head .btn svg { width: 14px; height: 14px; }
+.sd-song-row { flex-wrap: wrap; }
+.sd-song { flex: 1; min-width: 200px; }
+.sd-tiles { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.sd-tiles[hidden], .hint[hidden] { display: none; }
+
+/* The sound's mini timeline: click to move its playhead, drag to scrub. */
+.sd-scope {
+    border-radius: var(--r-sm); overflow: hidden;
+    background: var(--raised-bg); border: var(--bw) solid var(--card-border);
+}
+.sd-wave { display: block; width: 100%; height: 180px; cursor: default; touch-action: none; }
+.sd-wave.scrubbing { cursor: ew-resize; }
+.sd-transport { flex-wrap: wrap; }
+.sd-transport .btn.on { color: var(--accent-text); border-color: var(--accent-text); }
+.sd-readout { font-variant-numeric: tabular-nums; }
+.sd-seed { width: 70px; }
+
+/* Presets: where to start from, the one it still is lit. */
+.sd-presets { flex-wrap: wrap; gap: 6px; }
+.sd-preset { cursor: pointer; font: inherit; font-size: var(--fs-xs); }
+.sd-preset:hover { color: var(--text-strong); }
+.sd-preset[aria-pressed="true"] { background: var(--selection-bg); color: var(--selection-fg); border-color: transparent; }
+/* Saved: the user's own sounds, then Save (always as a new one). */
+.sd-saved .sd-save { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; font-size: var(--fs-xs); }
+.sd-saved .sd-save svg { width: 12px; height: 12px; }
+.sd-none { font-style: italic; }
+
+/* The mini timeline and its buttons stay in view while the settings scroll under them. */
+.sd-stage {
+    position: sticky; top: 0; z-index: 3;
+    display: flex; flex-direction: column; gap: 8px;
+    margin: -6px calc(-1 * var(--card-pad)) 0; padding: 6px var(--card-pad) 8px;
+    background: var(--card-bg);
+}
+
+/* Its settings: a group each (Timing, Noise, Tone...), side by side where there's room. */
+.sd-params { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--card-gap); align-items: start; }
+.sd-section {
+    grid-column: 1 / -1; margin: 6px 0 -4px;
+    font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-dim);
+}
+.sd-group {
+    padding: 0 12px; min-width: 0;
+    background: var(--raised-bg); border: var(--bw) solid var(--card-border); border-radius: var(--r-sm);
+}
+.sd-group-head { display: flex; align-items: center; gap: 8px; padding: 7px 0; min-height: 22px; cursor: pointer; user-select: none; }
+.sd-group-head:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--r-sm); }
+.sd-chevron {
+    width: 6px; height: 6px; flex: none; margin: 0 2px;
+    border-right: 1.5px solid var(--text-dim); border-bottom: 1.5px solid var(--text-dim);
+    transform: rotate(-45deg); transition: transform .15s;
+}
+.sd-group.open .sd-chevron { transform: rotate(45deg); }
+.sd-changed { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-text); visibility: hidden; flex: none; }
+.sd-group.changed .sd-changed { visibility: visible; }
+.sd-group-head .check { font-size: var(--fs-xs); color: var(--text-dim); }
+.sd-reset { padding: 1px 8px; font-size: var(--fs-xs); }
+.sd-reset:disabled { opacity: .35; }
+.sd-group-body { display: none; flex-direction: column; gap: 8px; padding-bottom: 12px; }
+.sd-group.open .sd-group-body { display: flex; }
+.sd-group.off .sd-group-body { opacity: .45; }
+.sd-group.off .group-title { color: var(--text-dim); }
+.sd-group .ctl { grid-template-columns: 96px minmax(0, 1fr); }
+.sd-group .ctl-label { cursor: default; user-select: none; }
+.sd-group .ctl-label.has-hint { text-decoration: underline dotted; text-underline-offset: 3px; }
+.sd-value { width: 58px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.sd-strip {
+    display: block; width: 100%; height: 64px; cursor: pointer; border-radius: var(--r-sm);
+    background: var(--raised-bg); border: var(--bw) solid var(--card-border);
+}
+.sd-strip[hidden] { display: none; }
+.sd-moments { display: flex; flex-direction: column; gap: 2px; }
+.sd-moment {
+    display: flex; align-items: center; gap: 10px; padding: 4px 6px; flex-wrap: wrap;
+    border-radius: var(--r-sm); border-left: 3px solid var(--card-border);
+}
+.sd-moment:hover { background: var(--raised-bg); }
+.sd-moment.drop { border-left-color: #E5393B; }
+.sd-moment.change { border-left-color: #4C9BE8; }
+.sd-moment.break { border-left-color: #9B6CE8; }
+.sd-moment.end { border-left-color: #F2A33A; }
+.sd-moment b { color: var(--text-strong); font-size: var(--fs-sm); min-width: 90px; }
+.sd-time { font-variant-numeric: tabular-nums; padding: 2px 6px; }
+.sd-strength { display: inline-block; width: 48px; height: 4px; border-radius: var(--r-full); background: var(--card-border); overflow: hidden; }
+.sd-strength i { display: block; height: 100%; background: var(--text-dim); }
+
+label.check[hidden], select[hidden] { display: none; }
+
+/* The tab row's way to the DAW (where the Keys tab went), at its right end. */
+.tabs .tab-link { margin-left: auto; align-self: center; padding: 3px 10px; font-size: var(--fs-sm); }

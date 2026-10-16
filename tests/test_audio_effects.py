@@ -268,6 +268,48 @@ class BeatTests(unittest.TestCase):
         self.assertIs(beats.scaled(found, "auto"), found)
 
 
+@unittest.skipUnless(HAVE_DEPS, "numpy / PySide6 not installed")
+class TakeOffTests(unittest.TestCase):
+    """Taking a processed or curve clip off: the clip it stood in for is
+    turned back on first, and if Resolve won't, the processed one stays -
+    never a timeline where neither plays."""
+
+    def setUp(self):
+        self.original = mock.Mock()
+        self.processed = mock.Mock()
+        self.processed.GetTrackTypeAndIndex.return_value = ["audio", 3]
+        self.timeline = mock.Mock()
+        self.timeline.DeleteClips.return_value = True
+        items = {"orig": self.original, "fx": self.processed}
+        for patch in (mock.patch.object(resolve_ext, "audio_items", lambda _c: (self.timeline, items)),
+                      mock.patch.object(resolve_ext, "_fx_of", lambda _m: {"chain": ["eq"]}),
+                      mock.patch.object(resolve_ext, "_curve_of",
+                                        lambda *_a: (mock.Mock(), {"original": "orig", "keys": []}, None, None)),
+                      mock.patch.object(resolve_ext, "_outer", lambda _i: {"props": {"AudioVolume": 0.0}}),
+                      mock.patch.object(resolve_ext, "_drop_empty_buddy_track", lambda *_a: None)):
+            patch.start()
+            self.addCleanup(patch.stop)
+        self.controller = mock.Mock()
+
+    def test_effects_stay_when_the_original_wont_turn_on(self):
+        self.original.SetClipEnabled.return_value = False
+        with self.assertRaises(resolve_ext.ResolveConnectionError):
+            resolve_ext.remove_effects(self.controller, "fx", "orig")
+        self.timeline.DeleteClips.assert_not_called()
+
+    def test_a_curve_stays_when_the_original_wont_turn_on(self):
+        self.original.SetClipEnabled.return_value = False
+        with self.assertRaises(resolve_ext.ResolveConnectionError):
+            resolve_ext.remove_curve(self.controller, "fx")
+        self.timeline.DeleteClips.assert_not_called()
+
+    def test_the_original_on_then_the_processed_one_goes(self):
+        self.original.SetClipEnabled.return_value = True
+        self.assertEqual(resolve_ext.remove_effects(self.controller, "fx", "orig"),
+                         {"original": "orig", "chain": ["eq"]})
+        self.timeline.DeleteClips.assert_called_once_with([self.processed])
+
+
 class MarkerTimeline:
     def __init__(self, markers):
         self.markers = dict(markers)

@@ -174,7 +174,7 @@ def encode_command(ffmpeg, pattern, first, count, fps, out, fmt, *, kind="clean"
            "-start_number", str(int(first)), "-i", pattern]
     with_audio = bool(audio and source and kind != "subject")
     if with_audio:
-        cmd += ["-ss", f"{at:.6f}", "-t", f"{count / fps:.6f}", "-i", source]
+        cmd += ["-ss", f"{at:.6f}", "-t", f"{float(count / fps):.6f}", "-i", source]   # a Fraction takes .6f only from 3.12
     cmd += ["-map", "0:v:0"]
     if with_audio:
         cmd += ["-map", "1:a?"]                   # every audio track, each kept as it is

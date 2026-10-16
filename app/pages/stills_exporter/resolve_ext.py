@@ -205,9 +205,8 @@ def export_stills(controller, stills, folder, prefix, fmt,
     export failures raise instead.
 
     ExportStills writes nothing and returns False unless the Gallery panel
-    is open on the Color page - which a script can neither see nor change
-    (measured by github.com/samuelgursky/davinci-resolve-mcp) - so a failure
-    says to open it. And its True isn't taken on trust: the stills are only
+    is open on the Color page - which a script can neither see nor change -
+    so a failure says to open it. And its True isn't taken on trust: the stills are only
     deleted from the gallery once as many new or rewritten image files as
     there were stills are in the folder.
     """

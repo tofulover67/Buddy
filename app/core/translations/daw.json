@@ -1,0 +1,2653 @@
+{
+ "_comment": "DAW. English -> each language; see core/i18n.py.",
+ "DAW": {
+  "日本語": "DAW",
+  "Español": "DAW",
+  "Deutsch": "DAW",
+  "Français": "DAW",
+  "한국어": "DAW",
+  "中文": "DAW",
+  "العربية": "DAW",
+  "Tiếng Việt": "DAW"
+ },
+ "Arrange": {
+  "日本語": "アレンジ",
+  "Español": "Arreglo",
+  "Deutsch": "Arrangement",
+  "Français": "Arrangement",
+  "한국어": "어레인지",
+  "中文": "编曲",
+  "العربية": "الترتيب",
+  "Tiếng Việt": "Sắp xếp"
+ },
+ "Console": {
+  "日本語": "コンソール",
+  "Español": "Consola",
+  "Deutsch": "Konsole",
+  "Français": "Console",
+  "한국어": "콘솔",
+  "中文": "控制台",
+  "العربية": "وحدة التحكم",
+  "Tiếng Việt": "Bàn điều khiển"
+ },
+ "Perform": {
+  "日本語": "パフォーマンス",
+  "Español": "Interpretación",
+  "Deutsch": "Performance",
+  "Français": "Performance",
+  "한국어": "퍼포먼스",
+  "中文": "演奏",
+  "العربية": "الأداء",
+  "Tiếng Việt": "Biểu diễn"
+ },
+ "Instruments": {
+  "日本語": "楽器",
+  "Español": "Instrumentos",
+  "Deutsch": "Instrumente",
+  "Français": "Instruments",
+  "한국어": "악기",
+  "中文": "乐器",
+  "العربية": "الآلات",
+  "Tiếng Việt": "Nhạc cụ"
+ },
+ "Drum kits": {
+  "日本語": "ドラムキット",
+  "Español": "Kits de batería",
+  "Deutsch": "Drumkits",
+  "Français": "Kits de batterie",
+  "한국어": "드럼 킷",
+  "中文": "鼓组",
+  "العربية": "أطقم الطبول",
+  "Tiếng Việt": "Bộ trống"
+ },
+ "Drum kit": {
+  "日本語": "ドラムキット",
+  "Español": "Kit de batería",
+  "Deutsch": "Drumkit",
+  "Français": "Kit de batterie",
+  "한국어": "드럼 킷",
+  "中文": "鼓组",
+  "العربية": "طقم الطبول",
+  "Tiếng Việt": "Bộ trống"
+ },
+ "Drums": {
+  "日本語": "ドラム",
+  "Español": "Batería",
+  "Deutsch": "Drums",
+  "Français": "Batterie",
+  "한국어": "드럼",
+  "中文": "鼓",
+  "العربية": "الطبول",
+  "Tiếng Việt": "Trống"
+ },
+ "Kit": {
+  "日本語": "キット",
+  "Español": "Kit",
+  "Deutsch": "Kit",
+  "Français": "Kit",
+  "한국어": "킷",
+  "中文": "鼓组",
+  "العربية": "الطقم",
+  "Tiếng Việt": "Bộ trống"
+ },
+ "Tight": {
+  "日本語": "タイト",
+  "Español": "Compacto",
+  "Deutsch": "Straff",
+  "Français": "Serré",
+  "한국어": "타이트",
+  "中文": "紧致",
+  "العربية": "محكم",
+  "Tiếng Việt": "Gọn"
+ },
+ "Boom": {
+  "日本語": "ブーム",
+  "Español": "Boom",
+  "Deutsch": "Boom",
+  "Français": "Boum",
+  "한국어": "붐",
+  "中文": "轰鸣",
+  "العربية": "دويّ",
+  "Tiếng Việt": "Bùm"
+ },
+ "Trailer": {
+  "日本語": "トレーラー",
+  "Español": "Tráiler",
+  "Deutsch": "Trailer",
+  "Français": "Bande-annonce",
+  "한국어": "트레일러",
+  "中文": "预告片",
+  "العربية": "إعلان سينمائي",
+  "Tiếng Việt": "Trailer"
+ },
+ "Short and punchy – a modern electronic kit.": {
+  "日本語": "短くパンチの効いた – モダンなエレクトロニックキット。",
+  "Español": "Corto y contundente – un kit electrónico moderno.",
+  "Deutsch": "Kurz und knackig – ein modernes elektronisches Kit.",
+  "Français": "Court et percutant – un kit électronique moderne.",
+  "한국어": "짧고 펀치감 있는 – 모던한 전자 드럼 킷.",
+  "中文": "短促有力 – 现代电子鼓组。",
+  "العربية": "قصير وقويّ – طقم إلكتروني حديث.",
+  "Tiếng Việt": "Ngắn và đanh gọn – một bộ trống điện tử hiện đại."
+ },
+ "A long, booming kick and a snappy snare – the classic drum machine.": {
+  "日本語": "長く響くキックと歯切れのいいスネア – 定番のドラムマシン。",
+  "Español": "Un bombo largo y retumbante y una caja seca – la caja de ritmos clásica.",
+  "Deutsch": "Eine lange, dröhnende Kick und eine knackige Snare – die klassische Drum-Machine.",
+  "Français": "Une grosse caisse longue et grondante et une caisse claire claquante – la boîte à rythmes classique.",
+  "한국어": "길고 울리는 킥과 날카로운 스네어 – 클래식 드럼 머신.",
+  "中文": "悠长轰鸣的底鼓和清脆的军鼓 – 经典鼓机。",
+  "العربية": "كيك طويل مدوٍّ وسنير حادّ – آلة الطبول الكلاسيكية.",
+  "Tiếng Việt": "Kick dài, vang và snare giòn – drum machine kinh điển."
+ },
+ "Huge toms and hits in a big room – for builds and trailers.": {
+  "日本語": "大きな部屋で鳴る巨大なタムとヒット – ビルドアップやトレーラーに。",
+  "Español": "Toms enormes y golpes en una sala grande – para subidas y tráileres.",
+  "Deutsch": "Riesige Toms und Schläge in einem großen Raum – für Steigerungen und Trailer.",
+  "Français": "Des toms énormes et des impacts dans une grande pièce – pour les montées et les bandes-annonces.",
+  "한국어": "큰 공간에서 울리는 거대한 탐과 히트 – 빌드업과 트레일러용.",
+  "中文": "大空间里的巨型通鼓与重击 – 适合铺垫和预告片。",
+  "العربية": "طبول توم ضخمة وضربات في غرفة كبيرة – للتصاعدات والإعلانات السينمائية.",
+  "Tiếng Việt": "Tom khổng lồ và những cú đánh trong phòng lớn – cho đoạn dồn và trailer."
+ },
+ "Kick": {
+  "日本語": "キック",
+  "Español": "Bombo",
+  "Deutsch": "Kick",
+  "Français": "Grosse caisse",
+  "한국어": "킥",
+  "中文": "底鼓",
+  "العربية": "كيك",
+  "Tiếng Việt": "Kick"
+ },
+ "Snare": {
+  "日本語": "スネア",
+  "Español": "Caja",
+  "Deutsch": "Snare",
+  "Français": "Caisse claire",
+  "한국어": "스네어",
+  "中文": "军鼓",
+  "العربية": "سنير",
+  "Tiếng Việt": "Snare"
+ },
+ "Clap": {
+  "日本語": "クラップ",
+  "Español": "Palmada",
+  "Deutsch": "Clap",
+  "Français": "Clap",
+  "한국어": "클랩",
+  "中文": "拍手",
+  "العربية": "تصفيق",
+  "Tiếng Việt": "Clap"
+ },
+ "Closed hat": {
+  "日本語": "クローズドハット",
+  "Español": "Hi-hat cerrado",
+  "Deutsch": "Geschlossene Hi-Hat",
+  "Français": "Charleston fermé",
+  "한국어": "클로즈드 햇",
+  "中文": "闭镲",
+  "العربية": "هاي هات مغلق",
+  "Tiếng Việt": "Hi-hat đóng"
+ },
+ "Low tom": {
+  "日本語": "ロータム",
+  "Español": "Tom grave",
+  "Deutsch": "Tiefes Tom",
+  "Français": "Tom basse",
+  "한국어": "로우 탐",
+  "中文": "低音通鼓",
+  "العربية": "توم منخفض",
+  "Tiếng Việt": "Tom trầm"
+ },
+ "High tom": {
+  "日本語": "ハイタム",
+  "Español": "Tom agudo",
+  "Deutsch": "Hohes Tom",
+  "Français": "Tom aigu",
+  "한국어": "하이 탐",
+  "中文": "高音通鼓",
+  "العربية": "توم عالٍ",
+  "Tiếng Việt": "Tom cao"
+ },
+ "Rim": {
+  "日本語": "リム",
+  "Español": "Aro",
+  "Deutsch": "Rim",
+  "Français": "Cercle",
+  "한국어": "림",
+  "中文": "鼓边",
+  "العربية": "الحافة",
+  "Tiếng Việt": "Rim"
+ },
+ "Envelope": {
+  "日本語": "エンベロープ",
+  "Español": "Envolvente",
+  "Deutsch": "Hüllkurve",
+  "Français": "Enveloppe",
+  "한국어": "엔벨로프",
+  "中文": "包络",
+  "العربية": "الغلاف",
+  "Tiếng Việt": "Đường bao"
+ },
+ "Tune": {
+  "日本語": "チューン",
+  "Español": "Afinación",
+  "Deutsch": "Stimmung",
+  "Français": "Accordage",
+  "한국어": "튠",
+  "中文": "调音",
+  "العربية": "الدوزان",
+  "Tiếng Việt": "Cao độ"
+ },
+ "Warmth, then grit": {
+  "日本語": "温かみ、そしてザラつき",
+  "Español": "Calidez y luego aspereza",
+  "Deutsch": "Wärme, dann Biss",
+  "Français": "Chaleur, puis grain",
+  "한국어": "따뜻함, 그다음 거친 맛",
+  "中文": "先温暖，后粗粝",
+  "العربية": "دفء، ثم خشونة",
+  "Tiếng Việt": "Ấm áp, rồi đến sần sạn"
+ },
+ "Repeats, three sixteenths apart": {
+  "日本語": "16分音符3つ分の間隔で繰り返し",
+  "Español": "Repeticiones, a tres semicorcheas de distancia",
+  "Deutsch": "Wiederholungen im Abstand von drei Sechzehnteln",
+  "Français": "Des répétitions, espacées de trois doubles croches",
+  "한국어": "16분음표 세 개 간격으로 반복",
+  "中文": "间隔三个十六分音符的重复",
+  "العربية": "تكرارات، بفاصل ثلاث نوتات 1/16",
+  "Tiếng Việt": "Lặp lại, cách nhau ba nốt móc kép"
+ },
+ "How long each note rings after it ends": {
+  "日本語": "各音が終わってから響く長さ",
+  "Español": "Cuánto suena cada nota después de terminar",
+  "Deutsch": "Wie lange jeder Ton nach seinem Ende klingt",
+  "Français": "Combien de temps chaque note sonne après sa fin",
+  "한국어": "각 음이 끝난 뒤 울리는 시간",
+  "中文": "每个音结束后的余响时长",
+  "العربية": "المدة التي ترن فيها كل نغمة بعد انتهائها",
+  "Tiếng Việt": "Mỗi nốt còn ngân bao lâu sau khi kết thúc"
+ },
+ "How long each hit rings": {
+  "日本語": "各ヒットが響く長さ",
+  "Español": "Cuánto suena cada golpe",
+  "Deutsch": "Wie lange jeder Schlag klingt",
+  "Français": "Combien de temps chaque coup résonne",
+  "한국어": "각 타격이 울리는 시간",
+  "中文": "每次敲击的余响时长",
+  "العربية": "المدة التي ترن فيها كل ضربة",
+  "Tiếng Việt": "Mỗi cú đánh ngân bao lâu"
+ },
+ "Double-click for 0 dB": {
+  "日本語": "ダブルクリックで 0 dB",
+  "Español": "Doble clic para 0 dB",
+  "Deutsch": "Doppelklick für 0 dB",
+  "Français": "Double-cliquez pour 0 dB",
+  "한국어": "더블클릭하면 0 dB",
+  "中文": "双击设为 0 dB",
+  "العربية": "انقر نقرًا مزدوجًا لـ 0 dB",
+  "Tiếng Việt": "Nhấp đúp để về 0 dB"
+ },
+ "Macros": {
+  "日本語": "マクロ",
+  "Español": "Macros",
+  "Deutsch": "Makros",
+  "Français": "Macros",
+  "한국어": "매크로",
+  "中文": "宏控",
+  "العربية": "الماكروهات",
+  "Tiếng Việt": "Macro"
+ },
+ "Brightness": {
+  "日本語": "明るさ",
+  "Español": "Brillo",
+  "Deutsch": "Helligkeit",
+  "Français": "Brillance",
+  "한국어": "밝기",
+  "中文": "亮度",
+  "العربية": "السطوع",
+  "Tiếng Việt": "Độ sáng"
+ },
+ "Opens the tone and adds drive": {
+  "日本語": "トーンを開き、ドライブを加えます",
+  "Español": "Abre el tono y añade saturación",
+  "Deutsch": "Öffnet den Ton und fügt Drive hinzu",
+  "Français": "Ouvre le ton et ajoute de la saturation",
+  "한국어": "톤을 열고 드라이브를 더합니다",
+  "中文": "让音调更开阔并加入过载",
+  "العربية": "يفتح النغمة ويضيف التشبّع",
+  "Tiếng Việt": "Mở âm sắc và thêm độ méo"
+ },
+ "Adds room and echo together": {
+  "日本語": "ルームとエコーを一緒に加えます",
+  "Español": "Añade sala y eco a la vez",
+  "Deutsch": "Fügt Raum und Echo zusammen hinzu",
+  "Français": "Ajoute pièce et écho ensemble",
+  "한국어": "룸과 에코를 함께 더합니다",
+  "中文": "同时加入房间和回声",
+  "العربية": "يضيف الغرفة والصدى معًا",
+  "Tiếng Việt": "Thêm phòng và tiếng vọng cùng lúc"
+ },
+ "Widens it and lets notes ring on": {
+  "日本語": "広げて、音を長く響かせます",
+  "Español": "Lo ensancha y deja sonar las notas",
+  "Deutsch": "Macht ihn breiter und lässt die Töne nachklingen",
+  "Français": "L'élargit et laisse les notes résonner",
+  "한국어": "넓히고 음이 계속 울리게 합니다",
+  "中文": "让声音更宽并延长余响",
+  "العربية": "يوسّعه ويترك النغمات ترن",
+  "Tiếng Việt": "Mở rộng và để các nốt ngân dài"
+ },
+ "A quicker attack and more drive": {
+  "日本語": "速いアタックとより強いドライブ",
+  "Español": "Un ataque más rápido y más saturación",
+  "Deutsch": "Schnellere Attack und mehr Drive",
+  "Français": "Une attaque plus rapide et plus de saturation",
+  "한국어": "더 빠른 어택과 더 강한 드라이브",
+  "中文": "更快的起音和更多过载",
+  "العربية": "هجوم أسرع وتشبّع أكثر",
+  "Tiếng Việt": "Độ vào nhanh hơn và méo hơn"
+ },
+ "Brightness and motion": {
+  "日本語": "明るさとモーション",
+  "Español": "Brillo y movimiento",
+  "Deutsch": "Helligkeit und Bewegung",
+  "Français": "Brillance et mouvement",
+  "한국어": "밝기와 모션",
+  "中文": "亮度与运动",
+  "العربية": "السطوع والحركة",
+  "Tiếng Việt": "Độ sáng và chuyển động"
+ },
+ "Brightness →": {
+  "日本語": "明るさ →",
+  "Español": "Brillo →",
+  "Deutsch": "Helligkeit →",
+  "Français": "Brillance →",
+  "한국어": "밝기 →",
+  "中文": "亮度 →",
+  "العربية": "السطوع →",
+  "Tiếng Việt": "Độ sáng →"
+ },
+ "↑ Motion": {
+  "日本語": "↑ モーション",
+  "Español": "↑ Movimiento",
+  "Deutsch": "↑ Bewegung",
+  "Français": "↑ Mouvement",
+  "한국어": "↑ 모션",
+  "中文": "↑ 运动",
+  "العربية": "↑ الحركة",
+  "Tiếng Việt": "↑ Chuyển động"
+ },
+ "Chord pads": {
+  "日本語": "コードパッド",
+  "Español": "Pads de acordes",
+  "Deutsch": "Akkord-Pads",
+  "Français": "Pads d'accords",
+  "한국어": "코드 패드",
+  "中文": "和弦打击垫",
+  "العربية": "لوحات الكوردات",
+  "Tiếng Việt": "Pad hợp âm"
+ },
+ "Voicing": {
+  "日本語": "ボイシング",
+  "Español": "Disposición",
+  "Deutsch": "Voicing",
+  "Français": "Disposition",
+  "한국어": "보이싱",
+  "中文": "和弦排列",
+  "العربية": "توزيع الكورد",
+  "Tiếng Việt": "Cách xếp nốt"
+ },
+ "7th": {
+  "日本語": "セブンス",
+  "Español": "Séptima",
+  "Deutsch": "Septakkord",
+  "Français": "Septième",
+  "한국어": "7화음",
+  "中文": "七和弦",
+  "العربية": "سابعة",
+  "Tiếng Việt": "Hợp âm bảy"
+ },
+ "Add an instrument track to play chords.": {
+  "日本語": "コードを弾くには楽器トラックを追加してください。",
+  "Español": "Añade una pista de instrumento para tocar acordes.",
+  "Deutsch": "Füge eine Instrumentenspur hinzu, um Akkorde zu spielen.",
+  "Français": "Ajoutez une piste d'instrument pour jouer des accords.",
+  "한국어": "코드를 연주하려면 악기 트랙을 추가하세요.",
+  "中文": "添加一条乐器轨道来弹奏和弦。",
+  "العربية": "أضف مسار آلة لعزف الكوردات.",
+  "Tiếng Việt": "Thêm một track nhạc cụ để chơi hợp âm."
+ },
+ "Straight": {
+  "日本語": "ストレート",
+  "Español": "Recto",
+  "Deutsch": "Gerade",
+  "Français": "Droit",
+  "한국어": "스트레이트",
+  "中文": "直拍",
+  "العربية": "مستقيم",
+  "Tiếng Việt": "Đều"
+ },
+ "Swing 8%": {
+  "日本語": "スイング 8%",
+  "Español": "Swing 8 %",
+  "Deutsch": "Swing 8 %",
+  "Français": "Swing 8 %",
+  "한국어": "스윙 8%",
+  "中文": "摇摆 8%",
+  "العربية": "سوينغ 8%",
+  "Tiếng Việt": "Swing 8%"
+ },
+ "Swing 16%": {
+  "日本語": "スイング 16%",
+  "Español": "Swing 16 %",
+  "Deutsch": "Swing 16 %",
+  "Français": "Swing 16 %",
+  "한국어": "스윙 16%",
+  "中文": "摇摆 16%",
+  "العربية": "سوينغ 16%",
+  "Tiếng Việt": "Swing 16%"
+ },
+ "Swing 25%": {
+  "日本語": "スイング 25%",
+  "Español": "Swing 25 %",
+  "Deutsch": "Swing 25 %",
+  "Français": "Swing 25 %",
+  "한국어": "스윙 25%",
+  "中文": "摇摆 25%",
+  "العربية": "سوينغ 25%",
+  "Tiếng Việt": "Swing 25%"
+ },
+ "Bar": {
+  "日本語": "小節",
+  "Español": "Compás",
+  "Deutsch": "Takt",
+  "Français": "Mesure",
+  "한국어": "마디",
+  "中文": "小节",
+  "العربية": "المازورة",
+  "Tiếng Việt": "Ô nhịp"
+ },
+ "bar": {
+  "日本語": "小節",
+  "Español": "compás",
+  "Deutsch": "Takt",
+  "Français": "mesure",
+  "한국어": "마디",
+  "中文": "小节",
+  "العربية": "مازورة",
+  "Tiếng Việt": "ô nhịp"
+ },
+ "bars": {
+  "日本語": "小節",
+  "Español": "compases",
+  "Deutsch": "Takte",
+  "Français": "mesures",
+  "한국어": "마디",
+  "中文": "小节",
+  "العربية": "مازورات",
+  "Tiếng Việt": "ô nhịp"
+ },
+ "Hear it": {
+  "日本語": "聴いてみる",
+  "Español": "Escúchalo",
+  "Deutsch": "Anhören",
+  "Français": "Écouter",
+  "한국어": "들어 보기",
+  "中文": "试听",
+  "العربية": "استمع إليه",
+  "Tiếng Việt": "Nghe thử"
+ },
+ "Start a beat": {
+  "日本語": "ビートを始める",
+  "Español": "Empezar un ritmo",
+  "Deutsch": "Einen Beat starten",
+  "Français": "Lancer un rythme",
+  "한국어": "비트 시작하기",
+  "中文": "开始一段节拍",
+  "العربية": "ابدأ إيقاعًا",
+  "Tiếng Việt": "Tạo một beat"
+ },
+ "There's no drum track yet.": {
+  "日本語": "まだドラムトラックがありません。",
+  "Español": "Todavía no hay pista de batería.",
+  "Deutsch": "Es gibt noch keine Drum-Spur.",
+  "Français": "Il n'y a pas encore de piste de batterie.",
+  "한국어": "아직 드럼 트랙이 없습니다.",
+  "中文": "还没有鼓轨道。",
+  "العربية": "لا يوجد مسار طبول بعد.",
+  "Tiếng Việt": "Chưa có track trống nào."
+ },
+ "This drum track has no beat yet.": {
+  "日本語": "このドラムトラックにはまだビートがありません。",
+  "Español": "Esta pista de batería aún no tiene ritmo.",
+  "Deutsch": "Diese Drum-Spur hat noch keinen Beat.",
+  "Français": "Cette piste de batterie n'a pas encore de rythme.",
+  "한국어": "이 드럼 트랙에는 아직 비트가 없습니다.",
+  "中文": "这条鼓轨道还没有节拍。",
+  "العربية": "لا يحتوي مسار الطبول هذا على إيقاع بعد.",
+  "Tiếng Việt": "Track trống này chưa có beat."
+ },
+ "Search sounds": {
+  "日本語": "サウンドを検索",
+  "Español": "Buscar sonidos",
+  "Deutsch": "Sounds suchen",
+  "Français": "Rechercher des sons",
+  "한국어": "사운드 검색",
+  "中文": "搜索音色",
+  "العربية": "ابحث عن الأصوات",
+  "Tiếng Việt": "Tìm âm thanh"
+ },
+ "Search sounds…": {
+  "日本語": "サウンドを検索…",
+  "Español": "Buscar sonidos…",
+  "Deutsch": "Sounds suchen…",
+  "Français": "Rechercher des sons…",
+  "한국어": "사운드 검색…",
+  "中文": "搜索音色…",
+  "العربية": "ابحث عن الأصوات…",
+  "Tiếng Việt": "Tìm âm thanh…"
+ },
+ "A new track with this sound": {
+  "日本語": "このサウンドで新しいトラック",
+  "Español": "Una pista nueva con este sonido",
+  "Deutsch": "Eine neue Spur mit diesem Sound",
+  "Français": "Une nouvelle piste avec ce son",
+  "한국어": "이 사운드로 새 트랙",
+  "中文": "使用此音色的新轨道",
+  "العربية": "مسار جديد بهذا الصوت",
+  "Tiếng Việt": "Track mới với âm thanh này"
+ },
+ "Add as a new track": {
+  "日本語": "新しいトラックとして追加",
+  "Español": "Añadir como pista nueva",
+  "Deutsch": "Als neue Spur hinzufügen",
+  "Français": "Ajouter comme nouvelle piste",
+  "한국어": "새 트랙으로 추가",
+  "中文": "添加为新轨道",
+  "العربية": "أضف كمسار جديد",
+  "Tiếng Việt": "Thêm thành track mới"
+ },
+ "Its beat on the step sequencer, in Perform": {
+  "日本語": "パフォーマンスのステップシーケンサーにあるビート",
+  "Español": "Su ritmo en el secuenciador por pasos, en Interpretación",
+  "Deutsch": "Sein Beat im Step-Sequencer, unter Performance",
+  "Français": "Son rythme dans le séquenceur pas à pas, dans Performance",
+  "한국어": "퍼포먼스의 스텝 시퀀서에 있는 비트",
+  "中文": "它的节拍在“演奏”的步进音序器中",
+  "العربية": "إيقاعه في مُسلسِل الخطوات، ضمن الأداء",
+  "Tiếng Việt": "Beat của nó trên bộ tạo nhịp theo bước, trong Biểu diễn"
+ },
+ "Its notes in a piano roll, in Console": {
+  "日本語": "コンソールのピアノロールにある音",
+  "Español": "Sus notas en un piano roll, en Consola",
+  "Deutsch": "Seine Noten in einer Pianorolle, unter Konsole",
+  "Français": "Ses notes dans un piano roll, dans Console",
+  "한국어": "콘솔의 피아노 롤에 있는 음",
+  "中文": "它的音符在“控制台”的钢琴卷帘中",
+  "العربية": "نغماته في لفافة البيانو، ضمن وحدة التحكم",
+  "Tiếng Việt": "Các nốt của nó trong piano roll, trong Bàn điều khiển"
+ },
+ "Level: {name}": {
+  "日本語": "レベル: {name}",
+  "Español": "Nivel: {name}",
+  "Deutsch": "Pegel: {name}",
+  "Français": "Niveau : {name}",
+  "한국어": "레벨: {name}",
+  "中文": "电平：{name}",
+  "العربية": "المستوى: {name}",
+  "Tiếng Việt": "Mức: {name}"
+ },
+ "Master level": {
+  "日本語": "マスターレベル",
+  "Español": "Nivel máster",
+  "Deutsch": "Master-Pegel",
+  "Français": "Niveau master",
+  "한국어": "마스터 레벨",
+  "中文": "主电平",
+  "العربية": "المستوى الرئيسي",
+  "Tiếng Việt": "Mức master"
+ },
+ "Song level": {
+  "日本語": "曲のレベル",
+  "Español": "Nivel de la canción",
+  "Deutsch": "Song-Pegel",
+  "Français": "Niveau du morceau",
+  "한국어": "곡 레벨",
+  "中文": "歌曲电平",
+  "العربية": "مستوى الأغنية",
+  "Tiếng Việt": "Mức bài hát"
+ },
+ "Solo": {
+  "日本語": "ソロ",
+  "Español": "Solo",
+  "Deutsch": "Solo",
+  "Français": "Solo",
+  "한국어": "솔로",
+  "中文": "独奏",
+  "العربية": "منفرد",
+  "Tiếng Việt": "Solo"
+ },
+ "Mute the song": {
+  "日本語": "曲をミュート",
+  "Español": "Silenciar la canción",
+  "Deutsch": "Song stummschalten",
+  "Français": "Couper le morceau",
+  "한국어": "곡 음소거",
+  "中文": "将歌曲静音",
+  "العربية": "اكتم الأغنية",
+  "Tiếng Việt": "Tắt tiếng bài hát"
+ },
+ "Duplicate the track": {
+  "日本語": "トラックを複製",
+  "Español": "Duplicar la pista",
+  "Deutsch": "Spur duplizieren",
+  "Français": "Dupliquer la piste",
+  "한국어": "트랙 복제",
+  "中文": "复制轨道",
+  "العربية": "كرّر المسار",
+  "Tiếng Việt": "Nhân bản track"
+ },
+ "Edit in Console": {
+  "日本語": "コンソールで編集",
+  "Español": "Editar en Consola",
+  "Deutsch": "In der Konsole bearbeiten",
+  "Français": "Modifier dans Console",
+  "한국어": "콘솔에서 편집",
+  "中文": "在控制台中编辑",
+  "العربية": "حرّر في وحدة التحكم",
+  "Tiếng Việt": "Sửa trong Bàn điều khiển"
+ },
+ "Delete the track": {
+  "日本語": "トラックを削除",
+  "Español": "Eliminar la pista",
+  "Deutsch": "Spur löschen",
+  "Français": "Supprimer la piste",
+  "한국어": "트랙 삭제",
+  "中文": "删除轨道",
+  "العربية": "احذف المسار",
+  "Tiếng Việt": "Xóa track"
+ },
+ "The loop – drag in the ruler to set it": {
+  "日本語": "ループ – ルーラーをドラッグして設定",
+  "Español": "El bucle – arrastra en la regla para fijarlo",
+  "Deutsch": "Die Schleife – zum Festlegen im Lineal ziehen",
+  "Français": "La boucle – faites glisser dans la règle pour la définir",
+  "한국어": "루프 – 눈금자에서 드래그해 설정",
+  "中文": "循环 – 在标尺上拖动来设置",
+  "العربية": "الحلقة – اسحب في المسطرة لتعيينها",
+  "Tiếng Việt": "Vòng lặp – kéo trên thước để đặt"
+ },
+ "Track": {
+  "日本語": "トラック",
+  "Español": "Pista",
+  "Deutsch": "Spur",
+  "Français": "Piste",
+  "한국어": "트랙",
+  "中文": "轨道",
+  "العربية": "المسار",
+  "Tiếng Việt": "Track"
+ },
+ "Scope": {
+  "日本語": "スコープ",
+  "Español": "Osciloscopio",
+  "Deutsch": "Oszilloskop",
+  "Français": "Oscilloscope",
+  "한국어": "스코프",
+  "中文": "示波器",
+  "العربية": "راسم الذبذبات",
+  "Tiếng Việt": "Dao động ký"
+ },
+ "New clip": {
+  "日本語": "新しいクリップ",
+  "Español": "Clip nuevo",
+  "Deutsch": "Neuer Clip",
+  "Français": "Nouveau clip",
+  "한국어": "새 클립",
+  "中文": "新片段",
+  "العربية": "مقطع جديد",
+  "Tiếng Việt": "Clip mới"
+ },
+ "No clip": {
+  "日本語": "クリップなし",
+  "Español": "Sin clip",
+  "Deutsch": "Kein Clip",
+  "Français": "Aucun clip",
+  "한국어": "클립 없음",
+  "中文": "无片段",
+  "العربية": "لا يوجد مقطع",
+  "Tiếng Việt": "Không có clip"
+ },
+ "The clip before": {
+  "日本語": "前のクリップ",
+  "Español": "El clip anterior",
+  "Deutsch": "Der vorherige Clip",
+  "Français": "Le clip précédent",
+  "한국어": "이전 클립",
+  "中文": "上一个片段",
+  "العربية": "المقطع السابق",
+  "Tiếng Việt": "Clip trước"
+ },
+ "The clip after": {
+  "日本語": "次のクリップ",
+  "Español": "El clip siguiente",
+  "Deutsch": "Der nächste Clip",
+  "Français": "Le clip suivant",
+  "한국어": "다음 클립",
+  "中文": "下一个片段",
+  "العربية": "المقطع التالي",
+  "Tiếng Việt": "Clip sau"
+ },
+ "Clip length": {
+  "日本語": "クリップの長さ",
+  "Español": "Duración del clip",
+  "Deutsch": "Cliplänge",
+  "Français": "Durée du clip",
+  "한국어": "클립 길이",
+  "中文": "片段长度",
+  "العربية": "طول المقطع",
+  "Tiếng Việt": "Độ dài clip"
+ },
+ "How long the clip is": {
+  "日本語": "クリップがどれだけ長いか",
+  "Español": "Cuánto dura el clip",
+  "Deutsch": "Wie lang der Clip ist",
+  "Français": "La durée du clip",
+  "한국어": "클립이 얼마나 긴지",
+  "中文": "片段有多长",
+  "العربية": "كم يبلغ طول المقطع",
+  "Tiếng Việt": "Clip dài bao lâu"
+ },
+ "Pick a clip above, or make a new one.": {
+  "日本語": "上のクリップを選ぶか、新しく作成してください。",
+  "Español": "Elige un clip arriba o crea uno nuevo.",
+  "Deutsch": "Wähle oben einen Clip oder erstelle einen neuen.",
+  "Français": "Choisissez un clip ci-dessus ou créez-en un nouveau.",
+  "한국어": "위에서 클립을 고르거나 새로 만드세요.",
+  "中文": "在上方选择一个片段，或新建一个。",
+  "العربية": "اختر مقطعًا أعلاه، أو أنشئ مقطعًا جديدًا.",
+  "Tiếng Việt": "Chọn một clip ở trên, hoặc tạo clip mới."
+ },
+ "This track has no clips yet.": {
+  "日本語": "このトラックにはまだクリップがありません。",
+  "Español": "Esta pista aún no tiene clips.",
+  "Deutsch": "Diese Spur hat noch keine Clips.",
+  "Français": "Cette piste n'a pas encore de clips.",
+  "한국어": "이 트랙에는 아직 클립이 없습니다.",
+  "中文": "这条轨道还没有片段。",
+  "العربية": "لا يحتوي هذا المسار على مقاطع بعد.",
+  "Tiếng Việt": "Track này chưa có clip nào."
+ },
+ "Piano roll": {
+  "日本語": "ピアノロール",
+  "Español": "Piano roll",
+  "Deutsch": "Pianorolle",
+  "Français": "Piano roll",
+  "한국어": "피아노 롤",
+  "中文": "钢琴卷帘",
+  "العربية": "لفافة البيانو",
+  "Tiếng Việt": "Piano roll"
+ },
+ "Velocity": {
+  "日本語": "ベロシティ",
+  "Español": "Velocidad",
+  "Deutsch": "Anschlagstärke",
+  "Français": "Vélocité",
+  "한국어": "벨로시티",
+  "中文": "力度",
+  "العربية": "شدة العزف",
+  "Tiếng Việt": "Lực nhấn"
+ },
+ "Record (R)": {
+  "日本語": "録音 (R)",
+  "Español": "Grabar (R)",
+  "Deutsch": "Aufnehmen (R)",
+  "Français": "Enregistrer (R)",
+  "한국어": "녹음 (R)",
+  "中文": "录制 (R)",
+  "العربية": "سجّل (R)",
+  "Tiếng Việt": "Ghi (R)"
+ },
+ "Play (Space)": {
+  "日本語": "再生 (Space)",
+  "Español": "Reproducir (Space)",
+  "Deutsch": "Abspielen (Space)",
+  "Français": "Lecture (Space)",
+  "한국어": "재생 (Space)",
+  "中文": "播放 (Space)",
+  "العربية": "تشغيل (Space)",
+  "Tiếng Việt": "Phát (Space)"
+ },
+ "To the start": {
+  "日本語": "先頭へ",
+  "Español": "Al principio",
+  "Deutsch": "Zum Anfang",
+  "Français": "Au début",
+  "한국어": "처음으로",
+  "中文": "回到开头",
+  "العربية": "إلى البداية",
+  "Tiếng Việt": "Về đầu"
+ },
+ "To the start (Home)": {
+  "日本語": "先頭へ (Home)",
+  "Español": "Al principio (Home)",
+  "Deutsch": "Zum Anfang (Home)",
+  "Français": "Au début (Home)",
+  "한국어": "처음으로 (Home)",
+  "中文": "回到开头 (Home)",
+  "العربية": "إلى البداية (Home)",
+  "Tiếng Việt": "Về đầu (Home)"
+ },
+ "Loop (L)": {
+  "日本語": "ループ (L)",
+  "Español": "Bucle (L)",
+  "Deutsch": "Schleife (L)",
+  "Français": "Boucle (L)",
+  "한국어": "루프 (L)",
+  "中文": "循环 (L)",
+  "العربية": "الحلقة (L)",
+  "Tiếng Việt": "Vòng lặp (L)"
+ },
+ "Click": {
+  "日本語": "クリック",
+  "Español": "Clic",
+  "Deutsch": "Klick",
+  "Français": "Clic",
+  "한국어": "클릭",
+  "中文": "咔嗒声",
+  "العربية": "النقرة",
+  "Tiếng Việt": "Tiếng gõ nhịp"
+ },
+ "Metronome (M)": {
+  "日本語": "メトロノーム (M)",
+  "Español": "Metrónomo (M)",
+  "Deutsch": "Metronom (M)",
+  "Français": "Métronome (M)",
+  "한국어": "메트로놈 (M)",
+  "中文": "节拍器 (M)",
+  "العربية": "المترونوم (M)",
+  "Tiếng Việt": "Máy đánh nhịp (M)"
+ },
+ "Snap": {
+  "日本語": "スナップ",
+  "Español": "Ajuste",
+  "Deutsch": "Einrasten",
+  "Français": "Magnétisme",
+  "한국어": "스냅",
+  "中文": "吸附",
+  "العربية": "المحاذاة",
+  "Tiếng Việt": "Bắt lưới"
+ },
+ "Snap off": {
+  "日本語": "スナップオフ",
+  "Español": "Ajuste desactivado",
+  "Deutsch": "Einrasten aus",
+  "Français": "Magnétisme désactivé",
+  "한국어": "스냅 끔",
+  "中文": "吸附关闭",
+  "العربية": "المحاذاة متوقفة",
+  "Tiếng Việt": "Tắt bắt lưới"
+ },
+ "Snap: where notes and clips land": {
+  "日本語": "スナップ: 音とクリップが置かれる位置",
+  "Español": "Ajuste: dónde caen las notas y los clips",
+  "Deutsch": "Einrasten: wo Noten und Clips landen",
+  "Français": "Magnétisme : où se placent les notes et les clips",
+  "한국어": "스냅: 음과 클립이 놓이는 위치",
+  "中文": "吸附：音符和片段落下的位置",
+  "العربية": "المحاذاة: أين تستقر النغمات والمقاطع",
+  "Tiếng Việt": "Bắt lưới: nơi nốt và clip được đặt"
+ },
+ "The key and tempo": {
+  "日本語": "キーとテンポ",
+  "Español": "La tonalidad y el tempo",
+  "Deutsch": "Die Tonart und das Tempo",
+  "Français": "La tonalité et le tempo",
+  "한국어": "조성과 템포",
+  "中文": "调性和速度",
+  "العربية": "المقام والإيقاع الزمني",
+  "Tiếng Việt": "Tông và nhịp độ"
+ },
+ "Key and tempo": {
+  "日本語": "キー・テンポ",
+  "Español": "Tonalidad y tempo",
+  "Deutsch": "Tonart und Tempo",
+  "Français": "Tonalité et tempo",
+  "한국어": "조성·템포",
+  "中文": "调性与速度",
+  "العربية": "المقام والإيقاع الزمني",
+  "Tiếng Việt": "Tông và nhịp độ"
+ },
+ "Key": {
+  "日本語": "キー",
+  "Español": "Tonalidad",
+  "Deutsch": "Tonart",
+  "Français": "Tonalité",
+  "한국어": "조성",
+  "中文": "调性",
+  "العربية": "المقام",
+  "Tiếng Việt": "Tông"
+ },
+ "Follow the song's key and tempo": {
+  "日本語": "曲のキーとテンポに合わせる",
+  "Español": "Seguir la tonalidad y el tempo de la canción",
+  "Deutsch": "Tonart und Tempo des Songs folgen",
+  "Français": "Suivre la tonalité et le tempo du morceau",
+  "한국어": "곡의 조성과 템포 따라가기",
+  "中文": "跟随歌曲的调性和速度",
+  "العربية": "اتبع مقام الأغنية وإيقاعها الزمني",
+  "Tiếng Việt": "Theo tông và nhịp độ của bài hát"
+ },
+ "Follow the song's key and tempo (pick a song first)": {
+  "日本語": "曲のキーとテンポに合わせる（先に曲を選んでください）",
+  "Español": "Seguir la tonalidad y el tempo de la canción (elige primero una canción)",
+  "Deutsch": "Tonart und Tempo des Songs folgen (zuerst einen Song wählen)",
+  "Français": "Suivre la tonalité et le tempo du morceau (choisissez d'abord un morceau)",
+  "한국어": "곡의 조성과 템포 따라가기 (먼저 곡을 고르세요)",
+  "中文": "跟随歌曲的调性和速度（请先选择歌曲）",
+  "العربية": "اتبع مقام الأغنية وإيقاعها الزمني (اختر أغنية أولًا)",
+  "Tiếng Việt": "Theo tông và nhịp độ của bài hát (hãy chọn bài hát trước)"
+ },
+ "Follow its key and tempo": {
+  "日本語": "そのキーとテンポに合わせる",
+  "Español": "Seguir su tonalidad y tempo",
+  "Deutsch": "Seiner Tonart und seinem Tempo folgen",
+  "Français": "Suivre sa tonalité et son tempo",
+  "한국어": "그 조성과 템포 따라가기",
+  "中文": "跟随它的调性和速度",
+  "العربية": "اتبع مقامها وإيقاعها الزمني",
+  "Tiếng Việt": "Theo tông và nhịp độ của nó"
+ },
+ "The music the DAW plays along with and follows": {
+  "日本語": "DAW が一緒に演奏し、合わせる音楽",
+  "Español": "La música con la que el DAW toca y a la que sigue",
+  "Deutsch": "Die Musik, zu der die DAW mitspielt und der sie folgt",
+  "Français": "La musique avec laquelle le DAW joue et qu'il suit",
+  "한국어": "DAW가 함께 연주하며 따라가는 음악",
+  "中文": "DAW 伴奏并跟随的音乐",
+  "العربية": "الموسيقى التي يعزف معها DAW ويتبعها",
+  "Tiếng Việt": "Bản nhạc mà DAW chơi cùng và đi theo"
+ },
+ "No song": {
+  "日本語": "曲なし",
+  "Español": "Sin canción",
+  "Deutsch": "Kein Song",
+  "Français": "Aucun morceau",
+  "한국어": "곡 없음",
+  "中文": "无歌曲",
+  "العربية": "لا توجد أغنية",
+  "Tiếng Việt": "Không có bài hát"
+ },
+ "Pick the song…": {
+  "日本語": "曲を選ぶ…",
+  "Español": "Elegir la canción…",
+  "Deutsch": "Song wählen…",
+  "Français": "Choisir le morceau…",
+  "한국어": "곡 고르기…",
+  "中文": "选择歌曲…",
+  "العربية": "اختر الأغنية…",
+  "Tiếng Việt": "Chọn bài hát…"
+ },
+ "No key heard": {
+  "日本語": "キーは聞き取れず",
+  "Español": "Sin tonalidad",
+  "Deutsch": "Keine Tonart gehört",
+  "Français": "Aucune tonalité entendue",
+  "한국어": "조성 없음",
+  "中文": "未听出调性",
+  "العربية": "لم يُسمع مقام",
+  "Tiếng Việt": "Không nghe ra tông"
+ },
+ "No steady beat": {
+  "日本語": "一定のビートなし",
+  "Español": "Sin ritmo constante",
+  "Deutsch": "Kein gleichmäßiger Beat",
+  "Français": "Pas de rythme régulier",
+  "한국어": "일정한 비트 없음",
+  "中文": "没有稳定节拍",
+  "العربية": "لا إيقاع ثابت",
+  "Tiếng Việt": "Không có nhịp đều"
+ },
+ "Play along with": {
+  "日本語": "一緒に演奏",
+  "Español": "Tocar junto con",
+  "Deutsch": "Mitspielen zu",
+  "Français": "Jouer avec",
+  "한국어": "함께 연주",
+  "中文": "伴随演奏",
+  "العربية": "العزف مع",
+  "Tiếng Việt": "Chơi cùng"
+ },
+ "Lined up with the song": {
+  "日本語": "曲に揃えて配置",
+  "Español": "Alineado con la canción",
+  "Deutsch": "Am Song ausgerichtet",
+  "Français": "Aligné sur le morceau",
+  "한국어": "곡에 맞춰 정렬됨",
+  "中文": "与歌曲对齐",
+  "العربية": "محاذى مع الأغنية",
+  "Tiếng Việt": "Khớp với bài hát"
+ },
+ "At the playhead": {
+  "日本語": "再生ヘッドの位置",
+  "Español": "En el cabezal",
+  "Deutsch": "Am Abspielkopf",
+  "Français": "À la tête de lecture",
+  "한국어": "재생 헤드 위치",
+  "中文": "在播放头处",
+  "العربية": "عند رأس التشغيل",
+  "Tiếng Việt": "Tại đầu phát"
+ },
+ "The whole mix": {
+  "日本語": "ミックス全体",
+  "Español": "Toda la mezcla",
+  "Deutsch": "Der ganze Mix",
+  "Français": "Tout le mixage",
+  "한국어": "믹스 전체",
+  "中文": "整个混音",
+  "العربية": "المزيج بالكامل",
+  "Tiếng Việt": "Toàn bộ bản mix"
+ },
+ "The selected track": {
+  "日本語": "選択したトラック",
+  "Español": "La pista seleccionada",
+  "Deutsch": "Die ausgewählte Spur",
+  "Français": "La piste sélectionnée",
+  "한국어": "선택한 트랙",
+  "中文": "所选轨道",
+  "العربية": "المسار المحدد",
+  "Tiếng Việt": "Track đã chọn"
+ },
+ "The loop": {
+  "日本語": "ループ",
+  "Español": "El bucle",
+  "Deutsch": "Die Schleife",
+  "Français": "La boucle",
+  "한국어": "루프",
+  "中文": "循环",
+  "العربية": "الحلقة",
+  "Tiếng Việt": "Vòng lặp"
+ },
+ "Nothing placed to undo": {
+  "日本語": "元に戻せる配置はありません",
+  "Español": "No hay nada colocado que deshacer",
+  "Deutsch": "Nichts platziert, das rückgängig gemacht werden kann",
+  "Français": "Rien de placé à annuler",
+  "한국어": "실행 취소할 배치가 없습니다",
+  "中文": "没有可撤销的放置",
+  "العربية": "لا يوجد شيء موضوع للتراجع عنه",
+  "Tiếng Việt": "Không có gì đã đặt để hoàn tác"
+ },
+ "Rendering…": {
+  "日本語": "レンダリング中…",
+  "Español": "Renderizando…",
+  "Deutsch": "Wird gerendert…",
+  "Français": "Rendu en cours…",
+  "한국어": "렌더링 중…",
+  "中文": "正在渲染…",
+  "العربية": "جارٍ التصيير…",
+  "Tiếng Việt": "Đang kết xuất…"
+ },
+ "There's nothing to place yet – record or write some notes first.": {
+  "日本語": "まだ配置するものがありません – 先に録音するか、音を書き込んでください。",
+  "Español": "Aún no hay nada que colocar – graba o escribe algunas notas primero.",
+  "Deutsch": "Noch nichts zu platzieren – nimm zuerst etwas auf oder schreib ein paar Noten.",
+  "Français": "Rien à placer pour l'instant – enregistrez ou écrivez d'abord quelques notes.",
+  "한국어": "아직 배치할 것이 없습니다 – 먼저 녹음하거나 음을 써 넣으세요.",
+  "中文": "还没有可放置的内容 – 请先录制或写入一些音符。",
+  "العربية": "لا يوجد شيء لوضعه بعد – سجّل أو اكتب بعض النغمات أولًا.",
+  "Tiếng Việt": "Chưa có gì để đặt – hãy ghi hoặc viết vài nốt trước."
+ },
+ "That's longer than Buddy places at once (2½ minutes) – place a loop or one track.": {
+  "日本語": "Buddy が一度に配置できる長さ（2½ 分）を超えています – ループかトラック 1 つを配置してください。",
+  "Español": "Es más largo de lo que Buddy coloca de una vez (2½ minutos) – coloca un bucle o una sola pista.",
+  "Deutsch": "Das ist länger, als Buddy auf einmal platziert (2½ Minuten) – platziere eine Schleife oder eine Spur.",
+  "Français": "C'est plus long que ce que Buddy place en une fois (2½ minutes) – placez une boucle ou une seule piste.",
+  "한국어": "Buddy가 한 번에 배치하는 길이(2½분)보다 깁니다 – 루프나 트랙 하나를 배치하세요.",
+  "中文": "这超过了 Buddy 一次能放置的长度（2½ 分钟） – 请放置一个循环或一条轨道。",
+  "العربية": "هذا أطول مما يضعه Buddy دفعة واحدة (دقيقتان ونصف) – ضع حلقة أو مسارًا واحدًا.",
+  "Tiếng Việt": "Đoạn này dài hơn mức Buddy đặt một lần (2½ phút) – hãy đặt một vòng lặp hoặc một track."
+ },
+ "{problem} – the DAW still plays; placing needs a timeline open in Resolve.": {
+  "日本語": "{problem} – DAW は引き続き再生できます。配置するには Resolve でタイムラインを開いてください。",
+  "Español": "{problem} – el DAW sigue sonando; para colocar hace falta una línea de tiempo abierta en Resolve.",
+  "Deutsch": "{problem} – die DAW spielt weiter; zum Platzieren muss in Resolve eine Timeline offen sein.",
+  "Français": "{problem} – le DAW joue toujours ; pour placer, il faut une timeline ouverte dans Resolve.",
+  "한국어": "{problem} – DAW는 계속 재생됩니다. 배치하려면 Resolve에서 타임라인을 열어야 합니다.",
+  "中文": "{problem} – DAW 仍可播放；放置需要在 Resolve 中打开时间线。",
+  "العربية": "{problem} – لا يزال DAW يعمل؛ يتطلب الوضع فتح مخطط زمني في Resolve.",
+  "Tiếng Việt": "{problem} – DAW vẫn phát; để đặt cần mở một dòng thời gian trong Resolve."
+ },
+ "Redo: {t_label}": {
+  "日本語": "やり直す: {t_label}",
+  "Español": "Rehacer: {t_label}",
+  "Deutsch": "Wiederholen: {t_label}",
+  "Français": "Rétablir : {t_label}",
+  "한국어": "다시 실행: {t_label}",
+  "中文": "重做：{t_label}",
+  "العربية": "إعادة: {t_label}",
+  "Tiếng Việt": "Làm lại: {t_label}"
+ },
+ "Redone: {t_label}": {
+  "日本語": "やり直しました: {t_label}",
+  "Español": "Rehecho: {t_label}",
+  "Deutsch": "Wiederholt: {t_label}",
+  "Français": "Rétabli : {t_label}",
+  "한국어": "다시 실행됨: {t_label}",
+  "中文": "已重做：{t_label}",
+  "العربية": "تمت الإعادة: {t_label}",
+  "Tiếng Việt": "Đã làm lại: {t_label}"
+ },
+ "Add a track": {
+  "日本語": "トラックを追加",
+  "Español": "Añadir una pista",
+  "Deutsch": "Spur hinzufügen",
+  "Français": "Ajouter une piste",
+  "한국어": "트랙 추가",
+  "中文": "添加轨道",
+  "العربية": "إضافة مسار",
+  "Tiếng Việt": "Thêm track"
+ },
+ "Add a clip": {
+  "日本語": "クリップを追加",
+  "Español": "Añadir un clip",
+  "Deutsch": "Clip hinzufügen",
+  "Français": "Ajouter un clip",
+  "한국어": "클립 추가",
+  "中文": "添加片段",
+  "العربية": "إضافة مقطع",
+  "Tiếng Việt": "Thêm clip"
+ },
+ "Add a note": {
+  "日本語": "音を追加",
+  "Español": "Añadir una nota",
+  "Deutsch": "Note hinzufügen",
+  "Français": "Ajouter une note",
+  "한국어": "음 추가",
+  "中文": "添加音符",
+  "العربية": "إضافة نغمة",
+  "Tiếng Việt": "Thêm nốt"
+ },
+ "Add steps": {
+  "日本語": "ステップを追加",
+  "Español": "Añadir pasos",
+  "Deutsch": "Steps hinzufügen",
+  "Français": "Ajouter des pas",
+  "한국어": "스텝 추가",
+  "中文": "添加步进",
+  "العربية": "إضافة خطوات",
+  "Tiếng Việt": "Thêm bước"
+ },
+ "Clear steps": {
+  "日本語": "ステップを消去",
+  "Español": "Borrar pasos",
+  "Deutsch": "Steps löschen",
+  "Français": "Effacer des pas",
+  "한국어": "스텝 지우기",
+  "中文": "清除步进",
+  "العربية": "مسح الخطوات",
+  "Tiếng Việt": "Xóa bước"
+ },
+ "Accent a step": {
+  "日本語": "ステップにアクセント",
+  "Español": "Acentuar un paso",
+  "Deutsch": "Step betonen",
+  "Français": "Accentuer un pas",
+  "한국어": "스텝 강조",
+  "中文": "为步进加重音",
+  "العربية": "إبراز خطوة",
+  "Tiếng Việt": "Nhấn một bước"
+ },
+ "Delete a clip": {
+  "日本語": "クリップを削除",
+  "Español": "Eliminar un clip",
+  "Deutsch": "Clip löschen",
+  "Français": "Supprimer un clip",
+  "한국어": "클립 삭제",
+  "中文": "删除片段",
+  "العربية": "حذف مقطع",
+  "Tiếng Việt": "Xóa clip"
+ },
+ "Delete a note": {
+  "日本語": "音を削除",
+  "Español": "Eliminar una nota",
+  "Deutsch": "Note löschen",
+  "Français": "Supprimer une note",
+  "한국어": "음 삭제",
+  "中文": "删除音符",
+  "العربية": "حذف نغمة",
+  "Tiếng Việt": "Xóa nốt"
+ },
+ "Delete a track": {
+  "日本語": "トラックを削除",
+  "Español": "Eliminar una pista",
+  "Deutsch": "Spur löschen",
+  "Français": "Supprimer une piste",
+  "한국어": "트랙 삭제",
+  "中文": "删除轨道",
+  "العربية": "حذف مسار",
+  "Tiếng Việt": "Xóa track"
+ },
+ "Duplicate a clip": {
+  "日本語": "クリップを複製",
+  "Español": "Duplicar un clip",
+  "Deutsch": "Clip duplizieren",
+  "Français": "Dupliquer un clip",
+  "한국어": "클립 복제",
+  "中文": "复制片段",
+  "العربية": "تكرار مقطع",
+  "Tiếng Việt": "Nhân bản clip"
+ },
+ "Duplicate a track": {
+  "日本語": "トラックを複製",
+  "Español": "Duplicar una pista",
+  "Deutsch": "Spur duplizieren",
+  "Français": "Dupliquer une piste",
+  "한국어": "트랙 복제",
+  "中文": "复制轨道",
+  "العربية": "تكرار مسار",
+  "Tiếng Việt": "Nhân bản track"
+ },
+ "Copy a clip": {
+  "日本語": "クリップをコピー",
+  "Español": "Copiar un clip",
+  "Deutsch": "Clip kopieren",
+  "Français": "Copier un clip",
+  "한국어": "클립 복사",
+  "中文": "拷贝片段",
+  "العربية": "نسخ مقطع",
+  "Tiếng Việt": "Sao chép clip"
+ },
+ "Move a clip": {
+  "日本語": "クリップを移動",
+  "Español": "Mover un clip",
+  "Deutsch": "Clip verschieben",
+  "Français": "Déplacer un clip",
+  "한국어": "클립 이동",
+  "中文": "移动片段",
+  "العربية": "نقل مقطع",
+  "Tiếng Việt": "Di chuyển clip"
+ },
+ "Lengthen a clip": {
+  "日本語": "クリップを延長",
+  "Español": "Alargar un clip",
+  "Deutsch": "Clip verlängern",
+  "Français": "Allonger un clip",
+  "한국어": "클립 늘리기",
+  "中文": "延长片段",
+  "العربية": "إطالة مقطع",
+  "Tiếng Việt": "Kéo dài clip"
+ },
+ "Change velocity": {
+  "日本語": "ベロシティを変更",
+  "Español": "Cambiar la velocidad",
+  "Deutsch": "Anschlagstärke ändern",
+  "Français": "Modifier la vélocité",
+  "한국어": "벨로시티 변경",
+  "中文": "更改力度",
+  "العربية": "تغيير شدة العزف",
+  "Tiếng Việt": "Đổi lực nhấn"
+ },
+ "Change a clip's length": {
+  "日本語": "クリップの長さを変更",
+  "Español": "Cambiar la duración de un clip",
+  "Deutsch": "Länge eines Clips ändern",
+  "Français": "Modifier la durée d'un clip",
+  "한국어": "클립 길이 변경",
+  "中文": "更改片段长度",
+  "العربية": "تغيير طول مقطع",
+  "Tiếng Việt": "Đổi độ dài clip"
+ },
+ "Change the sound": {
+  "日本語": "サウンドを変更",
+  "Español": "Cambiar el sonido",
+  "Deutsch": "Sound ändern",
+  "Français": "Changer le son",
+  "한국어": "사운드 변경",
+  "中文": "更改音色",
+  "العربية": "تغيير الصوت",
+  "Tiếng Việt": "Đổi âm thanh"
+ },
+ "Change the swing": {
+  "日本語": "スイングを変更",
+  "Español": "Cambiar el swing",
+  "Deutsch": "Swing ändern",
+  "Français": "Modifier le swing",
+  "한국어": "스윙 변경",
+  "中文": "更改摇摆",
+  "العربية": "تغيير السوينغ",
+  "Tiếng Việt": "Đổi swing"
+ },
+ "Change the level": {
+  "日本語": "レベルを変更",
+  "Español": "Cambiar el nivel",
+  "Deutsch": "Pegel ändern",
+  "Français": "Modifier le niveau",
+  "한국어": "레벨 변경",
+  "中文": "更改电平",
+  "العربية": "تغيير المستوى",
+  "Tiếng Việt": "Đổi mức"
+ },
+ "Change the master level": {
+  "日本語": "マスターレベルを変更",
+  "Español": "Cambiar el nivel máster",
+  "Deutsch": "Master-Pegel ändern",
+  "Français": "Modifier le niveau master",
+  "한국어": "마스터 레벨 변경",
+  "中文": "更改主电平",
+  "العربية": "تغيير المستوى الرئيسي",
+  "Tiếng Việt": "Đổi mức master"
+ },
+ "Change the song's level": {
+  "日本語": "曲のレベルを変更",
+  "Español": "Cambiar el nivel de la canción",
+  "Deutsch": "Song-Pegel ändern",
+  "Français": "Modifier le niveau du morceau",
+  "한국어": "곡 레벨 변경",
+  "中文": "更改歌曲电平",
+  "العربية": "تغيير مستوى الأغنية",
+  "Tiếng Việt": "Đổi mức bài hát"
+ },
+ "Change the key and tempo": {
+  "日本語": "キーとテンポを変更",
+  "Español": "Cambiar la tonalidad y el tempo",
+  "Deutsch": "Tonart und Tempo ändern",
+  "Français": "Modifier la tonalité et le tempo",
+  "한국어": "조성과 템포 변경",
+  "中文": "更改调性和速度",
+  "العربية": "تغيير المقام والإيقاع الزمني",
+  "Tiếng Việt": "Đổi tông và nhịp độ"
+ },
+ "Rename a track": {
+  "日本語": "トラック名を変更",
+  "Español": "Renombrar una pista",
+  "Deutsch": "Spur umbenennen",
+  "Français": "Renommer une piste",
+  "한국어": "트랙 이름 변경",
+  "中文": "重命名轨道",
+  "العربية": "إعادة تسمية مسار",
+  "Tiếng Việt": "Đổi tên track"
+ },
+ "Unsolo": {
+  "日本語": "ソロ解除",
+  "Español": "Quitar solo",
+  "Deutsch": "Solo aufheben",
+  "Français": "Désactiver le solo",
+  "한국어": "솔로 해제",
+  "中文": "取消独奏",
+  "العربية": "إلغاء المنفرد",
+  "Tiếng Việt": "Bỏ solo"
+ },
+ "Turn a knob": {
+  "日本語": "ノブを回す",
+  "Español": "Girar un mando",
+  "Deutsch": "Regler drehen",
+  "Français": "Tourner un bouton",
+  "한국어": "노브 돌리기",
+  "中文": "转动旋钮",
+  "العربية": "تدوير مقبض",
+  "Tiếng Việt": "Xoay núm"
+ },
+ "Turn a macro": {
+  "日本語": "マクロを回す",
+  "Español": "Girar una macro",
+  "Deutsch": "Makro drehen",
+  "Français": "Tourner une macro",
+  "한국어": "매크로 돌리기",
+  "中文": "转动宏控",
+  "العربية": "تدوير ماكرو",
+  "Tiếng Việt": "Xoay macro"
+ },
+ "Move the XY pad": {
+  "日本語": "XY パッドを動かす",
+  "Español": "Mover el pad XY",
+  "Deutsch": "XY-Pad bewegen",
+  "Français": "Déplacer le pad XY",
+  "한국어": "XY 패드 움직이기",
+  "中文": "移动 XY 触控板",
+  "العربية": "تحريك لوحة XY",
+  "Tiếng Việt": "Di chuyển pad XY"
+ },
+ "Place the mix": {
+  "日本語": "ミックスを配置",
+  "Español": "Colocar la mezcla",
+  "Deutsch": "Mix platzieren",
+  "Français": "Placer le mixage",
+  "한국어": "믹스 배치",
+  "中文": "放置混音",
+  "العربية": "ضع المزيج",
+  "Tiếng Việt": "Đặt bản mix"
+ },
+ "Place a track": {
+  "日本語": "トラックを配置",
+  "Español": "Colocar una pista",
+  "Deutsch": "Spur platzieren",
+  "Français": "Placer une piste",
+  "한국어": "트랙 배치",
+  "中文": "放置轨道",
+  "العربية": "ضع مسارًا",
+  "Tiếng Việt": "Đặt một track"
+ },
+ "Place the loop": {
+  "日本語": "ループを配置",
+  "Español": "Colocar el bucle",
+  "Deutsch": "Schleife platzieren",
+  "Français": "Placer la boucle",
+  "한국어": "루프 배치",
+  "中文": "放置循环",
+  "العربية": "ضع الحلقة",
+  "Tiếng Việt": "Đặt vòng lặp"
+ },
+ "Placed on A{track}": {
+  "日本語": "A{track} に配置しました",
+  "Español": "Colocado en A{track}",
+  "Deutsch": "Auf A{track} platziert",
+  "Français": "Placé sur A{track}",
+  "한국어": "A{track}에 배치했습니다",
+  "中文": "已放置到 A{track}",
+  "العربية": "وُضع على A{track}",
+  "Tiếng Việt": "Đã đặt vào A{track}"
+ },
+ "Placing on the timeline": {
+  "日本語": "タイムラインに配置中",
+  "Español": "Colocando en la línea de tiempo",
+  "Deutsch": "Wird in der Timeline platziert",
+  "Français": "Placement sur la timeline",
+  "한국어": "타임라인에 배치하는 중",
+  "中文": "正在放置到时间线",
+  "العربية": "جارٍ الوضع على المخطط الزمني",
+  "Tiếng Việt": "Đang đặt lên dòng thời gian"
+ },
+ "Listening to the song": {
+  "日本語": "曲を聴いています",
+  "Español": "Escuchando la canción",
+  "Deutsch": "Song wird angehört",
+  "Français": "Écoute du morceau",
+  "한국어": "곡을 듣는 중",
+  "中文": "正在聆听歌曲",
+  "العربية": "جارٍ الاستماع إلى الأغنية",
+  "Tiếng Việt": "Đang nghe bài hát"
+ },
+ "Couldn't use that render": {
+  "日本語": "そのレンダーは使えませんでした",
+  "Español": "No se pudo usar ese render",
+  "Deutsch": "Dieses Rendering konnte nicht verwendet werden",
+  "Français": "Impossible d'utiliser ce rendu",
+  "한국어": "그 렌더를 사용할 수 없습니다",
+  "中文": "无法使用该渲染结果",
+  "العربية": "تعذّر استخدام ذلك التصيير",
+  "Tiếng Việt": "Không thể dùng bản kết xuất đó"
+ },
+ "Couldn't put the render in": {
+  "日本語": "レンダーを入れられませんでした",
+  "Español": "No se pudo meter el render",
+  "Deutsch": "Das Rendering konnte nicht eingefügt werden",
+  "Français": "Impossible d'insérer le rendu",
+  "한국어": "렌더를 넣을 수 없습니다",
+  "中文": "无法放入渲染结果",
+  "العربية": "تعذّر إدخال التصيير",
+  "Tiếng Việt": "Không thể đưa bản kết xuất vào"
+ },
+ "Buddy is still putting the last render in.": {
+  "日本語": "Buddy はまだ前回のレンダーを入れています。",
+  "Español": "Buddy todavía está metiendo el último render.",
+  "Deutsch": "Buddy fügt das letzte Rendering noch ein.",
+  "Français": "Buddy insère encore le dernier rendu.",
+  "한국어": "Buddy가 아직 마지막 렌더를 넣는 중입니다.",
+  "中文": "Buddy 仍在放入上一次的渲染结果。",
+  "العربية": "لا يزال Buddy يُدخل آخر تصيير.",
+  "Tiếng Việt": "Buddy vẫn đang đưa bản kết xuất trước vào."
+ },
+ "The song it plays along with": {
+  "日本語": "一緒に演奏する曲",
+  "Español": "La canción con la que toca",
+  "Deutsch": "Der Song, zu dem sie mitspielt",
+  "Français": "Le morceau avec lequel il joue",
+  "한국어": "함께 연주하는 곡",
+  "中文": "它伴奏的歌曲",
+  "العربية": "الأغنية التي يعزف معها",
+  "Tiếng Việt": "Bài hát mà nó chơi cùng"
+ },
+ "Ambience": {
+  "日本語": "アンビエンス",
+  "Español": "Ambiente",
+  "Deutsch": "Ambiente",
+  "Français": "Ambiance",
+  "한국어": "앰비언스",
+  "中文": "氛围",
+  "العربية": "الأجواء",
+  "Tiếng Việt": "Không gian"
+ },
+ "A pure low sine – felt more than heard. For bass lines under the music.": {
+  "日本語": "純粋な低いサイン波 – 聞こえるより感じる音。音楽の下のベースラインに。",
+  "Español": "Un seno grave y puro: se siente más que se oye. Para líneas de bajo bajo la música.",
+  "Deutsch": "Ein reiner tiefer Sinus – mehr gefühlt als gehört. Für Basslinien unter der Musik.",
+  "Français": "Une sinusoïde grave et pure – plus ressentie qu'entendue. Pour les lignes de basse sous la musique.",
+  "한국어": "순수한 낮은 사인파 – 들리기보다 느껴지는. 음악 아래 베이스라인에.",
+  "中文": "纯净的低频正弦 – 与其说听到不如说感到。用于音乐下方的低音线。",
+  "العربية": "موجة جيبية منخفضة نقية – تُحس أكثر مما تُسمع. لخطوط الباص تحت الموسيقى.",
+  "Tiếng Việt": "Sóng sin trầm thuần – cảm nhận hơn là nghe. Cho đường bass dưới nhạc."
+ },
+ "A soft tine with a bell on top – for chords and melodies.": {
+  "日本語": "柔らかなタインにベルの響き – コードやメロディに。",
+  "Español": "Una lengüeta suave con una campana encima: para acordes y melodías.",
+  "Deutsch": "Ein weicher Ton mit einer Glocke darüber – für Akkorde und Melodien.",
+  "Français": "Une lame douce avec une cloche dessus – pour les accords et les mélodies.",
+  "한국어": "부드러운 타인 위에 벨 – 코드와 멜로디에.",
+  "中文": "柔和的音叉加上钟声 – 适合和弦和旋律。",
+  "العربية": "رنين ناعم يعلوه جرس – للكوردات والألحان.",
+  "Tiếng Việt": "Âm thanh mềm với tiếng chuông bên trên – cho hợp âm và giai điệu."
+ },
+ "An 'ah' from no one in particular – voices made of filters.": {
+  "日本語": "誰のものでもない「アー」 – フィルターで作った声。",
+  "Español": "Un «ah» de nadie en particular: voces hechas de filtros.",
+  "Deutsch": "Ein „Ah“ von niemand Bestimmtem – Stimmen aus Filtern.",
+  "Français": "Un « ah » de personne en particulier – des voix faites de filtres.",
+  "한국어": "누구의 것도 아닌 '아' – 필터로 만든 목소리.",
+  "中文": "不属于任何人的“啊” – 用滤波器做出的人声。",
+  "العربية": "\"آه\" من لا أحد بعينه – أصوات مصنوعة من المرشّحات.",
+  "Tiếng Việt": "Một tiếng 'a' của chẳng ai cả – giọng làm từ bộ lọc."
+ },
+ "Attack": {
+  "日本語": "アタック",
+  "Español": "Ataque",
+  "Deutsch": "Attack",
+  "Français": "Attaque",
+  "한국어": "어택",
+  "中文": "起音",
+  "العربية": "الهجوم",
+  "Tiếng Việt": "Độ vào"
+ },
+ "Bass": {
+  "日本語": "ベース",
+  "Español": "Bajo",
+  "Deutsch": "Bass",
+  "Français": "Basse",
+  "한국어": "베이스",
+  "中文": "贝斯",
+  "العربية": "باص",
+  "Tiếng Việt": "Bass"
+ },
+ "Bell": {
+  "日本語": "ベル",
+  "Español": "Campana",
+  "Deutsch": "Glocke",
+  "Français": "Cloche",
+  "한국어": "벨",
+  "中文": "钟",
+  "العربية": "جرس",
+  "Tiếng Việt": "Chuông"
+ },
+ "Choir": {
+  "日本語": "クワイア",
+  "Español": "Coro",
+  "Deutsch": "Chor",
+  "Français": "Chœur",
+  "한국어": "합창",
+  "中文": "合唱",
+  "العربية": "جوقة",
+  "Tiếng Việt": "Hợp xướng"
+ },
+ "Chords": {
+  "日本語": "コード",
+  "Español": "Acordes",
+  "Deutsch": "Akkorde",
+  "Français": "Accords",
+  "한국어": "코드",
+  "中文": "和弦",
+  "العربية": "الكوردات",
+  "Tiếng Việt": "Hợp âm"
+ },
+ "Count in": {
+  "日本語": "カウントイン",
+  "Español": "Cuenta previa",
+  "Deutsch": "Einzählen",
+  "Français": "Décompte",
+  "한국어": "카운트 인",
+  "中文": "预备拍",
+  "العربية": "عدّ تمهيدي",
+  "Tiếng Việt": "Đếm vào"
+ },
+ "Darker or brighter": {
+  "日本語": "暗く、または明るく",
+  "Español": "Más oscuro o más brillante",
+  "Deutsch": "Dunkler oder heller",
+  "Français": "Plus sombre ou plus brillant",
+  "한국어": "어둡게 또는 밝게",
+  "中文": "更暗或更亮",
+  "العربية": "أغمق أو أسطع",
+  "Tiếng Việt": "Tối hơn hoặc sáng hơn"
+ },
+ "Electric piano": {
+  "日本語": "エレクトリックピアノ",
+  "Español": "Piano eléctrico",
+  "Deutsch": "E-Piano",
+  "Français": "Piano électrique",
+  "한국어": "일렉트릭 피아노",
+  "中文": "电钢琴",
+  "العربية": "بيانو كهربائي",
+  "Tiếng Việt": "Piano điện"
+ },
+ "Follow the song": {
+  "日本語": "曲に合わせる",
+  "Español": "Seguir la canción",
+  "Deutsch": "Dem Song folgen",
+  "Français": "Suivre le morceau",
+  "한국어": "곡 따라가기",
+  "中文": "跟随歌曲",
+  "العربية": "اتبع الأغنية",
+  "Tiếng Việt": "Theo bài hát"
+ },
+ "Glassy and ringing – out of tune in the way a bell is.": {
+  "日本語": "ガラスのように響く – 鐘のように少し音程がずれた音。",
+  "Español": "Cristalino y resonante: desafinado como lo está una campana.",
+  "Deutsch": "Gläsern und klingend – verstimmt, wie eine Glocke es ist.",
+  "Français": "Cristallin et résonnant – faux comme l'est une cloche.",
+  "한국어": "유리처럼 울리는 – 종처럼 음이 살짝 어긋난.",
+  "中文": "清澈回响 – 像钟一样略带走音。",
+  "العربية": "زجاجي ورنّان – غير مضبوط كما يكون الجرس.",
+  "Tiếng Việt": "Trong và ngân – lệch tông như tiếng chuông."
+ },
+ "How hard": {
+  "日本語": "強さ",
+  "Español": "Fuerza",
+  "Deutsch": "Anschlag",
+  "Français": "Force",
+  "한국어": "세기",
+  "中文": "力度",
+  "العربية": "القوة",
+  "Tiếng Việt": "Độ mạnh"
+ },
+ "How long each note rings after you let go": {
+  "日本語": "離してから各音が響く長さ",
+  "Español": "Cuánto suena cada nota después de soltarla",
+  "Deutsch": "Wie lange jeder Ton nach dem Loslassen klingt",
+  "Français": "Combien de temps chaque note sonne après l'avoir lâchée",
+  "한국어": "손을 뗀 뒤 각 음이 울리는 시간",
+  "中文": "松开后每个音的余响时长",
+  "العربية": "المدة التي ترن فيها كل نغمة بعد تركها",
+  "Tiếng Việt": "Mỗi nốt còn ngân bao lâu sau khi thả"
+ },
+ "How long each note takes to come in": {
+  "日本語": "各音が立ち上がるまでの時間",
+  "Español": "Cuánto tarda cada nota en entrar",
+  "Deutsch": "Wie lange jeder Ton zum Einsetzen braucht",
+  "Français": "Le temps que met chaque note à arriver",
+  "한국어": "각 음이 들어오는 데 걸리는 시간",
+  "中文": "每个音进入所需的时间",
+  "العربية": "المدة التي تستغرقها كل نغمة لتدخل",
+  "Tiếng Việt": "Mỗi nốt mất bao lâu để vào"
+ },
+ "Keyboard": {
+  "日本語": "キーボード",
+  "Español": "Teclado",
+  "Deutsch": "Klaviatur",
+  "Français": "Clavier",
+  "한국어": "건반",
+  "中文": "琴键",
+  "العربية": "لوحة المفاتيح",
+  "Tiếng Việt": "Bàn phím"
+ },
+ "Metronome": {
+  "日本語": "メトロノーム",
+  "Español": "Metrónomo",
+  "Deutsch": "Metronom",
+  "Français": "Métronome",
+  "한국어": "메트로놈",
+  "中文": "节拍器",
+  "العربية": "المترونوم",
+  "Tiếng Việt": "Máy đánh nhịp"
+ },
+ "Pluck": {
+  "日本語": "プラック",
+  "Español": "Pulsado",
+  "Deutsch": "Zupfen",
+  "Français": "Pincé",
+  "한국어": "플럭",
+  "中文": "拨弦",
+  "العربية": "نقر",
+  "Tiếng Việt": "Gảy"
+ },
+ "Record": {
+  "日本語": "録音",
+  "Español": "Grabar",
+  "Deutsch": "Aufnehmen",
+  "Français": "Enregistrer",
+  "한국어": "녹음",
+  "中文": "录制",
+  "العربية": "سجّل",
+  "Tiếng Việt": "Ghi"
+ },
+ "Release": {
+  "日本語": "リリース",
+  "Español": "Liberación",
+  "Deutsch": "Release",
+  "Français": "Relâchement",
+  "한국어": "릴리스",
+  "中文": "释音",
+  "العربية": "التحرير",
+  "Tiếng Việt": "Độ tắt sau"
+ },
+ "Room": {
+  "日本語": "ルーム",
+  "Español": "Sala",
+  "Deutsch": "Raum",
+  "Français": "Pièce",
+  "한국어": "룸",
+  "中文": "房间",
+  "العربية": "الغرفة",
+  "Tiếng Việt": "Phòng"
+ },
+ "Round and low, with a little bite as each note starts.": {
+  "日本語": "丸く低く、音の出だしに少しアタック。",
+  "Español": "Redondo y grave, con un poco de mordida al empezar cada nota.",
+  "Deutsch": "Rund und tief, mit etwas Biss am Anfang jedes Tons.",
+  "Français": "Rond et grave, avec un peu de mordant au début de chaque note.",
+  "한국어": "둥글고 낮게, 음이 시작될 때 약간의 어택.",
+  "中文": "圆润低沉，每个音开头带一点咬劲。",
+  "العربية": "مستدير ومنخفض، مع لسعة خفيفة عند بداية كل نغمة.",
+  "Tiếng Việt": "Tròn và trầm, hơi bật ở đầu mỗi nốt."
+ },
+ "Short and bright – plucked, then gone. For riffs and arpeggios.": {
+  "日本語": "短く明るい – 弾いてすぐ消える。リフやアルペジオに。",
+  "Español": "Corto y brillante: se pulsa y se va. Para riffs y arpegios.",
+  "Deutsch": "Kurz und hell – gezupft und weg. Für Riffs und Arpeggios.",
+  "Français": "Court et brillant – pincé, puis parti. Pour les riffs et les arpèges.",
+  "한국어": "짧고 밝은 – 튕기고 사라짐. 리프와 아르페지오에.",
+  "中文": "短促明亮 – 一拨即逝。适合即兴乐句和琶音。",
+  "العربية": "قصير ولامع – يُنقر ثم يختفي. للجمل اللحنية والأربيجات.",
+  "Tiếng Việt": "Ngắn và sáng – gảy rồi tắt. Cho riff và rải hợp âm."
+ },
+ "Supersaw": {
+  "日本語": "スーパーソウ",
+  "Español": "Supersaw",
+  "Deutsch": "Supersaw",
+  "Français": "Supersaw",
+  "한국어": "슈퍼소",
+  "中文": "超级锯齿",
+  "العربية": "سوبر سو",
+  "Tiếng Việt": "Supersaw"
+ },
+ "Warm and slow – a bed of sound for chords.": {
+  "日本語": "温かくゆっくり – コードの下地になる音。",
+  "Español": "Cálido y lento: una base de sonido para acordes.",
+  "Deutsch": "Warm und langsam – ein Klangteppich für Akkorde.",
+  "Français": "Chaud et lent – un tapis sonore pour les accords.",
+  "한국어": "따뜻하고 느린 – 코드를 받치는 소리.",
+  "中文": "温暖而缓慢 – 和弦的铺底声音。",
+  "العربية": "دافئ وبطيء – فرشة صوتية للكوردات.",
+  "Tiếng Việt": "Ấm và chậm – nền âm thanh cho hợp âm."
+ },
+ "Wide and bright – a stack of saws for big leads and hooks.": {
+  "日本語": "広く明るい – ノコギリ波を重ねた大きなリードやフックに。",
+  "Español": "Amplio y brillante: una pila de sierras para leads y ganchos grandes.",
+  "Deutsch": "Breit und hell – gestapelte Sägezähne für große Leads und Hooks.",
+  "Français": "Large et brillant – une pile de dents de scie pour les grands leads.",
+  "한국어": "넓고 밝은 – 큰 리드와 훅을 위한 톱니파 묶음.",
+  "中文": "宽广明亮 – 叠加锯齿波，适合大段主旋律和记忆点。",
+  "العربية": "عريض ولامع – طبقات منشارية للألحان الرئيسية الكبيرة.",
+  "Tiếng Việt": "Rộng và sáng – chồng sóng răng cưa cho lead và hook lớn."
+ },
+ "Write a progression": {
+  "日本語": "進行を書き込む",
+  "Español": "Escribir una progresión",
+  "Deutsch": "Eine Akkordfolge schreiben",
+  "Français": "Écrire une progression",
+  "한국어": "진행 쓰기",
+  "中文": "写入和弦进行",
+  "العربية": "اكتب تتابعًا",
+  "Tiếng Việt": "Viết vòng hợp âm"
+ },
+ "no key heard": {
+  "日本語": "キーは聞き取れず",
+  "Español": "sin tonalidad",
+  "Deutsch": "keine Tonart gehört",
+  "Français": "aucune tonalité entendue",
+  "한국어": "조성 없음",
+  "中文": "未听出调性",
+  "العربية": "لم يُسمع مقام",
+  "Tiếng Việt": "không nghe ra tông"
+ },
+ "no steady beat": {
+  "日本語": "一定のビートなし",
+  "Español": "sin ritmo constante",
+  "Deutsch": "kein gleichmäßiger Beat",
+  "Français": "pas de rythme régulier",
+  "한국어": "일정한 비트 없음",
+  "中文": "没有稳定节拍",
+  "العربية": "لا إيقاع ثابت",
+  "Tiếng Việt": "không có nhịp đều"
+ },
+ "Keys is now the DAW": {
+  "日本語": "キーは DAW になりました",
+  "Español": "Keys ahora es el DAW",
+  "Deutsch": "Keys ist jetzt die DAW",
+  "Français": "Keys est devenu le DAW",
+  "한국어": "키는 이제 DAW입니다",
+  "中文": "键盘现已成为 DAW",
+  "العربية": "أصبحت لوحة المفاتيح الآن DAW",
+  "Tiếng Việt": "Keys giờ là DAW"
+ },
+ "Instruments and drums to play, record and arrange over the song": {
+  "日本語": "曲に合わせて演奏・録音・アレンジする楽器とドラム",
+  "Español": "Instrumentos y batería para tocar, grabar y arreglar sobre la canción",
+  "Deutsch": "Instrumente und Drums zum Spielen, Aufnehmen und Arrangieren zum Song",
+  "Français": "Instruments et batterie à jouer, enregistrer et arranger sur le morceau",
+  "한국어": "곡에 맞춰 연주하고 녹음하고 편곡하는 악기와 드럼",
+  "中文": "随歌曲演奏、录制和编曲的乐器与鼓",
+  "العربية": "آلات وطبول للعزف والتسجيل والتوزيع على الأغنية",
+  "Tiếng Việt": "Nhạc cụ và trống để chơi, thu và phối theo bài hát"
+ },
+ "A bar of clicks before recording starts": {
+  "日本語": "録音の前に1小節のクリック",
+  "Español": "Un compás de clics antes de empezar a grabar",
+  "Deutsch": "Ein Takt Klicks, bevor die Aufnahme beginnt",
+  "Français": "Une mesure de clics avant le début de l'enregistrement",
+  "한국어": "녹음 시작 전 한 마디의 클릭",
+  "中文": "录音开始前一小节的节拍声",
+  "العربية": "مازورة من النقرات قبل بدء التسجيل",
+  "Tiếng Việt": "Một ô nhịp tiếng gõ trước khi bắt đầu thu"
+ },
+ "The whole piece in view": {
+  "日本語": "曲全体を表示",
+  "Español": "Toda la pieza a la vista",
+  "Deutsch": "Das ganze Stück im Blick",
+  "Français": "Tout le morceau à l'écran",
+  "한국어": "곡 전체 보기",
+  "中文": "显示整首曲子",
+  "العربية": "المقطوعة كاملة في العرض",
+  "Tiếng Việt": "Xem toàn bộ bản nhạc"
+ },
+ "Click to move the playhead. Drag across bars to play just those.": {
+  "日本語": "クリックで再生ヘッドを移動。小節をドラッグすると、その小節だけを再生します。",
+  "Español": "Haz clic para mover el cabezal. Arrastra sobre los compases para reproducir solo esos.",
+  "Deutsch": "Klicken, um den Abspielkopf zu bewegen. Über Takte ziehen, um nur diese zu spielen.",
+  "Français": "Cliquez pour déplacer la tête de lecture. Faites glisser sur des mesures pour ne jouer que celles-ci.",
+  "한국어": "클릭하면 재생 헤드가 이동합니다. 마디를 드래그하면 그 마디만 재생합니다.",
+  "中文": "单击移动播放头。在小节上拖动可只播放这些小节。",
+  "العربية": "انقر لتحريك رأس التشغيل. اسحب عبر المازورات لتشغيلها وحدها.",
+  "Tiếng Việt": "Bấm để di chuyển đầu phát. Kéo qua các ô nhịp để chỉ phát những ô đó."
+ },
+ "Drag to change which bars play": {
+  "日本語": "ドラッグして再生する小節を変更",
+  "Español": "Arrastra para cambiar qué compases suenan",
+  "Deutsch": "Ziehen, um zu ändern, welche Takte spielen",
+  "Français": "Faites glisser pour changer les mesures jouées",
+  "한국어": "드래그해 재생할 마디 변경",
+  "中文": "拖动以更改播放哪些小节",
+  "العربية": "اسحب لتغيير المازورات التي تُشغَّل",
+  "Tiếng Việt": "Kéo để đổi các ô nhịp được phát"
+ },
+ "Drag to move the playhead": {
+  "日本語": "ドラッグして再生ヘッドを移動",
+  "Español": "Arrastra para mover el cabezal",
+  "Deutsch": "Ziehen, um den Abspielkopf zu bewegen",
+  "Français": "Faites glisser pour déplacer la tête de lecture",
+  "한국어": "드래그해 재생 헤드 이동",
+  "中文": "拖动以移动播放头",
+  "العربية": "اسحب لتحريك رأس التشغيل",
+  "Tiếng Việt": "Kéo để di chuyển đầu phát"
+ },
+ "Duplicate the clip": {
+  "日本語": "クリップを複製",
+  "Español": "Duplicar el clip",
+  "Deutsch": "Clip duplizieren",
+  "Français": "Dupliquer le clip",
+  "한국어": "클립 복제",
+  "中文": "复制片段",
+  "العربية": "تكرار المقطع",
+  "Tiếng Việt": "Nhân đôi clip"
+ },
+ "Delete the clip": {
+  "日本語": "クリップを削除",
+  "Español": "Eliminar el clip",
+  "Deutsch": "Clip löschen",
+  "Français": "Supprimer le clip",
+  "한국어": "클립 삭제",
+  "中文": "删除片段",
+  "العربية": "حذف المقطع",
+  "Tiếng Việt": "Xóa clip"
+ },
+ "Choose the bars to play": {
+  "日本語": "再生する小節を選択",
+  "Español": "Elegir los compases que suenan",
+  "Deutsch": "Takte zum Abspielen wählen",
+  "Français": "Choisir les mesures à jouer",
+  "한국어": "재생할 마디 선택",
+  "中文": "选择要播放的小节",
+  "العربية": "اختيار المازورات للتشغيل",
+  "Tiếng Việt": "Chọn các ô nhịp để phát"
+ },
+ "Change which bars play": {
+  "日本語": "再生する小節を変更",
+  "Español": "Cambiar qué compases suenan",
+  "Deutsch": "Ändern, welche Takte spielen",
+  "Français": "Changer les mesures jouées",
+  "한국어": "재생할 마디 변경",
+  "中文": "更改播放哪些小节",
+  "العربية": "تغيير المازورات التي تُشغَّل",
+  "Tiếng Việt": "Đổi các ô nhịp được phát"
+ },
+ "Play the chosen bars over and over (L) – choose them by dragging across the bar numbers in Arrange": {
+  "日本語": "選んだ小節を繰り返し再生（L）– Arrange で小節番号をドラッグして選びます",
+  "Español": "Reproduce los compases elegidos una y otra vez (L) – elígelos arrastrando sobre los números de compás en Arrange",
+  "Deutsch": "Die gewählten Takte immer wieder spielen (L) – wählen Sie sie, indem Sie in Arrange über die Taktnummern ziehen",
+  "Français": "Jouer les mesures choisies en boucle (L) – choisissez-les en faisant glisser sur les numéros de mesure dans Arrange",
+  "한국어": "선택한 마디를 반복 재생(L) – Arrange에서 마디 번호를 드래그해 선택합니다",
+  "中文": "反复播放所选小节（L）– 在 Arrange 中拖过小节编号来选择",
+  "العربية": "تشغيل المازورات المختارة مرارًا (L) – اخترها بالسحب عبر أرقام المازورات في Arrange",
+  "Tiếng Việt": "Phát lặp lại các ô nhịp đã chọn (L) – chọn bằng cách kéo qua số ô nhịp trong Arrange"
+ },
+ "1st inversion": {
+  "日本語": "第1転回形",
+  "Español": "Primera inversión",
+  "Deutsch": "Erste Umkehrung",
+  "Français": "Premier renversement",
+  "한국어": "1전위",
+  "中文": "第一转位",
+  "العربية": "الانقلاب الأول",
+  "Tiếng Việt": "Thể đảo 1"
+ },
+ "2nd inversion": {
+  "日本語": "第2転回形",
+  "Español": "Segunda inversión",
+  "Deutsch": "Zweite Umkehrung",
+  "Français": "Deuxième renversement",
+  "한국어": "2전위",
+  "中文": "第二转位",
+  "العربية": "الانقلاب الثاني",
+  "Tiếng Việt": "Thể đảo 2"
+ },
+ "3rd inversion": {
+  "日本語": "第3転回形",
+  "Español": "Tercera inversión",
+  "Deutsch": "Dritte Umkehrung",
+  "Français": "Troisième renversement",
+  "한국어": "3전위",
+  "中文": "第三转位",
+  "العربية": "الانقلاب الثالث",
+  "Tiếng Việt": "Thể đảo 3"
+ },
+ "7sus4": {
+  "日本語": "セブンス・サスフォー",
+  "Español": "7sus4",
+  "Deutsch": "7sus4",
+  "Français": "7sus4",
+  "한국어": "세븐 서스포",
+  "中文": "七挂四和弦",
+  "العربية": "7sus4 (سابعة معلّقة)",
+  "Tiếng Việt": "7sus4"
+ },
+ "7sus4 in the key": {
+  "日本語": "キーの 7sus4",
+  "Español": "7sus4 de la tonalidad",
+  "Deutsch": "7sus4 der Tonart",
+  "Français": "7sus4 de la tonalité",
+  "한국어": "조성의 7sus4",
+  "中文": "调内七挂四和弦",
+  "العربية": "7sus4 ضمن المقام",
+  "Tiếng Việt": "7sus4 theo tông"
+ },
+ "Add9": {
+  "日本語": "Add9",
+  "Español": "Add9",
+  "Deutsch": "Add9",
+  "Français": "Add9",
+  "한국어": "Add9",
+  "中文": "加九和弦",
+  "العربية": "Add9",
+  "Tiếng Việt": "Add9"
+ },
+ "Add9 in the key": {
+  "日本語": "キーの Add9",
+  "Español": "Add9 de la tonalidad",
+  "Deutsch": "Add9 der Tonart",
+  "Français": "Add9 de la tonalité",
+  "한국어": "조성의 Add9",
+  "中文": "调内加九和弦",
+  "العربية": "Add9 ضمن المقام",
+  "Tiếng Việt": "Add9 theo tông"
+ },
+ "Augmented": {
+  "日本語": "オーギュメント",
+  "Español": "Aumentado",
+  "Deutsch": "Übermäßig",
+  "Français": "Augmenté",
+  "한국어": "오그먼트",
+  "中文": "增三和弦",
+  "العربية": "زائد",
+  "Tiếng Việt": "Tăng"
+ },
+ "Augmented 7": {
+  "日本語": "オーギュメント 7",
+  "Español": "Aumentado 7",
+  "Deutsch": "Übermäßig 7",
+  "Français": "Augmenté 7",
+  "한국어": "오그먼트 7",
+  "中文": "增七和弦",
+  "العربية": "زائد 7",
+  "Tiếng Việt": "Tăng 7"
+ },
+ "Chords from one key": {
+  "日本語": "1 つの鍵盤でコード",
+  "Español": "Acordes con una tecla",
+  "Deutsch": "Akkorde mit einer Taste",
+  "Français": "Accords avec une touche",
+  "한국어": "건반 하나로 코드",
+  "中文": "单键和弦",
+  "العربية": "كوردات بمفتاح واحد",
+  "Tiếng Việt": "Hợp âm từ một phím"
+ },
+ "Diminished": {
+  "日本語": "ディミニッシュ",
+  "Español": "Disminuido",
+  "Deutsch": "Vermindert",
+  "Français": "Diminué",
+  "한국어": "디미니시",
+  "中文": "减三和弦",
+  "العربية": "ناقص",
+  "Tiếng Việt": "Giảm"
+ },
+ "Diminished 7": {
+  "日本語": "ディミニッシュ 7",
+  "Español": "Disminuido 7",
+  "Deutsch": "Vermindert 7",
+  "Français": "Diminué 7",
+  "한국어": "디미니시 7",
+  "中文": "减七和弦",
+  "العربية": "ناقص 7",
+  "Tiếng Việt": "Giảm 7"
+ },
+ "Drop 2": {
+  "日本語": "ドロップ 2",
+  "Español": "Drop 2",
+  "Deutsch": "Drop 2",
+  "Français": "Drop 2",
+  "한국어": "드롭 2",
+  "中文": "Drop 2 排列",
+  "العربية": "توزيع Drop 2",
+  "Tiếng Việt": "Drop 2"
+ },
+ "Elevenths in the key": {
+  "日本語": "キーのイレブンス・コード",
+  "Español": "Acordes de oncena de la tonalidad",
+  "Deutsch": "Undezimakkorde der Tonart",
+  "Français": "Accords de onzième de la tonalité",
+  "한국어": "조성의 11화음",
+  "中文": "调内十一和弦",
+  "العربية": "كوردات حادية عشرة ضمن المقام",
+  "Tiếng Việt": "Hợp âm mười một theo tông"
+ },
+ "Fifth": {
+  "日本語": "5 度",
+  "Español": "Quinta",
+  "Deutsch": "Quinte",
+  "Français": "Quinte",
+  "한국어": "5도",
+  "中文": "五度",
+  "العربية": "خامسة",
+  "Tiếng Việt": "Quãng năm"
+ },
+ "Fifth, in the key": {
+  "日本語": "5 度（キー内）",
+  "Español": "Quinta, en la tonalidad",
+  "Deutsch": "Quinte, in der Tonart",
+  "Français": "Quinte, dans la tonalité",
+  "한국어": "5도 (조성 내)",
+  "中文": "五度（调内）",
+  "العربية": "خامسة، ضمن المقام",
+  "Tiếng Việt": "Quãng năm, theo tông"
+ },
+ "Fourth": {
+  "日本語": "4 度",
+  "Español": "Cuarta",
+  "Deutsch": "Quarte",
+  "Français": "Quarte",
+  "한국어": "4도",
+  "中文": "四度",
+  "العربية": "رابعة",
+  "Tiếng Việt": "Quãng bốn"
+ },
+ "Half-diminished (m7♭5)": {
+  "日本語": "ハーフ・ディミニッシュ（m7♭5）",
+  "Español": "Semidisminuido (m7♭5)",
+  "Deutsch": "Halbvermindert (m7♭5)",
+  "Français": "Demi-diminué (m7♭5)",
+  "한국어": "하프 디미니시 (m7♭5)",
+  "中文": "半减七和弦（m7♭5）",
+  "العربية": "نصف ناقص (m7♭5)",
+  "Tiếng Việt": "Nửa giảm (m7♭5)"
+ },
+ "How the chord's notes are spread": {
+  "日本語": "コードの音の配置",
+  "Español": "Cómo se reparten las notas del acorde",
+  "Deutsch": "Wie die Töne des Akkords verteilt sind",
+  "Français": "Comment les notes de l'accord sont réparties",
+  "한국어": "코드 음들의 배치",
+  "中文": "和弦各音的分布方式",
+  "العربية": "كيف تتوزع نغمات الكورد",
+  "Tiếng Việt": "Cách dàn trải các nốt của hợp âm"
+ },
+ "In the key": {
+  "日本語": "キー内",
+  "Español": "En la tonalidad",
+  "Deutsch": "In der Tonart",
+  "Français": "Dans la tonalité",
+  "한국어": "조성 내",
+  "中文": "调内",
+  "العربية": "ضمن المقام",
+  "Tiếng Việt": "Theo tông"
+ },
+ "Intervals": {
+  "日本語": "音程",
+  "Español": "Intervalos",
+  "Deutsch": "Intervalle",
+  "Français": "Intervalles",
+  "한국어": "음정",
+  "中文": "音程",
+  "العربية": "الفواصل الموسيقية",
+  "Tiếng Việt": "Quãng"
+ },
+ "Inversion": {
+  "日本語": "転回形",
+  "Español": "Inversión",
+  "Deutsch": "Umkehrung",
+  "Français": "Renversement",
+  "한국어": "전위",
+  "中文": "转位",
+  "العربية": "الانقلاب",
+  "Tiếng Việt": "Thể đảo"
+ },
+ "Major": {
+  "日本語": "メジャー",
+  "Español": "Mayor",
+  "Deutsch": "Dur",
+  "Français": "Majeur",
+  "한국어": "메이저",
+  "中文": "大三和弦",
+  "العربية": "كبير",
+  "Tiếng Việt": "Trưởng"
+ },
+ "Major 13": {
+  "日本語": "メジャー 13",
+  "Español": "Mayor 13",
+  "Deutsch": "Dur 13",
+  "Français": "Majeur 13",
+  "한국어": "메이저 13",
+  "中文": "大十三和弦",
+  "العربية": "كبير 13",
+  "Tiếng Việt": "Trưởng 13"
+ },
+ "Major 7": {
+  "日本語": "メジャー 7",
+  "Español": "Mayor 7",
+  "Deutsch": "Dur 7",
+  "Français": "Majeur 7",
+  "한국어": "메이저 7",
+  "中文": "大七和弦",
+  "العربية": "كبير 7",
+  "Tiếng Việt": "Trưởng 7"
+ },
+ "Major 7♯11": {
+  "日本語": "メジャー 7♯11",
+  "Español": "Mayor 7♯11",
+  "Deutsch": "Dur 7♯11",
+  "Français": "Majeur 7♯11",
+  "한국어": "메이저 7♯11",
+  "中文": "大七♯11 和弦",
+  "العربية": "كبير 7♯11",
+  "Tiếng Việt": "Trưởng 7♯11"
+ },
+ "Major 7♯5": {
+  "日本語": "メジャー 7♯5",
+  "Español": "Mayor 7♯5",
+  "Deutsch": "Dur 7♯5",
+  "Français": "Majeur 7♯5",
+  "한국어": "메이저 7♯5",
+  "中文": "大七♯5 和弦",
+  "العربية": "كبير 7♯5",
+  "Tiếng Việt": "Trưởng 7♯5"
+ },
+ "Major 9": {
+  "日本語": "メジャー 9",
+  "Español": "Mayor 9",
+  "Deutsch": "Dur 9",
+  "Français": "Majeur 9",
+  "한국어": "메이저 9",
+  "中文": "大九和弦",
+  "العربية": "كبير 9",
+  "Tiếng Việt": "Trưởng 9"
+ },
+ "Major sixth": {
+  "日本語": "長 6 度",
+  "Español": "Sexta mayor",
+  "Deutsch": "Große Sexte",
+  "Français": "Sixte majeure",
+  "한국어": "장6도",
+  "中文": "大六度",
+  "العربية": "سادسة كبيرة",
+  "Tiếng Việt": "Quãng sáu trưởng"
+ },
+ "Major third": {
+  "日本語": "長 3 度",
+  "Español": "Tercera mayor",
+  "Deutsch": "Große Terz",
+  "Français": "Tierce majeure",
+  "한국어": "장3도",
+  "中文": "大三度",
+  "العربية": "ثالثة كبيرة",
+  "Tiếng Việt": "Quãng ba trưởng"
+ },
+ "Minor": {
+  "日本語": "マイナー",
+  "Español": "Menor",
+  "Deutsch": "Moll",
+  "Français": "Mineur",
+  "한국어": "마이너",
+  "中文": "小三和弦",
+  "العربية": "صغير",
+  "Tiếng Việt": "Thứ"
+ },
+ "Minor 11": {
+  "日本語": "マイナー 11",
+  "Español": "Menor 11",
+  "Deutsch": "Moll 11",
+  "Français": "Mineur 11",
+  "한국어": "마이너 11",
+  "中文": "小十一和弦",
+  "العربية": "صغير 11",
+  "Tiếng Việt": "Thứ 11"
+ },
+ "Minor 13": {
+  "日本語": "マイナー 13",
+  "Español": "Menor 13",
+  "Deutsch": "Moll 13",
+  "Français": "Mineur 13",
+  "한국어": "마이너 13",
+  "中文": "小十三和弦",
+  "العربية": "صغير 13",
+  "Tiếng Việt": "Thứ 13"
+ },
+ "Minor 6": {
+  "日本語": "マイナー 6",
+  "Español": "Menor 6",
+  "Deutsch": "Moll 6",
+  "Français": "Mineur 6",
+  "한국어": "마이너 6",
+  "中文": "小六和弦",
+  "العربية": "صغير 6",
+  "Tiếng Việt": "Thứ 6"
+ },
+ "Minor 7": {
+  "日本語": "マイナー 7",
+  "Español": "Menor 7",
+  "Deutsch": "Moll 7",
+  "Français": "Mineur 7",
+  "한국어": "마이너 7",
+  "中文": "小七和弦",
+  "العربية": "صغير 7",
+  "Tiếng Việt": "Thứ 7"
+ },
+ "Minor 9": {
+  "日本語": "マイナー 9",
+  "Español": "Menor 9",
+  "Deutsch": "Moll 9",
+  "Français": "Mineur 9",
+  "한국어": "마이너 9",
+  "中文": "小九和弦",
+  "العربية": "صغير 9",
+  "Tiếng Việt": "Thứ 9"
+ },
+ "Minor add9": {
+  "日本語": "マイナー Add9",
+  "Español": "Menor add9",
+  "Deutsch": "Moll add9",
+  "Français": "Mineur add9",
+  "한국어": "마이너 add9",
+  "中文": "小加九和弦",
+  "العربية": "صغير add9",
+  "Tiếng Việt": "Thứ add9"
+ },
+ "Minor sixth": {
+  "日本語": "短 6 度",
+  "Español": "Sexta menor",
+  "Deutsch": "Kleine Sexte",
+  "Français": "Sixte mineure",
+  "한국어": "단6도",
+  "中文": "小六度",
+  "العربية": "سادسة صغيرة",
+  "Tiếng Việt": "Quãng sáu thứ"
+ },
+ "Minor third": {
+  "日本語": "短 3 度",
+  "Español": "Tercera menor",
+  "Deutsch": "Kleine Terz",
+  "Français": "Tierce mineure",
+  "한국어": "단3도",
+  "中文": "小三度",
+  "العربية": "ثالثة صغيرة",
+  "Tiếng Việt": "Quãng ba thứ"
+ },
+ "Minor-major 7": {
+  "日本語": "マイナー・メジャー 7",
+  "Español": "Menor-mayor 7",
+  "Deutsch": "Moll-Dur 7",
+  "Français": "Mineur-majeur 7",
+  "한국어": "마이너 메이저 7",
+  "中文": "小大七和弦",
+  "العربية": "صغير-كبير 7",
+  "Tiếng Việt": "Thứ-trưởng 7"
+ },
+ "Ninths in the key": {
+  "日本語": "キーのナインス・コード",
+  "Español": "Acordes de novena de la tonalidad",
+  "Deutsch": "Nonakkorde der Tonart",
+  "Français": "Accords de neuvième de la tonalité",
+  "한국어": "조성의 9화음",
+  "中文": "调内九和弦",
+  "العربية": "كوردات تاسعة ضمن المقام",
+  "Tiếng Việt": "Hợp âm chín theo tông"
+ },
+ "Octave above": {
+  "日本語": "1 オクターブ上",
+  "Español": "Octava arriba",
+  "Deutsch": "Oktave darüber",
+  "Français": "Octave au-dessus",
+  "한국어": "한 옥타브 위",
+  "中文": "高八度",
+  "العربية": "أوكتاف للأعلى",
+  "Tiếng Việt": "Quãng tám trên"
+ },
+ "Octave below": {
+  "日本語": "1 オクターブ下",
+  "Español": "Octava abajo",
+  "Deutsch": "Oktave darunter",
+  "Français": "Octave en dessous",
+  "한국어": "한 옥타브 아래",
+  "中文": "低八度",
+  "العربية": "أوكتاف للأسفل",
+  "Tiếng Việt": "Quãng tám dưới"
+ },
+ "Octaves above and below": {
+  "日本語": "上下のオクターブ",
+  "Español": "Octavas arriba y abajo",
+  "Deutsch": "Oktaven darüber und darunter",
+  "Français": "Octaves au-dessus et en dessous",
+  "한국어": "위아래 옥타브",
+  "中文": "高低八度",
+  "العربية": "أوكتاف للأعلى وللأسفل",
+  "Tiếng Việt": "Quãng tám trên và dưới"
+ },
+ "Off – one note": {
+  "日本語": "オフ – 単音",
+  "Español": "Desactivado – una nota",
+  "Deutsch": "Aus – ein Ton",
+  "Français": "Désactivé – une note",
+  "한국어": "끄기 – 단음",
+  "中文": "关闭 – 单音",
+  "العربية": "إيقاف – نغمة واحدة",
+  "Tiếng Việt": "Tắt – một nốt"
+ },
+ "On a drum track the keys play its drums": {
+  "日本語": "ドラムトラックでは鍵盤でドラムを鳴らします",
+  "Español": "En una pista de batería, las teclas tocan su batería",
+  "Deutsch": "Auf einer Drum-Spur spielen die Tasten ihre Drums",
+  "Français": "Sur une piste de batterie, les touches jouent sa batterie",
+  "한국어": "드럼 트랙에서는 건반이 드럼을 연주합니다",
+  "中文": "在鼓轨道上，琴键弹奏它的鼓",
+  "العربية": "في مسار الطبول تعزف المفاتيح طبوله",
+  "Tiếng Việt": "Trên track trống, các phím chơi trống của track đó"
+ },
+ "Power chord (fifth and octave)": {
+  "日本語": "パワーコード（5 度とオクターブ）",
+  "Español": "Power chord (quinta y octava)",
+  "Deutsch": "Powerchord (Quinte und Oktave)",
+  "Français": "Power chord (quinte et octave)",
+  "한국어": "파워 코드 (5도와 옥타브)",
+  "中文": "强力和弦（五度和八度）",
+  "العربية": "كورد القوة (خامسة وأوكتاف)",
+  "Tiếng Việt": "Power chord (quãng năm và quãng tám)"
+ },
+ "Root position": {
+  "日本語": "基本形",
+  "Español": "Posición fundamental",
+  "Deutsch": "Grundstellung",
+  "Français": "Position fondamentale",
+  "한국어": "기본 위치",
+  "中文": "原位",
+  "العربية": "الوضع الأساسي",
+  "Tiếng Việt": "Thể gốc"
+ },
+ "Second": {
+  "日本語": "2 度",
+  "Español": "Segunda",
+  "Deutsch": "Sekunde",
+  "Français": "Seconde",
+  "한국어": "2도",
+  "中文": "二度",
+  "العربية": "ثانية",
+  "Tiếng Việt": "Quãng hai"
+ },
+ "Sevenths in the key": {
+  "日本語": "キーのセブンス・コード",
+  "Español": "Acordes de séptima de la tonalidad",
+  "Deutsch": "Septakkorde der Tonart",
+  "Français": "Accords de septième de la tonalité",
+  "한국어": "조성의 7화음",
+  "中文": "调内七和弦",
+  "العربية": "كوردات سابعة ضمن المقام",
+  "Tiếng Việt": "Hợp âm bảy theo tông"
+ },
+ "Shells in the key (root, 3rd, 7th)": {
+  "日本語": "キーのシェル・ボイシング（ルート・3 度・7 度）",
+  "Español": "Disposiciones shell de la tonalidad (fundamental, 3.ª y 7.ª)",
+  "Deutsch": "Shell-Voicings der Tonart (Grundton, Terz, Septime)",
+  "Français": "Voicings shell de la tonalité (fondamentale, tierce, septième)",
+  "한국어": "조성의 셸 보이싱 (근음, 3음, 7음)",
+  "中文": "调内骨架排列（根音、三音、七音）",
+  "العربية": "توزيعات Shell ضمن المقام (الجذر، الثالثة، السابعة)",
+  "Tiếng Việt": "Shell theo tông (nốt gốc, quãng 3, quãng 7)"
+ },
+ "Sixth above, in the key": {
+  "日本語": "6 度上（キー内）",
+  "Español": "Sexta arriba, en la tonalidad",
+  "Deutsch": "Sexte darüber, in der Tonart",
+  "Français": "Sixte au-dessus, dans la tonalité",
+  "한국어": "6도 위 (조성 내)",
+  "中文": "上方六度（调内）",
+  "العربية": "سادسة للأعلى، ضمن المقام",
+  "Tiếng Việt": "Quãng sáu trên, theo tông"
+ },
+ "Sixth below, in the key": {
+  "日本語": "6 度下（キー内）",
+  "Español": "Sexta abajo, en la tonalidad",
+  "Deutsch": "Sexte darunter, in der Tonart",
+  "Français": "Sixte en dessous, dans la tonalité",
+  "한국어": "6도 아래 (조성 내)",
+  "中文": "下方六度（调内）",
+  "العربية": "سادسة للأسفل، ضمن المقام",
+  "Tiếng Việt": "Quãng sáu dưới, theo tông"
+ },
+ "Sixths in the key": {
+  "日本語": "キーのシックス・コード",
+  "Español": "Acordes de sexta de la tonalidad",
+  "Deutsch": "6-Akkorde der Tonart",
+  "Français": "Accords de sixte de la tonalité",
+  "한국어": "조성의 식스 코드",
+  "中文": "调内加六和弦",
+  "العربية": "كوردات سادسة ضمن المقام",
+  "Tiếng Việt": "Hợp âm sáu theo tông"
+ },
+ "So What (fourths and a third)": {
+  "日本語": "So What（4 度の積み重ねと 3 度）",
+  "Español": "So What (cuartas y una tercera)",
+  "Deutsch": "So What (Quarten und eine Terz)",
+  "Français": "So What (quartes et une tierce)",
+  "한국어": "So What (4도 쌓기와 3도)",
+  "中文": "So What（叠置四度加一个三度）",
+  "العربية": "So What (رابعات وثالثة)",
+  "Tiếng Việt": "So What (các quãng bốn và một quãng ba)"
+ },
+ "Stacked fourths": {
+  "日本語": "4 度堆積",
+  "Español": "Cuartas superpuestas",
+  "Deutsch": "Quartenschichtung",
+  "Français": "Quartes superposées",
+  "한국어": "4도 쌓기",
+  "中文": "四度叠置和弦",
+  "العربية": "رابعات متراكبة",
+  "Tiếng Việt": "Chồng quãng bốn"
+ },
+ "Stacked fourths in the key": {
+  "日本語": "キーの 4 度堆積",
+  "Español": "Cuartas superpuestas de la tonalidad",
+  "Deutsch": "Quartenschichtung der Tonart",
+  "Français": "Quartes superposées de la tonalité",
+  "한국어": "조성의 4도 쌓기",
+  "中文": "调内四度叠置和弦",
+  "العربية": "رابعات متراكبة ضمن المقام",
+  "Tiếng Việt": "Chồng quãng bốn theo tông"
+ },
+ "Sus2": {
+  "日本語": "Sus2",
+  "Español": "Sus2",
+  "Deutsch": "Sus2",
+  "Français": "Sus2",
+  "한국어": "Sus2",
+  "中文": "挂二和弦",
+  "العربية": "Sus2",
+  "Tiếng Việt": "Sus2"
+ },
+ "Sus2 in the key": {
+  "日本語": "キーの Sus2",
+  "Español": "Sus2 de la tonalidad",
+  "Deutsch": "Sus2 der Tonart",
+  "Français": "Sus2 de la tonalité",
+  "한국어": "조성의 Sus2",
+  "中文": "调内挂二和弦",
+  "العربية": "Sus2 ضمن المقام",
+  "Tiếng Việt": "Sus2 theo tông"
+ },
+ "Sus4": {
+  "日本語": "Sus4",
+  "Español": "Sus4",
+  "Deutsch": "Sus4",
+  "Français": "Sus4",
+  "한국어": "Sus4",
+  "中文": "挂四和弦",
+  "العربية": "Sus4",
+  "Tiếng Việt": "Sus4"
+ },
+ "Sus4 in the key": {
+  "日本語": "キーの Sus4",
+  "Español": "Sus4 de la tonalidad",
+  "Deutsch": "Sus4 der Tonart",
+  "Français": "Sus4 de la tonalité",
+  "한국어": "조성의 Sus4",
+  "中文": "调内挂四和弦",
+  "العربية": "Sus4 ضمن المقام",
+  "Tiếng Việt": "Sus4 theo tông"
+ },
+ "Tenth above, in the key": {
+  "日本語": "10 度上（キー内）",
+  "Español": "Décima arriba, en la tonalidad",
+  "Deutsch": "Dezime darüber, in der Tonart",
+  "Français": "Dixième au-dessus, dans la tonalité",
+  "한국어": "10도 위 (조성 내)",
+  "中文": "上方十度（调内）",
+  "العربية": "عاشرة للأعلى، ضمن المقام",
+  "Tiếng Việt": "Quãng mười trên, theo tông"
+ },
+ "Third above, in the key": {
+  "日本語": "3 度上（キー内）",
+  "Español": "Tercera arriba, en la tonalidad",
+  "Deutsch": "Terz darüber, in der Tonart",
+  "Français": "Tierce au-dessus, dans la tonalité",
+  "한국어": "3도 위 (조성 내)",
+  "中文": "上方三度（调内）",
+  "العربية": "ثالثة للأعلى، ضمن المقام",
+  "Tiếng Việt": "Quãng ba trên, theo tông"
+ },
+ "Third below, in the key": {
+  "日本語": "3 度下（キー内）",
+  "Español": "Tercera abajo, en la tonalidad",
+  "Deutsch": "Terz darunter, in der Tonart",
+  "Français": "Tierce en dessous, dans la tonalité",
+  "한국어": "3도 아래 (조성 내)",
+  "中文": "下方三度（调内）",
+  "العربية": "ثالثة للأسفل، ضمن المقام",
+  "Tiếng Việt": "Quãng ba dưới, theo tông"
+ },
+ "Thirteenths in the key": {
+  "日本語": "キーのサーティーンス・コード",
+  "Español": "Acordes de trecena de la tonalidad",
+  "Deutsch": "Tredezimakkorde der Tonart",
+  "Français": "Accords de treizième de la tonalité",
+  "한국어": "조성의 13화음",
+  "中文": "调内十三和弦",
+  "العربية": "كوردات ثالثة عشرة ضمن المقام",
+  "Tiếng Việt": "Hợp âm mười ba theo tông"
+ },
+ "Triads in the key": {
+  "日本語": "キーのトライアド",
+  "Español": "Tríadas de la tonalidad",
+  "Deutsch": "Dreiklänge der Tonart",
+  "Français": "Triades de la tonalité",
+  "한국어": "조성의 3화음",
+  "中文": "调内三和弦",
+  "العربية": "كوردات ثلاثية ضمن المقام",
+  "Tiếng Việt": "Hợp âm ba theo tông"
+ },
+ "Tritone": {
+  "日本語": "トライトーン",
+  "Español": "Tritono",
+  "Deutsch": "Tritonus",
+  "Français": "Triton",
+  "한국어": "트라이톤",
+  "中文": "三全音",
+  "العربية": "التريتون",
+  "Tiếng Việt": "Quãng ba cung"
+ },
+ "What one key plays: a chord, or an interval": {
+  "日本語": "1 つの鍵盤で鳴らすもの: コードか音程",
+  "Español": "Lo que toca una tecla: un acorde o un intervalo",
+  "Deutsch": "Was eine Taste spielt: ein Akkord oder ein Intervall",
+  "Français": "Ce que joue une touche : un accord ou un intervalle",
+  "한국어": "건반 하나가 연주하는 것: 코드 또는 음정",
+  "中文": "单个琴键弹奏的内容：和弦或音程",
+  "العربية": "ما يعزفه مفتاح واحد: كورد أو فاصل موسيقي",
+  "Tiếng Việt": "Một phím chơi gì: một hợp âm hay một quãng"
+ },
+ "With the root below": {
+  "日本語": "下にルートを追加",
+  "Español": "Con la fundamental abajo",
+  "Deutsch": "Mit Grundton darunter",
+  "Français": "Avec la fondamentale en dessous",
+  "한국어": "아래에 근음 추가",
+  "中文": "下方加根音",
+  "العربية": "مع الجذر في الأسفل",
+  "Tiếng Việt": "Thêm nốt gốc ở dưới"
+ },
+ "Close voicing": {
+  "日本語": "クローズ・ボイシング",
+  "Español": "Voicing cerrado",
+  "Deutsch": "Enge Lage",
+  "Français": "Position serrée",
+  "한국어": "클로즈 보이싱",
+  "中文": "密集排列",
+  "العربية": "توزيع متقارب",
+  "Tiếng Việt": "Thế bấm hẹp"
+ },
+ "Open voicing": {
+  "日本語": "オープン・ボイシング",
+  "Español": "Voicing abierto",
+  "Deutsch": "Weite Lage",
+  "Français": "Position large",
+  "한국어": "오픈 보이싱",
+  "中文": "开放排列",
+  "العربية": "توزيع متباعد",
+  "Tiếng Việt": "Thế bấm rộng"
+ }
+}

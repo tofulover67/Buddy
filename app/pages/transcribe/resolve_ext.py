@@ -82,9 +82,8 @@ START_RETRY_WAIT = 1.0     # seconds between them
 
 def _render_finished(status: dict) -> bool:
     """A render job done without error. Not by its JobStatus: that's the words
-    Resolve shows, in its own language ("Concluso" in Italian - measured by
-    github.com/samuelgursky/davinci-resolve-mcp), so an English "Complete"
-    would fail every other language. The file is checked afterwards too."""
+    Resolve shows, in its own language ("Concluso" in Italian), so an English
+    "Complete" would fail every other language. The file is checked afterwards too."""
     try:
         done = float(status.get("CompletionPercentage") or 0) >= 100
     except (TypeError, ValueError):

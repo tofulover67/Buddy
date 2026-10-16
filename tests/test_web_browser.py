@@ -28,6 +28,12 @@ except ImportError:  # pragma: no cover
     HAVE_QT = False
 
 
+def _url(url):
+    """A file URL as Qt gives it back: a folder with a space in its name is
+    "%20" from Path.as_uri() but a space from Qt - the same address."""
+    return QUrl(url).toString()
+
+
 class AddressTests(unittest.TestCase):
     def test_addresses_and_searches(self):
         self.assertEqual(b.address_to_url("youtube.com"), "https://youtube.com")
@@ -428,7 +434,7 @@ class BrowserTests(unittest.TestCase):
         self.until(lambda: bee.page.lifecycleState() == QWebEnginePage.LifecycleState.Discarded)
         _wait(500)                                 # its address stays through the discard
         self.assertTrue(page.tabs[1].state(15, [])["asleep"])
-        self.assertEqual(bee.url, self.pages[1])
+        self.assertEqual(_url(bee.url), _url(self.pages[1]))
         page.select(bee)                                                    # wakes it
         self.assertEqual(bee.page.lifecycleState(), QWebEnginePage.LifecycleState.Active)
         # Kept awake, or on a never-sleep site: it stays up.
@@ -601,7 +607,7 @@ class BrowserTests(unittest.TestCase):
         page.on_media({"id": a.id})
         self.assertIsNone(a.web)
         page._save()                                                        # and it's saved as it was
-        self.assertEqual([t["url"] for t in self.saved["tabs"]], self.pages)
+        self.assertEqual([_url(t["url"]) for t in self.saved["tabs"]], [_url(u) for u in self.pages])
         self.assertEqual(self.saved["active"], 0)
 
     def test_the_asleep_tab_wakes_from_its_button_a_click_reload_or_an_address(self):
@@ -645,9 +651,9 @@ class BrowserTests(unittest.TestCase):
         page.open_tab(self.pages[1])
         self.assertEqual(len(page.tabs), 2)
         page.close_tab(page.active)
-        self.assertEqual([t.url for t in page.tabs], [self.pages[0]])
+        self.assertEqual([_url(t.url) for t in page.tabs], [_url(self.pages[0])])
         page.reopen_closed()
-        self.assertEqual([t.url for t in page.tabs], [self.pages[0], self.pages[1]])
+        self.assertEqual([_url(t.url) for t in page.tabs], [_url(u) for u in self.pages])
         page.close_tab(page.tabs[0])
         page.close_tab(page.tabs[0])
         self.assertEqual([t.url for t in page.tabs], [""])                  # never no tabs at all
@@ -709,7 +715,7 @@ class BrowserTests(unittest.TestCase):
         self.assertTrue(private.state(15, [])["private"])
         page.on_go({"text": "private-only.example"})                       # typed in a private tab
         page._save()
-        self.assertEqual([t["url"] for t in self.saved["tabs"]], [self.pages[0]])   # never saved
+        self.assertEqual([_url(t["url"]) for t in self.saved["tabs"]], [_url(self.pages[0])])   # never saved
         self.assertEqual(self.saved["active"], 0)
         self.assertNotIn("private-only.example", self.saved["sites"])        # nor remembered
         # What a private page opens is private too.
@@ -814,15 +820,15 @@ class BrowserTests(unittest.TestCase):
         # ...and so do the address bar and what's saved for next time: not the
         # address it was told to stay away from.
         held_url = Path(held).as_uri()
-        self.assertEqual((tab.url, tab.typed), (held_url, ""))
+        self.assertEqual((_url(tab.url), tab.typed), (_url(held_url), ""))
         page.push()
-        self.assertEqual(self.last_browser(page)["url"], held_url)
+        self.assertEqual(_url(self.last_browser(page)["url"]), _url(held_url))
         page._save()
-        self.assertEqual(self.saved["tabs"][0]["url"], held_url)
+        self.assertEqual(_url(self.saved["tabs"][0]["url"]), _url(held_url))
         with mock.patch.object(self.engine, "confirm", return_value=True):
             page.on_go({"text": self.pages[0]})
             self.until(lambda: tab.title == "Page A")
-        self.assertEqual(tab.url, self.pages[0])
+        self.assertEqual(_url(tab.url), _url(self.pages[0]))
 
     def held_tab(self, page):
         """A tab on a page that asks before it's left, and has been used."""

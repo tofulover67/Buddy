@@ -43,8 +43,31 @@ Every change but a crossfade can be undone (Undo puts back what the clips had, a
 takes a curve off or puts the one before back). Buddy can't remove a transition
 (DeleteClips refuses one), so the view asks first.
 
-Its second tab, Sound Design, is still to come: it says so and does nothing yet
-(web/tabs.js switches the tabs; the page loads on Timeline - the tab isn't saved).
+Its second tab, Sound Design (web/design.js, web/synth.js), makes sounds for the music
+on the timeline - Buddy's own, synthesized, so there's no sample to license or download:
+
+    Song       a music clip listened to (song.py): its key (and how sure Buddy is),
+               its tempo, and its moments - drops, new sections, breaks, its last hit
+    Sounds     a riser, an impact, a whoosh, made in the page (Web Audio, rendered
+               offline: what Play plays is what's placed) in the song's key and
+               tempo, with deep settings in groups, on a mini timeline of its own to
+               scrub and loop; Place puts one so its moment - a riser's top, an
+               impact's hit, a whoosh's peak - lands on the playhead
+    Moments    each moment with the sounds that belong on it: placed in one click
+
+    Saved      sounds kept by name - start from one, change it, then save it as a new
+               one or place it (a saved one is never written over) - and the settings
+               last used, back next time; both in the tool's settings
+               (~/.buddy/tools/audio_assistant, so a backup has them; sounds.py cleans
+               what the page sends before it's kept)
+
+A placed sound is a WAV beside the music in "Buddy Audio" (sounds.py), on a Buddy
+track under the music (resolve_ext.place_sound) - Undo takes it off, Tidy up lets its
+file go once nothing uses it. web/tabs.js switches the tabs; the page loads on
+Timeline (the tab isn't saved).
+
+Its Keys tab, an instrument to play and record, grew into the DAW - a tool of its
+own (pages/daw). Where the tab was, a button takes you there (open_daw).
 
 What Resolve 21.1's scripting can reach (tried on a duplicate timeline): a clip's
 volume, pan and pitch (SetProperties), fades in frames (SetFades), audio transitions
@@ -78,12 +101,13 @@ Protocol:
     to the view    state, timeline, levels, playhead, selection, peaks, peaks_progress,
                    options, undo, curve, toast, alert, tidy, tidy_done,
                    fx_busy, fx_preview, fx_done, draft, mix_plan, mix_done,
-                   automix_plan, fit_plans, fit_preview
+                   automix_plan, fit_plans, fit_preview, sd_song, sd_placed, sd_library
     from the view  refresh, select, seek, set_levels, match, crossfade, curve,
                    remove_curve, undo, tidy_scan, tidy_remove,
                    fx_preview, fx_stop, fx_apply, fx_remove, duck, ride, beats, clear_beats,
                    mix_measure, mix_apply, automix, fit_find, fit_preview, fit_apply,
-                   fit_remove
+                   fit_remove, sd_listen, sd_place, sd_saved_put, sd_saved_remove, sd_last,
+                   open_daw
 
 Mix to target (the bar's button): the whole timeline rendered and measured, then one
 gain for every clip - to a loudness target, held under the true-peak ceiling.
@@ -122,7 +146,8 @@ from core.web_page import WebToolPage
 from pages.stills_exporter.resolve_ext import frames_to_timecode
 
 from . import beats as beat_finder
-from . import automix, dsp, ducking, fit, fx, riding
+from . import automix, dsp, ducking, fit, fx, riding, sounds
+from . import song as song_ear
 from . import keys as K
 from . import levels as mixer
 from . import resolve_ext
@@ -208,6 +233,9 @@ class AudioAssistantPage(WebToolPage):
         self._duck_queue = []        # [(clip id, keys as heard, label)] still to get their curve (ducking, riding)
         self._fx_cache = None        # the stretch Preview decoded last, to play again with other settings
         self._fit = None             # Fit's last Find: {"id", "key", "samples", "rate", "found", "plans", "frames"}
+        self._songs = {}             # Sound Design: (path, start, end, channels) -> song.analyse()'s answer
+        self._sd_placing = False     # a sound on its way into Resolve
+        self.settings = self.host.tool_settings(self.tool_id)      # Sound Design's library
         self._child_timer = QTimer(self)
         self._child_timer.setInterval(CHILD_POLL_MS)
         self._child_timer.timeout.connect(self._check_child)
@@ -262,6 +290,7 @@ class AudioAssistantPage(WebToolPage):
         self._push_selection()
         self._push_undo()
         self.emit("playhead", {"frame": self.playhead})
+        self._push_library()
 
     def on_shown(self):
         self._full_due = 0.0
@@ -1237,6 +1266,177 @@ class AudioAssistantPage(WebToolPage):
         self._place_fit(step["id"], step["wav"], step["frames"], entry["label"], None)
         self.emit("toast", {"text": f"Undone: {entry['label']}"})
 
+    # -------------------------------------------------------- sound design --
+    #
+    # Listen: a music clip's stretch decoded (as much as is on the timeline,
+    # FIT_MOST_S at most) and heard by song.py on a thread - its answer kept
+    # per file and stretch, so going back to a song costs nothing. Place: the
+    # page's rendered sound (synth.js) written by sounds.py, then put on a
+    # Buddy track under the music on the worker.
+
+    SD_UNDO = {"riser": "Add a riser", "impact": "Add an impact", "whoosh": "Add a whoosh"}
+    SD_ADDED = {"riser": "Riser added on A{track}", "impact": "Impact added on A{track}",
+                "whoosh": "Whoosh added on A{track}"}
+
+    def _track_of(self, uid):
+        for track in (self.timeline or {}).get("tracks", []):
+            if any(c["id"] == uid for c in track["clips"]):
+                return track["index"]
+        return None
+
+    def on_sd_listen(self, payload):
+        uid = str((payload or {}).get("id") or "")
+        clip = self._clips().get(uid)
+        media = (clip or {}).get("media") or {}
+        if clip is None or not media.get("path") or self.timeline is None:
+            return self.emit("sd_song", {"id": uid, "error": "That clip has no audio file Buddy can listen to."})
+        fps = self.timeline["fps"]
+        start_s = float(clip.get("offset") or 0.0)
+        end_s = start_s + min((clip["end"] - clip["start"]) / fps, self.FIT_MOST_S)
+        channels = clip.get("channels")
+        key = (media["path"], round(start_s, 4), round(end_s, 4), tuple(channels or ()))
+
+        def send(found):
+            moments = []
+            for m in found["moments"]:
+                frame = clip["start"] + int(round(m["t"] * fps))
+                if clip["start"] <= frame < clip["end"]:
+                    moments.append(dict(m, frame=frame))
+            self.emit("sd_song", dict(found, id=uid, moments=moments, start=clip["start"], end=clip["end"],
+                                      name=clip["name"]))
+
+        if key in self._songs:
+            return send(self._songs[key])
+
+        def work(progress, cancelled):
+            got, error = peaks_decode_range(media["path"], start_s, end_s, lambda f: progress(f * 0.85), cancelled,
+                                            channels=channels)
+            if error:
+                return None, error
+            return song_ear.analyse(*got), None
+
+        def done(found, error):
+            if error is not None:
+                if error != "Stopped.":
+                    self.emit("sd_song", {"id": uid, "error": str(error)})
+                return
+            self._songs[key] = found
+            send(found)
+
+        if not self._start_fx("sd_listen", uid, work, done):
+            self.emit("sd_song", {"id": uid, "error": "Buddy is still processing another clip – try again in a moment."})
+
+    def on_sd_place(self, payload):
+        """A sound the page made (synth.js), its sync point at timeline frame
+        `frame`: saved (sounds.py), then put on a Buddy track under `song`'s
+        track - or under A1 when no song was listened to."""
+        payload = payload or {}
+        kind = payload.get("kind")
+        if kind not in sounds.KINDS:
+            return
+        if self._sd_placing:
+            return self.emit("toast", {"text": "Buddy is still putting the last sound in."})
+        try:
+            rate = int(payload.get("rate") or 0)
+            samples = sounds.decode(payload.get("channels"), rate)
+            frame, sync = int(payload.get("frame")), float(payload.get("sync") or 0.0)
+        except (TypeError, ValueError) as exc:
+            self.emit("sd_placed", {"ok": False})
+            return self.emit("alert", {"title": "Couldn't use that sound", "text": str(exc)})
+        if self.timeline is None:
+            self.emit("sd_placed", {"ok": False})
+            return self.emit("alert", {"title": "Not connected", "text": self.problem or "Open a timeline in Resolve first."})
+        seconds = len(samples) / rate
+        sync = min(max(sync, 0.0), seconds)
+        first = frame - int(round(sync * self.timeline["fps"]))
+        uid = str(payload.get("song") or "")
+        clip = self._clips().get(uid)
+        below = self._track_of(uid) or 1
+        music = ((clip or {}).get("media") or {}).get("path")
+        label = str(payload.get("label") or kind.title())[:80]
+        try:
+            wav = sounds.save(samples, rate, payload.get("recipe"), label, music, self.timeline.get("project", ""))
+        except (OSError, ValueError) as exc:
+            self.emit("sd_placed", {"ok": False})
+            return self.emit("alert", {"title": "Couldn't save the sound", "text": str(exc)})
+        controller = self._writable()
+        if controller is None:
+            return self.emit("sd_placed", {"ok": False})
+        self._sd_placing = True
+
+        def done(placed, error):
+            self._sd_placing = False
+            self._full_due = 0.0
+            if error is not None:
+                self.emit("sd_placed", {"ok": False})
+                return self.emit("alert", {"title": "Couldn't put the sound in", "text": str(error)})
+            self.undo_stack.append({"label": self.SD_UNDO[kind], "timeline": self.timeline["id"],
+                                    "sound": {"id": placed["id"]}})
+            del self.undo_stack[:-UNDO_LIMIT]
+            self._push_undo()
+            self.emit("sd_placed", {"ok": True, "id": placed["id"], "track": placed["track"]})
+            self.emit("toast", {"text": self.SD_ADDED[kind].format(track=placed["track"])})
+
+        self._worker.start(lambda: resolve_ext.place_sound(controller, wav["path"], first, seconds, below), done)
+
+    def _undo_sound(self, entry, controller):
+        def done(_result, error):
+            self._full_due = 0.0
+            if error is not None:
+                self.undo_stack.append(entry)          # nothing lost: it can be tried again
+                self._push_undo()
+                return self.emit("alert", {"title": "Couldn't undo", "text": str(error)})
+            self.emit("toast", {"text": f"Undone: {entry['label']}"})
+
+        self._worker.start(lambda: resolve_ext.remove_sound(controller, entry["sound"]["id"]), done)
+
+    # ---------------------------------------------------------------- DAW --
+
+    def on_open_daw(self, _payload=None):
+        """The button where the Keys tab was: the DAW, which it grew into."""
+        self.host.switch_tool("daw")
+
+    # ------------------------------------------------------------ library --
+
+    def _library(self):
+        kept = self.settings.get("sound_design") if isinstance(self.settings.get("sound_design"), dict) else {}
+        return {"saved": sounds.clean_saved(kept.get("saved")), "last": sounds.clean_last(kept.get("last"))}
+
+    def _keep_library(self, lib):
+        self.settings["sound_design"] = lib
+        self.settings.save()
+
+    def _push_library(self):
+        self.emit("sd_library", self._library())
+
+    def on_sd_saved_put(self, payload):
+        """A sound saved, or a saved one renamed: by its id."""
+        item = sounds.clean_saved([payload or {}])
+        if not item:
+            return
+        lib = self._library()
+        saved = [s for s in lib["saved"] if s["id"] != item[0]["id"]]
+        at = next((i for i, s in enumerate(lib["saved"]) if s["id"] == item[0]["id"]), len(saved))
+        if at == len(saved) and len(saved) >= sounds.MOST_SAVED:
+            return self.emit("toast", {"text": "That's as many sounds as can be saved – delete some first."})
+        saved.insert(at, item[0])
+        lib["saved"] = saved
+        self._keep_library(lib)
+        self._push_library()
+
+    def on_sd_saved_remove(self, payload):
+        uid = str((payload or {}).get("id") or "")
+        lib = self._library()
+        lib["saved"] = [s for s in lib["saved"] if s["id"] != uid]
+        self._keep_library(lib)
+        self._push_library()
+
+    def on_sd_last(self, payload):
+        """The settings in use now, kept for next time (the page sends them a moment after a change)."""
+        lib = self._library()
+        lib["last"] = sounds.clean_last(payload)
+        self._keep_library(lib)
+
     # ------------------------------------------------------------- ducking --
 
     def on_duck(self, payload):
@@ -1605,6 +1805,8 @@ class AudioAssistantPage(WebToolPage):
             return self._undo_fx(entry, controller)
         if entry.get("fit"):
             return self._undo_fit(entry, controller)
+        if entry.get("sound"):
+            return self._undo_sound(entry, controller)
         marks = entry.get("markers")
         if marks and marks["do"] == "remove":
             return self._worker.start(lambda: resolve_ext.remove_beat_markers(controller, marks["frames"]),

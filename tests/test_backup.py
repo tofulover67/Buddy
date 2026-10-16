@@ -62,6 +62,7 @@ class _Home(unittest.TestCase):
             ".buddy_network/identity.json", ".buddy_network/identity.json.bak", ".buddy_network/keys.json",
             ".davinci_time_tracker/auto_backups/b.json", ".davinci_design/huge.bin", ".ssh/id_rsa",
             ".buddy/settings.json.tmp", ".plain/x.corrupt-1",
+            ".buddy/audio_assistant/play_along/song-1.wav", ".buddy/audio_assistant/preview/fx-1.wav",
         ]
         for rel in self.kept + self.left:
             self.write(rel, rel.encode())
@@ -77,6 +78,22 @@ class WhatGoesInTests(_Home):
     def test_settings_and_what_was_made_in_models_engines_and_secrets_out(self):
         got = sorted(name for _p, name in backup.files(TOOLS))
         self.assertEqual(got, sorted(self.kept))
+
+    def test_a_bak_read_in_place_of_a_damaged_file_goes_in_under_its_name(self):
+        # atomic_io.read_json() set the damaged file aside: the .bak is all there is.
+        (self.home / ".buddy/settings.json").rename(self.home / ".buddy/settings.json.corrupt-1")
+        (self.home / ".figma_fusion_importer_settings.json").rename(
+            self.home / ".figma_fusion_importer_settings.json.corrupt-1")
+        self.write(".figma_fusion_importer_settings.json.bak", b"recovered")
+        self.write(".buddy/notes/tess.json.bak", b"recovered")
+        self.write(".buddy_network/keys.json.bak")          # never: the primary's left out too
+        os.remove(self.home / ".buddy_network/keys.json")
+        got = dict((name, p.name) for p, name in backup.files(TOOLS))
+        self.assertEqual(got[".buddy/settings.json"], "settings.json.bak")
+        self.assertEqual(got[".figma_fusion_importer_settings.json"], ".figma_fusion_importer_settings.json.bak")
+        self.assertEqual(got[".buddy/notes/tess.json"], "tess.json.bak")
+        self.assertNotIn(".buddy_network/keys.json", got)
+        self.assertFalse(any(n.endswith((".bak", ".corrupt-1")) for n in got))
 
     def test_the_folder_backups_go_in_is_never_backed_up(self):
         self.write(".buddy/backups/Buddy backup 2026-10-01 1200.zip")

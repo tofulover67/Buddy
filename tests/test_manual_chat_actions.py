@@ -243,8 +243,7 @@ class FakeResolve:
 
 
 class ResolveTrapTests(unittest.TestCase):
-    """What Resolve says isn't always what it did (both measured by
-    github.com/samuelgursky/davinci-resolve-mcp)."""
+    """What Resolve says isn't always what it did."""
 
     def setUp(self):
         self.a, self.b = FakeItem("A", 86400), FakeItem("Lower third", 86410)

@@ -40,6 +40,7 @@ FOLDERS = {
     "manual": ("Resolve manual", "The manual Ask Buddy answers from"),
     "audio_assistant": ("Audio Assistant", "Waveforms and renders"),
     "audit": ("Audit", "Renders it checks"),
+    "daw": ("DAW", "The song it plays along with"),
     "dailies": ("Dailies", "Transcripts"),
     "media_search": ("Search by description", "The index of the pictures, footage and sound Buddy has looked at"),
     "web": ("Web", "Browsing data: cookies, sign-ins, cache"),

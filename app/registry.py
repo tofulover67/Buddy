@@ -66,6 +66,8 @@ REGISTRY = [
     ("Editing Tools", _tool("text_animator", "Animation", "Editing Tools", "pages.text_animator.page", "AnimationPage", mac=True)),
     ("Editing Tools", _tool("transcribe", "Subtitles", "Editing Tools", "pages.transcribe.page", "TranscribePage", mac=True)),
     ("Editing Tools", _tool("audio_assistant", "Audio Assistant", "Editing Tools", "pages.audio_assistant.page", "AudioAssistantPage", mac=True)),
+    # Not yet checked on a Mac (its Web Audio and the computer keys).
+    ("Editing Tools", _tool("daw", "DAW", "Editing Tools", "pages.daw.page", "DawPage")),
     ("Editing Tools", _tool("color_palette", "Color Palette Manager", "Editing Tools", "pages.color_palette.page", "ColorPalettePage", mac=True)),
 
     ("Generative", _tool("generative", "Generative", "Generative", "pages.generative.page", "GenerativePage", mac=True)),

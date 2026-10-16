@@ -11,9 +11,10 @@ import sqlite3
 import tempfile
 import threading
 import unittest
+from unittest import mock
 
 import _paths  # noqa: F401
-from PySide6.QtCore import QDateTime, QEventLoop, QTimer, QUrl
+from PySide6.QtCore import QDateTime, QEventLoop, QObject, QTimer, QUrl
 from PySide6.QtNetwork import QNetworkCookie
 from PySide6.QtWidgets import QApplication
 
@@ -84,6 +85,40 @@ class RecordTests(unittest.TestCase):
         self.assertEqual((cookie.domain(), bytes(cookie.value())), (".youtube.com", b"f6=40000000"))
         self.assertEqual(cookie.sameSitePolicy(), QNetworkCookie.SameSite.None_)
         self.assertEqual(cv.read_plain_db(os.path.join(folder, "missing")), [])
+
+
+class _Profile(QObject):
+    def __init__(self):
+        super().__init__()
+        self.store = mock.Mock()
+
+    def cookieStore(self):
+        return self.store
+
+
+class MoveTests(unittest.TestCase):
+    """The old plain database goes only once its cookies are saved encrypted."""
+
+    def test_a_failed_save_keeps_the_plain_database(self):
+        folder = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, folder, True)
+        path = os.path.join(folder, "Cookies")
+        con = sqlite3.connect(path)
+        con.execute("CREATE TABLE cookies (host_key TEXT, name TEXT, value TEXT, path TEXT, expires_utc INTEGER, "
+                    "is_secure INTEGER, is_httponly INTEGER, samesite INTEGER, is_persistent INTEGER)")
+        later = (QDateTime.currentMSecsSinceEpoch() + 86_400_000 + cv._EPOCH_1601_MS) * 1000
+        con.execute("INSERT INTO cookies VALUES (?,?,?,?,?,?,?,?,?)",
+                    ("example.com", "signin", "x", "/", later, 0, 1, -1, 1))
+        con.commit()
+        con.close()
+        profile = _Profile()
+        vault = cv.CookieVault(profile, folder)
+        with mock.patch.object(vault, "save", return_value=False), mock.patch.object(vault, "_read", return_value=[]):
+            self.assertEqual(vault.load(), 1)
+        self.assertTrue(os.path.exists(path))                                # tried again next start
+        with mock.patch.object(vault, "save", return_value=True), mock.patch.object(vault, "_read", return_value=[]):
+            vault.load()
+        self.assertFalse(os.path.exists(path))
 
 
 class WipeTests(unittest.TestCase):
