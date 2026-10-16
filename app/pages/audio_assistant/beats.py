@@ -29,7 +29,14 @@ PREFERRED_BPM = 120.0
 TIGHTNESS = 100.0         # how hard the beats are held to the tempo
 BEATS_PER_BAR = 4
 PULSE_MIN = 0.15          # the beat's repeat, against the onset curve's own energy
-PULSE_OVER = 6.0          # ... and against the median over the tempo range
+PULSE_OVER = 6.0          # ... and against the median over the tempo range - or, short of that:
+STEADY_S = 8.0            # stretches this long, half overlapping...
+STEADY_SHARE = 0.8        # ... at least this share of them finding the same beat (or its double or half)
+STEADY_LEAST = 4          # ... out of this many, at least
+# A hit's flux peaks before the hit reaches the window's centre: measured on
+# made-up kicks, hats and plucks at 44.1 and 48 kHz, it's heard about this many
+# samples after the centre of the window that found it.
+ONSET_LAG = 400
 
 
 def _onsets(mono, rate):
@@ -70,8 +77,12 @@ def _tempo(onset, per_second):
     lags = np.arange(lo, hi + 1)
     plain = corr[lo:hi + 1] / corr[0]
     # A pulse repeats clearly: its lag stands well out of the rest (measured:
-    # drums 14-25x the median, noise, speech and a held tone 2-4x).
-    if plain.max() < PULSE_MIN or plain.max() < PULSE_OVER * np.median(np.abs(plain)):
+    # sparse drums 14-25x the median, noise, speech and a held tone 2-4x). A full
+    # mix with busy hats and offbeats can sit at 4x too - its beat is told from
+    # speech's by holding: the same beat, stretch after stretch.
+    if plain.max() < PULSE_MIN:
+        return None
+    if plain.max() < PULSE_OVER * np.median(np.abs(plain)) and not _steady(onset, lo + int(np.argmax(plain)), lo, hi, per_second):
         return None
     bpm = 60 * per_second / lags
     weight = np.exp(-0.5 * (np.log2(bpm / PREFERRED_BPM) / 1.0) ** 2)
@@ -84,6 +95,22 @@ def _tempo(onset, per_second):
         if denom < 0:
             period += 0.5 * (a - c) / denom
     return period
+
+
+def _steady(onset, lag, lo, hi, per_second):
+    """Whether stretch after stretch of the onset curve repeats at `lag` windows
+    (or twice or half that) - a beat that holds, not a chance repeat."""
+    n = int(STEADY_S * per_second)
+    agree = total = 0
+    for a in range(0, len(onset) - n + 1, n // 2):
+        x = onset[a:a + n] - onset[a:a + n].mean()
+        corr = np.correlate(x, x, mode="full")[n - 1:]
+        if corr[0] <= 0:
+            continue
+        total += 1
+        best = lo + int(np.argmax(corr[lo:hi + 1]))
+        agree += any(abs(best * m - lag) <= 0.04 * lag for m in (0.5, 1.0, 2.0))
+    return total >= STEADY_LEAST and agree >= STEADY_SHARE * total
 
 
 def _track(onset, period):
@@ -149,8 +176,8 @@ def find(samples, rate):
     windows = _track(onset, period)
     if len(windows) < 2:
         return None
-    # The window's centre is where its onset is heard.
-    seconds = (windows * HOP + N_FFT / 2) / rate
+    # Where its onset is heard: a little after the window's centre.
+    seconds = (windows * HOP + N_FFT / 2 + ONSET_LAG) / rate
     phase = max(range(BEATS_PER_BAR), key=lambda k: bass[windows[k::BEATS_PER_BAR]].sum())
     return {"bpm": round(60 * per_second / period, 1), "beats": [round(float(s), 4) for s in seconds],
             "bars": list(range(phase, len(windows), BEATS_PER_BAR))}

@@ -213,7 +213,7 @@ DawViews.console = (() => {
         if (what === "values") return;
         if (what === "notes" || what === "cursor") return UI.roll.draw();
         if (what === "keys") { UI.octave.draw(); UI.velocity.draw(); UI.chords.sync(); return UI.keyboard.draw(); }
-        if (what === "mixer" || what === "loop") return;
+        if (what === "mixer" || what === "loop" || what === "picture") return;
         // Keep a clip in view: the selected one, else the one under the cursor.
         const t = Daw.selTrack();
         if (t && !Daw.selClip()) {

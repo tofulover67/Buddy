@@ -232,7 +232,7 @@ DawViews.perform = (() => {
 
     function refresh(what) {
         if (!UI) return;
-        if (what === "values" || what === "mixer" || what === "cursor" || what === "loop") return;
+        if (what === "values" || what === "mixer" || what === "cursor" || what === "loop" || what === "picture") return;
         if (what === "steps") return;
         if (what === "keys") { UI.chords.sync(); return UI.keyboard.draw(); }
         if (what === "pads") return drawPads();

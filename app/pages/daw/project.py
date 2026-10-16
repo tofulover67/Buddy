@@ -12,7 +12,8 @@ A project (the page's web/engine.js makes and reads it):
     loop {on, start, end} (beats), metronome, count_in, octave, velocity,
     voicing ("triad" | "seventh" | "spread"), view ("arrange" | "console" |
     "perform"), master (its fader, 0-1.25), song (the clip id the song lane
-    is), song_level, song_mute, sel {track, clip}, key_chord {type (web/chords.js: a
+    is), song_level, song_mute, follow_resolve (the cursor follows Resolve's
+    playhead while stopped), sel {track, clip}, key_chord {type (web/chords.js: a
     short name, "off" for one note), voicing, inversion (0-3)} - what one key plays
     tracks [{id, name, kind ("inst" | "drums"), color (0-9), sound (an
              instrument for "inst", a kit for "drums"), values {name: number},
@@ -185,6 +186,7 @@ def clean(raw):
         "master": round(_num(raw.get("master"), 0.0, 1.25, 0.8), 4),
         "song_level": round(_num(raw.get("song_level"), 0.0, 1.25, 0.7), 4),
         "song_mute": _bool(raw.get("song_mute")),
+        "follow_resolve": _bool(raw.get("follow_resolve"), True),
         "song": raw.get("song") if isinstance(raw.get("song"), str) and len(raw["song"]) <= 80 else "",
         "sel": {"track": _id(sel.get("track"), ""), "clip": _id(sel.get("clip"), "")},
         "key_chord": {"type": chord.get("type") if isinstance(chord.get("type"), str) and _KEY.match(chord["type"]) else "off",

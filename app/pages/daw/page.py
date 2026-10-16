@@ -20,8 +20,9 @@ transport carrying on across the switch (web/app.js):
     Perform   chord pads in the key, macro knobs and an XY pad, a drum step
               sequencer and the keyboard (web/perform.js)
 
-Here: the timeline read lightly (its music clips and the playhead - the
-reads in the Resolve reader's process, as Audio Assistant's), the song
+Here: the timeline read lightly (its music clips, its markers and cuts for
+the picture lane, and the playhead - the reads in the Resolve reader's
+process, as Audio Assistant's), the song
 listened to and written once as a WAV for the page to play along with (and
 its waveform), a render placed (and Undo), and the project kept for next
 time (project.py cleans it).
@@ -58,6 +59,8 @@ SONG_MOST_S = 10 * 60         # the most of a song listened to
 PLACE_MOST_S = 150.0          # the longest render placed (64 bars at 102 BPM)
 WAVE_PER_S = 50               # the song lane's waveform: points a second
 WAVE_MOST = 30000
+MOST_MARKERS = 500            # the edit as the picture lane shows it
+MOST_CUTS = 3000
 PLAY_DIR = os.path.join(os.path.dirname(os.path.dirname(fx.PREVIEW_DIR)), "daw", "play_along")
 BUSY_TITLE = "Resolve isn't answering"
 BUSY_TEXT = "Resolve is holding Buddy's requests – usually because the timeline is playing. Stop playback and try again."
@@ -160,8 +163,12 @@ class DawPage(WebToolPage):
         t = self.timeline
         if t is None:
             return None
+        # The edit, to score to: its markers, its cuts and where the picture ends.
+        markers = [{"frame": m["frame"], "color": m["color"], "name": m["name"], "duration": m.get("duration", 1)}
+                   for m in t.get("markers", []) if not m.get("beat")][:MOST_MARKERS]
         return {"id": t["id"], "name": t["name"], "fps": t["fps"], "start": t["start"], "end": t["end"],
-                "songs": song_clips(t)}
+                "songs": song_clips(t), "markers": markers, "cuts": list(t.get("cuts", []))[:MOST_CUTS],
+                "video_end": t.get("video_end")}
 
     def _forget_timeline(self):
         if self.timeline is not None:

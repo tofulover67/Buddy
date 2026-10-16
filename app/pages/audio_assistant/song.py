@@ -7,7 +7,14 @@ made-up music; beats.py finds the beats and bars, fit.py's _features() what
 each beat sounds like.
 
     analyse(samples, rate) -> {"bpm", "beat_s", "bar_s", "bars": [seconds],
-                               "levels": [dB per bar], "key", "moments", "length_s"}
+                               "levels": [dB per bar], "key", "moments", "length_s",
+                               "grid": {"bpm", "first"}}
+
+The grid: the steady beat that fits the beats found best (a straight line
+through them, by least squares) - its tempo to the thousandth of a BPM, and
+where on it the first bar falls. A beat found on its own can be ten
+milliseconds out and a tempo rounded to a tenth drifts a fifth of a second
+over a song; what plays along with the music (the DAW) counts on the grid.
 
 The key (after Krumhansl and Kessler's key profiles, 1982): how much of each
 of the 12 notes the whole song has (a chroma, each frame's counted the same
@@ -126,6 +133,29 @@ def _bars(found, length_s):
     return [(s, min(length_s, starts[i + 1] if i + 1 < len(starts) else s + bar_s)) for i, s in enumerate(starts)]
 
 
+def grid(found):
+    """{"bpm", "first"}: the straight beat grid through found's beats, and the
+    time of its first bar - or None with too few beats to fit. Each beat is
+    counted from the last by the gap (a beat the finder skipped still counts),
+    and beats far off the line (a stray hit) are left out of the fit."""
+    t = np.asarray(found["beats"], dtype=np.float64)
+    if len(t) < 8 or not found["bars"]:
+        return None
+    period = 60.0 / found["bpm"]
+    n = np.concatenate(([0.0], np.cumsum(np.maximum(1.0, np.round(np.diff(t) / period)))))
+    keep = np.ones(len(t), dtype=bool)
+    for _ in range(3):
+        slope, at0 = np.polyfit(n[keep], t[keep], 1)
+        off = np.abs(t - (at0 + slope * n))
+        keep = off <= max(0.015, 3.0 * float(np.median(off[keep])) * 1.4826)
+        if keep.sum() < 8:
+            return None
+    slope, at0 = np.polyfit(n[keep], t[keep], 1)
+    if slope <= 0:
+        return None
+    return {"bpm": round(60.0 / slope, 3), "first": round(float(at0 + slope * n[found["bars"][0]]), 4)}
+
+
 def _level_db(mono, rate, a, b):
     part = mono[int(a * rate):max(int(a * rate) + 1, int(b * rate))]
     return float(10 * np.log10(max(np.mean(part ** 2) if len(part) else 0.0, 1e-12)))
@@ -188,7 +218,7 @@ def analyse(samples, rate):
     key = key_of(chroma(mono, rate))
     found = beat_finder.find(samples, rate)
     out = {"bpm": None, "beat_s": None, "bar_s": None, "bars": [], "levels": [], "key": key,
-           "moments": [], "length_s": round(length_s, 3)}
+           "moments": [], "length_s": round(length_s, 3), "grid": None}
     if not found or len(found["bars"]) < 2:
         return out
     bars = _bars(found, length_s)
@@ -197,5 +227,5 @@ def analyse(samples, rate):
     beat_s = 60.0 / found["bpm"]
     out.update(bpm=found["bpm"], beat_s=round(beat_s, 5), bar_s=round(beat_s * beat_finder.BEATS_PER_BAR, 5),
                bars=[round(a, 4) for a, _b in bars], levels=[round(v, 1) for v in levels],
-               moments=moments(mono, rate, found, bars, levels, song_s))
+               moments=moments(mono, rate, found, bars, levels, song_s), grid=grid(found))
     return out

@@ -48,7 +48,7 @@ const DawApp = (() => {
         UI.play = el("button.tbtn.play", {type: "button", title: "Play or pause (Space)", onclick: () => playOrPause()});
         UI.home = el("button.tbtn", {type: "button", title: "To the start (Home)", "aria-label": "To the start", onclick: () => moveCursor(Daw.loopOn() ? Daw.P.loop.start : 0)},
             [el("i.home-mark")]);
-        UI.loop = el("button.tbtn.toggle", {type: "button", title: "Play the chosen bars over and over (L) – choose them by dragging across the bar numbers in Arrange",
+        UI.loop = el("button.tbtn.toggle", {type: "button", title: "Play the chosen bars over and over (L) – choose them by dragging along the loop strip above the bar numbers in Arrange",
             onclick: () => flip("loop")});
         UI.metro = el("button.tbtn.toggle", {type: "button", text: "Click", title: "Metronome (M)", onclick: () => flip("metronome")});
         UI.countIn = el("button.tbtn.toggle", {type: "button", text: "Count in", title: "A bar of clicks before recording starts",
@@ -160,6 +160,12 @@ const DawApp = (() => {
         UI.countIn.setAttribute("aria-pressed", String(!!P.count_in));
         UI.snap.value = String(P.snap);
         UI.tempo.textContent = `${Math.round(Daw.bpm() * 10) / 10} BPM`;
+        // Following a song Buddy heard no steady beat in: the tempo is the project's own, not
+        // the song's - said, so it isn't taken for what was heard.
+        const unsure = !!(P.follow && S && !Daw.songBpm());
+        UI.tempo.classList.toggle("unsure", unsure);
+        UI.lcd.title = Buddy.t(unsure ? "Buddy couldn't hear a steady beat in the song, so this is the project's own tempo – click to set it"
+            : "The key and tempo");
         UI.keyOut.textContent = Daw.keyName();
         const u = Daw.undoLabel(), r = Daw.redoLabel();
         UI.undo.disabled = !u;
@@ -245,6 +251,38 @@ const DawApp = (() => {
         }}]});
     }
 
+    // ------------------------------------------------------------ the picture --
+    //
+    // Timeline frames and the DAW's beats. With a song, beat 0 is its first bar, as the song
+    // lane and Place have it; with none, it's the timeline's first frame - so the picture lane
+    // shows where things land, and Place puts them there.
+
+    const frameRate = () => (Daw.song ? Daw.song.fps : fpsOr());
+
+    function beatOfFrame(frame) {
+        const S = Daw.song;
+        if (S) return ((frame - S.start) / S.fps - Daw.songTime(0)) / (60 / (Daw.songBpm() || Daw.bpm()));
+        return TL ? (frame - TL.start) / TL.fps / Daw.beatS() : 0;
+    }
+
+    function frameOfBeat(beat) {
+        const S = Daw.song;
+        if (S) return S.start + Daw.songTime(beat) * S.fps;
+        return TL ? TL.start + beat * Daw.beatS() * TL.fps : 0;
+    }
+
+    /* The edit as beats, for the picture lane - or null with no timeline open: its cuts,
+       its markers (Buddy's own beat markers left out) and where the picture ends. */
+    function picture() {
+        if (!TL) return null;
+        return {
+            cuts: (TL.cuts || []).map(frame => ({frame, beat: beatOfFrame(frame)})),
+            markers: (TL.markers || []).map(m => Object.assign({}, m, {beat: beatOfFrame(m.frame),
+                end: beatOfFrame(m.frame + Math.max(1, m.duration || 1))})),
+            end: TL.video_end ? beatOfFrame(TL.video_end) : null,
+        };
+    }
+
     // ------------------------------------------------------------ place --
 
     function placeMenu(anchor) {
@@ -252,7 +290,7 @@ const DawApp = (() => {
         const mix = Daw.usedRange(), one = t ? Daw.usedRange(t.id) : null;
         const bars = range => (range ? ` · ${Buddy.t("bars")} ${range.from / 4 + 1}–${range.to / 4}` : "");
         Buddy.menu({x: r.right - 260, y: r.bottom + 4, items: [
-            {heading: TL ? (Daw.song ? "Lined up with the song" : `${Buddy.t("At the playhead")}, ${timecode(HEAD || 0)}`) : "Open a timeline in Resolve first"},
+            {heading: TL ? (Daw.song ? "Lined up with the song" : "Lined up with the picture") : "Open a timeline in Resolve first"},
             {label: `${Buddy.t("The whole mix")}${bars(mix)}`, disabled: !TL || !mix, onClick: () => place("mix")},
             {label: `${Buddy.t("The selected track")}${t ? ` (${t.name})` : ""}${bars(one)}`, raw: true, disabled: !TL || !one, onClick: () => place("track")},
             {label: `${Buddy.t("The loop")} · ${Buddy.t("bars")} ${Daw.P.loop.start / 4 + 1}–${Daw.P.loop.end / 4}`, disabled: !TL, onClick: () => place("loop")},
@@ -262,23 +300,23 @@ const DawApp = (() => {
     }
 
     /* A render of the mix, the selected track or the loop, onto the timeline as a new clip:
-       where the song plays that bar, or at the playhead. */
+       where the song plays that bar - or, with no song, where the picture lane shows it. */
     async function place(what) {
         if (!TL) return Buddy.toast(Buddy.t("Open a timeline in Resolve first."), 3500);
         const P = Daw.P, t = Daw.selTrack(), S = Daw.song;
         const range = what === "loop" ? {from: P.loop.start, to: P.loop.end} : Daw.usedRange(what === "track" && t ? t.id : null);
         if (!range) return Buddy.toast(Buddy.t("There's nothing to place yet – record or write some notes first."), 3500);
         if ((range.to - range.from) * Daw.beatS() > 145) return Buddy.toast(Buddy.t("That's longer than Buddy places at once (2½ minutes) – place a loop or one track."), 4500);
-        let frame;
-        if (S) frame = S.start + Math.round(Daw.songTime(range.from) * S.fps);
-        else if (HEAD !== null && HEAD !== undefined) frame = HEAD;
-        else return Buddy.toast(Buddy.t("Buddy doesn't know where the playhead is yet."), 3500);
+        // Its first beat seldom falls on a frame: the clip starts on the frame before, the
+        // render that much silence in - on the beat to the sample.
+        const exact = frameOfBeat(range.from), frame = Math.floor(exact + 1e-6);
+        const lead = Math.max(0, exact - frame) / frameRate();
         Daw.stop();
         placing = true;
         syncBar();
         Buddy.toast(Buddy.t("Rendering…"), 1500);
         try {
-            const buffer = await Daw.render(range.from, range.to, what === "track" && t ? t.id : null);
+            const buffer = await Daw.render(range.from, range.to, what === "track" && t ? t.id : null, lead);
             const what2 = what === "track" && t ? t.name : what === "loop" ? "loop" : "mix";
             send("place", {what, frame, rate: buffer.sampleRate, channels: Daw.channels(buffer), song: S ? S.id : null,
                 label: `DAW ${what2} ${Daw.keyName()} ${Math.round(Daw.bpm())} BPM`,
@@ -292,8 +330,22 @@ const DawApp = (() => {
 
     // ------------------------------------------------------------ keys --
 
-    const typing = e => e.target.closest && (e.target.closest("input, textarea, select, [contenteditable]")
-        || e.target.closest(".modal-backdrop, [role=dialog], .menu-pop"));
+    // A list (Chords, Snap...) with the focus keeps only the keys that work it - Up, Down,
+    // Enter... The rest play and move as anywhere else: a letter is a note, never a jump
+    // to the option it starts.
+    const LIST_KEYS = new Set(["ArrowUp", "ArrowDown", "Enter", "F4", "Tab", "PageUp", "PageDown", "Home", "End"]);
+    const inList = e => e.target.closest && e.target.closest("select");
+    const typing = e => e.target.closest && (e.target.closest("input, textarea, [contenteditable]")
+        || e.target.closest(".modal-backdrop, [role=dialog], .menu-pop")
+        || (inList(e) && (LIST_KEYS.has(e.key) || e.altKey)));
+
+    // Picked from with the mouse, a list lets go of the focus, so the keys go back to playing
+    // at once. (Worked from the keys, it keeps it.)
+    let listKeyAt = -Infinity;
+    window.addEventListener("keydown", e => { if (inList(e)) listKeyAt = e.timeStamp; }, true);
+    document.addEventListener("change", e => {
+        if (e.target.matches && e.target.matches("#daw select") && e.timeStamp - listKeyAt > 500) e.target.blur();
+    });
 
     // Space plays or pauses, and does nothing else: caught before anything on the page sees
     // it - a focused button isn't pressed, a list doesn't open, a knob or step isn't changed.
@@ -315,6 +367,7 @@ const DawApp = (() => {
 
     window.addEventListener("keydown", e => {
         if (typing(e)) return;
+        if (inList(e) && e.key.length === 1) e.preventDefault();    // not the list's type-ahead
         const ctrl = e.ctrlKey || e.metaKey, P = Daw.P;
         if (ctrl && !e.altKey) {
             const n = "123".indexOf(e.key);
@@ -402,9 +455,25 @@ const DawApp = (() => {
             if (want) listen(want);
         }
         if (!TL && Daw.song) Daw.setSong(null);
-        if (UI.panes) syncBar();
+        if (UI.panes) {
+            // The edit may have changed: the picture lane drawn again.
+            for (const v of VIEWS) if (v !== active()) dirty.add(v.id);
+            active().refresh("picture");
+            syncBar();
+        }
     });
-    Buddy.on("playhead", p => { HEAD = p ? p.frame : null; });
+    // Moved in Resolve while the DAW is stopped, Resolve's playhead takes the DAW's with it
+    // (follow_resolve, the picture lane's Follow) - only when it moves, so the DAW's own
+    // playhead, moved here, stays put till Resolve's does.
+    let lastHead = null;
+    Buddy.on("playhead", p => {
+        HEAD = p ? p.frame : null;
+        if (HEAD !== null && lastHead !== null && HEAD !== lastHead && TL && Daw.P.follow_resolve && !Daw.playing()) {
+            const beat = beatOfFrame(HEAD);
+            if (beat >= 0) moveCursor(Math.round(beat * 1000) / 1000, false);
+        }
+        lastHead = HEAD;
+    });
     Buddy.on("listening", () => {});
     Buddy.on("song", found => {
         if (found && found.id !== listening && listening !== null) return;
@@ -423,5 +492,5 @@ const DawApp = (() => {
     // For tests and a look from outside.
     window.DawState = {view: () => Daw.P.view, playing: () => Daw.playing(), project: () => JSON.parse(JSON.stringify(Daw.P))};
 
-    return {show, openClip, moveCursor, syncBar, scrub};
+    return {show, openClip, moveCursor, syncBar, scrub, picture, beatOfFrame, frameOfBeat, timecode};
 })();

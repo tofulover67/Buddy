@@ -63,6 +63,7 @@ TRANSITION_PREFIX = "Cross Fade"
 VOLUME_RANGE = (-100.0, 30.0)
 PAN_RANGE = (-100.0, 100.0)
 LEVELER_GAIN_RANGE = (0.0, 6.0)
+MOST_CUTS = 3000          # the picture's cuts read at the most (a long, busy edit has a few hundred)
 
 
 def file_key(path):
@@ -224,13 +225,19 @@ def read_timeline(controller, media_cache):
     _read_keys(controller, timeline, fps, start, tracks, items, media_cache)
     link_effects(tracks)
     markers = [{"frame": start + int(frame), "color": marker_colors.HEX.get(info.get("color", ""), "#888888"),
-                "name": str(info.get("name") or ""), "beat": info.get("customData") == BEAT_DATA}
+                "name": str(info.get("name") or ""), "beat": info.get("customData") == BEAT_DATA,
+                "duration": max(1, int(_float(info.get("duration"), 1.0) or 1))}
                for frame, info in marker_colors.numeric_markers(_call(timeline, "GetMarkers", default={}))]
-    # Where the picture ends - what music is most often fitted to.
-    video_end = 0
+    # Where the picture ends - what music is most often fitted to - and where its
+    # cuts are: each video clip's first frame, on any track (the DAW scores to them).
+    video_end, cuts = 0, set()
     for index in range(1, int(_call(timeline, "GetTrackCount", "video", default=0) or 0) + 1):
         for item in _call(timeline, "GetItemListInTrack", "video", index, default=[]) or []:
             video_end = max(video_end, int(_call(item, "GetEnd", default=0) or 0))
+            first = _call(item, "GetStart", default=None)
+            if first is not None and len(cuts) < MOST_CUTS:
+                cuts.add(int(first))
+    cuts.discard(start)                               # the timeline's start isn't a cut
     resolve = getattr(controller, "resolve", None)
     project = controller.current_project()
     data = {
@@ -245,6 +252,7 @@ def read_timeline(controller, media_cache):
         "start": start,
         "end": int(timeline.GetEndFrame()),
         "video_end": video_end or None,
+        "cuts": sorted(cuts),
         "tracks": tracks,
         "markers": markers,
     }

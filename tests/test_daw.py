@@ -6,6 +6,7 @@ sound and its three layouts are web/*.js."""
 import base64
 import json
 import os
+import shutil
 import tempfile
 import time
 import types
@@ -231,6 +232,20 @@ class PageTests(unittest.TestCase):
         got = self.page._timeline_for_view()
         self.assertEqual((got["id"], got["fps"], [s["id"] for s in got["songs"]]), ("t1", 24.0, ["m"]))
 
+    def test_the_view_gets_the_edit_to_score_to(self):
+        # Its cuts, where the picture ends, and its markers - but not Buddy's own beat markers.
+        self.page.timeline.update(cuts=[86460, 86520], video_end=88000, markers=[
+            {"frame": 86500, "color": "#E8664C", "name": "Logo hit", "beat": False, "duration": 1},
+            {"frame": 86510, "color": "#4C9BE8", "name": "", "beat": True, "duration": 1},
+            {"frame": 86700, "color": "#3FAE4B", "name": "Title", "beat": False, "duration": 48}])
+        got = self.page._timeline_for_view()
+        self.assertEqual((got["cuts"], got["video_end"]), ([86460, 86520], 88000))
+        self.assertEqual([(m["frame"], m["name"], m["duration"]) for m in got["markers"]],
+                         [(86500, "Logo hit", 1), (86700, "Title", 48)])
+        del self.page.timeline["cuts"], self.page.timeline["markers"], self.page.timeline["video_end"]
+        got = self.page._timeline_for_view()                   # a read from before: none of it, nothing breaks
+        self.assertEqual((got["cuts"], got["markers"], got["video_end"]), ([], [], None))
+
 
 # ---------------------------------------------------------------- the view --
 
@@ -345,6 +360,68 @@ class ViewTests(unittest.TestCase):
         self.assertTrue(self.js("return !!document.querySelector('.lane.song canvas.wave');"))
         self.assertIn("A minor", self.js("return document.querySelector('.song-pick').textContent;"))
 
+    def test_the_picture_lane_shows_the_edit_and_follows_resolves_playhead(self):
+        # The made-up song's first bar is 0.5 s (12 frames) in at 124 BPM: a frame's beat is
+        # (frame - 86424 - 12) / 24 / (60 / 124).
+        beat_of = lambda frame: (frame - 86436) / 24 / (60 / 124)
+        edit = dict(self.TIMELINE, cuts=[86460, 86580], video_end=87200, markers=[
+            {"frame": 86520, "color": "#E8664C", "name": "Logo hit", "duration": 1},
+            {"frame": 86700, "color": "#4C9BE8", "name": "Title", "duration": 48}])
+        self.receive("state", {"connected": True, "problem": "", "busy": False})
+        self.receive("timeline", edit)
+        self.receive("playhead", {"frame": 86500})                             # where Resolve's is to begin with
+        self.receive("song", dict(self.SONG, moments=[{"frame": 86436 + 96, "kind": "drop", "t": 4.5, "bar": 2}]))   # not shown
+        px = self.js("return parseFloat(getComputedStyle(document.querySelector('.lanes-grid')).getPropertyValue('--beat'));")
+        lane = self.js("""const l = document.querySelector('.lane.picture'), x0 = l.querySelector('.body').getBoundingClientRect().left;
+            const x = n => n.getBoundingClientRect().left - x0;
+            return {cuts: [...l.querySelectorAll('.cut')].map(c => x(c) + c.offsetWidth / 2),      // a tick: the middle of its grip
+                    marks: [...l.querySelectorAll('.mark')].map(m => [x(m), m.getBoundingClientRect().width, m.title]),
+                    end: x(l.querySelector('.pic-end')),
+                    guides: document.querySelectorAll('.pic-guides .guide').length,
+                    tags: document.querySelectorAll('.lane.song .moment').length};""")
+        for got, frame in zip(lane["cuts"], (86460, 86580)):
+            self.assertAlmostEqual(got, beat_of(frame) * px, delta=1)
+        self.assertAlmostEqual(lane["marks"][0][0], beat_of(86520) * px, delta=0.5)
+        self.assertAlmostEqual(lane["marks"][1][1], 48 / 24 / (60 / 124) * px, delta=0.5)   # as long as the marker
+        self.assertIn("Title", lane["marks"][1][2])
+        self.assertAlmostEqual(lane["end"], beat_of(87200) * px, delta=0.5)
+        self.assertEqual((lane["guides"], lane["tags"]), (4, 0))               # the song's moments aren't tagged
+        # A marker clicked: the playhead there.
+        self.js("""const m = document.querySelectorAll('.lane.picture .mark')[1];
+                   m.dispatchEvent(new PointerEvent('pointerdown', {button: 0, bubbles: true, cancelable: true})); return true;""")
+        self.assertAlmostEqual(self.js("return Daw.P.cursor;"), beat_of(86700), places=6)
+        # Resolve's playhead moved while the DAW is stopped: the DAW's goes with it...
+        self.receive("playhead", {"frame": 86436 + 240})
+        self.assertAlmostEqual(self.js("return Daw.P.cursor;"), round(beat_of(86436 + 240), 3), places=6)
+        self.js("Daw.P.cursor = 2; return true;")
+        self.receive("playhead", {"frame": 86436 + 240})                       # ...only when it moves
+        self.assertEqual(self.js("return Daw.P.cursor;"), 2)
+        self.js("document.querySelector('.pic-follow').click(); return true;")    # Follow off
+        self.assertFalse(self.js("return Daw.P.follow_resolve;"))
+        self.receive("playhead", {"frame": 86436 + 480})
+        self.assertEqual(self.js("return Daw.P.cursor;"), 2)
+
+    def test_with_no_song_place_lines_up_with_the_picture(self):
+        # No song: beat 0 is the timeline's first frame, at the project's tempo (120 BPM here).
+        self.receive("state", {"connected": True, "problem": "", "busy": False})
+        self.receive("timeline", dict(self.TIMELINE, songs=[], cuts=[86400 + 24 * 3]))
+        self.assertAlmostEqual(self.js("return DawApp.beatOfFrame(86400 + 24 * 3);"), 6.0, places=9)   # 3 s = 6 beats
+        self.js("document.querySelector('.daw-bar .btn.accent').click(); return true;")
+        self.assertIn("Lined up with the picture", self.js("return document.querySelector('.menu-pop').textContent;"))
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => /whole mix/.test(b.textContent)).click(); return true;")
+        self.until("window.__sent.some(s => s[0] === 'place')", seconds=15)
+        self.assertEqual(self.js("return window.__sent.find(s => s[0] === 'place')[1].frame;"), 86400)   # bar 1: its first frame
+
+    def test_a_song_with_no_steady_beat_says_the_tempo_is_the_projects_own(self):
+        tempo = "const s = document.querySelector('.lcd span'); return [s.textContent, s.classList.contains('unsure'), document.querySelector('.lcd').title];"
+        self.receive("timeline", self.TIMELINE)
+        self.receive("song", dict(self.SONG, bpm=None, bars=[], grid=None))
+        text, unsure, title = self.js(tempo)
+        self.assertEqual((text, unsure), ("120 BPM", True))                 # the project's, and said so
+        self.assertIn("steady beat", title)
+        self.receive("song", self.SONG)
+        self.assertEqual(self.js(tempo)[:2], ["124 BPM", False])
+
     def test_the_computer_keys_play_the_selected_track_in_its_key(self):
         self.with_song()
         self.js("DawApp.show('console'); return true;")
@@ -416,6 +493,25 @@ class ViewTests(unittest.TestCase):
         self.assertEqual(self.sounding(), [36])
         self.key("KeyA", "keyup")
 
+    def test_a_list_with_the_focus_leaves_the_keys_to_the_keyboard(self):
+        # Chords picked from its list with the mouse: the list lets go of the focus.
+        self.with_song()
+        self.js("DawApp.show('console'); Daw.select(Daw.P.tracks[0].id); return true;")
+        chord = "document.querySelector('.con-keys .chord-type')"
+        self.js(f"const s = {chord}; s.focus(); s.value = 'key_triad';"
+                " s.dispatchEvent(new Event('change', {bubbles: true})); return true;")
+        self.assertEqual(self.js(f"return [Daw.P.key_chord.type, document.activeElement === {chord}];"), ["key_triad", False])
+        # Still holding it (tabbed to): a letter plays its note, and isn't the list's type-ahead.
+        press = f"""const s = {chord}; s.focus();
+                    const e = new KeyboardEvent('keydown', {{code: %s, key: %s, bubbles: true, cancelable: true}});
+                    s.dispatchEvent(e); return e.defaultPrevented;"""
+        self.assertTrue(self.js(press % ("'KeyA'", "'a'")))
+        self.assertEqual(self.sounding(), [60, 64, 67])                       # C major, in A minor
+        self.key("KeyA", "keyup", on=chord)
+        self.assertEqual(self.js(f"return [Daw.P.key_chord.type, {chord}.value];"), ["key_triad", "key_triad"])
+        self.assertFalse(self.js(press % ("'ArrowDown'", "'ArrowDown'")))     # its own keys stay its own
+        self.assertEqual(self.sounding(), [])
+
     def test_a_progression_is_written_in_the_key_and_undone(self):
         self.with_song()
         self.js("Daw.select(Daw.P.tracks[0].id); return true;")                # Chords, a pad
@@ -454,6 +550,49 @@ class ViewTests(unittest.TestCase):
                        " return [d.what, d.frame, d.rate, d.channels.length, d.song, d.label];")
         self.assertEqual(sent, ["mix", 86424 + round(0.5 * 24), 48000, 2, "m1", "DAW mix A minor 124 BPM"])
 
+    def test_the_song_is_followed_on_its_grid_and_placed_on_the_beat(self):
+        # The grid song.py fits through the beats: its tempo to the thousandth, its first bar
+        # between two frames (0.52 s is 12.48 frames at 24 fps).
+        song = dict(self.SONG, grid={"bpm": 123.456, "first": 0.52})
+        self.receive("state", {"connected": True, "problem": "", "busy": False})
+        self.receive("timeline", self.TIMELINE)
+        self.receive("song", song)
+        self.assertEqual(self.js("return Daw.bpm();"), 123.456)
+        self.assertAlmostEqual(self.js("return Daw.songTime(16);"), 0.52 + 16 * 60 / 123.456, places=9)
+        # The drums' beat starts on bar 1: placed on the frame before it, the render that much
+        # silence in - the kick lands on the beat, not on the nearest frame.
+        self.js("document.querySelector('.daw-bar .btn.accent').click(); return true;")
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => /whole mix/.test(b.textContent)).click(); return true;")
+        self.until("window.__sent.some(s => s[0] === 'place')", seconds=15)
+        got = self.js("""const d = window.__sent.find(s => s[0] === 'place')[1];
+                         const bin = atob(d.channels[0]), bytes = new Uint8Array(bin.length);
+                         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                         const x = new Float32Array(bytes.buffer);
+                         return [d.frame, x.findIndex(v => Math.abs(v) > 1e-3)];""")
+        self.js("""Daw.render(0, 4).then(b => { window.__plain = b.getChannelData(0).findIndex(v => Math.abs(v) > 1e-3); });
+                   return true;""")                                        # the same, from the beat itself
+        self.until("window.__plain !== undefined", seconds=15)
+        self.assertEqual(got[0], 86424 + 12)
+        self.assertAlmostEqual((got[1] - self.js("return window.__plain;")) / 48000, 0.48 / 24, delta=0.0005)
+
+    def test_the_songs_file_is_played_on_the_daws_own_clock(self):
+        # The WAV page.py writes is read into the engine (a file:// read the page allows),
+        # then played from a buffer, started on the beat - not by an <audio> and a timer.
+        import wave
+        from PySide6.QtCore import QUrl
+        folder = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, folder, True)
+        path = os.path.join(folder, "song-0123456789abcdef.wav")
+        with wave.open(path, "wb") as w:
+            w.setnchannels(2)
+            w.setsampwidth(2)
+            w.setframerate(44100)
+            w.writeframes(b"\x00\x10" * 2 * 44100 * 3)
+        self.receive("song", dict(self.SONG, url=QUrl.fromLocalFile(path).toString(), length_s=3))
+        self.until("Daw.songReady()", seconds=10)
+        self.js("Daw.start(); return true;")
+        self.until("Daw.playing() && Daw.position() > 0.5")
+
     def test_the_tracks_scroll_zoom_and_the_ruler_moves_the_playhead(self):
         self.with_song()                                          # 80 s of song: more than fits
         wheel = """const lanes = document.querySelector('.lanes'), r = lanes.getBoundingClientRect();
@@ -466,46 +605,72 @@ class ViewTests(unittest.TestCase):
         self.assertGreater(self.js("return document.querySelector('.lanes').scrollLeft;"), 0)
         before = self.js(beat)
         self.assertTrue(self.js(wheel % "{altKey: true, deltaY: -240}"))                       # Alt + scroll: zoom in
-        self.assertGreater(self.js(beat), before)
+        self.until(f"parseFloat(getComputedStyle(document.querySelector('.lanes-grid')).getPropertyValue('--beat')) > {before}")
+        # A step draws nothing again (the clips stay the same nodes, placed in beats); once
+        # the zooming stops, all is drawn again at the new size.
+        self.js("window.__clip = document.querySelector('.clip'); return true;")
+        zoomed = self.js(beat)
         self.assertTrue(self.js(wheel % "{altKey: true, deltaY: 0, deltaX: 240}"))             # ...as Qt on Windows sends it
+        self.until(f"parseFloat(getComputedStyle(document.querySelector('.lanes-grid')).getPropertyValue('--beat')) < {zoomed}")
+        self.assertTrue(self.js("return document.querySelector('.clip') === window.__clip;"))
+        clip = "const c = document.querySelector('.clip'), px = parseFloat(getComputedStyle(document.querySelector('.lanes-grid')).getPropertyValue('--beat'));"
+        self.assertAlmostEqual(self.js(clip + " return (c.getBoundingClientRect().width + 1) / px;"), 4, delta=0.05)   # a bar, at any zoom
+        # Settled: its notes drawn again at its new size, in place - the same clip, nothing rebuilt.
+        self.until("(() => { const c = window.__clip.querySelector('canvas');"
+                   " return c.width === Math.round(c.clientWidth * (window.devicePixelRatio || 1)); })()")
+        self.assertTrue(self.js("return document.querySelector('.clip') === window.__clip;"))
         # The arrows: a beat, Shift a bar.
         self.js("Daw.P.cursor = 5; Daw.changed('cursor'); return true;")
         self.key("ArrowRight", shift=True)
         self.assertEqual(self.js("return Daw.P.cursor;"), 8)
 
-    def test_bars_to_play_are_chosen_by_dragging_across_them(self):
-        """A click in the ruler moves the playhead; a drag across bars plays just those -
-        whole bars, lit down the tracks, the playhead to their start; a lit end drags for
-        more or fewer; a double-click is one bar; a clip's menu plays its bars."""
+    def test_bars_to_loop_are_chosen_in_the_loop_strip_and_the_playhead_in_the_bars(self):
+        """The ruler's two rows. The bar numbers only move the playhead - a click, or a drag
+        to scrub, never the loop. The loop strip above them only chooses bars: a drag across
+        it loops just those - whole bars, lit down the tracks, the playhead to their start;
+        the lit bars slide, an end drags for more or fewer, a click turns the loop on or off;
+        a double-click is one bar; a clip's menu loops its bars."""
         # Each step finds the ruler again: choosing bars draws it anew. x is in beats.
-        ruler = """const b = document.querySelector('.bars'), r = b.getBoundingClientRect(), px = %s;
+        ruler = """const b = document.querySelector(%s), r = b.getBoundingClientRect(), px = %s;
                    const t = %s ? b.querySelector(%s) : b, o = {button: 0, bubbles: true, pointerId: 1, shiftKey: %s};
-                   const p = (type, beat) => t.dispatchEvent(new PointerEvent(type, Object.assign({clientX: r.left + beat * px, clientY: r.top + 15}, o)));
+                   const p = (type, beat) => t.dispatchEvent(new PointerEvent(type, Object.assign({clientX: r.left + beat * px, clientY: r.top + 6}, o)));
                    %s return true;"""
         px = self.js("return parseFloat(getComputedStyle(document.querySelector('.lanes-grid')).getPropertyValue('--beat'));")
 
-        def act(steps, target=None, shift=False):
-            self.js(ruler % (px, "true" if target else "false", json.dumps(target or ""), "true" if shift else "false", steps))
+        def act(steps, target=None, shift=False, row=".loopbar"):
+            self.js(ruler % (json.dumps(row), px, "true" if target else "false", json.dumps(target or ""),
+                             "true" if shift else "false", steps))
 
         state = "return [Daw.P.loop.start, Daw.P.loop.end, Daw.P.loop.on, Daw.P.cursor];"
         self.js("Daw.P.loop.on = false; Daw.changed('loop'); return true;")
-        act("p('pointerdown', 2); p('pointerup', 2);")                         # a click: the playhead only
+        act("p('pointerdown', 2); p('pointerup', 2);", row=".bars")                       # a click: the playhead
         self.assertEqual(self.js(state), [0, 16, False, 2])
+        act("p('pointerdown', 3); p('pointermove', 9); p('pointermove', 22.1); p('pointerup', 22.1);", row=".bars")
+        self.assertEqual(self.js(state), [0, 16, False, 22])                             # a drag: scrubbed, no loop
+        self.assertEqual(self.js("return document.querySelector('.range').classList.contains('off');"), True)   # dimmed, still there
         act("p('pointerdown', 5.5); p('pointermove', 9); p('pointermove', 14.2); p('pointerup', 14.2);")
-        self.assertEqual(self.js(state), [4, 16, True, 4])                       # bars 2-4, from bar 2
+        self.assertEqual(self.js(state), [4, 16, True, 4])                               # bars 2-4, from bar 2
         self.assertEqual(self.js("return document.querySelector('.range-label').textContent;"), "2–4")
         self.assertIn("2–4", self.js("return document.querySelector('.daw-bar .tbtn.toggle').textContent;"))
         shade = self.js("const s = document.querySelector('.loop-shade'); return [s.hidden, parseFloat(s.style.left), parseFloat(s.style.width)];")
-        self.assertEqual(shade, [False, 150 + 4 * px, 12 * px])                  # lit down the tracks
+        self.assertEqual(shade, [False, 150 + 4 * px, 12 * px])                          # lit down the tracks
         act("p('pointerdown', 16); p('pointermove', 23.6); p('pointerup', 23.6);", ".range-edge.end")
-        self.assertEqual(self.js(state)[:2], [4, 24])                            # dragged out to bar 6
+        self.assertEqual(self.js(state)[:2], [4, 24])                                    # dragged out to bar 6
+        act("p('pointerdown', 10); p('pointermove', 18.3); p('pointerup', 18.3);", ".range-label")
+        self.assertEqual(self.js(state), [12, 32, True, 12])                             # slid on two bars, length kept
+        act("p('pointerdown', 20); p('pointerup', 20);", ".range-label")                 # a click on it: the loop off...
+        self.assertEqual(self.js(state)[:3], [12, 32, False])
+        self.assertEqual(self.js("return [document.querySelector('.loop-shade').hidden, document.querySelector('.range').classList.contains('off')];"),
+                         [True, True])
+        act("p('pointerdown', 20); p('pointerup', 20);", ".range-label")                 # ...and on again
+        self.assertEqual(self.js(state)[:3], [12, 32, True])
         act("p('pointerdown', 6.5); p('pointermove', 3.2); p('pointerup', 3.2);", shift=True)
-        self.assertEqual(self.js(state)[:2], [3, 7])                             # Shift: beats, either way
+        self.assertEqual(self.js(state)[:2], [3, 7])                                     # Shift: beats, either way
         self.assertEqual(self.js("return document.querySelector('.range-label').textContent;"), "1.4–2.3")
-        self.js(f"""const b = document.querySelector('.bars'), r = b.getBoundingClientRect();
-                    b.dispatchEvent(new MouseEvent('dblclick', {{clientX: r.left + 30.5 * {px}, clientY: r.top + 15, bubbles: true}}));
+        self.js(f"""const b = document.querySelector('.loopbar'), r = b.getBoundingClientRect();
+                    b.dispatchEvent(new MouseEvent('dblclick', {{clientX: r.left + 30.5 * {px}, clientY: r.top + 6, bubbles: true}}));
                     return true;""")
-        self.assertEqual(self.js(state), [28, 32, True, 28])                     # just bar 8
+        self.assertEqual(self.js(state), [28, 32, True, 28])                             # just bar 8
         self.js("Daw.undo(); return true;")
         self.assertEqual(self.js(state)[:2], [3, 7])
         # Playing, new bars are gone to straight away.
@@ -520,7 +685,7 @@ class ViewTests(unittest.TestCase):
                    Daw.changed('clips'); return true;""")
         self.js("""const c = document.querySelector('.clip[data-clip=k1]');
                    c.dispatchEvent(new MouseEvent('contextmenu', {bubbles: true, cancelable: true, clientX: 300, clientY: 300}));
-                   [...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === 'Play these bars').click(); return true;""")
+                   [...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === 'Loop these bars').click(); return true;""")
         self.assertEqual(self.js(state), [48, 56, True, 48])
 
     def test_space_only_plays_and_pauses(self):

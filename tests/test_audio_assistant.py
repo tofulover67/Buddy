@@ -256,6 +256,24 @@ class ReadTimelineTests(unittest.TestCase):
         with self.assertRaises(resolve_ext.ResolveConnectionError):
             resolve_ext.read_timeline(Controller(None), {})
 
+    def test_the_pictures_cuts_and_end_are_read(self):
+        # Every video clip's first frame, on any track, is a cut (the timeline's start isn't);
+        # the picture ends where its last clip does. Markers keep how long they are.
+        video = [[Item("v1", "A001.mov", 86400, 86500), Item("v2", "A002.mov", 86500, 86620)],
+                 [Item("v3", "Title", 86550, 86580)]]
+
+        class WithPicture(Timeline):
+            def GetTrackCount(self, kind):
+                return len(video) if kind == "video" else super().GetTrackCount(kind)
+
+            def GetItemListInTrack(self, kind, i):
+                return video[i - 1] if kind == "video" else super().GetItemListInTrack(kind, i)
+
+        tl = WithPicture(self.timeline.tracks, markers={48: {"color": "Red", "name": "Hit", "duration": 12}})
+        data, _ = resolve_ext.read_timeline(Controller(tl), {})
+        self.assertEqual((data["cuts"], data["video_end"]), ([86500, 86550], 86620))
+        self.assertEqual([(m["frame"], m["name"], m["duration"]) for m in data["markers"]], [(86448, "Hit", 12)])
+
     def test_a_crossfade_is_read_as_one_not_a_clip(self):
         self.timeline.tracks[1]["items"].append(Item("x1", "Cross Fade +3 dB", 86790, 86810))
         data, _items = resolve_ext.read_timeline(Controller(self.timeline), {})

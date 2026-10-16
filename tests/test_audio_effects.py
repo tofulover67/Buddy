@@ -237,6 +237,39 @@ def drums(bpm, seconds=20.0, first=0.37, rate=RATE):
     return x, np.array(truth)
 
 
+def loose_drums(bpm, seconds=48.0, first=0.5, seed=0):
+    """Sixteenth hats under a kick and snare, played as a drummer would - each hit a
+    few milliseconds off the grid, none as loud as the last: the beat's repeat no
+    longer stands far out of the rest, though it holds all the way through."""
+    rng = np.random.default_rng(seed)
+    n = int(seconds * RATE)
+    x, t = rng.normal(0, 0.01, n), np.arange(int(0.25 * RATE)) / RATE
+    kick = np.sin(2 * np.pi * (50 + 60 * np.exp(-t * 30)) * t) * np.exp(-t * 12)
+    sixteenth, k = 60.0 / bpm / 4, 0
+    while first + k * sixteenth < seconds - 0.4:
+        a, v = int((first + k * sixteenth + rng.normal(0, 0.006)) * RATE), rng.uniform(0.6, 1.0)
+        x[a:a + len(t)] += rng.normal(0, 1, len(t)) * np.exp(-t * 70) * 0.1 * v
+        if k % 8 == 0:
+            x[a:a + len(t)] += kick * 0.8 * v
+        if k % 8 == 4:
+            x[a:a + len(t)] += rng.normal(0, 1, len(t)) * np.exp(-t * 22) * 0.5 * v
+        if k % 16 == 10:
+            x[a:a + len(t)] += kick * 0.6 * v
+        k += 1
+    return x
+
+
+def speechlike(seed, seconds=40.0):
+    """Bursts of noise, each as long and as far apart as chance has it: syllables, not a beat."""
+    rng = np.random.default_rng(seed)
+    x, i = np.zeros(int(seconds * RATE)), 0
+    while i < len(x) - RATE:
+        length = int(rng.uniform(0.08, 0.4) * RATE)
+        x[i:i + length] = rng.normal(0, 0.2, length) * np.hanning(length)
+        i += length + int(rng.uniform(0.05, 0.3) * RATE)
+    return x
+
+
 @unittest.skipUnless(HAVE_DEPS, "numpy / PySide6 not installed")
 class BeatTests(unittest.TestCase):
     def test_the_beats_and_the_bars_are_found(self):
@@ -249,6 +282,23 @@ class BeatTests(unittest.TestCase):
             self.assertLess(worst, 0.5 / 24, bpm)                       # within half a frame at 24 fps
             downbeats = got[found["bars"]]
             self.assertLess(min(np.abs(downbeats - truth[4])), 0.03)     # bar 2 starts on the kick
+            near = [got[np.argmin(np.abs(got - t))] - t for t in truth[2:-2]]
+            self.assertLess(abs(np.median(near)), 0.005, bpm)              # on the hits, not a little before
+
+    def test_the_grid_through_the_beats_doesnt_drift(self):
+        # Two and a half minutes at a tempo no rounding lands on: the steady grid through the
+        # beats found keeps within a few milliseconds of the hits to the very end.
+        from pages.audio_assistant import song
+        for bpm in (117.3, 141.7):
+            x, truth = drums(bpm, seconds=150.0, first=1.37)
+            found = beats.find(x, RATE)
+            got = song.grid(found)
+            self.assertAlmostEqual(got["bpm"], bpm, delta=0.02)
+            n0 = int(np.argmin(np.abs(truth - got["first"])))
+            self.assertEqual(n0 % 4, 0)                                          # on a kick: a bar's first beat
+            line = got["first"] + (np.arange(len(truth)) - n0) * 60.0 / got["bpm"]
+            self.assertLess(np.max(np.abs(line - truth)[2:-2]), 0.008, bpm)
+        self.assertIsNone(song.grid({"bpm": 120.0, "beats": [0.5, 1.0, 1.5], "bars": [0]}))   # too few to fit
 
     def test_no_beat_in_noise_a_tone_or_too_little(self):
         rng = np.random.default_rng(3)
@@ -256,6 +306,16 @@ class BeatTests(unittest.TestCase):
         self.assertIsNone(beats.find(rng.normal(0, 0.1, RATE * 10), RATE))
         self.assertIsNone(beats.find(0.3 * np.sin(2 * np.pi * 440 * t), RATE))
         self.assertIsNone(beats.find(drums(120, seconds=2)[0], RATE))
+        for seed in (1, 2, 3):
+            self.assertIsNone(beats.find(speechlike(seed), RATE), seed)
+
+    def test_a_loose_busy_beat_is_still_a_beat(self):
+        # Its repeat is only ~4x the usual (sparse drums: 20x and more) - it's told from
+        # speech by holding the same beat stretch after stretch, and isn't "no steady beat".
+        for bpm in (124, 140):
+            found = beats.find(loose_drums(bpm), RATE)
+            self.assertIsNotNone(found, bpm)
+            self.assertAlmostEqual(found["bpm"], bpm, delta=1.0)
 
     def test_twice_and_half_as_fast(self):
         found = {"bpm": 87.0, "beats": [0.0, 0.69, 1.38, 2.07, 2.76, 3.45], "bars": [1, 5]}

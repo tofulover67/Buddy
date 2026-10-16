@@ -20,8 +20,8 @@
  *                 clip under the playhead, or a new one), the loop, the
  *                 metronome, swing. One timer looks a moment ahead and
  *                 schedules on the audio clock what falls in it
- *   The song      heard by page.py: its key, tempo and bars, and its audio
- *                 played along, beat 0 on its first bar
+ *   The song      heard by page.py: its key, tempo and beat grid, and its
+ *                 audio played along on the same clock, beat 0 on its first bar
  *
  * Events (Daw.on): "change" {what}, "transport", "song", "notes" (what's
  * sounding live, to light the keys), "select".
@@ -105,7 +105,7 @@ const Daw = (() => {
         return {
             bpm: 120, tonic: 9, mode: "minor", follow: true, swing: 0, snap: 4, length: 16, cursor: 0,
             loop: {on: true, start: 0, end: 16}, metronome: false, count_in: true, octave: 4, velocity: 0.8,
-            voicing: "triad", view: "arrange", song: "", master: 0.8, song_level: 0.7, song_mute: false,
+            voicing: "triad", view: "arrange", song: "", master: 0.8, song_level: 0.7, song_mute: false, follow_resolve: true,
             key_chord: {type: "off", voicing: "close", inversion: 0},
             sel: {track: "", clip: ""},
             tracks: [newTrack("inst", "pad", "Chords", 0), newTrack("inst", "bass", "Bass", 1), drums,
@@ -197,7 +197,10 @@ const Daw = (() => {
         const k = songKey();
         return k ? {tonic: k.tonic, mode: k.mode === "minor" ? "minor" : "major"} : {tonic: P.tonic, mode: P.mode};
     }
-    const bpm = () => (P.follow && SONG && SONG.bpm ? SONG.bpm : P.bpm);
+    // The song's tempo: its grid's (song.py - to the thousandth, the steady beat through
+    // all of its beats), else the tempo heard.
+    const songBpm = () => (SONG ? (SONG.grid && SONG.grid.bpm) || SONG.bpm || null : null);
+    const bpm = () => (P.follow && songBpm() ? songBpm() : P.bpm);
     const beatS = () => 60 / bpm();
     const keyName = () => `${NAMES[key().tonic]} ${key().mode}`;
     const inScale = midi => SCALES[key().mode].includes(mod(midi - key().tonic, 12));
@@ -327,8 +330,10 @@ const Daw = (() => {
             n.fader.gain.setTargetAtTime(faderGain(t.level), now, 0.02);
             n.mute.gain.setTargetAtTime(audible(t) ? 1 : 0, now, 0.01);
         }
+        const songVolume = P.song_mute ? 0 : clamp(faderGain(P.song_level ?? 0.7) * 0.8, 0, 1);
+        if (songGain) songGain.gain.setTargetAtTime(songVolume, now, 0.02);
         if (songAudio) {
-            songAudio.volume = clamp(faderGain(P.song_level ?? 0.7) * 0.8, 0, 1);
+            songAudio.volume = songVolume;
             songAudio.muted = !!P.song_mute;
         }
     }
@@ -464,9 +469,7 @@ const Daw = (() => {
         timer = 0;
         T = null;
         allOff();
-        if (songAudio) songAudio.pause();
-        for (const id of songTimers) clearTimeout(id);
-        songTimers.length = 0;
+        songStop();
         if (wasRecording) finishRecording(recClip);
         if (!toCursor) return;
         emit("transport", {});
@@ -568,13 +571,21 @@ const Daw = (() => {
         emit("change", {what: "clips"});
     }
 
+    /* How long after the audio clock a sound is heard: what's played along to reaches the
+       ears this late, so a key pressed with it was pressed this late too. */
+    const heardLate = () => (ctx ? (ctx.baseLatency || 0) + (ctx.outputLatency || 0) : 0);
+
     function recordStart(t, m, vel, at) {
         if (!T || !T.record || !T.recClip || t.id !== T.recTrack) return;
-        let beat = position(at);
-        if (at < T.t0) {
-            if (at < T.t0 - beatS() / 2) return;   // a note well into the count-in isn't the take's
-            beat = T.from;                          // ...one a hair early is its first beat's
+        const heard = at - heardLate();
+        let beat = position(heard);
+        if (heard < T.t0) {
+            if (heard < T.t0 - beatS() / 2) return;   // a note well into the count-in isn't the take's
+            beat = T.from;                             // ...one a hair early is its first beat's
         }
+        // A hair before the loop comes round (it would snap onto its end): its first beat.
+        const g = P.snap ? 1 / P.snap : 0.25;
+        if (loopOn() && beat >= P.loop.end - g / 2) beat = P.loop.start;
         T.rec.set(m, {track: t.id, beat, vel, at});
     }
 
@@ -619,32 +630,76 @@ const Daw = (() => {
 
     // ------------------------------------------------------------ song --
 
-    let songAudio = null;
-    const songTimers = [];
+    // The song is played on the audio clock, as the tracks are: decoded once into a
+    // buffer and started at the very moment its beat is due - so it and what's played
+    // with it stay together to the sample. Until it's decoded (or if it can't be),
+    // an <audio> plays it, near enough.
+    let songAudio = null, songBuffer = null, songGain = null, songLoading = "";
+    const songTimers = [], songSources = [];
 
     function setSong(found) {
         SONG = found && !found.error ? found : null;
         if (SONG) {
             if (!songAudio) { songAudio = new Audio(); songAudio.preload = "auto"; }
             if (songAudio.src !== SONG.url) songAudio.src = SONG.url;
+            loadSong(SONG.url);
             P.song = SONG.id;
+        } else {
+            songBuffer = null;
+            songLoading = "";
         }
         syncGraph();
         emit("song", {});
         changed("song");
     }
 
-    /* Seconds into the song at project beat b: beat 0 is the song's first bar. */
+    /* The song's file into a buffer at the DAW's rate. (XHR: fetch() won't read a file:// URL.) */
+    function loadSong(url) {
+        if (!url || songLoading === url) return;
+        songLoading = url;
+        songBuffer = null;
+        const req = new XMLHttpRequest();
+        req.open("GET", url);
+        req.responseType = "arraybuffer";
+        req.onload = () => {
+            if (songLoading !== url || !req.response || !req.response.byteLength) return;
+            new OfflineAudioContext(2, 1, RATE).decodeAudioData(req.response)
+                .then(buffer => { if (songLoading === url) songBuffer = buffer; })
+                .catch(() => {});
+        };
+        req.send();
+    }
+
+    /* Seconds into the song at project beat b: beat 0 is the song's first bar, on its grid. */
     function songTime(b) {
         if (!SONG) return 0;
-        const first = SONG.bars && SONG.bars.length ? SONG.bars[0] : 0;
-        return first + b * 60 / (SONG.bpm || bpm());
+        const first = SONG.grid ? SONG.grid.first : SONG.bars && SONG.bars.length ? SONG.bars[0] : 0;
+        return first + b * 60 / (songBpm() || bpm());
     }
-    const songBeats = () => (SONG && SONG.length_s ? Math.max(0, (SONG.length_s - songTime(0)) / (60 / (SONG.bpm || bpm()))) : 0);
+    const songBeats = () => (SONG && SONG.length_s ? Math.max(0, (SONG.length_s - songTime(0)) / (60 / (songBpm() || bpm()))) : 0);
 
-    /* The song from beat `beat`, starting at time `at` on the audio clock. */
+    /* The song from beat `beat`, starting at time `at` on the audio clock - the part
+       playing until then (the loop's last pass) stopping at that moment. */
     function songFollow(at, beat) {
-        if (!SONG || !songAudio || !songAudio.src) return;
+        if (!SONG) return;
+        if (songBuffer) {
+            const c = audio();
+            if (!songGain) { songGain = c.createGain(); songGain.connect(c.destination); syncGraph(); }
+            const late = Math.max(0, c.currentTime - at), from = songTime(beat) + late;
+            if (songAudio) songAudio.pause();             // decoded while it played
+            // The pass before ends as this one starts - and stays in the list till then, so
+            // stopping in between stops it too.
+            for (const s of songSources) { try { s.stop(Math.max(c.currentTime, at)); } catch (err) { /* ended */ } }
+            songSources.splice(0, Math.max(0, songSources.length - 1));
+            if (from >= songBuffer.duration) return;
+            const src = c.createBufferSource();
+            src.buffer = songBuffer;
+            src.connect(songGain);
+            src.start(Math.max(c.currentTime, at), Math.max(0, from));
+            songSources.push(src);
+            return;
+        }
+        if (!songAudio || !songAudio.src) return;
         const go = () => {
             if (!T) return;
             const late = Math.max(0, ctx.currentTime - at);
@@ -653,6 +708,14 @@ const Daw = (() => {
         };
         songTimers.push(setTimeout(go, Math.max(0, (at - ctx.currentTime) * 1000 - 10)));
         if (songTimers.length > 6) songTimers.shift();
+    }
+
+    function songStop() {
+        if (songAudio) songAudio.pause();
+        for (const id of songTimers) clearTimeout(id);
+        songTimers.length = 0;
+        for (const s of songSources) { try { s.stop(); } catch (err) { /* ended */ } }
+        songSources.length = 0;
     }
 
     // ------------------------------------------------------------ length --
@@ -675,10 +738,12 @@ const Daw = (() => {
     // ------------------------------------------------------------ render --
 
     /* Beats `from`-`to` rendered offline as they play (one track, or every one heard),
-       with the last notes' ring after - a buffer, at most -1 dBFS. */
-    async function render(from, to, onlyTrack = null) {
+       with the last notes' ring after - a buffer, at most -1 dBFS. `lead` seconds of
+       silence first: a clip on the timeline starts on a frame, and the beat it's for
+       can fall between two. */
+    async function render(from, to, onlyTrack = null, lead = 0) {
         const B = beatS(), tail = 4;
-        const seconds = (to - from) * B + tail;
+        const seconds = lead + (to - from) * B + tail;
         const off = new OfflineAudioContext(2, Math.ceil(seconds * RATE), RATE);
         const m = masterGraph(off, off.destination, false);
         for (const t of P.tracks) {
@@ -688,7 +753,7 @@ const Daw = (() => {
                 for (const [mid, s, d, v] of clip.notes) {
                     const at = clip.start + s;
                     if (at < from || at >= to || s >= clip.len) continue;
-                    sound(off, n.input, t, mid, v, (swung(at) - from) * B, Math.min(d, clip.len - s) * B);
+                    sound(off, n.input, t, mid, v, lead + (swung(at) - from) * B, Math.min(d, clip.len - s) * B);
                 }
             }
         }
@@ -710,7 +775,7 @@ const Daw = (() => {
             }
         }
         // The ring after the last note, not the silence after it.
-        const keep = Math.min(buffer.length, Math.max(Math.ceil((to - from) * B * RATE), last + Math.round(0.05 * RATE)));
+        const keep = Math.min(buffer.length, Math.max(Math.ceil((lead + (to - from) * B) * RATE), last + Math.round(0.05 * RATE)));
         if (keep >= buffer.length) return buffer;
         const out = new AudioBuffer({numberOfChannels: 2, length: keep, sampleRate: RATE});
         for (let ch = 0; ch < 2; ch++) out.copyToChannel(buffer.getChannelData(ch).subarray(0, keep), ch);
@@ -772,10 +837,10 @@ const Daw = (() => {
         undoLabel: () => (undo.length ? undo[undo.length - 1].label : null),
         redoLabel: () => (redo.length ? redo[redo.length - 1].label : null),
         track, selTrack, selClip, clipOf, values, defaults, audible, faderDb,
-        key, bpm, beatS, keyName, inScale, isRoot, noteName, stack, chordsInKey,
+        key, bpm, songBpm, beatS, keyName, inScale, isRoot, noteName, stack, chordsInKey,
         audio, noteOn, noteOff, allOff, sounding, rowNote,
         start, stop, pause, playing, recording, position, loopOn,
-        setSong, songTime, songBeats, projectBeats, usedRange, render, channels,
+        setSong, songTime, songBeats, songReady: () => !!songBuffer, projectBeats, usedRange, render, channels,
         level, analyser, applyMacro,
     };
 })();

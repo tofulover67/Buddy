@@ -43,6 +43,9 @@ main.daw {
 }
 .lcd b { color: var(--daw-live); font-weight: 600; min-width: 5ch; text-align: left; }
 .lcd:hover { color: var(--text); }
+/* The tempo, when it is the project's own because the song had no steady beat to follow. */
+.lcd .unsure { color: #E8B04C; text-decoration: underline dotted; text-underline-offset: 3px; }
+.lcd .unsure::after { content: " ?"; }
 .tbtn {
     font: inherit; font-weight: 600; height: 30px; min-width: 30px; padding: 0 10px; border-radius: 8px; cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -192,25 +195,31 @@ main.daw {
                       linear-gradient(to right, rgba(127, 127, 127, .06) 1px, transparent 1px);
     background-size: calc(var(--beat) * 4) 100%, var(--beat) 100%;
 }
-.lane.ruler { min-height: 34px; position: sticky; top: 0; z-index: 5; }
-.lane.ruler .head { justify-content: center; }
-.bars { position: relative; flex: none; background: var(--daw-panel); border-bottom: var(--bw) solid var(--daw-line); cursor: pointer; touch-action: none; }
-.bars span { position: absolute; top: 0; height: 100%; padding: 8px 0 0 4px; border-left: var(--bw) solid var(--daw-line); font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-dim); pointer-events: none; }
-/* The bars that play: lit in the ruler, with ends to drag, and faintly down the tracks. */
+.lane.ruler { min-height: 40px; position: sticky; top: 0; z-index: 5; }
+.lane.ruler .head { display: grid; grid-template-rows: 16px 1fr; align-items: center; justify-content: stretch; gap: 0; padding-top: 0; padding-bottom: 0; cursor: default; }
+.lane.ruler .head .daw-label { line-height: 1; }
+/* Two rows: the loop strip, then the bar numbers (the playhead's). */
+.timebar { position: relative; flex: none; display: grid; grid-template-rows: 16px 1fr; background: var(--daw-panel); border-bottom: var(--bw) solid var(--daw-line); }
+.loopbar { position: relative; cursor: pointer; touch-action: none; background: rgba(0, 0, 0, .18); border-bottom: var(--bw) solid var(--daw-line); }
+.bars { position: relative; cursor: pointer; touch-action: none; }
+.bars span { position: absolute; top: 0; height: 100%; padding: 4px 0 0 4px; border-left: var(--bw) solid var(--daw-line); font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-dim); pointer-events: none; }
+/* The bars that loop: lit in the loop strip, with ends to drag, and faintly down the tracks. */
 .range {
-    position: absolute; top: 3px; bottom: 3px; border-radius: 5px; pointer-events: none;
-    background: rgba(242, 163, 58, .2); box-shadow: inset 0 0 0 1px var(--daw-live);
+    position: absolute; top: 2px; bottom: 2px; border-radius: 4px; cursor: grab;
+    background: rgba(242, 163, 58, .55); box-shadow: inset 0 0 0 1px var(--daw-live);
 }
-.range.off { background: none; box-shadow: inset 0 0 0 1px rgba(127, 127, 127, .45); }
+.range:active { cursor: grabbing; }
+.range.off { background: rgba(127, 127, 127, .25); box-shadow: inset 0 0 0 1px rgba(127, 127, 127, .5); }
 .range-label {
-    position: absolute; right: 10px; bottom: 2px; white-space: nowrap;
-    font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 700; color: var(--daw-live);
+    position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
+    white-space: nowrap; pointer-events: none;
+    font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 700; color: rgba(0, 0, 0, .8);
 }
 .range.off .range-label { color: var(--text-dim); }
-.range-edge { position: absolute; top: -3px; bottom: -3px; width: 12px; cursor: ew-resize; pointer-events: auto; }
+.range-edge { position: absolute; top: -2px; bottom: -2px; width: 12px; cursor: ew-resize; }
 .range-edge.start { left: -6px; }
 .range-edge.end { right: -6px; }
-.range-edge::after { content: ""; position: absolute; left: 4px; top: 5px; bottom: 5px; width: 4px; border-radius: 2px; background: var(--daw-live); }
+.range-edge::after { content: ""; position: absolute; left: 4px; top: 3px; bottom: 3px; width: 4px; border-radius: 2px; background: var(--daw-live); }
 .range.off .range-edge::after { background: var(--text-dim); }
 .loop-shade {
     position: absolute; top: 0; bottom: 0; z-index: -1; pointer-events: none;
@@ -218,12 +227,41 @@ main.daw {
 }
 .loop-shade[hidden] { display: none; }
 .head-handle {
-    position: absolute; bottom: 0; width: 16px; height: 16px; margin-left: -8px; z-index: 2; cursor: grab;
+    position: absolute; bottom: 0; width: 16px; height: 16px; margin-left: -8px; z-index: 2; pointer-events: none;
 }
 .head-handle::before { content: ""; position: absolute; left: 2px; bottom: 0; border: 6px solid transparent; border-bottom: 10px solid var(--daw-live); border-top: 0; }
 .lane.song { min-height: 60px; }
 .lane.song .body { color: var(--daw-song); cursor: text; }
 .wave { position: absolute; left: 0; top: 0; height: 100%; color: var(--daw-song); }
+/* The picture lane: the edit in Resolve, stuck under the ruler. */
+.lane.picture { min-height: 26px; position: sticky; top: 40px; z-index: 5; }
+.lane.picture .head { flex-direction: row; align-items: center; justify-content: space-between; padding-top: 0; padding-bottom: 0; cursor: default; }
+.pic-follow {
+    padding: 1px 7px; border-radius: 5px; border: var(--bw) solid var(--daw-line); background: none;
+    color: var(--text-dim); font-size: var(--fs-xs); cursor: pointer;
+}
+.pic-follow[aria-pressed="true"] { color: var(--daw-live); border-color: var(--daw-live); }
+.lane.picture .body.pic { background: var(--daw-panel); background-image: none; border-bottom: var(--bw) solid var(--daw-line); }
+.pic .cut { position: absolute; top: 0; bottom: 0; width: 9px; margin-left: -4px; cursor: pointer; }
+.pic .cut::after { content: ""; position: absolute; left: 4px; top: 4px; bottom: 4px; width: 1px; background: var(--text-dim); }
+.pic .cut:hover::after { background: var(--text-strong); width: 2px; }
+.pic .mark, .pic-guides .guide {
+    --mark: #8D9099;              /* each marker's own colour is set on it */
+}
+.pic .mark {
+    position: absolute; top: 3px; height: 9px; border-radius: 2px 5px 5px 2px; cursor: pointer; z-index: 1;
+    background: color-mix(in srgb, var(--mark) 75%, transparent); box-shadow: inset 2px 0 0 var(--mark);
+}
+.pic .mark:hover { background: var(--mark); }
+.pic .pic-end {
+    position: absolute; top: 0; bottom: 0; right: 0; cursor: pointer;
+    border-left: 2px solid var(--text-dim);
+    background: repeating-linear-gradient(135deg, rgba(127, 127, 127, .18) 0 4px, transparent 4px 9px);
+}
+/* ...and faint lines down the tracks from each cut and marker. */
+.pic-guides { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.pic-guides .guide { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(127, 127, 127, .22); }
+.pic-guides .guide.marked { background: color-mix(in srgb, var(--mark) 70%, transparent); }
 .lane.add { min-height: 44px; border-bottom: 0; }
 .lane.add .head { flex-direction: row; align-items: center; gap: 2px; cursor: default; }
 .lane.add .head .btn { padding: 3px 6px; font-size: var(--fs-xs); }

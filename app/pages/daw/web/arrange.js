@@ -10,11 +10,17 @@
  *             double-click an empty stretch for a new clip; Delete and
  *             Ctrl+D on the selected clip. A track's menu (right-click its
  *             name): rename, duplicate, delete
- *   Ruler     drag across the bar numbers to play just those bars (they're lit
- *             down the tracks, the loop goes on, the playhead to their start);
- *             drag a lit end for more or fewer; double-click a bar for just that
- *             one; click to move the playhead, drag its handle to scrub. A clip's
- *             menu (right-click) plays its bars
+ *   Ruler     two rows. The loop strip on top: drag across it to loop just
+ *             those bars (lit down the tracks, the playhead to their start),
+ *             drag the lit bars to slide them or an end for more or fewer,
+ *             click them to turn the loop on or off, double-click a bar for
+ *             just that one. The bar numbers under it: click to move the
+ *             playhead, drag to scrub. A clip's menu (right-click) loops its bars
+ *   Picture   under the ruler, with a timeline open: the edit in Resolve - its
+ *             cuts, its markers in their colours, where the picture ends - with
+ *             faint lines down the tracks, to write music to. Click one for the
+ *             playhead there. Follow: the playhead goes where Resolve's is moved
+ *             to while the DAW is stopped
  *   Scrolling the mouse wheel scrolls the tracks up and down, or along when they
  *             all fit; Shift + scroll goes along. Alt + scroll zooms (as on
  *             Resolve's timeline; Ctrl + scroll too), or the - Fit + buttons
@@ -31,6 +37,10 @@ DawViews.arrange = (() => {
     const HEAD = 150;
     let root = null, UI = null;
     let px = 0;                        // pixels a beat; 0 until it's been fitted
+    // Where something is, in beats: it moves and stretches with --beat, so a zoom step
+    // draws nothing again (zoom()).
+    const at = beats => `calc(var(--beat) * ${+beats.toFixed(6)})`;
+    const ZOOM_SETTLE_MS = 180;        // zooming stopped this long: drawn again, crisp
     const FIT_MOST = 32 * 4;           // a first look shows 32 bars at the most - a long song scrolls
 
     function build(into) {
@@ -53,15 +63,43 @@ DawViews.arrange = (() => {
         refresh("all");
     }
 
-    function zoom(by, e = null) {
+    /* A zoom step, around the mouse (clientX) or the middle. Nothing's drawn again: --beat is
+       set and all that's placed in beats moves and stretches with it - the waveform and the
+       clips' notes too, a little soft. Once the zooming stops, they're drawn again at the new
+       size, crisp, with as many bar numbers as fit. */
+    function zoom(by, clientX = null) {
         const r = UI.lanes.getBoundingClientRect();
-        const atX = e ? Math.max(0, e.clientX - r.left - HEAD) : (UI.lanes.clientWidth - HEAD) / 2;
+        const atX = clientX !== null ? Math.max(0, clientX - r.left - HEAD) : (UI.lanes.clientWidth - HEAD) / 2;
         const beat = (UI.lanes.scrollLeft + atX) / px;
         px = Math.min(160, Math.max(2, px * by));
-        const top = UI.lanes.scrollTop;
-        drawLanes();
+        UI.grid.style.setProperty("--beat", `${px}px`);
+        UI.grid.style.setProperty("--w", `${(Daw.projectBeats() + 16) * px}px`);
+        syncRange();
+        placeHead(Daw.playing() ? Daw.position() : null);
         UI.lanes.scrollLeft = beat * px - atX;
-        UI.lanes.scrollTop = top;
+        clearTimeout(UI.settle);
+        UI.settle = setTimeout(crisp, ZOOM_SETTLE_MS);
+    }
+
+    /* Zooming settled: what's drawn at a size drawn again at the new one, in place - the
+       waveform, each clip's notes, as many bar numbers as fit. Nothing else is rebuilt. */
+    function crisp() {
+        if (!UI.grid || !UI.grid.isConnected) return;
+        barNumbers();
+        if (UI.wave) drawWave(UI.wave, (Daw.projectBeats() + 16) * px);
+        for (const [canvas, t, c] of UI.clipCanvases) drawClip(canvas, t, c);
+    }
+
+    /* The wheel's zoom steps, gathered: one a frame, however many the wheel sends. */
+    function zoomSoon(by, clientX) {
+        if (UI.zoomBy) { UI.zoomBy *= by; UI.zoomX = clientX; return; }
+        UI.zoomBy = by;
+        UI.zoomX = clientX;
+        requestAnimationFrame(() => {
+            const step = UI.zoomBy;
+            UI.zoomBy = 0;
+            zoom(step, UI.zoomX);
+        });
     }
 
     function fitAll() {
@@ -83,7 +121,7 @@ DawViews.arrange = (() => {
         const pxStep = e.deltaMode === 1 ? step * 40 : e.deltaMode === 2 ? step * 400 : step;
         if (e.altKey || e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            return zoom(Math.pow(1.0015, -pxStep), e);
+            return zoomSoon(Math.pow(1.0015, -pxStep), e.clientX);
         }
         const lanes = UI.lanes, tall = lanes.scrollHeight > lanes.clientHeight + 1;
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;        // already sideways (a trackpad): as it comes
@@ -151,21 +189,31 @@ DawViews.arrange = (() => {
         return px > 0;
     }
 
+    // The edit, from the frame (app.js) - which is still being made on the very first draw.
+    const picture = () => { try { return DawApp.picture(); } catch (err) { return null; } };
+
     function drawLanes() {
         // Hidden (no width yet): a zoom for now, fitted once it shows.
         if (!px && !fitZoom()) { px = 20; UI.unfitted = true; }
         const P = Daw.P, beats = Daw.projectBeats() + 16, width = beats * px;
+        // What's drawn at a size, kept track of to draw again in place (crisp()).
+        UI.barsEvery = 0;
+        UI.wave = null;
+        UI.clipCanvases = [];
         const rows = [ruler(width, beats)];
+        const pic = picture();
+        UI.guides = el("div.pic-guides");
+        if (pic) rows.push(pictureLane(width, pic));
         if (Daw.song) rows.push(songLane(width));
         for (const t of P.tracks) rows.push(lane(t, width));
         rows.push(el("div.lane.add", {}, [
             el("div.head", {}, [
                 el("button.btn.ghost", {type: "button", onclick: () => addTrack("inst", "pad")}, [icon("plus"), el("span", {text: "Instrument"})]),
                 el("button.btn.ghost", {type: "button", onclick: () => addTrack("drums", "tight")}, [icon("plus"), el("span", {text: "Drums"})])]),
-            el("div.body", {style: `width:${width}px`})]));
+            el("div.body", {style: "width:var(--w)"})]));
         UI.playhead = el("i.playhead");
         UI.shade = el("i.loop-shade");
-        UI.grid = el("div.lanes-grid", {style: `--w:${width}px;--beat:${px}px`}, [UI.shade, ...rows, UI.playhead]);
+        UI.grid = el("div.lanes-grid", {style: `--w:${width}px;--beat:${px}px`}, [UI.shade, UI.guides, ...rows, UI.playhead]);
         UI.lanes.replaceChildren(UI.grid);
         syncRange();
         frame(Daw.playing() ? Daw.position() : null);
@@ -187,91 +235,133 @@ DawViews.arrange = (() => {
         if (x > view.scrollLeft + view.clientWidth - ahead || x < view.scrollLeft + HEAD) view.scrollLeft = Math.max(0, x - HEAD - ahead);
     }
 
-    /* The ruler: bar numbers, and the bars that play - lit across it, and down the tracks.
-         drag across bars     plays just those: whole bars (Shift: by the beat), the loop on,
-                              the playhead to their start
-         drag a lit end       more or fewer bars
-         double-click a bar   plays just that bar
-         click                moves the playhead (and drag its handle to scrub)
+    /* The ruler, two rows - one for the bars that loop, one for the playhead, so a click
+       meant for one never does the other.
+         Loop strip (top)    drag across it: the bars to loop - whole bars (Shift: by the beat),
+                             the loop on, the playhead to their start. Drag the lit bars to slide
+                             them, an end for more or fewer; click them to turn the loop on or
+                             off; double-click a bar for just that one
+         Bar numbers         click: the playhead there; drag: scrub
+       The lit bars stay in sight with the loop off (dimmed): what L and "Place the loop" mean.
        Playing, a change of bars goes on from the first of them straight away. */
     function ruler(width, beats) {
         const P = Daw.P;
-        const bars = el("div.bars", {style: `width:${width}px`,
-            title: Buddy.t("Click to move the playhead. Drag across bars to play just those.")});
-        const every = px * 4 < 26 ? (px * 4 < 10 ? 8 : 4) : 1;
-        for (let b = 0; b * 4 < beats; b += every) bars.append(el("span", {text: String(b + 1), style: `left:${b * 4 * px}px`, translate: "no"}));
+        const strip = el("div.loopbar", {title: Buddy.t("Drag across to choose the bars that loop")});
+        const bars = el("div.bars", {title: Buddy.t("Click to move the playhead, or drag to scrub")});
+        UI.bars = bars;
+        barNumbers(beats);
         UI.rangeLabel = el("span.range-label", {translate: "no"});
-        UI.range = el("div.range", {}, [
-            el("i.range-edge.start", {title: Buddy.t("Drag to change which bars play"), dataset: {edge: "start"}}),
+        UI.range = el("div.range", {title: Buddy.t("Drag to slide the loop, click to turn it on or off")}, [
+            el("i.range-edge.start", {title: Buddy.t("Drag to change which bars loop"), dataset: {edge: "start"}}),
             UI.rangeLabel,
-            el("i.range-edge.end", {title: Buddy.t("Drag to change which bars play"), dataset: {edge: "end"}})]);
-        UI.handle = el("i.head-handle", {title: Buddy.t("Drag to move the playhead")});
-        bars.append(UI.range, UI.handle);
+            el("i.range-edge.end", {title: Buddy.t("Drag to change which bars loop"), dataset: {edge: "end"}})]);
+        UI.handle = el("i.head-handle");
+        strip.append(UI.range);
+        bars.append(UI.handle);
+        const time = el("div.timebar", {style: "width:var(--w)"}, [strip, bars]);
 
-        const beatAt = e => Math.max(0, (e.clientX - bars.getBoundingClientRect().left) / px);
+        const beatAt = e => Math.max(0, (e.clientX - time.getBoundingClientRect().left) / px);
         const snapped = b => { const g = P.snap ? 1 / P.snap : 0.25; return Math.round(b / g) * g; };
         const step = e => (e.shiftKey ? 1 : 4);
+        // Dragged to an edge: the tracks scroll along.
+        const follow = e => {
+            const r = UI.lanes.getBoundingClientRect();
+            if (e.clientX > r.right - 30) UI.lanes.scrollLeft += 12;
+            if (e.clientX < r.left + HEAD + 20) UI.lanes.scrollLeft -= 12;
+        };
         let drag = null;
 
+        // The loop strip.
+        strip.addEventListener("pointerdown", e => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            Ctl.capture(strip, e);
+            const edge = e.target.dataset && e.target.dataset.edge;
+            const on = !edge && e.target.closest(".range");
+            drag = edge ? {kind: "edge", edge}
+                : on ? {kind: "slide", from: beatAt(e), start: P.loop.start, end: P.loop.end}
+                    : {kind: "new", from: beatAt(e)};
+            drag.x = e.clientX;
+            drag.moved = false;
+        });
+        strip.addEventListener("pointermove", e => {
+            if (!drag || drag.kind === "scrub") return;
+            if (!drag.moved) {
+                if (Math.abs(e.clientX - drag.x) <= 4) return;
+                drag.moved = true;
+                Daw.checkpoint(drag.kind === "new" ? "Choose the bars to loop" : drag.kind === "slide" ? "Slide the loop" : "Change which bars loop");
+            }
+            const b = beatAt(e), g = step(e);
+            if (drag.kind === "new") {
+                // From the bar it began in to the bar it's in now, whichever way it went.
+                const a = Math.floor(Math.min(drag.from, b) / g) * g;
+                setRange(a, Math.max(a + g, Math.ceil(Math.max(drag.from, b) / g) * g));
+            }
+            if (drag.kind === "slide") {
+                const by = Math.max(-drag.start, Math.round((b - drag.from) / g) * g);
+                setRange(drag.start + by, drag.end + by);
+            }
+            if (drag.kind === "edge") {
+                const at = Math.round(b / g) * g;
+                if (drag.edge === "start") setRange(Math.max(0, Math.min(at, P.loop.end - g)), P.loop.end);
+                else setRange(P.loop.start, Math.max(at, P.loop.start + g));
+            }
+            follow(e);
+        });
+        strip.addEventListener("pointerup", () => {
+            const was = drag;
+            drag = null;
+            if (!was) return;
+            if (was.moved) return chosen();
+            // A click on the lit bars: the loop on or off.
+            if (was.kind === "slide") {
+                P.loop.on = !P.loop.on;
+                syncRange();
+                Daw.changed("loop");
+                DawApp.syncBar();
+            }
+        });
+        strip.addEventListener("pointercancel", () => { drag = null; });
+        strip.addEventListener("dblclick", e => {
+            if (e.target.closest(".range")) return;
+            const a = Math.floor(beatAt(e) / 4) * 4;
+            Daw.checkpoint("Choose the bars to loop");
+            setRange(a, a + 4);
+            chosen();
+        });
+
+        // The bar numbers: the playhead.
         bars.addEventListener("pointerdown", e => {
             if (e.button !== 0) return;
             e.preventDefault();
             Ctl.capture(bars, e);
-            if (e.target === UI.handle) {
-                drag = {kind: "scrub"};
-                DawApp.scrub.start();
-                return;
-            }
-            const edge = e.target.dataset && e.target.dataset.edge;
-            drag = edge ? {kind: "edge", edge, moved: false} : {kind: "press", from: beatAt(e), x: e.clientX};
+            drag = {kind: "scrub"};
+            DawApp.scrub.start();
+            DawApp.scrub.to(snapped(beatAt(e)));
         });
         bars.addEventListener("pointermove", e => {
-            if (!drag) return;
-            const b = beatAt(e);
-            if (drag.kind === "scrub") DawApp.scrub.to(snapped(b));
-            if (drag.kind === "press" && Math.abs(e.clientX - drag.x) > 4) {
-                drag = {kind: "choose", from: drag.from};
-                Daw.checkpoint("Choose the bars to play");
-            }
-            if (drag.kind === "choose") {
-                // From the bar it began in to the bar it's in now, whichever way it went.
-                const g = step(e);
-                const a = Math.floor(Math.min(drag.from, b) / g) * g;
-                const z = Math.max(a + g, Math.ceil(Math.max(drag.from, b) / g) * g);
-                setRange(a, z);
-            }
-            if (drag.kind === "edge") {
-                if (!drag.moved) { drag.moved = true; Daw.checkpoint("Change which bars play"); }
-                const g = step(e), at = Math.round(b / g) * g;
-                if (drag.edge === "start") setRange(Math.max(0, Math.min(at, P.loop.end - g)), P.loop.end);
-                else setRange(P.loop.start, Math.max(at, P.loop.start + g));
-            }
-            if (drag.kind !== "press") {
-                // Dragged to an edge: the tracks scroll along.
-                const r = UI.lanes.getBoundingClientRect();
-                if (e.clientX > r.right - 30) UI.lanes.scrollLeft += 12;
-                if (e.clientX < r.left + HEAD + 20) UI.lanes.scrollLeft -= 12;
-            }
+            if (!drag || drag.kind !== "scrub") return;
+            DawApp.scrub.to(snapped(beatAt(e)));
+            follow(e);
         });
-        const up = e => {
-            const was = drag;
-            drag = null;
-            if (!was) return;
-            if (was.kind === "scrub") return DawApp.scrub.end();
-            if (was.kind === "press") return DawApp.moveCursor(snapped(beatAt(e)));
-            if (was.kind === "choose" || (was.kind === "edge" && was.moved)) chosen();
-        };
-        bars.addEventListener("pointerup", up);
-        bars.addEventListener("pointercancel", () => { if (drag && drag.kind === "scrub") DawApp.scrub.end(); drag = null; });
-        bars.addEventListener("dblclick", e => {
-            if (e.target !== bars && e.target.parentNode !== bars) return;
-            const a = Math.floor(beatAt(e) / 4) * 4;
-            Daw.checkpoint("Choose the bars to play");
-            setRange(a, a + 4);
-            chosen();
-        });
+        const scrubbed = () => { if (drag && drag.kind === "scrub") { drag = null; DawApp.scrub.end(); } };
+        bars.addEventListener("pointerup", scrubbed);
+        bars.addEventListener("pointercancel", scrubbed);
+
         syncRange();
-        return el("div.lane.ruler", {}, [el("div.head", {}, [el("span.daw-label", {text: "Bars"})]), bars]);
+        return el("div.lane.ruler", {}, [el("div.head", {}, [el("span.daw-label", {text: "Loop"}), el("span.daw-label", {text: "Bars"})]), time]);
+    }
+
+    /* The bar numbers: every bar, or every 4th or 8th when they'd crowd. */
+    function barNumbers(beats = Daw.projectBeats() + 16) {
+        const every = px * 4 < 26 ? (px * 4 < 10 ? 8 : 4) : 1;
+        if (!UI.bars || UI.barsEvery === every && UI.barsBeats === beats) return;
+        UI.barsEvery = every;
+        UI.barsBeats = beats;
+        for (const n of UI.bars.querySelectorAll("span")) n.remove();
+        const numbers = [];
+        for (let b = 0; b * 4 < beats; b += every) numbers.push(el("span", {text: String(b + 1), style: `left:${at(b * 4)}`, translate: "no"}));
+        UI.bars.prepend(...numbers);
     }
 
     /* The bars that play, while they're being chosen: lit, and the loop on. */
@@ -312,17 +402,59 @@ DawViews.arrange = (() => {
         }
     }
 
+    /* The picture lane: the edit in Resolve, to score to - each cut a tick, each marker a
+       flag in its colour (as long as the marker is), and where the picture ends; faint
+       lines down the tracks from each. Click one for the playhead there. Follow: the
+       playhead goes where Resolve's is moved to while the DAW is stopped. */
+    function pictureLane(width, pic) {
+        const P = Daw.P, most = width / px;
+        const body = el("div.body.pic", {style: "width:var(--w)"});
+        const guides = [];
+        const tc = frame => DawApp.timecode(frame);
+        const inView = beat => beat >= 0 && beat <= most;
+        for (const c of pic.cuts) {
+            if (!inView(c.beat)) continue;
+            body.append(el("i.cut", {style: `left:${at(c.beat)}`, title: `${Buddy.t("Cut in the edit")} · ${tc(c.frame)}`,
+                translate: "no", dataset: {beat: String(c.beat)}}));
+            guides.push(el("i.guide", {style: `left:calc(${HEAD}px + ${at(c.beat)})`}));
+        }
+        for (const m of pic.markers) {
+            if (!inView(m.beat)) continue;
+            const node = el("i.mark", {style: `left:${at(m.beat)};width:max(9px, ${at(m.end - m.beat)});--mark:${m.color}`,
+                title: `${m.name || Buddy.t("Marker")} · ${tc(m.frame)}`, translate: "no", dataset: {beat: String(m.beat)}});
+            body.append(node);
+            guides.push(el("i.guide.marked", {style: `left:calc(${HEAD}px + ${at(m.beat)});--mark:${m.color}`}));
+        }
+        if (pic.end !== null && pic.end < most) {
+            body.append(el("i.pic-end", {style: `left:${at(Math.max(0, pic.end))}`, title: Buddy.t("The picture ends here"),
+                dataset: {beat: String(Math.max(0, pic.end))}}));
+        }
+        UI.guides.replaceChildren(...guides);
+        body.addEventListener("pointerdown", e => {
+            const at = e.target.dataset && e.target.dataset.beat;
+            if (e.button !== 0 || at === undefined) return;
+            e.preventDefault();
+            DawApp.moveCursor(Math.max(0, Number(at)));
+        });
+        const follow = el("button.pic-follow", {type: "button", text: "Follow", "aria-pressed": String(!!P.follow_resolve),
+            title: "Move the playhead with Resolve's while the DAW is stopped",
+            onclick: () => { P.follow_resolve = !P.follow_resolve; Daw.changed("picture"); }});
+        const head = el("div.head", {}, [el("span.daw-label", {text: "Picture"}), follow]);
+        return el("div.lane.picture", {}, [head, body]);
+    }
+
     function songLane(width) {
         const S = Daw.song, P = Daw.P;
         const canvas = el("canvas.wave");
-        const body = el("div.body", {style: `width:${width}px`}, [canvas]);
+        UI.wave = canvas;
+        const body = el("div.body", {style: "width:var(--w)"}, [canvas]);
         body.addEventListener("pointerdown", e => {
             if (e.button === 0) DawApp.moveCursor(Math.max(0, Math.round((e.clientX - body.getBoundingClientRect().left) / px)));
         });
         requestAnimationFrame(() => drawWave(canvas, width));
         const head = el("div.head", {}, [
             el("div.tn", {}, [el("i", {style: "background:var(--daw-song)"}), el("span", {text: S.name, translate: "no", title: S.name})]),
-            el("div.sub", {translate: "no", text: `${S.key ? S.key.name : Buddy.t("No key heard")} · ${S.bpm ? `${Math.round(S.bpm)} BPM` : Buddy.t("No steady beat")}`}),
+            el("div.sub", {translate: "no", text: `${S.key ? S.key.name : Buddy.t("No key heard")} · ${Daw.songBpm() ? `${Math.round(Daw.songBpm())} BPM` : Buddy.t("No steady beat")}`}),
             el("div.ms", {translate: "no"}, [el("button.ms-m", {type: "button", text: "M", title: "Mute the song", "aria-pressed": String(!!P.song_mute),
                 onclick: () => Daw.edit("Mute the song", () => { P.song_mute = !P.song_mute; }, "mixer")})])]);
         return el("div.lane.song", {}, [head, body]);
@@ -333,7 +465,7 @@ DawViews.arrange = (() => {
         if (!S || !S.wave || !canvas.isConnected) return;
         const h = canvas.parentNode.clientHeight || 60, dpr = window.devicePixelRatio || 1;
         const w = Math.min(width, 16000);
-        canvas.style.width = `${w}px`;
+        canvas.style.width = at(w / px);
         canvas.width = Math.round(w * dpr);
         canvas.height = Math.round(h * dpr);
         const g = canvas.getContext("2d");
@@ -365,7 +497,7 @@ DawViews.arrange = (() => {
                     onclick: () => Daw.edit(t.mute ? "Unmute" : "Mute", () => { t.mute = !t.mute; }, "mixer")}),
                 el("button.ms-s", {type: "button", text: "S", title: "Solo", "aria-pressed": String(!!t.solo),
                     onclick: () => Daw.edit(t.solo ? "Unsolo" : "Solo", () => { t.solo = !t.solo; }, "mixer")})])]);
-        const body = el("div.body", {style: `width:${width}px`});
+        const body = el("div.body", {style: "width:var(--w)"});
         for (const c of t.clips) body.append(clipNode(t, c));
         body.addEventListener("pointerdown", e => {
             if (e.button !== 0 || e.target !== body) return;
@@ -374,10 +506,10 @@ DawViews.arrange = (() => {
         });
         body.addEventListener("dblclick", e => {
             if (e.target !== body) return;
-            const at = Math.floor((e.clientX - body.getBoundingClientRect().left) / px / 4) * 4;
-            if (t.clips.some(c => at < c.start + c.len && at + 4 > c.start)) return;
+            const bar = Math.floor((e.clientX - body.getBoundingClientRect().left) / px / 4) * 4;
+            if (t.clips.some(c => bar < c.start + c.len && bar + 4 > c.start)) return;
             Daw.edit("Add a clip", () => {
-                const c = {id: Daw.uid(), name: t.kind === "drums" ? "Beat" : "Clip", start: at, len: 4, notes: []};
+                const c = {id: Daw.uid(), name: t.kind === "drums" ? "Beat" : "Clip", start: bar, len: 4, notes: []};
                 t.clips.push(c);
                 t.clips.sort((a, b) => a.start - b.start);
                 P.sel.track = t.id;
@@ -445,10 +577,11 @@ DawViews.arrange = (() => {
     function clipNode(t, c) {
         const P = Daw.P, sel = P.sel.clip === c.id;
         const canvas = el("canvas");
+        UI.clipCanvases.push([canvas, t, c]);
         const node = el(`div.clip${sel ? ".sel" : ""}`, {dataset: {clip: c.id}, title: Buddy.t("Double-click to edit its notes")}, [
             el("span.ct", {text: c.name, translate: "no"}), canvas, el("i.grip")]);
-        node.style.left = `${c.start * px}px`;
-        node.style.width = `${Math.max(6, c.len * px - 1)}px`;
+        node.style.left = at(c.start);
+        node.style.width = `max(6px, calc(${at(c.len)} - 1px))`;
         requestAnimationFrame(() => drawClip(canvas, t, c));
         let drag = null;
         node.addEventListener("pointerdown", e => {
@@ -476,11 +609,11 @@ DawViews.arrange = (() => {
             const db = Math.round((e.clientX - drag.x) / px / step) * step;
             if (drag.edge) {
                 c.len = Math.max(step, drag.len + db);
-                node.style.width = `${Math.max(6, c.len * px - 1)}px`;
+                node.style.width = `max(6px, calc(${at(c.len)} - 1px))`;
                 return;
             }
             c.start = Math.max(0, drag.start + db);
-            node.style.left = `${c.start * px}px`;
+            node.style.left = at(c.start);
             // Onto another lane of the same kind.
             const hit = document.elementFromPoint(e.clientX, e.clientY);
             const laneNode = hit && hit.closest && hit.closest(".lane[data-track]");
@@ -508,8 +641,8 @@ DawViews.arrange = (() => {
             e.stopPropagation();
             Daw.select(t.id, c.id);
             Buddy.menu({x: e.clientX, y: e.clientY, items: [
-                {label: "Play these bars", onClick: () => {
-                    Daw.checkpoint("Choose the bars to play");
+                {label: "Loop these bars", onClick: () => {
+                    Daw.checkpoint("Choose the bars to loop");
                     setRange(c.start, c.start + c.len);
                     chosen();
                 }},
@@ -596,7 +729,7 @@ DawViews.arrange = (() => {
             }
             return;
         }
-        if (what === "notes" || what === "clips" || what === "loop") {
+        if (what === "notes" || what === "clips" || what === "loop" || what === "picture") {
             const left = UI.lanes.scrollLeft, top = UI.lanes.scrollTop;
             drawLanes();
             UI.lanes.scrollLeft = left;

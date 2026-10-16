@@ -1860,36 +1860,6 @@
   "العربية": "المقطوعة كاملة في العرض",
   "Tiếng Việt": "Xem toàn bộ bản nhạc"
  },
- "Click to move the playhead. Drag across bars to play just those.": {
-  "日本語": "クリックで再生ヘッドを移動。小節をドラッグすると、その小節だけを再生します。",
-  "Español": "Haz clic para mover el cabezal. Arrastra sobre los compases para reproducir solo esos.",
-  "Deutsch": "Klicken, um den Abspielkopf zu bewegen. Über Takte ziehen, um nur diese zu spielen.",
-  "Français": "Cliquez pour déplacer la tête de lecture. Faites glisser sur des mesures pour ne jouer que celles-ci.",
-  "한국어": "클릭하면 재생 헤드가 이동합니다. 마디를 드래그하면 그 마디만 재생합니다.",
-  "中文": "单击移动播放头。在小节上拖动可只播放这些小节。",
-  "العربية": "انقر لتحريك رأس التشغيل. اسحب عبر المازورات لتشغيلها وحدها.",
-  "Tiếng Việt": "Bấm để di chuyển đầu phát. Kéo qua các ô nhịp để chỉ phát những ô đó."
- },
- "Drag to change which bars play": {
-  "日本語": "ドラッグして再生する小節を変更",
-  "Español": "Arrastra para cambiar qué compases suenan",
-  "Deutsch": "Ziehen, um zu ändern, welche Takte spielen",
-  "Français": "Faites glisser pour changer les mesures jouées",
-  "한국어": "드래그해 재생할 마디 변경",
-  "中文": "拖动以更改播放哪些小节",
-  "العربية": "اسحب لتغيير المازورات التي تُشغَّل",
-  "Tiếng Việt": "Kéo để đổi các ô nhịp được phát"
- },
- "Drag to move the playhead": {
-  "日本語": "ドラッグして再生ヘッドを移動",
-  "Español": "Arrastra para mover el cabezal",
-  "Deutsch": "Ziehen, um den Abspielkopf zu bewegen",
-  "Français": "Faites glisser pour déplacer la tête de lecture",
-  "한국어": "드래그해 재생 헤드 이동",
-  "中文": "拖动以移动播放头",
-  "العربية": "اسحب لتحريك رأس التشغيل",
-  "Tiếng Việt": "Kéo để di chuyển đầu phát"
- },
  "Duplicate the clip": {
   "日本語": "クリップを複製",
   "Español": "Duplicar el clip",
@@ -1909,36 +1879,6 @@
   "中文": "删除片段",
   "العربية": "حذف المقطع",
   "Tiếng Việt": "Xóa clip"
- },
- "Choose the bars to play": {
-  "日本語": "再生する小節を選択",
-  "Español": "Elegir los compases que suenan",
-  "Deutsch": "Takte zum Abspielen wählen",
-  "Français": "Choisir les mesures à jouer",
-  "한국어": "재생할 마디 선택",
-  "中文": "选择要播放的小节",
-  "العربية": "اختيار المازورات للتشغيل",
-  "Tiếng Việt": "Chọn các ô nhịp để phát"
- },
- "Change which bars play": {
-  "日本語": "再生する小節を変更",
-  "Español": "Cambiar qué compases suenan",
-  "Deutsch": "Ändern, welche Takte spielen",
-  "Français": "Changer les mesures jouées",
-  "한국어": "재생할 마디 변경",
-  "中文": "更改播放哪些小节",
-  "العربية": "تغيير المازورات التي تُشغَّل",
-  "Tiếng Việt": "Đổi các ô nhịp được phát"
- },
- "Play the chosen bars over and over (L) – choose them by dragging across the bar numbers in Arrange": {
-  "日本語": "選んだ小節を繰り返し再生（L）– Arrange で小節番号をドラッグして選びます",
-  "Español": "Reproduce los compases elegidos una y otra vez (L) – elígelos arrastrando sobre los números de compás en Arrange",
-  "Deutsch": "Die gewählten Takte immer wieder spielen (L) – wählen Sie sie, indem Sie in Arrange über die Taktnummern ziehen",
-  "Français": "Jouer les mesures choisies en boucle (L) – choisissez-les en faisant glisser sur les numéros de mesure dans Arrange",
-  "한국어": "선택한 마디를 반복 재생(L) – Arrange에서 마디 번호를 드래그해 선택합니다",
-  "中文": "反复播放所选小节（L）– 在 Arrange 中拖过小节编号来选择",
-  "العربية": "تشغيل المازورات المختارة مرارًا (L) – اخترها بالسحب عبر أرقام المازورات في Arrange",
-  "Tiếng Việt": "Phát lặp lại các ô nhịp đã chọn (L) – chọn bằng cách kéo qua số ô nhịp trong Arrange"
  },
  "1st inversion": {
   "日本語": "第1転回形",
@@ -2649,5 +2589,165 @@
   "中文": "开放排列",
   "العربية": "توزيع متباعد",
   "Tiếng Việt": "Thế bấm rộng"
+ },
+ "Click to move the playhead, or drag to scrub": {
+  "日本語": "クリックで再生ヘッドを移動、ドラッグでスクラブ",
+  "Español": "Haz clic para mover el cabezal o arrastra para recorrer",
+  "Deutsch": "Klicken, um den Abspielkopf zu bewegen, oder ziehen zum Scrubben",
+  "Français": "Cliquez pour déplacer la tête de lecture, ou faites glisser pour parcourir",
+  "한국어": "클릭하면 재생 헤드가 이동하고, 드래그하면 스크럽합니다",
+  "中文": "单击移动播放头，拖动可擦洗",
+  "العربية": "انقر لتحريك رأس التشغيل، أو اسحب للتمرير",
+  "Tiếng Việt": "Bấm để di chuyển đầu phát, hoặc kéo để tua"
+ },
+ "Drag across to choose the bars that loop": {
+  "日本語": "ドラッグしてループする小節を選択",
+  "Español": "Arrastra para elegir los compases que se repiten",
+  "Deutsch": "Darüber ziehen, um die Takte für die Schleife zu wählen",
+  "Français": "Faites glisser pour choisir les mesures en boucle",
+  "한국어": "드래그해 반복할 마디 선택",
+  "中文": "拖过以选择要循环的小节",
+  "العربية": "اسحب عبرها لاختيار المازورات التي تتكرر",
+  "Tiếng Việt": "Kéo qua để chọn các ô nhịp lặp lại"
+ },
+ "Drag to change which bars loop": {
+  "日本語": "ドラッグしてループする小節を変更",
+  "Español": "Arrastra para cambiar qué compases se repiten",
+  "Deutsch": "Ziehen, um zu ändern, welche Takte in der Schleife sind",
+  "Français": "Faites glisser pour changer les mesures en boucle",
+  "한국어": "드래그해 반복할 마디 변경",
+  "中文": "拖动以更改循环哪些小节",
+  "العربية": "اسحب لتغيير المازورات التي تتكرر",
+  "Tiếng Việt": "Kéo để đổi các ô nhịp lặp lại"
+ },
+ "Drag to slide the loop, click to turn it on or off": {
+  "日本語": "ドラッグでループを移動、クリックでオン／オフ",
+  "Español": "Arrastra para desplazar el bucle; haz clic para activarlo o desactivarlo",
+  "Deutsch": "Ziehen, um die Schleife zu verschieben, klicken, um sie ein- oder auszuschalten",
+  "Français": "Faites glisser pour déplacer la boucle, cliquez pour l’activer ou la désactiver",
+  "한국어": "드래그하면 루프가 이동하고, 클릭하면 켜고 끕니다",
+  "中文": "拖动以移动循环，单击以开启或关闭",
+  "العربية": "اسحب لتحريك الحلقة، وانقر لتشغيلها أو إيقافها",
+  "Tiếng Việt": "Kéo để dời vòng lặp, bấm để bật hoặc tắt"
+ },
+ "Choose the bars to loop": {
+  "日本語": "ループする小節を選択",
+  "Español": "Elegir los compases que se repiten",
+  "Deutsch": "Takte für die Schleife wählen",
+  "Français": "Choisir les mesures en boucle",
+  "한국어": "반복할 마디 선택",
+  "中文": "选择要循环的小节",
+  "العربية": "اختيار المازورات التي تتكرر",
+  "Tiếng Việt": "Chọn các ô nhịp lặp lại"
+ },
+ "Slide the loop": {
+  "日本語": "ループを移動",
+  "Español": "Desplazar el bucle",
+  "Deutsch": "Schleife verschieben",
+  "Français": "Déplacer la boucle",
+  "한국어": "루프 이동",
+  "中文": "移动循环",
+  "العربية": "تحريك الحلقة",
+  "Tiếng Việt": "Dời vòng lặp"
+ },
+ "Change which bars loop": {
+  "日本語": "ループする小節を変更",
+  "Español": "Cambiar qué compases se repiten",
+  "Deutsch": "Ändern, welche Takte in der Schleife sind",
+  "Français": "Changer les mesures en boucle",
+  "한국어": "반복할 마디 변경",
+  "中文": "更改循环哪些小节",
+  "العربية": "تغيير المازورات التي تتكرر",
+  "Tiếng Việt": "Đổi các ô nhịp lặp lại"
+ },
+ "Play the chosen bars over and over (L) – choose them by dragging along the loop strip above the bar numbers in Arrange": {
+  "日本語": "選んだ小節を繰り返し再生（L）– Arrange で小節番号の上のループ帯をドラッグして選びます",
+  "Español": "Reproduce los compases elegidos una y otra vez (L) – elígelos arrastrando por la franja de bucle sobre los números de compás en Arrange",
+  "Deutsch": "Die gewählten Takte immer wieder spielen (L) – wählen Sie sie, indem Sie in Arrange über den Schleifenstreifen über den Taktnummern ziehen",
+  "Français": "Jouer les mesures choisies en boucle (L) – choisissez-les en faisant glisser sur la bande de boucle au-dessus des numéros de mesure dans Arrange",
+  "한국어": "선택한 마디를 반복 재생(L) – Arrange에서 마디 번호 위의 루프 띠를 드래그해 선택합니다",
+  "中文": "反复播放所选小节（L）– 在 Arrange 中沿小节编号上方的循环条拖动来选择",
+  "العربية": "تشغيل المازورات المختارة مرارًا (L) – اخترها بالسحب على شريط الحلقة فوق أرقام المازورات في Arrange",
+  "Tiếng Việt": "Phát lặp lại các ô nhịp đã chọn (L) – chọn bằng cách kéo dọc dải vòng lặp phía trên số ô nhịp trong Arrange"
+ },
+ "Loop these bars": {
+  "日本語": "この小節をループ",
+  "Español": "Repetir estos compases",
+  "Deutsch": "Diese Takte in Schleife spielen",
+  "Français": "Boucler ces mesures",
+  "한국어": "이 마디 반복",
+  "中文": "循环这些小节",
+  "العربية": "تكرار هذه المازورات",
+  "Tiếng Việt": "Lặp các ô nhịp này"
+ },
+ "Buddy couldn't hear a steady beat in the song, so this is the project's own tempo – click to set it": {
+  "日本語": "Buddy は曲に一定のビートを聞き取れなかったため、これはプロジェクト自体のテンポです – クリックして設定",
+  "Español": "Buddy no oyó un pulso constante en la canción, así que este es el tempo propio del proyecto – haz clic para ajustarlo",
+  "Deutsch": "Buddy konnte im Song keinen gleichmäßigen Beat hören, daher ist dies das eigene Tempo des Projekts – zum Einstellen klicken",
+  "Français": "Buddy n’a pas entendu de pulsation régulière dans le morceau : c’est donc le tempo propre au projet – cliquez pour le régler",
+  "한국어": "Buddy가 곡에서 일정한 비트를 듣지 못해 프로젝트 자체 템포를 쓰고 있습니다 – 클릭해 설정",
+  "中文": "Buddy 没有在歌曲中听出稳定的节拍，所以这是项目自己的速度 – 单击以设置",
+  "العربية": "لم يسمع Buddy إيقاعًا ثابتًا في الأغنية، لذا هذا هو إيقاع المشروع نفسه – انقر لضبطه",
+  "Tiếng Việt": "Buddy không nghe được nhịp đều trong bài hát, nên đây là nhịp độ riêng của dự án – bấm để đặt"
+ },
+ "Lined up with the picture": {
+  "日本語": "映像に合わせて配置",
+  "Español": "Alineado con la imagen",
+  "Deutsch": "Am Bild ausgerichtet",
+  "Français": "Aligné sur l’image",
+  "한국어": "영상에 맞춰 배치",
+  "中文": "与画面对齐",
+  "العربية": "محاذاة مع الصورة",
+  "Tiếng Việt": "Căn theo hình"
+ },
+ "Marker": {
+  "日本語": "マーカー",
+  "Español": "Marcador",
+  "Deutsch": "Marker",
+  "Français": "Marqueur",
+  "한국어": "마커",
+  "中文": "标记",
+  "العربية": "علامة",
+  "Tiếng Việt": "Điểm đánh dấu"
+ },
+ "Cut in the edit": {
+  "日本語": "編集のカット点",
+  "Español": "Corte del montaje",
+  "Deutsch": "Schnitt im Bild",
+  "Français": "Coupe du montage",
+  "한국어": "편집 컷 지점",
+  "中文": "剪辑切点",
+  "العربية": "قطع في المونتاج",
+  "Tiếng Việt": "Điểm cắt trong bản dựng"
+ },
+ "Follow": {
+  "日本語": "追従",
+  "Español": "Seguir",
+  "Deutsch": "Folgen",
+  "Français": "Suivre",
+  "한국어": "따라가기",
+  "中文": "跟随",
+  "العربية": "متابعة",
+  "Tiếng Việt": "Theo dõi"
+ },
+ "Move the playhead with Resolve's while the DAW is stopped": {
+  "日本語": "DAW の停止中は、Resolve の再生ヘッドに合わせて再生ヘッドを動かします",
+  "Español": "Mueve el cabezal con el de Resolve mientras el DAW está detenido",
+  "Deutsch": "Den Abspielkopf mit dem von Resolve bewegen, während die DAW angehalten ist",
+  "Français": "Déplacer la tête de lecture avec celle de Resolve quand la DAW est à l’arrêt",
+  "한국어": "DAW가 멈춰 있을 때 Resolve의 재생 헤드를 따라 재생 헤드를 이동합니다",
+  "中文": "DAW 停止时，播放头随 Resolve 的播放头移动",
+  "العربية": "تحريك رأس التشغيل مع رأس Resolve أثناء توقف DAW",
+  "Tiếng Việt": "Di chuyển đầu phát theo đầu phát của Resolve khi DAW đang dừng"
+ },
+ "The picture ends here": {
+  "日本語": "映像はここで終わります",
+  "Español": "Aquí termina la imagen",
+  "Deutsch": "Hier endet das Bild",
+  "Français": "L’image se termine ici",
+  "한국어": "영상이 여기서 끝납니다",
+  "中文": "画面在此结束",
+  "العربية": "تنتهي الصورة هنا",
+  "Tiếng Việt": "Hình kết thúc tại đây"
  }
 }
