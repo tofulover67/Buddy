@@ -287,16 +287,28 @@ const Ctl = (() => {
     // ------------------------------------------------------------ roll --
 
     /* spec: {track(), clip(), onEdit(label, fn), onPreview(midi), position() (the playhead, in
-       beats), seek: {start(), to(beat), end()}} - a canvas piano roll for the clip, rows of the
-       scale shaded. */
+       beats), seek: {start(), to(beat), end()}, room(clip) (beats from its start the roll shows:
+       past its end - the loop's bars - shaded, and a note written there grows the clip)} - a
+       canvas piano roll for the clip, rows of the scale shaded. Alt + scroll or - Fit + zoom;
+       the wheel goes along when the rows all fit (Shift: always). */
     function roll(spec) {
         const keysCol = el("canvas.roll-keys");
         const grid = el("canvas.roll-grid", {tabindex: "0", "aria-label": "Piano roll"});
         const vel = el("canvas.roll-vel", {"aria-label": "Velocity"});
         const ruler = el("canvas.roll-ruler", {title: Buddy.t("Click or drag to move the playhead")});
         const scroller = el("div.roll-scroll", {}, [grid]);
+        const zoomBy = by => {
+            const atX = scroller.clientWidth / 2, beat = (scroller.scrollLeft + atX) / pxPerBeat;
+            pxPerBeat = Math.min(400, Math.max(least(), pxPerBeat * by));
+            draw();
+            scroller.scrollLeft = beat * pxPerBeat - atX;
+        };
+        const zoomBar = el("div.zoom.roll-zoom", {}, [
+            el("button.btn.ghost.icon", {type: "button", title: "Zoom out (Alt + scroll)", onclick: () => zoomBy(1 / 1.4)}, [Buddy.icon("minus")]),
+            el("button.btn.ghost", {type: "button", text: "Fit", title: "The whole clip in view", onclick: () => { fit(); draw(); scroller.scrollLeft = 0; }}),
+            el("button.btn.ghost.icon", {type: "button", title: "Zoom in (Alt + scroll)", onclick: () => zoomBy(1.4)}, [Buddy.icon("plus")])]);
         const node = el("div.roll", {}, [el("div.roll-corner"), ruler, keysCol, scroller,
-            el("div.roll-vel-label", {text: "Velocity"}), vel]);
+            el("div.roll-vel-label", {text: "Velocity"}), vel, zoomBar]);
         const ROW = 14;
         let lo = 36, hi = 96;              // the rows shown
         let selected = new Set();          // indexes into the clip's notes
@@ -304,6 +316,16 @@ const Ctl = (() => {
         let pxPerBeat = 80;
 
         const clip = () => spec.clip();
+        /* Beats from the clip's start the roll reaches: its length, or more (spec.room). */
+        const span = (c = clip()) => (c ? Math.max(c.len, spec.room ? spec.room(c) : c.len) : 16);
+        const least = () => Math.max(8, (scroller.clientWidth - 2) / Math.max(4, span()));
+        /* A note past the clip's end (in its room): the clip grows to the bar it ends in. */
+        function grow(c) {
+            const end = Math.max(0, ...c.notes.map(n => n[1] + n[2]));
+            if (end > c.len + 1e-6) c.len = Math.min(span(c), Math.ceil(end / 4 - 1e-6) * 4);
+            for (const n of c.notes) n[2] = +Math.min(n[2], c.len - n[1]).toFixed(4);
+            c.notes = c.notes.filter(n => n[1] < c.len && n[2] > 0);
+        }
         const isDrums = () => { const t = spec.track(); return t && t.kind === "drums"; };
         function rows() {
             if (isDrums()) return Drums.ROWS.map(r => r.m).slice().reverse();
@@ -318,7 +340,7 @@ const Ctl = (() => {
         function fit() {
             const c = clip();
             const w = scroller.clientWidth || 600;
-            pxPerBeat = c ? Math.max(24, (w - 2) / Math.max(4, c.len)) : 80;
+            pxPerBeat = c ? Math.max(24, (w - 2) / Math.max(4, span(c))) : 80;
             if (!isDrums() && c && c.notes.length) {
                 const ms = c.notes.map(n => n[0]);
                 const mid = Math.round((Math.min(...ms) + Math.max(...ms)) / 2);
@@ -348,7 +370,7 @@ const Ctl = (() => {
 
         function layout() {
             const c = clip(), R = rows();
-            const w = Math.max(scroller.clientWidth - 2, (c ? c.len : 16) * pxPerBeat);
+            const w = Math.max(scroller.clientWidth - 2, span(c) * pxPerBeat);
             const rowH = isDrums() ? Math.max(ROW, Math.floor((scroller.clientHeight - 2) / R.length)) : ROW;
             const h = Math.max(scroller.clientHeight - 2, R.length * rowH);
             return {c, R, w, h, rowH, y: m => R.indexOf(m) * rowH, x: b => b * pxPerBeat};
@@ -369,7 +391,12 @@ const Ctl = (() => {
                 }
                 if (m % 12 === 0) { g.fillStyle = line; g.fillRect(0, (i + 1) * rowH - 1, w, 1); }
             });
-            const len = c ? c.len : 16, gstep = snap() || 0.25;
+            const len = span(c), gstep = snap() || 0.25;
+            // Past the clip's end: shaded - write there and the clip grows.
+            if (c && len > c.len) {
+                g.fillStyle = "rgba(0,0,0,.22)";
+                g.fillRect(L.x(c.len), 0, w - L.x(c.len), h);
+            }
             for (let b = 0; b <= len + 1e-6; b += gstep) {
                 const bar = Math.abs(b / 4 - Math.round(b / 4)) < 1e-6, beat = Math.abs(b - Math.round(b)) < 1e-6;
                 g.fillStyle = line;
@@ -390,7 +417,8 @@ const Ctl = (() => {
                     g.fillRect(x + nw - 2, y + 4, 2, Math.max(2, rowH - 8));
                 });
             }
-            if (pos !== null && c && pos >= c.start && pos < c.start + c.len) {
+            if (c && len > c.len) { g.fillStyle = live; g.globalAlpha = 0.6; g.fillRect(Math.round(L.x(c.len)) - 1, 0, 2, h); g.globalAlpha = 1; }
+            if (pos !== null && c && pos >= c.start && pos < c.start + len) {
                 g.fillStyle = live;
                 g.fillRect(Math.round(L.x(pos - c.start)), 0, 2, h);
             }
@@ -443,7 +471,7 @@ const Ctl = (() => {
             r.font = `600 10px ${getComputedStyle(document.body).fontFamily}`;
             r.textBaseline = "middle";
             const every = pxPerBeat * 4 < 30 ? 2 : 1;
-            for (let b = 0; b <= c.len + 1e-6; b++) {
+            for (let b = 0; b <= span(c) + 1e-6; b++) {
                 const x = Math.round(L.x(b) - sx);
                 if (x < -40 || x > rw + 2) continue;
                 const bar = (c.start + b) % 4 === 0;
@@ -451,10 +479,10 @@ const Ctl = (() => {
                 r.fillRect(x, bar ? 0 : rh - 6, 1, bar ? rh : 6);
                 if (bar && Math.floor((c.start + b) / 4) % every === 0) {
                     r.fillStyle = css("--text-dim") || "#888";
-                    r.fillText(String(Math.floor((c.start + b) / 4) + 1), x + 4, rh / 2);
+                    r.fillText(String(Daw.barOf(c.start + b)), x + 4, rh / 2);
                 }
             }
-            if (pos !== null && pos >= c.start && pos <= c.start + c.len) {
+            if (pos !== null && pos >= c.start && pos <= c.start + span(c)) {
                 const x = L.x(pos - c.start) - sx;
                 r.fillStyle = css("--daw-live") || "#f2a33a";
                 r.beginPath();
@@ -474,7 +502,7 @@ const Ctl = (() => {
             if (!c || !spec.seek) return;
             const b = (e.clientX - ruler.getBoundingClientRect().left + scroller.scrollLeft) / pxPerBeat;
             const g = snap() || 0.25;
-            spec.seek.to(c.start + Math.min(c.len, Math.max(0, Math.round(b / g) * g)));
+            spec.seek.to(c.start + Math.min(span(c), Math.max(0, Math.round(b / g) * g)));
         };
         ruler.addEventListener("pointerdown", e => {
             if (e.button !== 0 || !clip() || !spec.seek) return;
@@ -493,15 +521,22 @@ const Ctl = (() => {
         // too, a trackpad's pinch). Qt on Windows turns an Alt + wheel sideways: whichever
         // moved is the step. The rest scrolls as it comes - up and down, Shift along.
         node.addEventListener("wheel", e => {
-            if (!(e.altKey || e.ctrlKey || e.metaKey)) return;
             const step = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
             if (!step) return;
-            e.preventDefault();
             const pxStep = e.deltaMode === 1 ? step * 40 : e.deltaMode === 2 ? step * 400 : step;
+            if (!(e.altKey || e.ctrlKey || e.metaKey)) {
+                // Along when the rows all fit (or with Shift); up and down as it comes otherwise.
+                const wide = scroller.scrollWidth > scroller.clientWidth + 1, tall = scroller.scrollHeight > scroller.clientHeight + 1;
+                if (wide && Math.abs(e.deltaY) >= Math.abs(e.deltaX) && (e.shiftKey || !tall)) {
+                    e.preventDefault();
+                    scroller.scrollLeft += pxStep;
+                }
+                return;
+            }
+            e.preventDefault();
             const atX = Math.max(0, e.clientX - scroller.getBoundingClientRect().left);
             const beat = (scroller.scrollLeft + atX) / pxPerBeat;
-            const c = clip(), least = c ? Math.max(8, (scroller.clientWidth - 2) / Math.max(4, c.len)) : 8;
-            pxPerBeat = Math.min(400, Math.max(least, pxPerBeat * Math.pow(1.0015, -pxStep)));
+            pxPerBeat = Math.min(400, Math.max(least(), pxPerBeat * Math.pow(1.0015, -pxStep)));
             draw();
             scroller.scrollLeft = beat * pxPerBeat - atX;
         }, {passive: false});
@@ -537,8 +572,11 @@ const Ctl = (() => {
                 if (e.shiftKey) { drag = {kind: "box", x: e.clientX, y: e.clientY}; grid.setPointerCapture(e.pointerId); return; }
                 // A new note, the snap's length (a step on drums), where it was clicked.
                 const s = qDown(cell.b), d = isDrums() ? (snap() || 0.25) : (lastLen || snap() || 0.25);
-                if (s >= c.len) return;
-                spec.onEdit("Add a note", () => c.notes.push([cell.m, +s.toFixed(4), +Math.min(d, c.len - s).toFixed(4), Daw.P.velocity]));
+                if (s >= span(c)) return;
+                spec.onEdit("Add a note", () => {
+                    c.notes.push([cell.m, +s.toFixed(4), +Math.min(d, span(c) - s).toFixed(4), Daw.P.velocity]);
+                    grow(c);
+                });
                 selected = new Set([c.notes.length - 1]);
                 spec.onPreview(cell.m);
                 drag = {kind: "move", i: c.notes.length - 1, from: cell, orig: [c.notes[c.notes.length - 1].slice()], idx: [c.notes.length - 1], fresh: true};
@@ -574,7 +612,7 @@ const Ctl = (() => {
                 drag.idx.forEach((i, k) => {
                     const [, s, d] = drag.orig[k];
                     const nd = Math.max(snap() || 1 / 32, q(d + db));
-                    c.notes[i][2] = +Math.min(nd, c.len - s).toFixed(4);
+                    c.notes[i][2] = +Math.min(nd, span(c) - s).toFixed(4);
                 });
                 lastLen = c.notes[drag.i][2];
             } else {
@@ -586,7 +624,7 @@ const Ctl = (() => {
                     const nm = L.R[row];
                     if (nm !== c.notes[i][0] && i === drag.i) spec.onPreview(nm);
                     c.notes[i][0] = nm;
-                    c.notes[i][1] = +clamp(s + db, 0, c.len - Math.min(d, c.len) ).toFixed(4);
+                    c.notes[i][1] = +clamp(s + db, 0, span(c) - Math.min(d, span(c))).toFixed(4);
                 });
             }
             Daw.changed("notes");
@@ -603,7 +641,7 @@ const Ctl = (() => {
                 });
                 draw();
             }
-            if (drag && drag.kind !== "box") sortNotes();
+            if (drag && drag.kind !== "box") { const c = clip(); if (c) grow(c); sortNotes(); }
             drag = null;
         });
         grid.addEventListener("dblclick", e => {
@@ -706,7 +744,15 @@ const Ctl = (() => {
         });
         scroller.addEventListener("scroll", () => draw());
 
-        return {node, draw, fit: () => { fit(); selected = new Set(); draw(); }, clearSelection: () => { selected = new Set(); }};
+        /* Playing: the playhead kept in sight, scrolled to a quarter in when it goes past. */
+        function follow(pos) {
+            const c = clip();
+            if (!c || pos === null || pos < c.start || pos >= c.start + span(c)) return;
+            const x = (pos - c.start) * pxPerBeat, view = scroller;
+            if (x > view.scrollLeft + view.clientWidth - 20 || x < view.scrollLeft) view.scrollLeft = Math.max(0, x - view.clientWidth / 4);
+        }
+
+        return {node, draw, follow, fit: () => { fit(); selected = new Set(); draw(); }, clearSelection: () => { selected = new Set(); }};
     }
 
     /* Keeps a drag's pointer while it's held - when there's one to keep (a pointer gone already, or

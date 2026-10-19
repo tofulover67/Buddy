@@ -4,15 +4,20 @@
  * cue with several parts. A track's knobs are in Console (double-click a clip,
  * or "Edit in Console" in the track's menu).
  *
- *   Tracks    click a clip to select it, drag to move it (Shift: by a
- *             sixteenth, not a beat; Alt: a copy), drag its right end to
- *             lengthen it, double-click it to edit its notes in Console;
- *             double-click an empty stretch for a new clip; Delete and
- *             Ctrl+D on the selected clip. A track's menu (right-click its
- *             name): rename, duplicate, delete
+ *   Tracks    click a clip to select it, drag to move it (Alt: a copy), drag
+ *             its right end to lengthen it, double-click it to edit its notes
+ *             in Console; double-click an empty stretch for a new clip; Delete,
+ *             Ctrl+D and D (disable or enable, when the tracks were clicked last -
+ *             else D plays a note) on the selected clip, and in its menu.
+ *             Snapping (the magnet, N): a clip's start or end goes to the
+ *             nearest line of the grid (the Snap setting's) or beat of the song
+ *             - which, lined up with the timeline, can fall between them; off,
+ *             it goes where it's let go. A track's menu (right-click its name):
+ *             rename, duplicate, disable, delete
  *   Ruler     two rows. The loop strip on top: drag across it to loop just
- *             those bars (lit down the tracks, the playhead to their start),
- *             drag the lit bars to slide them or an end for more or fewer,
+ *             that stretch (lit down the tracks, the playhead to its start) -
+ *             its ends snap as clips do (the magnet), Shift for whole bars -
+ *             drag the lit stretch to slide it or an end for more or less,
  *             click them to turn the loop on or off, double-click a bar for
  *             just that one. The bar numbers under it: click to move the
  *             playhead, drag to scrub. A clip's menu (right-click) loops its bars
@@ -21,6 +26,9 @@
  *             faint lines down the tracks, to write music to. Click one for the
  *             playhead there. Follow: the playhead goes where Resolve's is moved
  *             to while the DAW is stopped
+ *   Song      the music the DAW plays along with, its waveform on the bars. Under it,
+ *             the timeline's audio: each audio track of the edit, its clips and their
+ *             waveforms, to write around (shown or hidden with its heading; never played)
  *   Scrolling the mouse wheel scrolls the tracks up and down, or along when they
  *             all fit; Shift + scroll goes along. Alt + scroll zooms (as on
  *             Resolve's timeline; Ctrl + scroll too), or the - Fit + buttons
@@ -52,13 +60,23 @@ DawViews.arrange = (() => {
         UI.browser = el("aside.daw-browser", {}, [UI.search, UI.browserList]);
         UI.lanes = el("div.lanes", {tabindex: "-1"});
         UI.mixer = el("div.daw-mixer");
-        UI.zoom = el("div.zoom", {}, [
+        UI.magnet = el("button.btn.ghost.magnet", {type: "button", onclick: () => toggleSnap()}, [el("i.magnet-icon")]);
+        UI.zoom = el("div.zoom", {}, [UI.magnet, el("span.zoom-sep"),
             el("button.btn.ghost.icon", {type: "button", title: "Zoom out (Alt + scroll)", onclick: () => zoom(1 / 1.4)}, [icon("minus")]),
             el("button.btn.ghost", {type: "button", text: "Fit", title: "The whole piece in view", onclick: () => fitAll()}),
             el("button.btn.ghost.icon", {type: "button", title: "Zoom in (Alt + scroll)", onclick: () => zoom(1.4)}, [icon("plus")])]);
         root.append(el("div.arr", {}, [UI.browser, el("div.arr-mid", {}, [UI.lanes, UI.zoom]), UI.mixer]));
         UI.lanes.addEventListener("wheel", wheel, {passive: false});
-        UI.lanes.addEventListener("scroll", () => placeHead(Daw.playing() ? Daw.position() : null));
+        // The tracks were clicked last (a clip, a lane): D is for the selected clip, not a note.
+        window.addEventListener("pointerdown", e => { UI.armed = !!(UI.lanes.contains(e.target)); }, true);
+        syncMagnet();
+        UI.lanes.addEventListener("scroll", () => {
+            placeHead(Daw.playing() ? Daw.position() : null);
+            if (!UI.winDue) UI.winDue = requestAnimationFrame(() => { UI.winDue = 0; syncWindow(); });
+        });
+        UI.seen = new IntersectionObserver(entries => {
+            for (const e of entries) if (e.isIntersecting) { UI.seen.unobserve(e.target); e.target.paint(); }
+        }, {root: UI.lanes, rootMargin: "0px 1200px"});
         drawBrowser();
         refresh("all");
     }
@@ -77,6 +95,7 @@ DawViews.arrange = (() => {
         syncRange();
         placeHead(Daw.playing() ? Daw.position() : null);
         UI.lanes.scrollLeft = beat * px - atX;
+        syncWindow();
         clearTimeout(UI.settle);
         UI.settle = setTimeout(crisp, ZOOM_SETTLE_MS);
     }
@@ -85,8 +104,8 @@ DawViews.arrange = (() => {
        waveform, each clip's notes, as many bar numbers as fit. Nothing else is rebuilt. */
     function crisp() {
         if (!UI.grid || !UI.grid.isConnected) return;
-        barNumbers();
-        if (UI.wave) drawWave(UI.wave, (Daw.projectBeats() + 16) * px);
+        syncWindow(true);
+        for (const wave of UI.waves) strips(...wave);
         for (const [canvas, t, c] of UI.clipCanvases) drawClip(canvas, t, c);
     }
 
@@ -121,7 +140,7 @@ DawViews.arrange = (() => {
         const pxStep = e.deltaMode === 1 ? step * 40 : e.deltaMode === 2 ? step * 400 : step;
         if (e.altKey || e.ctrlKey || e.metaKey) {
             e.preventDefault();
-            return zoomSoon(Math.pow(1.0015, -pxStep), e.clientX);
+            return zoomSoon(Math.pow(1.0022, -pxStep), e.clientX);           // a wheel's notch: about a quarter
         }
         const lanes = UI.lanes, tall = lanes.scrollHeight > lanes.clientHeight + 1;
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;        // already sideways (a trackpad): as it comes
@@ -198,13 +217,17 @@ DawViews.arrange = (() => {
         const P = Daw.P, beats = Daw.projectBeats() + 16, width = beats * px;
         // What's drawn at a size, kept track of to draw again in place (crisp()).
         UI.barsEvery = 0;
-        UI.wave = null;
+        UI.waves = [];
         UI.clipCanvases = [];
+        UI.editBodies = [];
+        UI.win = null;
+        UI.seen.disconnect();
         const rows = [ruler(width, beats)];
         const pic = picture();
         UI.guides = el("div.pic-guides");
         if (pic) rows.push(pictureLane(width, pic));
         if (Daw.song) rows.push(songLane(width));
+        if (pic && pic.audio.length) rows.push(...editAudio(pic));
         for (const t of P.tracks) rows.push(lane(t, width));
         rows.push(el("div.lane.add", {}, [
             el("div.head", {}, [
@@ -215,6 +238,7 @@ DawViews.arrange = (() => {
         UI.shade = el("i.loop-shade");
         UI.grid = el("div.lanes-grid", {style: `--w:${width}px;--beat:${px}px`}, [UI.shade, UI.guides, ...rows, UI.playhead]);
         UI.lanes.replaceChildren(UI.grid);
+        syncWindow(true);
         syncRange();
         frame(Daw.playing() ? Daw.position() : null);
     }
@@ -246,7 +270,7 @@ DawViews.arrange = (() => {
        Playing, a change of bars goes on from the first of them straight away. */
     function ruler(width, beats) {
         const P = Daw.P;
-        const strip = el("div.loopbar", {title: Buddy.t("Drag across to choose the bars that loop")});
+        const strip = el("div.loopbar", {title: Buddy.t("Drag across to choose what loops (Shift: whole bars)")});
         const bars = el("div.bars", {title: Buddy.t("Click to move the playhead, or drag to scrub")});
         UI.bars = bars;
         barNumbers(beats);
@@ -262,7 +286,6 @@ DawViews.arrange = (() => {
 
         const beatAt = e => Math.max(0, (e.clientX - time.getBoundingClientRect().left) / px);
         const snapped = b => { const g = P.snap ? 1 / P.snap : 0.25; return Math.round(b / g) * g; };
-        const step = e => (e.shiftKey ? 1 : 4);
         // Dragged to an edge: the tracks scroll along.
         const follow = e => {
             const r = UI.lanes.getBoundingClientRect();
@@ -291,20 +314,24 @@ DawViews.arrange = (() => {
                 drag.moved = true;
                 Daw.checkpoint(drag.kind === "new" ? "Choose the bars to loop" : drag.kind === "slide" ? "Slide the loop" : "Change which bars loop");
             }
-            const b = beatAt(e), g = step(e);
+            // Its ends go where a clip's would (snapping: the grid and the song's beats; off,
+            // anywhere) - or, with Shift, to whole bars.
+            const b = beatAt(e), bars = e.shiftKey, least = bars ? 4 : 0.25;
+            const to = x => (bars ? Math.round(x / 4) * 4 : snapBeat(x).beat);
             if (drag.kind === "new") {
-                // From the bar it began in to the bar it's in now, whichever way it went.
-                const a = Math.floor(Math.min(drag.from, b) / g) * g;
-                setRange(a, Math.max(a + g, Math.ceil(Math.max(drag.from, b) / g) * g));
+                const lo = Math.min(drag.from, b), hi = Math.max(drag.from, b);
+                const a = Math.max(0, bars ? Math.floor(lo / 4) * 4 : to(lo));
+                setRange(a, Math.max(a + least, bars ? Math.ceil(hi / 4) * 4 : to(hi)));
             }
             if (drag.kind === "slide") {
-                const by = Math.max(-drag.start, Math.round((b - drag.from) / g) * g);
-                setRange(drag.start + by, drag.end + by);
+                const len = drag.end - drag.start;
+                const start = bars ? drag.start + Math.max(-drag.start, Math.round((b - drag.from) / 4) * 4) : Math.max(0, to(drag.start + b - drag.from));
+                setRange(start, start + len);
             }
             if (drag.kind === "edge") {
-                const at = Math.round(b / g) * g;
-                if (drag.edge === "start") setRange(Math.max(0, Math.min(at, P.loop.end - g)), P.loop.end);
-                else setRange(P.loop.start, Math.max(at, P.loop.start + g));
+                const at = to(b);
+                if (drag.edge === "start") setRange(Math.max(0, Math.min(at, P.loop.end - least)), P.loop.end);
+                else setRange(P.loop.start, Math.max(at, P.loop.start + least));
             }
             follow(e);
         });
@@ -349,18 +376,81 @@ DawViews.arrange = (() => {
         bars.addEventListener("pointercancel", scrubbed);
 
         syncRange();
-        return el("div.lane.ruler", {}, [el("div.head", {}, [el("span.daw-label", {text: "Loop"}), el("span.daw-label", {text: "Bars"})]), time]);
+        return el("div.lane.ruler", {}, [el("div.head", {}, [el("span.daw-label", {text: "Loop"}), alignPick()]), time]);
     }
 
-    /* The bar numbers: every bar, or every 4th or 8th when they'd crowd. */
-    function barNumbers(beats = Daw.projectBeats() + 16) {
+    /* Bars: what they line up with, with a song - its beats (bar 1 its first downbeat) or the
+       timeline (bar 1 its first frame). Without one, just the word. */
+    function alignPick() {
+        // "Bar lines", not "Bars": that word is a letterbox's elsewhere in Buddy (one translation each).
+        if (!Daw.song) return el("span.daw-label", {text: "Bar lines"});
+        const seg = Ctl.seg([["song", "Song", "Bars on the song's beats – bar 1 is its first downbeat"],
+                             ["timeline", "Timeline", "Bars from the timeline's first frame – at the song's tempo, lined up with the edit"]],
+            Daw.P.align === "timeline" ? "timeline" : "song", v => { Daw.setAlign(v); DawApp.syncBar(); }, "Line the bars up with");
+        seg.node.classList.add("align-pick");
+        return el("div.align-row", {}, [el("span.daw-label", {text: "Bar lines", title: "What the bar lines line up with"}), seg.node]);
+    }
+
+    // ------------------------------------------------------------ snapping --
+
+    function syncMagnet() {
+        const on = Daw.P.snap_clips !== false;
+        UI.magnet.setAttribute("aria-pressed", String(on));
+        UI.magnet.title = Buddy.t(on ? "Snapping on: clips go to the grid and the song's beats (N)"
+            : "Snapping off: clips go where they're let go (N)");
+    }
+
+    function toggleSnap() {
+        Daw.P.snap_clips = Daw.P.snap_clips === false;
+        syncMagnet();
+        Daw.changed("snap");
+        Buddy.toast(Buddy.t(Daw.P.snap_clips ? "Snapping on" : "Snapping off"), 900);
+    }
+
+    /* Beat b, snapped: to the nearest line of the grid (the Snap setting's, a sixteenth when
+       it's off) or beat of the song, whichever's nearer - {beat, by} (how far it moved). Off,
+       as it is (to a thousandth). */
+    function snapBeat(b) {
+        if (Daw.P.snap_clips === false) return {beat: +b.toFixed(3), by: 0};
+        const g = Daw.P.snap ? 1 / Daw.P.snap : 0.25;
+        let best = Math.round(b / g) * g;
+        if (Daw.song && Daw.songBpm()) {
+            const at = Daw.songAt(), song = at + Math.round(b - at);       // the song's beats: a beat apart from its bar 1
+            if (Math.abs(song - b) < Math.abs(best - b)) best = song;
+        }
+        return {beat: +best.toFixed(4), by: Math.abs(best - b)};
+    }
+
+    // ------------------------------------------------------------ the window --
+    //
+    // A long edit is thousands of things - its cuts and markers, the lines down the tracks
+    // from them, the timeline's clips, the bar numbers - and each is placed in beats, so each
+    // zoom step lays every one out again. Only those near what's in view are made: from a
+    // screen's width before it to two after (UI.win, in beats), made again as it scrolls or
+    // zooms past them. (The waveforms are drawn as they come near too: strips().)
+
+    function syncWindow(force = false) {
+        if (!UI.grid || !px) return;
+        const w = Math.max(200, UI.lanes.clientWidth - HEAD), s = UI.lanes.scrollLeft;
+        const from = s / px, to = (s + w) / px;
+        if (!force && UI.win && from >= UI.win.b0 && to <= UI.win.b1 && UI.win.px === px) return;
+        UI.win = {b0: Math.max(0, (s - w) / px), b1: (s + 3 * w) / px, px};
+        barNumbers();
+        fillPicture();
+        for (const [body, spans] of UI.editBodies) fillEditClips(body, spans);
+    }
+    const inWin = (a, z = a) => UI.win && z >= UI.win.b0 && a <= UI.win.b1;
+
+    /* The bar numbers in the window: every bar, or every 4th or 8th when they'd crowd. */
+    function barNumbers() {
+        if (!UI.bars || !UI.win) return;
         const every = px * 4 < 26 ? (px * 4 < 10 ? 8 : 4) : 1;
-        if (!UI.bars || UI.barsEvery === every && UI.barsBeats === beats) return;
-        UI.barsEvery = every;
-        UI.barsBeats = beats;
         for (const n of UI.bars.querySelectorAll("span")) n.remove();
-        const numbers = [];
-        for (let b = 0; b * 4 < beats; b += every) numbers.push(el("span", {text: String(b + 1), style: `left:${at(b * 4)}`, translate: "no"}));
+        const numbers = [], beats = Daw.projectBeats() + 16;
+        const first = Math.max(0, Math.floor(UI.win.b0 / 4 / every) * every);
+        for (let b = first; b * 4 < Math.min(beats, UI.win.b1 + 4); b += every) {
+            numbers.push(el("span", {text: String(Daw.barOf(b * 4)), style: `left:${at(b * 4)}`, translate: "no"}));
+        }
         UI.bars.prepend(...numbers);
     }
 
@@ -388,10 +478,10 @@ DawViews.arrange = (() => {
             UI.range.style.left = `${left}px`;
             UI.range.style.width = `${w}px`;
             UI.range.classList.toggle("off", !on);
-            const first = Math.floor(P.loop.start / 4) + 1, last = Math.ceil(P.loop.end / 4);
+            const first = Daw.barOf(P.loop.start), last = Daw.barOf(P.loop.end - 1e-6);
             const whole = P.loop.start % 4 === 0 && P.loop.end % 4 === 0;
-            // Not whole bars (chosen with Shift): bar.beat of its first beat and its last, as the display shows them.
-            const at = beat => `${Math.floor(beat / 4) + 1}.${Math.floor(beat % 4) + 1}`;
+            // Not whole bars: bar.beat of its first beat and its last, as the display shows them.
+            const at = beat => `${Daw.barOf(beat)}.${Math.floor(beat % 4) + 1}`;
             UI.rangeLabel.textContent = w < 70 ? "" : whole ? (first === last ? `${first}` : `${first}–${last}`)
                 : `${at(P.loop.start)}–${at(P.loop.end - 1)}`;
         }
@@ -407,29 +497,9 @@ DawViews.arrange = (() => {
        lines down the tracks from each. Click one for the playhead there. Follow: the
        playhead goes where Resolve's is moved to while the DAW is stopped. */
     function pictureLane(width, pic) {
-        const P = Daw.P, most = width / px;
+        const P = Daw.P;
         const body = el("div.body.pic", {style: "width:var(--w)"});
-        const guides = [];
-        const tc = frame => DawApp.timecode(frame);
-        const inView = beat => beat >= 0 && beat <= most;
-        for (const c of pic.cuts) {
-            if (!inView(c.beat)) continue;
-            body.append(el("i.cut", {style: `left:${at(c.beat)}`, title: `${Buddy.t("Cut in the edit")} · ${tc(c.frame)}`,
-                translate: "no", dataset: {beat: String(c.beat)}}));
-            guides.push(el("i.guide", {style: `left:calc(${HEAD}px + ${at(c.beat)})`}));
-        }
-        for (const m of pic.markers) {
-            if (!inView(m.beat)) continue;
-            const node = el("i.mark", {style: `left:${at(m.beat)};width:max(9px, ${at(m.end - m.beat)});--mark:${m.color}`,
-                title: `${m.name || Buddy.t("Marker")} · ${tc(m.frame)}`, translate: "no", dataset: {beat: String(m.beat)}});
-            body.append(node);
-            guides.push(el("i.guide.marked", {style: `left:calc(${HEAD}px + ${at(m.beat)});--mark:${m.color}`}));
-        }
-        if (pic.end !== null && pic.end < most) {
-            body.append(el("i.pic-end", {style: `left:${at(Math.max(0, pic.end))}`, title: Buddy.t("The picture ends here"),
-                dataset: {beat: String(Math.max(0, pic.end))}}));
-        }
-        UI.guides.replaceChildren(...guides);
+        UI.pic = {body, pic, most: width / px};
         body.addEventListener("pointerdown", e => {
             const at = e.target.dataset && e.target.dataset.beat;
             if (e.button !== 0 || at === undefined) return;
@@ -443,44 +513,158 @@ DawViews.arrange = (() => {
         return el("div.lane.picture", {}, [head, body]);
     }
 
+    /* The picture lane's cuts, markers and picture end in the window, and their lines down
+       the tracks. */
+    function fillPicture() {
+        if (!UI.pic || !UI.grid.contains(UI.pic.body)) return UI.guides.replaceChildren();
+        const {body, pic, most} = UI.pic, tc = frame => DawApp.timecode(frame);
+        const show = (a, z = a) => a >= 0 && a <= most && inWin(a, z);
+        const items = [], guides = [];
+        for (const c of pic.cuts) {
+            if (!show(c.beat)) continue;
+            items.push(el("i.cut", {style: `left:${at(c.beat)}`, title: `${Buddy.t("Cut in the edit")} · ${tc(c.frame)}`,
+                translate: "no", dataset: {beat: String(c.beat)}}));
+            guides.push(el("i.guide", {style: `left:calc(${HEAD}px + ${at(c.beat)})`}));
+        }
+        for (const m of pic.markers) {
+            if (!show(m.beat, m.end)) continue;
+            items.push(el("i.mark", {style: `left:${at(m.beat)};width:max(9px, ${at(m.end - m.beat)});--mark:${m.color}`,
+                title: `${m.name || Buddy.t("Marker")} · ${tc(m.frame)}`, translate: "no", dataset: {beat: String(m.beat)}}));
+            guides.push(el("i.guide.marked", {style: `left:calc(${HEAD}px + ${at(m.beat)});--mark:${m.color}`}));
+        }
+        if (pic.end !== null && show(Math.max(0, pic.end))) {
+            items.push(el("i.pic-end", {style: `left:${at(Math.max(0, pic.end))}`, title: Buddy.t("The picture ends here"),
+                dataset: {beat: String(Math.max(0, pic.end))}}));
+        }
+        body.replaceChildren(...items);
+        UI.guides.replaceChildren(...guides);
+    }
+
     function songLane(width) {
         const S = Daw.song, P = Daw.P;
-        const canvas = el("canvas.wave");
-        UI.wave = canvas;
-        const body = el("div.body", {style: "width:var(--w)"}, [canvas]);
+        const body = el("div.body", {style: "width:var(--w)"});
         body.addEventListener("pointerdown", e => {
             if (e.button === 0) DawApp.moveCursor(Math.max(0, Math.round((e.clientX - body.getBoundingClientRect().left) / px)));
         });
-        requestAnimationFrame(() => drawWave(canvas, width));
+        strips(body, width / px, paintSong);
         const head = el("div.head", {}, [
             el("div.tn", {}, [el("i", {style: "background:var(--daw-song)"}), el("span", {text: S.name, translate: "no", title: S.name})]),
-            el("div.sub", {translate: "no", text: `${S.key ? S.key.name : Buddy.t("No key heard")} · ${Daw.songBpm() ? `${Math.round(Daw.songBpm())} BPM` : Buddy.t("No steady beat")}`}),
+            el("button.sub.song-tempo", {type: "button", translate: "no", title: "Correct the song's tempo",
+                text: `${S.key ? S.key.name : Buddy.t("No key heard")} · ${Daw.songBpm() ? `${Math.round(Daw.songBpm() * 10) / 10} BPM` : Buddy.t("No steady beat")}`,
+                onclick: () => DawApp.openTempo()}),
             el("div.ms", {translate: "no"}, [el("button.ms-m", {type: "button", text: "M", title: "Mute the song", "aria-pressed": String(!!P.song_mute),
                 onclick: () => Daw.edit("Mute the song", () => { P.song_mute = !P.song_mute; }, "mixer")})])]);
         return el("div.lane.song", {}, [head, body]);
     }
 
-    function drawWave(canvas, width) {
+    /* A wide picture along a lane - a waveform - as canvases STRIP_PX wide, each drawn as
+       it scrolls near: a long edit close up is far wider than one canvas can be. `beats`
+       long; paint(g, b0, w, h) draws the w pixels from beat b0. Drawn again at a new zoom
+       (crisp()). */
+    const STRIP_PX = 2048;
+    function strips(holder, beats, paint) {
+        for (const c of holder.querySelectorAll(":scope > canvas.wave")) { UI.seen.unobserve(c); c.remove(); }
+        if (!UI.waves.some(x => x[0] === holder)) UI.waves.push([holder, beats, paint]);
+        const per = STRIP_PX / px;
+        for (let b0 = 0; b0 < beats; b0 += per) {
+            const w = Math.max(1, Math.ceil(Math.min(per, beats - b0) * px));
+            const canvas = el("canvas.wave", {style: `left:${at(b0)};width:${at(w / px)}`});
+            canvas.paint = () => {
+                const h = holder.clientHeight || 40, dpr = window.devicePixelRatio || 1;
+                canvas.width = Math.round(w * dpr);
+                canvas.height = Math.round(h * dpr);
+                const g = canvas.getContext("2d");
+                g.setTransform(dpr, 0, 0, dpr, 0, 0);
+                g.fillStyle = getComputedStyle(canvas).color || "#8d9099";
+                paint(g, b0, w, h);
+            };
+            holder.append(canvas);
+            UI.seen.observe(canvas);
+        }
+    }
+
+    /* The song's waveform: its loudest moment at each pixel, on the bars. */
+    function paintSong(g, b0, w, h) {
         const S = Daw.song;
-        if (!S || !S.wave || !canvas.isConnected) return;
-        const h = canvas.parentNode.clientHeight || 60, dpr = window.devicePixelRatio || 1;
-        const w = Math.min(width, 16000);
-        canvas.style.width = at(w / px);
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-        const g = canvas.getContext("2d");
-        g.setTransform(dpr, 0, 0, dpr, 0, 0);
-        g.fillStyle = getComputedStyle(canvas).color || "#8d9099";
+        if (!S || !S.wave) return;
         const per = S.wave_per_s || 50;
         for (let x = 0; x < w; x += 2) {
-            const t = Daw.songTime(x / px), i = Math.floor(t * per);
+            const i = Math.floor(Daw.songTime(b0 + x / px) * per);
             if (i < 0 || i >= S.wave.length) continue;
             let peak = 0;
-            const j = Math.max(i + 1, Math.floor(Daw.songTime((x + 2) / px) * per));
+            const j = Math.max(i + 1, Math.floor(Daw.songTime(b0 + (x + 2) / px) * per));
             for (let k = i; k < Math.min(j, S.wave.length); k++) peak = Math.max(peak, S.wave[k]);
             const a = peak / 255 * (h / 2 - 3);
             g.fillRect(x, h / 2 - a, 1.4, Math.max(1, a * 2));
         }
+    }
+
+    /* The timeline's audio: a heading to show or hide it, then a lane for each audio track of
+       the edit - its clips where they are, their names and waveforms. To write around (what's
+       said, the effects, other music); it isn't played. Click for the playhead there. */
+    function editAudio(pic) {
+        const P = Daw.P, shown = P.edit_audio !== false;
+        const n = pic.audio.length;
+        const toggle = el("button.edit-toggle", {type: "button", "aria-expanded": String(shown),
+            title: shown ? "Hide the timeline's audio" : "Show the timeline's audio",
+            onclick: () => { P.edit_audio = !shown; Daw.changed("audio"); }}, [
+            el("i.edit-caret"), el("span", {text: "Timeline audio"})]);
+        const heading = el("div.lane.edit-head", {}, [
+            el("div.head", {}, [toggle]),
+            el("div.body", {style: "width:var(--w)"}, [el("span.edit-count", {translate: "no",
+                text: `${n} ${Buddy.t(n === 1 ? "track" : "tracks")}`})])]);
+        if (!shown) return [heading];
+        return [heading, ...pic.audio.map(track => editLane(track, pic))];
+    }
+
+    function editLane(track, pic) {
+        const body = el("div.body", {style: "width:var(--w)"});
+        // Each clip's beats, once (the window fills in their boxes).
+        const spans = track.clips.map(c => [c, Math.max(0, Daw.beatOfFrame(c.start)), Daw.beatOfFrame(c.end)]).filter(x => x[2] > x[1]);
+        UI.editBodies.push([body, spans]);
+        body.addEventListener("pointerdown", e => {
+            if (e.button === 0) DawApp.moveCursor(Math.max(0, Math.round((e.clientX - body.getBoundingClientRect().left) / px)));
+        });
+        strips(body, Daw.projectBeats() + 16, paintClips(track, pic.fps));
+        const head = el("div.head", {}, [el("div.tn", {}, [el("b.edit-track", {translate: "no", text: `A${track.index}`}),
+            el("span", {text: track.name, translate: "no", title: track.name})])]);
+        return el("div.lane.edit-audio", {}, [head, body]);
+    }
+
+    /* A timeline track's clips in the window: boxes with their names (the waveforms are
+       painted under them). */
+    function fillEditClips(body, spans) {
+        for (const n of body.querySelectorAll(":scope > .eclip")) n.remove();
+        const song = Daw.song ? Daw.song.id : null, boxes = [];
+        for (const [c, a, z] of spans) {
+            if (!inWin(a, z)) continue;
+            boxes.push(el(`div.eclip${c.enabled === false ? ".off" : ""}${c.id === song ? ".is-song" : ""}`, {
+                style: `left:${at(a)};width:${at(z - a)}` + (c.color ? `;--clip:${c.color}` : ""),
+                title: `${c.name} · ${DawApp.timecode(c.start)}`, translate: "no"}, [el("span", {text: c.name})]));
+        }
+        body.prepend(...boxes);
+    }
+
+    /* A track's clips' waveforms: each pixel's moment of the edit, as a moment of the clip's
+       file - the loudest there (dB, from page.py's peaks). */
+    function paintClips(track, fps) {
+        return (g, b0, w, h) => {
+            for (const c of track.clips) {
+                const wave = DawApp.peaks(c.peaks);
+                if (!wave) continue;
+                const x0 = Math.max(0, Math.floor((Daw.beatOfFrame(c.start) - b0) * px));
+                const x1 = Math.min(w, Math.ceil((Daw.beatOfFrame(c.end) - b0) * px));
+                const second = x => c.offset + (Daw.frameOfBeat(b0 + x / px) - c.start) / fps;
+                for (let x = x0; x < x1; x += 2) {
+                    const i = Math.floor(second(x) * wave.rate);
+                    const j = Math.min(wave.codes.length, Math.max(i + 1, Math.floor(second(x + 2) * wave.rate)));
+                    let peak = 0;
+                    for (let k = Math.max(0, i); k < j; k++) peak = Math.max(peak, wave.codes[k]);
+                    const a = peak / 255 * (h / 2 - 3);
+                    if (a > 0.3) g.fillRect(x, h / 2 - a, 1.4, a * 2);
+                }
+            }
+        };
     }
 
     function lane(t, width) {
@@ -491,7 +675,7 @@ DawViews.arrange = (() => {
             ondblclick: e => { if (!e.target.closest("button")) rename(t, name); },
             oncontextmenu: e => { e.preventDefault(); trackMenu(t, name, e); }}, [
             el("div.tn", {}, [el("i", {style: `background:${color}`}), name]),
-            el("div.sub", {text: Parts.soundInfo(t).label}),
+            el("div.sub", {text: t.off ? Buddy.t("Disabled") : Parts.soundInfo(t).label}),
             el("div.ms", {translate: "no"}, [
                 el("button.ms-m", {type: "button", text: "M", title: "Mute", "aria-pressed": String(!!t.mute),
                     onclick: () => Daw.edit(t.mute ? "Unmute" : "Mute", () => { t.mute = !t.mute; }, "mixer")}),
@@ -516,7 +700,7 @@ DawViews.arrange = (() => {
                 P.sel.clip = c.id;
             }, "clips");
         });
-        const node = el(`div.lane${sel ? ".sel" : ""}${Daw.audible(t) ? "" : ".quiet"}`, {dataset: {track: t.id}}, [head, body]);
+        const node = el(`div.lane${sel ? ".sel" : ""}${Daw.audible(t) ? "" : ".quiet"}${t.off ? ".off" : ""}`, {dataset: {track: t.id}}, [head, body]);
         node.style.setProperty("--track", color);
         node.addEventListener("dragover", e => { if (e.dataTransfer.types.includes("text/x-daw-sound")) { e.preventDefault(); node.classList.add("drop"); } });
         node.addEventListener("dragleave", () => node.classList.remove("drop"));
@@ -566,6 +750,8 @@ DawViews.arrange = (() => {
                 P.sel.track = copy.id;
             }, "tracks")},
             {label: "Edit in Console", onClick: () => DawApp.openClip(t.id, (t.clips[0] || {}).id || "")},
+            {label: t.off ? "Enable the track" : "Disable the track", onClick: () => Daw.edit(t.off ? "Enable a track" : "Disable a track",
+                () => { t.off = !t.off; }, "tracks")},
             {sep: true},
             {label: "Delete the track", danger: true, disabled: P.tracks.length <= 1, onClick: () => Daw.edit("Delete a track", () => {
                 P.tracks = P.tracks.filter(x => x !== t);
@@ -578,7 +764,8 @@ DawViews.arrange = (() => {
         const P = Daw.P, sel = P.sel.clip === c.id;
         const canvas = el("canvas");
         UI.clipCanvases.push([canvas, t, c]);
-        const node = el(`div.clip${sel ? ".sel" : ""}`, {dataset: {clip: c.id}, title: Buddy.t("Double-click to edit its notes")}, [
+        const node = el(`div.clip${sel ? ".sel" : ""}${c.off ? ".off" : ""}`, {dataset: {clip: c.id},
+            title: Buddy.t(c.off ? "Disabled – not played or placed (D)" : "Double-click to edit its notes")}, [
             el("span.ct", {text: c.name, translate: "no"}), canvas, el("i.grip")]);
         node.style.left = at(c.start);
         node.style.width = `max(6px, calc(${at(c.len)} - 1px))`;
@@ -605,14 +792,16 @@ DawViews.arrange = (() => {
                     t.clips.push(copy);          // the copy stays where the clip was
                 }
             }
-            const step = e.shiftKey ? 0.25 : 1;
-            const db = Math.round((e.clientX - drag.x) / px / step) * step;
+            const raw = (e.clientX - drag.x) / px;
             if (drag.edge) {
-                c.len = Math.max(step, drag.len + db);
+                // Its end, snapped.
+                c.len = Math.max(0.25, snapBeat(drag.start + drag.len + raw).beat - drag.start);
                 node.style.width = `max(6px, calc(${at(c.len)} - 1px))`;
                 return;
             }
-            c.start = Math.max(0, drag.start + db);
+            // Its start or its end, whichever lands nearer a line.
+            const a = snapBeat(drag.start + raw), z = snapBeat(drag.start + drag.len + raw);
+            c.start = Math.max(0, z.by < a.by ? +(z.beat - drag.len).toFixed(4) : a.beat);
             node.style.left = at(c.start);
             // Onto another lane of the same kind.
             const hit = document.elementFromPoint(e.clientX, e.clientY);
@@ -647,6 +836,7 @@ DawViews.arrange = (() => {
                     chosen();
                 }},
                 {label: "Edit in Console", onClick: () => DawApp.openClip(t.id, c.id)},
+                {label: c.off ? "Enable the clip" : "Disable the clip", onClick: () => disableClip(c)},
                 {sep: true},
                 {label: "Duplicate the clip", onClick: () => keydown({key: "", code: "KeyD", ctrlKey: true})},
                 {label: "Delete the clip", danger: true, onClick: () => keydown({key: "Delete", code: "Delete"})},
@@ -729,7 +919,7 @@ DawViews.arrange = (() => {
             }
             return;
         }
-        if (what === "notes" || what === "clips" || what === "loop" || what === "picture") {
+        if (what === "notes" || what === "clips" || what === "loop" || what === "picture" || what === "tempo" || what === "audio") {
             const left = UI.lanes.scrollLeft, top = UI.lanes.scrollTop;
             drawLanes();
             UI.lanes.scrollLeft = left;
@@ -760,10 +950,22 @@ DawViews.arrange = (() => {
         refresh("all");
     }
 
-    /* Keys this layout takes: Delete and Ctrl+D on the selected clip. */
+    /* A clip disabled (not played, rendered or placed) or enabled again. */
+    function disableClip(c) {
+        Daw.edit(c.off ? "Enable a clip" : "Disable a clip", () => { if (c.off) delete c.off; else c.off = true; }, "clips");
+    }
+
+    /* Keys this layout takes: N (snapping); Delete, Ctrl+D and - with the tracks focused -
+       D on the selected clip. */
     function keydown(e) {
+        const plain = !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey;
+        if (plain && e.code === "KeyN") { if (!e.repeat) toggleSnap(); return true; }
         const t = Daw.selTrack(), c = Daw.selClip();
         if (!t || !c) return false;
+        if (plain && e.code === "KeyD" && UI.armed) {
+            if (!e.repeat) disableClip(c);
+            return true;
+        }
         if (e.key === "Delete" || e.key === "Backspace") {
             Daw.edit("Delete a clip", () => { t.clips = t.clips.filter(x => x !== c); Daw.P.sel.clip = ""; }, "clips");
             return true;

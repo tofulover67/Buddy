@@ -8,7 +8,9 @@
  *           drag its right end to lengthen, double-click or right-click to
  *           delete, Shift + drag to select several; Delete, the arrows
  *           (Shift: an octave, or a bar), Ctrl+A and Ctrl+D on the selection;
- *           the velocity lane under it
+ *           the velocity lane under it. With the loop on, the roll reaches to
+ *           the loop's end (up to the track's next clip): a note written past
+ *           the clip's end grows it. Playing, the playhead stays in sight
  */
 "use strict";
 
@@ -36,6 +38,7 @@ DawViews.console = (() => {
             position: () => (Daw.playing() ? Daw.position() : Daw.P.cursor),
             // DawApp is still being made while this is built: looked up when it's used.
             seek: {start: () => DawApp.scrub.start(), to: b => DawApp.scrub.to(b), end: () => DawApp.scrub.end()},
+            room,
         });
         UI.empty = el("div.roll-empty");
         UI.keyboard = Parts.keyboard(4);
@@ -101,6 +104,16 @@ DawViews.console = (() => {
         Daw.select(t.id, c ? c.id : "");
     }
 
+    /* How far the roll reaches from the clip's start: to the loop's end when the loop runs on
+       past the clip, but never into the track's next clip. */
+    function room(c) {
+        const P = Daw.P, t = Daw.selTrack();
+        let reach = c.len;
+        if (Daw.loopOn() && P.loop.start < c.start + c.len && P.loop.end > c.start + c.len) reach = P.loop.end - c.start;
+        const next = Math.min(Infinity, ...(t ? t.clips : []).filter(x => x !== c && x.start >= c.start + c.len).map(x => x.start));
+        return Math.max(c.len, Math.min(reach, next - c.start));
+    }
+
     const clipAtCursor = t => t.clips.find(c => Daw.P.cursor >= c.start && Daw.P.cursor < c.start + c.len) || null;
 
     function drawClipBar() {
@@ -110,7 +123,7 @@ DawViews.console = (() => {
         const go = d => { const n = t.clips[i + d]; if (n) { Daw.select(t.id, n.id); DawApp.moveCursor(n.start, false); } };
         Parts.fill(UI.clipBar,
             el("button.btn.ghost.icon", {type: "button", title: "The clip before", disabled: i <= 0, onclick: () => go(-1)}, [icon("left")]),
-            el("span.con-clipname", {translate: "no", text: c ? `${c.name} · ${Buddy.t("bar")} ${Math.floor(c.start / 4) + 1}` : Buddy.t("No clip")}),
+            el("span.con-clipname", {translate: "no", text: c ? `${c.name} · ${Buddy.t("bar")} ${Daw.barOf(c.start)}` : Buddy.t("No clip")}),
             el("button.btn.ghost.icon", {type: "button", title: "The clip after", disabled: i < 0 || i >= t.clips.length - 1, onclick: () => go(1)}, [icon("right")]),
             c ? clipLength(t, c) : null,
             t.kind === "drums" ? null : el("button.btn.ghost", {type: "button", text: "Write a progression…",
@@ -211,9 +224,11 @@ DawViews.console = (() => {
     function refresh(what) {
         if (!UI) return;
         if (what === "values") return;
-        if (what === "notes" || what === "cursor") return UI.roll.draw();
+        if (what === "cursor") return UI.roll.draw();
+        if (what === "notes") { drawClipBar(); return UI.roll.draw(); }         // a note past its end grows the clip
         if (what === "keys") { UI.octave.draw(); UI.velocity.draw(); UI.chords.sync(); return UI.keyboard.draw(); }
-        if (what === "mixer" || what === "loop" || what === "picture") return;
+        if (what === "mixer" || what === "picture" || what === "audio") return;
+        if (what === "loop") return drawRoll();
         // Keep a clip in view: the selected one, else the one under the cursor.
         const t = Daw.selTrack();
         if (t && !Daw.selClip()) {
@@ -234,7 +249,7 @@ DawViews.console = (() => {
     function frame(pos) {
         if (!UI) return;
         drawScope();
-        if (Daw.playing()) UI.roll.draw(pos);
+        if (Daw.playing()) { UI.roll.follow(pos); UI.roll.draw(pos); }
         UI.keyboard.light(Daw.sounding());
     }
 
@@ -243,5 +258,5 @@ DawViews.console = (() => {
         refresh("all");
     }
 
-    return {id: "console", label: "Console", build, refresh, frame, shown, keydown: () => false};
+    return {id: "console", label: "Console", build, refresh, frame, shown, keydown: () => false, room};
 })();

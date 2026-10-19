@@ -21,20 +21,29 @@ transport carrying on across the switch (web/app.js):
               sequencer and the keyboard (web/perform.js)
 
 Here: the timeline read lightly (its music clips, its markers and cuts for
-the picture lane, and the playhead - the reads in the Resolve reader's
-process, as Audio Assistant's), the song
+the picture lane, its audio for the reference lanes - each file's waveform
+from Audio Assistant's peaks.py and its cache - and the playhead - the reads
+in the Resolve reader's process, as Audio Assistant's), the song
 listened to and written once as a WAV for the page to play along with (and
 its waveform), a render placed (and Undo), and the project kept for next
-time (project.py cleans it).
+time (project.py cleans it) - one for each timeline of each Resolve project
+(projects/<key>.json in the tool's folder, the timeline's key: its project's id
+and its own). A timeline the DAW hasn't had starts a new project; the project
+kept before there was one for each goes with the first timeline opened.
+The view's saves say whose they are (scope), so one still on its way when
+the timeline changes is kept with the timeline it was made on.
 
 Protocol:
-    to the view    state, timeline, playhead, song, placed, undo, project, toast, alert
-    from the view  refresh, listen, place, undo, project
+    to the view    state, timeline, playhead, song, peaks, placed, undo, project, toast, alert
+    from the view  refresh, listen, place, undo, project {scope, project}
 """
 
+import base64
 import hashlib
 import os
 import time
+
+from core import atomic_io, tool_dirs
 
 import numpy as np
 from PySide6.QtCore import QTimer, QUrl
@@ -46,7 +55,9 @@ from core.web_page import WebToolPage
 
 from pages.audio_assistant import fx, resolve_ext, sounds
 from pages.audio_assistant import song as song_ear
+from pages.audio_assistant.peaks import PEAK_RATE, PeakLoader
 from pages.audio_assistant.peaks import decode_range as peaks_decode_range
+from pages.audio_assistant.peaks import fold as peaks_fold
 
 from . import project as P
 
@@ -61,9 +72,17 @@ WAVE_PER_S = 50               # the song lane's waveform: points a second
 WAVE_MOST = 30000
 MOST_MARKERS = 500            # the edit as the picture lane shows it
 MOST_CUTS = 3000
+MOST_AUDIO_TRACKS = 24        # the edit's audio, as reference lanes
+MOST_AUDIO_CLIPS = 2000
+REF_PER_S = 25                # their waveforms: peaks a second
 PLAY_DIR = os.path.join(os.path.dirname(os.path.dirname(fx.PREVIEW_DIR)), "daw", "play_along")
 BUSY_TITLE = "Resolve isn't answering"
 BUSY_TEXT = "Resolve is holding Buddy's requests – usually because the timeline is playing. Stop playback and try again."
+
+
+def scope_of(timeline):
+    """The key a timeline's DAW project is kept under: its project's id and its own."""
+    return f"{(timeline or {}).get('project', '')}|{(timeline or {}).get('id', '')}" if timeline else ""
 
 
 def song_clips(timeline):
@@ -76,6 +95,38 @@ def song_clips(timeline):
                 out.append({"id": clip["id"], "name": clip["name"], "track": track["index"],
                             "track_name": track.get("name", ""), "start": clip["start"], "end": clip["end"]})
     return out
+
+
+def edit_audio(timeline):
+    """The timeline's audio tracks for the reference lanes - each with a clip -
+    {index, name, clips: [{id, name, start, end, offset, peaks, color, enabled}]},
+    MOST_AUDIO_TRACKS and MOST_AUDIO_CLIPS at the most."""
+    out, budget = [], MOST_AUDIO_CLIPS
+    for track in (timeline or {}).get("tracks", []):
+        clips = [{"id": c["id"], "name": c.get("name", ""), "start": c["start"], "end": c["end"],
+                  "offset": round(float(c.get("offset") or 0.0), 4), "peaks": c.get("peaks"),
+                  "color": c.get("color", ""), "enabled": c.get("enabled", True)}
+                 for c in track.get("clips", []) if not c.get("transition")][:budget]
+        if clips and len(out) < MOST_AUDIO_TRACKS:
+            budget -= len(clips)
+            out.append({"index": track["index"], "name": track.get("name", ""), "clips": clips})
+    return out
+
+
+def reference_peaks(result, channels, per_s=REF_PER_S):
+    """A file's decoded peaks (peaks.decode()'s) for the channels a clip plays, thinned
+    to per_s a second (the loudest of each stretch) - dB codes, 0-255 - or None."""
+    if not result:
+        return None
+    folded, _why = peaks_fold(result, channels)
+    if not folded:
+        return None
+    codes = np.frombuffer(folded[0], dtype=np.uint8)
+    step = max(1, PEAK_RATE // per_s)
+    n = len(codes) // step
+    if not n:
+        return codes.tobytes()
+    return codes[:n * step].reshape(n, step).max(axis=1).astype(np.uint8).tobytes()
 
 
 def waveform(samples, rate, per_s=WAVE_PER_S):
@@ -109,6 +160,11 @@ class DawPage(WebToolPage):
         self._placing = False
         self._full_due = 0.0
         self.settings = self.host.tool_settings(self.tool_id)
+        self.scope = ""                # the timeline the view's project is for ("": none yet)
+        self._peaks = {}               # file key -> peaks.decode()'s result | None (no waveform)
+        self._peaks_sent = set()       # clip["peaks"] keys the view has
+        self._loader = PeakLoader(self)
+        self._loader.ready.connect(self._on_peaks)
         self._worker = ResolveWorker(self)
         self._calls = ResolveCalls(self, self._worker)
         self._tick = QTimer(self)
@@ -124,9 +180,11 @@ class DawPage(WebToolPage):
         return None
 
     def web_ready(self):
-        self.emit("project", P.clean(self.settings.get("project")))
+        self._send_project()
         self._push_state()
         self.emit("timeline", self._timeline_for_view())
+        self._peaks_sent = set()
+        self._send_peaks()
         self.emit("playhead", {"frame": self.playhead})
         self._push_undo()
 
@@ -144,6 +202,7 @@ class DawPage(WebToolPage):
         if self._job is not None:
             self._job.stop_for_quit()
         self._tick.stop()
+        self._loader.shutdown()
 
     # ------------------------------------------------------------ Resolve --
 
@@ -168,7 +227,7 @@ class DawPage(WebToolPage):
                    for m in t.get("markers", []) if not m.get("beat")][:MOST_MARKERS]
         return {"id": t["id"], "name": t["name"], "fps": t["fps"], "start": t["start"], "end": t["end"],
                 "songs": song_clips(t), "markers": markers, "cuts": list(t.get("cuts", []))[:MOST_CUTS],
-                "video_end": t.get("video_end")}
+                "video_end": t.get("video_end"), "audio": edit_audio(t)}
 
     def _forget_timeline(self):
         if self.timeline is not None:
@@ -212,9 +271,18 @@ class DawPage(WebToolPage):
         before = self._timeline_for_view()
         self.timeline, self.problem, self.busy = data, "", False
         self._push_state()
+        if scope_of(data) != self.scope:
+            self.scope = scope_of(data)
+            self._send_project()
         now = self._timeline_for_view()
         if now != before:
             self.emit("timeline", now)
+        for track in data.get("tracks", []):
+            for clip in track["clips"]:
+                media = clip.get("media")
+                if media and media.get("path"):
+                    self._loader.want(media["key"], media["path"])
+        self._send_peaks()
 
     def _on_live(self, result, error):
         if error is not None:
@@ -251,6 +319,27 @@ class DawPage(WebToolPage):
                     return clip, track["index"]
         return None, None
 
+    # -------------------------------------------------------------- peaks --
+    #
+    # The reference lanes' waveforms: each file decoded once (peaks.py, one at a time,
+    # cached on disk - what Audio Assistant decoded is found there), each clip's sent for
+    # the channels it plays.
+
+    def _on_peaks(self, key, result, _error):
+        self._peaks[key] = result
+        self._peaks_sent = {k for k in self._peaks_sent if k.split(":")[0] != key}
+        self._send_peaks()
+
+    def _send_peaks(self):
+        for track in (self.timeline or {}).get("tracks", []):
+            for clip in track["clips"]:
+                media, pk = clip.get("media"), clip.get("peaks")
+                if media and pk and pk not in self._peaks_sent and media["key"] in self._peaks:
+                    self._peaks_sent.add(pk)
+                    codes = reference_peaks(self._peaks[media["key"]], clip.get("channels"))
+                    self.emit("peaks", {"key": pk, "rate": REF_PER_S,
+                                        "data": base64.b64encode(codes).decode("ascii") if codes else None})
+
     # --------------------------------------------------------------- song --
     #
     # The song lane: a music clip listened to (its key, tempo and bars - song.py)
@@ -277,8 +366,11 @@ class DawPage(WebToolPage):
                 frame = clip["start"] + int(round(m["t"] * fps))
                 if clip["start"] <= frame < clip["end"]:
                     moments.append(dict(m, frame=frame))
+            # media and offset: its file, and where in it the clip starts - a tempo set by
+            # hand is kept by the file (project.py "grids").
             self.emit("song", dict(found, id=uid, moments=moments, start=clip["start"], end=clip["end"], fps=fps,
-                                   name=clip["name"], url=QUrl.fromLocalFile(out).toString()))
+                                   name=clip["name"], url=QUrl.fromLocalFile(out).toString(),
+                                   media=key[0], offset=round(start_s, 4)))
 
         if key in self._songs and os.path.isfile(out):
             return send(self._songs[key])
@@ -406,11 +498,44 @@ class DawPage(WebToolPage):
 
     # ------------------------------------------------------------ project --
 
+    def projects_dir(self):
+        return os.path.join(tool_dirs.path(self.tool_id), "projects")
+
+    def _project_path(self, scope):
+        return os.path.join(self.projects_dir(), hashlib.sha1(scope.encode("utf-8")).hexdigest()[:20] + ".json")
+
+    def _kept(self, scope):
+        """The project kept for a timeline, or None for one the DAW hasn't had - except the
+        first timeline opened, which takes the project kept from before there was one each."""
+        if not scope:
+            return P.clean(self.settings.get("project"))
+        found = atomic_io.read_json(self._project_path(scope), default=None, expected_type=dict)
+        if found is not None:
+            return P.clean(found.get("project"))
+        if not self.settings.get("scoped"):
+            self.settings["scoped"] = True
+            self.settings.save()
+            return P.clean(self.settings.get("project"))
+        return None
+
+    def _send_project(self):
+        self.emit("project", {"scope": self.scope, "project": self._kept(self.scope)})
+
     def on_project(self, payload):
-        """The project as it is now, kept for next time (the page sends it a moment after a change)."""
-        cleaned = P.clean(payload)
-        if cleaned is None:
+        """The project as it is now, kept for next time (the page sends it a moment after a change)
+        - with the timeline it's for: {scope, project} (a bare project: the current one's)."""
+        payload = payload if isinstance(payload, dict) else {}
+        scope = payload.get("scope") if "project" in payload else self.scope
+        cleaned = P.clean(payload.get("project") if "project" in payload else payload)
+        if cleaned is None or not isinstance(scope, str):
             return
-        self.settings["project"] = cleaned
-        self.settings.save()
+        if not scope:
+            self.settings["project"] = cleaned
+            return self.settings.save()
+        t = self.timeline if self.timeline is not None and scope_of(self.timeline) == scope else {}
+        try:
+            atomic_io.write_json(self._project_path(scope), {"scope": scope, "timeline": t.get("name", ""),
+                                                             "project": cleaned}, indent=None)
+        except OSError as exc:
+            self.emit("toast", {"text": f"Couldn't keep the DAW project: {exc}"})
 

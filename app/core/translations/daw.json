@@ -2749,5 +2749,675 @@
   "中文": "画面在此结束",
   "العربية": "تنتهي الصورة هنا",
   "Tiếng Việt": "Hình kết thúc tại đây"
+ },
+ "Correct its tempo…": {
+  "日本語": "テンポを修正…",
+  "Español": "Corregir su tempo…",
+  "Deutsch": "Tempo korrigieren…",
+  "Français": "Corriger son tempo…",
+  "한국어": "템포 바로잡기…",
+  "中文": "校正其速度…",
+  "العربية": "تصحيح إيقاعها الزمني…",
+  "Tiếng Việt": "Chỉnh nhịp độ của bài…"
+ },
+ "Correct the song's tempo…": {
+  "日本語": "曲のテンポを修正…",
+  "Español": "Corregir el tempo de la canción…",
+  "Deutsch": "Tempo des Songs korrigieren…",
+  "Français": "Corriger le tempo du morceau…",
+  "한국어": "곡의 템포 바로잡기…",
+  "中文": "校正歌曲的速度…",
+  "العربية": "تصحيح الإيقاع الزمني للأغنية…",
+  "Tiếng Việt": "Chỉnh nhịp độ của bài hát…"
+ },
+ "Correct the song's tempo": {
+  "日本語": "曲のテンポを修正",
+  "Español": "Corregir el tempo de la canción",
+  "Deutsch": "Tempo des Songs korrigieren",
+  "Français": "Corriger le tempo du morceau",
+  "한국어": "곡의 템포 바로잡기",
+  "中文": "校正歌曲的速度",
+  "العربية": "تصحيح الإيقاع الزمني للأغنية",
+  "Tiếng Việt": "Chỉnh nhịp độ của bài hát"
+ },
+ "When Buddy heard the song's tempo or its first bar wrong": {
+  "日本語": "Buddy が曲のテンポや最初の小節を聞き違えたとき",
+  "Español": "Cuando Buddy oyó mal el tempo de la canción o su primer compás",
+  "Deutsch": "Wenn Buddy das Tempo des Songs oder seinen ersten Takt falsch gehört hat",
+  "Français": "Quand Buddy a mal entendu le tempo du morceau ou sa première mesure",
+  "한국어": "Buddy가 곡의 템포나 첫 마디를 잘못 들었을 때",
+  "中文": "当 Buddy 听错了歌曲的速度或第一小节时",
+  "العربية": "عندما يخطئ Buddy في سماع الإيقاع الزمني للأغنية أو مازورتها الأولى",
+  "Tiếng Việt": "Khi Buddy nghe sai nhịp độ hoặc ô nhịp đầu của bài hát"
+ },
+ "Half as fast – Buddy heard it double": {
+  "日本語": "半分の速さ – Buddy は倍に聞いていました",
+  "Español": "La mitad de rápido: Buddy lo oyó al doble",
+  "Deutsch": "Halb so schnell – Buddy hat es doppelt gehört",
+  "Français": "Deux fois moins vite – Buddy l'a entendu au double",
+  "한국어": "절반 빠르기 – Buddy가 두 배로 들었습니다",
+  "中文": "慢一半 – Buddy 听成了两倍",
+  "العربية": "أبطأ بالنصف – سمعها Buddy مضاعفة",
+  "Tiếng Việt": "Chậm bằng một nửa – Buddy nghe thành gấp đôi"
+ },
+ "Three quarters as fast – Buddy counted the hi-hats as the beat": {
+  "日本語": "4分の3の速さ – Buddy はハイハットを拍として数えていました",
+  "Español": "Tres cuartos de rápido: Buddy contó los charles como el pulso",
+  "Deutsch": "Drei Viertel so schnell – Buddy hat die Hi-Hats als Beat gezählt",
+  "Français": "Aux trois quarts de la vitesse – Buddy a compté les charlestons comme temps",
+  "한국어": "4분의 3 빠르기 – Buddy가 하이햇을 박자로 세었습니다",
+  "中文": "四分之三的速度 – Buddy 把踩镲当成了拍子",
+  "العربية": "ثلاثة أرباع السرعة – عدّ Buddy صنج الهاي هات على أنه النبضة",
+  "Tiếng Việt": "Nhanh bằng ba phần tư – Buddy đã đếm tiếng hi-hat là phách"
+ },
+ "A third faster – Buddy heard it three quarters as fast": {
+  "日本語": "3分の1速く – Buddy は4分の3の速さに聞いていました",
+  "Español": "Un tercio más rápido: Buddy lo oyó a tres cuartos de su velocidad",
+  "Deutsch": "Ein Drittel schneller – Buddy hat es drei Viertel so schnell gehört",
+  "Français": "Un tiers plus vite – Buddy l'a entendu aux trois quarts de sa vitesse",
+  "한국어": "3분의 1 빠르게 – Buddy가 4분의 3 빠르기로 들었습니다",
+  "中文": "快三分之一 – Buddy 听成了四分之三的速度",
+  "العربية": "أسرع بالثلث – سمعها Buddy بثلاثة أرباع سرعتها",
+  "Tiếng Việt": "Nhanh hơn một phần ba – Buddy nghe thành ba phần tư tốc độ"
+ },
+ "Twice as fast – Buddy heard it half": {
+  "日本語": "倍の速さ – Buddy は半分に聞いていました",
+  "Español": "El doble de rápido: Buddy lo oyó a la mitad",
+  "Deutsch": "Doppelt so schnell – Buddy hat es halb so schnell gehört",
+  "Français": "Deux fois plus vite – Buddy l'a entendu à moitié",
+  "한국어": "두 배 빠르기 – Buddy가 절반으로 들었습니다",
+  "中文": "快一倍 – Buddy 听成了一半",
+  "العربية": "أسرع بمرتين – سمعها Buddy بنصف سرعتها",
+  "Tiếng Việt": "Nhanh gấp đôi – Buddy nghe thành một nửa"
+ },
+ "The song's tempo": {
+  "日本語": "曲のテンポ",
+  "Español": "El tempo de la canción",
+  "Deutsch": "Das Tempo des Songs",
+  "Français": "Le tempo du morceau",
+  "한국어": "곡의 템포",
+  "中文": "歌曲的速度",
+  "العربية": "الإيقاع الزمني للأغنية",
+  "Tiếng Việt": "Nhịp độ của bài hát"
+ },
+ "Follow the song's tempo": {
+  "日本語": "曲のテンポに合わせる",
+  "Español": "Seguir el tempo de la canción",
+  "Deutsch": "Dem Tempo des Songs folgen",
+  "Français": "Suivre le tempo du morceau",
+  "한국어": "곡의 템포 따르기",
+  "中文": "跟随歌曲的速度",
+  "العربية": "اتباع الإيقاع الزمني للأغنية",
+  "Tiếng Việt": "Theo nhịp độ của bài hát"
+ },
+ "Back to what Buddy heard": {
+  "日本語": "Buddy が聞いた値に戻す",
+  "Español": "Volver a lo que oyó Buddy",
+  "Deutsch": "Zurück zu dem, was Buddy gehört hat",
+  "Français": "Revenir à ce que Buddy a entendu",
+  "한국어": "Buddy가 들은 값으로 되돌리기",
+  "中文": "恢复为 Buddy 听到的",
+  "العربية": "العودة إلى ما سمعه Buddy",
+  "Tiếng Việt": "Trở lại như Buddy đã nghe"
+ },
+ "Back to the tempo Buddy heard": {
+  "日本語": "Buddy が聞いたテンポに戻す",
+  "Español": "Volver al tempo que oyó Buddy",
+  "Deutsch": "Zurück zum Tempo, das Buddy gehört hat",
+  "Français": "Revenir au tempo entendu par Buddy",
+  "한국어": "Buddy가 들은 템포로 되돌리기",
+  "中文": "恢复为 Buddy 听到的速度",
+  "العربية": "العودة إلى الإيقاع الزمني الذي سمعه Buddy",
+  "Tiếng Việt": "Trở lại nhịp độ Buddy đã nghe"
+ },
+ "Song tempo": {
+  "日本語": "曲のテンポ",
+  "Español": "Tempo de la canción",
+  "Deutsch": "Song-Tempo",
+  "Français": "Tempo du morceau",
+  "한국어": "곡 템포",
+  "中文": "歌曲速度",
+  "العربية": "إيقاع الأغنية",
+  "Tiếng Việt": "Nhịp độ bài hát"
+ },
+ "Heard wrong?": {
+  "日本語": "聞き違い?",
+  "Español": "¿Oído mal?",
+  "Deutsch": "Falsch gehört?",
+  "Français": "Mal entendu ?",
+  "한국어": "잘못 들었나요?",
+  "中文": "听错了?",
+  "العربية": "هل سُمع خطأً؟",
+  "Tiếng Việt": "Nghe sai?"
+ },
+ "Nudge": {
+  "日本語": "微調整",
+  "Español": "Ajuste fino",
+  "Deutsch": "Feinschub",
+  "Français": "Ajuster",
+  "한국어": "미세 조정",
+  "中文": "微调",
+  "العربية": "ضبط دقيق",
+  "Tiếng Việt": "Tinh chỉnh"
+ },
+ "Nudge the song's grid": {
+  "日本語": "曲のグリッドを微調整",
+  "Español": "Ajustar la cuadrícula de la canción",
+  "Deutsch": "Raster des Songs verschieben",
+  "Français": "Ajuster la grille du morceau",
+  "한국어": "곡의 그리드 미세 조정",
+  "中文": "微调歌曲的网格",
+  "العربية": "ضبط شبكة الأغنية بدقة",
+  "Tiếng Việt": "Tinh chỉnh lưới của bài hát"
+ },
+ "The grid – and what plays on it – a little earlier against the song (Shift: 1 ms)": {
+  "日本語": "グリッド(とその上で鳴るもの)を曲に対して少し前へ (Shift: 1 ms)",
+  "Español": "La cuadrícula, y lo que suena en ella, un poco antes respecto a la canción (Shift: 1 ms)",
+  "Deutsch": "Das Raster – und was darauf spielt – etwas früher gegenüber dem Song (Shift: 1 ms)",
+  "Français": "La grille – et ce qui joue dessus – un peu plus tôt par rapport au morceau (Shift : 1 ms)",
+  "한국어": "그리드(와 그 위에서 연주되는 것)를 곡보다 조금 앞으로 (Shift: 1 ms)",
+  "中文": "网格(及其上演奏的内容)相对歌曲稍微提前 (Shift: 1 ms)",
+  "العربية": "الشبكة – وما يُعزف عليها – أبكر قليلًا مقارنة بالأغنية (Shift: 1 ms)",
+  "Tiếng Việt": "Lưới – và những gì phát trên đó – sớm hơn một chút so với bài hát (Shift: 1 ms)"
+ },
+ "The grid – and what plays on it – a little later against the song (Shift: 1 ms)": {
+  "日本語": "グリッド(とその上で鳴るもの)を曲に対して少し後ろへ (Shift: 1 ms)",
+  "Español": "La cuadrícula, y lo que suena en ella, un poco después respecto a la canción (Shift: 1 ms)",
+  "Deutsch": "Das Raster – und was darauf spielt – etwas später gegenüber dem Song (Shift: 1 ms)",
+  "Français": "La grille – et ce qui joue dessus – un peu plus tard par rapport au morceau (Shift : 1 ms)",
+  "한국어": "그리드(와 그 위에서 연주되는 것)를 곡보다 조금 뒤로 (Shift: 1 ms)",
+  "中文": "网格(及其上演奏的内容)相对歌曲稍微推后 (Shift: 1 ms)",
+  "العربية": "الشبكة – وما يُعزف عليها – أبطأ قليلًا مقارنة بالأغنية (Shift: 1 ms)",
+  "Tiếng Việt": "Lưới – và những gì phát trên đó – muộn hơn một chút so với bài hát (Shift: 1 ms)"
+ },
+ "Set by hand": {
+  "日本語": "手動で設定",
+  "Español": "Ajustado a mano",
+  "Deutsch": "Von Hand gesetzt",
+  "Français": "Réglé à la main",
+  "한국어": "직접 설정함",
+  "中文": "手动设置",
+  "العربية": "مضبوط يدويًا",
+  "Tiếng Việt": "Đặt bằng tay"
+ },
+ "As Buddy heard it": {
+  "日本語": "Buddy が聞いたとおり",
+  "Español": "Como lo oyó Buddy",
+  "Deutsch": "Wie Buddy es gehört hat",
+  "Français": "Tel que Buddy l'a entendu",
+  "한국어": "Buddy가 들은 그대로",
+  "中文": "按 Buddy 听到的",
+  "العربية": "كما سمعه Buddy",
+  "Tiếng Việt": "Như Buddy đã nghe"
+ },
+ "Buddy heard": {
+  "日本語": "Buddy が聞いたのは",
+  "Español": "Buddy oyó",
+  "Deutsch": "Buddy hat gehört:",
+  "Français": "Buddy a entendu",
+  "한국어": "Buddy가 들은 값:",
+  "中文": "Buddy 听到的是",
+  "العربية": "سمع Buddy",
+  "Tiếng Việt": "Buddy đã nghe"
+ },
+ "Set the song's tempo": {
+  "日本語": "曲のテンポを設定",
+  "Español": "Fijar el tempo de la canción",
+  "Deutsch": "Tempo des Songs setzen",
+  "Français": "Régler le tempo du morceau",
+  "한국어": "곡의 템포 설정",
+  "中文": "设置歌曲的速度",
+  "العربية": "ضبط الإيقاع الزمني للأغنية",
+  "Tiếng Việt": "Đặt nhịp độ của bài hát"
+ },
+ "Pre-roll": {
+  "日本語": "プリロール",
+  "Español": "Preroll",
+  "Deutsch": "Vorlauf",
+  "Français": "Pré-roll",
+  "한국어": "프리롤",
+  "中文": "预卷",
+  "العربية": "تشغيل مسبق",
+  "Tiếng Việt": "Chạy trước"
+ },
+ "Play from a beat before the playhead, so nothing right at its start is cut off": {
+  "日本語": "再生ヘッドの1拍前から再生し、始まりの瞬間が欠けないようにします",
+  "Español": "Reproduce desde un tiempo antes del cabezal, para que no se corte nada justo al empezar",
+  "Deutsch": "Spielt ab einem Schlag vor dem Abspielkopf, damit nichts direkt am Anfang abgeschnitten wird",
+  "Français": "Lit à partir d'un temps avant la tête de lecture, pour que rien ne soit coupé tout au début",
+  "한국어": "재생 헤드보다 한 박 앞에서 재생해 시작 부분이 잘리지 않게 합니다",
+  "中文": "从播放头前一拍开始播放,开头的内容就不会被截掉",
+  "العربية": "يبدأ التشغيل قبل رأس التشغيل بنبضة، حتى لا يُقطع شيء في البداية تمامًا",
+  "Tiếng Việt": "Phát từ một phách trước đầu phát, để không phần nào ngay lúc bắt đầu bị cắt mất"
+ },
+ "Timeline audio": {
+  "日本語": "タイムラインのオーディオ",
+  "Español": "Audio de la línea de tiempo",
+  "Deutsch": "Audio der Timeline",
+  "Français": "Audio de la timeline",
+  "한국어": "타임라인 오디오",
+  "中文": "时间线音频",
+  "العربية": "صوت المخطط الزمني",
+  "Tiếng Việt": "Âm thanh timeline"
+ },
+ "Hide the timeline's audio": {
+  "日本語": "タイムラインのオーディオを隠す",
+  "Español": "Ocultar el audio de la línea de tiempo",
+  "Deutsch": "Audio der Timeline ausblenden",
+  "Français": "Masquer l'audio de la timeline",
+  "한국어": "타임라인 오디오 숨기기",
+  "中文": "隐藏时间线音频",
+  "العربية": "إخفاء صوت المخطط الزمني",
+  "Tiếng Việt": "Ẩn âm thanh timeline"
+ },
+ "Show the timeline's audio": {
+  "日本語": "タイムラインのオーディオを表示",
+  "Español": "Mostrar el audio de la línea de tiempo",
+  "Deutsch": "Audio der Timeline einblenden",
+  "Français": "Afficher l'audio de la timeline",
+  "한국어": "타임라인 오디오 보기",
+  "中文": "显示时间线音频",
+  "العربية": "إظهار صوت المخطط الزمني",
+  "Tiếng Việt": "Hiện âm thanh timeline"
+ },
+ "track": {
+  "日本語": "トラック",
+  "Español": "pista",
+  "Deutsch": "Spur",
+  "Français": "piste",
+  "한국어": "트랙",
+  "中文": "条轨道",
+  "العربية": "مسار",
+  "Tiếng Việt": "track"
+ },
+ "tracks": {
+  "日本語": "トラック",
+  "Español": "pistas",
+  "Deutsch": "Spuren",
+  "Français": "pistes",
+  "한국어": "트랙",
+  "中文": "条轨道",
+  "العربية": "مسارات",
+  "Tiếng Việt": "track"
+ },
+ "Downbeat": {
+  "日本語": "強拍",
+  "Español": "Tiempo fuerte",
+  "Deutsch": "Eins",
+  "Français": "Temps fort",
+  "한국어": "강박",
+  "中文": "强拍",
+  "العربية": "النبضة القوية",
+  "Tiếng Việt": "Phách mạnh"
+ },
+ "Downbeat here": {
+  "日本語": "強拍はここ",
+  "Español": "Tiempo fuerte aquí",
+  "Deutsch": "Eins ist hier",
+  "Français": "Temps fort ici",
+  "한국어": "강박은 여기",
+  "中文": "强拍在这里",
+  "العربية": "النبضة القوية هنا",
+  "Tiếng Việt": "Phách mạnh ở đây"
+ },
+ "A bar starts at the playhead – or click this on a downbeat (a 1) as the song plays": {
+  "日本語": "再生ヘッドの位置から小節が始まります – 曲の再生中に強拍(1拍目)でクリックしても構いません",
+  "Español": "Un compás empieza en el cabezal, o haz clic aquí en un tiempo fuerte (un 1) mientras suena la canción",
+  "Deutsch": "Ein Takt beginnt am Abspielkopf – oder klicke hier auf einer Eins, während der Song läuft",
+  "Français": "Une mesure commence à la tête de lecture – ou cliquez ici sur un temps fort (un 1) pendant que le morceau joue",
+  "한국어": "재생 헤드에서 마디가 시작합니다 – 곡이 재생되는 동안 강박(1박)에 맞춰 클릭해도 됩니다",
+  "中文": "小节从播放头开始 – 也可以在歌曲播放时于强拍(第 1 拍)上点击这里",
+  "العربية": "يبدأ مازورة عند رأس التشغيل – أو انقر هنا على نبضة قوية (الأولى) أثناء تشغيل الأغنية",
+  "Tiếng Việt": "Một ô nhịp bắt đầu tại đầu phát – hoặc nhấp vào đây đúng phách mạnh (phách 1) khi bài hát đang phát"
+ },
+ "Where the song's first bar starts, in seconds into the song": {
+  "日本語": "曲の最初の小節の開始位置(曲の先頭からの秒数)",
+  "Español": "Dónde empieza el primer compás de la canción, en segundos desde su inicio",
+  "Deutsch": "Wo der erste Takt des Songs beginnt, in Sekunden ab Songbeginn",
+  "Français": "Où commence la première mesure du morceau, en secondes depuis son début",
+  "한국어": "곡의 첫 마디가 시작하는 곳(곡 시작부터 초 단위)",
+  "中文": "歌曲第一小节的起点(从歌曲开头算起的秒数)",
+  "العربية": "موضع بداية أول مازورة في الأغنية، بالثواني من بدايتها",
+  "Tiếng Việt": "Chỗ ô nhịp đầu tiên của bài bắt đầu, tính bằng giây từ đầu bài"
+ },
+ "The downbeat a beat earlier": {
+  "日本語": "強拍を1拍前へ",
+  "Español": "El tiempo fuerte un tiempo antes",
+  "Deutsch": "Die Eins einen Schlag früher",
+  "Français": "Le temps fort un temps plus tôt",
+  "한국어": "강박을 한 박 앞으로",
+  "中文": "强拍提前一拍",
+  "العربية": "النبضة القوية أبكر بنبضة",
+  "Tiếng Việt": "Phách mạnh sớm hơn một phách"
+ },
+ "The downbeat a beat later": {
+  "日本語": "強拍を1拍後ろへ",
+  "Español": "El tiempo fuerte un tiempo después",
+  "Deutsch": "Die Eins einen Schlag später",
+  "Français": "Le temps fort un temps plus tard",
+  "한국어": "강박을 한 박 뒤로",
+  "中文": "强拍推后一拍",
+  "العربية": "النبضة القوية أبطأ بنبضة",
+  "Tiếng Việt": "Phách mạnh muộn hơn một phách"
+ },
+ "Move the downbeat": {
+  "日本語": "強拍を移動",
+  "Español": "Mover el tiempo fuerte",
+  "Deutsch": "Die Eins verschieben",
+  "Français": "Déplacer le temps fort",
+  "한국어": "강박 옮기기",
+  "中文": "移动强拍",
+  "العربية": "تحريك النبضة القوية",
+  "Tiếng Việt": "Dời phách mạnh"
+ },
+ "Put a downbeat here": {
+  "日本語": "強拍をここに",
+  "Español": "Poner un tiempo fuerte aquí",
+  "Deutsch": "Eine Eins hierher legen",
+  "Français": "Placer un temps fort ici",
+  "한국어": "강박을 여기로",
+  "中文": "把强拍放在这里",
+  "العربية": "وضع نبضة قوية هنا",
+  "Tiếng Việt": "Đặt phách mạnh ở đây"
+ },
+ "Buddy heard no steady beat – type the tempo, then set a downbeat": {
+  "日本語": "Buddy には一定のビートが聞こえませんでした – テンポを入力して、強拍を設定してください",
+  "Español": "Buddy no oyó un ritmo constante: escribe el tempo y luego fija un tiempo fuerte",
+  "Deutsch": "Buddy hat keinen gleichmäßigen Beat gehört – gib das Tempo ein und setze dann eine Eins",
+  "Français": "Buddy n'a pas entendu de rythme régulier – tapez le tempo, puis placez un temps fort",
+  "한국어": "Buddy가 일정한 비트를 듣지 못했습니다 – 템포를 입력한 뒤 강박을 정하세요",
+  "中文": "Buddy 没有听出稳定节拍 – 输入速度,然后设置强拍",
+  "العربية": "لم يسمع Buddy إيقاعًا ثابتًا – اكتب الإيقاع الزمني ثم حدّد نبضة قوية",
+  "Tiếng Việt": "Buddy không nghe ra nhịp đều – hãy nhập nhịp độ rồi đặt phách mạnh"
+ },
+ "The whole clip in view": {
+  "日本語": "クリップ全体を表示",
+  "Español": "Toda la clip a la vista",
+  "Deutsch": "Den ganzen Clip zeigen",
+  "Français": "Tout le clip visible",
+  "한국어": "클립 전체 보기",
+  "中文": "显示整个片段",
+  "العربية": "المقطع كله في العرض",
+  "Tiếng Việt": "Hiện toàn bộ clip"
+ },
+ "Drums: the keyboard plays the kit, the steps are its beat": {
+  "日本語": "ドラム:キーボードでキットを演奏し、ステップがそのビートです",
+  "Español": "Batería: el teclado toca el kit y los pasos son su ritmo",
+  "Deutsch": "Drums: Die Tastatur spielt das Kit, die Steps sind sein Beat",
+  "Français": "Batterie : le clavier joue le kit, les pas sont son rythme",
+  "한국어": "드럼: 키보드로 킷을 연주하고, 스텝이 그 비트입니다",
+  "中文": "鼓:键盘演奏鼓组,步进就是它的节拍",
+  "العربية": "الطبول: لوحة المفاتيح تعزف الطقم، والخطوات هي إيقاعه",
+  "Tiếng Việt": "Trống: bàn phím chơi bộ trống, các bước là nhịp của nó"
+ },
+ "Record the pads into their track from the playhead (R), a bar of clicks first when Count in is on": {
+  "日本語": "パッドを再生ヘッドの位置からそのトラックに録音します (R)。カウントインがオンなら最初に1小節分のクリック",
+  "Español": "Grabar los pads en su pista desde el cabezal (R); con Cuenta previa activada, primero un compás de clics",
+  "Deutsch": "Die Pads ab dem Abspielkopf in ihre Spur aufnehmen (R) – mit Einzählen zuerst ein Takt Klicks",
+  "Français": "Enregistrer les pads dans leur piste depuis la tête de lecture (R) – avec le décompte, une mesure de clics d'abord",
+  "한국어": "패드를 재생 헤드부터 해당 트랙에 녹음합니다(R). 카운트인이 켜져 있으면 먼저 한 마디 클릭",
+  "中文": "从播放头开始把打击垫录进它们的轨道 (R);开启预备拍时先有一小节咔嗒声",
+  "العربية": "تسجيل الوسادات في مسارها من رأس التشغيل (R)، ومازورة من النقرات أولًا عند تشغيل العدّ التمهيدي",
+  "Tiếng Việt": "Thu các pad vào track của chúng từ đầu phát (R), một ô nhịp tiếng click trước khi bật Đếm vào"
+ },
+ "Write": {
+  "日本語": "書き込み",
+  "Español": "Escribir",
+  "Deutsch": "Schreiben",
+  "Français": "Écrire",
+  "한국어": "쓰기",
+  "中文": "写入",
+  "العربية": "كتابة",
+  "Tiếng Việt": "Ghi"
+ },
+ "Each pad puts its chord in at the playhead, then moves the playhead on - a progression a click at a time": {
+  "日本語": "各パッドが再生ヘッドの位置にコードを入れ、再生ヘッドを次へ進めます – クリックごとにコード進行を作れます",
+  "Español": "Cada pad pone su acorde en el cabezal y avanza el cabezal: una progresión, un clic cada vez",
+  "Deutsch": "Jedes Pad setzt seinen Akkord am Abspielkopf ein und rückt ihn weiter – eine Akkordfolge, ein Klick nach dem anderen",
+  "Français": "Chaque pad place son accord à la tête de lecture, puis avance la tête de lecture – une grille d'accords, un clic à la fois",
+  "한국어": "각 패드가 재생 헤드에 코드를 넣고 재생 헤드를 다음으로 옮깁니다 – 클릭 한 번에 코드 하나씩 진행을 만듭니다",
+  "中文": "每个打击垫在播放头处放入和弦,然后把播放头往后移 – 一次点击一个和弦,写出和弦进行",
+  "العربية": "كل وسادة تضع وترها عند رأس التشغيل ثم تنقل رأس التشغيل إلى الأمام – تتابع أوتار بنقرة في كل مرة",
+  "Tiếng Việt": "Mỗi pad đặt hợp âm của nó tại đầu phát rồi dời đầu phát tiếp – một vòng hợp âm, mỗi lần một cú nhấp"
+ },
+ "How long each chord is": {
+  "日本語": "各コードの長さ",
+  "Español": "Cuánto dura cada acorde",
+  "Deutsch": "Wie lang jeder Akkord ist",
+  "Français": "La durée de chaque accord",
+  "한국어": "코드 하나의 길이",
+  "中文": "每个和弦的长度",
+  "العربية": "طول كل وتر",
+  "Tiếng Việt": "Mỗi hợp âm dài bao lâu"
+ },
+ "How long each chord written is": {
+  "日本語": "書き込む各コードの長さ",
+  "Español": "Cuánto dura cada acorde escrito",
+  "Deutsch": "Wie lang jeder geschriebene Akkord ist",
+  "Français": "La durée de chaque accord écrit",
+  "한국어": "써 넣는 코드 하나의 길이",
+  "中文": "写入的每个和弦的长度",
+  "العربية": "طول كل وتر يُكتب",
+  "Tiếng Việt": "Mỗi hợp âm được ghi dài bao lâu"
+ },
+ "Click the chords in order": {
+  "日本語": "コードを順にクリック",
+  "Español": "Haz clic en los acordes en orden",
+  "Deutsch": "Klicke die Akkorde der Reihe nach",
+  "Français": "Cliquez les accords dans l'ordre",
+  "한국어": "코드를 차례로 클릭하세요",
+  "中文": "按顺序点击和弦",
+  "العربية": "انقر الأوتار بالترتيب",
+  "Tiếng Việt": "Nhấp các hợp âm theo thứ tự"
+ },
+ "Write a chord": {
+  "日本語": "コードを書き込む",
+  "Español": "Escribir un acorde",
+  "Deutsch": "Einen Akkord schreiben",
+  "Français": "Écrire un accord",
+  "한국어": "코드 쓰기",
+  "中文": "写入和弦",
+  "العربية": "كتابة وتر",
+  "Tiếng Việt": "Ghi một hợp âm"
+ },
+ "Bar lines": {
+  "日本語": "小節線",
+  "Español": "Líneas de compás",
+  "Deutsch": "Taktstriche",
+  "Français": "Barres de mesure",
+  "한국어": "마디선",
+  "中文": "小节线",
+  "العربية": "خطوط المازورة",
+  "Tiếng Việt": "Vạch nhịp"
+ },
+ "What the bar lines line up with": {
+  "日本語": "小節線を何に合わせるか",
+  "Español": "Con qué se alinean las líneas de compás",
+  "Deutsch": "Woran sich die Taktstriche ausrichten",
+  "Français": "Sur quoi s'alignent les barres de mesure",
+  "한국어": "마디선을 무엇에 맞출지",
+  "中文": "小节线对齐到哪里",
+  "العربية": "ما الذي تُحاذى معه خطوط المازورة",
+  "Tiếng Việt": "Vạch nhịp canh theo cái gì"
+ },
+ "Bars on the song's beats – bar 1 is its first downbeat": {
+  "日本語": "小節を曲の拍に合わせる – 1小節目は曲の最初の強拍",
+  "Español": "Compases sobre los tiempos de la canción: el compás 1 es su primer tiempo fuerte",
+  "Deutsch": "Takte auf den Schlägen des Songs – Takt 1 ist seine erste Eins",
+  "Français": "Mesures sur les temps du morceau – la mesure 1 est son premier temps fort",
+  "한국어": "마디를 곡의 박에 맞춤 – 1마디는 곡의 첫 강박",
+  "中文": "小节对齐歌曲的拍子 – 第 1 小节是它的第一个强拍",
+  "العربية": "المازورات على نبضات الأغنية – المازورة 1 هي أول نبضة قوية فيها",
+  "Tiếng Việt": "Ô nhịp theo phách của bài – ô nhịp 1 là phách mạnh đầu tiên của bài"
+ },
+ "Bars from the timeline's first frame – at the song's tempo, lined up with the edit": {
+  "日本語": "タイムラインの最初のフレームから小節を数える – 曲のテンポで、編集に合わせる",
+  "Español": "Compases desde el primer fotograma de la línea de tiempo: al tempo de la canción, alineados con el montaje",
+  "Deutsch": "Takte ab dem ersten Frame der Timeline – im Tempo des Songs, am Schnitt ausgerichtet",
+  "Français": "Mesures depuis la première image de la timeline – au tempo du morceau, alignées sur le montage",
+  "한국어": "타임라인의 첫 프레임부터 마디 – 곡의 템포로, 편집에 맞춤",
+  "中文": "小节从时间线的第一帧开始 – 按歌曲的速度,与剪辑对齐",
+  "العربية": "المازورات من أول إطار في المخطط الزمني – بإيقاع الأغنية، محاذاةً للمونتاج",
+  "Tiếng Việt": "Ô nhịp từ khung hình đầu tiên của timeline – theo nhịp độ của bài, canh theo bản dựng"
+ },
+ "Line the bars up with": {
+  "日本語": "小節を合わせる先",
+  "Español": "Alinear los compases con",
+  "Deutsch": "Takte ausrichten an",
+  "Français": "Aligner les mesures sur",
+  "한국어": "마디를 맞출 대상",
+  "中文": "小节对齐到",
+  "العربية": "محاذاة المازورات مع",
+  "Tiếng Việt": "Canh ô nhịp theo"
+ },
+ "Line the bars up with the timeline": {
+  "日本語": "小節をタイムラインに合わせる",
+  "Español": "Alinear los compases con la línea de tiempo",
+  "Deutsch": "Takte an der Timeline ausrichten",
+  "Français": "Aligner les mesures sur la timeline",
+  "한국어": "마디를 타임라인에 맞추기",
+  "中文": "小节对齐时间线",
+  "العربية": "محاذاة المازورات مع المخطط الزمني",
+  "Tiếng Việt": "Canh ô nhịp theo timeline"
+ },
+ "Line the bars up with the song": {
+  "日本語": "小節を曲に合わせる",
+  "Español": "Alinear los compases con la canción",
+  "Deutsch": "Takte am Song ausrichten",
+  "Français": "Aligner les mesures sur le morceau",
+  "한국어": "마디를 곡에 맞추기",
+  "中文": "小节对齐歌曲",
+  "العربية": "محاذاة المازورات مع الأغنية",
+  "Tiếng Việt": "Canh ô nhịp theo bài hát"
+ },
+ "Snapping on: clips go to the grid and the song's beats (N)": {
+  "日本語": "スナップ オン:クリップはグリッドと曲の拍に吸着します (N)",
+  "Español": "Ajuste activado: los clips van a la cuadrícula y a los tiempos de la canción (N)",
+  "Deutsch": "Einrasten an: Clips springen auf das Raster und die Schläge des Songs (N)",
+  "Français": "Magnétisme activé : les clips vont sur la grille et les temps du morceau (N)",
+  "한국어": "스냅 켜짐: 클립이 그리드와 곡의 박에 붙습니다 (N)",
+  "中文": "吸附开启:片段吸附到网格和歌曲的拍子 (N)",
+  "العربية": "الالتقاط مفعّل: تذهب المقاطع إلى الشبكة ونبضات الأغنية (N)",
+  "Tiếng Việt": "Bật bắt dính: clip bắt vào lưới và phách của bài (N)"
+ },
+ "Snapping off: clips go where they're let go (N)": {
+  "日本語": "スナップ オフ:クリップは離した位置に置かれます (N)",
+  "Español": "Ajuste desactivado: los clips quedan donde se sueltan (N)",
+  "Deutsch": "Einrasten aus: Clips bleiben, wo sie losgelassen werden (N)",
+  "Français": "Magnétisme désactivé : les clips restent là où on les lâche (N)",
+  "한국어": "스냅 꺼짐: 클립이 놓은 자리에 놓입니다 (N)",
+  "中文": "吸附关闭:片段停在松开的位置 (N)",
+  "العربية": "الالتقاط متوقف: تبقى المقاطع حيث تُفلت (N)",
+  "Tiếng Việt": "Tắt bắt dính: clip nằm đúng chỗ thả (N)"
+ },
+ "Snapping on": {
+  "日本語": "スナップ オン",
+  "Español": "Ajuste activado",
+  "Deutsch": "Einrasten an",
+  "Français": "Magnétisme activé",
+  "한국어": "스냅 켜짐",
+  "中文": "吸附开启",
+  "العربية": "الالتقاط مفعّل",
+  "Tiếng Việt": "Bật bắt dính"
+ },
+ "Snapping off": {
+  "日本語": "スナップ オフ",
+  "Español": "Ajuste desactivado",
+  "Deutsch": "Einrasten aus",
+  "Français": "Magnétisme désactivé",
+  "한국어": "스냅 꺼짐",
+  "中文": "吸附关闭",
+  "العربية": "الالتقاط متوقف",
+  "Tiếng Việt": "Tắt bắt dính"
+ },
+ "Disabled – not played or placed (D)": {
+  "日本語": "無効 – 再生も配置もされません (D)",
+  "Español": "Desactivado: no se reproduce ni se coloca (D)",
+  "Deutsch": "Deaktiviert – wird nicht gespielt oder platziert (D)",
+  "Français": "Désactivé – ni joué ni placé (D)",
+  "한국어": "비활성 – 재생되거나 배치되지 않습니다 (D)",
+  "中文": "已停用 – 不播放也不放置 (D)",
+  "العربية": "معطّل – لا يُشغَّل ولا يُوضع (D)",
+  "Tiếng Việt": "Đã tắt – không phát và không đặt (D)"
+ },
+ "Enable the clip": {
+  "日本語": "クリップを有効にする",
+  "Español": "Activar el clip",
+  "Deutsch": "Clip aktivieren",
+  "Français": "Activer le clip",
+  "한국어": "클립 켜기",
+  "中文": "启用片段",
+  "العربية": "تفعيل المقطع",
+  "Tiếng Việt": "Bật clip"
+ },
+ "Disable the clip": {
+  "日本語": "クリップを無効にする",
+  "Español": "Desactivar el clip",
+  "Deutsch": "Clip deaktivieren",
+  "Français": "Désactiver le clip",
+  "한국어": "클립 끄기",
+  "中文": "停用片段",
+  "العربية": "تعطيل المقطع",
+  "Tiếng Việt": "Tắt clip"
+ },
+ "Enable the track": {
+  "日本語": "トラックを有効にする",
+  "Español": "Activar la pista",
+  "Deutsch": "Spur aktivieren",
+  "Français": "Activer la piste",
+  "한국어": "트랙 켜기",
+  "中文": "启用轨道",
+  "العربية": "تفعيل المسار",
+  "Tiếng Việt": "Bật track"
+ },
+ "Disable the track": {
+  "日本語": "トラックを無効にする",
+  "Español": "Desactivar la pista",
+  "Deutsch": "Spur deaktivieren",
+  "Français": "Désactiver la piste",
+  "한국어": "트랙 끄기",
+  "中文": "停用轨道",
+  "العربية": "تعطيل المسار",
+  "Tiếng Việt": "Tắt track"
+ },
+ "Enable a clip": {
+  "日本語": "クリップを有効化",
+  "Español": "Activar un clip",
+  "Deutsch": "Einen Clip aktivieren",
+  "Français": "Activer un clip",
+  "한국어": "클립 켜기",
+  "中文": "启用一个片段",
+  "العربية": "تفعيل مقطع",
+  "Tiếng Việt": "Bật một clip"
+ },
+ "Disable a clip": {
+  "日本語": "クリップを無効化",
+  "Español": "Desactivar un clip",
+  "Deutsch": "Einen Clip deaktivieren",
+  "Français": "Désactiver un clip",
+  "한국어": "클립 끄기",
+  "中文": "停用一个片段",
+  "العربية": "تعطيل مقطع",
+  "Tiếng Việt": "Tắt một clip"
+ },
+ "Enable a track": {
+  "日本語": "トラックを有効化",
+  "Español": "Activar una pista",
+  "Deutsch": "Eine Spur aktivieren",
+  "Français": "Activer une piste",
+  "한국어": "트랙 켜기",
+  "中文": "启用一条轨道",
+  "العربية": "تفعيل مسار",
+  "Tiếng Việt": "Bật một track"
+ },
+ "Disable a track": {
+  "日本語": "トラックを無効化",
+  "Español": "Desactivar una pista",
+  "Deutsch": "Eine Spur deaktivieren",
+  "Français": "Désactiver une piste",
+  "한국어": "트랙 끄기",
+  "中文": "停用一条轨道",
+  "العربية": "تعطيل مسار",
+  "Tiếng Việt": "Tắt một track"
  }
 }

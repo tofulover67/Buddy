@@ -69,6 +69,31 @@ main.daw {
     background: var(--daw-well); border: var(--bw) dashed var(--daw-line);
 }
 
+/* The song's tempo, put right by hand: a strip under the title bar, open while it plays. */
+.tempo-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 6px 10px; border-radius: 8px;
+    background: var(--daw-panel); border: var(--bw) solid var(--daw-live);
+}
+.tempo-bar[hidden] { display: none; }
+.tempo-group { display: flex; align-items: center; gap: 5px; }
+.tempo-group .daw-label { margin-right: 3px; }
+.tempo-bar .tbtn { height: 26px; padding: 0 8px; font-size: var(--fs-sm); }
+.tempo-bar .tbtn:disabled { opacity: .4; cursor: default; }
+.tempo-bpm { width: 84px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tempo-unit, .tempo-first { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--text-dim); }
+.tempo-first { min-width: 7ch; font-variant-numeric: tabular-nums; }
+.tempo-x b { font-weight: 700; }
+.tempo-x span { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.tempo-nudge { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tempo-end { margin-left: auto; }
+.tempo-state { font-size: var(--fs-sm); color: var(--text-dim); }
+.tempo-end .btn[hidden] { display: none; }
+.lane .head .song-tempo {
+    font: inherit; font-size: var(--fs-xs); text-align: left; padding: 0; border: 0; background: none; color: var(--text-dim);
+    cursor: pointer; max-width: 100%;
+}
+.lane .head .song-tempo:hover { color: var(--daw-live); text-decoration: underline dotted; text-underline-offset: 3px; }
+
 .seg { display: inline-flex; background: var(--daw-well); border: var(--bw) solid var(--daw-line); border-radius: 8px; padding: 2px; gap: 2px; }
 .seg button {
     font: inherit; font-size: var(--fs-sm); font-weight: 600; border: 0; background: transparent; color: var(--text-dim);
@@ -111,14 +136,21 @@ main.daw {
 .knob-row { display: flex; flex-wrap: wrap; gap: 6px 10px; }
 
 .fader { position: relative; width: 26px; cursor: ns-resize; touch-action: none; border-radius: 4px; flex: none; }
-.fader .slot { position: absolute; left: 50%; top: 4px; bottom: 4px; width: 4px; transform: translateX(-50%); border-radius: 2px; background: rgba(0, 0, 0, .5); }
-.fader .fill { position: absolute; left: 50%; bottom: 4px; width: 4px; transform: translateX(-50%); border-radius: 2px; background: var(--daw-live); opacity: .5; }
+/* Hardware, in every theme (as the knobs are): a light slot in a dark well, the level in the
+   track's own colour, a bright cap - so they stand out on any panel. */
+.fader .slot {
+    position: absolute; left: 50%; top: 4px; bottom: 4px; width: 6px; transform: translateX(-50%); border-radius: 3px;
+    background: #4A4C55; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 0 0 1px #5E616B;
+}
+.fader .fill { position: absolute; left: 50%; bottom: 4px; width: 6px; transform: translateX(-50%); border-radius: 3px; background: var(--track, var(--daw-live)); }
 .fader .cap {
     position: absolute; left: 1px; right: 1px; height: 14px; border-radius: 4px;
-    background: linear-gradient(#5B5D66, #3A3C43); box-shadow: 0 2px 6px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .12);
+    background: linear-gradient(#9A9DA8, #63666F); border: 1px solid rgba(255, 255, 255, .35);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .3);
 }
-.fader .cap::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; height: 2px; background: #E7E8EC; opacity: .7; border-radius: 1px; }
-.meter { width: 6px; border-radius: 3px; background: rgba(0, 0, 0, .5); position: relative; overflow: hidden; flex: none; }
+.fader .cap::after { content: ""; position: absolute; left: 3px; right: 3px; top: 5px; height: 2px; background: #FFFFFF; border-radius: 1px; }
+.fader:hover .cap, .fader:focus-visible .cap { background: linear-gradient(#B4B7C1, #767983); }
+.meter { width: 6px; border-radius: 3px; background: #33353C; box-shadow: inset 0 0 0 1px #45474F; position: relative; overflow: hidden; flex: none; }
 .meter i {
     position: absolute; left: 0; right: 0; bottom: 0; height: 0;
     background: linear-gradient(to top, #3FAE4B 0 62%, #E8B04C 62% 88%, #E64B3D 88%); background-position: bottom;
@@ -174,7 +206,18 @@ main.daw {
     flex: 1; min-width: 0; overflow: auto; border-radius: 10px; background: var(--daw-well);
     border: var(--bw) solid var(--card-border); position: relative; outline: none;
 }
-.zoom { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 2px; background: var(--daw-panel); border-radius: 8px; padding: 2px; border: var(--bw) solid var(--daw-line); z-index: 6; }
+.zoom { position: absolute; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 2px; background: var(--daw-panel); border-radius: 8px; padding: 2px; border: var(--bw) solid var(--daw-line); z-index: 6; }
+.zoom-sep { width: 1px; align-self: stretch; margin: 3px 2px; background: var(--daw-line); }
+/* Arrange's snapping: a magnet, lit when it's on (N). */
+.magnet { width: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--text-dim); }
+.magnet[aria-pressed="true"] { color: var(--daw-live); background: var(--daw-live-soft); }
+.magnet-icon {
+    display: block; width: 12px; height: 11px; box-sizing: border-box; border: 3px solid currentColor; border-top: 0;
+    border-radius: 0 0 7px 7px; position: relative;
+}
+.magnet-icon::before, .magnet-icon::after { content: ""; position: absolute; top: -1px; width: 3px; height: 3px; background: var(--daw-panel); }
+.magnet-icon::before { left: -3px; }
+.magnet-icon::after { right: -3px; }
 .lanes-grid { position: relative; min-width: calc(150px + var(--w)); isolation: isolate; }
 .lane { display: flex; min-height: 64px; border-bottom: var(--bw) solid rgba(0, 0, 0, .25); }
 .lane .head {
@@ -198,6 +241,9 @@ main.daw {
 .lane.ruler { min-height: 40px; position: sticky; top: 0; z-index: 5; }
 .lane.ruler .head { display: grid; grid-template-rows: 16px 1fr; align-items: center; justify-content: stretch; gap: 0; padding-top: 0; padding-bottom: 0; cursor: default; }
 .lane.ruler .head .daw-label { line-height: 1; }
+.align-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.align-pick { padding: 1px; border-radius: 6px; }
+.align-pick button { padding: 1px 6px; font-size: var(--fs-xs); border-radius: 5px; }
 /* Two rows: the loop strip, then the bar numbers (the playhead's). */
 .timebar { position: relative; flex: none; display: grid; grid-template-rows: 16px 1fr; background: var(--daw-panel); border-bottom: var(--bw) solid var(--daw-line); }
 .loopbar { position: relative; cursor: pointer; touch-action: none; background: rgba(0, 0, 0, .18); border-bottom: var(--bw) solid var(--daw-line); }
@@ -232,7 +278,36 @@ main.daw {
 .head-handle::before { content: ""; position: absolute; left: 2px; bottom: 0; border: 6px solid transparent; border-bottom: 10px solid var(--daw-live); border-top: 0; }
 .lane.song { min-height: 60px; }
 .lane.song .body { color: var(--daw-song); cursor: text; }
-.wave { position: absolute; left: 0; top: 0; height: 100%; color: var(--daw-song); }
+.wave { position: absolute; left: 0; top: 0; height: 100%; color: var(--daw-song); pointer-events: none; }
+/* The timeline's audio, under the song: to write around, never played. */
+.lane.edit-head { min-height: 24px; }
+.lane.edit-head .head { padding-top: 0; padding-bottom: 0; cursor: default; }
+.edit-toggle {
+    font: inherit; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: var(--text-dim); cursor: pointer;
+}
+.edit-toggle:hover { color: var(--text-strong); }
+.edit-caret { width: 0; height: 0; border: 4px solid transparent; border-left: 6px solid currentColor; border-right: 0; transition: transform .12s; }
+.edit-toggle[aria-expanded="true"] .edit-caret { transform: rotate(90deg); }
+.edit-count { position: sticky; left: 8px; font-size: var(--fs-xs); color: var(--text-dim); line-height: 24px; padding-left: 8px; }
+.lane.edit-audio { min-height: 38px; }
+.lane.edit-audio .head { padding-top: 2px; padding-bottom: 2px; cursor: default; }
+.lane.edit-audio .head .tn { font-weight: 600; font-size: var(--fs-sm); color: var(--text); }
+.edit-track { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-dim); flex: none; }
+.lane.edit-audio .body { cursor: text; }
+.lane.edit-audio .wave { color: rgba(170, 180, 195, .75); }
+.eclip {
+    --clip: #5B7088;              /* a clip's own colour in Resolve is set on it */
+    position: absolute; top: 3px; bottom: 3px; border-radius: 4px; overflow: hidden; pointer-events: none;
+    background: color-mix(in srgb, var(--clip) 24%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--clip) 55%, transparent);
+}
+.eclip span {
+    position: absolute; left: 4px; top: 1px; right: 4px; font-size: var(--fs-xs); line-height: 1.2; color: var(--text-dim);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.eclip.off { opacity: .4; }
+.eclip.is-song { box-shadow: inset 0 0 0 1px var(--daw-song); }
 /* The picture lane: the edit in Resolve, stuck under the ruler. */
 .lane.picture { min-height: 26px; position: sticky; top: 40px; z-index: 5; }
 .lane.picture .head { flex-direction: row; align-items: center; justify-content: space-between; padding-top: 0; padding-bottom: 0; cursor: default; }
@@ -275,6 +350,12 @@ main.daw {
 .clip canvas { position: absolute; left: 2px; right: 2px; top: 17px; bottom: 3px; width: calc(100% - 4px); height: calc(100% - 20px); pointer-events: none; }
 .clip .grip { position: absolute; right: 0; top: 0; bottom: 0; width: 7px; cursor: ew-resize; }
 .clip .grip:hover { background: rgba(255, 255, 255, .25); }
+/* Disabled (D): greyed and struck through - not played or placed. */
+.clip.off { background: repeating-linear-gradient(135deg, #3A3B42 0 6px, #303137 6px 12px); border-style: dashed; border-color: rgba(255, 255, 255, .3); }
+.clip.off .ct { color: #A9ABB3; text-decoration: line-through; }
+.clip.off canvas { opacity: .35; }
+.lane.off .body { opacity: .35; }
+.lane.off .head .sub { color: var(--daw-live); }
 /* The playhead: always there - where it's playing, or where it'll start. Its handle is in the ruler. */
 .playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; pointer-events: none; z-index: 6; background: var(--daw-live); }
 .playhead.moving { box-shadow: 0 0 10px var(--daw-live); }
@@ -293,19 +374,26 @@ main.daw {
 .prog .chip { cursor: pointer; }
 
 .daw-mixer {
-    grid-column: 2; display: flex; gap: 4px; overflow-x: auto; padding: 8px;
+    grid-column: 2; display: flex; gap: 6px; overflow-x: auto; padding: 8px;
     background: var(--daw-panel); border: var(--bw) solid var(--card-border); border-radius: 10px;
 }
+/* Each strip its own panel, set off from the mixer's (its own surface and edge, from the theme). */
 .strip {
-    width: 84px; flex: none; background: var(--daw-raised); border-radius: 8px; padding: 6px 4px 8px; display: grid; justify-items: center;
-    gap: 5px; border-top: 3px solid var(--track, var(--daw-line)); cursor: pointer; align-content: start;
+    width: 84px; flex: none; background: var(--raised-bg); border: var(--bw) solid var(--btn-border); border-radius: 8px;
+    padding: 6px 4px 8px; display: grid; justify-items: center; gap: 5px;
+    border-top: 3px solid var(--track, var(--daw-line)); cursor: pointer; align-content: start;
 }
-.strip.sel { box-shadow: inset 0 0 0 1px var(--daw-live); }
+.strip:hover { border-color: var(--btn-hover-border); border-top-color: var(--track, var(--daw-line)); }
+.strip.sel { background: var(--btn-hover-bg); border-color: var(--daw-live); border-top-color: var(--track, var(--daw-line)); }
 .strip.quiet .strip-fm { opacity: .45; }
 .strip-name { font-size: var(--fs-xs); font-weight: 700; color: var(--text-strong); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.strip-fm { display: flex; gap: 6px; align-items: flex-end; }
+.strip-fm {
+    display: flex; gap: 6px; align-items: flex-end; padding: 6px 7px; border-radius: 6px;
+    background: #121316; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .07);
+}
 .strip-gap { height: 52px; }
-.strip .db { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.strip .knob .kl { color: var(--text); }
+.strip .db { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-strong); font-variant-numeric: tabular-nums; }
 .strip.master { margin-left: auto; --track: var(--text-strong); }
 .strip.song { --track: var(--daw-song); }
 
@@ -348,6 +436,9 @@ main.daw {
     border-radius: 12px; overflow: hidden; border: var(--bw) solid var(--card-border); background: var(--daw-panel);
 }
 .roll[hidden] { display: none; }
+.roll { position: relative; }
+.roll-zoom { top: 26px; bottom: auto; right: 12px; opacity: .85; }
+.roll-zoom:hover { opacity: 1; }
 .roll-corner { grid-row: 1; grid-column: 1; background: var(--daw-panel); border-bottom: var(--bw) solid var(--daw-line); }
 .roll-ruler { grid-row: 1; grid-column: 2; display: block; background: var(--daw-panel); border-bottom: var(--bw) solid var(--daw-line); cursor: pointer; touch-action: none; }
 .roll-keys { grid-row: 2; grid-column: 1; display: block; }
@@ -386,6 +477,11 @@ main.daw {
 .pcard .ch { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .pcard .ch .field { width: auto; }
 .pads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.perf-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pads-foot { margin-top: 2px; }
+.pads-rec .rec-dot { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--daw-rec); }
+.pads-write { height: 28px; }
+.pads-hint { color: var(--daw-live); }
 .pad {
     font: inherit; aspect-ratio: 1.4; border-radius: 10px; border: var(--bw) solid var(--daw-line); cursor: pointer; touch-action: none;
     background: linear-gradient(#2A2B31, #222328); color: #E7E8EC; display: grid; align-content: center; justify-items: center; gap: 2px;

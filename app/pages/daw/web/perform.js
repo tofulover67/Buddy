@@ -4,9 +4,15 @@
  * pad that each move several settings at once, a drum step sequencer and
  * the keyboard. What's played can be recorded like anything else.
  *
+ *   Tracks   across the top: the track the keyboard, the pads (an instrument
+ *            track), the macros and the steps (a drum track) work on - a click
+ *            to go from the drums to the keys and back
  *   Pads     click, or the number keys 1-8; Triad, 7th or Spread voicing.
  *            They play the selected track - or, with a drum track selected,
- *            the first instrument track
+ *            the first instrument track - and its sound is picked beside them.
+ *            Into the mix: Record (the pads' track, from the playhead, a count-in
+ *            first), or Write - each pad puts its chord in at the playhead, as
+ *            long as chosen, and the playhead moves on to the next
  *   Macros   Brightness, Ambience, Motion, Punch on the selected track; the XY
  *            pad is Brightness across and Motion up
  *   Steps    the drum track's beat at the cursor, a bar at a time: click a
@@ -24,7 +30,9 @@ DawViews.perform = (() => {
     function build(into) {
         root = into;
         UI = {};
+        UI.top = el("div.perf-top");
         UI.padsHead = el("div.ch");
+        UI.padsFoot = el("div.ch.pads-foot");
         UI.pads = el("div.pads");
         UI.macrosHead = el("div.ch");
         UI.macros = el("div.macros");
@@ -34,8 +42,8 @@ DawViews.perform = (() => {
         UI.seq = el("div.seq");
         UI.keyboard = Parts.keyboard(3);
         UI.chords = Parts.chordControl();
-        root.append(el("div.perf", {}, [
-            el("section.pcard", {}, [UI.padsHead, UI.pads]),
+        root.append(UI.top, el("div.perf", {}, [
+            el("section.pcard", {}, [UI.padsHead, UI.pads, UI.padsFoot]),
             el("section.pcard", {}, [UI.macrosHead, UI.macros, UI.xy]),
             el("section.pcard.wide", {}, [UI.drumsHead, UI.seq]),
             el("section.pcard.wide.pkeys", {}, [UI.chords.node, UI.keyboard.node]),
@@ -52,20 +60,46 @@ DawViews.perform = (() => {
         return t && t.kind === "inst" ? t : Daw.P.tracks.find(x => x.kind === "inst") || null;
     };
 
+    // ------------------------------------------------------------ tracks --
+
+    function drawTop() {
+        const P = Daw.P;
+        Parts.fill(UI.top,
+            el("div.seg.con-seg", {role: "group", "aria-label": "Track"}, P.tracks.map(t =>
+                el("button", {type: "button", "aria-pressed": String(t.id === P.sel.track), translate: "no",
+                    title: t.kind === "drums" ? Buddy.t("Drums: the keyboard plays the kit, the steps are its beat") : Parts.soundInfo(t).label,
+                    style: `--track:${Parts.color(t)}`, onclick: () => { Daw.allOff(); Daw.select(t.id); }},
+                [el("i.dot"), el("span", {text: t.name})]))));
+    }
+
     function drawPads() {
         const t = padTrack();
         Parts.fill(UI.padsHead,
             el("span.daw-label", {translate: "no", text: `${Buddy.t("Chord pads")} · ${Daw.keyName()}`}),
             el("span.spacer"),
-            t ? el("span.muted.small", {translate: "no", text: `${t.name} · ${Parts.soundInfo(t).label}`}) : null,
+            t ? el("span.muted.small", {translate: "no", text: t.name}) : null,
+            t ? Parts.soundSelect(t) : null,
             Ctl.seg([["triad", "Triad"], ["seventh", "7th"], ["spread", "Spread"]], Daw.P.voicing, v => {
                 Daw.P.voicing = v;
                 Daw.changed("pads");
             }, "Voicing").node);
+        // Into the mix: recorded as played, or written in a chord at a time.
+        const lenPick = el("select.field", {"aria-label": "How long each chord is", title: "How long each chord written is"},
+            WRITE_LENS.map(([v, text]) => el("option", {value: String(v), text, selected: v === writeLen})));
+        lenPick.addEventListener("change", () => { writeLen = Number(lenPick.value); });
+        Parts.fill(UI.padsFoot,
+            el("button.btn.ghost.pads-rec", {type: "button", disabled: !t, onclick: () => recordPads(),
+                title: "Record the pads into their track from the playhead (R), a bar of clicks first when Count in is on"},
+                [el("i.rec-dot"), el("span", {text: "Record"})]),
+            el("button.tbtn.toggle.pads-write", {type: "button", text: "Write", disabled: !t, "aria-pressed": String(writing),
+                title: "Each pad puts its chord in at the playhead, then moves the playhead on - a progression a click at a time",
+                onclick: () => { writing = !writing; drawPads(); }}),
+            writing ? lenPick : null,
+            el("span.muted.small.pads-hint", {text: writing ? "Click the chords in order" : ""}));
         UI.pads.replaceChildren(...Daw.chordsInKey().map((ch, i) => {
             const pad = el("button.pad", {type: "button", dataset: {pad: i}, title: `${Buddy.t("Key")} ${i + 1}`}, [
                 el("span", {text: ch.name, translate: "no"}), el("small", {text: ch.numeral, translate: "no"})]);
-            pad.addEventListener("pointerdown", e => { if (e.button === 0) { e.preventDefault(); pad.setPointerCapture(e.pointerId); padOn(i); } });
+            pad.addEventListener("pointerdown", e => { if (e.button === 0) { e.preventDefault(); Ctl.capture(pad, e); padOn(i); } });
             pad.addEventListener("pointerup", () => padOff(i));
             pad.addEventListener("pointercancel", () => padOff(i));
             return pad;
@@ -76,6 +110,7 @@ DawViews.perform = (() => {
     function padOn(i) {
         const t = padTrack();
         if (!t) return;
+        if (writing && !Daw.recording()) writeChord(t, i);
         Daw.noteOn(`pad${i}`, Daw.chordsInKey()[i].notes, Daw.P.velocity, t.id, true);
         const node = UI.pads.querySelector(`[data-pad="${i}"]`);
         if (node) node.classList.add("on");
@@ -85,6 +120,48 @@ DawViews.perform = (() => {
         Daw.noteOff(`pad${i}`);
         const node = UI.pads.querySelector(`[data-pad="${i}"]`);
         if (node) node.classList.remove("on");
+    }
+
+    /* Record from the playhead into the pads' track (selected first, so what's played goes in). */
+    function recordPads() {
+        const t = padTrack();
+        if (!t) return;
+        if (Daw.recording()) { Daw.stop(); DawApp.syncBar(); return drawPads(); }
+        Daw.select(t.id);
+        Daw.start(true);
+        DawApp.syncBar();
+        drawPads();
+    }
+
+    const WRITE_LENS = [[2, "½ bar"], [4, "1 bar"], [8, "2 bars"]];
+    let writing = false, writeLen = 4;
+
+    /* Pad i's chord into track t at the playhead (stopped) or the stretch playing now, writeLen
+       beats long: into the clip there (or the one ending there, grown), else a new clip from
+       its bar - what was in that stretch replaced. The playhead moves on to the next. */
+    function writeChord(t, i) {
+        const P = Daw.P, len = writeLen;
+        const at = Daw.playing() ? Math.floor(Daw.position() / len + 1e-6) * len : Math.round(P.cursor * 4) / 4;
+        const notes = Daw.chordsInKey()[i].notes;
+        Daw.edit("Write a chord", () => {
+            let c = t.clips.find(x => at >= x.start && at < x.start + x.len) || t.clips.find(x => Math.abs(x.start + x.len - at) < 1e-6);
+            if (!c) {
+                const before = Math.max(0, ...t.clips.filter(x => x.start + x.len <= at).map(x => x.start + x.len));
+                c = {id: Daw.uid(), name: "Chords", start: Math.max(before, Math.floor(at / 4) * 4), len: 0, notes: []};
+                t.clips.push(c);
+                t.clips.sort((a, b) => a.start - b.start);
+            }
+            const next = Math.min(Infinity, ...t.clips.filter(x => x !== c && x.start >= at).map(x => x.start));
+            const end = Math.min(next, at + len);
+            c.len = Math.max(c.len, Math.min(next - c.start, Math.ceil((end - c.start) / 4 - 1e-6) * 4));
+            const s = at - c.start, d = end - at;
+            c.notes = c.notes.filter(n => n[1] + n[2] <= s + 1e-6 || n[1] >= s + d - 1e-6);
+            for (const m of notes) c.notes.push([m, +s.toFixed(4), +d.toFixed(4), P.velocity]);
+            c.notes.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+            P.sel.track = t.id;
+            P.sel.clip = c.id;
+            if (!Daw.playing()) P.cursor = at + len;
+        }, "clips");
     }
 
     // ------------------------------------------------------------ macros --
@@ -232,10 +309,11 @@ DawViews.perform = (() => {
 
     function refresh(what) {
         if (!UI) return;
-        if (what === "values" || what === "mixer" || what === "cursor" || what === "loop" || what === "picture") return;
+        if (what === "values" || what === "mixer" || what === "cursor" || what === "loop" || what === "picture" || what === "tempo" || what === "audio") return;
         if (what === "steps") return;
         if (what === "keys") { UI.chords.sync(); return UI.keyboard.draw(); }
         if (what === "pads") return drawPads();
+        drawTop();
         drawPads();
         drawMacros();
         drawSteps();

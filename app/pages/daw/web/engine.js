@@ -20,8 +20,11 @@
  *                 clip under the playhead, or a new one), the loop, the
  *                 metronome, swing. One timer looks a moment ahead and
  *                 schedules on the audio clock what falls in it
- *   The song      heard by page.py: its key, tempo and beat grid, and its
- *                 audio played along on the same clock, beat 0 on its first bar
+ *   The song      heard by page.py: its key, tempo and beat grid (the grid put
+ *                 right by hand when it was heard wrong: setSongGrid), and its
+ *                 audio played along on the same clock
+ *   The edit      the open timeline: beat 0 is its first frame, on the song's
+ *                 grid (setEdit, reanchor)
  *
  * Events (Daw.on): "change" {what}, "transport", "song", "notes" (what's
  * sounding live, to light the keys), "select".
@@ -36,6 +39,10 @@ const Daw = (() => {
     const INSTRUMENTS = Object.keys(Instruments.KINDS);
     const KITS = Object.keys(Drums.KITS);
     const AHEAD = 0.12;
+    const MIN_SONG_BPM = 30, MAX_SONG_BPM = 300;
+    const MOST_GRIDS = 32;             // songs whose grid was set by hand, kept (project.py)
+    const PRE_ROLL_BEATS = 1;
+    const MOST_BEATS = 256 * 4 * 4;    // the edit drawn: 1024 bars at the most (project.py keeps 256 of clips)
 
     /* The knobs, in groups: what each instrument and each kit can be set to. */
     const LOG = {log: true};
@@ -104,9 +111,9 @@ const Daw = (() => {
         drums.clips.push({id: uid(), name: "Beat", start: 0, len: 4, notes: beat});
         return {
             bpm: 120, tonic: 9, mode: "minor", follow: true, swing: 0, snap: 4, length: 16, cursor: 0,
-            loop: {on: true, start: 0, end: 16}, metronome: false, count_in: true, octave: 4, velocity: 0.8,
+            loop: {on: true, start: 0, end: 16}, metronome: false, count_in: true, pre_roll: false, octave: 4, velocity: 0.8,
             voicing: "triad", view: "arrange", song: "", master: 0.8, song_level: 0.7, song_mute: false, follow_resolve: true,
-            key_chord: {type: "off", voicing: "close", inversion: 0},
+            key_chord: {type: "off", voicing: "close", inversion: 0}, grids: {}, anchor: null, edit_audio: true, align: "song", snap_clips: true,
             sel: {track: "", clip: ""},
             tracks: [newTrack("inst", "pad", "Chords", 0), newTrack("inst", "bass", "Bass", 1), drums,
                      newTrack("inst", "lead", "Lead", 3)],
@@ -133,11 +140,14 @@ const Daw = (() => {
             : Object.assign({drive: 0, echo: 0, octave: 0}, Instruments.values(t.sound));
     }
 
-    let saveTimer = 0;
+    // Kept for the timeline it's for (page.py: SCOPE, its key) - a save still waiting when
+    // another timeline's project comes is sent first, with its own.
+    let saveTimer = 0, SCOPE = null;
+    const sendSave = () => { saveTimer = 0; Buddy.send("project", SCOPE === null ? P : {scope: SCOPE, project: P}); };
     function save() {
         if (!restored) return;
         clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => Buddy.send("project", P), 900);
+        saveTimer = setTimeout(sendSave, 900);
     }
 
     /* A change from a layout: kept for Undo, drawn everywhere, saved. */
@@ -163,13 +173,24 @@ const Daw = (() => {
         const view = P.view;
         P = JSON.parse(was.state);
         P.view = view;
+        reanchor();
         changed("all");
         Buddy.toast(`${from === undo ? "Undone" : "Redone"}: ${was.label}`);
     }
 
-    function load(given) {
+    /* A kept project - or, with none (a timeline the DAW hasn't had), a new one - for the
+       timeline `scope` (null: as it was). */
+    function load(given, scope = null) {
+        if (saveTimer) { clearTimeout(saveTimer); sendSave(); }
         restored = true;
-        if (!given || !Array.isArray(given.tracks)) return;
+        if (scope !== null) SCOPE = scope;
+        if (!given || !Array.isArray(given.tracks)) {
+            P = fresh();
+            P.sel.track = P.tracks[0].id;
+            reanchor();
+            undo.length = redo.length = 0;
+            return changed("all");
+        }
         const base = fresh();
         P = Object.assign(base, given, {loop: Object.assign(base.loop, given.loop), sel: Object.assign(base.sel, given.sel),
                                         key_chord: Object.assign(base.key_chord, given.key_chord)});
@@ -177,6 +198,9 @@ const Daw = (() => {
             if (t.kind === "drums" && !Drums.KITS[t.sound]) t.sound = KITS[0];
             if (t.kind !== "drums" && !Instruments.KINDS[t.sound]) t.sound = INSTRUMENTS[0];
         }
+        // Kept before beat 0 was the edit's start: its beats were its song's, from bar 1.
+        if (!given.anchor && given.song) P.anchor = {song: `#clip:${given.song}`, at: 0, origin: 0};
+        reanchor();
         undo.length = redo.length = 0;
         changed("all");
     }
@@ -197,9 +221,23 @@ const Daw = (() => {
         const k = songKey();
         return k ? {tonic: k.tonic, mode: k.mode === "minor" ? "minor" : "major"} : {tonic: P.tonic, mode: P.mode};
     }
-    // The song's tempo: its grid's (song.py - to the thousandth, the steady beat through
-    // all of its beats), else the tempo heard.
-    const songBpm = () => (SONG ? (SONG.grid && SONG.grid.bpm) || SONG.bpm || null : null);
+    // The song's beat grid, {bpm, first: seconds into the song where bar 1 starts}: set by
+    // hand (P.grids, by the song's file - seconds into the file, so it holds when the clip
+    // is trimmed or cut up), else what Buddy heard (song.py's grid: the steady beat through
+    // all of its beats, to the thousandth), else the tempo heard and its first bar.
+    const songFile = () => (SONG && SONG.media) || "";
+    function heardGrid() {
+        if (!SONG) return null;
+        if (SONG.grid && SONG.grid.bpm) return {bpm: SONG.grid.bpm, first: SONG.grid.first};
+        if (SONG.bpm) return {bpm: SONG.bpm, first: SONG.bars && SONG.bars.length ? SONG.bars[0] : 0};
+        return null;
+    }
+    function handGrid() {
+        const g = songFile() && P.grids ? P.grids[songFile()] : null;
+        return g ? {bpm: g.bpm, first: g.first - (SONG.offset || 0)} : null;
+    }
+    const songGrid = () => handGrid() || heardGrid();
+    const songBpm = () => { const g = songGrid(); return g ? g.bpm : null; };
     const bpm = () => (P.follow && songBpm() ? songBpm() : P.bpm);
     const beatS = () => 60 / bpm();
     const keyName = () => `${NAMES[key().tonic]} ${key().mode}`;
@@ -240,7 +278,7 @@ const Daw = (() => {
     let ctx = null, master = null;
     const nodes = new Map();           // track id -> its live graph
     const anySolo = () => P.tracks.some(t => t.solo);
-    const audible = t => !t.mute && (!anySolo() || t.solo);
+    const audible = t => !t.off && !t.mute && (!anySolo() || t.solo);
     const faderGain = level => Math.pow(level / 0.8, 2);
     const faderDb = level => (level <= 0.001 ? -Infinity : 20 * Math.log10(faderGain(level)));
 
@@ -445,15 +483,18 @@ const Daw = (() => {
         const B = beatS();
         let from = P.cursor;
         if (loopOn() && (from < P.loop.start || from >= P.loop.end)) from = P.loop.start;
-        const lead = record && P.count_in ? 4 * B : 0.06;
-        const t0 = c.currentTime + lead + 0.04;
-        T = {record, t0, from, nextBeat: from, nextTime: t0, anchors: [{time: t0, beat: from}], countFrom: c.currentTime + 0.04,
-             clicked: c.currentTime, recClip: null, rec: new Map()};
+        // Pre-roll: it plays from a beat before - the song, and anything a hair early, already
+        // sounding when the playhead's beat comes; the playhead waits there till then.
+        const pre = P.pre_roll ? PRE_ROLL_BEATS : 0;
+        const lead = Math.max(record && P.count_in ? 4 * B : 0, pre * B) + 0.06;
+        const t0 = c.currentTime + lead + 0.04, tPre = t0 - pre * B;
+        T = {record, t0, from, nextBeat: from - pre, nextTime: tPre, anchors: [{time: tPre, beat: from - pre}],
+             countFrom: c.currentTime + 0.04, clicked: c.currentTime, recClip: null, rec: new Map()};
         if (record) {
             checkpoint("Record");
             prepareRecording(from);
         }
-        songFollow(t0, from);
+        songFollow(tPre, from - pre);
         tick();
         timer = setInterval(tick, 25);
         emit("transport", {});
@@ -532,7 +573,7 @@ const Daw = (() => {
             if (!audible(t)) continue;
             const n = nodes.get(t.id);
             for (const clip of t.clips) {
-                if (clip.start >= b1 || clip.start + clip.len <= b0) continue;
+                if (clip.off || clip.start >= b1 || clip.start + clip.len <= b0) continue;
                 for (const [m, s, d, v] of clip.notes) {
                     const at = clip.start + s;
                     if (at < b0 || at >= b1 || s >= clip.len) continue;
@@ -644,6 +685,7 @@ const Daw = (() => {
             if (songAudio.src !== SONG.url) songAudio.src = SONG.url;
             loadSong(SONG.url);
             P.song = SONG.id;
+            reanchor();
         } else {
             songBuffer = null;
             songLoading = "";
@@ -670,13 +712,45 @@ const Daw = (() => {
         req.send();
     }
 
-    /* Seconds into the song at project beat b: beat 0 is the song's first bar, on its grid. */
+    /* Seconds into the song at project beat b: its bar 1 is beat songAt(), on its grid. */
     function songTime(b) {
         if (!SONG) return 0;
-        const first = SONG.grid ? SONG.grid.first : SONG.bars && SONG.bars.length ? SONG.bars[0] : 0;
-        return first + b * 60 / (songBpm() || bpm());
+        const g = songGrid();
+        return (g ? g.first : 0) + (b - songAt()) * 60 / (g ? g.bpm : bpm());
     }
     const songBeats = () => (SONG && SONG.length_s ? Math.max(0, (SONG.length_s - songTime(0)) / (60 / (songBpm() || bpm()))) : 0);
+
+    /* Seconds into the song where it's heard now: playing, what reaches the ears is a moment
+       behind the audio clock (a click on a beat heard is that late); stopped, the playhead. */
+    const songNow = () => songTime(T ? position(ctx.currentTime - heardLate()) : P.cursor);
+
+    /* The song's grid set by hand ({bpm, first} as songGrid() has them), or null for what
+       Buddy heard again - an edit (Undo), kept for the song's file. The playhead stays on
+       the same moment of the song, and what's playing goes on from it. */
+    function setSongGrid(g, label) {
+        if (!SONG || !songFile()) return false;
+        const was = T && !T.record;
+        const at = songTime(T ? position() : P.cursor);
+        if (T) stop();
+        edit(label, () => {
+            const grids = Object.assign({}, P.grids);
+            delete grids[songFile()];
+            if (g) {
+                const b = clamp(g.bpm, MIN_SONG_BPM, MAX_SONG_BPM), bar = 240 / b;
+                // Any downbeat: the bars run on from it both ways - kept as the song's first.
+                const first = g.first - Math.floor(g.first / bar + 1e-9) * bar + (SONG.offset || 0);
+                grids[songFile()] = {bpm: +b.toFixed(3), first: +first.toFixed(4)};
+            }
+            // The latest songs' only (a song set again is the latest).
+            const files = Object.keys(grids);
+            for (const f of files.slice(0, Math.max(0, files.length - MOST_GRIDS))) delete grids[f];
+            P.grids = grids;
+            reanchor();
+            P.cursor = Math.max(0, Math.round((at - songTime(0)) / (60 / songBpm()) * 1000) / 1000);
+        }, "tempo");
+        if (was) start();
+        return true;
+    }
 
     /* The song from beat `beat`, starting at time `at` on the audio clock - the part
        playing until then (the loop's last pass) stopping at that moment. */
@@ -695,7 +769,8 @@ const Daw = (() => {
             const src = c.createBufferSource();
             src.buffer = songBuffer;
             src.connect(songGain);
-            src.start(Math.max(c.currentTime, at), Math.max(0, from));
+            // A beat before the song begins (bar 1 set ahead of it): it starts when it's due.
+            src.start(Math.max(c.currentTime, at) + Math.max(0, -from), Math.max(0, from));
             songSources.push(src);
             return;
         }
@@ -706,7 +781,7 @@ const Daw = (() => {
             songAudio.currentTime = Math.max(0, songTime(beat) + late);
             songAudio.play().catch(() => {});
         };
-        songTimers.push(setTimeout(go, Math.max(0, (at - ctx.currentTime) * 1000 - 10)));
+        songTimers.push(setTimeout(go, Math.max(0, (at - ctx.currentTime - Math.min(0, songTime(beat))) * 1000 - 10)));
         if (songTimers.length > 6) songTimers.shift();
     }
 
@@ -718,19 +793,102 @@ const Daw = (() => {
         songSources.length = 0;
     }
 
+    // ------------------------------------------------------------ the edit --
+    //
+    // The open timeline, {start, end, fps} in frames: the DAW spans it. P.align says what the
+    // bars line up with:
+    //   "song"      the song's grid carried back to the edit's start in whole bars - beat 0 is
+    //               its bar 1 less as many bars as reach back to the timeline's first frame -
+    //               so the bar lines are the song's beats all through the edit, and bar 1 (as
+    //               numbered: barOf) is the song's first; those before it are 0, -1...
+    //   "timeline"  beat 0 on the timeline's first frame, at the song's tempo: the bars are
+    //               the edit's, and the song's beats fall where they fall.
+    // With no song, beat 0 is the timeline's first frame at the project's tempo either way.
+    //
+    // P.anchor {song, at, origin}: the song the project's beats were last lined up with,
+    // the beat its bar 1 was on, and where beat 0 was (seconds from the edit's first frame).
+    // When that moves - the song moved in the edit, its grid put right, another song - the
+    // clips, the loop and the playhead move with it, by whole bars: with the same song, to
+    // stay on its beats; with another, to stay as near the same moment of the edit as whole
+    // bars go.
+
+    let EDIT = null;
+    const songIdent = () => (SONG ? SONG.media || `#clip:${SONG.id}` : "");
+    const sameSong = a => !!(a && SONG && (a.song === songIdent() || a.song === `#clip:${SONG.id}`));
+    const songAt = () => (sameSong(P.anchor) ? P.anchor.at : 0);
+
+    function setEdit(e) {
+        const next = e ? {start: e.start, end: e.end, fps: e.fps} : null;
+        if (JSON.stringify(next) === JSON.stringify(EDIT)) return;
+        EDIT = next;
+        changed(reanchor() ? "clips" : "picture");
+    }
+
+    /* Lined up with the song and the edit as they are now - true when what's on the
+       project's beats moved. */
+    function reanchor() {
+        if (!SONG || !EDIT) return false;
+        const g = songGrid(), bar = 240 / (g ? g.bpm : bpm());
+        const before = (SONG.start - EDIT.start) / SONG.fps + (g ? g.first : 0);     // the edit's start to bar 1
+        const at = P.align === "timeline" ? +(before / (bar / 4)).toFixed(6) : 4 * Math.max(0, Math.ceil(before / bar - 1e-6));
+        const origin = +(before - at / 4 * bar).toFixed(4);
+        // Never lined up with anything (a new project): its first bar becomes the song's first - or,
+        // lined up with the timeline, stays the timeline's.
+        const was = P.anchor;
+        const by = !was ? (P.align === "timeline" ? 0 : at) : sameSong(was) ? at - was.at : 4 * Math.round((was.origin - origin) / bar);
+        P.anchor = {song: songIdent(), at, origin};
+        if (!by) return false;
+        for (const t of P.tracks) for (const c of t.clips) c.start = Math.max(0, +(c.start + by).toFixed(4));
+        // The loop stays whole bars: moved by the nearest.
+        const len = P.loop.end - P.loop.start;
+        P.loop.start = Math.max(0, P.loop.start + 4 * Math.round(by / 4));
+        P.loop.end = P.loop.start + len;
+        P.cursor = Math.max(0, +(P.cursor + by).toFixed(4));
+        return true;
+    }
+
+    /* What the bars line up with: "song" or "timeline" (see above) - an edit, nothing moving in
+       time: the clips and the playhead go to the beats that are where they were. */
+    function setAlign(mode) {
+        if (P.align === mode) return;
+        const was = T && !T.record;
+        if (T) pause();
+        edit(mode === "timeline" ? "Line the bars up with the timeline" : "Line the bars up with the song", () => {
+            P.align = mode;
+            reanchor();
+        }, "tempo");
+        if (was) start();
+    }
+
+    /* The bar number beat b is in, as shown: lined up with the song, bar 1 is its first. */
+    const barShift = () => (P.align !== "timeline" && sameSong(P.anchor) ? P.anchor.at : 0);
+    const barOf = b => Math.floor((b - barShift()) / 4 + 1e-9) + 1;
+
+    /* Timeline frames and the project's beats: on the song's grid, or - with no song - at
+       the project's tempo from the edit's first frame. */
+    function beatOfFrame(frame) {
+        if (SONG) return ((frame - SONG.start) / SONG.fps - songTime(0)) / (60 / (songBpm() || bpm()));
+        return EDIT ? (frame - EDIT.start) / EDIT.fps / beatS() : 0;
+    }
+    function frameOfBeat(beat) {
+        if (SONG) return SONG.start + songTime(beat) * SONG.fps;
+        return EDIT ? EDIT.start + beat * beatS() * EDIT.fps : 0;
+    }
+
     // ------------------------------------------------------------ length --
 
     function projectBeats() {
         let end = P.length * 4;
         for (const t of P.tracks) for (const c of t.clips) end = Math.max(end, c.start + c.len);
-        return Math.max(end, Math.ceil(songBeats() / 4) * 4);
+        const edit = EDIT ? beatOfFrame(EDIT.end) : 0;
+        return Math.max(end, Math.ceil(songBeats() / 4) * 4, Math.min(MOST_BEATS, Math.ceil(edit / 4) * 4));
     }
 
     function usedRange(onlyTrack = null) {
         let lo = Infinity, hi = 0;
         for (const t of P.tracks) {
             if (onlyTrack ? t.id !== onlyTrack : !audible(t)) continue;
-            for (const c of t.clips) if (c.notes.length) { lo = Math.min(lo, c.start); hi = Math.max(hi, c.start + c.len); }
+            for (const c of t.clips) if (c.notes.length && !c.off) { lo = Math.min(lo, c.start); hi = Math.max(hi, c.start + c.len); }
         }
         return hi > 0 ? {from: Math.floor(lo / 4) * 4, to: Math.ceil(hi / 4) * 4} : null;
     }
@@ -750,6 +908,7 @@ const Daw = (() => {
             if (onlyTrack ? t.id !== onlyTrack : !audible(t)) continue;
             const n = trackGraph(off, t, m.input, false, true);
             for (const clip of t.clips) {
+                if (clip.off) continue;
                 for (const [mid, s, d, v] of clip.notes) {
                     const at = clip.start + s;
                     if (at < from || at >= to || s >= clip.len) continue;
@@ -779,6 +938,15 @@ const Daw = (() => {
         if (keep >= buffer.length) return buffer;
         const out = new AudioBuffer({numberOfChannels: 2, length: keep, sampleRate: RATE});
         for (let ch = 0; ch < 2; ch++) out.copyToChannel(buffer.getChannelData(ch).subarray(0, keep), ch);
+        return out;
+    }
+
+    /* The buffer without its first `seconds`. */
+    function trim(buffer, seconds) {
+        const skip = Math.min(buffer.length - 1, Math.max(0, Math.round(seconds * buffer.sampleRate)));
+        if (!skip) return buffer;
+        const out = new AudioBuffer({numberOfChannels: buffer.numberOfChannels, length: buffer.length - skip, sampleRate: buffer.sampleRate});
+        for (let ch = 0; ch < buffer.numberOfChannels; ch++) out.copyToChannel(buffer.getChannelData(ch).subarray(skip), ch);
         return out;
     }
 
@@ -831,16 +999,16 @@ const Daw = (() => {
 
     return {
         RATE, NAMES, SCALES, COLORS, INSTRUMENTS, KITS, INST_KNOBS, DRUM_KNOBS, MACROS, knobsOf,
-        get P() { return P; }, get song() { return SONG; },
+        get P() { return P; }, get song() { return SONG; }, get scope() { return SCOPE; },
         on, emit, edit, checkpoint, changed, load, fresh, newTrack, uid, select,
         undo: () => step(undo, redo), redo: () => step(redo, undo),
         undoLabel: () => (undo.length ? undo[undo.length - 1].label : null),
         redoLabel: () => (redo.length ? redo[redo.length - 1].label : null),
         track, selTrack, selClip, clipOf, values, defaults, audible, faderDb,
-        key, bpm, songBpm, beatS, keyName, inScale, isRoot, noteName, stack, chordsInKey,
+        key, bpm, songBpm, songGrid, heardGrid, handGrid, setSongGrid, songNow, MIN_SONG_BPM, MAX_SONG_BPM, beatS, keyName, inScale, isRoot, noteName, stack, chordsInKey,
         audio, noteOn, noteOff, allOff, sounding, rowNote,
         start, stop, pause, playing, recording, position, loopOn,
-        setSong, songTime, songBeats, songReady: () => !!songBuffer, projectBeats, usedRange, render, channels,
+        setSong, setEdit, setAlign, barOf, beatOfFrame, frameOfBeat, songAt, songTime, songBeats, songReady: () => !!songBuffer, projectBeats, usedRange, render, trim, channels,
         level, analyser, applyMacro,
     };
 })();
