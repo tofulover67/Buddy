@@ -219,7 +219,8 @@ class PageTests(unittest.TestCase):
         self.assertTrue(song["wave"] and max(song["wave"]) <= 255)
         self.assertNotIn("levels", song)
         self.assertEqual((song["media"], song["offset"]), (os.path.normcase(self.music_path), 0.0))   # a hand-set tempo's key
-        path = song["url"].replace("file:///", "")
+        from PySide6.QtCore import QUrl
+        path = QUrl(song["url"]).toLocalFile()                 # "C:/..." on Windows, "/Users/..." on a Mac
         self.assertTrue(os.path.isfile(path))
         self.page.on_listen({"id": "m"})                       # again: what was heard is kept
         self.assertEqual(len(self.decoded), 1)
