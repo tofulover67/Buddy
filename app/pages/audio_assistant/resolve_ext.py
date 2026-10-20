@@ -518,6 +518,20 @@ def _bin(media_pool):
 
 
 BUDDY_TRACK = "Buddy"
+STEM_NAME_MOST = 32
+
+
+def stem_track_name(name):
+    """The Buddy track a stem goes on: "Buddy - Bass" for the DAW's track
+    named Bass - plain "Buddy" for a name with nothing in it."""
+    text = re.sub(r"[\x00-\x1f\x7f]", "", re.sub(r"\s+", " ", str(name or ""))).strip()[:STEM_NAME_MOST].strip()
+    return f"{BUDDY_TRACK} - {text}" if text else BUDDY_TRACK
+
+
+def is_buddy_track(name):
+    """Whether a track of that name is one of Buddy's: "Buddy", or a stem's "Buddy - ..."."""
+    name = str(name or "")
+    return name == BUDDY_TRACK or name.startswith(BUDDY_TRACK + " - ")
 
 
 def _track_ids(timeline, index):
@@ -552,13 +566,14 @@ def _new_track(before, after, wanted):
     return fresh[-1] if fresh else None
 
 
-def _buddy_track(timeline, below, start, end):
+def _buddy_track(timeline, below, start, end, name=BUDDY_TRACK):
     """(index, added) - the audio track a clip of track `below` gets its curve
-    clip on. Buddy's own tracks, all named BUDDY_TRACK, sit in a run directly
-    under the track whose clips they stand in for (the user's choice: not
-    whatever track below has a gap there, which could be the music). The
-    first of that run with nothing in [start, end), on and unlocked, is
-    reused; if there's none, a new one goes in at the end of the run.
+    clip on. Buddy's own tracks (is_buddy_track: "Buddy", or a stem's "Buddy -
+    Bass") sit in a run directly under the track whose clips they stand in for
+    (the user's choice: not whatever track below has a gap there, which could
+    be the music). The first of that run named `name` with nothing in [start,
+    end), on and unlocked, is reused; if there's none, a new one named so goes
+    in at the end of the run.
 
     Resolve 21.1 inserts a track where asked with AddTrack("audio",
     {"audioType", "index"}) - undocumented; the tracks under it move down
@@ -569,8 +584,11 @@ def _buddy_track(timeline, below, start, end):
     made none."""
     count = int(_call(timeline, "GetTrackCount", "audio", default=0) or 0)
     index = below + 1
-    while index <= count and _call(timeline, "GetTrackName", "audio", index, default="") == BUDDY_TRACK:
-        usable = _call(timeline, "GetIsTrackEnabled", "audio", index, default=True) \
+    while index <= count:
+        here = _call(timeline, "GetTrackName", "audio", index, default="")
+        if not is_buddy_track(here):
+            break
+        usable = here == name and _call(timeline, "GetIsTrackEnabled", "audio", index, default=True) \
             and not _call(timeline, "GetIsTrackLocked", "audio", index, default=False)
         if usable and not any(_call(i, "GetStart", default=0) < end and _call(i, "GetEnd", default=0) > start
                               for i in _call(timeline, "GetItemListInTrack", "audio", index, default=[]) or []):
@@ -586,14 +604,14 @@ def _buddy_track(timeline, below, start, end):
     index = _new_track(before, [_track_sig(timeline, i) for i in range(1, count + 2)], index)
     if index is None:
         return None
-    _call(timeline, "SetTrackName", "audio", index, BUDDY_TRACK)
+    _call(timeline, "SetTrackName", "audio", index, name)
     return index, True
 
 
 def _drop_empty_buddy_track(timeline, index):
     """A Buddy track left with nothing on it goes (after a failed Apply, or a
     curve taken off) - never a track that isn't Buddy's, or has clips."""
-    if _call(timeline, "GetTrackName", "audio", index, default="") == BUDDY_TRACK and not _track_ids(timeline, index):
+    if is_buddy_track(_call(timeline, "GetTrackName", "audio", index, default="")) and not _track_ids(timeline, index):
         _call(timeline, "DeleteTrack", "audio", index)
 
 
@@ -1045,54 +1063,89 @@ def place_sound(controller, path, frame, seconds, below):
     A sound that would start before the timeline does has its head cut off
     there - its moment still lands where it should. Checked, and taken back
     if Resolve didn't put it there. Returns {"id", "track"}."""
+    return place_sounds(controller, [{"path": path, "seconds": seconds}], frame, below)[0]
+
+
+def place_sounds(controller, sounds, frame, below):
+    """Several WAVs, all from timeline frame `frame` - a DAW render's stems:
+    each {"path", "seconds", "name"} on a Buddy track of its own named for it
+    (stem_track_name: "Buddy - Bass"; no name, a plain "Buddy" one), in the
+    order given, down the run under audio track `below` - a track of that
+    name with room is reused, so stems placed again go on the same tracks.
+    All or none: one Resolve didn't place takes the others back with it.
+    Returns [{"id", "track"}], in the same order."""
     project = controller.current_project()
     timeline = get_timeline(controller)
     media_pool = project.GetMediaPool()
     fps = _float(timeline.GetSetting("timelineFrameRate"), 24.0) or 24.0
     first_frame = int(_call(timeline, "GetStartFrame", default=0) or 0)
     head = max(0, first_frame - int(frame))
-    start, end = int(frame) + head, int(frame) + int(round(seconds * fps))
-    if end - start < 1:
-        raise ResolveConnectionError("The sound would end before the timeline starts.")
-    new_mpi = _wav_item(media_pool, _bin(media_pool), path)
-    if new_mpi is None:
-        raise ResolveConnectionError("Resolve didn't import the sound.")
-    wav_fps = _float(_call(new_mpi, "GetClipProperty", "FPS", default=None)) or fps
-    got_track = _buddy_track(timeline, max(1, int(below)), start, end)
-    if got_track is None:
-        raise ResolveConnectionError("Resolve didn't add a track for the sound.")
-    spot, added = got_track
-    placed = None
+    bin_ = _bin(media_pool)
+    done = []                                         # (item, track, added) - taken back on a failure
     try:
-        got = _call(media_pool, "AppendToTimeline", [{
-            "mediaPoolItem": new_mpi, "startFrame": int(round(head * wav_fps / fps)),
-            "endFrame": int(round((end - int(frame)) * wav_fps / fps)), "mediaType": 2,
-            "trackIndex": spot, "recordFrame": start}], default=[]) or []
-        placed = got[0] if got else None
-        if placed is None or _call(placed, "GetStart") != start or abs((_call(placed, "GetEnd") or 0) - end) > 1:
-            raise ResolveConnectionError("Resolve didn't place the sound where it belongs.")
+        for sound in sounds:
+            start, end = int(frame) + head, int(frame) + int(round(sound["seconds"] * fps))
+            if end - start < 1:
+                raise ResolveConnectionError("The sound would end before the timeline starts.")
+            new_mpi = _wav_item(media_pool, bin_, sound["path"])
+            if new_mpi is None:
+                raise ResolveConnectionError("Resolve didn't import the sound.")
+            wav_fps = _float(_call(new_mpi, "GetClipProperty", "FPS", default=None)) or fps
+            name = stem_track_name(sound["name"]) if sound.get("name") else BUDDY_TRACK
+            got_track = _buddy_track(timeline, max(1, int(below)), start, end, name)
+            if got_track is None:
+                raise ResolveConnectionError("Resolve didn't add a track for the sound.")
+            spot, added = got_track
+            placed = None
+            try:
+                got = _call(media_pool, "AppendToTimeline", [{
+                    "mediaPoolItem": new_mpi, "startFrame": int(round(head * wav_fps / fps)),
+                    "endFrame": int(round((end - int(frame)) * wav_fps / fps)), "mediaType": 2,
+                    "trackIndex": spot, "recordFrame": start}], default=[]) or []
+                placed = got[0] if got else None
+                if placed is None or _call(placed, "GetStart") != start or abs((_call(placed, "GetEnd") or 0) - end) > 1:
+                    raise ResolveConnectionError("Resolve didn't place the sound where it belongs.")
+            except Exception:
+                if placed is not None:
+                    _call(timeline, "DeleteClips", [placed])
+                if added:
+                    _drop_empty_buddy_track(timeline, spot)
+                raise
+            done.append((placed, spot, added))
     except Exception:
-        if placed is not None:
+        # A track added later is lower in the run: taken off first, the ones above don't move.
+        for placed, spot, added in reversed(done):
             _call(timeline, "DeleteClips", [placed])
-        if added:
-            _drop_empty_buddy_track(timeline, spot)
+            if added:
+                _drop_empty_buddy_track(timeline, spot)
         raise
-    return {"id": str(_call(placed, "GetUniqueId", default="") or ""), "track": spot}
+    return [{"id": str(_call(placed, "GetUniqueId", default="") or ""), "track": spot} for placed, spot, _ in done]
 
 
 def remove_sound(controller, clip_id):
     """Takes a placed sound off (Undo), and its Buddy track if that's left
     empty. The WAV stays in the bin - Tidy up lets it go."""
+    return {"id": remove_sounds(controller, [clip_id])[0]}
+
+
+def remove_sounds(controller, clip_ids):
+    """Takes placed sounds off (Undo of a set of stems) - those still on the
+    timeline - and their Buddy tracks that are left empty, the lowest first so
+    the others keep their places. Returns the ids taken off."""
     timeline, items = audio_items(controller)
-    item = items.get(clip_id)
-    if item is None:
+    there = [(clip_id, items[clip_id]) for clip_id in clip_ids if clip_id in items]
+    if not there:
         raise ResolveConnectionError("The sound isn't on the open timeline any more.")
-    track = (_call(item, "GetTrackTypeAndIndex", default=["audio", 0]) or ["audio", 0])[1]
-    if not _call(timeline, "DeleteClips", [item], default=False):
-        raise ResolveConnectionError("Resolve didn't take the sound off.")
-    if track:
-        _drop_empty_buddy_track(timeline, int(track))
-    return {"id": clip_id}
+    tracks = set()
+    for clip_id, item in there:
+        track = (_call(item, "GetTrackTypeAndIndex", default=["audio", 0]) or ["audio", 0])[1]
+        if not _call(timeline, "DeleteClips", [item], default=False):
+            raise ResolveConnectionError("Resolve didn't take the sound off.")
+        if track:
+            tracks.add(int(track))
+    for track in sorted(tracks, reverse=True):
+        _drop_empty_buddy_track(timeline, track)
+    return [clip_id for clip_id, _ in there]
 
 
 # ---------------------------------------------------------- beat markers --

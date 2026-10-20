@@ -7,8 +7,11 @@
  *   Tracks    click a clip to select it, drag to move it (Alt: a copy), drag
  *             its right end to lengthen it, double-click it to edit its notes
  *             in Console; double-click an empty stretch for a new clip; Delete,
- *             Ctrl+D and D (disable or enable, when the tracks were clicked last -
- *             else D plays a note) on the selected clip, and in its menu.
+ *             Ctrl+C, Ctrl+X, Ctrl+D and D (disable or enable, when the tracks were
+ *             clicked last - else D plays a note) on the selected clip, and in its
+ *             menu. Ctrl+V pastes on the selected track at the playhead (click an
+ *             empty stretch for both), and again straight after; right-click an
+ *             empty stretch: Paste here.
  *             Snapping (the magnet, N): a clip's start or end goes to the
  *             nearest line of the grid (the Snap setting's) or beat of the song
  *             - which, lined up with the timeline, can fall between them; off,
@@ -171,13 +174,14 @@ DawViews.arrange = (() => {
             });
             return node;
         };
-        const group = (label, items) => {
+        // Each kind its own box, its heading marked in the kind's colour.
+        const group = (label, color, items) => {
             items = items.filter(Boolean);
-            return items.length ? el("div.bgroup", {}, [el("span.daw-label", {text: label}), ...items]) : null;
+            return items.length ? el("div.bgroup", {style: `--group:${color}`}, [el("span.daw-label", {text: label}), ...items]) : null;
         };
         UI.browserList.replaceChildren(...[
-            group("Instruments", Daw.INSTRUMENTS.map(n => item("inst", n, Instruments.KINDS[n]))),
-            group("Drum kits", Daw.KITS.map(n => item("drums", n, Drums.KITS[n]))),
+            group("Instruments", Daw.COLORS[0], Daw.INSTRUMENTS.map(n => item("inst", n, Instruments.KINDS[n]))),
+            group("Drum kits", Daw.COLORS[2], Daw.KITS.map(n => item("drums", n, Drums.KITS[n]))),
         ].filter(Boolean));
     }
 
@@ -688,6 +692,15 @@ DawViews.arrange = (() => {
             Daw.select(t.id, "");
             DawApp.moveCursor(Math.max(0, Math.round((e.clientX - body.getBoundingClientRect().left) / px)));
         });
+        body.addEventListener("contextmenu", e => {
+            if (e.target !== body) return;
+            e.preventDefault();
+            const at = (e.clientX - body.getBoundingClientRect().left) / px;
+            Daw.select(t.id, "");
+            Buddy.menu({x: e.clientX, y: e.clientY, items: [
+                {label: "Paste here", disabled: !copied, onClick: () => pasteClip(t, at)},
+            ]});
+        });
         body.addEventListener("dblclick", e => {
             if (e.target !== body) return;
             const bar = Math.floor((e.clientX - body.getBoundingClientRect().left) / px / 4) * 4;
@@ -838,6 +851,8 @@ DawViews.arrange = (() => {
                 {label: "Edit in Console", onClick: () => DawApp.openClip(t.id, c.id)},
                 {label: c.off ? "Enable the clip" : "Disable the clip", onClick: () => disableClip(c)},
                 {sep: true},
+                {label: "Copy", onClick: () => copyClip(t, c, false)},
+                {label: "Cut", onClick: () => copyClip(t, c, true)},
                 {label: "Duplicate the clip", onClick: () => keydown({key: "", code: "KeyD", ctrlKey: true})},
                 {label: "Delete the clip", danger: true, onClick: () => keydown({key: "Delete", code: "Delete"})},
             ]});
@@ -955,13 +970,62 @@ DawViews.arrange = (() => {
         Daw.edit(c.off ? "Enable a clip" : "Disable a clip", () => { if (c.off) delete c.off; else c.off = true; }, "clips");
     }
 
-    /* Keys this layout takes: N (snapping); Delete, Ctrl+D and - with the tracks focused -
-       D on the selected clip. */
+    // ------------------------------------------------------------ copy and paste --
+    //
+    // One clip copied at a time (kept while Buddy's open, across the layouts): pasted on the
+    // selected track at the playhead - or, when that track is the other kind (a beat on an
+    // instrument), on the track it came from, else the first of its kind.
+
+    let copied = null;                            // {clip, kind, from}
+
+    function copyClip(t, c, cut) {
+        copied = {clip: JSON.parse(JSON.stringify(c)), kind: t.kind, from: t.id};
+        if (cut) Daw.edit("Cut a clip", () => { t.clips = t.clips.filter(x => x !== c); Daw.P.sel.clip = ""; }, "clips");
+        else Buddy.toast(Buddy.t(t.kind === "drums" ? "Beat copied" : "Clip copied"), 900);
+    }
+
+    /* The copied clip onto track t (or one of its kind) from beat `at`: a clip it would
+       overlap makes way, as for Duplicate. The playhead goes to its end, so pasting again
+       puts the next one straight after it. */
+    function pasteClip(t, at) {
+        if (!copied) return Buddy.toast(Buddy.keys(Buddy.t("Copy a clip first (Ctrl+C).")), 2500);
+        const P = Daw.P, from = Daw.track(copied.from);
+        const into = t && t.kind === copied.kind ? t
+            : from && from.kind === copied.kind ? from : P.tracks.find(x => x.kind === copied.kind);
+        if (!into) {
+            return Buddy.toast(Buddy.t(copied.kind === "drums" ? "A beat is pasted on a drum track – add one first."
+                : "Notes are pasted on an instrument track – add one first."), 3500);
+        }
+        const clip = JSON.parse(JSON.stringify(copied.clip));
+        clip.id = Daw.uid();
+        clip.start = snapBeat(Math.max(0, at)).beat;
+        Daw.edit("Paste a clip", () => {
+            into.clips = into.clips.filter(x => x.start + x.len <= clip.start || x.start >= clip.start + clip.len);
+            into.clips.push(clip);
+            into.clips.sort((a, b) => a.start - b.start);
+            P.sel.track = into.id;
+            P.sel.clip = clip.id;
+        }, "clips");
+        DawApp.moveCursor(clip.start + clip.len, false);
+        if (t && into !== t) Buddy.toast(`${Buddy.t("Pasted on")} ${into.name}`, 2000);
+    }
+
+    /* Keys this layout takes: N (snapping); Ctrl+V (paste at the playhead); Delete, Ctrl+C,
+       Ctrl+X, Ctrl+D and - with the tracks focused - D on the selected clip. */
     function keydown(e) {
         const plain = !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey;
+        const ctrl = (e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey;
         if (plain && e.code === "KeyN") { if (!e.repeat) toggleSnap(); return true; }
         const t = Daw.selTrack(), c = Daw.selClip();
+        if (ctrl && e.code === "KeyV") {
+            pasteClip(t, Daw.playing() ? Daw.position() : Daw.P.cursor);
+            return true;
+        }
         if (!t || !c) return false;
+        if (ctrl && (e.code === "KeyC" || e.code === "KeyX")) {
+            if (!e.repeat) copyClip(t, c, e.code === "KeyX");
+            return true;
+        }
         if (plain && e.code === "KeyD" && UI.armed) {
             if (!e.repeat) disableClip(c);
             return true;

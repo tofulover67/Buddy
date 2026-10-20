@@ -154,7 +154,8 @@ class DawPage(WebToolPage):
         self.playhead = None
         self.problem = ""
         self.busy = False
-        self.undo_stack = []           # [{"label", "timeline", "sound": {"id"}}], newest last
+        self.undo_stack = []           # [{"label", "timeline", "sound": {"id"} | {"ids"} (stems)}], newest last
+        self._stems = None             # a set of stems coming in: {"set", "count", "frame", "sounds"} | {"set", "failed"}
         self._songs = {}               # (path, start, end, channels) -> what the view was sent
         self._job = None               # the fx.Job listening to a song
         self._placing = False
@@ -425,20 +426,27 @@ class DawPage(WebToolPage):
     def on_place(self, payload):
         """A render the page made, its first sample at timeline frame `frame`:
         saved (sounds.py), then put on a Buddy track under the song's track -
-        or under A1 with no song."""
+        or under A1 with no song.
+
+        Stems come a message each - {"stem": {"set", "index", "count", "name"}},
+        one track's render: each saved as it comes (a set of them at once could
+        be hundreds of megabytes), the set placed once the last is in - each on
+        a track of its own named for it (resolve_ext.place_sounds), one Undo."""
         payload = payload or {}
+        stem = payload.get("stem") if isinstance(payload.get("stem"), dict) else None
+        if stem is not None and self._stems_dropped(stem):
+            return
         if self._placing:
+            self._stems = None
             return self.emit("toast", {"text": "Buddy is still putting the last render in."})
         try:
             rate = int(payload.get("rate") or 0)
             samples = sounds.decode(payload.get("channels"), rate, PLACE_MOST_S)
             frame = int(payload.get("frame"))
         except (TypeError, ValueError) as exc:
-            self.emit("placed", {"ok": False})
-            return self.emit("alert", {"title": "Couldn't use that render", "text": str(exc)})
+            return self._place_failed(stem, "Couldn't use that render", str(exc))
         if self.timeline is None:
-            self.emit("placed", {"ok": False})
-            return self.emit("alert", {"title": "Not connected", "text": self.problem or "Open a timeline in Resolve first."})
+            return self._place_failed(stem, "Not connected", self.problem or "Open a timeline in Resolve first.")
         seconds = len(samples) / rate
         clip, below = self._clip(str(payload.get("song") or ""))
         music = ((clip or {}).get("media") or {}).get("path")
@@ -446,14 +454,24 @@ class DawPage(WebToolPage):
         try:
             wav = sounds.save(samples, rate, payload.get("recipe"), label, music, self.timeline.get("project", ""))
         except (OSError, ValueError) as exc:
-            self.emit("placed", {"ok": False})
-            return self.emit("alert", {"title": "Couldn't save the render", "text": str(exc)})
+            return self._place_failed(stem, "Couldn't save the render", str(exc))
+        what = str(payload.get("what") or "mix")
+        if stem is None:
+            placing = [{"path": wav["path"], "seconds": seconds}]
+        else:
+            try:
+                placing = self._stem_in(stem, frame, {"path": wav["path"], "seconds": seconds,
+                                                      "name": str(stem.get("name") or "")[:P.MOST_NAME]})
+            except (TypeError, ValueError) as exc:
+                return self._place_failed(stem, "Couldn't use that render", str(exc))
+            if placing is None:
+                return                                   # more to come
         controller = self._writable()
         if controller is None:
             return self.emit("placed", {"ok": False})
         self._placing = True
-        what = str(payload.get("what") or "mix")
-        undo_label = {"mix": "Place the mix", "track": "Place a track", "loop": "Place the loop"}.get(what, "Place the mix")
+        undo_label = {"mix": "Place the mix", "track": "Place a track", "loop": "Place the loop",
+                      "stems": "Place the stems"}.get(what, "Place the mix")
 
         def done(placed, error):
             self._placing = False
@@ -461,14 +479,55 @@ class DawPage(WebToolPage):
             if error is not None:
                 self.emit("placed", {"ok": False})
                 return self.emit("alert", {"title": "Couldn't put the render in", "text": str(error)})
+            ids = [p["id"] for p in placed]
             self.undo_stack.append({"label": undo_label, "timeline": self.timeline["id"] if self.timeline else "",
-                                    "sound": {"id": placed["id"]}})
+                                    "sound": {"id": ids[0]} if stem is None else {"ids": ids}})
             del self.undo_stack[:-UNDO_LIMIT]
             self._push_undo()
-            self.emit("placed", {"ok": True, "id": placed["id"], "track": placed["track"]})
-            self.emit("toast", {"text": "Placed on A{track}".format(track=placed["track"])})
+            tracks = [p["track"] for p in placed]
+            self.emit("placed", {"ok": True, "id": ids[0], "track": tracks[0], "ids": ids, "tracks": tracks})
+            if stem is None:
+                self.emit("toast", {"text": "Placed on A{track}".format(track=tracks[0])})
+            else:
+                self.emit("toast", {"text": "Placed {count} stems on A{first}–A{last}".format(
+                    count=len(tracks), first=min(tracks), last=max(tracks))})
 
-        self._worker.start(lambda: resolve_ext.place_sound(controller, wav["path"], frame, seconds, below or 1), done)
+        self._worker.start(lambda: resolve_ext.place_sounds(controller, placing, frame, below or 1), done)
+
+    def _stem_in(self, stem, frame, sound):
+        """One stem in: the whole set's sounds once it's the last, else None.
+        ValueError for one out of its set's order (a set left half sent)."""
+        sets, index, count = str(stem.get("set") or ""), int(stem.get("index")), int(stem.get("count"))
+        if index == 0:
+            self._stems = {"set": sets, "count": count, "frame": frame, "sounds": []}
+        got = self._stems
+        if (got is None or got.get("failed") or got["set"] != sets or got["count"] != count or got["frame"] != frame
+                or len(got["sounds"]) != index or not 1 <= count <= P.MOST_TRACKS):
+            raise ValueError("Not all the stems came through. Place them again.")
+        got["sounds"].append(sound)
+        if len(got["sounds"]) < count:
+            return None
+        self._stems = None
+        return got["sounds"]
+
+    def _stems_dropped(self, stem):
+        """Whether this stem is of a set that failed already: passed over
+        without another alert (the last one lets the set go)."""
+        got = self._stems
+        if not (got and got.get("failed") and got["set"] == str(stem.get("set") or "")):
+            return False
+        try:
+            if int(stem.get("index")) >= int(stem.get("count")) - 1:
+                self._stems = None
+        except (TypeError, ValueError):
+            self._stems = None
+        return True
+
+    def _place_failed(self, stem, title, text):
+        if stem is not None:
+            self._stems = {"set": str(stem.get("set") or ""), "failed": True}
+        self.emit("placed", {"ok": False})
+        self.emit("alert", {"title": title, "text": text})
 
     def _push_undo(self):
         here = (self.timeline or {}).get("id")
@@ -494,7 +553,8 @@ class DawPage(WebToolPage):
                 return self.emit("alert", {"title": "Couldn't undo", "text": str(error)})
             self.emit("toast", {"text": f"Undone: {entry['label']}"})
 
-        self._worker.start(lambda: resolve_ext.remove_sound(controller, entry["sound"]["id"]), done)
+        ids = entry["sound"].get("ids") or [entry["sound"]["id"]]
+        self._worker.start(lambda: resolve_ext.remove_sounds(controller, ids), done)
 
     # ------------------------------------------------------------ project --
 

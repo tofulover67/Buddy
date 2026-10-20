@@ -527,6 +527,24 @@ class BuddyTrackTests(unittest.TestCase):
         self.assertEqual(resolve_ext._buddy_track(tl, 1, 0, 100), (3, True))
         self.assertEqual(tl.names(), ["Dialogue", "Music", "Buddy"])            # Music keeps its name
 
+    def test_a_stem_gets_a_buddy_track_named_for_it_in_the_run(self):
+        tl = TrackTimeline([("Music", [], True), ("Buddy", [], True), ("Buddy - Bass", [("b", 0, 100)], True),
+                            ("SFX", [], True)])
+        self.assertEqual(resolve_ext._buddy_track(tl, 1, 0, 100, "Buddy - Keys"), (4, True))    # the run's end, not plain Buddy
+        self.assertEqual(tl.names(), ["Music", "Buddy", "Buddy - Bass", "Buddy - Keys", "SFX"])
+        self.assertEqual(resolve_ext._buddy_track(tl, 1, 200, 300, "Buddy - Bass"), (3, False))  # its own, with room
+        self.assertEqual(resolve_ext._buddy_track(tl, 1, 0, 10), (2, False))                     # a plain sound: plain Buddy
+        resolve_ext._drop_empty_buddy_track(tl, 4)
+        self.assertEqual(tl.names(), ["Music", "Buddy", "Buddy - Bass", "SFX"])
+
+    def test_stem_track_names(self):
+        self.assertEqual(resolve_ext.stem_track_name("  Lead\tsynth \n"), "Buddy - Lead synth")
+        self.assertEqual(resolve_ext.stem_track_name(""), "Buddy")
+        self.assertEqual(len(resolve_ext.stem_track_name("x" * 100)), len("Buddy - ") + resolve_ext.STEM_NAME_MOST)
+        self.assertTrue(resolve_ext.is_buddy_track("Buddy - Drums"))
+        for name in ("Buddy's mix", "Buddy-Drums", "Music", "", None):
+            self.assertFalse(resolve_ext.is_buddy_track(name), name)
+
     def test_only_an_empty_buddy_track_is_dropped(self):
         tl = TrackTimeline([("Dialogue", [], True), ("Buddy", [("c", 0, 1)], True), ("Buddy", [], True),
                             (None, [], True)])

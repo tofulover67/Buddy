@@ -5,13 +5,33 @@ only (no Qt, no Resolve), so it's tested on made-up music.
 
     find(samples, rate) -> {"bpm", "beats": [seconds], "bars": [indices into beats]}
 
-How (after Ellis, "Beat tracking by dynamic programming", 2007):
-  onsets   spectral flux - how much louder each band got since the last
-           window (log magnitude, rises only), summed: peaks where notes and
-           hits start. One value per HOP samples.
-  tempo    the onset curve's autocorrelation, weighted towards 120 BPM (a
-           log-normal over an octave) so a half or double tempo doesn't win
-           on a tie; between MIN_BPM and MAX_BPM.
+How (the tempo after Percival and Tzanetakis, "Streamlined tempo estimation",
+2014; the beats after Ellis, "Beat tracking by dynamic programming", 2007):
+  onsets   spectral flux on a mel scale: how many dB louder each of MEL_BANDS
+           bands (spaced as the ear hears pitch) got since the last window,
+           rises only, averaged - each band counts the same, so a kick and a
+           snare count as much as the hats over them. One value per HOP.
+  tempo    the candidates: the peaks of the onset curve's autocorrelation
+           between MIN_BPM and MAX_BPM. Each is tried as a pulse: of all the
+           ways to lay beats that far apart over the music, how far the best
+           one stands out of the rest (and, at half weight, the same for its
+           eighths) - stretch by stretch, so a song's small drifts don't blur
+           it. A tempo a dotted beat (4:3) or a triplet (3:2) off puts half
+           its beats between the hits, and loses. A leaning to PREFERRED_BPM
+           breaks near ties.
+  octave   a tempo and its double fit the same hits; which one a musician
+           counts can't be heard from the audio alone. It's said between
+           FOLD_BPM and twice that, where most music is counted. Measured on
+           10-40 s excerpts of 27 released songs: the published tempo, or
+           half or double it, on 91% of them, the very tempo on 79%, no tempo
+           on 3% (the way before this: 54%, 44%, and none on a quarter). The
+           DAW has x2 and ÷2 for a song counted the other way.
+  pulse    a steady beat stands clear of chance: the best pulse's beats are
+           PULSE_Z spreads (and more for a longer clip - music's grows with
+           its length, speech's doesn't) over the average way of laying them.
+           And it holds: of the clip's stretches of about AGREE_S, heard on
+           their own, at least half find the same tempo - a few laughs or
+           footsteps can line up by chance once, not stretch after stretch.
   beats    dynamic programming: each window's best score is its onset plus
            the best earlier score one beat back, less a penalty for being off
            the tempo - traced back from the best place near the end. Beats
@@ -24,38 +44,62 @@ import numpy as np
 
 N_FFT = 2048
 HOP = 512
-MIN_BPM, MAX_BPM = 60.0, 200.0
+MEL_BANDS = 40
+MEL_LO_HZ, MEL_HI_HZ = 30.0, 16000.0
+TOP_DB = 80.0             # quieter than this under the loudest is left out (no hiss counted)
+MIN_BPM, MAX_BPM = 50.0, 210.0
+FOLD_BPM = 72.0           # the tempo said: from this to twice it
 PREFERRED_BPM = 120.0
+PREFER_OCTAVES = 1.5      # how gently: a log-normal this many octaves wide
+CANDIDATES = 10
+EIGHTHS = 0.5             # how much a tempo's eighths count, against its beats
+STRETCH_S = 20.0          # a pulse is tried stretch by stretch, this long
+PULSE_Z = 4.5             # a steady beat's pulse stands out at least this much...
+PULSE_Z_GROWTH = 2.0      # ... plus this, times the square root of its length in tens of seconds
+AGREE_S = 10.0            # ... and stretches about this long, heard on their own...
+AGREE_SHARE = 0.5         # ... this share of them at least, find the same tempo...
+AGREE_WITHIN = 0.04       # ... to within this
+SHORT_Z = 8.0             # a clip too short to split: its pulse stands out this much
+QUIET_DB = 0.02           # an onset curve flatter than this (dB a window, on average) has no hits at all
 TIGHTNESS = 100.0         # how hard the beats are held to the tempo
 BEATS_PER_BAR = 4
-PULSE_MIN = 0.15          # the beat's repeat, against the onset curve's own energy
-PULSE_OVER = 6.0          # ... and against the median over the tempo range - or, short of that:
-STEADY_S = 8.0            # stretches this long, half overlapping...
-STEADY_SHARE = 0.8        # ... at least this share of them finding the same beat (or its double or half)
-STEADY_LEAST = 4          # ... out of this many, at least
 # A hit's flux peaks before the hit reaches the window's centre: measured on
 # made-up kicks, hats and plucks at 44.1 and 48 kHz, it's heard about this many
 # samples after the centre of the window that found it.
-ONSET_LAG = 400
+ONSET_LAG = 290
+
+
+def _mel_bank(rate):
+    """MEL_BANDS triangles over the FFT's bins, and each one's centre (Hz)."""
+    hi = min(MEL_HI_HZ, rate / 2)
+    to_mel = lambda f: 2595.0 * np.log10(1 + f / 700.0)
+    edges = 700.0 * (10 ** (np.linspace(to_mel(MEL_LO_HZ), to_mel(hi), MEL_BANDS + 2) / 2595.0) - 1)
+    freqs = np.fft.rfftfreq(N_FFT, 1.0 / rate)
+    bank = np.zeros((MEL_BANDS, len(freqs)))
+    for b in range(MEL_BANDS):
+        lo, mid, top = edges[b:b + 3]
+        bank[b] = np.maximum(0.0, np.minimum((freqs - lo) / (mid - lo), (top - freqs) / (top - mid)))
+    return bank, edges[1:-1]
 
 
 def _onsets(mono, rate):
-    """(all bands, bass) onset strength per HOP, both scaled to unit spread."""
+    """(all bands, bass) onset strength per HOP, both scaled to unit spread -
+    or (None, None) when nothing in it starts at all (silence, a held tone)."""
     if len(mono) < N_FFT:
         mono = np.concatenate((mono, np.zeros(N_FFT - len(mono))))
     frames = np.lib.stride_tricks.sliding_window_view(mono, N_FFT)[::HOP]
     window = np.hanning(N_FFT)
-    freqs = np.fft.rfftfreq(N_FFT, 1.0 / rate)
-    bass = freqs < 200
-    flux, low = np.zeros(len(frames)), np.zeros(len(frames))
-    prev = None
+    bank, centres = _mel_bank(rate)
+    mel = np.zeros((len(frames), MEL_BANDS))
     for first in range(0, len(frames), 512):
-        mag = np.log1p(1000.0 * np.abs(np.fft.rfft(frames[first:first + 512] * window, axis=-1)))
-        before = np.concatenate(([prev if prev is not None else mag[0]], mag[:-1]))
-        rise = np.maximum(mag - before, 0.0)
-        flux[first:first + len(mag)] = rise.sum(axis=1)
-        low[first:first + len(mag)] = rise[:, bass].sum(axis=1)
-        prev = mag[-1]
+        power = np.abs(np.fft.rfft(frames[first:first + 512] * window, axis=-1)) ** 2
+        mel[first:first + len(power)] = power @ bank.T
+    db = 10 * np.log10(np.maximum(mel, 1e-10))
+    db = np.maximum(db, db.max() - TOP_DB)
+    rise = np.maximum(np.diff(db, axis=0, prepend=db[:1]), 0.0)
+    flux, low = rise.mean(axis=1), rise[:, centres < 200].mean(axis=1)
+    if flux.mean() < QUIET_DB:
+        return None, None
     out = []
     for curve in (flux, low):
         curve = curve - np.convolve(curve, np.ones(16) / 16, mode="same")     # the local level away
@@ -65,52 +109,117 @@ def _onsets(mono, rate):
     return out
 
 
+def _phases(onset, period):
+    """For each way of laying beats `period` windows apart (each phase, in
+    windows): the mean onset on its beats - a window either side counted, as
+    a hit's peak can fall in the next - and how many beats there are."""
+    n = len(onset)
+    near = onset.copy()
+    near[1:] = np.maximum(near[1:], onset[:-1])
+    near[:-1] = np.maximum(near[:-1], onset[1:])
+    k = np.arange(int((n - 1) / period) + 1)
+    at = np.round(np.arange(int(np.ceil(period)))[:, None] + k[None, :] * period).astype(int)
+    inside = at < n
+    sums = np.where(inside, near[np.minimum(at, n - 1)], 0.0).sum(axis=1)
+    return sums / np.maximum(inside.sum(axis=1), 1), len(k)
+
+
+def _stretches(n, per_second):
+    m = int(STRETCH_S * per_second)
+    bounds = np.linspace(0, n, max(1, int(round(n / m))) + 1).astype(int)
+    return list(zip(bounds, bounds[1:]))
+
+
+def _stands_out(onset, period, per_second):
+    """How far the best way of laying beats `period` apart stands out of the
+    average way, in the onset's own spread - stretch by stretch, averaged."""
+    out = []
+    for a, b in _stretches(len(onset), per_second):
+        part = onset[a:b]
+        if len(part) >= 2 * period and part.std() > 0:
+            means, _ = _phases(part, period)
+            out.append((means.max() - means.mean()) / part.std())
+    return float(np.mean(out)) if out else 0.0
+
+
+def _pulse_z(onset, period, per_second):
+    """The same, against chance: in spreads of a mean of that many beats.
+    Stretch by stretch, so the more there are, the surer."""
+    zs = []
+    for a, b in _stretches(len(onset), per_second):
+        part = onset[a:b]
+        if len(part) >= 2 * period and part.std() > 0:
+            means, beats_ = _phases(part, period)
+            zs.append((means.max() - means.mean()) / (part.std() / np.sqrt(beats_)))
+    return float(np.mean(zs) * np.sqrt(len(zs))) if zs else 0.0
+
+
 def _tempo(onset, per_second):
     """The beat's length in onset windows (a float), or None for no pulse."""
-    lo, hi = int(per_second * 60 / MAX_BPM), int(np.ceil(per_second * 60 / MIN_BPM))
-    if len(onset) < hi * 4:
+    period = _likeliest(onset, per_second)
+    if period is None:
         return None
-    x = onset - onset.mean()
-    corr = np.correlate(x, x, mode="full")[len(x) - 1:]
-    if corr[0] <= 0:
+    seconds = len(onset) / per_second
+    z = _pulse_z(onset, period, per_second)
+    folded = _folded(period, per_second)
+    parts = max(2, int(round(seconds / AGREE_S)))
+    n = len(onset)
+    if not _long_enough(n // parts, per_second):
+        return folded if z >= SHORT_Z else None             # too short to split: only a clearer pulse will do
+    if z < PULSE_Z + PULSE_Z_GROWTH * np.sqrt(seconds / 10):
         return None
-    lags = np.arange(lo, hi + 1)
-    plain = corr[lo:hi + 1] / corr[0]
-    # A pulse repeats clearly: its lag stands well out of the rest (measured:
-    # sparse drums 14-25x the median, noise, speech and a held tone 2-4x). A full
-    # mix with busy hats and offbeats can sit at 4x too - its beat is told from
-    # speech's by holding: the same beat, stretch after stretch.
-    if plain.max() < PULSE_MIN:
+    # The stretches vote: the tempo most of them find wins, even over the
+    # whole clip's (a busy song can lead it to a 4:5 or 3:4 of its beat).
+    heard = [_folded(p, per_second) for p in
+             (_likeliest(onset[i * n // parts:(i + 1) * n // parts], per_second) for i in range(parts)) if p]
+    near = lambda a, b: abs(a / b - 1) < AGREE_WITHIN
+    best = max(heard + [folded], key=lambda h: (sum(near(q, h) for q in heard), near(h, folded)))
+    with_it = [q for q in heard if near(q, best)]
+    if len(with_it) < AGREE_SHARE * parts or (len(with_it) < 2 and not near(best, folded)):
         return None
-    if plain.max() < PULSE_OVER * np.median(np.abs(plain)) and not _steady(onset, lo + int(np.argmax(plain)), lo, hi, per_second):
-        return None
-    bpm = 60 * per_second / lags
-    weight = np.exp(-0.5 * (np.log2(bpm / PREFERRED_BPM) / 1.0) ** 2)
-    score = corr[lo:hi + 1] * weight
-    best = int(np.argmax(score))
-    period = float(lags[best])
-    if 0 < best < len(score) - 1:                 # between the lags: a parabola's top
-        a, b, c = score[best - 1], score[best], score[best + 1]
-        denom = a - 2 * b + c
-        if denom < 0:
-            period += 0.5 * (a - c) / denom
+    return folded if near(best, folded) else float(np.median(with_it))
+
+
+def _folded(period, per_second):
+    """The period between FOLD_BPM and twice it: halved or doubled."""
+    while 60 * per_second / period < FOLD_BPM:
+        period /= 2
+    while 60 * per_second / period > 2 * FOLD_BPM:
+        period *= 2
     return period
 
 
-def _steady(onset, lag, lo, hi, per_second):
-    """Whether stretch after stretch of the onset curve repeats at `lag` windows
-    (or twice or half that) - a beat that holds, not a chance repeat."""
-    n = int(STEADY_S * per_second)
-    agree = total = 0
-    for a in range(0, len(onset) - n + 1, n // 2):
-        x = onset[a:a + n] - onset[a:a + n].mean()
-        corr = np.correlate(x, x, mode="full")[n - 1:]
-        if corr[0] <= 0:
+def _long_enough(n, per_second):
+    """Whether an onset curve n windows long holds four beats at MIN_BPM."""
+    return n >= int(np.ceil(per_second * 60 / MIN_BPM)) * 4
+
+
+def _likeliest(onset, per_second):
+    """The likeliest beat's length in onset windows, before folding - or None
+    for a curve too short or too flat to say."""
+    lo, hi = int(per_second * 60 / MAX_BPM), int(np.ceil(per_second * 60 / MIN_BPM))
+    if not _long_enough(len(onset), per_second):
+        return None
+    # The autocorrelation, its spectrum's magnitude squashed (a square root)
+    # so a few loud hits don't make every peak.
+    x = onset - onset.mean()
+    corr = np.fft.irfft(np.abs(np.fft.rfft(x, 2 * len(x))), 2 * len(x))[:len(x)]
+    if corr[0] <= 0:
+        return None
+    peaks = [t for t in range(max(lo, 1), hi + 1) if corr[t] >= corr[t - 1] and corr[t] >= corr[t + 1]]
+    best = None
+    for t in sorted(peaks, key=lambda t: -corr[t])[:CANDIDATES]:
+        a, b, c = corr[t - 1], corr[t], corr[t + 1]
+        denom = a - 2 * b + c
+        period = t + (0.5 * (a - c) / denom if denom < 0 else 0.0)        # between the lags: a parabola's top
+        bpm = 60 * per_second / period
+        if not MIN_BPM <= bpm <= MAX_BPM:
             continue
-        total += 1
-        best = lo + int(np.argmax(corr[lo:hi + 1]))
-        agree += any(abs(best * m - lag) <= 0.04 * lag for m in (0.5, 1.0, 2.0))
-    return total >= STEADY_LEAST and agree >= STEADY_SHARE * total
+        score = _stands_out(onset, period, per_second) + EIGHTHS * _stands_out(onset, period / 2, per_second)
+        score *= np.exp(-0.5 * (np.log2(bpm / PREFERRED_BPM) / PREFER_OCTAVES) ** 2)
+        if best is None or score > best[0]:
+            best = (score, period)
+    return best[1] if best else None
 
 
 def _track(onset, period):
@@ -169,11 +278,22 @@ def find(samples, rate):
     if len(mono) < rate * 3:
         return None
     onset, bass = _onsets(mono, rate)
+    if onset is None:
+        return None
     per_second = rate / HOP
     period = _tempo(onset, per_second)
     if period is None:
         return None
-    windows = _track(onset, period)
+    if 60 * per_second / (period / 2) <= MAX_BPM:
+        # Tracked at twice the tempo, then every other beat kept (the way that
+        # hits harder): with the eighths to hold on to, the beats don't slip
+        # to the "and"s between them - a fast song said at half its tempo
+        # kept to a thousandth of a BPM, measured, not a quarter of one.
+        fine = _track(onset, period / 2)
+        on, off = fine[0::2], fine[1::2]
+        windows = on if len(off) == 0 or onset[on].mean() >= onset[off].mean() else off
+    else:
+        windows = _track(onset, period)
     if len(windows) < 2:
         return None
     # Where its onset is heard: a little after the window's centre.

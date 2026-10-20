@@ -397,6 +397,7 @@ const DawApp = (() => {
             {heading: TL ? (Daw.song ? "Lined up with the song" : "Lined up with the picture") : "Open a timeline in Resolve first"},
             {label: `${Buddy.t("The whole mix")}${bars(mix)}`, disabled: !TL || !mix, onClick: () => place("mix")},
             {label: `${Buddy.t("The selected track")}${t ? ` (${t.name})` : ""}${bars(one)}`, raw: true, disabled: !TL || !one, onClick: () => place("track")},
+            {label: `${Buddy.t("Stems: each track on a track of its own")}${bars(mix)}`, disabled: !TL || !mix, onClick: () => place("stems")},
             {label: `${Buddy.t("The loop")} · ${Buddy.t("bars")} ${Daw.barOf(Daw.P.loop.start)}–${Daw.barOf(Daw.P.loop.end - 1e-6)}`, disabled: !TL, onClick: () => place("loop")},
             {sep: true},
             {label: RESOLVE_UNDO ? `${Buddy.t("Undo")}: ${Buddy.t(RESOLVE_UNDO)}` : "Nothing placed to undo", disabled: !RESOLVE_UNDO, onClick: () => send("undo")},
@@ -404,7 +405,9 @@ const DawApp = (() => {
     }
 
     /* A render of the mix, the selected track or the loop, onto the timeline as a new clip:
-       where the song plays that bar - or, with no song, where the picture lane shows it. */
+       where the song plays that bar - or, with no song, where the picture lane shows it.
+       Stems: each track heard, over the mix's bars, a clip each on a track named for it -
+       sent one at a time as each is rendered, placed together. */
     async function place(what) {
         if (!TL) return Buddy.toast(Buddy.t("Open a timeline in Resolve first."), 3500);
         const P = Daw.P, t = Daw.selTrack(), S = Daw.song;
@@ -422,6 +425,22 @@ const DawApp = (() => {
         syncBar();
         Buddy.toast(Buddy.t("Rendering…"), 1500);
         try {
+            if (what === "stems") {
+                const set = `${Date.now()}`;
+                const count = await Daw.renderStems(range.from, range.to, Math.max(0, lead), (track, buffer, index, count) => {
+                    if (lead < 0) buffer = Daw.trim(buffer, -lead);
+                    send("place", {what, frame, rate: buffer.sampleRate, channels: Daw.channels(buffer), song: S ? S.id : null,
+                        label: `DAW stem ${track.name} ${Daw.keyName()} ${Math.round(Daw.bpm())} BPM`,
+                        recipe: {kind: "daw", what, track: track.name, bpm: Daw.bpm(), key: Daw.keyName(), from: range.from, to: range.to},
+                        stem: {set, index, count, name: track.name}});
+                });
+                if (!count) {
+                    placing = false;
+                    syncBar();
+                    Buddy.toast(Buddy.t("There's nothing to place yet – record or write some notes first."), 3500);
+                }
+                return;
+            }
             let buffer = await Daw.render(range.from, range.to, what === "track" && t ? t.id : null, Math.max(0, lead));
             if (lead < 0) buffer = Daw.trim(buffer, -lead);
             const what2 = what === "track" && t ? t.name : what === "loop" ? "loop" : "mix";

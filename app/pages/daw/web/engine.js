@@ -309,9 +309,13 @@ const Daw = (() => {
         return {input, pan, fader, mute, analyser, sig: JSON.stringify(p)};
     }
 
-    function masterGraph(c, dest, live) {
+    function masterGraph(c, dest, live, limited = true) {
         const input = c.createGain();
         input.gain.value = faderGain(P.master ?? 0.8);
+        if (!limited) {                       // a stem: the master fader, not the limiter
+            input.connect(dest);
+            return {input, analyser: null};
+        }
         const limit = c.createDynamicsCompressor();
         limit.threshold.value = -3;
         limit.knee.value = 0;
@@ -900,12 +904,23 @@ const Daw = (() => {
        silence first: a clip on the timeline starts on a frame, and the beat it's for
        can fall between two. */
     async function render(from, to, onlyTrack = null, lead = 0) {
-        const B = beatS(), tail = 4;
-        const seconds = lead + (to - from) * B + tail;
-        const off = new OfflineAudioContext(2, Math.ceil(seconds * RATE), RATE);
-        const m = masterGraph(off, off.destination, false);
-        for (const t of P.tracks) {
-            if (onlyTrack ? t.id !== onlyTrack : !audible(t)) continue;
+        const buffer = await renderRaw(P.tracks.filter(t => (onlyTrack ? t.id === onlyTrack : audible(t))), from, to, lead, true);
+        const peak = peakOf(buffer);
+        if (peak > MOST_PEAK) scaleBy(buffer, MOST_PEAK / peak);
+        return ringCut(buffer, from, to, lead);
+    }
+
+    const MOST_PEAK = Math.pow(10, -1 / 20);
+    const RING_S = 4;                             // the most of a last note's ring kept
+    const STEMS_KEPT = 32e6;                      // samples of stems held at once, else rendered twice
+
+    /* The tracks' notes in beats `from`-`to`, rendered offline as they play - `lead`
+       seconds of silence first, RING_S of ring after. */
+    async function renderRaw(tracks, from, to, lead, limited) {
+        const B = beatS();
+        const off = new OfflineAudioContext(2, Math.ceil((lead + (to - from) * B + RING_S) * RATE), RATE);
+        const m = masterGraph(off, off.destination, false, limited);
+        for (const t of tracks) {
             const n = trackGraph(off, t, m.input, false, true);
             for (const clip of t.clips) {
                 if (clip.off) continue;
@@ -916,29 +931,76 @@ const Daw = (() => {
                 }
             }
         }
-        const buffer = await off.startRendering();
-        let peak = 0, last = 0;
+        return off.startRendering();
+    }
+
+    function peakOf(buffer) {
+        let peak = 0;
         for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
             const d = buffer.getChannelData(ch);
-            for (let i = 0; i < d.length; i++) {
-                const a = Math.abs(d[i]);
-                if (a > peak) peak = a;
-                if (a > 1e-4) last = Math.max(last, i);
-            }
+            for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > peak) peak = Math.abs(d[i]);
         }
-        const most = Math.pow(10, -1 / 20);
-        if (peak > most) {
-            for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
-                const d = buffer.getChannelData(ch);
-                for (let i = 0; i < d.length; i++) d[i] *= most / peak;
-            }
+        return peak;
+    }
+
+    function scaleBy(buffer, gain) {
+        for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+            const d = buffer.getChannelData(ch);
+            for (let i = 0; i < d.length; i++) d[i] *= gain;
         }
-        // The ring after the last note, not the silence after it.
-        const keep = Math.min(buffer.length, Math.max(Math.ceil((lead + (to - from) * B) * RATE), last + Math.round(0.05 * RATE)));
+    }
+
+    /* The buffer to the ring after its last note, not the silence after it - at least
+       as long as the beats. */
+    function ringCut(buffer, from, to, lead) {
+        let last = 0;
+        for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+            const d = buffer.getChannelData(ch);
+            for (let i = d.length - 1; i > last; i--) if (Math.abs(d[i]) > 1e-4) { last = i; break; }
+        }
+        const keep = Math.min(buffer.length, Math.max(Math.ceil((lead + (to - from) * beatS()) * RATE), last + Math.round(0.05 * RATE)));
         if (keep >= buffer.length) return buffer;
         const out = new AudioBuffer({numberOfChannels: 2, length: keep, sampleRate: RATE});
         for (let ch = 0; ch < 2; ch++) out.copyToChannel(buffer.getChannelData(ch).subarray(0, keep), ch);
         return out;
+    }
+
+    /* The tracks a stem is made of: each one heard with a note in beats `from`-`to`. */
+    function stemTracks(from, to) {
+        return P.tracks.filter(t => audible(t) && t.clips.some(c => !c.off
+            && c.notes.some(([, s]) => s < c.len && c.start + s >= from && c.start + s < to)));
+    }
+
+    /* Stems: each of stemTracks() rendered on its own over the same beats, handed to
+       each(track, buffer, index, count) in the tracks' order (awaited). No master
+       limiter, and one gain for them all - their sum at most -1 dBFS - so together
+       they're the mix as it plays before the limiter, each at its own fader's level. Held
+       all at once when that's not much, else rendered once for the gain and again
+       to hand over. Returns how many. */
+    async function renderStems(from, to, lead, each) {
+        const tracks = stemTracks(from, to);
+        if (!tracks.length) return 0;
+        const length = Math.ceil((lead + (to - from) * beatS() + RING_S) * RATE);
+        const keep = tracks.length * length * 2 <= STEMS_KEPT;
+        const sum = [new Float32Array(length), new Float32Array(length)], held = [];
+        for (const t of tracks) {
+            const b = await renderRaw([t], from, to, lead, false);
+            for (let ch = 0; ch < 2; ch++) {
+                const d = b.getChannelData(ch), s = sum[ch];
+                for (let i = 0; i < d.length; i++) s[i] += d[i];
+            }
+            if (keep) held.push(b);
+        }
+        let peak = 0;
+        for (const s of sum) for (let i = 0; i < s.length; i++) if (Math.abs(s[i]) > peak) peak = Math.abs(s[i]);
+        const gain = peak > MOST_PEAK ? MOST_PEAK / peak : 1;
+        for (let k = 0; k < tracks.length; k++) {
+            const b = keep ? held[k] : await renderRaw([tracks[k]], from, to, lead, false);
+            held[k] = null;
+            if (gain !== 1) scaleBy(b, gain);
+            await each(tracks[k], ringCut(b, from, to, lead), k, tracks.length);
+        }
+        return tracks.length;
     }
 
     /* The buffer without its first `seconds`. */
@@ -1008,7 +1070,7 @@ const Daw = (() => {
         key, bpm, songBpm, songGrid, heardGrid, handGrid, setSongGrid, songNow, MIN_SONG_BPM, MAX_SONG_BPM, beatS, keyName, inScale, isRoot, noteName, stack, chordsInKey,
         audio, noteOn, noteOff, allOff, sounding, rowNote,
         start, stop, pause, playing, recording, position, loopOn,
-        setSong, setEdit, setAlign, barOf, beatOfFrame, frameOfBeat, songAt, songTime, songBeats, songReady: () => !!songBuffer, projectBeats, usedRange, render, trim, channels,
+        setSong, setEdit, setAlign, barOf, beatOfFrame, frameOfBeat, songAt, songTime, songBeats, songReady: () => !!songBuffer, projectBeats, usedRange, render, stemTracks, renderStems, trim, channels,
         level, analyser, applyMacro,
     };
 })();

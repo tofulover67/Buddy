@@ -188,9 +188,20 @@ main.daw {
     background: var(--daw-panel); border: var(--bw) solid var(--card-border); border-radius: 10px; padding: 10px;
 }
 .daw-search { width: 100%; }
-.browser-list { display: grid; gap: 12px; }
-.bgroup { display: grid; gap: 1px; }
-.bgroup .daw-label { padding: 2px 6px 4px; }
+.browser-list { display: grid; gap: 10px; }
+/* Each kind of sound in a box of its own, sunk into the panel, its heading lit and marked in its colour. */
+.bgroup {
+    --group: var(--text-dim);                 /* the kind's colour, set on each by arrange.js */
+    display: grid; gap: 1px; padding: 4px; border-radius: 8px;
+    background: var(--daw-well); border: var(--bw) solid var(--daw-line);
+}
+.bgroup .daw-label {
+    position: relative; padding: 6px 6px 6px 13px; margin-bottom: 3px; border-radius: 5px;
+    color: var(--text-strong); background: color-mix(in srgb, var(--group) 18%, transparent);
+}
+.bgroup .daw-label::before {
+    content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--group);
+}
 .bitem { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; color: var(--text); cursor: pointer; }
 .bitem i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
 .bitem span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

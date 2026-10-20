@@ -317,6 +317,39 @@ class PlaceTests(unittest.TestCase):
         resolve_ext.remove_sound(self.controller, got["id"])
         self.assertEqual(len(self.timeline.tracks), 3)
 
+    def test_stems_go_on_tracks_named_for_them_and_come_off_together(self):
+        stems = [{"path": rf"D:\x - Buddy {n}.wav", "seconds": s, "name": n} for n, s in (("Drums", 2.0), ("Bass", 1.0))]
+        got = resolve_ext.place_sounds(self.controller, stems, 86500, 2)
+        self.assertEqual([g["track"] for g in got], [3, 4])
+        self.assertEqual([self.timeline.GetTrackName("audio", i) for i in range(1, 6)],
+                         ["Dialogue", "Music", "Buddy - Drums", "Buddy - Bass", "SFX"])
+        self.assertEqual([(t.items[0].GetStart(), t.items[0].GetEnd()) for t in self.timeline.tracks[2:4]],
+                         [(86500, 86548), (86500, 86524)])
+        # Placed again later: the same tracks.
+        again = resolve_ext.place_sounds(self.controller, stems, 87000, 2)
+        self.assertEqual([g["track"] for g in again], [3, 4])
+        self.assertEqual(len(self.timeline.tracks), 5)
+        # Undo of the first set: its clips off, the tracks stay for the second.
+        self.assertEqual(resolve_ext.remove_sounds(self.controller, [g["id"] for g in got]), [g["id"] for g in got])
+        self.assertEqual(len(self.timeline.tracks), 5)
+        resolve_ext.remove_sounds(self.controller, [g["id"] for g in again] + ["gone"])      # one gone already: the rest
+        self.assertEqual([t.name for t in self.timeline.tracks], ["Dialogue", "Music", "SFX"])
+
+    def test_stems_go_in_all_or_none(self):
+        stems = [{"path": rf"D:\x - Buddy {n}.wav", "seconds": 1.0, "name": n} for n in ("Drums", "Bass", "Keys")]
+        real = self.pool.AppendToTimeline
+
+        def third_fails(infos):
+            if len(self.pool.appended) == 2:
+                self.pool.shift = 5                                              # Resolve puts it elsewhere
+            return real(infos)
+
+        self.pool.AppendToTimeline = third_fails
+        with self.assertRaises(resolve_ext.ResolveConnectionError):
+            resolve_ext.place_sounds(self.controller, stems, 86500, 2)
+        self.assertEqual([t.name for t in self.timeline.tracks], ["Dialogue", "Music", "SFX"])
+        self.assertEqual([i.GetUniqueId() for i in self.music.items], ["m"])
+
     def test_a_sound_before_the_timelines_start_loses_its_head(self):
         resolve_ext.place_sound(self.controller, r"D:\x - Buddy 2.wav", 86400 - 12, 1.0, 2)
         info = self.pool.appended[-1]

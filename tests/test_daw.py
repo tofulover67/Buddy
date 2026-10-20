@@ -197,11 +197,12 @@ class PageTests(unittest.TestCase):
         p = types.SimpleNamespace(
             timeline={"id": "t1", "project": "p1", "name": "Edit", "fps": 24.0, "start": 86400, "end": 90000,
                       "tracks": [{"index": 1, "name": "Dialogue", "clips": []}, {"index": 2, "name": "Music", "clips": [clip]}]},
-            _songs={}, _placing=False, _full_due=1.0, undo_stack=[], problem="", _worker=worker, settings=Settings(),
+            _songs={}, _placing=False, _stems=None, _full_due=1.0, undo_stack=[], problem="", _worker=worker, settings=Settings(),
             emit=lambda name, data: self.sent.append((name, data)), _writable=lambda: controller,
             _listen=lambda uid, work, done: done(*work(lambda f: None, lambda: False)),
             PLAY_DIR=os.path.join(tmp.name, "play_along"), scope="", projects_dir=lambda: os.path.join(tmp.name, "projects"))
-        for name in ("on_listen", "on_place", "on_undo", "on_project", "_push_undo", "_clip", "_timeline_for_view",
+        for name in ("on_listen", "on_place", "_stem_in", "_stems_dropped", "_place_failed", "on_undo", "on_project",
+                     "_push_undo", "_clip", "_timeline_for_view",
                      "_project_path", "_kept", "_send_project"):
             setattr(p, name, types.MethodType(getattr(Page, name), p))
         self.page = p
@@ -240,6 +241,38 @@ class PageTests(unittest.TestCase):
         self.assertEqual(len(self.tl.tracks), 2)
         self.assertEqual(self.last("toast")["text"], "Undone: Place the mix")
         self.assertEqual(self.last("undo")["label"], None)
+
+    def stem(self, index, count, name, at=86436, sets="s1", channels=None):
+        x = np.zeros(48000, dtype="<f4")
+        x[100 + index] = 0.5
+        chans = channels or [base64.b64encode(x.tobytes()).decode()] * 2
+        self.page.on_place({"what": "stems", "label": f"DAW stem {name}", "frame": at, "rate": 48000, "channels": chans,
+                            "song": "m", "recipe": {"kind": "daw"}, "stem": {"set": sets, "index": index, "count": count, "name": name}})
+
+    def test_stems_are_placed_together_each_on_its_own_track_and_undone_together(self):
+        self.stem(0, 2, "Drums")
+        self.assertEqual([n for n, _ in self.sent if n in ("placed", "alert")], [])            # waits for the last
+        self.assertEqual(len(self.tl.tracks), 2)
+        self.stem(1, 2, "Bass")
+        self.assertEqual(self.last("placed")["tracks"], [3, 4])
+        self.assertEqual([t.name for t in self.tl.tracks], ["Dialogue", "Music", "Buddy - Drums", "Buddy - Bass"])
+        self.assertEqual(self.last("toast")["text"], "Placed 2 stems on A3–A4")
+        self.assertEqual(self.last("undo")["label"], "Place the stems")
+        self.page.on_undo()
+        self.assertEqual(len(self.tl.tracks), 2)
+        self.assertEqual(self.last("toast")["text"], "Undone: Place the stems")
+
+    def test_a_set_of_stems_that_breaks_is_said_once_and_nothing_placed(self):
+        self.stem(0, 3, "Drums")
+        self.stem(1, 3, "Bass", channels=["!!"])
+        self.stem(2, 3, "Keys")
+        self.assertEqual([n for n, _ in self.sent if n == "alert"], ["alert"])
+        self.assertEqual(len(self.tl.tracks), 2)
+        self.stem(1, 2, "Bass", sets="s2")                       # a set that doesn't start at its first
+        self.assertIn("Place them again", self.last("alert")["text"])
+        self.stem(0, 1, "Keys", sets="s3")                       # and the next set is fine
+        self.assertEqual(self.last("placed")["tracks"], [3])
+        self.assertEqual(self.tl.tracks[2].name, "Buddy - Keys")
 
     def test_a_render_that_isnt_one_or_is_too_long_is_said(self):
         self.page.on_place({"frame": 86500, "rate": 48000, "channels": ["!!"]})
@@ -667,6 +700,38 @@ class ViewTests(unittest.TestCase):
                        " return [d.what, d.frame, d.rate, d.channels.length, d.song, d.label];")
         self.assertEqual(sent, ["mix", 86424 + round(0.5 * 24), 48000, 2, "m1", "DAW mix A minor 124 BPM"])
 
+    def test_stems_are_rendered_a_track_each_and_sent_one_at_a_time(self):
+        self.with_song()
+        self.js("""Daw.edit("x", () => { for (const t of Daw.P.tracks) t.clips = [];
+                   Daw.P.tracks[0].clips.push({id: "k1", name: "K", start: 0, len: 4, notes: [[60, 0, 1, 0.8], [64, 2, 1, 0.8]]});
+                   Daw.P.tracks[2].clips.push({id: "d1", name: "D", start: 0, len: 4, notes: [[36, 0, 0.25, 0.9], [36, 2, 0.25, 0.9]]}); });
+                   return true;""")
+        heard =self.js("const r = Daw.usedRange(); return Daw.stemTracks(r.from, r.to).map(t => t.name);")
+        self.assertGreaterEqual(len(heard), 2)
+        muted = self.js("const t = Daw.P.tracks.find(t => t.name === %s); t.mute = true;"
+                        " const r = Daw.usedRange(); const got = Daw.stemTracks(r.from, r.to).map(t => t.name);"
+                        " t.mute = false; return got;" % json.dumps(heard[0]))
+        self.assertEqual(muted, heard[1:])                                         # what's heard, as the mix
+        self.js("document.querySelector('.daw-bar .btn.accent').click(); return true;")
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => /Stems/.test(b.textContent)).click(); return true;")
+        self.until(f"window.__sent.filter(s => s[0] === 'place').length === {len(heard)}", seconds=30)
+        got = self.js("""const sent = window.__sent.filter(s => s[0] === 'place').map(s => s[1]);
+                         const samples = d => { const bin = atob(d.channels[0]), bytes = new Uint8Array(bin.length);
+                             for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                             return new Float32Array(bytes.buffer); };
+                         const sum = new Float32Array(Math.max(...sent.map(d => samples(d).length)));
+                         for (const d of sent) samples(d).forEach((v, i) => { sum[i] += v; });
+                         let peak = 0;
+                         for (const v of sum) peak = Math.max(peak, Math.abs(v));
+                         return {stems: sent.map(d => [d.what, d.frame, d.stem.index, d.stem.count, d.stem.name, d.label]),
+                                 sets: new Set(sent.map(d => d.stem.set)).size,
+                                 peak};""")
+        self.assertEqual([s[2:5] for s in got["stems"]], [[i, len(heard), n] for i, n in enumerate(heard)])
+        self.assertEqual({(s[0], s[1]) for s in got["stems"]}, {("stems", got["stems"][0][1])})   # one place, one set
+        self.assertEqual(got["sets"], 1)
+        self.assertEqual(got["stems"][0][5], f"DAW stem {heard[0]} A minor 124 BPM")
+        self.assertTrue(0 < got["peak"] <= 10 ** (-1 / 20) + 1e-4)                 # together, no louder than a mix
+
     def test_the_song_is_followed_on_its_grid_and_placed_on_the_beat(self):
         # The grid song.py fits through the beats: its tempo to the thousandth, its first bar
         # between two frames (0.52 s is 12.48 frames at 24 fps).
@@ -832,6 +897,45 @@ class ViewTests(unittest.TestCase):
         start = self.js("return Daw.P.tracks[0].clips[0].start;")
         got = self.js(drag % (2.37 * px, 2.37 * px))
         self.assertAlmostEqual(got, start + 2.37, delta=0.02)
+
+    def test_a_beat_is_copied_and_pasted_at_the_playhead_again_and_again(self):
+        self.js("""const d = Daw.P.tracks.find(t => t.kind === 'drums');
+                   for (const t of Daw.P.tracks) t.clips = [];
+                   d.clips = [{id: "b1", name: "Beat", start: 0, len: 4, notes: [[36, 0, 0.25, 0.9], [38, 1, 0.25, 0.9]]}];
+                   Daw.select(d.id, "b1"); Daw.changed('clips'); return true;""")
+        beats = "const d = Daw.P.tracks.find(t => t.kind === 'drums'); return d.clips.map(c => [c.start, c.len, c.notes.length]);"
+        self.key("KeyV", ctrl=True)                                         # nothing copied yet: said
+        self.assertIn("Copy a clip first", self.js("return document.querySelector('.toast').textContent;"))
+        self.key("KeyC", ctrl=True)
+        self.js("DawApp.moveCursor(8); return true;")
+        self.key("KeyV", ctrl=True)
+        self.key("KeyV", ctrl=True)                                         # again: straight after the last
+        self.assertEqual(self.js(beats), [[0, 4, 2], [8, 4, 2], [12, 4, 2]])
+        self.assertEqual(self.js("return Daw.P.cursor;"), 16)
+        ids = self.js("const d = Daw.P.tracks.find(t => t.kind === 'drums'); return d.clips.map(c => c.id);")
+        self.assertEqual(len(set(ids)), 3)                                  # each its own clip
+        self.assertEqual(self.js("return Daw.undoLabel();"), "Paste a clip")
+        # An instrument track selected: the beat goes on the drum track it came from.
+        self.js("Daw.select(Daw.P.tracks.find(t => t.kind !== 'drums').id, ''); return true;")
+        self.key("KeyV", ctrl=True)
+        self.assertEqual(self.js(beats)[-1], [16, 4, 2])
+        self.assertEqual(self.js("return Daw.P.tracks.filter(t => t.kind !== 'drums').every(t => !t.clips.length);"), True)
+        # Cut: gone, and pasted back where the playhead is.
+        self.js("const d = Daw.P.tracks.find(t => t.kind === 'drums'); Daw.select(d.id, d.clips[0].id); return true;")
+        self.key("KeyX", ctrl=True)
+        self.assertEqual([b[0] for b in self.js(beats)], [8, 12, 16])
+        self.assertEqual(self.js("return Daw.undoLabel();"), "Cut a clip")
+        self.js("DawApp.moveCursor(24); return true;")
+        self.key("KeyV", ctrl=True)
+        self.assertEqual([b[0] for b in self.js(beats)], [8, 12, 16, 24])
+        # Right-click an empty stretch of a track: Paste here.
+        self.js("Daw.changed('clips'); return true;")
+        self.js("""const body = document.querySelector('.lane[data-track="' + Daw.P.tracks.find(t => t.kind === 'drums').id + '"] .body');
+                   const r = body.getBoundingClientRect();
+                   body.dispatchEvent(new MouseEvent('contextmenu', {bubbles: true, cancelable: true, clientX: r.left + 2, clientY: r.top + 5}));
+                   return true;""")
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === 'Paste here').click(); return true;")
+        self.assertEqual([b[0] for b in self.js(beats)], [0, 8, 12, 16, 24])
 
     def test_d_or_the_menus_disable_a_clip_or_a_track(self):
         self.js("""const t = Daw.P.tracks[0]; t.clips = [{id: "c1", name: "Clip", start: 0, len: 4, notes: [[60, 0, 1, 0.8]]}];

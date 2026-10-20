@@ -3419,5 +3419,135 @@
   "中文": "停用一条轨道",
   "العربية": "تعطيل مسار",
   "Tiếng Việt": "Tắt một track"
+ },
+ "Stems: each track on a track of its own": {
+  "日本語": "ステム:各トラックをそれぞれ別のトラックに",
+  "Español": "Stems: cada pista en una pista propia",
+  "Deutsch": "Stems: jede Spur auf eine eigene Spur",
+  "Français": "Stems : chaque piste sur sa propre piste",
+  "한국어": "스템: 각 트랙을 각자의 트랙에",
+  "中文": "分轨:每条轨道放到各自的轨道上",
+  "العربية": "المسارات المنفصلة: كل مسار على مسار خاص به",
+  "Tiếng Việt": "Stem: mỗi track trên một track riêng"
+ },
+ "Place the stems": {
+  "日本語": "ステムを配置",
+  "Español": "Colocar los stems",
+  "Deutsch": "Stems platzieren",
+  "Français": "Placer les stems",
+  "한국어": "스템 배치",
+  "中文": "放置分轨",
+  "العربية": "ضع المسارات المنفصلة",
+  "Tiếng Việt": "Đặt các stem"
+ },
+ "Placed {count} stems on A{first}–A{last}": {
+  "日本語": "{count} 個のステムを A{first}–A{last} に配置しました",
+  "Español": "{count} stems colocados en A{first}–A{last}",
+  "Deutsch": "{count} Stems auf A{first}–A{last} platziert",
+  "Français": "{count} stems placés sur A{first}–A{last}",
+  "한국어": "스템 {count}개를 A{first}–A{last}에 배치했습니다",
+  "中文": "已将 {count} 条分轨放置到 A{first}–A{last}",
+  "العربية": "وُضعت {count} مسارات منفصلة على A{first}–A{last}",
+  "Tiếng Việt": "Đã đặt {count} stem vào A{first}–A{last}"
+ },
+ "Cut": {
+  "日本語": "切り取り",
+  "Español": "Cortar",
+  "Deutsch": "Ausschneiden",
+  "Français": "Couper",
+  "한국어": "잘라내기",
+  "中文": "剪切",
+  "العربية": "قص",
+  "Tiếng Việt": "Cắt"
+ },
+ "Paste here": {
+  "日本語": "ここに貼り付け",
+  "Español": "Pegar aquí",
+  "Deutsch": "Hier einfügen",
+  "Français": "Coller ici",
+  "한국어": "여기에 붙여넣기",
+  "中文": "粘贴到这里",
+  "العربية": "الصق هنا",
+  "Tiếng Việt": "Dán vào đây"
+ },
+ "Beat copied": {
+  "日本語": "ビートをコピーしました",
+  "Español": "Ritmo copiado",
+  "Deutsch": "Beat kopiert",
+  "Français": "Rythme copié",
+  "한국어": "비트를 복사했습니다",
+  "中文": "已复制节拍",
+  "العربية": "نُسخ الإيقاع",
+  "Tiếng Việt": "Đã sao chép beat"
+ },
+ "Clip copied": {
+  "日本語": "クリップをコピーしました",
+  "Español": "Clip copiado",
+  "Deutsch": "Clip kopiert",
+  "Français": "Clip copié",
+  "한국어": "클립을 복사했습니다",
+  "中文": "已复制片段",
+  "العربية": "نُسخ المقطع",
+  "Tiếng Việt": "Đã sao chép clip"
+ },
+ "Copy a clip first (Ctrl+C).": {
+  "日本語": "先にクリップをコピーしてください(Ctrl+C)。",
+  "Español": "Copia primero un clip (Ctrl+C).",
+  "Deutsch": "Kopiere zuerst einen Clip (Ctrl+C).",
+  "Français": "Copiez d'abord un clip (Ctrl+C).",
+  "한국어": "먼저 클립을 복사하세요(Ctrl+C).",
+  "中文": "请先复制一个片段(Ctrl+C)。",
+  "العربية": "انسخ مقطعًا أولًا (Ctrl+C).",
+  "Tiếng Việt": "Hãy sao chép một clip trước (Ctrl+C)."
+ },
+ "Pasted on": {
+  "日本語": "貼り付け先:",
+  "Español": "Pegado en",
+  "Deutsch": "Eingefügt auf",
+  "Français": "Collé sur",
+  "한국어": "붙여넣은 트랙:",
+  "中文": "已粘贴到",
+  "العربية": "لُصق على",
+  "Tiếng Việt": "Đã dán vào"
+ },
+ "Cut a clip": {
+  "日本語": "クリップを切り取り",
+  "Español": "Cortar un clip",
+  "Deutsch": "Clip ausschneiden",
+  "Français": "Couper un clip",
+  "한국어": "클립 잘라내기",
+  "中文": "剪切片段",
+  "العربية": "قص مقطع",
+  "Tiếng Việt": "Cắt một clip"
+ },
+ "Paste a clip": {
+  "日本語": "クリップを貼り付け",
+  "Español": "Pegar un clip",
+  "Deutsch": "Clip einfügen",
+  "Français": "Coller un clip",
+  "한국어": "클립 붙여넣기",
+  "中文": "粘贴片段",
+  "العربية": "لصق مقطع",
+  "Tiếng Việt": "Dán một clip"
+ },
+ "A beat is pasted on a drum track – add one first.": {
+  "日本語": "ビートはドラムトラックに貼り付けます。先に追加してください。",
+  "Español": "Un ritmo se pega en una pista de batería: añade una primero.",
+  "Deutsch": "Ein Beat wird auf eine Drum-Spur eingefügt – füge zuerst eine hinzu.",
+  "Français": "Un rythme se colle sur une piste de batterie – ajoutez-en une d'abord.",
+  "한국어": "비트는 드럼 트랙에 붙여넣습니다. 먼저 하나 추가하세요.",
+  "中文": "节拍需要粘贴到鼓轨道上,请先添加一条。",
+  "العربية": "يُلصق الإيقاع على مسار طبول – أضف واحدًا أولًا.",
+  "Tiếng Việt": "Beat được dán vào track trống – hãy thêm một track trước."
+ },
+ "Notes are pasted on an instrument track – add one first.": {
+  "日本語": "ノートは楽器トラックに貼り付けます。先に追加してください。",
+  "Español": "Las notas se pegan en una pista de instrumento: añade una primero.",
+  "Deutsch": "Noten werden auf eine Instrumentspur eingefügt – füge zuerst eine hinzu.",
+  "Français": "Les notes se collent sur une piste d'instrument – ajoutez-en une d'abord.",
+  "한국어": "노트는 악기 트랙에 붙여넣습니다. 먼저 하나 추가하세요.",
+  "中文": "音符需要粘贴到乐器轨道上,请先添加一条。",
+  "العربية": "تُلصق النوتات على مسار آلة – أضف واحدًا أولًا.",
+  "Tiếng Việt": "Nốt được dán vào track nhạc cụ – hãy thêm một track trước."
  }
 }

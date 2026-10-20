@@ -307,15 +307,35 @@ class BeatTests(unittest.TestCase):
         self.assertIsNone(beats.find(0.3 * np.sin(2 * np.pi * 440 * t), RATE))
         self.assertIsNone(beats.find(drums(120, seconds=2)[0], RATE))
         for seed in (1, 2, 3):
-            self.assertIsNone(beats.find(speechlike(seed), RATE), seed)
+            for seconds in (10, 20, 40):
+                self.assertIsNone(beats.find(speechlike(seed, seconds), RATE), (seed, seconds))
 
     def test_a_loose_busy_beat_is_still_a_beat(self):
-        # Its repeat is only ~4x the usual (sparse drums: 20x and more) - it's told from
-        # speech by holding the same beat stretch after stretch, and isn't "no steady beat".
+        # Sixteenth hats, every hit a little off the grid: the beat is still the
+        # kick and snare's, not a dotted beat the hats line up with.
         for bpm in (124, 140):
             found = beats.find(loose_drums(bpm), RATE)
             self.assertIsNotNone(found, bpm)
             self.assertAlmostEqual(found["bpm"], bpm, delta=1.0)
+
+    def test_a_short_clip_of_a_busy_beat_is_still_a_beat(self):
+        # Twelve seconds of it - a clip cut from a song - is enough to hear it.
+        for bpm in (124, 140):
+            for seed in (0, 1):
+                found = beats.find(loose_drums(bpm, seconds=12.0, seed=seed), RATE)
+                self.assertIsNotNone(found, (bpm, seed))
+                self.assertAlmostEqual(found["bpm"], bpm, delta=1.0)
+
+    def test_a_fast_song_is_said_at_half_its_tempo_and_its_grid_holds(self):
+        # 170 is counted as 85 (the DAW has x2): every other hit is a beat, and
+        # the grid through them is still 85 to a hundredth of a BPM.
+        from pages.audio_assistant import song
+        x, truth = drums(170, seconds=150.0, first=1.37)
+        found = beats.find(x, RATE)
+        self.assertAlmostEqual(found["bpm"], 85.0, delta=0.5)
+        self.assertAlmostEqual(song.grid(found)["bpm"], 85.0, delta=0.02)
+        got = np.array(found["beats"])
+        self.assertLess(max(np.min(np.abs(truth - t)) for t in got[2:-2]), 0.5 / 24)       # each on a hit
 
     def test_twice_and_half_as_fast(self):
         found = {"bpm": 87.0, "beats": [0.0, 0.69, 1.38, 2.07, 2.76, 3.45], "bars": [1, 5]}
