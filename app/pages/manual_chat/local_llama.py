@@ -200,36 +200,62 @@ def gpu_server_exe() -> Path | None:
     return _exe_in(GPU_RUNTIME_DIR)
 
 
-_GPU_DEVICE = {}        # the Vulkan build's exe -> (device, its name), asked once
+_GPU_LISTING = {}       # the Vulkan build's exe -> what --list-devices said, asked once
 
 
-def pick_device(listing: str) -> tuple[str, str] | None:
-    """(device, name) of the graphics card to run on, from llama-server
-    --list-devices' output ("  Vulkan0: NVIDIA GeForce RTX 5070 Ti (15995
-    MiB, 15227 MiB free)") - the first that's a card of its own; None when
-    there's only the processor's built-in graphics."""
-    for line in listing.splitlines():
-        found = re.match(r"\s*(Vulkan\d+):\s*(.+?)\s*\(\d+ MiB", line)
-        if found and any(word in found.group(2).lower() for word in _OWN_CARDS):
-            return found.group(1), found.group(2)
+def list_devices(listing: str) -> list[tuple[str, str]]:
+    """[(device, label)] for every device in llama-server --list-devices'
+    output ("  Vulkan0: NVIDIA GeForce RTX 5070 Ti (15995 MiB, 15227 MiB
+    free)"): its name, and #2, #3 after a name another device before it has
+    (two of the same card)."""
+    from core import ai_card
+    found = [m for m in (re.match(r"\s*(Vulkan\d+):\s*(.+?)\s*\(\d+ MiB", line) for line in listing.splitlines()) if m]
+    return list(zip([m.group(1) for m in found], ai_card.numbered([m.group(2) for m in found])))
+
+
+def pick_device(listing: str, wanted: str = "") -> tuple[str, str] | None:
+    """(device, label) of the graphics card to run on, from llama-server
+    --list-devices' output: the one wanted (a label, Settings > AI's) if
+    it's there, else the first that's a card of its own; None when there's
+    only the processor's built-in graphics."""
+    devices = list_devices(listing)
+    for device in devices:
+        if wanted and device[1] == wanted:
+            return device
+    for device in devices:
+        if any(word in device[1].lower() for word in _OWN_CARDS):
+            return device
     return None
 
 
-def gpu_device() -> tuple[str, str] | None:
-    """(device, name) the Vulkan build would run on here, or None: not
-    installed, or no graphics card of its own. Asked of it once (a second or so)."""
+def _gpu_listing() -> str:
+    """What the Vulkan build's --list-devices says ("" when it isn't
+    installed or can't say). Asked of it once (a second or so)."""
     exe = gpu_server_exe()
     if exe is None:
-        return None
-    if str(exe) not in _GPU_DEVICE:
+        return ""
+    if str(exe) not in _GPU_LISTING:
         try:
             flags = 0x08000000 if os.name == "nt" else 0               # CREATE_NO_WINDOW
             done = subprocess.run([str(exe), "--list-devices"], cwd=str(exe.parent), capture_output=True, timeout=10,
                                   stdin=subprocess.DEVNULL, creationflags=flags)
-            _GPU_DEVICE[str(exe)] = pick_device((done.stdout + done.stderr).decode("utf-8", "replace"))
+            _GPU_LISTING[str(exe)] = (done.stdout + done.stderr).decode("utf-8", "replace")
         except (OSError, subprocess.SubprocessError):
-            _GPU_DEVICE[str(exe)] = None
-    return _GPU_DEVICE[str(exe)]
+            _GPU_LISTING[str(exe)] = ""
+    return _GPU_LISTING[str(exe)]
+
+
+def gpu_devices() -> list[tuple[str, str]]:
+    """[(device, label)] the Vulkan build could run on here - [] when it
+    isn't installed."""
+    return list_devices(_gpu_listing())
+
+
+def gpu_device(wanted: str = "") -> tuple[str, str] | None:
+    """(device, label) the Vulkan build would run on here - wanted (Settings
+    > AI's card, core/ai_card.py) if it's there, else the first card of its
+    own - or None: not installed, or no graphics card of its own."""
+    return pick_device(_gpu_listing(), wanted)
 
 
 def runtime_dir() -> Path | None:
@@ -690,19 +716,22 @@ class LlamaServer:
                 process.kill()
 
 
-def server_for(model: Path, embedding: bool = True, mmproj: Path | None = None, gpu: bool = False) -> LlamaServer:
+def server_for(model: Path, embedding: bool = True, mmproj: Path | None = None, gpu: bool = False,
+               card: str = "") -> LlamaServer:
     """The one server for this model, made the first time it's asked for.
     mmproj: the file that lets it read pictures and sound, loaded beside it.
-    gpu: run by the Vulkan build on the graphics card gpu_device() names -
-    another server than the CPU build's for the same model."""
-    key = (str(Path(model).resolve()), embedding, str(Path(mmproj).resolve()) if mmproj else "", bool(gpu))
+    gpu: run by the Vulkan build on the graphics card gpu_device(card) names
+    (card: Settings > AI's, "" for the first of its own) - another
+    server than the CPU build's for the same model."""
+    key = (str(Path(model).resolve()), embedding, str(Path(mmproj).resolve()) if mmproj else "", bool(gpu),
+           card if gpu else "")
     with _LOCK:
         server = _SERVERS.get(key)
         if server is None:
             extra = ("--mmproj", str(mmproj)) if mmproj else ()
             exe = None
             if gpu:
-                device, exe = gpu_device(), gpu_server_exe()
+                device, exe = gpu_device(card), gpu_server_exe()
                 if device is None or exe is None:
                     raise LlamaError("There's no graphics card set up to run it on.")
                 # Every layer on that one card - not shared out over the processor's graphics too.

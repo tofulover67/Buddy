@@ -87,6 +87,17 @@ class ShellFormTests(unittest.TestCase):
             self.assertEqual(field["kind"], "select")
             self.assertEqual(field["value"], "on")
             self.assertEqual([o["value"] for o in field["options"]], ["auto", "on", "off"])
+            cards = [("auto", "Automatic (the low-power card)"), ("NVIDIA GeForce RTX 5070 Ti", "NVIDIA GeForce RTX 5070 Ti"),
+                     ("AMD Radeon(TM) Graphics", "AMD Radeon(TM) Graphics")]
+            with mock.patch.object(sf.gpu_adapter, "choices", return_value=cards):
+                self.assertEqual(sf.apply_shell(shared, "web_adapter", "NVIDIA GeForce RTX 5070 Ti"), "later")
+                self.assertEqual(kinds(sf.shell_fields(shared, True))["web_adapter"]["value"],
+                                 "NVIDIA GeForce RTX 5070 Ti")
+                self.assertIsNone(sf.apply_shell(shared, "web_adapter", "Some other card"))     # the cards here only
+                shared["web_adapter"] = "NVIDIA GeForce RTX 3060"                                # since taken out
+                self.assertEqual(kinds(sf.shell_fields(shared, True))["web_adapter"]["value"], "auto")
+            with mock.patch.object(sf.gpu_adapter, "choices", return_value=[]):
+                self.assertNotIn("web_adapter", kinds(sf.shell_fields(shared, True)))           # one card: no choice
         self.assertIsNone(sf.apply_shell(shared, "split_tint", "neon"))
         self.assertEqual(sf.apply_shell(shared, "stay_on_top", 1), "window")
         self.assertIs(shared["stay_on_top"], True)
@@ -96,6 +107,21 @@ class ShellFormTests(unittest.TestCase):
         self.assertIsNone(sf.apply_shell(shared, "anything", True))
         unknown = kinds(sf.shell_fields(shared, None))["autostart"]
         self.assertTrue(unknown["disabled"])                      # Windows' setting couldn't be read
+
+    def test_the_graphics_card_for_ai(self):
+        shared = Mem()
+        cards = [("", "Automatic (each tool's own choice)"), ("NVIDIA GeForce RTX 5070 Ti", "NVIDIA GeForce RTX 5070 Ti"),
+                 ("AMD Radeon(TM) Graphics", "AMD Radeon(TM) Graphics")]
+        with mock.patch.object(sf.ai_card, "choices", return_value=cards):
+            self.assertEqual(sf.apply_shell(shared, "ai_card", "AMD Radeon(TM) Graphics"), "later")  # at the next start
+            field = sf.ai_card_field(shared)
+            self.assertEqual((field["kind"], field["value"]), ("select", "AMD Radeon(TM) Graphics"))
+            self.assertIsNone(sf.apply_shell(shared, "ai_card", "Some other card"))   # the cards here only
+            self.assertEqual(shared["ai_card"], "AMD Radeon(TM) Graphics")
+            shared["ai_card"] = "NVIDIA GeForce RTX 3060"                              # since taken out
+            self.assertEqual(sf.ai_card_field(shared)["value"], "")
+        with mock.patch.object(sf.ai_card, "choices", return_value=[]):
+            self.assertIsNone(sf.ai_card_field(shared))                                # one card: no choice
 
     def test_numbers(self):
         self.assertEqual(sf.parse_number("12,5", 0, 100), 12.5)

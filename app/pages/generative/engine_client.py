@@ -23,6 +23,8 @@ import threading
 
 from PySide6.QtCore import QObject, Signal
 
+from core import ai_card
+
 from . import engine_setup as es
 
 MARK = "@@BUDDY@@"
@@ -91,6 +93,7 @@ class EngineClient(QObject):
         env = dict(os.environ)
         env.pop("PYTHONPATH", None)          # Resolve's, not the engine's
         env["BUDDY_GENERATIVE_GPU"] = "1" if self.use_gpu else "0"     # gpu.py
+        ai_card.cuda_env(env)                # on Settings > AI's card, if one was chosen
         try:
             proc = subprocess.Popen(
                 [str(python), str(es.WORKER), "--models", str(es.MODELS_DIR), "--work", str(es.WORK_DIR),

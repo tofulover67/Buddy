@@ -32,7 +32,7 @@ import json
 import os
 from pathlib import Path
 
-from core import atomic_io, tool_dirs
+from core import ai_card, atomic_io, tool_dirs
 
 NAME = "embeddinggemma-2-Q8_0"          # in the index: another model's vectors aren't these
 QUERY_PREFIX = "task: search result | query: "
@@ -104,7 +104,7 @@ def gpu() -> str:
     """The graphics card it runs on now, by name - "" on the processor."""
     if not use_gpu() or _GPU_FAILED[0]:
         return ""
-    device = _llama().gpu_device()
+    device = _llama().gpu_device(ai_card.vulkan_card())
     return device[1] if device else ""
 
 
@@ -166,19 +166,21 @@ def _embed(inputs: list, timeout: float) -> list[list[float]]:
         raise SearchError(why)
     ll = _llama()
     model, media = files()
+    chosen = ai_card.vulkan_card()          # Settings > AI's card, if one was chosen
     vectors = []
     for at in range(0, len(inputs), BATCH):
         batch = inputs[at:at + BATCH]
         on_card = bool(gpu())
         try:
-            payload = ll.server_for(model, mmproj=media, gpu=on_card).post("/embeddings", {"input": batch}, timeout)
+            server = ll.server_for(model, mmproj=media, gpu=on_card, card=chosen)
+            payload = server.post("/embeddings", {"input": batch}, timeout)
         except ll.LlamaError as exc:
             if not on_card:
                 raise SearchError(str(exc)) from exc
             # The card couldn't: the processor does this batch and the rest of the session's.
             _GPU_FAILED[0] = str(exc)
             try:
-                ll.server_for(model, mmproj=media, gpu=True).stop()
+                ll.server_for(model, mmproj=media, gpu=True, card=chosen).stop()
                 payload = ll.server_for(model, mmproj=media).post("/embeddings", {"input": batch}, timeout)
             except ll.LlamaError as again:
                 raise SearchError(str(again)) from again

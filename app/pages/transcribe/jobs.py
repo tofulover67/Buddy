@@ -22,6 +22,8 @@ from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
 
+from core import ai_card
+
 from . import ai_translate as ai
 from . import env_setup as es
 from . import languages as L
@@ -99,10 +101,12 @@ class WorkerRun:
         # started - rather than reading it to the end.
         if self.cancelled:
             raise RenderCancelled()
+        # On Settings > AI's graphics card, if one was chosen (core/ai_card.py).
+        env = ai_card.cuda_env(dict(os.environ))
         self.proc = subprocess.Popen(
             [str(es.venv_python()), str(es.WORKER), *args],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-            encoding="utf-8", errors="replace", bufsize=1, **es._no_window())
+            encoding="utf-8", errors="replace", bufsize=1, env=env, **es._no_window())
         if self.cancelled:
             self.proc.kill()
             self.proc.wait()

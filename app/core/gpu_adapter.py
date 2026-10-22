@@ -15,8 +15,12 @@ ask very little of a GPU, and the card is left to Resolve.
 
 So with two or more hardware adapters, QT_D3D_ADAPTER_INDEX is set to the
 one Windows calls minimum-power (IDXGIFactory6::EnumAdapterByGpuPreference).
-With one adapter nothing is set. BUDDY_WEB_ADAPTER=<index> picks one by
-hand, =default leaves Qt's choice; a QT_D3D_ADAPTER_INDEX already set wins.
+With one adapter nothing is set. Settings > Window > "Graphics card for
+Buddy's window" picks one by name instead (SharedSettings web_adapter: "auto"
+or a card's label, see labels) - a card that's gone since falls back to the
+low-power one. BUDDY_WEB_ADAPTER=<index> picks one by hand, =default leaves
+Qt's choice; both win over the setting, and a QT_D3D_ADAPTER_INDEX already
+set wins over everything.
 
 The pick is kept (picked) for what depends on which card it is: AMD's
 integrated graphics draws some rounded corners wrong on the GPU, so web
@@ -29,6 +33,8 @@ import ctypes
 import sys
 import uuid
 
+from core import ai_card
+
 VENDOR_AMD = 0x1002
 DXGI_ADAPTER_FLAG_SOFTWARE = 2
 DXGI_GPU_PREFERENCE_MINIMUM_POWER = 1
@@ -36,36 +42,82 @@ _IID_FACTORY1 = uuid.UUID("770aae78-f26f-4dba-a829-253c83d1b387")
 _IID_FACTORY6 = uuid.UUID("c1b6694f-ff09-44a9-b03c-77900a0a1d17")
 _IID_ADAPTER1 = uuid.UUID("29038f61-3839-4626-91fd-086879011a05")
 
-# The adapter apply() picked as the low-power one of two or more ({"name",
-# "luid", "vendor", "software"}), None when it picked nothing - one card, a
-# choice made by hand, no DXGI.
+# The adapter apply() picked when there were two or more to pick from
+# ({"name", "luid", "vendor", "software", "low_power"}), None when it picked
+# nothing - one card, a choice made in the environment, no DXGI.
 picked = None
+# DXGI's adapters and the low-power one's LUID, as apply() found them as
+# Buddy started - what Settings lists (choices); None until they're asked for.
+_found = None
+
+AUTO = "auto"
 
 
 def amd_integrated():
-    """Is Buddy drawing on AMD's integrated graphics, picked as the
-    low-power card of two? There, Chromium paints rounded corners wrong on
-    the GPU (core/web_flags.py)."""
-    return bool(picked) and picked.get("vendor") == VENDOR_AMD
+    """Is Buddy drawing on AMD's integrated graphics - the low-power card of
+    two, picked for it or chosen in Settings? There, Chromium paints rounded
+    corners wrong on the GPU (core/web_flags.py)."""
+    return bool(picked) and picked.get("vendor") == VENDOR_AMD and bool(picked.get("low_power"))
 
 
-def choose(adapters, low_power_luid):
-    """The index to draw on, or None for Qt's own choice. adapters: DXGI's
-    order, [{"luid", "software"}]; low_power_luid: Windows' minimum-power
-    adapter. Only when there's more than one real card to choose from."""
+def labels(adapters):
+    """{index: label} for each hardware adapter - its name, and #2, #3 after
+    a name another card before it has (two of the same card)."""
     hardware = [i for i, a in enumerate(adapters) if not a["software"]]
-    if len(hardware) < 2 or low_power_luid is None:
+    return dict(zip(hardware, ai_card.numbered([adapters[i]["name"] for i in hardware])))
+
+
+def choose(adapters, low_power_luid, wanted=AUTO):
+    """The index to draw on, or None for Qt's own choice. adapters: DXGI's
+    order, [{"name", "luid", "software"}]; low_power_luid: Windows'
+    minimum-power adapter; wanted: the setting - a label (see labels), or
+    AUTO for the low-power one. Only when there's more than one real card to
+    choose from."""
+    named = labels(adapters)
+    if len(named) < 2:
         return None
-    for i in hardware:
+    for i, label in named.items():
+        if wanted != AUTO and label == wanted:
+            return i
+    if low_power_luid is None:
+        return None
+    for i in named:
         if adapters[i]["luid"] == low_power_luid:
             return i
     return None
 
 
-def apply(environ):
+def _adapters():
+    """(adapters, low-power LUID), asked of DXGI once."""
+    global _found
+    if _found is None:
+        _found = _enumerate()
+    return _found
+
+
+def cards():
+    """This PC's hardware adapters' labels (see labels), in DXGI's order - []
+    without DXGI. What Settings lists, here and for the AI (core/ai_card.py)."""
+    try:
+        return list(labels(_adapters()[0]).values())
+    except Exception:  # noqa: BLE001 - no DXGI: nothing to choose
+        return []
+
+
+def choices():
+    """Settings' list, [(value, label)]: AUTO, then each card - or [] where
+    there's one card or none to choose from (or no DXGI)."""
+    found = cards()
+    if len(found) < 2:
+        return []
+    return [(AUTO, "Automatic (the low-power card)"), *((label, label) for label in found)]
+
+
+def apply(environ, wanted=AUTO):
     """Sets QT_D3D_ADAPTER_INDEX if it should be; returns what the crash
-    trail should say about it. Before the QApplication exists."""
-    global picked
+    trail should say about it. wanted: Settings' choice (web_adapter).
+    Before the QApplication exists."""
+    global picked, _found
     picked = None
     if environ.get("QT_D3D_ADAPTER_INDEX"):
         return f"adapter {environ['QT_D3D_ADAPTER_INDEX']} (QT_D3D_ADAPTER_INDEX)"
@@ -76,15 +128,19 @@ def apply(environ):
         environ["QT_D3D_ADAPTER_INDEX"] = manual
         return f"adapter {manual} (BUDDY_WEB_ADAPTER)"
     try:
-        adapters, low_power = _enumerate()
+        adapters, low_power = _found = _enumerate()
     except Exception as exc:  # noqa: BLE001 - no DXGI, an old Windows: Qt's choice
         return f"adapter: Qt's choice ({type(exc).__name__})"
-    index = choose(adapters, low_power)
+    wanted = wanted if isinstance(wanted, str) and wanted else AUTO
+    index = choose(adapters, low_power, wanted)
     if index is None:
         return f"adapter: Qt's choice ({len(adapters)} adapters)"
     environ["QT_D3D_ADAPTER_INDEX"] = str(index)
-    picked = adapters[index]
-    return f"adapter {index} ({adapters[index]['name']}, low-power of {len(adapters)})"
+    picked = dict(adapters[index], low_power=adapters[index]["luid"] == low_power)
+    if wanted != AUTO and labels(adapters)[index] == wanted:
+        return f"adapter {index} ({adapters[index]['name']}, Settings)"
+    gone = "" if wanted == AUTO else f"; Settings' {wanted} not found"
+    return f"adapter {index} ({adapters[index]['name']}, low-power of {len(adapters)}{gone})"
 
 
 # ------------------------------------------------------------------ DXGI --

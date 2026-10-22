@@ -51,6 +51,10 @@ DEFAULT_SHARED_SETTINGS = {
     # The whole app's language (a core/i18n.py LANGUAGES key) - the
     # dropdown at the foot of Settings.
     "language": "English",
+    # The graphics card the AI runs on, on a PC with more than one
+    # (core/ai_card.py): "" each tool's own choice, or a card's name. Read
+    # once a run, so it takes a restart.
+    "ai_card": "",
 }
 if sys.platform == "win32":
     # Web pages painted on the CPU (core/web_flags.py CPU_PAINT_CHOICES):
@@ -58,6 +62,11 @@ if sys.platform == "win32":
     # graphics) - "on" or "off". Read by main.py before the web engine
     # starts, so it takes a restart. A tick from before 1.15 is read as is.
     DEFAULT_SHARED_SETTINGS["web_cpu_paint"] = "auto"
+    # The graphics card Buddy's window and pages draw on, on a PC with more
+    # than one (core/gpu_adapter.py): "auto" - the low-power one - or a
+    # card's name as gpu_adapter.labels gives it. Read by main.py before the
+    # web engine starts, so it takes a restart.
+    DEFAULT_SHARED_SETTINGS["web_adapter"] = "auto"
 
 
 class SharedSettings:

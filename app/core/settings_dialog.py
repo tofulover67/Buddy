@@ -320,6 +320,9 @@ class SettingsDialog(WebDialog):
             sf.buttons(("Open Buddy's folder", "open_buddy_folder")),
             *self._folder_fields(),
         ]
+        card = sf.ai_card_field(self.shared_settings)     # with more than one graphics card (core/ai_card.py)
+        if card:
+            fields += [sf.heading("Graphics card"), card]
         return sf.page("ai_library", "ai", "Model library", fields,
                        "Every model Buddy can use, on this PC or in the cloud, and what uses it.") | {"owner": "shell"}
 

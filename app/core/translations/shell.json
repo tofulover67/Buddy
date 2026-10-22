@@ -4699,5 +4699,75 @@
   "中文": "Buddy 已查看过的图片、视频素材和声音的索引",
   "العربية": "فهرس الصور واللقطات والأصوات التي فحصها Buddy",
   "Tiếng Việt": "Chỉ mục hình ảnh, cảnh quay và âm thanh mà Buddy đã xem"
+ },
+ "Graphics card for Buddy's window (from the next start)": {
+  "日本語": "Buddyのウィンドウに使うグラフィックカード（次回起動から）",
+  "Español": "Tarjeta gráfica para la ventana de Buddy (desde el próximo inicio)",
+  "Deutsch": "Grafikkarte für das Buddy-Fenster (ab dem nächsten Start)",
+  "Français": "Carte graphique pour la fenêtre de Buddy (au prochain démarrage)",
+  "한국어": "Buddy 창에 사용할 그래픽 카드 (다음 시작부터)",
+  "中文": "Buddy 窗口使用的显卡（下次启动起生效）",
+  "العربية": "بطاقة الرسومات لنافذة Buddy (من التشغيل التالي)",
+  "Tiếng Việt": "Card đồ họa cho cửa sổ Buddy (từ lần khởi động sau)"
+ },
+ "Automatic (the low-power card)": {
+  "日本語": "自動（省電力のカード）",
+  "Español": "Automático (la tarjeta de bajo consumo)",
+  "Deutsch": "Automatisch (die stromsparende Karte)",
+  "Français": "Automatique (la carte basse consommation)",
+  "한국어": "자동 (저전력 카드)",
+  "中文": "自动（低功耗显卡）",
+  "العربية": "تلقائي (البطاقة منخفضة الطاقة)",
+  "Tiếng Việt": "Tự động (card tiết kiệm điện)"
+ },
+ "Automatic draws Buddy on the low-power card - usually the processor's built-in graphics - and leaves the other to Resolve: on Resolve's card, Buddy can go down with it when its driver restarts. Pick a card if Buddy is slow or drawn wrong on the automatic one. Takes effect when Buddy next starts.": {
+  "日本語": "自動では、Buddyは省電力のカード（通常はプロセッサー内蔵のグラフィックス）で描画し、もう一方はResolveに任せます。Resolveのカードで描画すると、そのドライバーが再起動したときにBuddyも一緒に落ちることがあります。自動で選ばれたカードでBuddyが遅い、または正しく描画されない場合は、カードを選んでください。次回Buddyを起動したときに反映されます。",
+  "Español": "En Automático, Buddy se dibuja en la tarjeta de bajo consumo (normalmente los gráficos integrados del procesador) y deja la otra a Resolve: en la tarjeta de Resolve, Buddy puede caerse con ella cuando su controlador se reinicia. Elige una tarjeta si Buddy va lento o se dibuja mal en la automática. Se aplica la próxima vez que se inicie Buddy.",
+  "Deutsch": "Automatisch zeichnet Buddy auf der stromsparenden Karte - meist der im Prozessor eingebauten Grafik - und überlässt die andere Resolve: Auf der Karte von Resolve kann Buddy mit abstürzen, wenn deren Treiber neu startet. Wählen Sie eine Karte, wenn Buddy auf der automatischen langsam ist oder falsch gezeichnet wird. Wirkt beim nächsten Start von Buddy.",
+  "Français": "En Automatique, Buddy est dessiné sur la carte basse consommation - en général la puce graphique intégrée au processeur - et laisse l'autre à Resolve : sur la carte de Resolve, Buddy peut tomber avec elle quand son pilote redémarre. Choisissez une carte si Buddy est lent ou mal dessiné sur la carte automatique. Prend effet au prochain démarrage de Buddy.",
+  "한국어": "자동은 Buddy를 저전력 카드(보통 프로세서 내장 그래픽)에서 그리고 다른 카드는 Resolve에 맡깁니다. Resolve의 카드에서 그리면 그 드라이버가 다시 시작될 때 Buddy도 함께 종료될 수 있습니다. 자동으로 고른 카드에서 Buddy가 느리거나 잘못 그려지면 카드를 직접 고르세요. 다음에 Buddy를 시작할 때 적용됩니다.",
+  "中文": "自动会让 Buddy 在低功耗显卡（通常是处理器的集成显卡）上绘制，把另一张留给 Resolve：若在 Resolve 的显卡上绘制，显卡驱动重启时 Buddy 可能随之崩溃。如果 Buddy 在自动选择的显卡上运行缓慢或显示错误，请选择一张显卡。下次启动 Buddy 时生效。",
+  "العربية": "في الوضع التلقائي يُرسم Buddy على البطاقة منخفضة الطاقة - عادةً رسومات المعالج المدمجة - وتُترك الأخرى لـ Resolve: فعلى بطاقة Resolve قد يتوقف Buddy معها عند إعادة تشغيل برنامج تشغيلها. اختر بطاقة إذا كان Buddy بطيئًا أو يُرسم بشكل خاطئ على البطاقة التلقائية. يسري ذلك عند تشغيل Buddy في المرة القادمة.",
+  "Tiếng Việt": "Tự động vẽ Buddy trên card tiết kiệm điện - thường là đồ họa tích hợp trong bộ xử lý - và để card còn lại cho Resolve: trên card của Resolve, Buddy có thể bị sập theo khi trình điều khiển của card khởi động lại. Hãy chọn một card nếu Buddy chạy chậm hoặc hiển thị sai trên card tự động. Có hiệu lực từ lần khởi động Buddy tiếp theo."
+ },
+ "Graphics card": {
+  "日本語": "グラフィックカード",
+  "Español": "Tarjeta gráfica",
+  "Deutsch": "Grafikkarte",
+  "Français": "Carte graphique",
+  "한국어": "그래픽 카드",
+  "中文": "显卡",
+  "العربية": "بطاقة الرسومات",
+  "Tiếng Việt": "Card đồ họa"
+ },
+ "Graphics card for AI (from the next start)": {
+  "日本語": "AIに使うグラフィックカード（次回起動から）",
+  "Español": "Tarjeta gráfica para la IA (desde el próximo inicio)",
+  "Deutsch": "Grafikkarte für die KI (ab dem nächsten Start)",
+  "Français": "Carte graphique pour l'IA (au prochain démarrage)",
+  "한국어": "AI에 사용할 그래픽 카드 (다음 시작부터)",
+  "中文": "AI 使用的显卡（下次启动起生效）",
+  "العربية": "بطاقة الرسومات للذكاء الاصطناعي (من التشغيل التالي)",
+  "Tiếng Việt": "Card đồ họa cho AI (từ lần khởi động sau)"
+ },
+ "Automatic (each tool's own choice)": {
+  "日本語": "自動（各ツールが選択）",
+  "Español": "Automático (cada herramienta elige)",
+  "Deutsch": "Automatisch (jedes Werkzeug wählt selbst)",
+  "Français": "Automatique (chaque outil choisit)",
+  "한국어": "자동 (각 도구가 선택)",
+  "中文": "自动（由各工具自行选择）",
+  "العربية": "تلقائي (تختار كل أداة بنفسها)",
+  "Tiếng Việt": "Tự động (mỗi công cụ tự chọn)"
+ },
+ "Where search by description, Transcribe, Dailies' transcripts and Generative run. Automatic leaves each to its own choice - the first graphics card of its own. Pick the card Resolve isn't using to keep the two apart. Transcribe and Generative need an NVIDIA card: with another kind picked they run on the processor. Ask Buddy's chat runs in Ollama or LM Studio, which choose their own. Takes effect when Buddy next starts.": {
+  "日本語": "説明で検索、文字起こし、デイリーズの書き起こし、Generativeを実行する場所です。自動では、それぞれが自分で選びます（最初の独立したグラフィックカード）。両者を分けるには、Resolveが使っていないカードを選んでください。文字起こしとGenerativeにはNVIDIAのカードが必要で、別の種類のカードを選ぶとプロセッサーで実行されます。Ask Buddyのチャットは、Ollama や LM Studio で動き、それらが自分でカードを選びます。次回Buddyを起動したときに反映されます。",
+  "Español": "Dónde se ejecutan Buscar por descripción, Transcribir, las transcripciones de Diarios y Generative. Automático deja que cada uno elija: la primera tarjeta gráfica propia. Elige la tarjeta que no usa Resolve para mantenerlos separados. Transcribir y Generative necesitan una tarjeta NVIDIA: con otro tipo elegido se ejecutan en el procesador. El chat de Ask Buddy se ejecuta en Ollama o LM Studio, que eligen la suya. Se aplica la próxima vez que se inicie Buddy.",
+  "Deutsch": "Wo Nach Beschreibung suchen, Transkribieren, die Transkripte in Dailies und Generative laufen. Automatisch überlässt jedem die eigene Wahl - die erste eigene Grafikkarte. Wählen Sie die Karte, die Resolve nicht nutzt, um beide zu trennen. Transkribieren und Generative brauchen eine NVIDIA-Karte: Mit einer anderen Art laufen sie auf dem Prozessor. Der Chat von Ask Buddy läuft in Ollama oder LM Studio, die ihre Karte selbst wählen. Wirkt beim nächsten Start von Buddy.",
+  "Français": "Où s'exécutent Rechercher par description, Transcrire, les transcriptions des Rushes et Generative. Automatique laisse chacun choisir : la première carte graphique dédiée. Choisissez la carte que Resolve n'utilise pas pour les séparer. Transcrire et Generative ont besoin d'une carte NVIDIA : avec une autre sorte de carte, ils s'exécutent sur le processeur. Le chat d'Ask Buddy s'exécute dans Ollama ou LM Studio, qui choisissent la leur. Prend effet au prochain démarrage de Buddy.",
+  "한국어": "설명으로 검색, 받아쓰기, 데일리스의 받아쓰기, Generative가 실행되는 곳입니다. 자동은 각자 고르게 합니다(첫 번째 별도 그래픽 카드). 둘을 분리하려면 Resolve가 쓰지 않는 카드를 고르세요. 받아쓰기와 Generative는 NVIDIA 카드가 필요하며, 다른 종류를 고르면 프로세서에서 실행됩니다. Ask Buddy의 채팅은 Ollama나 LM Studio에서 실행되며, 이들이 직접 카드를 고릅니다. 다음에 Buddy를 시작할 때 적용됩니다.",
+  "中文": "按描述搜索、转录、每日素材的转录和 Generative 在哪张显卡上运行。自动会让它们各自选择：第一张独立显卡。选择 Resolve 没有使用的显卡，可将两者分开。转录和 Generative 需要 NVIDIA 显卡：选择其他类型的显卡时，它们会在处理器上运行。Ask Buddy 的聊天在 Ollama 或 LM Studio 中运行，由它们自行选择显卡。下次启动 Buddy 时生效。",
+  "العربية": "المكان الذي يعمل فيه البحث بالوصف والتفريغ النصي وتفريغ اللقطات اليومية وGenerative. في الوضع التلقائي تختار كل أداة بنفسها: أول بطاقة رسومات مستقلة. اختر البطاقة التي لا يستخدمها Resolve للفصل بينهما. يحتاج التفريغ النصي وGenerative إلى بطاقة NVIDIA: وإذا اخترت نوعًا آخر فإنهما يعملان على المعالج. تعمل دردشة Ask Buddy في Ollama أو LM Studio، وهما يختاران بطاقتهما بنفسيهما. يسري ذلك عند تشغيل Buddy في المرة القادمة.",
+  "Tiếng Việt": "Nơi Tìm theo mô tả, Phiên âm, bản phiên âm của Dailies và Generative chạy. Tự động để mỗi công cụ tự chọn - card đồ họa rời đầu tiên. Hãy chọn card Resolve không dùng để tách riêng hai bên. Phiên âm và Generative cần card NVIDIA: nếu chọn loại khác, chúng chạy trên bộ xử lý. Trò chuyện của Ask Buddy chạy trong Ollama hoặc LM Studio, các ứng dụng này tự chọn card. Có hiệu lực từ lần khởi động Buddy tiếp theo."
  }
 }

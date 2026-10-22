@@ -17,6 +17,7 @@ from pathlib import Path
 from unittest import mock
 
 import _paths  # noqa: F401
+from core import ai_card
 from core.media_search import extract, indexer, model
 from core.media_search import store as st
 from pages.manual_chat import embedder as emb
@@ -409,7 +410,7 @@ class _LlamaRoot(_Temp):
         for name, value in {"ROOT": self.dir, "RUNTIME_DIR": self.dir / "llama.cpp" / ll.RELEASE,
                             "GPU_RUNTIME_DIR": self.dir / "llama.cpp" / (ll.RELEASE + "-vulkan"),
                             "MODELS_DIR": self.dir / "models", "LOG_PATH": self.dir / "llama.cpp" / "server.log",
-                            "_VERIFIED": {}, "_LOADED": set(), "_GPU_DEVICE": {}, "_SERVERS": {},
+                            "_VERIFIED": {}, "_LOADED": set(), "_GPU_LISTING": {}, "_SERVERS": {},
                             "gpu_runtime_download": lambda: None}.items():
             patcher = mock.patch.object(ll, name, value)
             patcher.start()
@@ -419,6 +420,9 @@ class _LlamaRoot(_Temp):
             patcher = mock.patch.object(model, name, value)
             patcher.start()
             self.addCleanup(patcher.stop)
+        patcher = mock.patch.object(ai_card, "_chosen", [ai_card.AUTO])      # Settings > AI: Automatic
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def card(self, listing="  Vulkan0: NVIDIA GeForce RTX 5070 Ti (15995 MiB, 15227 MiB free)\n"):
         """A graphics card build for this machine, installed, on a PC whose devices are `listing`."""
@@ -431,7 +435,7 @@ class _LlamaRoot(_Temp):
         folder.mkdir(parents=True)
         exe = folder / ("llama-server.exe" if os.name == "nt" else "llama-server")
         exe.write_bytes(b"MZ")
-        ll._GPU_DEVICE[str(exe)] = ll.pick_device(listing)      # what asking it (--list-devices) would say
+        ll._GPU_LISTING[str(exe)] = listing                     # what asking it (--list-devices) would say
         return build, exe
 
     def set_up(self):
@@ -581,7 +585,7 @@ class ModelTests(_LlamaRoot):
                 return {"data": [{"index": i, "embedding": [float(i)]} for i in reversed(range(len(body["input"])))]}
 
         with mock.patch.object(ll, "server_for",
-                               lambda model_path, mmproj=None, gpu=False: asked.append((model_path.name, mmproj.name)) or Server()):
+                               lambda model_path, mmproj=None, gpu=False, card="": asked.append((model_path.name, mmproj.name)) or Server()):
             self.assertEqual(model.embed_texts(["a  red\nkite"]), [[0.0]])
             self.assertEqual(model.embed_pictures([b"jpeg"] * 5), [[0.0], [1.0], [2.0], [3.0], [0.0]])     # four a request
             model.embed_sounds([b"wav"])
@@ -632,6 +636,36 @@ class ModelTests(_LlamaRoot):
         self.assertEqual(args[args.index("-ngl") + 1], "99")
         model.set_use_gpu(False)
         self.assertEqual(model.gpu(), "")
+
+    TWO = ("Available devices:\n"
+           "  Vulkan0: NVIDIA GeForce RTX 5070 Ti (15995 MiB, 15227 MiB free)\n"
+           "  Vulkan1: NVIDIA GeForce RTX 3060 (12288 MiB, 11000 MiB free)\n")
+
+    def test_two_of_the_same_card_are_told_apart(self):
+        twins = ("  Vulkan0: NVIDIA RTX A4000 (16376 MiB, 16000 MiB free)\n"
+                 "  Vulkan1: NVIDIA RTX A4000 (16376 MiB, 16000 MiB free)\n")
+        self.assertEqual(ll.list_devices(twins), [("Vulkan0", "NVIDIA RTX A4000"), ("Vulkan1", "NVIDIA RTX A4000 #2")])
+        self.assertEqual(ll.pick_device(twins, "NVIDIA RTX A4000 #2"), ("Vulkan1", "NVIDIA RTX A4000 #2"))
+
+    def test_it_runs_on_the_card_chosen_for_the_ai(self):
+        self.set_up()
+        _build, exe = self.card(self.TWO)
+        self.assertEqual(model.gpu(), "NVIDIA GeForce RTX 5070 Ti")    # Automatic: the first card of its own
+        ai_card._chosen[:] = ["NVIDIA GeForce RTX 3060"]                # Settings > AI
+        self.assertEqual(model.gpu(), "NVIDIA GeForce RTX 3060")
+        with mock.patch.object(ll.subprocess, "Popen") as popen, \
+                mock.patch.object(ll.LlamaServer, "_wait_ready", lambda *_a: None), mock.patch.object(ll, "_JOB", mock.Mock()), \
+                mock.patch.object(ll.LlamaServer, "post", lambda s, path, body, timeout: s.ensure() and {"data": [
+                    {"index": i, "embedding": [1.0]} for i in range(len(body["input"]))]}):
+            popen.return_value.poll.return_value = None
+            popen.return_value.pid = 1
+            model.embed_texts(["a red kite"])
+            args = popen.call_args[0][0]
+            for server in ll._SERVERS.values():
+                server.process = None
+        self.assertEqual(args[args.index("--device") + 1], "Vulkan1")
+        ai_card._chosen[:] = ["NVIDIA GeForce RTX 2080"]                # not one llama.cpp sees: its own choice
+        self.assertEqual(model.gpu(), "NVIDIA GeForce RTX 5070 Ti")
 
     def test_only_the_processors_own_graphics_means_the_processor(self):
         self.set_up()

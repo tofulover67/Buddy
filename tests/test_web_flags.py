@@ -3,7 +3,7 @@ on 12 - plain Direct3D 11 crashes in ANGLE's state cache, and software
 drawing (BUDDY_WEB_SOFTWARE=1) is slow - painting pages on the GPU without
 multisampling (with it, 11 on 12 cuts rounded corners on AMD's integrated
 graphics; painting on the CPU made switching tools slow) - and, with two
-GPUs, on the low-power one (core/gpu_adapter.py). All of Buddy's own pages
+GPUs, on the low-power one or the one chosen in Settings (core/gpu_adapter.py). All of Buddy's own pages
 share one renderer process (--process-per-site)."""
 
 import sys
@@ -148,6 +148,68 @@ class AdapterTests(unittest.TestCase):
             self.assertFalse(gpu_adapter.amd_integrated())               # one card: nothing picked
         gpu_adapter.apply({"BUDDY_WEB_ADAPTER": "1"})
         self.assertFalse(gpu_adapter.amd_integrated())                   # picked by hand: unknown
+
+    # ------------------------------------------- the card chosen in Settings --
+
+    def named(self):
+        cards = adapters(NVIDIA, AMD, WARP, software=[WARP])
+        cards[0]["name"], cards[0]["vendor"] = "NVIDIA GeForce RTX 5070 Ti", 0x10DE
+        cards[1]["name"], cards[1]["vendor"] = "AMD Radeon(TM) Graphics", gpu_adapter.VENDOR_AMD
+        cards[2]["name"], cards[2]["vendor"] = "Microsoft Basic Render Driver", 0x1414
+        return cards
+
+    def test_two_of_the_same_card_are_told_apart(self):
+        twin = (0, 96600)
+        cards = adapters(NVIDIA, twin, WARP, software=[WARP])
+        cards[0]["name"] = cards[1]["name"] = "NVIDIA RTX A4000"
+        self.assertEqual(gpu_adapter.labels(cards), {0: "NVIDIA RTX A4000", 1: "NVIDIA RTX A4000 #2"})
+        self.assertEqual(gpu_adapter.choose(cards, NVIDIA, "NVIDIA RTX A4000 #2"), 1)
+
+    def test_settings_lists_the_cards_only_when_there_is_a_choice(self):
+        with mock.patch.object(gpu_adapter, "_found", (self.named(), AMD)):
+            self.assertEqual(gpu_adapter.choices(), [
+                ("auto", "Automatic (the low-power card)"), ("NVIDIA GeForce RTX 5070 Ti", "NVIDIA GeForce RTX 5070 Ti"),
+                ("AMD Radeon(TM) Graphics", "AMD Radeon(TM) Graphics")])           # never the software renderer
+        with mock.patch.object(gpu_adapter, "_found", (self.named()[:1], NVIDIA)):
+            self.assertEqual(gpu_adapter.choices(), [])
+        with mock.patch.object(gpu_adapter, "_found", None), \
+                mock.patch.object(gpu_adapter, "_enumerate", side_effect=OSError("no DXGI")):
+            self.assertEqual(gpu_adapter.choices(), [])
+
+    def test_the_card_chosen_in_settings_is_drawn_on(self):
+        with mock.patch.object(gpu_adapter, "_found", None), \
+                mock.patch.object(gpu_adapter, "_enumerate", return_value=(self.named(), AMD)):
+            env = {}
+            self.assertEqual(gpu_adapter.apply(env, "NVIDIA GeForce RTX 5070 Ti"),
+                             "adapter 0 (NVIDIA GeForce RTX 5070 Ti, Settings)")
+            self.assertEqual(env["QT_D3D_ADAPTER_INDEX"], "0")
+            self.assertFalse(gpu_adapter.amd_integrated())
+            env = {}
+            gpu_adapter.apply(env, "AMD Radeon(TM) Graphics")                   # the same card Automatic picks
+            self.assertEqual(env["QT_D3D_ADAPTER_INDEX"], "1")
+            self.assertTrue(gpu_adapter.amd_integrated())                      # its corners are still painted right
+
+    def test_a_card_that_is_gone_falls_back_to_the_low_power_one(self):
+        with mock.patch.object(gpu_adapter, "_found", None), \
+                mock.patch.object(gpu_adapter, "_enumerate", return_value=(self.named(), AMD)):
+            env = {}
+            self.assertEqual(gpu_adapter.apply(env, "NVIDIA GeForce RTX 3060"),
+                             "adapter 1 (AMD Radeon(TM) Graphics, low-power of 3; Settings' NVIDIA GeForce RTX 3060 "
+                             "not found)")
+            self.assertEqual(env["QT_D3D_ADAPTER_INDEX"], "1")
+            env = {}
+            gpu_adapter.apply(env, None)                                        # a settings file without it
+            self.assertEqual(env["QT_D3D_ADAPTER_INDEX"], "1")
+
+    def test_the_environment_wins_over_settings(self):
+        with mock.patch.object(gpu_adapter, "_found", None), \
+                mock.patch.object(gpu_adapter, "_enumerate", return_value=(self.named(), AMD)):
+            env = {"BUDDY_WEB_ADAPTER": "default"}
+            gpu_adapter.apply(env, "NVIDIA GeForce RTX 5070 Ti")
+            self.assertNotIn("QT_D3D_ADAPTER_INDEX", env)
+            env = {"QT_D3D_ADAPTER_INDEX": "1"}
+            gpu_adapter.apply(env, "NVIDIA GeForce RTX 5070 Ti")
+            self.assertEqual(env["QT_D3D_ADAPTER_INDEX"], "1")
 
 
 if __name__ == "__main__":

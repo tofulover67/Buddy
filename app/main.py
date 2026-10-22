@@ -83,15 +83,17 @@ def main(start_hidden=False):
     if sys.platform != "darwin":
         # Web pages draw through ANGLE's Direct3D 11 on 12: plain Direct3D 11
         # crashes inside Buddy's process (core/web_flags.py) - and with two
-        # GPUs, on the low-power one, away from Resolve's card (core/gpu_adapter.py).
+        # GPUs, on the low-power one, away from Resolve's card, unless Settings >
+        # Window names another (core/gpu_adapter.py).
         # On AMD's integrated graphics the GPU paints rounded corners wrong, so
         # there pages are painted on the CPU - Settings > Window > Draw web
         # pages on the CPU says where (web_flags.cpu_paint), after the card is known.
-        adapter = gpu_adapter.apply(os.environ)
         try:
-            choice = web_flags.cpu_paint_choice(SharedSettings().get("web_cpu_paint"))
+            shared = SharedSettings()
+            card, choice = shared.get("web_adapter"), web_flags.cpu_paint_choice(shared.get("web_cpu_paint"))
         except Exception:  # noqa: BLE001 - a settings file the shell will complain about itself
-            choice = "auto"
+            card, choice = gpu_adapter.AUTO, "auto"
+        adapter = gpu_adapter.apply(os.environ, card)
         paint = web_flags.cpu_paint(os.environ, choice, gpu_adapter.amd_integrated())
         crash_log.trail("web", f"{web_flags.apply(os.environ)}; {adapter}; {paint}")
     # Web tool pages (core/web_page.py) share GPU contexts with each other;

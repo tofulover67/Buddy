@@ -40,7 +40,7 @@ import urllib.request
 from pathlib import Path
 from typing import Callable
 
-from core import model_folders, tool_dirs
+from core import ai_card, model_folders, tool_dirs
 from pages.transcribe import env_setup as tes
 from pages.transcribe.env_setup import SetupCancelled, SetupError  # noqa: F401 - the page catches these
 
@@ -290,26 +290,14 @@ MIN_COMPUTE = 8.0                             # Ampere (RTX 30) and later: Tenso
 
 
 def nvidia_card() -> dict | None:
-    """{"name", "memory_mb", "compute"} of the first NVIDIA card nvidia-smi
-    knows - None without one (or without its driver)."""
+    """{"name", "memory_mb", "compute"} of the NVIDIA card the engine runs
+    on: Settings > AI's, or the first nvidia-smi knows (core/ai_card.py) -
+    None without one (or without its driver), or with another kind of card
+    chosen there."""
     if os.name != "nt":
         return None
-    exe = shutil.which("nvidia-smi") or os.path.expandvars(r"%SystemRoot%\System32\nvidia-smi.exe")
-    if not os.path.isfile(exe):
-        return None
-    try:
-        out = subprocess.run([exe, "--query-gpu=name,memory.total,compute_cap", "--format=csv,noheader,nounits"],
-                             capture_output=True, text=True, timeout=15, **tes._no_window())
-    except (OSError, subprocess.SubprocessError):
-        return None
-    for line in out.stdout.splitlines():
-        parts = [p.strip() for p in line.split(",")]
-        if len(parts) == 3:
-            try:
-                return {"name": parts[0], "memory_mb": int(float(parts[1])), "compute": float(parts[2])}
-            except ValueError:
-                continue
-    return None
+    card = ai_card.cuda_card()
+    return {"name": card["name"], "memory_mb": card["memory_mb"], "compute": card["compute"]} if card else None
 
 
 def gpu_installed() -> bool:

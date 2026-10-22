@@ -57,9 +57,10 @@ import re
 import sys
 
 if sys.platform == "win32":
-    from core import backup, link_bar, web_flags
-else:       # core/web_flags.py: Windows only
+    from core import backup, gpu_adapter, link_bar, web_flags
+else:       # core/gpu_adapter.py, core/web_flags.py: Windows only
     from core import backup, link_bar
+from core import ai_card
 from core.app_version import buddy_version
 from core.i18n import LANGUAGES, canonical_language, language_label
 from core.theme import (
@@ -345,6 +346,7 @@ def shell_pages(shared, autostart, autostart_available=True, updates=None, tools
                            "Buddy paints pages on the CPU: right, but slower to show a big page. Always: for "
                            "another card that paints something wrong. Never: if a page is too slow to appear. "
                            "Takes effect when Buddy next starts.") if sys.platform == "win32" else None,
+            web_adapter_field(shared) if sys.platform == "win32" else None,
             select("split_tint", "Second pane in dual view", shared.get("split_tint", DEFAULT_SIDE_PANE_TINT),
                    list(SIDE_PANE_TINTS.items()),
                    tooltip="Tints the tool on the right while dual view is on, so it's easy to tell which side is "
@@ -465,6 +467,40 @@ def appearance_fields(shared):
     ]
 
 
+def ai_card_field(shared):
+    """Settings > AI > Model library's graphics card for the AI, on a PC with
+    more than one (core/ai_card.py) - None with one. A card that's gone since
+    shows as Automatic, which is what the AI runs on then."""
+    options = ai_card.choices()
+    if not options:
+        return None
+    value = shared.get(ai_card.KEY, ai_card.AUTO)
+    return select(ai_card.KEY, "Graphics card for AI (from the next start)",
+                  value if value in dict(options) else ai_card.AUTO, options,
+                  tooltip="Where search by description, Transcribe, Dailies' transcripts and Generative run. "
+                          "Automatic leaves each to its own choice - the first graphics card of its own. Pick the "
+                          "card Resolve isn't using to keep the two apart. Transcribe and Generative need an "
+                          "NVIDIA card: with another kind picked they run on the processor. Ask Buddy's chat "
+                          "runs in Ollama or LM Studio, which choose their own. Takes effect when Buddy next "
+                          "starts.")
+
+
+def web_adapter_field(shared):
+    """Settings > Window's graphics card, on a PC with more than one (Windows
+    only, core/gpu_adapter.py) - None with one. A card that's gone since
+    shows as Automatic, which is what Buddy draws on then."""
+    options = gpu_adapter.choices()
+    if not options:
+        return None
+    value = shared.get("web_adapter", gpu_adapter.AUTO)
+    return select("web_adapter", "Graphics card for Buddy's window (from the next start)",
+                  value if value in dict(options) else gpu_adapter.AUTO, options,
+                  tooltip="Automatic draws Buddy on the low-power card - usually the processor's built-in "
+                          "graphics - and leaves the other to Resolve: on Resolve's card, Buddy can go down with "
+                          "it when its driver restarts. Pick a card if Buddy is slow or drawn wrong on the "
+                          "automatic one. Takes effect when Buddy next starts.")
+
+
 def shell_fields(shared, autostart, autostart_available=True, updates=None, tools=(), shortcuts=None):
     """Every field of the shell's pages, as one list."""
     return [f for p in shell_pages(shared, autostart, autostart_available, updates, tools, shortcuts)
@@ -529,6 +565,16 @@ def apply_shell(shared, key, value):
         theme = shared.get("theme", DEFAULT_THEME)
         shared[f"{COLOR_KEYS[key]}_{theme}"] = value.upper()
         return "theme"
+    if key == ai_card.KEY:
+        if value not in dict(ai_card.choices()):
+            return None
+        shared[key] = value
+        return "later"                  # read once a run (core/ai_card.py)
+    if sys.platform == "win32" and key == "web_adapter":
+        if value not in dict(gpu_adapter.choices()):
+            return None
+        shared[key] = value
+        return "later"                  # read at the next start (main.py)
     if sys.platform == "win32" and key == "web_cpu_paint":
         if value not in dict(web_flags.CPU_PAINT_CHOICES):
             return None

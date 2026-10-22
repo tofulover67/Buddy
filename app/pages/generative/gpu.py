@@ -21,7 +21,8 @@ beside Resolve, a model TensorRT can't take - falls back to the CPU for that
 model, and says why (why()).
 
 BUDDY_GENERATIVE_GPU=0 in the environment keeps everything on the CPU (the
-page's "Use the graphics card" off).
+page's "Use the graphics card" off). Which card: the one CUDA_VISIBLE_DEVICES
+shows, which Settings > AI can set (core/ai_card.py cuda_env).
 """
 
 from __future__ import annotations
@@ -60,7 +61,10 @@ def devices():
                 _state["devices"] = found or None
                 _state["ep"] = trt.get_ep_name()
                 _state["version"] = getattr(trt, "__version__", "")
-                if not found:
+                if not found and os.environ.get("CUDA_VISIBLE_DEVICES") == "-1" and os.environ.get("BUDDY_AI_CARD"):
+                    # Settings > AI chose another kind of card (core/ai_card.py cuda_env).
+                    _state["why"] = f"Settings > AI runs AI on {os.environ['BUDDY_AI_CARD']}, not an NVIDIA RTX."
+                elif not found:
                     _state["why"] = "No NVIDIA RTX graphics card was found."
             except ImportError:
                 _state["why"] = "The graphics card add-on isn't installed."
