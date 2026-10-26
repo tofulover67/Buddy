@@ -73,7 +73,9 @@ function applyEnabled() {
         for (const b of document.querySelectorAll("[data-action='connect'], [data-action='refresh']")) b.disabled = false;
     }
     const proxyHeld = !!(state.overlay || state.proxy_busy);
-    for (const b of document.querySelectorAll("[data-scope], [data-resolution], #proxy-format")) b.disabled = proxyHeld;
+    for (const b of document.querySelectorAll("[data-scope], [data-resolution], [data-location], #proxy-format, #proxy-folder-change")) {
+        b.disabled = proxyHeld;
+    }
     $("proxy-recursive").disabled = proxyHeld;
 }
 
@@ -376,6 +378,10 @@ for (const b of document.querySelectorAll("#proxy-resolution [data-resolution]")
 }
 $("proxy-format").onchange = e => send("proxy_option", {key: "codec", value: e.target.value});
 $("proxy-recursive").onchange = e => send("proxy_option", {key: "recursive", value: e.target.checked});
+for (const b of document.querySelectorAll("#proxy-location [data-location]")) {
+    b.onclick = () => send("proxy_option", {key: "location", value: b.dataset.location});
+}
+$("proxy-folder-change").onclick = () => send("proxy_folder");
 $("proxy-check").onclick = () => send("proxy_status");
 $("proxy-relink").onclick = () => send("proxy_relink");
 for (const b of document.querySelectorAll("#proxy-mode [data-mode]")) {
@@ -478,6 +484,13 @@ Buddy.on("proxy", d => {
     for (const b of document.querySelectorAll("#proxy-resolution [data-resolution]")) {
         b.setAttribute("aria-pressed", String(b.dataset.resolution === (d.resolution || "half")));
     }
+    const inFolder = d.location === "folder" && !!d.folder;
+    for (const b of document.querySelectorAll("#proxy-location [data-location]")) {
+        b.setAttribute("aria-pressed", String(b.dataset.location === (inFolder ? "folder" : "beside")));
+    }
+    const folder = $("proxy-folder");
+    folder.hidden = $("proxy-folder-change").hidden = !inFolder;
+    folder.textContent = folder.title = d.folder || "";
     const format = $("proxy-format"), codecs = d.codecs || [];
     if (format.options.length !== codecs.length) {
         format.replaceChildren(...codecs.map(c => el("option", {value: c.id, text: c.label})));

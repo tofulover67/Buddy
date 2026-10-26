@@ -6,8 +6,10 @@ run reports.
 
 Proxies are .mov files written into a "Proxy" folder beside each source -
 the same convention Resolve's own Generate Proxy Media uses, so a project
-stays portable - then linked in Resolve with MediaPoolItem.LinkProxyMedia,
-the call behind the manual "Relink Proxy Media". Source files are never
+stays portable - or into a folder chosen on the tab, under each source's
+own folder path (proxy_dir). Then they're linked in Resolve with
+MediaPoolItem.LinkProxyMedia, the call behind the manual "Relink Proxy
+Media". Source files are never
 touched: the proxy is a new file, and only Resolve's own proxy toggle ever
 swaps a clip onto it.
 
@@ -40,6 +42,7 @@ import re
 import subprocess
 import sys
 import threading
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
 from .ffmpeg_utils import _ffprobe_path, _no_feedback_cursor_kwargs
 from .importer import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
@@ -94,27 +97,54 @@ CODECS = {
                  "args": _DNXHR + ["dnxhr_hq"]},
     "cineform": {"label": "CineForm", "hint": "GoPro's intra-frame format: light to play, between LB and SQ in size.",
                  "args": ["-c:v", "cfhd", "-quality", "medium", "-pix_fmt", "yuv422p10le"]},
-    # NVIDIA's encoders (Windows, an NVIDIA card). The clip is decoded,
-    # scaled and encoded on the graphics card, so the CPU stays free for
-    # Resolve: a minute of 4K on an RTX 5080 took 1-3 s of CPU time, not
-    # 100-230 s, and a drone's H.265 rendered 4x faster (2026-09-30). A source the card can't decode (ProRes, DNxHR, BRAW, 4:2:2
-    # on older cards) is decoded on the CPU and still encoded on the card; a
-    # PC without NVENC renders the "cpu" format instead (render_plan).
-    "h264_nvenc": {"label": "H.264 (NVIDIA GPU)",
+    # The graphics card's formats (Windows): the first of NVIDIA, AMD and
+    # Intel's encoders (GPU_ENCODERS) that starts on this PC, and the "cpu"
+    # format on a PC with none of them (render_plan). The ids are NVIDIA's
+    # encoders' names from when there was only NVIDIA, so a saved choice
+    # still means the same format.
+    "h264_nvenc": {"label": "H.264 (GPU)",
                    "hint": "Rendered on the graphics card – much faster, and leaves the CPU free for Resolve.",
-                   "args": ["-c:v", "h264_nvenc", "-preset", "p4", "-rc", "vbr", "-cq", "28", "-b:v", "0"],
-                   "gpu": "h264_nvenc", "cpu": "h264"},
-    "hevc_nvenc": {"label": "H.265 (NVIDIA GPU)",
+                   "gpu": ["h264_nvenc", "h264_amf", "h264_qsv"], "cpu": "h264"},
+    "hevc_nvenc": {"label": "H.265 (GPU)",
                    "hint": "Smaller files than H.264, rendered on the graphics card.",
+                   "gpu": ["hevc_nvenc", "hevc_amf", "hevc_qsv"], "cpu": "h265"},
+}
+
+# The encoders behind the GPU formats, in the order they're tried.
+# NVIDIA's ("cuda"): the clip is decoded, scaled and encoded on the card,
+# so the CPU stays free for Resolve: a minute of 4K on an RTX 5080 took
+# 1-3 s of CPU time, not 100-230 s, and a drone's H.265 rendered 4x faster
+# (2026-09-30). A source the card can't decode (ProRes, DNxHR, BRAW, 4:2:2
+# before the RTX 50s) is decoded on the CPU and still encoded on the card.
+# AMD's and Intel's: decoded and scaled on the CPU, encoded on the card -
+# ffmpeg's Windows decoder (d3d11va) takes the first graphics card, which
+# on a PC with an NVIDIA card as well is the wrong one, and AMD's encoder
+# then won't start. AMD's rate control is constant QP: a Ryzen 9000's
+# Radeon refuses QVBR (2026-10-26). Decoding is most of the work with 4K
+# 4:2:2 H.264 either way: a 20 s clip took 52 s of CPU time on the Radeon,
+# 63 s with libx264. Intel's are untested on Intel hardware.
+GPU_ENCODERS = {
+    "h264_nvenc": {"vendor": "NVIDIA", "cuda": True,
+                   "args": ["-c:v", "h264_nvenc", "-preset", "p4", "-rc", "vbr", "-cq", "28", "-b:v", "0"]},
+    "h264_amf": {"vendor": "AMD",
+                 "args": ["-c:v", "h264_amf", "-quality", "speed", "-rc", "cqp",
+                          "-qp_i", "24", "-qp_p", "26", "-qp_b", "28"]},
+    "h264_qsv": {"vendor": "Intel",
+                 "args": ["-c:v", "h264_qsv", "-preset", "faster", "-global_quality", "25"]},
+    "hevc_nvenc": {"vendor": "NVIDIA", "cuda": True,
                    "args": ["-c:v", "hevc_nvenc", "-preset", "p4", "-rc", "vbr", "-cq", "30", "-b:v", "0",
-                            "-tag:v", "hvc1"],
-                   "gpu": "hevc_nvenc", "cpu": "h265"},
+                            "-tag:v", "hvc1"]},
+    "hevc_amf": {"vendor": "AMD",
+                 "args": ["-c:v", "hevc_amf", "-quality", "speed", "-rc", "cqp",
+                          "-qp_i", "26", "-qp_p", "28", "-qp_b", "30", "-tag:v", "hvc1"]},
+    "hevc_qsv": {"vendor": "Intel",
+                 "args": ["-c:v", "hevc_qsv", "-preset", "faster", "-global_quality", "27", "-tag:v", "hvc1"]},
 }
 
 
 def codec_choices(platform=None):
-    """The dropdown's entries, in order: [{id, label, hint}]. NVIDIA's
-    only on Windows - there are no NVIDIA cards in today's Macs."""
+    """The dropdown's entries, in order: [{id, label, hint}]. The GPU ones
+    only on Windows - a Mac's encoders are VideoToolbox, not these."""
     platform = platform or sys.platform
     return [{"id": key, "label": c["label"], "hint": c["hint"]} for key, c in CODECS.items()
             if platform == "win32" or not c.get("gpu")]
@@ -124,34 +154,86 @@ _GPU_CHECKED = {}   # (ffmpeg path, encoder) -> True: it encoded here (asked onc
 _GPU_PROBLEM = {}   # (ffmpeg path, encoder) -> why it didn't, the last time it was tried
 
 NO_NVIDIA = "it needs an NVIDIA graphics card."
+# Why an encoder didn't start when this PC hasn't got the hardware for it -
+# the one reason that isn't worth a word while another card's encoder works.
+NO_HARDWARE = {
+    "NVIDIA": NO_NVIDIA,
+    "AMD": "it needs AMD Radeon graphics.",
+    "Intel": "it needs Intel graphics with Quick Sync.",
+}
+NO_GPU = "it needs an NVIDIA, AMD or Intel graphics card that can encode video."
+_NO_DEVICE = {
+    "NVIDIA": r"Cannot load nvcuda|Cannot load nvEncodeAPI|No capable devices found|No NVENC capable devices"
+              r"|Could not dynamically load CUDA|cuInit\(0\) failed",
+    # amfrt64.dll is AMD's driver; CreateComponent fails on a Radeon without
+    # this encoder (the AV1 one on a Ryzen 9000's, 2026-10-26).
+    "AMD": r"amfrt64|Failed to load AMF|AMF failed to initiali|CreateComponent\(|No such device",
+    # ffmpeg 9 on a PC with no Intel graphics: "Error creating a MFX session: -9".
+    "Intel": r"MFX session|mfx implementation|libmfx|libvpl|No device available",
+}
 
 
-def gpu_problem(stderr, driver=""):
-    """What ffmpeg's error on the test encode means, in words - "" when
-    there's nothing to say beyond the error itself. A build newer than the
-    driver is the usual one on a PC that does have the card: ffmpeg 9 wants
-    driver 610 or newer (NVENC 13.1) and says so."""
+# The NVIDIA cards that get no new drivers, and the last driver series
+# each has: by CUDA compute capability, Kepler (3.x) stops at 470;
+# Maxwell, Pascal and Volta (5.0-7.0: the GTX 750 and 900s, the GTX 10s,
+# Titan V) at 580. Turing (7.5: GTX 16, RTX 20) and later still get them.
+# Telling one of these to update past its last series sends its owner
+# looking for a driver that doesn't exist; an ffmpeg built for an older
+# NVENC (headers 13.0 want driver 570) does work on a 580 card.
+LAST_DRIVER = {
+    470: "this NVIDIA card gets no drivers newer than the 470 series, and this ffmpeg needs a newer one. "
+         "An older ffmpeg build that works with driver 470 will use the card – set its path in Settings.",
+    580: "this NVIDIA card gets no drivers newer than the 580 series, and this ffmpeg needs a newer one. "
+         "An older ffmpeg build that works with driver 580 will use the card – set its path in Settings.",
+}
+
+
+def last_driver_series(compute):
+    """The last driver series a card of this compute capability ("6.1")
+    gets - 470 or 580 - or None for one that still gets new drivers (or a
+    capability that can't be read)."""
+    try:
+        capability = float(compute)
+    except (TypeError, ValueError):
+        return None
+    if capability < 5:
+        return 470
+    return 580 if capability < 7.5 else None
+
+
+def gpu_problem(stderr, driver="", vendor="NVIDIA", last=None):
+    """What ffmpeg's error on the test encode means, in words. A build
+    newer than the driver is the usual one on a PC that does have an NVIDIA
+    card: ffmpeg 9 wants driver 610 or newer (NVENC 13.1) and says so.
+    last: the card's last driver series (last_driver_series), when it gets
+    no new ones - then updating is no answer once ffmpeg needs more."""
     text = stderr.decode("utf-8", "replace") if isinstance(stderr, bytes) else (stderr or "")
     needed = re.search(r"minimum required Nvidia driver for nvenc is ([\d.]+)", text, re.I)
-    if needed or re.search(r"does not support the required nvenc API version", text, re.I):
+    if vendor == "NVIDIA" and (needed or re.search(r"does not support the required nvenc API version", text, re.I)):
+        if last in LAST_DRIVER:
+            need = int(float(needed.group(1))) if needed else None
+            have = re.match(r"\d+", driver or "")
+            # A card short of its own last series can still update to it.
+            if (need is not None and need > last) or (need is None and (not have or int(have.group()) >= last)):
+                return LAST_DRIVER[last]
         version = f" {needed.group(1)}" if needed else ""
         have = f", and this PC has {driver}" if driver else ""
         return (f"the NVIDIA driver is older than this ffmpeg needs – driver{version} or newer{have}. "
                 f"Update it in the NVIDIA app or from nvidia.com.")
     if re.search(r"Unknown encoder|Encoder not found|Requested encoder", text, re.I):
-        return "this ffmpeg was built without NVIDIA's encoders (a \"full\" build has them)."
-    if re.search(r"Cannot load nvcuda|Cannot load nvEncodeAPI|No capable devices found|No NVENC capable devices"
-                 r"|Could not dynamically load CUDA|cuInit\(0\) failed", text, re.I):
-        return NO_NVIDIA
+        return f"this ffmpeg was built without {vendor}'s encoders (a \"full\" build has them)."
+    if re.search(_NO_DEVICE[vendor], text, re.I):
+        return NO_HARDWARE[vendor]
     lines = [line.split("] ", 1)[-1].strip() for line in text.splitlines() if line.strip()]
-    return f"NVIDIA's encoder didn't start ({lines[0][:160].rstrip('.')})." if lines else NO_NVIDIA
+    return f"{vendor}'s encoder didn't start ({lines[0][:160].rstrip('.')})." if lines else NO_HARDWARE[vendor]
 
 
-def nvidia_driver(run=None):
+def nvidia_driver(run=None, query="driver_version"):
     """The installed NVIDIA driver's version ("596.36"), or "" - for saying
-    how far behind it is."""
+    how far behind it is. query="compute_cap": the card's CUDA compute
+    capability ("6.1" on a GTX 1080) instead, for last_driver_series."""
     try:
-        result = (run or subprocess.run)(["nvidia-smi", "--query-gpu=driver_version", "--format=csv,noheader"],
+        result = (run or subprocess.run)(["nvidia-smi", f"--query-gpu={query}", "--format=csv,noheader"],
                                          capture_output=True, timeout=10, **_no_feedback_cursor_kwargs())
     except (subprocess.SubprocessError, OSError):
         return ""
@@ -160,45 +242,74 @@ def nvidia_driver(run=None):
 
 
 def gpu_available(ffmpeg_path, encoder, run=None):
-    """Whether this ffmpeg can encode with `encoder` on this PC - a build
-    can include NVENC with no NVIDIA card to run it (or a driver too old
-    for it), so it's tried on a tenth of a second of black. A yes is kept
-    for the session; a no is tried again next run, so updating the driver
-    works without restarting Buddy. Why not: _GPU_PROBLEM."""
+    """Whether this ffmpeg can encode with `encoder` (a GPU_ENCODERS key)
+    on this PC - a build includes every vendor's encoders whatever card
+    there is to run them (or a driver too old for it), so it's tried, with
+    the settings a proxy uses, on a tenth of a second of black. A yes is
+    kept for the session; a no is tried again next run, so updating the
+    driver works without restarting Buddy. Why not: _GPU_PROBLEM."""
     key = (ffmpeg_path, encoder)
     if _GPU_CHECKED.get(key):
         return True
+    vendor = GPU_ENCODERS[encoder]["vendor"]
     run = run or subprocess.run
     try:
         result = run([ffmpeg_path, "-hide_banner", "-v", "error", "-f", "lavfi",
-                      "-i", "color=black:s=256x144:d=0.1", "-c:v", encoder, "-f", "null", "-"],
+                      "-i", "color=black:s=256x144:d=0.1", *GPU_ENCODERS[encoder]["args"],
+                      "-pix_fmt", "yuv420p", "-f", "null", "-"],
                      capture_output=True, timeout=30, **_no_feedback_cursor_kwargs())
     except (subprocess.SubprocessError, OSError) as exc:
-        _GPU_PROBLEM[key] = f"NVIDIA's encoder didn't start ({exc})."
+        _GPU_PROBLEM[key] = f"{vendor}'s encoder didn't start ({exc})."
         return False
     if result.returncode == 0:
         _GPU_CHECKED[key] = True
         _GPU_PROBLEM.pop(key, None)
         return True
     stderr = getattr(result, "stderr", b"") or b""
-    driver = nvidia_driver(run) if b"nvenc API" in stderr or b"Nvidia driver" in stderr else ""
-    _GPU_PROBLEM[key] = gpu_problem(stderr, driver)
+    driver, last = "", None
+    if b"nvenc API" in stderr or b"Nvidia driver" in stderr:
+        driver = nvidia_driver(run)
+        last = last_driver_series(nvidia_driver(run, "compute_cap"))
+    _GPU_PROBLEM[key] = gpu_problem(stderr, driver, vendor, last)
     return False
 
 
 def render_plan(ffmpeg_path, codec):
-    """(the format a run really renders, what to tell the user or ""): a
-    GPU format this PC can't encode becomes its CPU one - and the note
-    says why, from ffmpeg's own error."""
-    gpu = CODECS.get(codec, {}).get("gpu")
-    if not gpu or gpu_available(ffmpeg_path, gpu):
+    """(what a run really renders - a CODECS or GPU_ENCODERS key - and what
+    to tell the user, or ""). A GPU format renders on the first of its
+    encoders that starts here, and becomes its CPU format when none does.
+    An encoder that didn't start for want of the hardware isn't mentioned
+    while another works, nor one this ffmpeg was built without (the PC may
+    not have that card at all); one that failed for any other reason (a
+    driver too old) is, from ffmpeg's own error."""
+    encoders = CODECS.get(codec, {}).get("gpu")
+    if not encoders:
         return codec, ""
+    problems, missing = [], []
+    for encoder in encoders:
+        vendor = GPU_ENCODERS[encoder]["vendor"]
+        if gpu_available(ffmpeg_path, encoder):
+            if not problems:
+                return encoder, ""
+            other, why = problems[0]
+            return encoder, (f"Couldn't encode on the {other} graphics card: {why} "
+                             f"This run used the {vendor} graphics instead.")
+        why = _GPU_PROBLEM.get((ffmpeg_path, encoder)) or NO_HARDWARE[vendor]
+        if why.startswith("this ffmpeg was built without"):
+            missing.append((vendor, why))
+        elif why != NO_HARDWARE[vendor]:
+            problems.append((vendor, why))
     fallback = CODECS[codec]["cpu"]
-    why = _GPU_PROBLEM.get((ffmpeg_path, gpu)) or NO_NVIDIA
+    why = (problems or missing or [("", NO_GPU)])[0][1]
     return fallback, (f"Couldn't encode {CODECS[codec]['label']} on this PC: {why} "
                       f"This run used {CODECS[fallback]['label']} on the CPU instead.")
 DEFAULT_RESOLUTION = "half"
 DEFAULT_CODEC = "h264"
+
+# Where proxies go: a "Proxy" folder beside each source, or a folder chosen
+# on the tab (proxy_dir).
+LOCATIONS = ("beside", "folder")
+DEFAULT_LOCATION = "beside"
 
 # What a run can target. "timeline" is the clips selected on the open
 # timeline, or every clip on it when none are (or when this Resolve can't
@@ -237,8 +348,9 @@ INFO_TEXT = (
     "Generate Proxy Media, for when a machine struggles to play the originals "
     "back.\n\n"
     "Proxies are .mov files written into a 'Proxy' folder beside each source "
-    "(Resolve's own convention), then linked with the same call the manual "
-    "relink uses. Source files are never touched, and each clip's audio is "
+    "(Resolve's own convention) – or, if you choose a folder, into it under "
+    "each source's own folder path, so clips of the same name never clash – "
+    "then linked with the same call the manual relink uses. Source files are never touched, and each clip's audio is "
     "stream-copied, so nothing changes but the playback load.\n\n"
     "Which clips: the Media Pool selection, the current timeline (the clips "
     "selected on it, or all of them when none are), the open bin (optionally "
@@ -419,9 +531,25 @@ def timeline_clips(timeline):
 
 # ------------------------------------------------------------------ plan
 
-def _claim(src, claimed):
-    """The .mov path this source's proxy should use, and whether that's a
-    render or an existing file to adopt.
+def proxy_dir(src, root=None):
+    """The folder src's proxy goes in: a 'Proxy' folder beside it - or,
+    with root (a folder chosen on the tab), root followed by src's own
+    folder path, so two cards' C0001.MP4 never meet and a later run finds
+    each one's proxy again: E:\\Shoot\\Card A\\C0001.MP4 under D:\\Proxies
+    goes in D:\\Proxies\\E\\Shoot\\Card A, /Volumes/Card A/C0001.MP4 under
+    /Users/you/Proxies in /Users/you/Proxies/Volumes/Card A."""
+    folder = os.path.dirname(src) or "."
+    if not root:
+        return os.path.join(folder, PROXY_DIRNAME)
+    drive, rest = os.path.splitdrive(os.path.abspath(folder))
+    # "E:" -> "E"; a share's "\\server\share" -> "server", "share".
+    parts = [p for p in re.split(r"[\\/]+", drive.replace(":", "") + "/" + rest) if p]
+    return os.path.join(root, *parts)
+
+
+def _claim(src, claimed, root=None):
+    """The .mov path this source's proxy should use (in proxy_dir), and
+    whether that's a render or an existing file to adopt.
 
     `claimed` tracks, per (folder, lowercase stem), which proxy names this
     run has handed out and whether the stem's first file was adopted. The
@@ -431,10 +559,10 @@ def _claim(src, claimed):
     be another clip's proxy, so it moves on to the next free name instead.
 
     Returns ("render", path) or ("existing", path)."""
-    folder = os.path.dirname(src) or "."
+    folder = proxy_dir(src, root)
     stem = os.path.splitext(os.path.basename(src))[0]
     base = stem + PROXY_SUFFIX
-    state = claimed.setdefault((folder, base.lower()), {"adopted": False, "names": set()})
+    state = claimed.setdefault((os.path.normcase(folder), base.lower()), {"adopted": False, "names": set()})
     n = 1
     while True:
         name = f"{base}{PROXY_EXT}" if n == 1 else f"{base}_{n}{PROXY_EXT}"
@@ -442,7 +570,7 @@ def _claim(src, claimed):
         if key in state["names"]:
             n += 1
             continue
-        path = os.path.join(folder, PROXY_DIRNAME, name)
+        path = os.path.join(folder, name)
         if not os.path.exists(path):
             state["names"].add(key)
             return "render", path
@@ -453,9 +581,10 @@ def _claim(src, claimed):
         n += 1
 
 
-def plan(videos):
-    """Where each video clip's proxy goes. `videos` is the deduped entry
-    list of one scope's video clips; returns
+def plan(videos, root=None):
+    """Where each video clip's proxy goes - beside it, or under root (see
+    proxy_dir). `videos` is the deduped entry list of one scope's video
+    clips; returns
     {"render": [{id, name, path, dst}], "existing": [{id, name, path, dst}],
      "skipped": [sentence, ...]}.
 
@@ -472,7 +601,7 @@ def plan(videos):
         if not os.path.isfile(src):
             skipped.append(f"Skipped \"{entry['name']}\" – the file is offline.")
             continue
-        kind, dst = _claim(src, claimed)
+        kind, dst = _claim(src, claimed, root)
         target = {**entry, "dst": dst}
         (render if kind == "render" else existing).append(target)
     return {"render": render, "existing": existing, "skipped": skipped}
@@ -512,19 +641,21 @@ def build_command(ffmpeg_path, src, out_path, resolution, codec, timecode="", gp
     tracks all survive) and is optional, so a video with no sound at all
     still renders.
 
-    gpu_decode (a GPU format only): decode and scale on the graphics card
-    too; without it the CPU decodes and scales, and hands NVENC 8-bit
-    4:2:0 frames."""
+    codec: a CODECS key, or a GPU_ENCODERS one (what render_plan picked).
+    gpu_decode (NVIDIA's encoders only): decode and scale on the graphics
+    card too; without it the CPU decodes and scales, and hands the encoder
+    8-bit 4:2:0 frames."""
     try:
-        codec_args = list(CODECS[codec]["args"])
-        gpu = bool(CODECS[codec].get("gpu"))
-        vf = RESOLUTIONS[resolution]["cuda_vf" if gpu and gpu_decode else "vf"]
+        encoder = GPU_ENCODERS.get(codec)
+        codec_args = list(encoder["args"] if encoder else CODECS[codec]["args"])
+        cuda = bool(encoder and encoder.get("cuda") and gpu_decode)
+        vf = RESOLUTIONS[resolution]["cuda_vf" if cuda else "vf"]
     except KeyError as exc:
         raise ProxyError("Unknown proxy resolution or codec.") from exc
     cmd = [ffmpeg_path, "-hide_banner", "-nostdin", "-v", "error", "-y"]
-    if gpu and gpu_decode:
+    if cuda:
         cmd += ["-hwaccel", "cuda", "-hwaccel_output_format", "cuda"]
-    elif gpu:
+    elif encoder:
         codec_args += ["-pix_fmt", "yuv420p"]
     cmd += ["-i", src]
     if vf:
@@ -590,7 +721,7 @@ def render_one(ffmpeg_path, src, dst, resolution, codec, run=None, timecode=""):
     part = dst + PART_EXT
     run = run or _run_process
     code, err = 1, b""
-    if CODECS.get(codec, {}).get("gpu"):
+    if GPU_ENCODERS.get(codec, {}).get("cuda"):
         # All on the graphics card first; a source it can't decode fails
         # at once, and goes again decoded on the CPU.
         code, err = run(build_command(ffmpeg_path, src, part, resolution, codec, timecode, gpu_decode=True))
@@ -609,6 +740,73 @@ def render_one(ffmpeg_path, src, dst, resolution, codec, run=None, timecode=""):
                          + (f": {detail}" if detail else ""))
     os.replace(part, dst)
     return dst
+
+
+# Two proxies render side by side: one ffmpeg keeps neither the CPU nor the
+# card busy - decoding a frame waits on reading, encoding on decoding. Four
+# 20 s clips of 4K 4:2:2 H.264, Ryzen 9 9900X with an RTX 5070 Ti
+# (2026-10-26): decoded on the CPU for NVENC 16.8 s one at a time, 11.7 s
+# two at once (four at once: 10.7 s); libx264 17.9 s to 13.7 s. More than
+# two buys little, and leaves less of the PC for Resolve.
+RENDERS_AT_ONCE = 2
+
+
+def render_many(ffmpeg_path, targets, resolution, codec, report, run=None, at_once=RENDERS_AT_ONCE):
+    """Renders every target's proxy ({id, path, dst, tc}), `at_once` at a
+    time, and returns [{id, ok, error?}] in the targets' order.
+
+    report(stage, done, total) is the job's, and is only ever called on
+    this thread: after Cancel it raises, and the renders not yet begun see
+    report.stopped() and never start. Cancel has already killed the ones
+    running; anything that slipped in between is killed on the way out."""
+    total = len(targets)
+    results = [None] * total
+    running = []            # the file names rendering now, for the progress line
+    lock = threading.Lock()
+    stopped = getattr(report, "stopped", lambda: False)
+
+    def one(index):
+        target = targets[index]
+        if stopped():
+            return
+        name = os.path.basename(target["path"])
+        with lock:
+            running.append(name)
+        try:
+            render_one(ffmpeg_path, target["path"], target["dst"], resolution, codec,
+                       run=run, timecode=target.get("tc", ""))
+            results[index] = {"id": target["id"], "ok": True}
+        except ProxyError as exc:
+            results[index] = {"id": target["id"], "ok": False, "error": str(exc)}
+        finally:
+            with lock:
+                running.remove(name)
+
+    if not targets:
+        return []
+    pool = ThreadPoolExecutor(max_workers=max(1, min(at_once, total)))
+    try:
+        pending = {pool.submit(one, index) for index in range(total)}
+        done, stage, shown = 0, f"Rendering {os.path.basename(targets[0]['path'])}", None
+        while pending:
+            with lock:
+                if running:
+                    stage = "Rendering " + ", ".join(running)
+            if (stage, done) != shown:
+                report(stage, done, total)
+                shown = (stage, done)
+            finished, pending = wait(pending, timeout=0.25, return_when=FIRST_COMPLETED)
+            for future in finished:
+                future.result()     # a bug in here, not a clip that failed: let it out
+            done += len(finished)
+        report(stage, total, total)     # a Cancel during the last render still unwinds the job
+    except BaseException:
+        pool.shutdown(wait=False, cancel_futures=True)
+        terminate_active()
+        raise
+    finally:
+        pool.shutdown(wait=True)
+    return results
 
 
 # ------------------------------------------------------------ status
@@ -659,38 +857,40 @@ def set_aside_key(path):
     return os.path.normcase(os.path.normpath(path)) if path else ""
 
 
-def known_proxy(entry, set_aside=None):
+def known_proxy(entry, set_aside=None, root=None):
     """A proxy file on disk for a clip that has none linked: the one taken
     off it with Use camera originals (set_aside: {set_aside_key(source):
-    proxy path}), else Buddy's own beside the source, else Resolve's
-    (Generate Proxy Media writes Proxy/<name>.mov). "" if there's none."""
+    proxy path}), else Buddy's own - under root when a folder is chosen
+    (proxy_dir), else beside the source - else Resolve's (Generate Proxy
+    Media writes Proxy/<name>.mov). "" if there's none."""
     src = entry.get("path") or ""
     if not src:
         return ""
     remembered = (set_aside or {}).get(set_aside_key(src))
     if remembered and os.path.isfile(remembered):
         return remembered
-    folder = os.path.join(os.path.dirname(src), PROXY_DIRNAME)
     stem = os.path.splitext(os.path.basename(src))[0]
-    for name in (f"{stem}{PROXY_SUFFIX}{PROXY_EXT}", f"{stem}{PROXY_EXT}"):
-        path = os.path.join(folder, name)
+    candidates = [os.path.join(proxy_dir(src, root), f"{stem}{PROXY_SUFFIX}{PROXY_EXT}")] if root else []
+    beside = proxy_dir(src)
+    candidates += [os.path.join(beside, f"{stem}{PROXY_SUFFIX}{PROXY_EXT}"), os.path.join(beside, f"{stem}{PROXY_EXT}")]
+    for path in candidates:
         if os.path.isfile(path) and os.path.normcase(path) != os.path.normcase(src):
             return path
     return ""
 
 
-def proxy_state(entry, set_aside=None):
+def proxy_state(entry, set_aside=None, root=None):
     """"linked", "offline", "original" (no proxy linked, but one on disk
     to link - set aside, or made and never linked) or "none". Resolve goes
     on reporting a proxy whose file has gone as linked (tested: 21.1), so
     Buddy looks for the file itself."""
     path = entry.get("proxy_path") or ""
     if not path and entry.get("proxy", "None") in ("", "None"):
-        return "original" if known_proxy(entry, set_aside) else "none"
+        return "original" if known_proxy(entry, set_aside, root) else "none"
     return "linked" if path and os.path.isfile(path) else "offline"
 
 
-def status_report(videos, set_aside=None):
+def status_report(videos, set_aside=None, root=None):
     """What Proxy management lists for a scope's video clips:
     {"counts": {linked, offline, original, none}, "rows": [{id, name, type,
     state, detail}], "more": how many rows weren't listed}. Offline first,
@@ -699,10 +899,10 @@ def status_report(videos, set_aside=None):
     order = {"offline": 0, "none": 1, "original": 2, "linked": 3}
     rows = []
     for entry in videos:
-        state = proxy_state(entry, set_aside)
+        state = proxy_state(entry, set_aside, root)
         detail = {"linked": f"{entry.get('proxy') or ''}  {entry.get('proxy_path') or ''}".strip(),
                   "offline": entry.get("proxy_path") or "", "none": "",
-                  "original": known_proxy(entry, set_aside)}[state]
+                  "original": known_proxy(entry, set_aside, root)}[state]
         rows.append({"id": entry["id"], "name": entry["name"], "type": clip_type(entry),
                      "state": state, "detail": detail})
     rows.sort(key=lambda r: (order[r["state"]], r["name"].lower()))
@@ -722,11 +922,25 @@ def status_line(counts):
 RELINK_WALK_MAX = 200_000   # files looked at in the chosen folder before giving up
 
 
+def _same_tail(a, b):
+    """How many folders at the ends of two folder paths are the same."""
+    def parts(path):
+        return [p.lower() for p in re.split(r"[\\/]+", path or "") if p][::-1]
+    n = 0
+    for x, y in zip(parts(a), parts(b)):
+        if x != y:
+            break
+        n += 1
+    return n
+
+
 def find_relinks(offline, folder, walk=os.walk):
     """Where each offline proxy has gone: [(entry, new path)] for the ones
     found in `folder` or below, by the proxy's own file name (or, failing
-    that, the name Buddy would give it). Runs on the worker - a big drive
-    takes a while to walk."""
+    that, the name Buddy would give it). Two cards' C0001_proxy.mov can
+    both be there, so of the files with the right name, the one whose
+    folders end the most like the old file's wins. Runs on the worker - a
+    big drive takes a while to walk."""
     wanted = {}
     for entry in offline:
         names = {os.path.basename(entry.get("proxy_path") or "")}
@@ -735,16 +949,20 @@ def find_relinks(offline, folder, walk=os.walk):
             names.add(f"{stem}{PROXY_SUFFIX}{PROXY_EXT}")
         for name in names - {""}:
             wanted.setdefault(name.lower(), []).append(entry)
-    found, seen = {}, 0
+    found, seen = {}, 0      # id -> (how alike its folders are, entry, path)
     for root, dirs, files in walk(folder):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
         for name in files:
             seen += 1
             for entry in wanted.get(name.lower(), ()):
-                found.setdefault(entry["id"], (entry, os.path.join(root, name)))
-        if seen >= RELINK_WALK_MAX or len(found) == len(offline):
+                score = _same_tail(root, os.path.dirname(entry.get("proxy_path") or ""))
+                if entry["id"] not in found or score > found[entry["id"]][0]:
+                    found[entry["id"]] = (score, entry, os.path.join(root, name))
+        # Done early only once every proxy has turned up somewhere that
+        # looks like where it was (two folders alike).
+        if seen >= RELINK_WALK_MAX or (len(found) == len(offline) and all(s >= 2 for s, _e, _p in found.values())):
             break
-    return list(found.values())
+    return [(entry, path) for _score, entry, path in found.values()]
 
 
 def relink_report(relinked, refused, missing):

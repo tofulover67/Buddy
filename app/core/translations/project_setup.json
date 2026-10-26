@@ -2440,16 +2440,6 @@
   "العربية": "إنشاء البروكسي",
   "Tiếng Việt": "Tạo proxy"
  },
- "Each video file gets a .mov copy in a 'Proxy' folder beside it, then linked as that clip's proxy media in Resolve. Flip them on in Resolve with the proxy button in the viewer.": {
-  "日本語": "各動画ファイルの横にある「Proxy」フォルダーに.movコピーが作成され、そのクリップのプロキシメディアとしてResolveにリンクされます。Resolveのビューアーのプロキシボタンで切り替えられます。",
-  "Español": "Cada archivo de vídeo recibe una copia .mov en una carpeta 'Proxy' a su lado, que luego se enlaza como material proxy de ese clip en Resolve. Actívalos en Resolve con el botón de proxy del visor.",
-  "Deutsch": "Jede Videodatei erhält eine .mov-Kopie in einem 'Proxy'-Ordner daneben, die dann in Resolve als Proxy-Medium dieses Clips verlinkt wird. Im Viewer von Resolve über den Proxy-Knopf einschalten.",
-  "Français": "Chaque fichier vidéo reçoit une copie .mov dans un dossier « Proxy » à côté de lui, puis est lié comme média proxy de ce clip dans Resolve. Activez-les dans Resolve avec le bouton proxy du visualiseur.",
-  "한국어": "각 비디오 파일 옆의 'Proxy' 폴더에 .mov 사본이 만들어지고, 해당 클립의 프록시 미디어로 Resolve에 연결됩니다. 뷰어의 프록시 버튼으로 Resolve에서 켜세요.",
-  "中文": "每个视频文件都会在旁边的「Proxy」文件夹中得到一个 .mov 副本，然后作为该剪辑的代理媒体在 Resolve 中链接。用查看器中的代理按钮在 Resolve 里开启它们。",
-  "العربية": "يحصل كل ملف مرئي على نسخة .mov في مجلد «Proxy» بجانبه، ثم تُربط كوسائط بروكسي لهذا المقطع في Resolve. شغّلها في Resolve بزر البروكسي في العارض.",
-  "Tiếng Việt": "Mỗi tệp video nhận một bản sao .mov trong thư mục 'Proxy' bên cạnh nó, sau đó được liên kết làm phương tiện proxy của clip đó trong Resolve. Bật chúng trong Resolve bằng nút proxy trong trình xem."
- },
  "Which clips": {
   "日本語": "対象クリップ",
   "Español": "Qué clips",
@@ -3500,15 +3490,15 @@
   "العربية": "لا توجد مقاطع على مسارات الفيديو في الخط الزمني الحالي.",
   "Tiếng Việt": "Timeline hiện tại không có clip nào trên các track video."
  },
- "Renders lightweight copies of the project's video clips with ffmpeg and links them in Resolve as proxy media - the same workflow as Resolve's own Generate Proxy Media, for when a machine struggles to play the originals back.\n\nProxies are .mov files written into a 'Proxy' folder beside each source (Resolve's own convention), then linked with the same call the manual relink uses. Source files are never touched, and each clip's audio is stream-copied, so nothing changes but the playback load.\n\nWhich clips: the Media Pool selection, the current timeline (the clips selected on it, or all of them when none are), the open bin (optionally with its sub-bins), or every clip in the project. Only video files are transcoded - audio-only clips never play from a proxy.\n\nResolution and format are chosen here. H.264 and H.265 make the smallest files but take more work to decode while scrubbing; ProRes, DNxHR and CineForm are larger on disk and much lighter to play. Each proxy carries its clip's timecode, which Resolve needs to link it. A clip whose proxy file already exists is linked, not re-rendered - unless the file's timecode is wrong, when it's rendered again; delete the file to render it again anyway. ffmpeg is needed - install it or set its path in Settings.": {
-  "日本語": "プロジェクトのビデオクリップの軽量なコピーを ffmpeg でレンダリングし、Resolve でプロキシメディアとしてリンクします – Resolve 自身の「プロキシメディアを生成」と同じワークフローで、マシンが元のメディアをスムーズに再生できないときに使います。\n\nプロキシは各ソースの横にある「Proxy」フォルダーに書き出される .mov ファイルで（Resolve 自身の慣例）、手動の再リンクと同じ呼び出しでリンクされます。ソースファイルには一切手を加えず、各クリップの音声はストリームコピーされるため、変わるのは再生の負荷だけです。\n\n対象のクリップ: メディアプールの選択、現在のタイムライン（選択したクリップ、何も選択していないときはすべてのクリップ）、開いているビン（サブビンも含めることができます）、またはプロジェクト内のすべてのクリップ。変換されるのはビデオファイルだけです – 音声だけのクリップがプロキシから再生されることはありません。\n\n解像度と形式はここで選びます。H.264 と H.265 はファイルが最も小さくなりますが、スクラブ時のデコード負荷が大きくなります。ProRes、DNxHR、CineForm はディスク上では大きくなりますが、再生ははるかに軽くなります。各プロキシにはクリップのタイムコードが入ります – Resolve がリンクするのに必要です。プロキシファイルがすでにあるクリップは、レンダリングし直さずにリンクされます – ただしファイルのタイムコードが違う場合はレンダリングし直されます。それでもレンダリングし直したい場合はファイルを削除してください。ffmpeg が必要です – インストールするか、設定でパスを指定してください。",
-  "Español": "Renderiza copias ligeras de los clips de vídeo del proyecto con ffmpeg y las vincula en Resolve como medios proxy: el mismo flujo de trabajo que el propio Generar medios proxy de Resolve, para cuando un equipo no consigue reproducir bien los originales.\n\nLos proxies son archivos .mov escritos en una carpeta 'Proxy' junto a cada original (la convención del propio Resolve) y se vinculan con la misma llamada que usa la revinculación manual. Los archivos originales nunca se tocan, y el audio de cada clip se copia sin recodificar, así que solo cambia la carga de reproducción.\n\nQué clips: la selección del Media Pool, la línea de tiempo actual (sus clips seleccionados, o todos cuando no hay ninguno seleccionado), el bin abierto (opcionalmente con sus sub-bins) o todos los clips del proyecto. Solo se transcodifican los archivos de vídeo: los clips solo de audio nunca se reproducen desde un proxy.\n\nLa resolución y el formato se eligen aquí. H.264 y H.265 generan los archivos más pequeños, pero cuesta más decodificarlos al desplazarse; ProRes, DNxHR y CineForm ocupan más en disco y son mucho más ligeros de reproducir. Cada proxy lleva el timecode de su clip, que Resolve necesita para vincularlo. Un clip cuyo archivo de proxy ya existe se vincula, sin volver a renderizar, salvo que el timecode del archivo sea incorrecto: entonces se renderiza de nuevo. Borra el archivo para renderizarlo de nuevo igualmente. Hace falta ffmpeg: instálalo o indica su ruta en Ajustes.",
-  "Deutsch": "Rendert mit ffmpeg schlanke Kopien der Videoclips des Projekts und verlinkt sie in Resolve als Proxy-Medien – derselbe Ablauf wie Resolves eigenes „Proxy-Medien generieren“, für Rechner, die die Originale nicht flüssig abspielen.\n\nProxys sind .mov-Dateien in einem Ordner „Proxy“ neben jeder Quelle (Resolves eigene Konvention) und werden mit demselben Aufruf verlinkt wie beim manuellen Neuverlinken. Quelldateien werden nie angerührt, und der Ton jedes Clips wird unverändert kopiert – es ändert sich nur die Last beim Abspielen.\n\nWelche Clips: die Auswahl im Media Pool, die aktuelle Timeline (die darin ausgewählten Clips oder alle, wenn keine ausgewählt sind), der geöffnete Bin (auf Wunsch mit seinen Unter-Bins) oder alle Clips im Projekt. Umgewandelt werden nur Videodateien – reine Audioclips werden nie von einem Proxy abgespielt.\n\nAuflösung und Format wählen Sie hier. H.264 und H.265 ergeben die kleinsten Dateien, sind beim Scrubben aber aufwendiger zu dekodieren; ProRes, DNxHR und CineForm brauchen mehr Speicherplatz und spielen viel leichter ab. Jeder Proxy trägt den Timecode seines Clips, den Resolve zum Verlinken braucht. Ein Clip, dessen Proxy-Datei schon vorhanden ist, wird verlinkt statt neu gerendert – außer der Timecode der Datei stimmt nicht, dann wird sie neu gerendert. Löschen Sie die Datei, um sie trotzdem neu zu rendern. ffmpeg wird benötigt – installieren Sie es oder legen Sie seinen Pfad in den Einstellungen fest.",
-  "Français": "Rend avec ffmpeg des copies légères des clips vidéo du projet et les lie dans Resolve comme médias proxy – le même flux de travail que la fonction Générer des médias proxy de Resolve, pour une machine qui peine à lire les originaux.\n\nLes proxys sont des fichiers .mov écrits dans un dossier « Proxy » à côté de chaque source (la convention de Resolve lui-même), puis liés par le même appel que la reliaison manuelle. Les fichiers sources ne sont jamais modifiés, et l'audio de chaque clip est copié tel quel : seule la charge de lecture change.\n\nQuels clips : la sélection du Media Pool, la timeline actuelle (ses clips sélectionnés, ou tous quand aucun ne l'est), le chutier ouvert (avec ses sous-chutiers si vous le souhaitez) ou tous les clips du projet. Seuls les fichiers vidéo sont transcodés – un clip uniquement audio n'est jamais lu depuis un proxy.\n\nLa résolution et le format se choisissent ici. H.264 et H.265 donnent les fichiers les plus légers, mais demandent plus de travail de décodage en navigation ; ProRes, DNxHR et CineForm prennent plus de place sur le disque et sont bien plus légers à lire. Chaque proxy porte le timecode de son clip, dont Resolve a besoin pour le lier. Un clip dont le fichier de proxy existe déjà est lié sans nouveau rendu – sauf si le timecode du fichier est faux : il est alors rendu à nouveau. Supprimez le fichier pour le rendre à nouveau quand même. ffmpeg est nécessaire – installez-le ou indiquez son chemin dans les Réglages.",
-  "한국어": "프로젝트의 비디오 클립을 ffmpeg로 가볍게 복사해 렌더링하고, Resolve에서 프록시 미디어로 연결합니다 – Resolve 자체의 프록시 미디어 생성과 같은 작업 흐름으로, 컴퓨터가 원본을 원활하게 재생하지 못할 때 사용합니다.\n\n프록시는 각 소스 옆의 'Proxy' 폴더에 기록되는 .mov 파일이며(Resolve 자체의 관례), 수동 재연결과 같은 호출로 연결됩니다. 소스 파일은 절대 건드리지 않고 각 클립의 오디오는 스트림 복사되므로, 바뀌는 것은 재생 부담뿐입니다.\n\n대상 클립: 미디어 풀 선택, 현재 타임라인(선택한 클립, 선택한 것이 없으면 모든 클립), 열려 있는 빈(원하면 하위 빈 포함), 또는 프로젝트의 모든 클립. 비디오 파일만 변환합니다 – 오디오만 있는 클립은 프록시로 재생되지 않습니다.\n\n해상도와 형식은 여기서 고릅니다. H.264와 H.265는 파일이 가장 작지만 스크러빙할 때 디코딩 부담이 큽니다. ProRes, DNxHR, CineForm은 디스크 용량은 더 크지만 훨씬 가볍게 재생됩니다. 각 프록시에는 클립의 타임코드가 들어갑니다 – Resolve가 연결하는 데 필요합니다. 프록시 파일이 이미 있는 클립은 다시 렌더링하지 않고 연결합니다 – 단, 파일의 타임코드가 다르면 다시 렌더링합니다. 그래도 다시 렌더링하려면 파일을 삭제하세요. ffmpeg가 필요합니다 – 설치하거나 설정에서 경로를 지정하세요.",
-  "中文": "使用 ffmpeg 渲染项目视频片段的轻量副本，并在 Resolve 中将其链接为代理媒体——与 Resolve 自带的“生成代理媒体”工作流程相同，适用于电脑难以流畅播放原始素材的情况。\n\n代理是写入每个源文件旁 “Proxy” 文件夹中的 .mov 文件（Resolve 自己的惯例），并通过与手动重新链接相同的调用进行链接。源文件从不改动，每个片段的音频按流复制，因此唯一变化的是播放负担。\n\n哪些片段：媒体池中的选择、当前时间线（其中选中的片段，没有选中时为全部片段）、当前打开的媒体夹（可选包含其子媒体夹），或项目中的所有片段。只转码视频文件——纯音频片段从不通过代理播放。\n\n分辨率和格式在此选择。H.264 和 H.265 文件最小，但拖动浏览时解码负担更重；ProRes、DNxHR 和 CineForm 占用更多磁盘空间，但播放轻快得多。每个代理都带有其片段的时间码，Resolve 需要它才能链接。已有代理文件的片段会直接链接而不重新渲染——除非文件的时间码不对，那时会重新渲染；若仍想重新渲染，请删除该文件。需要 ffmpeg——请安装它，或在设置中指定其路径。",
-  "العربية": "يصيّر نسخًا خفيفة من مقاطع الفيديو في المشروع باستخدام ffmpeg ويربطها في Resolve كوسائط وكيلة – سير العمل نفسه لميزة «إنشاء وسائط وكيلة» في Resolve، لحين يعجز الجهاز عن تشغيل الأصول بسلاسة.\n\nالوكلاء ملفات .mov تُكتب في مجلد «Proxy» بجانب كل مصدر (اصطلاح Resolve نفسه)، ثم تُربط بالاستدعاء نفسه الذي تستخدمه إعادة الربط اليدوية. لا تُلمس الملفات المصدر أبدًا، ويُنسخ صوت كل مقطع كما هو، فلا يتغير سوى عبء التشغيل.\n\nأي المقاطع: التحديد في Media Pool، أو الخط الزمني الحالي (المقاطع المحددة عليه، أو كلها عندما لا يكون أي منها محددًا)، أو الحاوية المفتوحة (مع حاوياتها الفرعية اختياريًا)، أو كل مقاطع المشروع. تُحوَّل ملفات الفيديو فقط – المقاطع الصوتية وحدها لا تُشغَّل أبدًا من وكيل.\n\nتختار الدقة والصيغة هنا. تعطي H.264 وH.265 أصغر الملفات لكنها تتطلب جهدًا أكبر في فك الترميز أثناء التمرير؛ أما ProRes وDNxHR وCineForm فأكبر حجمًا على القرص وأخف كثيرًا في التشغيل. يحمل كل وكيل الرمز الزمني لمقطعه، وهو ما يحتاجه Resolve لربطه. المقطع الذي يوجد ملف وكيله مسبقًا يُربط دون إعادة تصيير – إلا إذا كان رمزه الزمني خاطئًا، فيُصيَّر من جديد؛ احذف الملف لتصييره من جديد على أي حال. يلزم ffmpeg – ثبّته أو حدّد مساره في الإعدادات.",
-  "Tiếng Việt": "Render các bản sao nhẹ của clip video trong dự án bằng ffmpeg và liên kết chúng trong Resolve làm proxy media – cùng quy trình với tính năng Generate Proxy Media của chính Resolve, dành cho khi máy khó phát mượt các tệp gốc.\n\nProxy là các tệp .mov được ghi vào thư mục 'Proxy' bên cạnh mỗi tệp nguồn (quy ước của chính Resolve), rồi được liên kết bằng cùng lệnh mà thao tác liên kết lại thủ công dùng. Tệp nguồn không bao giờ bị động đến, và âm thanh của mỗi clip được sao chép nguyên luồng, nên chỉ có tải phát lại thay đổi.\n\nNhững clip nào: phần chọn trong Media Pool, timeline hiện tại (các clip được chọn trên đó, hoặc tất cả khi không chọn clip nào), bin đang mở (có thể kèm các bin con), hoặc mọi clip trong dự án. Chỉ tệp video được chuyển mã – clip chỉ có âm thanh không bao giờ phát từ proxy.\n\nĐộ phân giải và định dạng được chọn ở đây. H.264 và H.265 cho tệp nhỏ nhất nhưng giải mã nặng hơn khi tua; ProRes, DNxHR và CineForm chiếm nhiều dung lượng hơn nhưng phát nhẹ hơn nhiều. Mỗi proxy mang timecode của clip, thứ Resolve cần để liên kết. Clip đã có tệp proxy sẽ được liên kết mà không render lại – trừ khi timecode của tệp sai, khi đó tệp được render lại; hãy xóa tệp nếu vẫn muốn render lại. Cần có ffmpeg – hãy cài đặt hoặc đặt đường dẫn của nó trong Cài đặt."
+ "Renders lightweight copies of the project's video clips with ffmpeg and links them in Resolve as proxy media - the same workflow as Resolve's own Generate Proxy Media, for when a machine struggles to play the originals back.\n\nProxies are .mov files written into a 'Proxy' folder beside each source (Resolve's own convention) – or, if you choose a folder, into it under each source's own folder path, so clips of the same name never clash – then linked with the same call the manual relink uses. Source files are never touched, and each clip's audio is stream-copied, so nothing changes but the playback load.\n\nWhich clips: the Media Pool selection, the current timeline (the clips selected on it, or all of them when none are), the open bin (optionally with its sub-bins), or every clip in the project. Only video files are transcoded - audio-only clips never play from a proxy.\n\nResolution and format are chosen here. H.264 and H.265 make the smallest files but take more work to decode while scrubbing; ProRes, DNxHR and CineForm are larger on disk and much lighter to play. Each proxy carries its clip's timecode, which Resolve needs to link it. A clip whose proxy file already exists is linked, not re-rendered - unless the file's timecode is wrong, when it's rendered again; delete the file to render it again anyway. ffmpeg is needed - install it or set its path in Settings.": {
+  "日本語": "プロジェクトのビデオクリップの軽量なコピーを ffmpeg でレンダリングし、Resolve でプロキシメディアとしてリンクします – Resolve 自身の「プロキシメディアを生成」と同じワークフローで、マシンが元のメディアをスムーズに再生できないときに使います。\n\nプロキシは各ソースの横にある「Proxy」フォルダー（Resolve 自身の慣例）、またはフォルダーを選んだ場合はその中の各ソースと同じフォルダー構成の場所（同名のクリップがぶつからないように）に書き出される .mov ファイルで、手動の再リンクと同じ呼び出しでリンクされます。ソースファイルには一切手を加えず、各クリップの音声はストリームコピーされるため、変わるのは再生の負荷だけです。\n\n対象のクリップ: メディアプールの選択、現在のタイムライン（選択したクリップ、何も選択していないときはすべてのクリップ）、開いているビン（サブビンも含めることができます）、またはプロジェクト内のすべてのクリップ。変換されるのはビデオファイルだけです – 音声だけのクリップがプロキシから再生されることはありません。\n\n解像度と形式はここで選びます。H.264 と H.265 はファイルが最も小さくなりますが、スクラブ時のデコード負荷が大きくなります。ProRes、DNxHR、CineForm はディスク上では大きくなりますが、再生ははるかに軽くなります。各プロキシにはクリップのタイムコードが入ります – Resolve がリンクするのに必要です。プロキシファイルがすでにあるクリップは、レンダリングし直さずにリンクされます – ただしファイルのタイムコードが違う場合はレンダリングし直されます。それでもレンダリングし直したい場合はファイルを削除してください。ffmpeg が必要です – インストールするか、設定でパスを指定してください。",
+  "Español": "Renderiza copias ligeras de los clips de vídeo del proyecto con ffmpeg y las vincula en Resolve como medios proxy: el mismo flujo de trabajo que el propio Generar medios proxy de Resolve, para cuando un equipo no consigue reproducir bien los originales.\n\nLos proxies son archivos .mov escritos en una carpeta 'Proxy' junto a cada original (la convención del propio Resolve) o, si eliges una carpeta, dentro de ella bajo la misma ruta de carpetas que cada original, para que los clips con el mismo nombre nunca choquen; luego se vinculan con la misma llamada que usa la revinculación manual. Los archivos originales nunca se tocan, y el audio de cada clip se copia sin recodificar, así que solo cambia la carga de reproducción.\n\nQué clips: la selección del Media Pool, la línea de tiempo actual (sus clips seleccionados, o todos cuando no hay ninguno seleccionado), el bin abierto (opcionalmente con sus sub-bins) o todos los clips del proyecto. Solo se transcodifican los archivos de vídeo: los clips solo de audio nunca se reproducen desde un proxy.\n\nLa resolución y el formato se eligen aquí. H.264 y H.265 generan los archivos más pequeños, pero cuesta más decodificarlos al desplazarse; ProRes, DNxHR y CineForm ocupan más en disco y son mucho más ligeros de reproducir. Cada proxy lleva el timecode de su clip, que Resolve necesita para vincularlo. Un clip cuyo archivo de proxy ya existe se vincula, sin volver a renderizar, salvo que el timecode del archivo sea incorrecto: entonces se renderiza de nuevo. Borra el archivo para renderizarlo de nuevo igualmente. Hace falta ffmpeg: instálalo o indica su ruta en Ajustes.",
+  "Deutsch": "Rendert mit ffmpeg schlanke Kopien der Videoclips des Projekts und verlinkt sie in Resolve als Proxy-Medien – derselbe Ablauf wie Resolves eigenes „Proxy-Medien generieren“, für Rechner, die die Originale nicht flüssig abspielen.\n\nProxys sind .mov-Dateien in einem Ordner „Proxy“ neben jeder Quelle (Resolves eigene Konvention) – oder, wenn du einen Ordner wählst, darin unter dem Ordnerpfad der jeweiligen Quelle, damit gleichnamige Clips nie kollidieren – und werden mit demselben Aufruf verlinkt wie beim manuellen Neuverlinken. Quelldateien werden nie angerührt, und der Ton jedes Clips wird unverändert kopiert – es ändert sich nur die Last beim Abspielen.\n\nWelche Clips: die Auswahl im Media Pool, die aktuelle Timeline (die darin ausgewählten Clips oder alle, wenn keine ausgewählt sind), der geöffnete Bin (auf Wunsch mit seinen Unter-Bins) oder alle Clips im Projekt. Umgewandelt werden nur Videodateien – reine Audioclips werden nie von einem Proxy abgespielt.\n\nAuflösung und Format wählen Sie hier. H.264 und H.265 ergeben die kleinsten Dateien, sind beim Scrubben aber aufwendiger zu dekodieren; ProRes, DNxHR und CineForm brauchen mehr Speicherplatz und spielen viel leichter ab. Jeder Proxy trägt den Timecode seines Clips, den Resolve zum Verlinken braucht. Ein Clip, dessen Proxy-Datei schon vorhanden ist, wird verlinkt statt neu gerendert – außer der Timecode der Datei stimmt nicht, dann wird sie neu gerendert. Löschen Sie die Datei, um sie trotzdem neu zu rendern. ffmpeg wird benötigt – installieren Sie es oder legen Sie seinen Pfad in den Einstellungen fest.",
+  "Français": "Rend avec ffmpeg des copies légères des clips vidéo du projet et les lie dans Resolve comme médias proxy – le même flux de travail que la fonction Générer des médias proxy de Resolve, pour une machine qui peine à lire les originaux.\n\nLes proxys sont des fichiers .mov écrits dans un dossier « Proxy » à côté de chaque source (la convention de Resolve lui-même) – ou, si vous choisissez un dossier, dans celui-ci sous le chemin de dossiers de chaque source, pour que des clips du même nom ne se télescopent jamais –, puis liés par le même appel que la reliaison manuelle. Les fichiers sources ne sont jamais modifiés, et l'audio de chaque clip est copié tel quel : seule la charge de lecture change.\n\nQuels clips : la sélection du Media Pool, la timeline actuelle (ses clips sélectionnés, ou tous quand aucun ne l'est), le chutier ouvert (avec ses sous-chutiers si vous le souhaitez) ou tous les clips du projet. Seuls les fichiers vidéo sont transcodés – un clip uniquement audio n'est jamais lu depuis un proxy.\n\nLa résolution et le format se choisissent ici. H.264 et H.265 donnent les fichiers les plus légers, mais demandent plus de travail de décodage en navigation ; ProRes, DNxHR et CineForm prennent plus de place sur le disque et sont bien plus légers à lire. Chaque proxy porte le timecode de son clip, dont Resolve a besoin pour le lier. Un clip dont le fichier de proxy existe déjà est lié sans nouveau rendu – sauf si le timecode du fichier est faux : il est alors rendu à nouveau. Supprimez le fichier pour le rendre à nouveau quand même. ffmpeg est nécessaire – installez-le ou indiquez son chemin dans les Réglages.",
+  "한국어": "프로젝트의 비디오 클립을 ffmpeg로 가볍게 복사해 렌더링하고, Resolve에서 프록시 미디어로 연결합니다 – Resolve 자체의 프록시 미디어 생성과 같은 작업 흐름으로, 컴퓨터가 원본을 원활하게 재생하지 못할 때 사용합니다.\n\n프록시는 각 소스 옆의 'Proxy' 폴더(Resolve 자체의 관례)에, 또는 폴더를 고르면 그 안에서 각 소스의 폴더 경로를 그대로 따른 위치(같은 이름의 클립이 겹치지 않도록)에 기록되는 .mov 파일이며, 수동 재연결과 같은 호출로 연결됩니다. 소스 파일은 절대 건드리지 않고 각 클립의 오디오는 스트림 복사되므로, 바뀌는 것은 재생 부담뿐입니다.\n\n대상 클립: 미디어 풀 선택, 현재 타임라인(선택한 클립, 선택한 것이 없으면 모든 클립), 열려 있는 빈(원하면 하위 빈 포함), 또는 프로젝트의 모든 클립. 비디오 파일만 변환합니다 – 오디오만 있는 클립은 프록시로 재생되지 않습니다.\n\n해상도와 형식은 여기서 고릅니다. H.264와 H.265는 파일이 가장 작지만 스크러빙할 때 디코딩 부담이 큽니다. ProRes, DNxHR, CineForm은 디스크 용량은 더 크지만 훨씬 가볍게 재생됩니다. 각 프록시에는 클립의 타임코드가 들어갑니다 – Resolve가 연결하는 데 필요합니다. 프록시 파일이 이미 있는 클립은 다시 렌더링하지 않고 연결합니다 – 단, 파일의 타임코드가 다르면 다시 렌더링합니다. 그래도 다시 렌더링하려면 파일을 삭제하세요. ffmpeg가 필요합니다 – 설치하거나 설정에서 경로를 지정하세요.",
+  "中文": "使用 ffmpeg 渲染项目视频片段的轻量副本，并在 Resolve 中将其链接为代理媒体——与 Resolve 自带的“生成代理媒体”工作流程相同，适用于电脑难以流畅播放原始素材的情况。\n\n代理是写入每个源文件旁 “Proxy” 文件夹（Resolve 自己的惯例）的 .mov 文件——如果选择了文件夹，则写入该文件夹中与各源文件相同的文件夹路径下，因此同名片段永不冲突——并通过与手动重新链接相同的调用进行链接。源文件从不改动，每个片段的音频按流复制，因此唯一变化的是播放负担。\n\n哪些片段：媒体池中的选择、当前时间线（其中选中的片段，没有选中时为全部片段）、当前打开的媒体夹（可选包含其子媒体夹），或项目中的所有片段。只转码视频文件——纯音频片段从不通过代理播放。\n\n分辨率和格式在此选择。H.264 和 H.265 文件最小，但拖动浏览时解码负担更重；ProRes、DNxHR 和 CineForm 占用更多磁盘空间，但播放轻快得多。每个代理都带有其片段的时间码，Resolve 需要它才能链接。已有代理文件的片段会直接链接而不重新渲染——除非文件的时间码不对，那时会重新渲染；若仍想重新渲染，请删除该文件。需要 ffmpeg——请安装它，或在设置中指定其路径。",
+  "العربية": "يصيّر نسخًا خفيفة من مقاطع الفيديو في المشروع باستخدام ffmpeg ويربطها في Resolve كوسائط وكيلة – سير العمل نفسه لميزة «إنشاء وسائط وكيلة» في Resolve، لحين يعجز الجهاز عن تشغيل الأصول بسلاسة.\n\nالوكلاء ملفات .mov تُكتب في مجلد «Proxy» بجانب كل مصدر (اصطلاح Resolve نفسه) – أو، إن اخترت مجلدًا، داخله تحت مسار مجلدات كل مصدر نفسه كي لا تتعارض المقاطع ذات الاسم الواحد – ثم تُربط بالاستدعاء نفسه الذي تستخدمه إعادة الربط اليدوية. لا تُلمس الملفات المصدر أبدًا، ويُنسخ صوت كل مقطع كما هو، فلا يتغير سوى عبء التشغيل.\n\nأي المقاطع: التحديد في Media Pool، أو الخط الزمني الحالي (المقاطع المحددة عليه، أو كلها عندما لا يكون أي منها محددًا)، أو الحاوية المفتوحة (مع حاوياتها الفرعية اختياريًا)، أو كل مقاطع المشروع. تُحوَّل ملفات الفيديو فقط – المقاطع الصوتية وحدها لا تُشغَّل أبدًا من وكيل.\n\nتختار الدقة والصيغة هنا. تعطي H.264 وH.265 أصغر الملفات لكنها تتطلب جهدًا أكبر في فك الترميز أثناء التمرير؛ أما ProRes وDNxHR وCineForm فأكبر حجمًا على القرص وأخف كثيرًا في التشغيل. يحمل كل وكيل الرمز الزمني لمقطعه، وهو ما يحتاجه Resolve لربطه. المقطع الذي يوجد ملف وكيله مسبقًا يُربط دون إعادة تصيير – إلا إذا كان رمزه الزمني خاطئًا، فيُصيَّر من جديد؛ احذف الملف لتصييره من جديد على أي حال. يلزم ffmpeg – ثبّته أو حدّد مساره في الإعدادات.",
+  "Tiếng Việt": "Render các bản sao nhẹ của clip video trong dự án bằng ffmpeg và liên kết chúng trong Resolve làm proxy media – cùng quy trình với tính năng Generate Proxy Media của chính Resolve, dành cho khi máy khó phát mượt các tệp gốc.\n\nProxy là các tệp .mov được ghi vào thư mục 'Proxy' bên cạnh mỗi tệp nguồn (quy ước của chính Resolve) – hoặc, nếu bạn chọn một thư mục, vào thư mục đó theo đúng đường dẫn thư mục của từng tệp nguồn, để các clip trùng tên không bao giờ đè nhau – rồi được liên kết bằng cùng lệnh mà thao tác liên kết lại thủ công dùng. Tệp nguồn không bao giờ bị động đến, và âm thanh của mỗi clip được sao chép nguyên luồng, nên chỉ có tải phát lại thay đổi.\n\nNhững clip nào: phần chọn trong Media Pool, timeline hiện tại (các clip được chọn trên đó, hoặc tất cả khi không chọn clip nào), bin đang mở (có thể kèm các bin con), hoặc mọi clip trong dự án. Chỉ tệp video được chuyển mã – clip chỉ có âm thanh không bao giờ phát từ proxy.\n\nĐộ phân giải và định dạng được chọn ở đây. H.264 và H.265 cho tệp nhỏ nhất nhưng giải mã nặng hơn khi tua; ProRes, DNxHR và CineForm chiếm nhiều dung lượng hơn nhưng phát nhẹ hơn nhiều. Mỗi proxy mang timecode của clip, thứ Resolve cần để liên kết. Clip đã có tệp proxy sẽ được liên kết mà không render lại – trừ khi timecode của tệp sai, khi đó tệp được render lại; hãy xóa tệp nếu vẫn muốn render lại. Cần có ffmpeg – hãy cài đặt hoặc đặt đường dẫn của nó trong Cài đặt."
  },
  "Couldn't encode {label} on this PC: {t_why} This run used {fallback} on the CPU instead.": {
   "日本語": "この PC では {label} をエンコードできませんでした: {t_why} 今回は代わりに CPU で {fallback} を使用しました。",
@@ -4069,5 +4059,185 @@
   "中文": "已运行时长",
   "العربية": "مدة تشغيله حتى الآن",
   "Tiếng Việt": "Đã chạy bao lâu"
+ },
+ "it needs AMD Radeon graphics.": {
+  "日本語": "AMD Radeon グラフィックスが必要です。",
+  "Español": "necesita gráficos AMD Radeon.",
+  "Deutsch": "dafür braucht es eine AMD-Radeon-Grafik.",
+  "Français": "il faut une puce graphique AMD Radeon.",
+  "한국어": "AMD Radeon 그래픽이 필요합니다.",
+  "中文": "需要 AMD Radeon 显卡。",
+  "العربية": "يلزم وجود رسوميات AMD Radeon.",
+  "Tiếng Việt": "cần đồ họa AMD Radeon."
+ },
+ "it needs Intel graphics with Quick Sync.": {
+  "日本語": "Quick Sync 対応の Intel グラフィックスが必要です。",
+  "Español": "necesita gráficos Intel con Quick Sync.",
+  "Deutsch": "dafür braucht es eine Intel-Grafik mit Quick Sync.",
+  "Français": "il faut une puce graphique Intel avec Quick Sync.",
+  "한국어": "Quick Sync를 지원하는 Intel 그래픽이 필요합니다.",
+  "中文": "需要支持 Quick Sync 的 Intel 显卡。",
+  "العربية": "يلزم وجود رسوميات Intel تدعم Quick Sync.",
+  "Tiếng Việt": "cần đồ họa Intel có Quick Sync."
+ },
+ "it needs an NVIDIA, AMD or Intel graphics card that can encode video.": {
+  "日本語": "動画をエンコードできる NVIDIA、AMD、または Intel のグラフィックカードが必要です。",
+  "Español": "necesita una tarjeta gráfica NVIDIA, AMD o Intel capaz de codificar vídeo.",
+  "Deutsch": "dafür braucht es eine NVIDIA-, AMD- oder Intel-Grafikkarte, die Video kodieren kann.",
+  "Français": "il faut une carte graphique NVIDIA, AMD ou Intel capable d'encoder la vidéo.",
+  "한국어": "동영상을 인코딩할 수 있는 NVIDIA, AMD 또는 Intel 그래픽 카드가 필요합니다.",
+  "中文": "需要能编码视频的 NVIDIA、AMD 或 Intel 显卡。",
+  "العربية": "يلزم وجود بطاقة رسوميات من NVIDIA أو AMD أو Intel قادرة على ترميز الفيديو.",
+  "Tiếng Việt": "cần card đồ họa NVIDIA, AMD hoặc Intel có thể mã hóa video."
+ },
+ "this ffmpeg was built without AMD's encoders (a \"full\" build has them).": {
+  "日本語": "この ffmpeg は AMD のエンコーダーなしでビルドされています（「full」ビルドには含まれます）。",
+  "Español": "este ffmpeg se compiló sin los codificadores de AMD (una versión \"full\" los incluye).",
+  "Deutsch": "dieses ffmpeg wurde ohne die AMD-Encoder gebaut (ein „full“-Build hat sie).",
+  "Français": "ce ffmpeg a été compilé sans les encodeurs AMD (une version « full » les inclut).",
+  "한국어": "이 ffmpeg는 AMD 인코더 없이 빌드되었습니다(\"full\" 빌드에는 포함).",
+  "中文": "此 ffmpeg 构建时未包含 AMD 编码器(“full”版本包含)。",
+  "العربية": "بُني ffmpeg هذا دون مرمّزات AMD (إصدار \"full\" يتضمنها).",
+  "Tiếng Việt": "bản ffmpeg này không có bộ mã hóa AMD (bản \"full\" thì có)."
+ },
+ "this ffmpeg was built without Intel's encoders (a \"full\" build has them).": {
+  "日本語": "この ffmpeg は Intel のエンコーダーなしでビルドされています（「full」ビルドには含まれます）。",
+  "Español": "este ffmpeg se compiló sin los codificadores de Intel (una versión \"full\" los incluye).",
+  "Deutsch": "dieses ffmpeg wurde ohne die Intel-Encoder gebaut (ein „full“-Build hat sie).",
+  "Français": "ce ffmpeg a été compilé sans les encodeurs Intel (une version « full » les inclut).",
+  "한국어": "이 ffmpeg는 Intel 인코더 없이 빌드되었습니다(\"full\" 빌드에는 포함).",
+  "中文": "此 ffmpeg 构建时未包含 Intel 编码器(“full”版本包含)。",
+  "العربية": "بُني ffmpeg هذا دون مرمّزات Intel (إصدار \"full\" يتضمنها).",
+  "Tiếng Việt": "bản ffmpeg này không có bộ mã hóa Intel (bản \"full\" thì có)."
+ },
+ "Couldn't encode on the {failed} graphics card: {t_why} This run used the {used} graphics instead.": {
+  "日本語": "{failed} のグラフィックカードではエンコードできませんでした: {t_why} 今回は代わりに {used} のグラフィックスを使用しました。",
+  "Español": "No se pudo codificar en la tarjeta gráfica {failed}: {t_why} Esta vez se usaron los gráficos {used}.",
+  "Deutsch": "Auf der {failed}-Grafikkarte konnte nicht kodiert werden: {t_why} Diesmal wurde stattdessen die {used}-Grafik verwendet.",
+  "Français": "Impossible d'encoder sur la carte graphique {failed} : {t_why} Ce rendu a utilisé la puce graphique {used} à la place.",
+  "한국어": "{failed} 그래픽 카드에서 인코딩할 수 없습니다: {t_why} 이번에는 대신 {used} 그래픽을 사용했습니다.",
+  "中文": "无法在 {failed} 显卡上编码:{t_why} 本次改用 {used} 显卡。",
+  "العربية": "تعذّر الترميز على بطاقة رسوميات {failed}: {t_why} استُخدمت رسوميات {used} بدلًا منها هذه المرة.",
+  "Tiếng Việt": "Không thể mã hóa trên card đồ họa {failed}: {t_why} Lần này đã dùng đồ họa {used} thay thế."
+ },
+ "Couldn't encode on the NVIDIA graphics card: the NVIDIA driver is older than this ffmpeg needs – driver {need} or newer, and this PC has {have}. Update it in the NVIDIA app or from nvidia.com. This run used the {used} graphics instead.": {
+  "日本語": "NVIDIA のグラフィックカードではエンコードできませんでした: NVIDIA ドライバーがこの ffmpeg の要件より古いです（ドライバー {need} 以降が必要、この PC は {have}）。NVIDIA アプリまたは nvidia.com から更新してください。今回は代わりに {used} のグラフィックスを使用しました。",
+  "Español": "No se pudo codificar en la tarjeta gráfica NVIDIA: el controlador de NVIDIA es más antiguo de lo que necesita este ffmpeg (controlador {need} o posterior; este PC tiene {have}). Actualízalo desde la app de NVIDIA o nvidia.com. Esta vez se usaron los gráficos {used}.",
+  "Deutsch": "Auf der NVIDIA-Grafikkarte konnte nicht kodiert werden: Der NVIDIA-Treiber ist älter, als dieses ffmpeg braucht (Treiber {need} oder neuer; dieser PC hat {have}). Aktualisiere ihn in der NVIDIA-App oder über nvidia.com. Diesmal wurde stattdessen die {used}-Grafik verwendet.",
+  "Français": "Impossible d'encoder sur la carte graphique NVIDIA : le pilote NVIDIA est plus ancien que ce qu'exige ce ffmpeg (pilote {need} ou plus récent ; ce PC a {have}). Mettez-le à jour via l'application NVIDIA ou nvidia.com. Ce rendu a utilisé la puce graphique {used} à la place.",
+  "한국어": "NVIDIA 그래픽 카드에서 인코딩할 수 없습니다: NVIDIA 드라이버가 이 ffmpeg에 필요한 버전보다 오래되었습니다(드라이버 {need} 이상 필요, 이 PC는 {have}). NVIDIA 앱이나 nvidia.com에서 업데이트하세요. 이번에는 대신 {used} 그래픽을 사용했습니다.",
+  "中文": "无法在 NVIDIA 显卡上编码:NVIDIA 驱动比此 ffmpeg 所需的旧(需要驱动 {need} 或更新,此 PC 为 {have})。请在 NVIDIA 应用或 nvidia.com 更新。本次改用 {used} 显卡。",
+  "العربية": "تعذّر الترميز على بطاقة رسوميات NVIDIA: برنامج تشغيل NVIDIA أقدم مما يحتاجه ffmpeg هذا (يلزم الإصدار {need} أو أحدث، وفي هذا الحاسوب {have}). حدّثه من تطبيق NVIDIA أو من nvidia.com. استُخدمت رسوميات {used} بدلًا منها هذه المرة.",
+  "Tiếng Việt": "Không thể mã hóa trên card đồ họa NVIDIA: trình điều khiển NVIDIA cũ hơn mức ffmpeg này cần (cần bản {need} trở lên, máy này có {have}). Hãy cập nhật trong ứng dụng NVIDIA hoặc từ nvidia.com. Lần này đã dùng đồ họa {used} thay thế."
+ },
+ "Beside each clip": {
+  "日本語": "各クリップの横",
+  "Español": "Junto a cada clip",
+  "Deutsch": "Neben jedem Clip",
+  "Français": "À côté de chaque clip",
+  "한국어": "각 클립 옆",
+  "中文": "每个片段旁边",
+  "العربية": "بجانب كل مقطع",
+  "Tiếng Việt": "Cạnh mỗi clip"
+ },
+ "In a folder": {
+  "日本語": "フォルダー内",
+  "Español": "En una carpeta",
+  "Deutsch": "In einem Ordner",
+  "Français": "Dans un dossier",
+  "한국어": "폴더에",
+  "中文": "放在一个文件夹中",
+  "العربية": "في مجلد",
+  "Tiếng Việt": "Trong một thư mục"
+ },
+ "Where proxies go": {
+  "日本語": "プロキシの保存先",
+  "Español": "Dónde van los proxies",
+  "Deutsch": "Wohin die Proxys kommen",
+  "Français": "Emplacement des proxys",
+  "한국어": "프록시 저장 위치",
+  "中文": "代理的存放位置",
+  "العربية": "مكان حفظ الوكلاء",
+  "Tiếng Việt": "Nơi lưu proxy"
+ },
+ "A 'Proxy' folder beside each source file – Resolve's own convention": {
+  "日本語": "各ソースファイルの横の「Proxy」フォルダー – Resolve 自身の慣例",
+  "Español": "Una carpeta 'Proxy' junto a cada archivo original: la convención del propio Resolve",
+  "Deutsch": "Ein Ordner „Proxy“ neben jeder Quelldatei – Resolves eigene Konvention",
+  "Français": "Un dossier « Proxy » à côté de chaque fichier source – la convention de Resolve lui-même",
+  "한국어": "각 소스 파일 옆의 'Proxy' 폴더 – Resolve 자체의 관례",
+  "中文": "每个源文件旁的 “Proxy” 文件夹——Resolve 自己的惯例",
+  "العربية": "مجلد «Proxy» بجانب كل ملف مصدر – اصطلاح Resolve نفسه",
+  "Tiếng Việt": "Thư mục 'Proxy' cạnh mỗi tệp nguồn – quy ước của chính Resolve"
+ },
+ "One folder you choose, each proxy under its source's own folder path so clips of the same name never clash": {
+  "日本語": "選んだ 1 つのフォルダー。各プロキシはソースと同じフォルダー構成の下に置かれるので、同名のクリップがぶつかりません",
+  "Español": "Una carpeta que eliges, con cada proxy bajo la misma ruta de carpetas que su original, para que los clips con el mismo nombre nunca choquen",
+  "Deutsch": "Ein Ordner deiner Wahl, jeder Proxy unter dem Ordnerpfad seiner Quelle, damit gleichnamige Clips nie kollidieren",
+  "Français": "Un dossier de votre choix, chaque proxy sous le chemin de dossiers de sa source, pour que des clips du même nom ne se télescopent jamais",
+  "한국어": "고른 폴더 하나에, 각 프록시를 소스의 폴더 경로 그대로 아래에 두어 같은 이름의 클립이 겹치지 않습니다",
+  "中文": "你选择的一个文件夹，每个代理放在与其源文件相同的文件夹路径下，同名片段永不冲突",
+  "العربية": "مجلد واحد تختاره، وكل وكيل تحت مسار مجلدات مصدره نفسه كي لا تتعارض المقاطع ذات الاسم الواحد",
+  "Tiếng Việt": "Một thư mục bạn chọn, mỗi proxy nằm theo đúng đường dẫn thư mục của tệp nguồn để các clip trùng tên không bao giờ đè nhau"
+ },
+ "Choose a folder for the proxies": {
+  "日本語": "プロキシの保存先フォルダーを選択",
+  "Español": "Elige una carpeta para los proxies",
+  "Deutsch": "Ordner für die Proxys wählen",
+  "Français": "Choisir un dossier pour les proxys",
+  "한국어": "프록시를 저장할 폴더 선택",
+  "中文": "选择存放代理的文件夹",
+  "العربية": "اختر مجلدًا للوكلاء",
+  "Tiếng Việt": "Chọn thư mục cho proxy"
+ },
+ "Proxy folder missing": {
+  "日本語": "プロキシフォルダーが見つかりません",
+  "Español": "Falta la carpeta de proxies",
+  "Deutsch": "Proxy-Ordner fehlt",
+  "Français": "Dossier des proxys introuvable",
+  "한국어": "프록시 폴더 없음",
+  "中文": "找不到代理文件夹",
+  "العربية": "مجلد الوكلاء غير موجود",
+  "Tiếng Việt": "Không thấy thư mục proxy"
+ },
+ "The proxy folder isn't there: {path} – plug its drive in, or choose another.": {
+  "日本語": "プロキシフォルダーが見つかりません: {path} – そのドライブを接続するか、別のフォルダーを選んでください。",
+  "Español": "La carpeta de proxies no está: {path}. Conecta su disco o elige otra.",
+  "Deutsch": "Der Proxy-Ordner ist nicht da: {path} – schließe sein Laufwerk an oder wähle einen anderen.",
+  "Français": "Le dossier des proxys est introuvable : {path} – branchez son disque, ou choisissez-en un autre.",
+  "한국어": "프록시 폴더가 없습니다: {path} – 해당 드라이브를 연결하거나 다른 폴더를 고르세요.",
+  "中文": "代理文件夹不在:{path}——请接上它所在的硬盘，或另选一个。",
+  "العربية": "مجلد الوكلاء غير موجود: {path} – صِل قرصه أو اختر مجلدًا آخر.",
+  "Tiếng Việt": "Không thấy thư mục proxy: {path} – hãy cắm ổ chứa nó, hoặc chọn thư mục khác."
+ },
+ "Each video file gets a .mov copy – in a 'Proxy' folder beside it, or in a folder you choose – then linked as that clip's proxy media in Resolve. Flip them on in Resolve with the proxy button in the viewer.": {
+  "日本語": "各動画ファイルの .mov コピーが、その横の「Proxy」フォルダーまたは選んだフォルダーに作成され、そのクリップのプロキシメディアとしてResolveにリンクされます。Resolveのビューアーのプロキシボタンで切り替えられます。",
+  "Español": "Cada archivo de vídeo recibe una copia .mov (en una carpeta 'Proxy' a su lado, o en la carpeta que elijas) que luego se enlaza como material proxy de ese clip en Resolve. Actívalos en Resolve con el botón de proxy del visor.",
+  "Deutsch": "Jede Videodatei erhält eine .mov-Kopie – in einem 'Proxy'-Ordner daneben oder in einem Ordner deiner Wahl –, die dann in Resolve als Proxy-Medium dieses Clips verlinkt wird. Im Viewer von Resolve über den Proxy-Knopf einschalten.",
+  "Français": "Chaque fichier vidéo reçoit une copie .mov – dans un dossier « Proxy » à côté de lui, ou dans le dossier de votre choix –, puis est lié comme média proxy de ce clip dans Resolve. Activez-les dans Resolve avec le bouton proxy du visualiseur.",
+  "한국어": "각 비디오 파일의 .mov 사본이 그 옆의 'Proxy' 폴더나 고른 폴더에 만들어지고, 해당 클립의 프록시 미디어로 Resolve에 연결됩니다. 뷰어의 프록시 버튼으로 Resolve에서 켜세요.",
+  "中文": "每个视频文件都会得到一个 .mov 副本（放在旁边的「Proxy」文件夹，或你选择的文件夹中），然后作为该剪辑的代理媒体在 Resolve 中链接。用查看器中的代理按钮在 Resolve 里开启它们。",
+  "العربية": "يحصل كل ملف مرئي على نسخة .mov – في مجلد «Proxy» بجانبه، أو في مجلد تختاره – ثم تُربط كوسائط بروكسي لهذا المقطع في Resolve. شغّلها في Resolve بزر البروكسي في العارض.",
+  "Tiếng Việt": "Mỗi tệp video nhận một bản sao .mov – trong thư mục 'Proxy' bên cạnh nó, hoặc trong thư mục bạn chọn – sau đó được liên kết làm phương tiện proxy của clip đó trong Resolve. Bật chúng trong Resolve bằng nút proxy trong trình xem."
+ },
+ "this NVIDIA card gets no drivers newer than the 580 series, and this ffmpeg needs a newer one. An older ffmpeg build that works with driver 580 will use the card – set its path in Settings.": {
+  "日本語": "この NVIDIA カードには 580 シリーズより新しいドライバーが出ませんが、この ffmpeg にはそれより新しいドライバーが必要です。ドライバー 580 で動く古い ffmpeg ビルドならこのカードを使えます – 設定でそのパスを指定してください。",
+  "Español": "esta tarjeta NVIDIA no recibe controladores posteriores a la serie 580, y este ffmpeg necesita uno más nuevo. Una versión anterior de ffmpeg que funcione con el controlador 580 sí usará la tarjeta: indica su ruta en Ajustes.",
+  "Deutsch": "diese NVIDIA-Karte bekommt keine Treiber nach der 580er-Serie, und dieses ffmpeg braucht einen neueren. Ein älterer ffmpeg-Build, der mit Treiber 580 läuft, nutzt die Karte – gib seinen Pfad in den Einstellungen an.",
+  "Français": "cette carte NVIDIA ne reçoit plus de pilotes après la série 580, et ce ffmpeg en demande un plus récent. Une version plus ancienne de ffmpeg qui fonctionne avec le pilote 580 utilisera la carte – indiquez son chemin dans les Réglages.",
+  "한국어": "이 NVIDIA 카드는 580 시리즈 이후의 드라이버를 받지 못하는데, 이 ffmpeg에는 더 새로운 드라이버가 필요합니다. 드라이버 580에서 작동하는 이전 ffmpeg 빌드라면 이 카드를 사용합니다 – 설정에서 그 경로를 지정하세요.",
+  "中文": "此 NVIDIA 显卡不会再有比 580 系列更新的驱动，而此 ffmpeg 需要更新的驱动。能在 580 驱动上运行的较旧 ffmpeg 版本可以使用这张显卡——请在设置中填写它的路径。",
+  "العربية": "لا تحصل بطاقة NVIDIA هذه على برامج تشغيل أحدث من سلسلة 580، وffmpeg هذا يحتاج إلى أحدث منها. إصدار أقدم من ffmpeg يعمل مع برنامج التشغيل 580 سيستخدم البطاقة – حدّد مساره في الإعدادات.",
+  "Tiếng Việt": "card NVIDIA này không còn được cấp trình điều khiển mới hơn dòng 580, mà bản ffmpeg này cần bản mới hơn. Một bản ffmpeg cũ hơn chạy được với trình điều khiển 580 sẽ dùng được card – hãy đặt đường dẫn của nó trong Cài đặt."
+ },
+ "this NVIDIA card gets no drivers newer than the 470 series, and this ffmpeg needs a newer one. An older ffmpeg build that works with driver 470 will use the card – set its path in Settings.": {
+  "日本語": "この NVIDIA カードには 470 シリーズより新しいドライバーが出ませんが、この ffmpeg にはそれより新しいドライバーが必要です。ドライバー 470 で動く古い ffmpeg ビルドならこのカードを使えます – 設定でそのパスを指定してください。",
+  "Español": "esta tarjeta NVIDIA no recibe controladores posteriores a la serie 470, y este ffmpeg necesita uno más nuevo. Una versión anterior de ffmpeg que funcione con el controlador 470 sí usará la tarjeta: indica su ruta en Ajustes.",
+  "Deutsch": "diese NVIDIA-Karte bekommt keine Treiber nach der 470er-Serie, und dieses ffmpeg braucht einen neueren. Ein älterer ffmpeg-Build, der mit Treiber 470 läuft, nutzt die Karte – gib seinen Pfad in den Einstellungen an.",
+  "Français": "cette carte NVIDIA ne reçoit plus de pilotes après la série 470, et ce ffmpeg en demande un plus récent. Une version plus ancienne de ffmpeg qui fonctionne avec le pilote 470 utilisera la carte – indiquez son chemin dans les Réglages.",
+  "한국어": "이 NVIDIA 카드는 470 시리즈 이후의 드라이버를 받지 못하는데, 이 ffmpeg에는 더 새로운 드라이버가 필요합니다. 드라이버 470에서 작동하는 이전 ffmpeg 빌드라면 이 카드를 사용합니다 – 설정에서 그 경로를 지정하세요.",
+  "中文": "此 NVIDIA 显卡不会再有比 470 系列更新的驱动，而此 ffmpeg 需要更新的驱动。能在 470 驱动上运行的较旧 ffmpeg 版本可以使用这张显卡——请在设置中填写它的路径。",
+  "العربية": "لا تحصل بطاقة NVIDIA هذه على برامج تشغيل أحدث من سلسلة 470، وffmpeg هذا يحتاج إلى أحدث منها. إصدار أقدم من ffmpeg يعمل مع برنامج التشغيل 470 سيستخدم البطاقة – حدّد مساره في الإعدادات.",
+  "Tiếng Việt": "card NVIDIA này không còn được cấp trình điều khiển mới hơn dòng 470, mà bản ffmpeg này cần bản mới hơn. Một bản ffmpeg cũ hơn chạy được với trình điều khiển 470 sẽ dùng được card – hãy đặt đường dẫn của nó trong Cài đặt."
  }
 }

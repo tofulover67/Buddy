@@ -12,7 +12,7 @@ import unittest
 from unittest import mock
 
 import _paths  # noqa: F401
-from pages.project_setup import bins, importer, sync_report
+from pages.project_setup import bins, importer, proxy, sync_report
 
 try:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -571,6 +571,57 @@ class PageTests(unittest.TestCase):
         # The audio clip and the timeline pseudo-clip never reached ffmpeg.
         self.assertEqual(len(rendered), 1)
 
+    def test_proxies_can_go_in_a_chosen_folder(self):
+        media = os.path.join(self._tmp.name, "media", "Card A")
+        os.makedirs(media)
+        open(os.path.join(media, "C0001.MP4"), "w").close()
+        chosen = os.path.join(self._tmp.name, "Proxies")
+        os.makedirs(chosen)
+        clip = Clip("C0001", path=os.path.join(media, "C0001.MP4"))
+        self.pool.selected = [clip]
+        self.page.on_proxy_option({"key": "scope", "value": "selection"})
+        # Picking "In a folder" with none chosen yet asks for one; cancelling changes nothing.
+        with mock.patch("pages.project_setup.page.QFileDialog.getExistingDirectory", return_value="") as ask:
+            self.page.on_proxy_option({"key": "location", "value": "folder"})
+        ask.assert_called_once()
+        self.assertEqual(self.page.proxy_options["location"], "beside")
+        with mock.patch("pages.project_setup.page.QFileDialog.getExistingDirectory", return_value=chosen):
+            self.page.on_proxy_option({"key": "location", "value": "folder"})
+        state = self.last("proxy")
+        self.assertEqual((state["location"], state["folder"]), ("folder", os.path.normpath(chosen)))
+        self.assertEqual(self.page.data_mgr.settings["proxy_location"], "folder")
+        self.assertEqual(self.page.data_mgr.settings["proxy_folder"], os.path.normpath(chosen))
+
+        rendered = []
+        with mock.patch.object(self.page, "_ffmpeg", return_value="ffmpeg.exe"), \
+                mock.patch("pages.project_setup.proxy.render_one",
+                           side_effect=lambda *a, **k: rendered.append(a[2]) or a[2]):
+            self.page.on_proxy_go(None)
+            deadline = time.monotonic() + 5
+            while self.page._worker is not None and time.monotonic() < deadline:
+                self.app.processEvents()
+        expected = os.path.join(proxy.proxy_dir(clip.path, os.path.normpath(chosen)), "C0001_proxy.mov")
+        self.assertTrue(expected.startswith(os.path.normpath(chosen)), expected)
+        self.assertTrue(os.path.dirname(expected).endswith(os.path.join("media", "Card A")), expected)
+        self.assertEqual(rendered, [expected])
+        self.assertEqual(clip.linked, [expected])
+
+        # Back to beside each clip: the folder is kept for next time.
+        self.page.on_proxy_option({"key": "location", "value": "beside"})
+        self.assertEqual(self.last("proxy")["folder"], os.path.normpath(chosen))
+        self.page.on_proxy_option({"key": "location", "value": "nowhere"})     # refused
+        self.assertEqual(self.page.proxy_options["location"], "beside")
+
+    def test_a_chosen_proxy_folder_that_has_gone_stops_the_run(self):
+        self.page.proxy_folder = os.path.join(self._tmp.name, "unplugged drive")
+        self.page.proxy_options["location"] = "folder"
+        with mock.patch.object(self.page, "_ffmpeg", return_value="ffmpeg.exe"), \
+                mock.patch("pages.project_setup.proxy.render_one") as render:
+            self.page.on_proxy_go(None)
+        render.assert_not_called()
+        self.assertEqual(self.last("alert")["title"], "Proxy folder missing")
+        self.assertTrue(any("The proxy folder isn't there" in t for t in self.logs("proxy")), self.logs("proxy"))
+
     def _existing_run(self, file_tc, links=True):
         """A run over one clip whose proxy file is already there, with
         file_tc as that file's timecode. Returns (clip, what was rendered)."""
@@ -729,7 +780,8 @@ class PageTests(unittest.TestCase):
             while self.page._worker is not None and time.monotonic() < deadline:
                 self.app.processEvents()
         self.assertEqual(used, ["h264"])
-        self.assertTrue(any("needs an NVIDIA graphics card" in t for t in self.logs("proxy")), self.logs("proxy"))
+        self.assertTrue(any("needs an NVIDIA, AMD or Intel graphics card" in t for t in self.logs("proxy")),
+                        self.logs("proxy"))
 
     def test_a_proxy_run_and_a_sync_job_go_at_once_and_say_how_long(self):
         """Proxies take hours, a sync minutes: each has its own slot, box and

@@ -152,6 +152,7 @@
 .proxy-card { flex: none; display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; }
 .proxy-card > :not(.card-head) { margin: 0 16px; }
 .proxy-opts { gap: 10px 18px; }
+.proxy-folder { min-width: 0; max-width: 28em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
 
 /* ----------------------------------------------------------- activity -- */
 

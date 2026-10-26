@@ -58,12 +58,16 @@ DEFAULT_SETTINGS = {
     "collapse_delete_silent_audio": False,
     # Proxy tab: which clips a run targets ("selection", "timeline",
     # "bin" or "all"), the proxy resolution ("original", "half",
-    # "quarter") and format (a proxy.CODECS id), and whether the bin
-    # scope reaches into sub-bins. See pages/project_setup/proxy.py.
+    # "quarter") and format (a proxy.CODECS id), whether the bin scope
+    # reaches into sub-bins, and where proxies go: "beside" each clip, or
+    # "folder" - proxy_folder, under each source's folder path. See
+    # pages/project_setup/proxy.py.
     "proxy_scope": "selection",
     "proxy_resolution": "half",
     "proxy_codec": "h264",
     "proxy_recursive": False,
+    "proxy_location": "beside",
+    "proxy_folder": "",
 }
 
 

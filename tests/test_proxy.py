@@ -4,7 +4,10 @@ report lines. No Qt, no Resolve, no real ffmpeg - render_one's process
 call is replaced."""
 
 import os
+import sys
 import tempfile
+import threading
+import time
 import unittest
 from unittest import mock
 
@@ -98,6 +101,61 @@ class ClaimTests(_Tmp):
         _, dst_a = proxy._claim(a, claimed)
         _, dst_b = proxy._claim(b, claimed)
         self.assertNotEqual(dst_a, dst_b)
+
+    @unittest.skipUnless(sys.platform == "win32", "Windows drive letters and shares")
+    def test_a_chosen_folder_mirrors_the_source_path_on_windows(self):
+        self.assertEqual(proxy.proxy_dir(r"E:\Shoot\Card A\C0001.MP4", r"D:\Proxies"), r"D:\Proxies\E\Shoot\Card A")
+        self.assertEqual(proxy.proxy_dir(r"\\nas.example.com\media\Day 1\C0001.MP4", r"D:\Proxies"),
+                         r"D:\Proxies\nas.example.com\media\Day 1")
+        self.assertEqual(proxy.proxy_dir(r"E:\C0001.MP4", r"D:\Proxies"), r"D:\Proxies\E")
+        self.assertEqual(proxy.proxy_dir(r"E:\Shoot\C0001.MP4"), r"E:\Shoot\Proxy")
+
+    @unittest.skipIf(sys.platform == "win32", "POSIX paths")
+    def test_a_chosen_folder_mirrors_the_source_path_on_a_mac(self):
+        self.assertEqual(proxy.proxy_dir("/Volumes/Card A/C0001.MP4", "/Users/you/Proxies"),
+                         "/Users/you/Proxies/Volumes/Card A")
+        self.assertEqual(proxy.proxy_dir("/Volumes/Card A/C0001.MP4"), "/Volumes/Card A/Proxy")
+
+    def test_in_a_chosen_folder_two_cards_clip_names_never_meet(self):
+        root = os.path.join(self.dir, "Proxies")
+        a = self.touch("Shoot/Card A/CLIP/C0001.MP4")
+        b = self.touch("Shoot/Card B/CLIP/C0001.MP4")
+        claimed = {}
+        kind_a, dst_a = proxy._claim(a, claimed, root)
+        kind_b, dst_b = proxy._claim(b, claimed, root)
+        self.assertEqual((kind_a, kind_b), ("render", "render"))
+        self.assertEqual(os.path.basename(dst_a), os.path.basename(dst_b))      # both plain names
+        self.assertNotEqual(dst_a, dst_b)
+        for card, dst in (("Card A", dst_a), ("Card B", dst_b)):
+            self.assertTrue(dst.startswith(root + os.sep), dst)
+            self.assertTrue(os.path.dirname(dst).endswith(os.path.join("Shoot", card, "CLIP")), dst)
+
+    def test_a_chosen_folders_earlier_proxy_is_reused_and_found(self):
+        root = os.path.join(self.dir, "Proxies")
+        src = self.touch("Shoot/Card A/C0001.MP4")
+        old = os.path.join(proxy.proxy_dir(src, root), "C0001_proxy.mov")
+        os.makedirs(os.path.dirname(old))
+        open(old, "wb").close()
+        self.assertEqual(proxy._claim(src, {}, root), ("existing", old))
+        self.assertEqual(proxy._claim(src, {})[0], "render")    # beside it, there's none
+        entry = {"path": src}
+        self.assertEqual(proxy.known_proxy(entry, root=root), old)
+        self.assertEqual(proxy.known_proxy(entry), "")
+        self.assertEqual(proxy.proxy_state({**entry, "proxy": "None"}, root=root), "original")
+        # A proxy made beside the clip before is still found with a folder chosen.
+        beside = self.touch("Shoot/Card B/Proxy/C0001_proxy.mov")
+        self.assertEqual(proxy.known_proxy({"path": os.path.join(self.dir, "Shoot", "Card B", "C0001.MP4")},
+                                           root=root), beside)
+
+    def test_relink_picks_the_same_named_proxy_from_the_right_card(self):
+        a = self.touch("new drive/Proxies/E/Shoot/Card A/C0001_proxy.mov")
+        b = self.touch("new drive/Proxies/E/Shoot/Card B/C0001_proxy.mov")
+        offline = [{"id": "b", "path": r"E:\Shoot\Card B\C0001.MP4",
+                    "proxy_path": r"D:\Proxies\E\Shoot\Card B\C0001_proxy.mov"},
+                   {"id": "a", "path": r"E:\Shoot\Card A\C0001.MP4",
+                    "proxy_path": r"D:\Proxies\E\Shoot\Card A\C0001_proxy.mov"}]
+        found = {e["id"]: path for e, path in proxy.find_relinks(offline, os.path.join(self.dir, "new drive"))}
+        self.assertEqual(found, {"a": a, "b": b})
 
     def test_plan_splits_renders_existing_and_skips(self):
         self.touch("footage/A001.mp4")
@@ -199,6 +257,81 @@ class RenderTests(_Tmp):
         self.assertEqual(len(calls), 1)
         self.assertFalse(os.path.exists(dst + proxy.PART_EXT))
         self.assertTrue(issubclass(proxy.ProxyCancelled, proxy.ProxyError))
+
+
+class _Report:
+    """A job's report(): records what it's told, and raises once stopped
+    (as the worker's does after Cancel)."""
+
+    def __init__(self):
+        self.calls, self.stop = [], False
+
+    def stopped(self):
+        return self.stop
+
+    def __call__(self, stage, done=0, total=1):
+        if self.stop:
+            raise RuntimeError("cancelled")
+        self.calls.append((stage, done, total))
+
+
+class RenderManyTests(_Tmp):
+    def targets(self, *names):
+        return [{"id": n, "path": self.touch(f"footage/{n}.mp4"), "tc": "01:00:00:00",
+                 "dst": os.path.join(self.dir, "footage", "Proxy", f"{n}_proxy.mov")} for n in names]
+
+    def test_two_render_at_once_and_results_keep_the_run_order(self):
+        both_in = threading.Barrier(2, timeout=5)
+
+        def run(cmd):
+            name = os.path.basename(cmd[cmd.index("-i") + 1])
+            if name in ("A.mp4", "B.mp4"):
+                both_in.wait()          # times out unless A and B are rendering together
+            if name == "B.mp4":
+                return 1, b"B is broken"
+            open(cmd[-1], "wb").close()
+            return 0, b""
+        report = _Report()
+        results = proxy.render_many("ffmpeg", self.targets("A", "B", "C"), "half", "h264", report, run=run)
+        self.assertEqual([(r["id"], r["ok"]) for r in results], [("A", True), ("B", False), ("C", True)])
+        self.assertIn("B is broken", results[1]["error"])
+        self.assertEqual(report.calls[-1][1:], (3, 3))
+        self.assertTrue(all(stage.startswith("Rendering ") for stage, _d, _t in report.calls), report.calls)
+
+    def test_one_at_a_time_when_asked(self):
+        inside, most = [0], [0]
+        lock = threading.Lock()
+
+        def run(cmd):
+            with lock:
+                inside[0] += 1
+                most[0] = max(most[0], inside[0])
+            time.sleep(0.05)
+            with lock:
+                inside[0] -= 1
+            open(cmd[-1], "wb").close()
+            return 0, b""
+        proxy.render_many("ffmpeg", self.targets("A", "B", "C"), "half", "h264", _Report(), run=run, at_once=1)
+        self.assertEqual(most[0], 1)
+
+    def test_cancel_starts_nothing_more_and_unwinds_the_job(self):
+        report, started = _Report(), []
+
+        def run(cmd):
+            started.append(cmd)
+            report.stop = True          # Cancel lands during the first renders
+            return None, b""            # ... which it kills
+        with mock.patch.object(proxy, "terminate_active") as kill:
+            with self.assertRaises(RuntimeError):
+                proxy.render_many("ffmpeg", self.targets("A", "B", "C", "D"), "half", "h264", report, run=run)
+        self.assertLessEqual(len(started), 2)
+        kill.assert_called()
+        self.assertFalse(any(os.path.exists(t["dst"]) for t in self.targets("A", "B", "C", "D")))
+
+    def test_nothing_to_render(self):
+        report = _Report()
+        self.assertEqual(proxy.render_many("ffmpeg", [], "half", "h264", report), [])
+        self.assertEqual(report.calls, [])
 
 
 class TerminateTests(unittest.TestCase):
@@ -392,8 +525,13 @@ class FormatTests(unittest.TestCase):
             cmd = proxy.build_command("ffmpeg", "in.mp4", "out.mov", "half", key)
             self.assertIn("-c:v", cmd, key)
             self.assertTrue(codec["label"] and codec["hint"], key)
+        for key in proxy.GPU_ENCODERS:
+            cmd = proxy.build_command("ffmpeg", "in.mp4", "out.mov", "half", key)
+            self.assertEqual(cmd[cmd.index("-c:v") + 1], key)
+        for key, codec in proxy.CODECS.items():
+            self.assertTrue(set(codec.get("gpu", ())) <= set(proxy.GPU_ENCODERS), key)
         self.assertEqual([c["id"] for c in proxy.codec_choices("win32")], list(proxy.CODECS))
-        # No NVIDIA cards in today's Macs.
+        # A Mac's encoders are VideoToolbox's.
         self.assertNotIn("h264_nvenc", [c["id"] for c in proxy.codec_choices("darwin")])
 
     def test_dnxhr_and_prores_profiles(self):
@@ -440,15 +578,167 @@ class GpuTests(unittest.TestCase):
             proxy.render_one("ffmpeg", "A.mov", dst, "half", "h264", run=run)
             self.assertEqual(len(calls), 1)
 
-    def test_no_nvenc_renders_the_cpu_format_and_says_so(self):
+    # What each vendor's encoder says on a PC without the hardware (ffmpeg 9).
+    NO_DEVICE = {"nvenc": b"[hevc_nvenc @ 01] Cannot load nvcuda.dll",
+                 "amf": b"[hevc_amf @ 01] CreateComponent(AMFVideoEncoderHW_HEVC) failed with error 30",
+                 "qsv": b"[hevc_qsv @ 01] Error creating a MFX session: -9."}
+
+    def _encoders(self, works=(), errors=None):
+        """A subprocess.run for the test encodes: the encoders in `works`
+        start, the rest fail with errors[suffix] or their no-device line."""
+        errors = {**self.NO_DEVICE, **(errors or {})}
+
+        def run(cmd, **_kw):
+            if cmd[0] == "nvidia-smi":
+                return mock.Mock(returncode=0, stdout=b"580.97\n")
+            encoder = cmd[cmd.index("-c:v") + 1]
+            if encoder in works:
+                return mock.Mock(returncode=0)
+            return mock.Mock(returncode=1, stderr=errors[encoder.split("_")[1]])
+        return mock.Mock(side_effect=run)
+
+    def test_the_amd_and_intel_encoders_decode_on_the_cpu(self):
+        for encoder in ("h264_amf", "hevc_qsv"):
+            cmd = proxy.build_command("ffmpeg", "in.mov", "out.mov", "half", encoder, gpu_decode=True)
+            self.assertNotIn("-hwaccel", cmd)
+            self.assertIn("scale=trunc(iw/4)*2:trunc(ih/4)*2", cmd)
+            self.assertEqual(cmd[cmd.index("-pix_fmt") + 1], "yuv420p")
+            self.assertEqual(cmd[cmd.index("-c:v") + 1], encoder)
+        self.assertIn("cqp", proxy.build_command("ffmpeg", "in.mov", "out.mov", "half", "hevc_amf"))
+
+    def test_an_amd_or_intel_render_goes_once_on_the_cpu(self):
+        with tempfile.TemporaryDirectory() as folder:
+            calls = []
+
+            def run(cmd):
+                calls.append(cmd)
+                open(cmd[-1], "wb").close()
+                return 0, b""
+            proxy.render_one("ffmpeg", "A.mov", os.path.join(folder, "Proxy", "A_proxy.mov"), "half", "hevc_amf",
+                             run=run)
+            self.assertEqual(len(calls), 1)
+            self.assertNotIn("-hwaccel", calls[0])
+
+    def test_the_gpu_format_takes_the_first_card_that_encodes(self):
+        """An AMD or Intel card renders the GPU format when there's no
+        NVIDIA one - without a word, since a missing card isn't news."""
         proxy._GPU_CHECKED.clear()
-        run = mock.Mock(return_value=mock.Mock(returncode=1, stderr=b"Cannot load nvcuda.dll"))
+        run = self._encoders(works={"hevc_amf"})
+        with mock.patch.object(proxy.subprocess, "run", run):
+            self.assertEqual(proxy.render_plan("ffmpeg", "hevc_nvenc"), ("hevc_amf", ""))
+        tried = [c.args[0][c.args[0].index("-c:v") + 1] for c in run.call_args_list]
+        self.assertEqual(tried, ["hevc_nvenc", "hevc_amf"])
+        proxy._GPU_CHECKED.clear()
+        with mock.patch.object(proxy.subprocess, "run", self._encoders(works={"h264_qsv"})):
+            self.assertEqual(proxy.render_plan("ffmpeg", "h264_nvenc"), ("h264_qsv", ""))
+        proxy._GPU_CHECKED.clear()
+
+    def test_an_nvidia_card_that_wont_start_is_named_when_another_card_renders(self):
+        """A GTX 1080 stays on driver 580 - too old for ffmpeg 9 - beside a
+        Ryzen's Radeon: the Radeon renders, and the note says why not NVIDIA."""
+        proxy._GPU_CHECKED.clear()
+        old = b"[hevc_nvenc @ 01] The minimum required Nvidia driver for nvenc is 610.00 or newer\n"
+        with mock.patch.object(proxy.subprocess, "run", self._encoders(works={"hevc_amf"}, errors={"nvenc": old})):
+            used, note = proxy.render_plan("ffmpeg", "hevc_nvenc")
+        self.assertEqual(used, "hevc_amf")
+        self.assertIn("Couldn't encode on the NVIDIA graphics card: the NVIDIA driver is older", note)
+        self.assertIn("this PC has 580.97", note)
+        self.assertIn("This run used the AMD graphics instead.", note)
+        proxy._GPU_CHECKED.clear()
+
+    def test_a_build_without_one_vendor_is_only_named_when_nothing_else_is_wrong(self):
+        proxy._GPU_CHECKED.clear()
+        no_amf = {"amf": b"Unknown encoder 'hevc_amf'"}
+        with mock.patch.object(proxy.subprocess, "run", self._encoders(works={"hevc_qsv"}, errors=no_amf)):
+            self.assertEqual(proxy.render_plan("ffmpeg", "hevc_nvenc"), ("hevc_qsv", ""))
+        proxy._GPU_CHECKED.clear()
+        with mock.patch.object(proxy.subprocess, "run", self._encoders(errors=no_amf)):
+            self.assertIn("built without AMD's encoders", proxy.render_plan("ffmpeg", "hevc_nvenc")[1])
+        proxy._GPU_CHECKED.clear()
+        odd = {**no_amf, "qsv": b"[hevc_qsv @ 01] Something odd.\n"}
+        with mock.patch.object(proxy.subprocess, "run", self._encoders(errors=odd)):
+            self.assertIn("Intel's encoder didn't start (Something odd)", proxy.render_plan("ffmpeg", "hevc_nvenc")[1])
+        proxy._GPU_CHECKED.clear()
+
+    def _nvidia_smi(self, driver, compute):
+        def run(cmd, **_kw):
+            if cmd[0] == "nvidia-smi":
+                answer = compute if "--query-gpu=compute_cap" in cmd else driver
+                return mock.Mock(returncode=0, stdout=answer.encode() + b"\n")
+            encoder = cmd[cmd.index("-c:v") + 1]
+            if encoder.endswith("_nvenc"):
+                return mock.Mock(returncode=1, stderr=(
+                    b"[hevc_nvenc @ 01] Driver does not support the required nvenc API version. Required: 13.1 Found: 13.0\n"
+                    b"[hevc_nvenc @ 01] The minimum required Nvidia driver for nvenc is 610.00 or newer\n"))
+            return mock.Mock(returncode=1, stderr=self.NO_DEVICE[encoder.split("_")[1]])
+        return run
+
+    def test_a_card_whose_drivers_stop_at_580_isnt_told_to_update(self):
+        """A GTX 1080 (compute 6.1) on its last driver, 580, with ffmpeg 9:
+        no driver will do, so the note says what will."""
+        proxy._GPU_CHECKED.clear()
+        with mock.patch.object(proxy.subprocess, "run", side_effect=self._nvidia_smi("580.97", "6.1")):
+            used, note = proxy.render_plan("ffmpeg", "hevc_nvenc")
+        self.assertEqual(used, "h265")
+        self.assertNotIn("Update it", note)
+        self.assertIn("gets no drivers newer than the 580 series", note)
+        self.assertIn("An older ffmpeg build that works with driver 580 will use the card – set its path in Settings.",
+                      note)
+        self.assertIn("This run used H.265 (HEVC) on the CPU instead.", note)
+        proxy._GPU_CHECKED.clear()
+
+    def test_a_card_that_still_gets_drivers_is_told_to_update(self):
+        proxy._GPU_CHECKED.clear()
+        with mock.patch.object(proxy.subprocess, "run", side_effect=self._nvidia_smi("596.36", "8.9")):  # an RTX 40
+            note = proxy.render_plan("ffmpeg", "hevc_nvenc")[1]
+        self.assertIn("Update it in the NVIDIA app", note)
+        proxy._GPU_CHECKED.clear()
+
+    def test_the_last_driver_series_by_card(self):
+        self.assertEqual([proxy.last_driver_series(c) for c in ("3.5", "5.2", "6.1", "7.0", "7.5", "12.0", "", None)],
+                         [470, 580, 580, 580, None, None, None, None])
+        too_old = b"The minimum required Nvidia driver for nvenc is 610.00 or newer"
+        self.assertIn("580 series", proxy.gpu_problem(too_old, "580.97", last=580))
+        # A 580 card on an older driver than its last, with an ffmpeg that wants 570: updating does work.
+        wants_570 = b"The minimum required Nvidia driver for nvenc is 570.00 or newer"
+        self.assertIn("Update it", proxy.gpu_problem(wants_570, "553.50", last=580))
+        # No version in the error: the card's own driver says whether updating could help.
+        api_only = b"Driver does not support the required nvenc API version. Required: 13.1 Found: 13.0"
+        self.assertIn("580 series", proxy.gpu_problem(api_only, "580.97", last=580))
+        self.assertIn("Update it", proxy.gpu_problem(api_only, "553.50", last=580))
+
+    def test_each_vendor_says_what_it_lacks(self):
+        self.assertEqual(proxy.gpu_problem(self.NO_DEVICE["amf"], vendor="AMD"), "it needs AMD Radeon graphics.")
+        self.assertEqual(proxy.gpu_problem(self.NO_DEVICE["qsv"], vendor="Intel"),
+                         "it needs Intel graphics with Quick Sync.")
+        self.assertIn("built without Intel's encoders", proxy.gpu_problem(b"Unknown encoder 'hevc_qsv'", vendor="Intel"))
+        self.assertIn("AMD's encoder didn't start (encoder->Init() failed with error 4)",
+                      proxy.gpu_problem(b"[hevc_amf @ 01] encoder->Init() failed with error 4\n", vendor="AMD"))
+        # Only NVIDIA's encoder asks for a driver version.
+        self.assertNotIn("NVIDIA driver", proxy.gpu_problem(b"minimum required Nvidia driver for nvenc is 610",
+                                                            vendor="AMD"))
+
+    def test_the_test_encode_uses_the_proxy_settings(self):
+        """An encoder that starts but refuses a proxy's settings (QVBR on a
+        Radeon that hasn't got it) mustn't count as one that works."""
+        proxy._GPU_CHECKED.clear()
+        run = mock.Mock(return_value=mock.Mock(returncode=0))
+        self.assertTrue(proxy.gpu_available("ffmpeg", "hevc_amf", run=run))
+        cmd = run.call_args.args[0]
+        self.assertEqual(cmd[cmd.index("-rc") + 1], "cqp")
+        self.assertEqual(cmd[cmd.index("-pix_fmt") + 1], "yuv420p")
+        proxy._GPU_CHECKED.clear()
+
+    def test_no_gpu_renders_the_cpu_format_and_says_so(self):
+        proxy._GPU_CHECKED.clear()
+        run = self._encoders()
         with mock.patch.object(proxy.subprocess, "run", run):
             used, note = proxy.render_plan("ffmpeg", "hevc_nvenc")
             self.assertEqual(used, "h265")
-            self.assertIn("needs an NVIDIA graphics card", note)
+            self.assertIn("needs an NVIDIA, AMD or Intel graphics card", note)
+            self.assertIn("This run used H.265 (HEVC) on the CPU instead.", note)
             proxy.render_plan("ffmpeg", "hevc_nvenc")
-        self.assertEqual(run.call_count, 2)   # a no is asked again: a driver may have been updated since
+        self.assertEqual(run.call_count, 6)   # a no is asked again: a driver may have been updated since
         self.assertEqual(proxy.render_plan("ffmpeg", "prores"), ("prores", ""))
         proxy._GPU_CHECKED.clear()
         ok = mock.Mock(return_value=mock.Mock(returncode=0))

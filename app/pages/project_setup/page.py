@@ -78,7 +78,7 @@ METHODS = (align_engine.METHOD_TIMECODE, align_engine.METHOD_WAVEFORM)
 
 # Actions that stay available while a job runs: they change nothing in
 # Resolve.
-_WHILE_BUSY = {"tab", "bins_text", "sync_option", "proxy_option", "proxy_mode", "populate_recursive",
+_WHILE_BUSY = {"tab", "bins_text", "sync_option", "proxy_option", "proxy_folder", "proxy_mode", "populate_recursive",
                "to_master", "cancel_job"}
 
 # Two jobs can run at once: one of the Sync tab's ("main") and one of the
@@ -139,7 +139,11 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             "resolution": self.data_mgr.settings.get("proxy_resolution") or proxy.DEFAULT_RESOLUTION,
             "codec": self.data_mgr.settings.get("proxy_codec") or proxy.DEFAULT_CODEC,
             "recursive": bool(self.data_mgr.settings.get("proxy_recursive", False)),
+            "location": self.data_mgr.settings.get("proxy_location") or proxy.DEFAULT_LOCATION,
         }
+        # The folder "In a folder" puts proxies in (kept when Beside each
+        # clip is picked again, so switching back needs no new pick).
+        self.proxy_folder = self.data_mgr.settings.get("proxy_folder") or ""
 
         folder =self.data_mgr.settings.get("last_import_folder") or ""
         self.import_folder = folder if folder and os.path.isdir(folder) else ""
@@ -1059,10 +1063,12 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         "resolution": "proxy_resolution",
         "codec": "proxy_codec",
         "recursive": "proxy_recursive",
+        "location": "proxy_location",
     }
 
     def _push_proxy(self):
         self.emit("proxy", {**self._proxy, **self.proxy_options,
+                            "folder": self.proxy_folder,
                             "codecs": proxy.codec_choices(),
                             "ffmpeg": bool(self._ffmpeg()),
                             "connected": self.controller is not None})
@@ -1100,12 +1106,37 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             return
         if key == "codec" and value not in proxy.CODECS:
             return
+        if key == "location" and value not in proxy.LOCATIONS:
+            return
+        if key == "location" and value == "folder" and not self.proxy_folder:
+            self.on_proxy_folder(None)      # picks the folder, and the location with it
+            return
         if key == "recursive":
             value = bool(value)
         self.data_mgr.settings[self.PROXY_OPTIONS[key]] = value
         self.data_mgr.save_settings()
         self.proxy_options[key] = value
         self._push_proxy()
+
+    def on_proxy_folder(self, _payload):
+        """Choose the folder proxies go in - and put them there. Cancelling
+        the picker changes nothing."""
+        start = self.proxy_folder if os.path.isdir(self.proxy_folder) else os.path.expanduser("~")
+        folder = QFileDialog.getExistingDirectory(self, tr("Choose a folder for the proxies"), start)
+        if not folder:
+            return
+        self.proxy_folder = os.path.normpath(folder)
+        self.proxy_options["location"] = "folder"
+        self.data_mgr.settings["proxy_folder"] = self.proxy_folder
+        self.data_mgr.settings["proxy_location"] = "folder"
+        self.data_mgr.save_settings()
+        self._push_proxy()
+
+    def _proxy_root(self):
+        """The chosen folder when proxies go in one, else None (beside each clip)."""
+        if self.proxy_options.get("location") == "folder" and self.proxy_folder:
+            return self.proxy_folder
+        return None
 
     def _proxy_videos(self, controller, scope):
         """The deduped video entries a scope covers, with the live
@@ -1178,7 +1209,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             return
         where, videos, objects = read
         self._proxy_listing = {"entries": {e["id"]: e for e in videos}, "objects": objects}
-        report = proxy.status_report(videos, self._set_aside())
+        report = proxy.status_report(videos, self._set_aside(), self._proxy_root())
         self.emit("proxy_status", {**report, "where": where})
         self._log("proxy", proxy.status_line(report["counts"]), "info")
 
@@ -1224,11 +1255,11 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             _where, chosen, objects = read
         if not chosen:
             return
-        set_aside = self._set_aside()
+        set_aside, root = self._set_aside(), self._proxy_root()
         done, refused, missing = 0, [], []
         for entry in chosen:
             clip, key = objects.get(entry["id"]), proxy.set_aside_key(entry["path"])
-            state = proxy.proxy_state(entry, set_aside)
+            state = proxy.proxy_state(entry, set_aside, root)
             try:
                 if use == "original":
                     if state not in ("linked", "offline"):
@@ -1243,7 +1274,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
                     continue
                 if state == "linked":
                     continue
-                path = proxy.known_proxy(entry, set_aside)
+                path = proxy.known_proxy(entry, set_aside, root)
                 if not path:
                     missing.append(entry["name"])
                 elif clip.LinkProxyMedia(path):
@@ -1359,6 +1390,12 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             self._log("proxy", "ffmpeg not found – install it, or set its path in Settings.", "error")
             self._alert("ffmpeg needed", "Making proxies needs ffmpeg installed, or its path set in Settings.")
             return
+        root = self._proxy_root()
+        if root and not os.path.isdir(root):
+            message = f"The proxy folder isn't there: {root} – plug its drive in, or choose another."
+            self._log("proxy", message, "error")
+            self._alert("Proxy folder missing", message)
+            return
         controller = self.ensure_connected()
         if controller is None:
             return
@@ -1378,7 +1415,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
                 self._log("proxy", "No video files in that scope – audio and stills don't need proxies.", "warn")
                 self._overlay(False)
                 return
-            targets = proxy.plan(videos)
+            targets = proxy.plan(videos, root)
         except proxy.ProxyError as exc:
             self._overlay(False)
             self._log("proxy", str(exc), "error")
@@ -1427,15 +1464,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
                 if not proxy.same_timecode(proxy.file_timecode(ffmpeg_path, target["dst"]), target.get("tc")):
                     stale.append(target["id"])
             todo = render_list + [t for t in existing_list if t["id"] in stale]
-            results = []
-            for index, target in enumerate(todo):
-                report(f"Rendering {os.path.basename(target['path'])}", index, len(todo))
-                try:
-                    proxy.render_one(ffmpeg_path, target["path"], target["dst"],
-                                     resolution, used, timecode=target.get("tc", ""))
-                    results.append({"id": target["id"], "ok": True})
-                except proxy.ProxyError as exc:
-                    results.append({"id": target["id"], "ok": False, "error": str(exc)})
+            results = proxy.render_many(ffmpeg_path, todo, resolution, used, report)
             return {"results": results, "stale": stale, "note": note}
 
         def finish(controller, context, payload):

@@ -255,7 +255,7 @@
                 <div class="spacer"></div>
                 <button type="button" class="btn ghost" data-help="proxy">How it works</button>
             </div>
-            <p class="muted desc">Each video file gets a .mov copy in a 'Proxy' folder beside it, then linked as that clip's proxy media in Resolve. Flip them on in Resolve with the proxy button in the viewer.</p>
+            <p class="muted desc">Each video file gets a .mov copy – in a 'Proxy' folder beside it, or in a folder you choose – then linked as that clip's proxy media in Resolve. Flip them on in Resolve with the proxy button in the viewer.</p>
             <div class="row wrap">
                 <span class="lbl-inline">Proxy</span>
                 <div class="segmented" id="proxy-scope" role="group" aria-label="Which clips">
@@ -277,6 +277,15 @@
                 <select class="field proxy-format" id="proxy-format" aria-label="Proxy format"></select>
             </div>
             <p class="muted small" id="proxy-format-hint"></p>
+            <div class="row wrap proxy-opts">
+                <span class="lbl-inline">Save to</span>
+                <div class="segmented" id="proxy-location" role="group" aria-label="Where proxies go">
+                    <button type="button" data-location="beside" title="A 'Proxy' folder beside each source file – Resolve's own convention">Beside each clip</button>
+                    <button type="button" data-location="folder" title="One folder you choose, each proxy under its source's own folder path so clips of the same name never clash">In a folder</button>
+                </div>
+                <span class="small proxy-folder" id="proxy-folder" translate="no" hidden></span>
+                <button type="button" class="btn" id="proxy-folder-change" hidden>Change…</button>
+            </div>
             <div class="note warn-note" id="proxy-ffmpeg-note" hidden></div>
             <div class="row">
                 <div class="spacer"></div>
