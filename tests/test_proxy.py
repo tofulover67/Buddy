@@ -150,10 +150,10 @@ class ClaimTests(_Tmp):
     def test_relink_picks_the_same_named_proxy_from_the_right_card(self):
         a = self.touch("new drive/Proxies/E/Shoot/Card A/C0001_proxy.mov")
         b = self.touch("new drive/Proxies/E/Shoot/Card B/C0001_proxy.mov")
-        offline = [{"id": "b", "path": r"E:\Shoot\Card B\C0001.MP4",
-                    "proxy_path": r"D:\Proxies\E\Shoot\Card B\C0001_proxy.mov"},
-                   {"id": "a", "path": r"E:\Shoot\Card A\C0001.MP4",
-                    "proxy_path": r"D:\Proxies\E\Shoot\Card A\C0001_proxy.mov"}]
+        # Where they were: the old drive's Proxies folder, in this platform's own paths.
+        old = os.path.join(os.sep, "old drive", "Proxies", "E", "Shoot")
+        offline = [{"id": card[-1].lower(), "path": os.path.join(os.sep, "E", "Shoot", card, "C0001.MP4"),
+                    "proxy_path": os.path.join(old, card, "C0001_proxy.mov")} for card in ("Card B", "Card A")]
         found = {e["id"]: path for e, path in proxy.find_relinks(offline, os.path.join(self.dir, "new drive"))}
         self.assertEqual(found, {"a": a, "b": b})
 
