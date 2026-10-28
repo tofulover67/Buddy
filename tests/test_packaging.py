@@ -69,6 +69,22 @@ class PackagingTests(unittest.TestCase):
                        ".safetensors"):     # Generative's prompt embeddings (pages/generative/data/)
             self.assertIn(suffix, b.INCLUDE_SUFFIXES)
 
+    def test_zip_carries_the_package_list_for_the_launcher(self):
+        # Buddy.py installs what's missing from it when Resolve switches Python.
+        import tempfile
+        import zipfile
+        from unittest import mock
+
+        import build_buddy_zip as b
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "buddy.zip"
+            with mock.patch.object(b, "OUTPUT_ZIP", str(out)), mock.patch("builtins.print"):
+                b.build()
+            with zipfile.ZipFile(out) as z:
+                shipped = z.read("buddy/requirements.txt").decode("utf-8")
+        self.assertEqual(shipped.replace("\r\n", "\n"),
+                         (ROOT / "installer" / "requirements.txt").read_text(encoding="utf-8").replace("\r\n", "\n"))
+
     def test_installer_checks_what_requirements_install(self):
         iss = (ROOT / "installer" / "Buddy.iss").read_text(encoding="utf-8")
         check = re.search(r"-c \"import (PySide6[^\"]+)\"", iss).group(1)

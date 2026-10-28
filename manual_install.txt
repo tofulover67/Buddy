@@ -190,6 +190,12 @@ Python and its packages are left alone; other programs may use them.
 If something goes wrong
 -----------------------
 
+"Buddy - Missing packages" when you open Buddy - DaVinci Resolve runs
+Buddy with the newest Python on the computer, so installing a newer Python
+leaves Buddy on one without its packages. Click Install and Buddy installs
+them into that Python, then opens. If you'd rather not, or it fails, the
+message shows the exact command to run yourself.
+
 "PySide6 is not installed for the Python interpreter DaVinci Resolve is
 using to run this script" - the message shows that Python's full path and the exact command
 to run. Run it, with that path, in Command Prompt. (This happens when a PC

@@ -81,6 +81,11 @@ def build():
         with open(os.path.join(REPO_ROOT, "VERSION"), encoding="utf-8") as f:
             archive.writestr(f"{PACKAGE_DIR_NAME}/VERSION", f.read().strip() + "\n")
         written.append(f"{PACKAGE_DIR_NAME}/VERSION")
+        # What Buddy needs installed, for the launcher to put back when
+        # Resolve switches to a Python without it (Buddy.py, _repair_packages).
+        archive.write(os.path.join(REPO_ROOT, "installer", "requirements.txt"),
+                      f"{PACKAGE_DIR_NAME}/requirements.txt")
+        written.append(f"{PACKAGE_DIR_NAME}/requirements.txt")
 
     size_mb = os.path.getsize(OUTPUT_ZIP) / 1e6
     print(f"Wrote {OUTPUT_ZIP} ({len(written)} files, {size_mb:.2f} MB)")
