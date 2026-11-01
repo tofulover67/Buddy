@@ -78,6 +78,11 @@ body.window { background: var(--surface); }
     color: var(--nav-heading); padding: 10px 10px 2px; white-space: nowrap; flex: none;
 }
 .nav-line { flex: none; height: var(--bw); margin: 10px 10px 6px; background: var(--shell-border); }
+/* More tools (core/more_tools.py): at the foot of the rail, quieter than a
+   tool - the spacer pushes it down, and keeps it apart in a full rail. */
+.nav-spacer { flex: 1 0 12px; }
+.nav-more { gap: 8px; color: var(--text-dim); }
+.nav-more .icon-svg { flex: none; width: 16px; height: 16px; }
 /* A short window (a 768px laptop, a 900px window under a roomy theme)
    tightens the rail's rows - vertical padding only, each theme keeps its own
    sideways padding and type - so every tool stays in view instead of the
@@ -490,6 +495,48 @@ body.window { background: var(--surface); }
 .btn.small { padding: 2px 8px; font-size: var(--fs-sm); }
 
 /* ----------------------------------------------------- announcements -- */
+
+/* The tour (core/onboarding.py): a page over the whole window. The dim
+   has a hole cut for each part lit up (tour.js), outlined, with the card
+   beside them. */
+body.tour { margin: 0; height: 100vh; overflow: hidden; }
+.tour-dim { position: fixed; inset: 0; width: 100vw; height: 100vh; }
+.tour-dim path { fill: var(--overlay-tint); }
+.tour-hole {
+    position: fixed; border-radius: 8px; pointer-events: none;
+    box-shadow: 0 0 0 2px var(--primary); animation: buddy-fade .18s ease-out;
+}
+.tour-card {
+    position: fixed; width: min(340px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 16px;
+    background: var(--modal-bg); color: var(--text);
+    border: var(--bw) solid var(--card-border); border-radius: var(--card-radius);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, .45); backdrop-filter: var(--card-blur);
+    transition: left .22s ease, top .22s ease;
+}
+.tour-card.welcome { width: min(420px, calc(100vw - 32px)); }
+.tour-count { font-size: var(--fs-xs); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+.tour-title { margin: 0; font-size: var(--fs-lg); font-weight: 700; color: var(--text-strong); }
+.tour-text { display: flex; flex-direction: column; gap: 8px; }
+.tour-text p { margin: 0; line-height: 1.5; }
+.tour-never { font-size: var(--fs-sm); }
+.tour-foot { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.tour-foot .spacer { flex: 1; }
+@media (prefers-reduced-motion: reduce) {
+    .tour-hole { animation: none; }
+    .tour-card { transition: none; }
+}
+
+/* More tools (core/more_tools.py). */
+.more-list { gap: 0; }
+.more-row { display: flex; align-items: center; gap: 14px; padding: 10px 2px; }
+.more-row + .more-row { border-top: var(--bw) solid var(--card-border); }
+.more-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.more-name { font-weight: 700; color: var(--text-strong); }
+.more-blurb { font-size: var(--fs-sm); line-height: 1.45; color: var(--text-dim); }
+.more-act { flex: none; display: flex; align-items: center; gap: 8px; }
+.more-added { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-sm); color: var(--success); }
+.more-added .icon-svg { width: 14px; height: 14px; }
 
 .news { display: flex; flex-direction: column; gap: 4px; }
 .news + .news { border-top: var(--bw) solid var(--card-border); padding-top: 12px; }

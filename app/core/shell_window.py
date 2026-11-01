@@ -6,8 +6,9 @@ all the chrome the tools share, owned exactly once, with N independent
 tool pages grouped by category.
 
 The header and the rail are web views (core/shell_web.py) and Settings,
-Organize sidebar and the announcements are web windows; this window lays
-them out around the panes and keeps everything they show. What's left in
+Organize sidebar, More tools and the announcements are web windows; this
+window lays them out around the panes and keeps everything they show. A
+new install's tour is a web view over all of it (core/onboarding.py). What's left in
 Qt is the frame itself: the panes, the dual-view divider and its tint,
 the busy overlay and the tray.
 """
@@ -41,6 +42,8 @@ from core import link_bar
 from core.achievements import Achievements
 from core.render_watch import RenderWatch
 from core import nav_layout
+from core import onboarding
+from core.more_tools import MoreToolsDialog
 from core.announcements_window import AnnouncementsDialog
 from core.announcements import SEEN_KEY, AnnouncementChecker
 from core import updater
@@ -500,6 +503,13 @@ class ShellWindow(QMainWindow):
         # (ToolPage.achieve) and show it (Pets, Achievements).
         self.achievements = Achievements()
         self.achievements.on_unlock.append(self._on_achievements_unlocked)
+        # A new install: a few key tools in the rail, and the tour when the
+        # window first shows (core/onboarding.py). The achievements' file is
+        # written at every start, so it says Buddy has run here before.
+        if onboarding.is_new_install(self.shared_settings, [self.achievements.path]):
+            onboarding.set_up_new_install(self.shared_settings, registry)
+        self._tour = None
+        self._tour_offered = False
         self._init_ui()
         # Not tools: the pet on the desktop and the achievements' page, with
         # pages in Settings (under General) and nowhere else (core/settings_dialog.py
@@ -1050,6 +1060,51 @@ class ShellWindow(QMainWindow):
         if self.tray_icon is not None:
             self._update_tray_show_action()
             self.tray_quit_action.setText(tr("Quit"))
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        # A new install's tour (core/onboarding.py): when the window first
+        # shows - at the start, or from the tray after starting hidden.
+        if not getattr(self, "_tour_offered", True) and self.shared_settings.get(onboarding.TOUR_KEY, False):
+            self._tour_offered = True
+            QTimer.singleShot(onboarding.TOUR_DELAY_MS, self, lambda: self.start_tour(welcome=True))
+
+    # ------------------------------------------------------------ tour --
+    def start_tour(self, welcome=False, waited=0):
+        """The tour over this window (core/onboarding.py) - on its welcome
+        card for a new install, straight to the first step from Settings.
+        It waits for the header and rail to have loaded, and for any
+        dialog in front to go."""
+        if self._tour is not None or self._layout != "panes":
+            return
+        modal = QApplication.activeModalWidget() is not None
+        if modal or not self.isVisible() or self.isMinimized() or not (self.header._ready and self.rail._ready):
+            if modal or waited < onboarding.READY_WAIT_MS:
+                QTimer.singleShot(onboarding.READY_POLL_MS, self,
+                                  lambda: self.start_tour(welcome, waited + onboarding.READY_POLL_MS))
+            elif welcome:
+                self._tour_offered = False      # put away first: offered when it's next shown
+            return
+        if not welcome:
+            self.end_tour_offer()               # taken from Settings: no welcome card at the next start
+        ask = "manual_chat" in nav_layout.visible_tool_ids(self.nav_layout)
+        tray = None
+        if self.tray_icon is not None and self.shared_settings.get("keep_running_in_tray", True):
+            tray = "mac" if sys.platform == "darwin" else "win"
+        steps = onboarding.tour_steps(ask=ask, more=len(self.more_tool_ids()), tray=tray)
+        self._tour = onboarding.TourView(self, steps, start=0 if welcome else 1)
+
+    def end_tour_offer(self):
+        """Taken, or Don't show this again: not offered at start-up again."""
+        if self.shared_settings.get(onboarding.TOUR_KEY, False):
+            self.shared_settings[onboarding.TOUR_KEY] = False
+            self.shared_settings.save()
+
+    def close_tour(self):
+        tour, self._tour = self._tour, None
+        if tour is not None:
+            tour.finish()
+            self.activateWindow()
 
     def changeEvent(self, event):
         # Minimising/restoring from the taskbar changes what the tray's
@@ -1668,15 +1723,37 @@ class ShellWindow(QMainWindow):
 
     def push_rail(self):
         items = []
-        for entry in self.nav_layout:
+        for entry in nav_layout.rail_rows(self.nav_layout):
             if entry["type"] == nav_layout.DIVIDER:
                 items.append({"type": "heading", "label": entry["label"]} if entry["label"] else {"type": "line"})
-            elif entry["visible"]:
+            else:
                 tool_id = entry["id"]
                 items.append({"type": "tool", "id": tool_id, "label": self.pages[tool_id].display_name,
                               "active": tool_id == self._current_tool_id, "badge": self._badge(tool_id),
                               "working": self._working(tool_id)})
-        self.rail.show_items(items)
+        self.rail.show_items(items, more=len(self.more_tool_ids()))
+
+    def more_tool_ids(self):
+        """Tools hidden from the rail that More tools can put back (a
+        placeholder has nothing to add)."""
+        return [tid for tid in nav_layout.hidden_tool_ids(self.nav_layout)
+                if tid in self.pages and not self.pages[tid].is_placeholder]
+
+    def open_more_tools(self):
+        """The rail's More tools (core/more_tools.py)."""
+        dialog = MoreToolsDialog(self)
+        dialog.exec()
+        if dialog.open_tool is not None:
+            self.switch_tool(dialog.open_tool)
+        elif dialog.organize:
+            self.open_nav_organizer(self)
+
+    def add_to_rail(self, tool_id):
+        """More tools' Add: shown in the rail again, and saved."""
+        layout = [dict(entry) for entry in self.nav_layout]
+        if nav_layout.show_tool(layout, tool_id) == "":
+            nav_layout.save(self.shared_settings, layout)
+            self.rebuild_nav()
 
     def _badge(self, tool_id):
         try:

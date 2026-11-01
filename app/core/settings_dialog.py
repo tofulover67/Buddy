@@ -669,6 +669,11 @@ class SettingsDialog(WebDialog):
             return
         elif action == "organize" and hasattr(self.main_window, "open_nav_organizer"):
             self.main_window.open_nav_organizer(self)
+        elif action == "tour" and hasattr(self.main_window, "start_tour"):
+            # Settings is in front of the window the tour lights up.
+            self.accept()
+            QTimer.singleShot(0, self.main_window.start_tour)
+            return
         elif action == "check_updates" and hasattr(self.main_window, "check_updates_now"):
             self.main_window.check_updates_now(self)
         elif action == "roll_back_update" and hasattr(self.main_window, "roll_back_update"):

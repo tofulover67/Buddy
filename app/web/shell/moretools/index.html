@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>More tools</title>
+    <link rel="stylesheet" href="../../buddy.css">
+    <link rel="stylesheet" href="../shell.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../buddy.js"></script>
+</head>
+<body class="window">
+<main class="dialog">
+    <p class="set-hint">These tools are installed already, just not in the sidebar yet. Add the ones you want –
+        they go under their usual heading. Organize sidebar can hide one again.</p>
+    <div class="dialog-body more-list" id="list"></div>
+    <div class="dialog-foot">
+        <button type="button" class="btn" id="organize">Organize sidebar…</button>
+        <div class="spacer"></div>
+        <button type="button" class="btn accent" id="close">Done</button>
+    </div>
+</main>
+<script src="moretools.js"></script>
+</body>
+</html>

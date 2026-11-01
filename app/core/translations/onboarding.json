@@ -1,0 +1,593 @@
+{
+  "_comment": "A new install's first start: the tour, More tools and its line on each tool (core/onboarding.py, core/more_tools.py). English -> each language; see core/i18n.py.",
+  "Welcome to Buddy": {
+    "日本語": "Buddy へようこそ",
+    "Español": "Te damos la bienvenida a Buddy",
+    "Deutsch": "Willkommen bei Buddy",
+    "Français": "Bienvenue dans Buddy",
+    "한국어": "Buddy에 오신 것을 환영합니다",
+    "中文": "欢迎使用 Buddy",
+    "العربية": "مرحبًا بك في Buddy",
+    "Tiếng Việt": "Chào mừng đến với Buddy"
+  },
+  "Buddy is a set of tools for DaVinci Resolve, in one window beside it. Want a quick look round? It takes about a minute.": {
+    "日本語": "Buddy は DaVinci Resolve のためのツールをひとつのウィンドウにまとめたもので、Resolve の横で使います。ざっと見て回りませんか？ 1 分ほどで終わります。",
+    "Español": "Buddy es un conjunto de herramientas para DaVinci Resolve, en una sola ventana junto a él. ¿Quieres un recorrido rápido? Dura alrededor de un minuto.",
+    "Deutsch": "Buddy ist eine Sammlung von Werkzeugen für DaVinci Resolve in einem einzigen Fenster daneben. Möchten Sie sich kurz umsehen? Es dauert etwa eine Minute.",
+    "Français": "Buddy est un ensemble d'outils pour DaVinci Resolve, réunis dans une fenêtre à côté de lui. Envie d'une visite rapide ? Elle dure environ une minute.",
+    "한국어": "Buddy는 DaVinci Resolve 옆에 띄워 두고 쓰는, 한 창에 모은 도구 모음입니다. 잠깐 둘러보시겠어요? 1분 정도 걸립니다.",
+    "中文": "Buddy 是一套 DaVinci Resolve 工具，集中在它旁边的一个窗口里。要快速看一圈吗？大约只需一分钟。",
+    "العربية": "Buddy مجموعة أدوات لـ DaVinci Resolve في نافذة واحدة بجانبه. هل تريد جولة سريعة؟ تستغرق نحو دقيقة.",
+    "Tiếng Việt": "Buddy là bộ công cụ cho DaVinci Resolve, gói trong một cửa sổ đặt cạnh nó. Bạn muốn xem qua nhanh không? Chỉ mất khoảng một phút."
+  },
+  "Your tools": {
+    "日本語": "ツール一覧",
+    "Español": "Tus herramientas",
+    "Deutsch": "Ihre Werkzeuge",
+    "Français": "Vos outils",
+    "한국어": "내 도구",
+    "中文": "你的工具",
+    "العربية": "أدواتك",
+    "Tiếng Việt": "Công cụ của bạn"
+  },
+  "Each tool has a page of its own. Pick one here to open it, or right-click it for its settings.": {
+    "日本語": "ツールにはそれぞれ専用のページがあります。ここで選ぶと開き、右クリックするとそのツールの設定が開きます。",
+    "Español": "Cada herramienta tiene su propia página. Elige una aquí para abrirla, o haz clic derecho en ella para ver sus ajustes.",
+    "Deutsch": "Jedes Werkzeug hat eine eigene Seite. Wählen Sie hier eines aus, um es zu öffnen, oder klicken Sie mit der rechten Maustaste darauf, um seine Einstellungen aufzurufen.",
+    "Français": "Chaque outil a sa propre page. Choisissez-en un ici pour l'ouvrir, ou faites un clic droit dessus pour ses réglages.",
+    "한국어": "도구마다 자체 페이지가 있습니다. 여기서 하나를 선택하면 열리고, 마우스 오른쪽 버튼으로 클릭하면 해당 도구의 설정이 열립니다.",
+    "中文": "每个工具都有自己的页面。在这里点选一个即可打开，右键点击则可打开它的设置。",
+    "العربية": "لكل أداة صفحتها الخاصة. اختر واحدة هنا لفتحها، أو انقر عليها بزر الماوس الأيمن لفتح إعداداتها.",
+    "Tiếng Việt": "Mỗi công cụ có một trang riêng. Chọn một công cụ ở đây để mở, hoặc bấm chuột phải vào nó để mở phần cài đặt."
+  },
+  "There's more": {
+    "日本語": "ほかにもあります",
+    "Español": "Hay más",
+    "Deutsch": "Es gibt noch mehr",
+    "Français": "Il y en a d'autres",
+    "한국어": "더 있습니다",
+    "中文": "还有更多",
+    "العربية": "هناك المزيد",
+    "Tiếng Việt": "Còn nhiều hơn nữa"
+  },
+  "Buddy starts with a few key tools. One more is ready whenever you want it – add it here.": {
+    "日本語": "Buddy は主要なツールだけを表示した状態で始まります。ほかにも 1 つのツールがいつでも使えます。ここから追加してください。",
+    "Español": "Buddy empieza con unas pocas herramientas clave. Hay una más lista para cuando la quieras: añádela aquí.",
+    "Deutsch": "Buddy startet mit einigen wichtigen Werkzeugen. Ein weiteres steht bereit, wann immer Sie es möchten – fügen Sie es hier hinzu.",
+    "Français": "Buddy démarre avec quelques outils essentiels. Un autre est prêt quand vous le voulez – ajoutez-le ici.",
+    "한국어": "Buddy는 핵심 도구 몇 가지로 시작합니다. 도구 하나가 더 준비되어 있으니 원할 때 여기서 추가하세요.",
+    "中文": "Buddy 一开始只显示几个主要工具。另外还有 1 个工具随时可用——在这里添加即可。",
+    "العربية": "يبدأ Buddy ببعض الأدوات الأساسية. هناك أداة أخرى جاهزة متى أردتها – أضفها من هنا.",
+    "Tiếng Việt": "Buddy bắt đầu với vài công cụ chính. Còn một công cụ nữa sẵn sàng bất cứ khi nào bạn cần – hãy thêm nó ở đây."
+  },
+  "Buddy starts with a few key tools. {count} more are ready whenever you want them – add any of them here.": {
+    "日本語": "Buddy は主要なツールだけを表示した状態で始まります。ほかにも {count} 個のツールがいつでも使えます。ここから好きなものを追加してください。",
+    "Español": "Buddy empieza con unas pocas herramientas clave. Hay {count} más listas para cuando las quieras: añade las que quieras aquí.",
+    "Deutsch": "Buddy startet mit einigen wichtigen Werkzeugen. {count} weitere stehen bereit, wann immer Sie sie möchten – fügen Sie hier beliebige davon hinzu.",
+    "Français": "Buddy démarre avec quelques outils essentiels. {count} autres sont prêts quand vous le voulez – ajoutez ceux que vous voulez ici.",
+    "한국어": "Buddy는 핵심 도구 몇 가지로 시작합니다. 도구 {count}개가 더 준비되어 있으니 원하는 것을 언제든 여기서 추가하세요.",
+    "中文": "Buddy 一开始只显示几个主要工具。另外还有 {count} 个工具随时可用——在这里添加你想要的即可。",
+    "العربية": "يبدأ Buddy ببعض الأدوات الأساسية. هناك {count} أدوات أخرى جاهزة متى أردتها – أضف أيًّا منها من هنا.",
+    "Tiếng Việt": "Buddy bắt đầu với vài công cụ chính. Còn {count} công cụ nữa sẵn sàng bất cứ khi nào bạn cần – hãy thêm bất kỳ công cụ nào ở đây."
+  },
+  "Buddy and Resolve": {
+    "日本語": "Buddy と Resolve",
+    "Español": "Buddy y Resolve",
+    "Deutsch": "Buddy und Resolve",
+    "Français": "Buddy et Resolve",
+    "한국어": "Buddy와 Resolve",
+    "中文": "Buddy 与 Resolve",
+    "العربية": "Buddy و Resolve",
+    "Tiếng Việt": "Buddy và Resolve"
+  },
+  "Buddy works on the project open in DaVinci Resolve, and this says whether it can reach it. After starting Resolve or opening another project, press this button to connect again.": {
+    "日本語": "Buddy は DaVinci Resolve で開いているプロジェクトを対象に動作します。ここには Buddy が Resolve に接続できているかどうかが表示されます。Resolve を起動したときや別のプロジェクトを開いたときは、このボタンを押して接続し直してください。",
+    "Español": "Buddy trabaja con el proyecto abierto en DaVinci Resolve, y aquí se indica si puede conectarse con él. Después de iniciar Resolve o abrir otro proyecto, pulsa este botón para volver a conectar.",
+    "Deutsch": "Buddy arbeitet mit dem Projekt, das in DaVinci Resolve geöffnet ist, und hier sehen Sie, ob es Resolve erreicht. Nachdem Sie Resolve gestartet oder ein anderes Projekt geöffnet haben, klicken Sie auf diese Schaltfläche, um die Verbindung neu herzustellen.",
+    "Français": "Buddy travaille sur le projet ouvert dans DaVinci Resolve, et ceci indique s'il parvient à le joindre. Après avoir lancé Resolve ou ouvert un autre projet, appuyez sur ce bouton pour vous reconnecter.",
+    "한국어": "Buddy는 DaVinci Resolve에서 열려 있는 프로젝트를 대상으로 작동하며, 여기에 Resolve에 연결되어 있는지 표시됩니다. Resolve를 실행하거나 다른 프로젝트를 연 뒤에는 이 버튼을 눌러 다시 연결하세요.",
+    "中文": "Buddy 处理的是 DaVinci Resolve 中打开的项目，这里会显示它能否连接到 Resolve。启动 Resolve 或打开另一个项目后，请按这个按钮重新连接。",
+    "العربية": "يعمل Buddy على المشروع المفتوح في DaVinci Resolve، وهنا يظهر ما إذا كان يستطيع الوصول إليه. بعد تشغيل Resolve أو فتح مشروع آخر، اضغط هذا الزر للاتصال من جديد.",
+    "Tiếng Việt": "Buddy làm việc trên dự án đang mở trong DaVinci Resolve, và chỗ này cho biết Buddy có kết nối được với Resolve hay không. Sau khi mở Resolve hoặc mở một dự án khác, hãy bấm nút này để kết nối lại."
+  },
+  "Where tools work": {
+    "日本語": "ツールの作業エリア",
+    "Español": "Dónde trabajan las herramientas",
+    "Deutsch": "Hier arbeiten die Werkzeuge",
+    "Français": "Là où travaillent les outils",
+    "한국어": "도구가 작동하는 곳",
+    "中文": "工具的工作区",
+    "العربية": "حيث تعمل الأدوات",
+    "Tiếng Việt": "Nơi công cụ làm việc"
+  },
+  "The tool you pick opens here. Tools keep running when you switch to another – Time Tracker carries on tracking while you use the rest.": {
+    "日本語": "選んだツールはここに開きます。別のツールに切り替えてもツールは動き続けます。ほかのツールを使っている間も、タイムトラッカーは記録を続けます。",
+    "Español": "La herramienta que elijas se abre aquí. Las herramientas siguen funcionando cuando cambias a otra: Control de tiempo sigue registrando mientras usas las demás.",
+    "Deutsch": "Das gewählte Werkzeug öffnet sich hier. Werkzeuge laufen weiter, wenn Sie zu einem anderen wechseln – die Zeiterfassung zeichnet weiter auf, während Sie die anderen nutzen.",
+    "Français": "L'outil choisi s'ouvre ici. Les outils continuent de tourner quand vous passez à un autre – Suivi du temps continue de compter pendant que vous utilisez les autres.",
+    "한국어": "선택한 도구는 여기에 열립니다. 다른 도구로 전환해도 도구는 계속 실행되므로, 다른 도구를 쓰는 동안에도 시간 추적기는 계속 기록합니다.",
+    "中文": "你选的工具会在这里打开。切换到其他工具时，工具会继续运行——你使用其他工具时，时间追踪仍在计时。",
+    "العربية": "تُفتح الأداة التي تختارها هنا. تواصل الأدوات العمل عند الانتقال إلى أداة أخرى – فيستمر متتبع الوقت في التتبع بينما تستخدم بقية الأدوات.",
+    "Tiếng Việt": "Công cụ bạn chọn sẽ mở ở đây. Các công cụ vẫn tiếp tục chạy khi bạn chuyển sang công cụ khác – Theo dõi thời gian vẫn ghi giờ trong lúc bạn dùng các công cụ còn lại."
+  },
+  "Questions about Resolve? Ask Buddy answers them, and can read your project to help – it changes it only if you say yes.": {
+    "日本語": "Resolve についての疑問には「Buddy に質問」が答えます。手助けのためにプロジェクトを読み取ることもできますが、変更するのはあなたが許可したときだけです。",
+    "Español": "¿Dudas sobre Resolve? «Pregunta a Buddy» las responde y puede leer tu proyecto para ayudarte; solo lo cambia si dices que sí.",
+    "Deutsch": "Fragen zu Resolve? „Buddy fragen“ beantwortet sie und kann Ihr Projekt lesen, um zu helfen – geändert wird es nur, wenn Sie zustimmen.",
+    "Français": "Des questions sur Resolve ? « Demander à Buddy » y répond, et peut lire votre projet pour vous aider – il ne le modifie que si vous dites oui.",
+    "한국어": "Resolve에 대해 궁금한 점이 있나요? 'Buddy에게 질문'이 답해 드립니다. 도움을 위해 프로젝트를 읽을 수도 있으며, 변경은 허락하실 때만 합니다.",
+    "中文": "对 Resolve 有疑问？“询问 Buddy”会为你解答，还能读取你的项目来帮忙——只有在你同意时才会修改它。",
+    "العربية": "لديك أسئلة عن Resolve؟ تجيب عنها أداة «اسأل Buddy»، ويمكنها قراءة مشروعك للمساعدة – ولا تغيّره إلا إذا وافقت.",
+    "Tiếng Việt": "Có thắc mắc về Resolve? “Hỏi Buddy” sẽ trả lời, và có thể đọc dự án của bạn để hỗ trợ – nó chỉ thay đổi dự án khi bạn đồng ý."
+  },
+  "It runs on an AI model you choose in Settings > AI: your own key for an online one, or one on this computer.": {
+    "日本語": "使う AI モデルは 設定 > AI で選べます。オンラインのモデルならご自身のキーで、またはこのコンピューター上のモデルで動かせます。",
+    "Español": "Funciona con un modelo de IA que eliges en Configuración > IA: tu propia clave para uno en línea, o uno en este ordenador.",
+    "Deutsch": "Es läuft mit einem KI-Modell, das Sie unter Einstellungen > KI wählen: mit Ihrem eigenen Schlüssel für ein Online-Modell oder mit einem auf diesem Computer.",
+    "Français": "Il fonctionne avec un modèle d'IA que vous choisissez dans Paramètres > IA : votre propre clé pour un modèle en ligne, ou un modèle sur cet ordinateur.",
+    "한국어": "사용할 AI 모델은 설정 > AI에서 고릅니다. 온라인 모델은 본인의 키로, 또는 이 컴퓨터에 있는 모델로 실행할 수 있습니다.",
+    "中文": "它使用你在“设置 > AI”中选择的 AI 模型：在线模型用你自己的密钥，也可以用这台电脑上的模型。",
+    "العربية": "تعمل بنموذج ذكاء اصطناعي تختاره من الإعدادات > الذكاء الاصطناعي: بمفتاحك الخاص لنموذج على الإنترنت، أو بنموذج على هذا الكمبيوتر.",
+    "Tiếng Việt": "Nó chạy bằng mô hình AI bạn chọn trong Cài đặt > AI: dùng khóa của riêng bạn cho mô hình trực tuyến, hoặc một mô hình trên máy tính này."
+  },
+  "Two tools at once": {
+    "日本語": "2 つのツールを同時に",
+    "Español": "Dos herramientas a la vez",
+    "Deutsch": "Zwei Werkzeuge gleichzeitig",
+    "Français": "Deux outils à la fois",
+    "한국어": "두 도구를 동시에",
+    "中文": "同时使用两个工具",
+    "العربية": "أداتان في آنٍ واحد",
+    "Tiếng Việt": "Hai công cụ cùng lúc"
+  },
+  "Dual view puts a second tool beside this one – say, Ask Buddy on one side while you work in another tool.": {
+    "日本語": "デュアルビューでは、このツールの横に 2 つ目のツールを並べられます。たとえば片側に「Buddy に質問」を開いたまま、もう片側で別のツールを使えます。",
+    "Español": "La vista doble pone una segunda herramienta junto a esta: por ejemplo, «Pregunta a Buddy» a un lado mientras trabajas en otra herramienta.",
+    "Deutsch": "Die Doppelansicht stellt ein zweites Werkzeug neben dieses – zum Beispiel „Buddy fragen“ auf der einen Seite, während Sie in einem anderen Werkzeug arbeiten.",
+    "Français": "La double vue place un second outil à côté de celui-ci – par exemple « Demander à Buddy » d'un côté pendant que vous travaillez dans un autre outil.",
+    "한국어": "듀얼 뷰는 이 도구 옆에 두 번째 도구를 띄웁니다. 예를 들어 한쪽에 'Buddy에게 질문'을 열어 두고 다른 도구에서 작업할 수 있습니다.",
+    "中文": "双视图会在此工具旁放置第二个工具——比如一边开着“询问 Buddy”，一边在另一个工具里工作。",
+    "العربية": "يضع العرض المزدوج أداة ثانية بجانب هذه الأداة – مثلًا «اسأل Buddy» في جانب بينما تعمل في أداة أخرى.",
+    "Tiếng Việt": "Chế độ xem kép đặt công cụ thứ hai bên cạnh công cụ này – ví dụ “Hỏi Buddy” ở một bên trong khi bạn làm việc ở công cụ khác."
+  },
+  "Something not right?": {
+    "日本語": "うまくいかないときは",
+    "Español": "¿Algo no va bien?",
+    "Deutsch": "Stimmt etwas nicht?",
+    "Français": "Quelque chose ne va pas ?",
+    "한국어": "문제가 있나요?",
+    "中文": "遇到问题了？",
+    "العربية": "هل هناك خطأ ما؟",
+    "Tiếng Việt": "Có gì đó không ổn?"
+  },
+  "Send a bug report from here: say what went wrong and add screenshots if they help. It goes to Buddy's developer, with the versions of Buddy, your system and Resolve.": {
+    "日本語": "ここからバグを報告できます。何が起きたかを書き、役に立つならスクリーンショットも添えてください。報告は Buddy・システム・Resolve のバージョンと一緒に Buddy の開発者に届きます。",
+    "Español": "Envía un informe de error desde aquí: cuenta qué falló y añade capturas de pantalla si ayudan. Le llega al desarrollador de Buddy, junto con las versiones de Buddy, de tu sistema y de Resolve.",
+    "Deutsch": "Senden Sie hier einen Fehlerbericht: Beschreiben Sie, was schiefgelaufen ist, und fügen Sie Screenshots hinzu, wenn sie helfen. Er geht an den Entwickler von Buddy, zusammen mit den Versionen von Buddy, Ihrem System und Resolve.",
+    "Français": "Envoyez un rapport de bug d'ici : dites ce qui n'a pas marché et ajoutez des captures d'écran si elles aident. Il est transmis au développeur de Buddy, avec les versions de Buddy, de votre système et de Resolve.",
+    "한국어": "여기서 버그를 신고할 수 있습니다. 무엇이 잘못되었는지 적고, 도움이 된다면 스크린샷도 첨부하세요. 신고는 Buddy, 시스템, Resolve의 버전 정보와 함께 Buddy 개발자에게 전달됩니다.",
+    "中文": "在这里发送错误报告：说明出了什么问题，有帮助的话附上截图。报告会连同 Buddy、系统和 Resolve 的版本一起发给 Buddy 的开发者。",
+    "العربية": "أرسل تقرير خطأ من هنا: اذكر ما الذي حدث وأضف لقطات شاشة إن كانت تساعد. يصل التقرير إلى مطوّر Buddy مع إصدارات Buddy ونظامك و Resolve.",
+    "Tiếng Việt": "Gửi báo lỗi từ đây: mô tả chuyện gì đã xảy ra và thêm ảnh chụp màn hình nếu hữu ích. Báo cáo được gửi tới nhà phát triển Buddy, kèm phiên bản của Buddy, hệ thống và Resolve."
+  },
+  "Themes, language, the tool Buddy opens on and the sidebar's order are all in Settings – and this tour, to take again.": {
+    "日本語": "テーマ、言語、起動時に開くツール、サイドバーの並び順はすべて設定にあります。このツアーもそこからもう一度見られます。",
+    "Español": "Los temas, el idioma, la herramienta con la que se abre Buddy y el orden de la barra lateral están en Configuración, igual que este recorrido, por si quieres repetirlo.",
+    "Deutsch": "Designs, Sprache, das Werkzeug, mit dem Buddy startet, und die Reihenfolge der Seitenleiste finden Sie alle in den Einstellungen – ebenso diese Tour, falls Sie sie noch einmal machen möchten.",
+    "Français": "Les thèmes, la langue, l'outil sur lequel Buddy s'ouvre et l'ordre de la barre latérale se trouvent tous dans les Paramètres – ainsi que cette visite, pour la refaire.",
+    "한국어": "테마, 언어, Buddy가 시작할 때 여는 도구, 사이드바 순서는 모두 설정에 있습니다. 이 둘러보기도 그곳에서 다시 볼 수 있습니다.",
+    "中文": "主题、语言、Buddy 启动时打开的工具以及侧边栏的顺序都在设置里——这个导览也可以在那里重新开始。",
+    "العربية": "السمات واللغة والأداة التي يفتح عليها Buddy وترتيب الشريط الجانبي كلها في الإعدادات – ومنها يمكنك إعادة هذه الجولة أيضًا.",
+    "Tiếng Việt": "Giao diện, ngôn ngữ, công cụ Buddy mở khi khởi động và thứ tự thanh bên đều nằm trong Cài đặt – cả chuyến tham quan này nữa, nếu bạn muốn xem lại."
+  },
+  "You're all set": {
+    "日本語": "準備完了です",
+    "Español": "Todo listo",
+    "Deutsch": "Alles bereit",
+    "Français": "Tout est prêt",
+    "한국어": "준비가 끝났습니다",
+    "中文": "一切就绪",
+    "العربية": "كل شيء جاهز",
+    "Tiếng Việt": "Bạn đã sẵn sàng"
+  },
+  "That's the tour. Pick a tool to get started.": {
+    "日本語": "ツアーは以上です。ツールを選んで始めましょう。",
+    "Español": "Eso es todo. Elige una herramienta para empezar.",
+    "Deutsch": "Das war die Tour. Wählen Sie ein Werkzeug, um loszulegen.",
+    "Français": "C'est la fin de la visite. Choisissez un outil pour commencer.",
+    "한국어": "둘러보기가 끝났습니다. 도구를 골라 시작하세요.",
+    "中文": "导览到此结束。选一个工具开始吧。",
+    "العربية": "انتهت الجولة. اختر أداة لتبدأ.",
+    "Tiếng Việt": "Chuyến tham quan đã xong. Hãy chọn một công cụ để bắt đầu."
+  },
+  "Closing the window keeps Buddy running in the system tray, so Time Tracker keeps tracking. To quit, right-click Buddy's icon there and choose Quit.": {
+    "日本語": "ウィンドウを閉じても Buddy はシステムトレイで動き続けるので、タイムトラッカーは記録を続けます。終了するには、トレイの Buddy アイコンを右クリックして「終了」を選んでください。",
+    "Español": "Al cerrar la ventana, Buddy sigue funcionando en la bandeja del sistema, así que Control de tiempo sigue registrando. Para salir, haz clic derecho en el icono de Buddy allí y elige Salir.",
+    "Deutsch": "Wenn Sie das Fenster schließen, läuft Buddy im Infobereich der Taskleiste weiter, sodass die Zeiterfassung weiter aufzeichnet. Zum Beenden klicken Sie dort mit der rechten Maustaste auf das Buddy-Symbol und wählen „Beenden“.",
+    "Français": "Fermer la fenêtre laisse Buddy tourner dans la zone de notification, donc Suivi du temps continue de compter. Pour quitter, faites un clic droit sur l'icône de Buddy à cet endroit et choisissez Quitter.",
+    "한국어": "창을 닫아도 Buddy는 시스템 트레이에서 계속 실행되므로 시간 추적기가 계속 기록합니다. 종료하려면 트레이의 Buddy 아이콘을 마우스 오른쪽 버튼으로 클릭하고 종료를 선택하세요.",
+    "中文": "关闭窗口后，Buddy 会在系统托盘中继续运行，因此时间追踪会继续计时。要退出，请右键点击托盘中的 Buddy 图标并选择“退出”。",
+    "العربية": "عند إغلاق النافذة يبقى Buddy قيد التشغيل في علبة النظام، فيواصل متتبع الوقت التتبع. للإنهاء، انقر بزر الماوس الأيمن على أيقونة Buddy هناك واختر إنهاء.",
+    "Tiếng Việt": "Khi đóng cửa sổ, Buddy vẫn chạy trên khay hệ thống nên Theo dõi thời gian vẫn tiếp tục ghi giờ. Để thoát, hãy bấm chuột phải vào biểu tượng Buddy ở đó và chọn Thoát."
+  },
+  "Closing the window keeps Buddy running in the menu bar, so Time Tracker keeps tracking. To quit, click Buddy's icon there and choose Quit.": {
+    "日本語": "ウィンドウを閉じても Buddy はメニューバーで動き続けるので、タイムトラッカーは記録を続けます。終了するには、メニューバーの Buddy アイコンをクリックして「終了」を選んでください。",
+    "Español": "Al cerrar la ventana, Buddy sigue funcionando en la barra de menús, así que Control de tiempo sigue registrando. Para salir, haz clic en el icono de Buddy allí y elige Salir.",
+    "Deutsch": "Wenn Sie das Fenster schließen, läuft Buddy in der Menüleiste weiter, sodass die Zeiterfassung weiter aufzeichnet. Zum Beenden klicken Sie dort auf das Buddy-Symbol und wählen „Beenden“.",
+    "Français": "Fermer la fenêtre laisse Buddy tourner dans la barre des menus, donc Suivi du temps continue de compter. Pour quitter, cliquez sur l'icône de Buddy à cet endroit et choisissez Quitter.",
+    "한국어": "창을 닫아도 Buddy는 메뉴 막대에서 계속 실행되므로 시간 추적기가 계속 기록합니다. 종료하려면 메뉴 막대의 Buddy 아이콘을 클릭하고 종료를 선택하세요.",
+    "中文": "关闭窗口后，Buddy 会在菜单栏中继续运行，因此时间追踪会继续计时。要退出，请点击菜单栏中的 Buddy 图标并选择“退出”。",
+    "العربية": "عند إغلاق النافذة يبقى Buddy قيد التشغيل في شريط القائمة، فيواصل متتبع الوقت التتبع. للإنهاء، انقر على أيقونة Buddy هناك واختر إنهاء.",
+    "Tiếng Việt": "Khi đóng cửa sổ, Buddy vẫn chạy trên thanh menu nên Theo dõi thời gian vẫn tiếp tục ghi giờ. Để thoát, hãy bấm vào biểu tượng Buddy ở đó và chọn Thoát."
+  },
+  "Step {number} of {count}": {
+    "日本語": "ステップ {number}/{count}",
+    "Español": "Paso {number} de {count}",
+    "Deutsch": "Schritt {number} von {count}",
+    "Français": "Étape {number} sur {count}",
+    "한국어": "{count}단계 중 {number}단계",
+    "中文": "第 {number} 步，共 {count} 步",
+    "العربية": "الخطوة {number} من {count}",
+    "Tiếng Việt": "Bước {number}/{count}"
+  },
+  "Skip": {
+    "日本語": "スキップ",
+    "Español": "Omitir",
+    "Deutsch": "Überspringen",
+    "Français": "Passer",
+    "한국어": "건너뛰기",
+    "中文": "跳过",
+    "العربية": "تخطي",
+    "Tiếng Việt": "Bỏ qua"
+  },
+  "Skip tour": {
+    "日本語": "ツアーをスキップ",
+    "Español": "Omitir el recorrido",
+    "Deutsch": "Tour überspringen",
+    "Français": "Passer la visite",
+    "한국어": "둘러보기 건너뛰기",
+    "中文": "跳过导览",
+    "العربية": "تخطي الجولة",
+    "Tiếng Việt": "Bỏ qua tham quan"
+  },
+  "Take the tour": {
+    "日本語": "ツアーを見る",
+    "Español": "Hacer el recorrido",
+    "Deutsch": "Tour starten",
+    "Français": "Faire la visite",
+    "한국어": "둘러보기",
+    "中文": "开始导览",
+    "العربية": "ابدأ الجولة",
+    "Tiếng Việt": "Bắt đầu tham quan"
+  },
+  "Don't show this again": {
+    "日本語": "今後は表示しない",
+    "Español": "No volver a mostrar",
+    "Deutsch": "Nicht mehr anzeigen",
+    "Français": "Ne plus afficher",
+    "한국어": "다시 표시하지 않음",
+    "中文": "不再显示",
+    "العربية": "عدم الإظهار مرة أخرى",
+    "Tiếng Việt": "Không hiện lại"
+  },
+  "More tools": {
+    "日本語": "ほかのツール",
+    "Español": "Más herramientas",
+    "Deutsch": "Weitere Werkzeuge",
+    "Français": "Plus d'outils",
+    "한국어": "더 많은 도구",
+    "中文": "更多工具",
+    "العربية": "مزيد من الأدوات",
+    "Tiếng Việt": "Thêm công cụ"
+  },
+  "Add more of Buddy's tools to the sidebar": {
+    "日本語": "Buddy のほかのツールをサイドバーに追加します",
+    "Español": "Añade más herramientas de Buddy a la barra lateral",
+    "Deutsch": "Weitere Werkzeuge von Buddy zur Seitenleiste hinzufügen",
+    "Français": "Ajouter d'autres outils de Buddy à la barre latérale",
+    "한국어": "Buddy의 다른 도구를 사이드바에 추가합니다",
+    "中文": "将 Buddy 的更多工具添加到侧边栏",
+    "العربية": "أضف المزيد من أدوات Buddy إلى الشريط الجانبي",
+    "Tiếng Việt": "Thêm các công cụ khác của Buddy vào thanh bên"
+  },
+  "These tools are installed already, just not in the sidebar yet. Add the ones you want – they go under their usual heading. Organize sidebar can hide one again.": {
+    "日本語": "これらのツールはすでにインストールされていて、まだサイドバーに出ていないだけです。使いたいものを追加すると、いつもの見出しの下に入ります。「サイドバーを整理」でまた隠すこともできます。",
+    "Español": "Estas herramientas ya están instaladas, solo que aún no aparecen en la barra lateral. Añade las que quieras: irán bajo su encabezado habitual. Con Organizar barra lateral puedes volver a ocultar cualquiera.",
+    "Deutsch": "Diese Werkzeuge sind bereits installiert, nur noch nicht in der Seitenleiste. Fügen Sie die gewünschten hinzu – sie erscheinen unter ihrer üblichen Überschrift. Mit „Seitenleiste organisieren“ lässt sich eines wieder ausblenden.",
+    "Français": "Ces outils sont déjà installés, simplement pas encore dans la barre latérale. Ajoutez ceux que vous voulez – ils se placent sous leur titre habituel. Organiser la barre latérale permet d'en masquer un à nouveau.",
+    "한국어": "이 도구들은 이미 설치되어 있으며 아직 사이드바에 표시되지 않았을 뿐입니다. 원하는 도구를 추가하면 원래 제목 아래에 들어갑니다. 사이드바 정리에서 다시 숨길 수 있습니다.",
+    "中文": "这些工具已经安装好了，只是还没放到侧边栏里。添加你想要的——它们会出现在各自原来的标题下。用“整理侧边栏”可以再把它们隐藏起来。",
+    "العربية": "هذه الأدوات مثبتة بالفعل، لكنها ليست في الشريط الجانبي بعد. أضف ما تريده منها – وستظهر تحت عنوانها المعتاد. ويمكنك إخفاء أي منها مجددًا من تنظيم الشريط الجانبي.",
+    "Tiếng Việt": "Các công cụ này đã được cài sẵn, chỉ là chưa có trên thanh bên. Hãy thêm những công cụ bạn muốn – chúng sẽ nằm dưới tiêu đề quen thuộc của mình. Bạn có thể ẩn lại bằng Sắp xếp thanh bên."
+  },
+  "Not on a Mac yet": {
+    "日本語": "Mac ではまだ使えません",
+    "Español": "Aún no disponible en Mac",
+    "Deutsch": "Auf dem Mac noch nicht verfügbar",
+    "Français": "Pas encore sur Mac",
+    "한국어": "Mac에서는 아직 사용할 수 없음",
+    "中文": "Mac 版暂不可用",
+    "العربية": "غير متاح على Mac بعد",
+    "Tiếng Việt": "Chưa có trên Mac"
+  },
+  "Every tool is in the sidebar already.": {
+    "日本語": "すべてのツールがすでにサイドバーにあります。",
+    "Español": "Todas las herramientas ya están en la barra lateral.",
+    "Deutsch": "Alle Werkzeuge sind bereits in der Seitenleiste.",
+    "Français": "Tous les outils sont déjà dans la barre latérale.",
+    "한국어": "모든 도구가 이미 사이드바에 있습니다.",
+    "中文": "所有工具都已在侧边栏中。",
+    "العربية": "كل الأدوات موجودة في الشريط الجانبي بالفعل.",
+    "Tiếng Việt": "Tất cả công cụ đã có trên thanh bên."
+  },
+  "Tour": {
+    "日本語": "ツアー",
+    "Español": "Recorrido",
+    "Deutsch": "Tour",
+    "Français": "Visite",
+    "한국어": "둘러보기",
+    "中文": "导览",
+    "العربية": "الجولة",
+    "Tiếng Việt": "Tham quan"
+  },
+  "The tour shows Buddy's sidebar layout, so it isn't there under the Desktop theme.": {
+    "日本語": "ツアーは Buddy のサイドバー表示を案内するものなので、デスクトップ テーマでは使えません。",
+    "Español": "El recorrido muestra el diseño con barra lateral de Buddy, así que no está disponible con el tema Escritorio.",
+    "Deutsch": "Die Tour zeigt Buddys Layout mit Seitenleiste und ist daher mit dem Design „Desktop“ nicht verfügbar.",
+    "Français": "La visite présente la disposition de Buddy avec barre latérale ; elle n'est donc pas disponible avec le thème Bureau.",
+    "한국어": "둘러보기는 Buddy의 사이드바 레이아웃을 안내하므로 데스크톱 테마에서는 사용할 수 없습니다.",
+    "中文": "导览介绍的是 Buddy 的侧边栏布局，因此在“桌面”主题下不可用。",
+    "العربية": "تعرض الجولة تخطيط Buddy ذي الشريط الجانبي، لذا فهي غير متاحة مع سمة سطح المكتب.",
+    "Tiếng Việt": "Chuyến tham quan giới thiệu bố cục có thanh bên của Buddy nên không có trong giao diện Màn hình nền."
+  },
+  "A one-minute look round Buddy's window: the sidebar, the connection to Resolve, dual view and Settings.": {
+    "日本語": "Buddy のウィンドウを 1 分で案内します: サイドバー、Resolve との接続、デュアルビュー、設定。",
+    "Español": "Un recorrido de un minuto por la ventana de Buddy: la barra lateral, la conexión con Resolve, la vista doble y la configuración.",
+    "Deutsch": "Ein einminütiger Rundgang durch Buddys Fenster: die Seitenleiste, die Verbindung zu Resolve, die Doppelansicht und die Einstellungen.",
+    "Français": "Une visite d'une minute de la fenêtre de Buddy : la barre latérale, la connexion à Resolve, la double vue et les paramètres.",
+    "한국어": "Buddy 창을 1분 만에 둘러봅니다: 사이드바, Resolve 연결, 듀얼 뷰, 설정.",
+    "中文": "一分钟了解 Buddy 的窗口：侧边栏、与 Resolve 的连接、双视图和设置。",
+    "العربية": "جولة مدتها دقيقة في نافذة Buddy: الشريط الجانبي، والاتصال بـ Resolve، والعرض المزدوج، والإعدادات.",
+    "Tiếng Việt": "Một phút tham quan cửa sổ Buddy: thanh bên, kết nối với Resolve, chế độ xem kép và Cài đặt."
+  },
+  "Ask anything about DaVinci Resolve. It can read your project to help, and changes it only if you say yes.": {
+    "日本語": "DaVinci Resolve について何でも質問できます。手助けのためにプロジェクトを読み取ることがあり、変更はあなたが許可したときだけです。",
+    "Español": "Pregunta lo que quieras sobre DaVinci Resolve. Puede leer tu proyecto para ayudarte y solo lo cambia si dices que sí.",
+    "Deutsch": "Fragen Sie alles zu DaVinci Resolve. Es kann Ihr Projekt lesen, um zu helfen, und ändert es nur, wenn Sie zustimmen.",
+    "Français": "Posez n'importe quelle question sur DaVinci Resolve. Il peut lire votre projet pour vous aider, et ne le modifie que si vous dites oui.",
+    "한국어": "DaVinci Resolve에 대해 무엇이든 물어보세요. 도움을 위해 프로젝트를 읽을 수 있으며, 변경은 허락하실 때만 합니다.",
+    "中文": "关于 DaVinci Resolve 的问题尽管问。它能读取你的项目来帮忙，只有在你同意时才会修改。",
+    "العربية": "اسأل أي شيء عن DaVinci Resolve. يمكنه قراءة مشروعك للمساعدة، ولا يغيّره إلا إذا وافقت.",
+    "Tiếng Việt": "Hỏi bất cứ điều gì về DaVinci Resolve. Nó có thể đọc dự án của bạn để hỗ trợ và chỉ thay đổi khi bạn đồng ý."
+  },
+  "Checks the timeline before delivery – missing media, gaps, flash frames, loudness – with one-click fixes.": {
+    "日本語": "納品前にタイムラインをチェックします。メディアの欠落、ギャップ、フラッシュフレーム、ラウドネスなどを見つけ、ワンクリックで修正できます。",
+    "Español": "Revisa la línea de tiempo antes de la entrega (medios que faltan, huecos, fotogramas sueltos, sonoridad) con correcciones de un clic.",
+    "Deutsch": "Prüft die Timeline vor der Auslieferung – fehlende Medien, Lücken, Blitzframes, Lautheit – mit Korrekturen per Klick.",
+    "Français": "Vérifie la timeline avant la livraison – médias manquants, trous, images flash, loudness – avec des corrections en un clic.",
+    "한국어": "납품 전에 타임라인을 점검합니다. 누락된 미디어, 공백, 플래시 프레임, 라우드니스 등을 찾아 클릭 한 번으로 고칩니다.",
+    "中文": "交付前检查时间线——缺失的媒体、空隙、闪帧、响度——并可一键修复。",
+    "العربية": "يفحص المخطط الزمني قبل التسليم – الوسائط المفقودة والفجوات والإطارات الوامضة ومستوى الصوت – مع إصلاحات بنقرة واحدة.",
+    "Tiếng Việt": "Kiểm tra timeline trước khi giao – media bị thiếu, khoảng trống, khung hình lóe, độ lớn âm thanh – kèm sửa lỗi bằng một cú bấm."
+  },
+  "Bins from a list, folders imported as they are, multicam sync and proxy media.": {
+    "日本語": "リストからのビン作成、フォルダー構成そのままの読み込み、マルチカム同期、プロキシメディア。",
+    "Español": "Bins a partir de una lista, carpetas importadas tal cual, sincronización multicámara y medios proxy.",
+    "Deutsch": "Bins aus einer Liste, Ordner so importiert, wie sie sind, Multicam-Synchronisierung und Proxy-Medien.",
+    "Français": "Des chutiers à partir d'une liste, des dossiers importés tels quels, la synchro multicam et les médias proxy.",
+    "한국어": "목록으로 빈 만들기, 폴더 구조 그대로 가져오기, 멀티캠 동기화, 프록시 미디어.",
+    "中文": "按列表创建素材箱、按原样导入文件夹、多机位同步以及代理媒体。",
+    "العربية": "حاويات من قائمة، واستيراد المجلدات كما هي، ومزامنة الكاميرات المتعددة، ووسائط بديلة (بروكسي).",
+    "Tiếng Việt": "Tạo bin từ danh sách, nhập thư mục giữ nguyên cấu trúc, đồng bộ multicam và media proxy."
+  },
+  "Lists of steps from Buddy's tools that run one after another while you do something else.": {
+    "日本語": "Buddy のツールの手順を並べたリストで、あなたが別の作業をしている間に順番に実行されます。",
+    "Español": "Listas de pasos de las herramientas de Buddy que se ejecutan uno tras otro mientras haces otra cosa.",
+    "Deutsch": "Listen von Schritten aus Buddys Werkzeugen, die nacheinander ablaufen, während Sie etwas anderes tun.",
+    "Français": "Des listes d'étapes tirées des outils de Buddy, exécutées l'une après l'autre pendant que vous faites autre chose.",
+    "한국어": "Buddy 도구의 단계를 모은 목록으로, 다른 일을 하는 동안 차례로 실행됩니다.",
+    "中文": "由 Buddy 各工具的步骤组成的列表，在你做别的事时依次运行。",
+    "العربية": "قوائم بخطوات من أدوات Buddy تُنفَّذ واحدة تلو الأخرى بينما تقوم بشيء آخر.",
+    "Tiếng Việt": "Danh sách các bước từ công cụ của Buddy, chạy lần lượt trong khi bạn làm việc khác."
+  },
+  "A library of the images, audio and video you reuse, searchable by what's in them.": {
+    "日本語": "繰り返し使う画像・音声・動画のライブラリ。中身で検索できます。",
+    "Español": "Una biblioteca de las imágenes, el audio y el vídeo que reutilizas, con búsqueda por su contenido.",
+    "Deutsch": "Eine Bibliothek der Bilder, Audios und Videos, die Sie wiederverwenden – durchsuchbar nach ihrem Inhalt.",
+    "Français": "Une bibliothèque des images, sons et vidéos que vous réutilisez, avec une recherche par contenu.",
+    "한국어": "자주 쓰는 이미지, 오디오, 비디오를 모은 라이브러리로, 내용으로 검색할 수 있습니다.",
+    "中文": "收纳你反复使用的图片、音频和视频的素材库，可按内容搜索。",
+    "العربية": "مكتبة للصور والصوت والفيديو التي تعيد استخدامها، يمكن البحث فيها بحسب محتواها.",
+    "Tiếng Việt": "Thư viện ảnh, âm thanh và video bạn dùng lại, tìm kiếm được theo nội dung."
+  },
+  "Find a shot in the Media Pool by describing it, and get B-roll ideas for each line of a transcript.": {
+    "日本語": "説明するだけでメディアプールからショットを探せます。トランスクリプトの各行に合う B ロールの候補も出します。",
+    "Español": "Encuentra una toma en el Media Pool describiéndola y obtén ideas de B-roll para cada línea de una transcripción.",
+    "Deutsch": "Finden Sie eine Einstellung im Media-Pool, indem Sie sie beschreiben, und erhalten Sie B-Roll-Ideen für jede Zeile eines Transkripts.",
+    "Français": "Trouvez un plan dans la médiathèque en le décrivant, et obtenez des idées de plans de coupe pour chaque ligne d'une transcription.",
+    "한국어": "설명만으로 미디어 풀에서 샷을 찾고, 대본 각 줄에 맞는 B롤 아이디어도 얻을 수 있습니다.",
+    "中文": "用描述在媒体池中找到镜头，并为文字稿的每一行获取 B-roll 建议。",
+    "العربية": "اعثر على لقطة في مجمع الوسائط بوصفها، واحصل على أفكار للقطات B-roll لكل سطر من النص المفرّغ.",
+    "Tiếng Việt": "Tìm cảnh quay trong Media Pool bằng cách mô tả nó, và nhận gợi ý B-roll cho từng dòng của bản ghi lời thoại."
+  },
+  "Puts images into a bin straight from the clipboard: a copied image, files or an image link.": {
+    "日本語": "クリップボードから画像を直接ビンに入れます。コピーした画像、ファイル、画像のリンクに対応します。",
+    "Español": "Pone imágenes en un bin directamente desde el portapapeles: una imagen copiada, archivos o un enlace a una imagen.",
+    "Deutsch": "Legt Bilder direkt aus der Zwischenablage in einen Bin: ein kopiertes Bild, Dateien oder einen Bildlink.",
+    "Français": "Place des images dans un chutier directement depuis le presse-papiers : une image copiée, des fichiers ou un lien d'image.",
+    "한국어": "클립보드에서 바로 이미지를 빈에 넣습니다. 복사한 이미지, 파일, 이미지 링크 모두 됩니다.",
+    "中文": "直接从剪贴板把图片放进素材箱：复制的图片、文件或图片链接都行。",
+    "العربية": "يضع الصور في حاوية مباشرة من الحافظة: صورة منسوخة أو ملفات أو رابط صورة.",
+    "Tiếng Việt": "Đưa ảnh vào bin ngay từ bộ nhớ tạm: ảnh đã sao chép, tệp hoặc liên kết ảnh."
+  },
+  "Brings SVG artwork and Lottie animations into Fusion as nodes.": {
+    "日本語": "SVG アートワークや Lottie アニメーションを Fusion のノードとして取り込みます。",
+    "Español": "Lleva ilustraciones SVG y animaciones Lottie a Fusion como nodos.",
+    "Deutsch": "Bringt SVG-Grafiken und Lottie-Animationen als Nodes in Fusion.",
+    "Français": "Importe des illustrations SVG et des animations Lottie dans Fusion sous forme de nœuds.",
+    "한국어": "SVG 아트워크와 Lottie 애니메이션을 Fusion 노드로 가져옵니다.",
+    "中文": "把 SVG 图形和 Lottie 动画作为节点导入 Fusion。",
+    "العربية": "يجلب رسومات SVG ورسوم Lottie المتحركة إلى Fusion على شكل عُقد.",
+    "Tiếng Việt": "Đưa hình SVG và hoạt ảnh Lottie vào Fusion dưới dạng node."
+  },
+  "Renames a bin's clips in one go, and relinks offline media.": {
+    "日本語": "ビン内のクリップを一括でリネームし、オフラインのメディアを再リンクします。",
+    "Español": "Renombra de una vez los clips de un bin y vuelve a vincular los medios sin conexión.",
+    "Deutsch": "Benennt die Clips eines Bins in einem Rutsch um und verknüpft Offline-Medien neu.",
+    "Français": "Renomme d'un coup les clips d'un chutier et reconnecte les médias hors ligne.",
+    "한국어": "빈의 클립 이름을 한 번에 바꾸고, 오프라인 미디어를 다시 연결합니다.",
+    "中文": "一次性重命名素材箱中的片段，并重新链接离线媒体。",
+    "العربية": "يعيد تسمية مقاطع الحاوية دفعة واحدة، ويعيد ربط الوسائط غير المتصلة.",
+    "Tiếng Việt": "Đổi tên các clip trong bin một lượt và liên kết lại media ngoại tuyến."
+  },
+  "Review the Media Pool's footage clip after clip, with named source tapes, notes and metadata.": {
+    "日本語": "メディアプールの素材をクリップごとに続けて確認できます。ソーステープ名、メモ、メタデータ付き。",
+    "Español": "Revisa el material del Media Pool clip tras clip, con cintas de origen con nombre, notas y metadatos.",
+    "Deutsch": "Sichten Sie das Material im Media-Pool Clip für Clip, mit benannten Quellbändern, Notizen und Metadaten.",
+    "Français": "Visionnez les rushes de la médiathèque clip après clip, avec des bandes sources nommées, des notes et des métadonnées.",
+    "한국어": "미디어 풀의 영상을 클립별로 이어서 검토합니다. 소스 테이프 이름, 메모, 메타데이터를 함께 다룹니다.",
+    "中文": "逐个片段连续审看媒体池中的素材，附带命名的源磁带、备注和元数据。",
+    "العربية": "راجع لقطات مجمع الوسائط مقطعًا تلو الآخر، مع أشرطة مصدر مسمّاة وملاحظات وبيانات وصفية.",
+    "Tiếng Việt": "Duyệt lần lượt từng clip trong Media Pool, kèm tên băng nguồn, ghi chú và metadata."
+  },
+  "Motion presets, animated titles, zooms and transitions for the clips you select.": {
+    "日本語": "選んだクリップに、モーションプリセット、アニメーション付きタイトル、ズーム、トランジションを適用します。",
+    "Español": "Preajustes de movimiento, títulos animados, zooms y transiciones para los clips que selecciones.",
+    "Deutsch": "Bewegungsvorlagen, animierte Titel, Zooms und Übergänge für die ausgewählten Clips.",
+    "Français": "Préréglages de mouvement, titres animés, zooms et transitions pour les clips sélectionnés.",
+    "한국어": "선택한 클립에 모션 프리셋, 애니메이션 타이틀, 줌, 트랜지션을 적용합니다.",
+    "中文": "为所选片段添加运动预设、动画标题、缩放和转场。",
+    "العربية": "إعدادات حركة جاهزة وعناوين متحركة وتكبير وانتقالات للمقاطع التي تحددها.",
+    "Tiếng Việt": "Preset chuyển động, tiêu đề động, zoom và chuyển cảnh cho các clip bạn chọn."
+  },
+  "Subtitles from the timeline's dialogue, and translations of them, made on this computer.": {
+    "日本語": "タイムラインのセリフから字幕と、その翻訳を、このコンピューター上で作成します。",
+    "Español": "Subtítulos a partir de los diálogos de la línea de tiempo, y sus traducciones, creados en este ordenador.",
+    "Deutsch": "Untertitel aus den Dialogen der Timeline und deren Übersetzungen – erstellt auf diesem Computer.",
+    "Français": "Des sous-titres à partir des dialogues de la timeline, et leurs traductions, créés sur cet ordinateur.",
+    "한국어": "타임라인의 대사로 자막과 그 번역을 이 컴퓨터에서 만듭니다.",
+    "中文": "在这台电脑上根据时间线的对白生成字幕及其翻译。",
+    "العربية": "ترجمات مرئية من حوار المخطط الزمني، وترجماتها إلى لغات أخرى، تُنشأ على هذا الكمبيوتر.",
+    "Tiếng Việt": "Phụ đề từ lời thoại trên timeline, cùng bản dịch của chúng, được tạo ngay trên máy tính này."
+  },
+  "An easier way to set a clip's volume, fades and loudness, clean up voices and fit music to length.": {
+    "日本語": "クリップの音量、フェード、ラウドネスの設定、声のクリーンアップ、音楽の尺合わせを手軽に行えます。",
+    "Español": "Una forma más sencilla de ajustar el volumen, los fundidos y la sonoridad de un clip, limpiar voces y ajustar música a una duración.",
+    "Deutsch": "Ein einfacherer Weg, Lautstärke, Blenden und Lautheit eines Clips einzustellen, Stimmen zu säubern und Musik auf Länge zu bringen.",
+    "Français": "Une façon plus simple de régler le volume, les fondus et la loudness d'un clip, de nettoyer les voix et d'ajuster une musique à une durée.",
+    "한국어": "클립의 볼륨, 페이드, 라우드니스를 설정하고 목소리를 정리하며 음악 길이를 맞추는 더 쉬운 방법입니다.",
+    "中文": "更轻松地设置片段的音量、淡入淡出和响度，清理人声，并把音乐调整到合适长度。",
+    "العربية": "طريقة أسهل لضبط مستوى صوت المقطع وتلاشيه وجهارته، وتنقية الأصوات، وضبط الموسيقى على المدة المطلوبة.",
+    "Tiếng Việt": "Cách dễ hơn để chỉnh âm lượng, fade và độ lớn của clip, làm sạch giọng nói và cắt nhạc vừa thời lượng."
+  },
+  "A small music studio for making music in the key and tempo of the song on your timeline.": {
+    "日本語": "タイムライン上の曲と同じキーとテンポで音楽を作れる、小さな音楽スタジオです。",
+    "Español": "Un pequeño estudio musical para crear música en la tonalidad y el tempo de la canción de tu línea de tiempo.",
+    "Deutsch": "Ein kleines Musikstudio, um Musik in Tonart und Tempo des Songs auf Ihrer Timeline zu machen.",
+    "Français": "Un petit studio de musique pour composer dans la tonalité et le tempo du morceau de votre timeline.",
+    "한국어": "타임라인에 있는 곡의 키와 템포에 맞춰 음악을 만드는 작은 음악 스튜디오입니다.",
+    "中文": "一个小型音乐工作室，按时间线上歌曲的调性和速度制作音乐。",
+    "العربية": "استوديو موسيقى صغير لصنع موسيقى بمقام وإيقاع الأغنية الموجودة في مخططك الزمني.",
+    "Tiếng Việt": "Một phòng thu nhạc nhỏ để làm nhạc theo đúng tông và nhịp độ của bài hát trên timeline."
+  },
+  "Colour palettes, colours picked from pictures, and contrast checks.": {
+    "日本語": "カラーパレット、画像からの色の抽出、コントラストのチェック。",
+    "Español": "Paletas de colores, colores tomados de imágenes y comprobaciones de contraste.",
+    "Deutsch": "Farbpaletten, Farben aus Bildern und Kontrastprüfungen.",
+    "Français": "Palettes de couleurs, couleurs prélevées dans des images et vérifications de contraste.",
+    "한국어": "색상 팔레트, 이미지에서 뽑은 색상, 대비 검사.",
+    "中文": "调色板、从图片中取色以及对比度检查。",
+    "العربية": "لوحات ألوان، وألوان مأخوذة من الصور، وفحوصات للتباين.",
+    "Tiếng Việt": "Bảng màu, màu lấy từ hình ảnh và kiểm tra độ tương phản."
+  },
+  "Takes things out of stills, or the whole background, on this computer – nothing is uploaded.": {
+    "日本語": "静止画から不要なもの、または背景全体を取り除きます。処理はこのコンピューター上で行い、何もアップロードしません。",
+    "Español": "Quita cosas de las imágenes fijas, o el fondo entero, en este ordenador: no se sube nada.",
+    "Deutsch": "Entfernt Dinge aus Standbildern oder den ganzen Hintergrund – auf diesem Computer, ohne etwas hochzuladen.",
+    "Français": "Retire des éléments des images fixes, ou tout l'arrière-plan, sur cet ordinateur – rien n'est envoyé en ligne.",
+    "한국어": "스틸 이미지에서 원하는 것이나 배경 전체를 지웁니다. 이 컴퓨터에서 처리하며 아무것도 업로드하지 않습니다.",
+    "中文": "在这台电脑上去除静帧中的物体或整个背景——不会上传任何内容。",
+    "العربية": "يزيل أشياء من الصور الثابتة، أو الخلفية كلها، على هذا الكمبيوتر – دون رفع أي شيء.",
+    "Tiếng Việt": "Xóa vật thể khỏi ảnh tĩnh, hoặc xóa cả nền, ngay trên máy tính này – không tải gì lên mạng."
+  },
+  "Grabs stills at your markers and exports them, and makes a YouTube chapter list from the markers.": {
+    "日本語": "マーカー位置のスチルを取り込んで書き出し、マーカーから YouTube のチャプターリストを作ります。",
+    "Español": "Captura fotogramas en tus marcadores y los exporta, y crea una lista de capítulos de YouTube a partir de los marcadores.",
+    "Deutsch": "Erfasst Standbilder an Ihren Markern und exportiert sie, und erstellt aus den Markern eine YouTube-Kapitelliste.",
+    "Français": "Capture des images fixes à vos marqueurs et les exporte, et crée une liste de chapitres YouTube à partir des marqueurs.",
+    "한국어": "마커 위치의 스틸을 캡처해 내보내고, 마커로 YouTube 챕터 목록을 만듭니다.",
+    "中文": "在标记处抓取静帧并导出，并根据标记生成 YouTube 章节列表。",
+    "العربية": "يلتقط صورًا ثابتة عند علاماتك ويصدّرها، وينشئ قائمة فصول YouTube من العلامات.",
+    "Tiếng Việt": "Chụp ảnh tĩnh tại các marker rồi xuất ra, và tạo danh sách chương YouTube từ các marker."
+  },
+  "Tracks the time you spend on each project by itself, with reports and invoices.": {
+    "日本語": "プロジェクトごとの作業時間を自動で記録し、レポートや請求書も作れます。",
+    "Español": "Registra por sí solo el tiempo que dedicas a cada proyecto, con informes y facturas.",
+    "Deutsch": "Erfasst automatisch die Zeit, die Sie an jedem Projekt arbeiten, mit Berichten und Rechnungen.",
+    "Français": "Suit tout seul le temps passé sur chaque projet, avec des rapports et des factures.",
+    "한국어": "프로젝트마다 쓴 시간을 알아서 기록하고, 보고서와 청구서도 만듭니다.",
+    "中文": "自动记录你在每个项目上花的时间，并提供报告和发票。",
+    "العربية": "يتتبع تلقائيًا الوقت الذي تقضيه في كل مشروع، مع تقارير وفواتير.",
+    "Tiếng Việt": "Tự động ghi lại thời gian bạn dành cho từng dự án, kèm báo cáo và hóa đơn."
+  },
+  "A light web browser inside Buddy that blocks ads. What you download drags straight into Resolve.": {
+    "日本語": "広告をブロックする、Buddy 内の軽量な Web ブラウザー。ダウンロードしたものはそのまま Resolve にドラッグできます。",
+    "Español": "Un navegador web ligero dentro de Buddy que bloquea anuncios. Lo que descargas se arrastra directamente a Resolve.",
+    "Deutsch": "Ein schlanker Webbrowser in Buddy, der Werbung blockiert. Heruntergeladenes ziehen Sie direkt in Resolve.",
+    "Français": "Un navigateur web léger dans Buddy qui bloque les publicités. Ce que vous téléchargez se glisse directement dans Resolve.",
+    "한국어": "광고를 차단하는 Buddy 안의 가벼운 웹 브라우저입니다. 다운로드한 것은 바로 Resolve로 끌어다 놓을 수 있습니다.",
+    "中文": "Buddy 内置的轻量网页浏览器，可拦截广告。下载的内容可直接拖进 Resolve。",
+    "العربية": "متصفح ويب خفيف داخل Buddy يحجب الإعلانات. ما تنزّله يمكن سحبه مباشرة إلى Resolve.",
+    "Tiếng Việt": "Trình duyệt web gọn nhẹ ngay trong Buddy, có chặn quảng cáo. Những gì bạn tải về có thể kéo thẳng vào Resolve."
+  },
+  "System-wide hot keys for markers, clip colours, copying the timecode and more.": {
+    "日本語": "マーカー、クリップカラー、タイムコードのコピーなどに使える、システム全体で効くホットキー。",
+    "Español": "Atajos de teclado para todo el sistema: marcadores, colores de clip, copiar el código de tiempo y más.",
+    "Deutsch": "Systemweite Tastenkürzel für Marker, Clipfarben, das Kopieren des Timecodes und mehr.",
+    "Français": "Des raccourcis clavier valables partout pour les marqueurs, les couleurs de clip, la copie du timecode et plus encore.",
+    "한국어": "마커, 클립 색상, 타임코드 복사 등에 쓰는 시스템 전체 단축키.",
+    "中文": "全局快捷键，用于标记、片段颜色、复制时间码等。",
+    "العربية": "اختصارات لوحة مفاتيح تعمل على مستوى النظام للعلامات وألوان المقاطع ونسخ رمز الوقت والمزيد.",
+    "Tiếng Việt": "Phím tắt toàn hệ thống cho marker, màu clip, sao chép timecode và hơn thế nữa."
+  },
+  "One-click buttons for markers, clip colours, copying the timecode and more.": {
+    "日本語": "マーカー、クリップカラー、タイムコードのコピーなどをワンクリックで実行できるボタン。",
+    "Español": "Botones de un clic para marcadores, colores de clip, copiar el código de tiempo y más.",
+    "Deutsch": "Ein-Klick-Schaltflächen für Marker, Clipfarben, das Kopieren des Timecodes und mehr.",
+    "Français": "Des boutons en un clic pour les marqueurs, les couleurs de clip, la copie du timecode et plus encore.",
+    "한국어": "마커, 클립 색상, 타임코드 복사 등을 한 번에 실행하는 버튼.",
+    "中文": "一键按钮，用于标记、片段颜色、复制时间码等。",
+    "العربية": "أزرار بنقرة واحدة للعلامات وألوان المقاطع ونسخ رمز الوقت والمزيد.",
+    "Tiếng Việt": "Nút bấm một lần cho marker, màu clip, sao chép timecode và hơn thế nữa."
+  },
+  "A calculator that also does timecode, data rates and aspect ratios, with a timer, notes and a world clock.": {
+    "日本語": "タイムコード、データレート、アスペクト比も計算できる電卓に、タイマー、メモ、世界時計付き。",
+    "Español": "Una calculadora que también trabaja con código de tiempo, tasas de datos y relaciones de aspecto, con temporizador, notas y reloj mundial.",
+    "Deutsch": "Ein Rechner, der auch Timecode, Datenraten und Seitenverhältnisse beherrscht, dazu Timer, Notizen und Weltuhr.",
+    "Français": "Une calculatrice qui gère aussi le timecode, les débits et les formats d'image, avec un minuteur, des notes et une horloge mondiale.",
+    "한국어": "타임코드, 데이터 전송률, 화면비까지 계산하는 계산기에 타이머, 메모, 세계 시계까지.",
+    "中文": "一个也能算时间码、数据速率和宽高比的计算器，另有计时器、笔记和世界时钟。",
+    "العربية": "آلة حاسبة تتعامل أيضًا مع رمز الوقت ومعدلات البيانات ونسب العرض إلى الارتفاع، مع مؤقت وملاحظات وساعة عالمية.",
+    "Tiếng Việt": "Máy tính tính được cả timecode, tốc độ dữ liệu và tỉ lệ khung hình, kèm hẹn giờ, ghi chú và đồng hồ thế giới."
+  },
+  "Pong, Snake, Solitaire, Chess and more, for a break.": {
+    "日本語": "休憩に、ポン、スネーク、ソリティア、チェスなど。",
+    "Español": "Pong, Snake, Solitario, Ajedrez y más, para tomarte un respiro.",
+    "Deutsch": "Pong, Snake, Solitär, Schach und mehr – für eine Pause.",
+    "Français": "Pong, Snake, Solitaire, Échecs et d'autres, pour faire une pause.",
+    "한국어": "쉬는 시간에 즐기는 퐁, 스네이크, 솔리테어, 체스 등.",
+    "中文": "Pong、贪吃蛇、纸牌、国际象棋等，休息时玩一玩。",
+    "العربية": "Pong و Snake والسوليتير والشطرنج وغيرها، لاستراحة قصيرة.",
+    "Tiếng Việt": "Pong, Rắn săn mồi, Solitaire, Cờ vua và nhiều trò khác để giải lao."
+  },
+  "An anonymous chat with other people who use Buddy.": {
+    "日本語": "Buddy を使うほかの人たちとの匿名チャット。",
+    "Español": "Un chat anónimo con otras personas que usan Buddy.",
+    "Deutsch": "Ein anonymer Chat mit anderen Menschen, die Buddy nutzen.",
+    "Français": "Un chat anonyme avec d'autres personnes qui utilisent Buddy.",
+    "한국어": "Buddy를 쓰는 다른 사람들과 나누는 익명 채팅.",
+    "中文": "与其他 Buddy 用户的匿名聊天。",
+    "العربية": "دردشة مجهولة الهوية مع أشخاص آخرين يستخدمون Buddy.",
+    "Tiếng Việt": "Trò chuyện ẩn danh với những người khác dùng Buddy."
+  }
+}

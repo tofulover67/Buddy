@@ -39,6 +39,19 @@ Buddy's integrated tools include the following:
 
 The sidebar can be reordered and tools hidden from Settings.
 
+A new install starts with a few key tools in the sidebar - Ask Buddy, Project
+Setup, Media Manager, Animation, Subtitles, Audio Assistant, Time Tracker and
+Buddy Network. The rest are installed and running, one click away under
+**More tools** at the foot of the sidebar, which lists each with a line on
+what it does and an Add button. Updating Buddy leaves an existing sidebar as
+it was. The first time Buddy opens it offers a one-minute tour of its window:
+the window dims and each part lights up in turn (the sidebar, More tools, the
+connection to Resolve, the tool's pane, Ask Buddy, dual view, the bug report
+and Settings). Skip asks again next time; Don't show this again, or taking
+the tour, ends it. Settings > General > Take the tour runs it again. It's
+the sidebar layout's tour, so the Desktop theme has none. See
+`core/onboarding.py` and `core/more_tools.py`.
+
 Two more things live in Settings (under General) rather than in the sidebar: a **pet**,
 a small companion in a see-through window of its own that floats over Resolve,
 and **achievements**, badges for what's done with the tools and for what

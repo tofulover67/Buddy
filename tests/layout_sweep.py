@@ -207,6 +207,12 @@ def sweep_shell(theme, report):
                   mock.patch.object(shell_window.QSystemTrayIcon, "isSystemTrayAvailable", return_value=False)):
         patch.start()
     win = shell_window.ShellWindow(app, registry.REGISTRY)
+    # A new install's rail shows a few tools and offers the tour
+    # (core/onboarding.py): the sweep wants every tool, and no tour.
+    from core import nav_layout, onboarding
+    win.shared_settings[onboarding.TOUR_KEY] = False
+    win.shared_settings[nav_layout.SETTINGS_KEY] = nav_layout.default_layout(registry.REGISTRY)
+    win.rebuild_nav()
     win.shared_settings["theme"] = theme
     win.apply_theme()
     win.resize(*SHELL_SIZES[0])

@@ -169,7 +169,7 @@ class DualViewTests(unittest.TestCase):
 
     def test_the_rail_lists_the_layout(self):
         shown = []
-        self.win.rail.show_items = shown.append
+        self.win.rail.show_items = lambda items, more=0: shown.append(items)
         self.win.switch_tool("gamma")
         items = shown[-1]
         self.assertEqual([i.get("id") for i in items if i["type"] == "tool"], ["alpha", "beta", "gamma"])

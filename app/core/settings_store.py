@@ -77,6 +77,9 @@ class SharedSettings:
         # renamed aside (see _load) so nothing overwrites it, and the shell
         # tells the user once.
         self.load_warnings = []
+        # No settings.json and no backup of one: Buddy's first start here
+        # (core/onboarding.py). A damaged file is not a new install.
+        self.is_new = False
         self._load()
         self._migrate_theme_preset()
 
@@ -135,6 +138,7 @@ class SharedSettings:
                 self.load_warnings.append(f"{name} was damaged and could not be read ({err}).")
             return
         if saved is None:
+            self.is_new = True
             return
         self.values.update(saved)
         self._loaded_keys = set(saved)

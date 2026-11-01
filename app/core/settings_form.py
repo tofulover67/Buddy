@@ -72,7 +72,9 @@ from core.theme import (
     derive_panel,
     list_subthemes,
     list_themes,
+    resolve as resolve_theme,
     theme_label,
+    theme_layout,
 )
 
 _HEX = re.compile(r"^#[0-9A-Fa-f]{6}$")
@@ -282,6 +284,19 @@ def startup_fields(shared, tools):
                    tooltip="The tool Buddy shows when it starts.")]
 
 
+def tour_fields(shared):
+    """Take the tour (core/onboarding.py). It points at the sidebar layout's
+    header, rail and panes, so a theme with the desktop layout has none."""
+    theme, _subtheme = resolve_theme(shared.get("theme", DEFAULT_THEME), shared.get("subtheme"))
+    if theme_layout(theme) == "desktop":
+        return [heading("Tour"),
+                hint("The tour shows Buddy's sidebar layout, so it isn't there under the Desktop theme.")]
+    return [heading("Tour"),
+            hint("A one-minute look round Buddy's window: the sidebar, the connection to Resolve, dual view "
+                 "and Settings."),
+            buttons(("Take the tour", "tour"))]
+
+
 def shortcut_fields(state):
     """Start menu and desktop shortcuts (core/shortcuts.py) - Windows only.
     state: {"start_menu": bool, "desktop": bool}, or None where they can't
@@ -333,6 +348,7 @@ def shell_pages(shared, autostart, autostart_available=True, updates=None, tools
                   hint_text="Once a day Buddy checks for news (updates, known issues) and shows a small glowing dot "
                             "next to \"Buddy\" when there's something new. Nothing about you or your projects is "
                             "sent. Untick to stop checking."),
+            *tour_fields(shared),
             *shortcut_fields(shortcuts),
         ], "Language, starting up and news from Buddy."),
         page("window", "general", "Window", [

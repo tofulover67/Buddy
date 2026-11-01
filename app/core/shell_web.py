@@ -20,7 +20,7 @@ Protocol (header):
     from the view  reconnect, split, side, settings, orb, bug, size, overlay
 Protocol (rail):
     to the view    rail
-    from the view  switch, size
+    from the view  switch, menu, media, more, size
 """
 
 import os
@@ -122,8 +122,10 @@ class RailView(_ChromeView):
     def web_ready(self):
         self.shell.push_rail()
 
-    def show_items(self, items):
-        self.emit("rail", {"items": items})
+    def show_items(self, items, more=0):
+        """more: how many tools More tools can add - its button shows while
+        there are any."""
+        self.emit("rail", {"items": items, "more": more})
 
     def fit(self, size):
         width = size.get("width")
@@ -137,6 +139,9 @@ class RailView(_ChromeView):
 
     def on_menu(self, payload):
         self.shell.open_tool_menu((payload or {}).get("id"))
+
+    def on_more(self, _payload=None):
+        self.shell.open_more_tools()
 
     def on_media(self, payload):
         self.shell.badge_media((payload or {}).get("id"))

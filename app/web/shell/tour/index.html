@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Buddy tour</title>
+    <link rel="stylesheet" href="../../buddy.css">
+    <link rel="stylesheet" href="../shell.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../buddy.js"></script>
+</head>
+<body class="chrome tour">
+<svg class="tour-dim" aria-hidden="true"><path id="dim" fill-rule="evenodd"/></svg>
+<div id="holes"></div>
+<section class="tour-card" id="card" role="dialog" aria-modal="true" aria-labelledby="title" hidden>
+    <div class="tour-count" id="count"></div>
+    <h2 class="tour-title" id="title"></h2>
+    <div class="tour-text" id="text"></div>
+    <label class="check tour-never" id="never-row" hidden><input type="checkbox" id="never"> Don't show this again</label>
+    <div class="tour-foot">
+        <button type="button" class="btn ghost" id="skip">Skip tour</button>
+        <div class="spacer"></div>
+        <button type="button" class="btn" id="back">Back</button>
+        <button type="button" class="btn accent" id="next">Next</button>
+    </div>
+</section>
+<script src="tour.js"></script>
+</body>
+</html>

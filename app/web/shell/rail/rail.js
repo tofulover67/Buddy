@@ -52,10 +52,19 @@ Buddy.on("rail", r => {
         if (item.type === "line") return el("div.nav-line", {role: "separator"});
         // Right-click: the tool's own menu (its Settings).
         return el("button.nav-item", {type: "button", "aria-current": item.active ? "page" : undefined,
+                                      dataset: {id: item.id},
                                       onclick: () => send("switch", {id: item.id}),
                                       oncontextmenu: e => { e.preventDefault(); send("menu", {id: item.id}); }},
                   [el("span", {text: item.label}), ...badge(item)]);
     }));
+    // Tools hidden from the rail (a new install shows only a few): More
+    // tools puts them back (core/more_tools.py).
+    if (r.more) {
+        rail.append(el("div.nav-spacer"),
+                    el("button.nav-item.nav-more#more", {type: "button", onclick: () => send("more"),
+                                                         title: "Add more of Buddy's tools to the sidebar"},
+                       [icon("plus"), el("span", {text: "More tools"})]));
+    }
     reportSize();
 });
 Buddy.on("theme", () => requestAnimationFrame(reportSize));

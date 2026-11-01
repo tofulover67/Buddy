@@ -12,6 +12,9 @@ The default is derived from registry.py - its categories become dividers -
 so a user who never opens the organizer sees exactly the rail the registry
 describes. Hiding a tool only removes its nav button: the page is still
 built and still running (Time Tracker keeps tracking with its tab hidden).
+A new install starts from starter_layout() instead: the same rail with only
+a few key tools showing (core/onboarding.py), the rest one click away in
+More tools at the foot of the rail.
 
 A saved layout is always reconciled against the registry before use, so it
 can never strand a tool: ids that no longer exist are dropped, and a tool
@@ -43,6 +46,19 @@ def default_layout(registry) -> list[dict]:
             current = category
         out.append({"type": TOOL, "id": page_cls.tool_id, "visible": True})
     return out
+
+
+def starter_layout(registry, starter) -> list[dict]:
+    """The default rail with only the `starter` tool ids showing - a new
+    install's (core/onboarding.py). The rest stay in the layout, hidden, so
+    More tools and Organize sidebar list them; a placeholder never starts
+    out showing."""
+    out = default_layout(registry)
+    placeholders = {cls.tool_id for _category, cls in registry if getattr(cls, "is_placeholder", False)}
+    for entry in out:
+        if entry["type"] == TOOL:
+            entry["visible"] = entry["id"] in starter and entry["id"] not in placeholders
+    return reconcile(out, registry)
 
 
 def reconcile(saved, registry) -> list[dict]:
@@ -117,6 +133,31 @@ def visible_tool_ids(layout) -> list[str]:
     return [e["id"] for e in layout if e["type"] == TOOL and e["visible"]]
 
 
+def hidden_tool_ids(layout) -> list[str]:
+    return [e["id"] for e in layout if e["type"] == TOOL and not e["visible"]]
+
+
+def rail_rows(layout) -> list[dict]:
+    """What the rail draws: the visible tools, and the headings and lines
+    over each group that has one of them - a heading over hidden tools
+    only would head nothing. A group is a run of dividers and the tools
+    after them."""
+    out, dividers, tools_seen, headed = [], [], False, False
+    for entry in layout:
+        if entry["type"] == DIVIDER:
+            if tools_seen:
+                dividers, tools_seen, headed = [], False, False
+            dividers.append(entry)
+            continue
+        tools_seen = True
+        if entry["visible"]:
+            if not headed:
+                out.extend(dividers)
+                headed = True
+            out.append(entry)
+    return out
+
+
 # ------------------------------------------------ Organize sidebar edits --
 # Settings > Organize sidebar (nav_organizer.py) edits a copy of the layout
 # with these. Each returns an error message, or "" when it's done.
@@ -171,3 +212,12 @@ def show_all(layout) -> str:
         if entry["type"] == TOOL:
             entry["visible"] = True
     return ""
+
+
+def show_tool(layout, tool_id) -> str:
+    """More tools' Add: the tool shows again, where it already sits."""
+    for entry in layout:
+        if entry["type"] == TOOL and entry["id"] == tool_id:
+            entry["visible"] = True
+            return ""
+    return "nothing"
