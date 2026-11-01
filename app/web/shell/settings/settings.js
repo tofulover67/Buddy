@@ -503,6 +503,9 @@ Buddy.on("where", data => {
     });
 });
 
+// The tour's Theme and Language steps (core/onboarding.py): a page by id.
+Buddy.on("goto", g => { if (pageById(g.page)) openPage(g.page); });
+
 Buddy.on("settings", data => {
     // Keep the field being typed in: its focus, caret and (for a field that
     // saves when it's left) what's been typed so far.

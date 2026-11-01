@@ -47,7 +47,8 @@ what it does and an Add button. Updating Buddy leaves an existing sidebar as
 it was. The first time Buddy opens it offers a one-minute tour of its window:
 the window dims and each part lights up in turn (the sidebar, More tools, the
 connection to Resolve, the tool's pane, Ask Buddy, dual view, the bug report
-and Settings). Skip asks again next time; Don't show this again, or taking
+and Settings), then Settings opens to show where the theme and the language
+are changed, and closes again. Skip asks again next time; Don't show this again, or taking
 the tour, ends it. Settings > General > Take the tour runs it again. It's
 the sidebar layout's tour, so the Desktop theme has none. See
 `core/onboarding.py` and `core/more_tools.py`.

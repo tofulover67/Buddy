@@ -180,6 +180,26 @@
     "العربية": "السمات واللغة والأداة التي يفتح عليها Buddy وترتيب الشريط الجانبي كلها في الإعدادات – ومنها يمكنك إعادة هذه الجولة أيضًا.",
     "Tiếng Việt": "Giao diện, ngôn ngữ, công cụ Buddy mở khi khởi động và thứ tự thanh bên đều nằm trong Cài đặt – cả chuyến tham quan này nữa, nếu bạn muốn xem lại."
   },
+  "Choose Buddy's look here: a theme, and a subtheme for its colours – Custom lets you pick your own. Changes show straight away.": {
+    "日本語": "ここで Buddy の見た目を選べます。テーマと、その色合いを決めるサブテーマを選んでください。「カスタム」なら色を自分で選べます。変更はすぐに反映されます。",
+    "Español": "Elige aquí el aspecto de Buddy: un tema y un subtema para sus colores; con Personalizado eliges los tuyos. Los cambios se ven al instante.",
+    "Deutsch": "Wählen Sie hier das Aussehen von Buddy: ein Thema und ein Unterthema für seine Farben – mit „Benutzerdefiniert“ wählen Sie eigene. Änderungen sind sofort zu sehen.",
+    "Français": "Choisissez ici l'apparence de Buddy : un thème, et un sous-thème pour ses couleurs – Personnalisé vous laisse choisir les vôtres. Les changements s'affichent tout de suite.",
+    "한국어": "여기서 Buddy의 모양을 고릅니다. 테마와 색상을 정하는 하위 테마를 선택하세요. '사용자 지정'을 고르면 색상을 직접 정할 수 있습니다. 변경 사항이 바로 보입니다.",
+    "中文": "在这里选择 Buddy 的外观：一个主题，以及决定配色的子主题——选“自定义”可以自己挑颜色。更改会立即显示。",
+    "العربية": "اختر مظهر Buddy من هنا: سمة، وسمة فرعية لألوانها – ويتيح لك «مخصص» اختيار ألوانك بنفسك. تظهر التغييرات فورًا.",
+    "Tiếng Việt": "Chọn giao diện của Buddy ở đây: một chủ đề, và một chủ đề phụ cho màu sắc – Tùy chỉnh cho phép bạn tự chọn màu. Thay đổi hiện ra ngay."
+  },
+  "Choose the language for all of Buddy here. Every window switches over straight away, and what you type yourself stays as it is.": {
+    "日本語": "ここで Buddy 全体の言語を選べます。すべてのウィンドウがすぐに切り替わり、ご自身で入力した内容はそのまま残ります。",
+    "Español": "Elige aquí el idioma de todo Buddy. Todas las ventanas cambian al instante, y lo que escribes tú mismo no se modifica.",
+    "Deutsch": "Wählen Sie hier die Sprache für ganz Buddy. Alle Fenster wechseln sofort, und was Sie selbst eingeben, bleibt unverändert.",
+    "Français": "Choisissez ici la langue de tout Buddy. Toutes les fenêtres changent tout de suite, et ce que vous saisissez vous-même reste tel quel.",
+    "한국어": "여기서 Buddy 전체에 사용할 언어를 고릅니다. 모든 창이 바로 바뀌며, 직접 입력한 내용은 그대로 유지됩니다.",
+    "中文": "在这里为整个 Buddy 选择语言。所有窗口会立即切换，你自己输入的内容保持不变。",
+    "العربية": "اختر لغة Buddy بالكامل من هنا. تتبدّل كل النوافذ فورًا، وما تكتبه بنفسك يبقى كما هو.",
+    "Tiếng Việt": "Chọn ngôn ngữ cho toàn bộ Buddy ở đây. Mọi cửa sổ chuyển đổi ngay lập tức, và nội dung bạn tự nhập sẽ được giữ nguyên."
+  },
   "You're all set": {
     "日本語": "準備完了です",
     "Español": "Todo listo",

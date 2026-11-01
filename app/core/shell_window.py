@@ -1078,12 +1078,18 @@ class ShellWindow(QMainWindow):
         if self._tour is not None or self._layout != "panes":
             return
         modal = QApplication.activeModalWidget() is not None
-        if modal or not self.isVisible() or self.isMinimized() or not (self.header._ready and self.rail._ready):
-            if modal or waited < onboarding.READY_WAIT_MS:
+        on_screen = self.isVisible() and not self.isMinimized()
+        loaded = self.header._ready and self.rail._ready
+        if modal or not on_screen or not loaded:
+            # On screen it waits as long as the header and rail take to load
+            # (onboarding.LOAD_WAIT_MS); put away, only a while - then it's
+            # offered when the window is next shown.
+            limit = onboarding.LOAD_WAIT_MS if on_screen else onboarding.READY_WAIT_MS
+            if modal or waited < limit:
                 QTimer.singleShot(onboarding.READY_POLL_MS, self,
                                   lambda: self.start_tour(welcome, waited + onboarding.READY_POLL_MS))
             elif welcome:
-                self._tour_offered = False      # put away first: offered when it's next shown
+                self._tour_offered = False
             return
         if not welcome:
             self.end_tour_offer()               # taken from Settings: no welcome card at the next start

@@ -26,6 +26,9 @@ except ImportError:  # pragma: no cover
     HAVE_QT = False
 
 APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app")
+# Seconds a wait for a web page may take: a slow CI Mac loading the first
+# pages of a test process (a passing wait returns as soon as it's done).
+SLOW = 90
 
 
 def registry_ids():
@@ -135,7 +138,8 @@ class NewInstallTests(unittest.TestCase):
 
 @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
 class StepTests(unittest.TestCase):
-    TARGETS = {None, "rail", "more", "connection", "pane", "tool:manual_chat", "split", "bug", "settings"}
+    TARGETS = {None, "rail", "more", "connection", "pane", "tool:manual_chat", "split", "bug", "settings",
+               "settings:theme", "settings:language"}
 
     def ids(self, **kw):
         return [s["id"] for s in onboarding.tour_steps(**kw)]
@@ -144,6 +148,13 @@ class StepTests(unittest.TestCase):
         steps = onboarding.tour_steps(more=4, tray="win")
         self.assertEqual((steps[0]["id"], steps[-1]["id"]), ("welcome", "done"))
         self.assertLessEqual({s["target"] for s in steps}, self.TARGETS)
+
+    def test_theme_then_language_follow_settings(self):
+        ids = self.ids(more=4)
+        self.assertEqual(ids[ids.index("settings"):], ["settings", "theme", "language", "done"])
+        for step_id, page in (("theme", "appearance"), ("language", "general")):
+            target = next(s["target"] for s in onboarding.tour_steps() if s["id"] == step_id)
+            self.assertEqual(onboarding.SETTINGS_TARGETS[target][0], page)
 
     def test_steps_that_have_nothing_to_show_are_left_out(self):
         self.assertNotIn("more", self.ids(more=0))
@@ -262,22 +273,41 @@ class ShellTests(unittest.TestCase):
 
     def show_with_tour(self):
         """Shows the window with the tour offered at once; the steps this
-        window's tour sends go into the list returned."""
+        window's tour sends - to its own view, or to the one over Settings
+        ("in_settings") - go into the list returned."""
         sent = []
         real_emit = onboarding.TourView.emit
 
         def emit(view, name, payload=None):
-            if name == "step" and view.shell is self.win:
-                sent.append(payload)
+            if name == "step" and getattr(view, "tour", view).shell is self.win:
+                sent.append(dict(payload, in_settings=isinstance(view, onboarding._SettingsLens)))
             real_emit(view, name, payload)
 
-        for p in (mock.patch.object(onboarding, "TOUR_DELAY_MS", 0), mock.patch.object(onboarding.TourView, "emit", emit)):
+        for p in (mock.patch.object(onboarding, "TOUR_DELAY_MS", 0),
+                  mock.patch.object(onboarding.TourView, "emit", emit),
+                  mock.patch.object(onboarding._SettingsLens, "emit", emit)):
             p.start()
             self.addCleanup(p.stop)
+        # The first pages a test process loads can take a slow CI Mac well
+        # over 10 s: what's timed here is the tour, not the web engine starting.
+        self.assertTrue(self.wait_until(lambda: self.win.header._ready and self.win.rail._ready, SLOW),
+                        "the header and rail never loaded")
         self.win.resize(1300, 800)
         self.win.show()
-        self.assertTrue(self.wait_until(lambda: sent), "the tour never came up")
+        self.assertTrue(self.wait_until(lambda: sent, SLOW), "the tour never came up")
         return sent
+
+    def test_on_screen_it_waits_however_long_the_pages_take(self):
+        self.build(new=True)
+        self.assertTrue(self.wait_until(lambda: self.win.header._ready and self.win.rail._ready, SLOW))
+        self.win.header._ready = False                         # as if still loading
+        with mock.patch.object(onboarding, "TOUR_DELAY_MS", 0), mock.patch.object(onboarding, "READY_WAIT_MS", 300):
+            self.win.resize(1300, 800)
+            self.win.show()
+            self.wait_until(lambda: False, 1.0)                # well past READY_WAIT_MS
+            self.assertIsNone(self.win._tour)
+            self.win.header._ready = True
+            self.assertTrue(self.wait_until(lambda: self.win._tour is not None, 10), "it gave up waiting")
 
     def test_the_tour_skip_and_dont_show_again(self):
         self.build(new=True)
@@ -289,7 +319,7 @@ class ShellTests(unittest.TestCase):
         self.assertTrue(self.settings[onboarding.TOUR_KEY])
         # Don't show this again.
         self.win.start_tour(welcome=True)
-        self.assertTrue(self.wait_until(lambda: self.win._tour is not None and self.win._tour._ready))
+        self.assertTrue(self.wait_until(lambda: self.win._tour is not None and self.win._tour._ready, SLOW))
         self.win._tour.on_skip({"never": True})
         self.assertFalse(self.settings[onboarding.TOUR_KEY])
 
@@ -301,27 +331,61 @@ class ShellTests(unittest.TestCase):
         self.assertEqual(self.win._tour.index, 1)
         self.assertFalse(self.settings[onboarding.TOUR_KEY])      # taken: no welcome card at the next start
 
+    def card(self, sent, step_id, seconds=SLOW):
+        """The card a step shows - wherever it shows it (not the main
+        window's dim while Settings has it)."""
+        found = lambda: next((p for p in reversed(sent) if p["id"] == step_id and not p["elsewhere"]), None)  # noqa: E731
+        self.assertTrue(self.wait_until(lambda: found() is not None, seconds), f"{step_id} never showed its card")
+        return found()
+
+    def settings_open(self):
+        from core.settings_dialog import SettingsDialog
+        return [d for d in SettingsDialog.on_screen() if d.isVisible()]
+
     def test_taking_the_tour_lights_up_each_part(self):
         self.build(new=True)
         sent = self.show_with_tour()
         tour = self.win._tour
         tour.on_start()
         self.assertFalse(self.settings[onboarding.TOUR_KEY])               # taken: not offered again
-        lit, current = {}, "welcome"
-        for _ in range(len(tour.steps)):
-            self.assertTrue(self.wait_until(lambda: sent[-1]["id"] != current, 10), f"stuck after {current}")
-            step = sent[-1]
-            current = step["id"]
-            lit[current] = step["rects"]
+        lit, where = {}, {}
+        for step in tour.steps[1:]:
+            card = self.card(sent, step["id"])
+            lit[step["id"]], where[step["id"]] = card["rects"], card["in_settings"]
+            if step["id"] in ("theme", "language"):
+                self.assertTrue(self.settings_open(), f"Settings isn't open for {step['id']}")
             tour.on_next()
-            if step["last"]:
-                break
         self.assertIsNone(self.win._tour)
-        for step_id in ("rail", "more", "connection", "pane", "ask", "split", "bug", "settings"):
+        for step_id in ("rail", "more", "connection", "pane", "ask", "split", "bug", "settings", "theme", "language"):
             with self.subTest(step_id):
                 self.assertTrue(lit.get(step_id), f"{step_id} lit nothing")
         self.assertEqual(len(lit["connection"]), 2)                         # the status and its button, apart
         self.assertEqual(lit["done"], [])
+        self.assertEqual({k for k, v in where.items() if v}, {"theme", "language"})
+        self.assertTrue(self.wait_until(lambda: not self.settings_open(), 5), "the tour left Settings open")
+
+    def test_back_from_the_theme_closes_settings(self):
+        self.build(new=True)
+        sent = self.show_with_tour()
+        tour = self.win._tour
+        tour.on_start()
+        tour._go([s["id"] for s in tour.steps].index("theme"))
+        self.card(sent, "theme")
+        tour.on_back()
+        self.assertEqual(tour.steps[tour.index]["id"], "settings")
+        self.assertFalse(self.card(sent, "settings")["in_settings"])
+        self.assertTrue(self.wait_until(lambda: not self.settings_open(), 5), "Settings stayed open")
+
+    def test_closing_settings_under_the_tour_ends_it(self):
+        self.build(new=True)
+        sent = self.show_with_tour()
+        tour = self.win._tour
+        tour.on_start()
+        tour._go([s["id"] for s in tour.steps].index("language"))
+        self.card(sent, "language")
+        self.settings_open()[0].reject()                                    # its own close button
+        self.assertTrue(self.wait_until(lambda: self.win._tour is None, 5))
+        self.assertFalse(self.settings[onboarding.TOUR_KEY])
 
 
 if __name__ == "__main__":

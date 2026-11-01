@@ -17,7 +17,7 @@ $("skip").onclick = () => send("skip", {never: $("never").checked});
 $("back").onclick = () => send("back");
 $("next").onclick = () => send(step && step.welcome ? "start" : "next");
 document.addEventListener("keydown", e => {
-    if (!step) return;
+    if (!step || step.elsewhere) return;
     if (e.key === "Escape") { e.preventDefault(); send("skip", {never: $("never").checked}); }
     else if (step.welcome) return;
     else if (e.key === "ArrowRight") { e.preventDefault(); send("next"); }
@@ -76,7 +76,13 @@ function place(box, side) {
 Buddy.on("step", s => {
     step = s;
     const card = $("card");
-    card.hidden = false;
+    // A step shown in the Settings window (its own copy of this page): here,
+    // only the dim behind it.
+    card.hidden = s.elsewhere;
+    if (s.elsewhere) {
+        light(null);
+        return;
+    }
     card.classList.toggle("welcome", s.welcome);
     $("count").textContent = s.welcome ? "" : `Step ${s.number} of ${s.count}`;
     $("count").hidden = s.welcome;
@@ -96,4 +102,7 @@ Buddy.on("step", s => {
 
 // The window resized: Python sends the step again with the light moved.
 // Until then the card keeps inside the window.
-addEventListener("resize", () => { if (step) place(light(step.rects), step.side); });
+addEventListener("resize", () => {
+    if (step && step.elsewhere) light(null);
+    else if (step) place(light(step.rects), step.side);
+});

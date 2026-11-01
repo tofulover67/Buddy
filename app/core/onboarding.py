@@ -17,6 +17,12 @@ Skip asks again at the next start; Don't show this again, or taking the
 tour, is the end of it. Settings > General > Take the tour starts it again
 whenever.
 
+Its Theme and Language steps open Settings on their page and light up the
+field there. Settings is a window of its own, which the tour's view can't
+draw over, so a second view of the same page (_SettingsLens) lies over
+Settings for those steps while the main window waits dimmed behind; going
+on, or back, closes the Settings the tour opened.
+
 It's the sidebar layout's tour: the desktop layout's tool windows are
 native, so nothing can be drawn over them, and there it waits.
 
@@ -46,11 +52,19 @@ TOUR_KEY = "tour_pending"
 # After the window first shows: the rail and the first tool have drawn.
 TOUR_DELAY_MS = 900
 # The header and rail are web views of their own: until both are loaded
-# there's nothing to point at. Asked again this often, for this long.
+# there's nothing to point at. Asked again this often - for this long with
+# the window on screen (on GitHub's Mac runners the tour didn't come up
+# when this gave up after 10 s), or this long with it hidden or minimised,
+# after which it's offered when the window is next shown.
 READY_POLL_MS = 150
+LOAD_WAIT_MS = 120000
 READY_WAIT_MS = 10000
 # A window resized under the tour: the light moves once it settles.
 REFIT_MS = 120
+# Settings just opened, or turned to another page: looked for this often,
+# this many times, before its card shows in the middle instead.
+FIND_RETRY_MS = 100
+FIND_TRIES = 30
 
 TRAY_TEXT = {
     "win": "Closing the window keeps Buddy running in the system tray, so Time Tracker keeps tracking. "
@@ -126,6 +140,12 @@ def tour_steps(ask=True, more=0, tray=None) -> list:
         _step("settings", "Settings", [
             "Themes, language, the tool Buddy opens on and the sidebar's order are all in Settings – and "
             "this tour, to take again."], "settings"),
+        _step("theme", "Theme", [
+            "Choose Buddy's look here: a theme, and a subtheme for its colours – Custom lets you pick your "
+            "own. Changes show straight away."], "settings:theme"),
+        _step("language", "Language", [
+            "Choose the language for all of Buddy here. Every window switches over straight away, and what "
+            "you type yourself stays as it is."], "settings:language"),
     ]
     done = ["That's the tour. Pick a tool to get started."]
     if tray in TRAY_TEXT:
@@ -134,8 +154,8 @@ def tour_steps(ask=True, more=0, tray=None) -> list:
     return steps
 
 
-# Where the elements are in a header or rail view: a box each, in the
-# view's CSS pixels - scrolled into view first (a short window's rail
+# Where the elements are in a header, rail or Settings view: a box each, in
+# the view's CSS pixels - scrolled into view first (a short window's rail
 # scrolls). As JSON text: runJavaScript hands an object or array back to
 # PySide6 as an empty string.
 FIND_JS = """(() => {
@@ -154,6 +174,22 @@ HEADER_TARGETS = {
     "settings": ["#settings"],
 }
 
+# Steps shown in the Settings window: its page, and the card lit there
+# (app/web/shell/settings/ - a card per heading, a row per setting).
+SETTINGS_TARGETS = {
+    "settings:theme": ("appearance", ['.set-card:has(.set-row[data-key="theme"])']),
+    "settings:language": ("general", ['.set-card:has(.set-row[data-key="language"])']),
+}
+
+
+def _alive(widget):
+    """False once Qt has deleted it (Settings closed, and deleteLater run)."""
+    try:
+        widget.isVisible()
+        return True
+    except RuntimeError:
+        return False
+
 
 class TourView(WebWindow):
     """The tour, over the whole of the shell's window. `steps` from
@@ -168,6 +204,8 @@ class TourView(WebWindow):
         self.steps = steps
         self.index = max(0, min(start, len(steps) - 1))
         self._asked = 0             # the latest _find; an older answer is dropped
+        self._lens = None           # over Settings, for its steps
+        self._opened = None         # the Settings window the tour opened (it closes it)
         super().__init__(shell)
         central = shell.centralWidget()
         self.setParent(central)
@@ -191,9 +229,11 @@ class TourView(WebWindow):
         self.view.setFocus()
 
     def finish(self):
-        """Gone: nothing it was waiting on (a resize, a lookup) draws again."""
+        """Gone: nothing it was waiting on (a resize, a lookup) draws again,
+        and a Settings it opened closes."""
         self._refit.stop()
         self._asked += 1
+        self._leave_settings()
         self.parentWidget().removeEventFilter(self)
         self.hide()
         self.deleteLater()
@@ -203,19 +243,107 @@ class TourView(WebWindow):
         step = self.steps[self.index]
         self._asked += 1
         asked = self._asked
+        if step["target"] in SETTINGS_TARGETS:
+            self._send(step, [], elsewhere=True)          # this window waits behind Settings, dimmed
+            self._show_in_settings(step, asked)
+            return
+        self._leave_settings()
         self._find(step["target"], lambda rects: asked == self._asked and self._send(step, rects))
 
-    def _send(self, step, rects):
-        self.raise_()               # above the header, which raises itself as it's placed
-        self.emit("step", {
+    def _payload(self, step, rects, elsewhere=False):
+        return {
             "id": step["id"], "title": step["title"], "text": step["text"],
             "rects": [{"x": r.x(), "y": r.y(), "w": r.width(), "h": r.height()} for r in rects],
-            # Where the card goes: under what's along the top, else beside it.
-            "side": "below" if step["target"] in HEADER_TARGETS else "right",
+            # Where the card goes: under what's along the top, or a Settings
+            # card that fills the page's width; else beside it.
+            "side": "below" if step["target"] in HEADER_TARGETS or step["target"] in SETTINGS_TARGETS else "right",
+            # On a step shown in another window: dimmed, with no card here.
+            "elsewhere": elsewhere,
             "welcome": step["id"] == "welcome",
             "number": self.index, "count": len(self.steps) - 1,
             "first": self.index <= 1, "last": self.index == len(self.steps) - 1,
-        })
+        }
+
+    def _send(self, step, rects, elsewhere=False):
+        self.raise_()               # above the header, which raises itself as it's placed
+        self.emit("step", self._payload(step, rects, elsewhere))
+
+    # ------------------------------------------------------------ Settings --
+    def _show_in_settings(self, step, asked):
+        """Settings open on the step's page, the lens over it, the card lit."""
+        page_id, selectors = SETTINGS_TARGETS[step["target"]]
+        dialog = self._settings_window()
+        if dialog is None:
+            self._send(step, [])            # Settings didn't open: the card here, in the middle
+            return
+        if self._lens is None or not _alive(self._lens) or self._lens.dialog is not dialog:
+            self._lens = _SettingsLens(self, dialog)
+        self._find_in_settings(dialog, page_id, selectors, step, asked, FIND_TRIES, turned=False)
+
+    def _find_in_settings(self, dialog, page_id, selectors, step, asked, tries, turned):
+        """Once Settings has loaded: turns it to the page, then looks for the
+        card until it's drawn there (the page turns as a message, after
+        which the lookup may run first)."""
+        if asked != self._asked or not _alive(dialog) or self._lens is None:
+            return
+        again = lambda turned: QTimer.singleShot(  # noqa: E731
+            FIND_RETRY_MS, self, lambda: self._find_in_settings(dialog, page_id, selectors, step, asked, tries - 1,
+                                                                turned))
+        if not (dialog._ready and dialog.isVisible()):
+            if tries > 0:
+                again(turned)
+            else:
+                self._lens.send(self._payload(step, []))
+            return
+        if not turned:
+            dialog.go_to_page(page_id)
+
+        def got(rects):
+            if asked != self._asked or self._lens is None:
+                return
+            if rects or tries <= 0:
+                self._lens.send(self._payload(step, rects))
+            else:
+                again(True)
+
+        self._ask(dialog, selectors, got, frame=dialog)
+
+    def _settings_window(self):
+        """Settings, opened if it isn't already (and then the tour's to close)."""
+        from core.settings_dialog import SettingsDialog     # here: it's a lot to import for the tour's sake
+        dialog = next(iter(SettingsDialog.on_screen()), None)
+        if dialog is None:
+            self.shell.open_settings()
+            dialog = next(iter(SettingsDialog.on_screen()), None)
+            if dialog is not None:
+                self._opened = dialog
+                dialog.finished.connect(self._settings_closed)
+        return dialog
+
+    def _settings_closed(self, _result=None):
+        """Settings closed under the tour (its own close button): the tour
+        ends with it - it was taken."""
+        self._opened = None
+        if self.steps[self.index]["target"] in SETTINGS_TARGETS:
+            self.shell.end_tour_offer()
+            self.shell.close_tour()
+
+    def _leave_settings(self):
+        """Back in the main window: the lens goes, and the Settings the tour
+        opened closes."""
+        lens, self._lens = self._lens, None
+        dialog, self._opened = self._opened, None
+        if lens is not None and _alive(lens):
+            lens.finish()
+        if dialog is not None and _alive(dialog):
+            try:
+                dialog.finished.disconnect(self._settings_closed)
+            except (RuntimeError, TypeError):
+                pass
+            dialog.accept()
+        if lens is not None or dialog is not None:
+            self.shell.activateWindow()
+            self.view.setFocus()
 
     def _find(self, target, done):
         """done([QRect in this view]) - empty when it isn't on screen."""
@@ -238,13 +366,14 @@ class TourView(WebWindow):
             return []
         return [QRect(widget.mapTo(self.parentWidget(), QPoint(0, 0)), widget.size())]
 
-    def _ask(self, chrome, selectors, done):
-        """Where `selectors` are in one of the shell's web views (the header,
-        the rail)."""
+    def _ask(self, chrome, selectors, done, frame=None):
+        """Where `selectors` are in a web view of the shell's (the header, the
+        rail) or Settings', in `frame`'s coordinates - this view's parent
+        unless given."""
         if chrome is None or not chrome.isVisible():
             done([])
             return
-        origin = chrome.mapTo(self.parentWidget(), QPoint(0, 0))
+        origin = chrome.view.mapTo(frame or self.parentWidget(), QPoint(0, 0))
         zoom = chrome.view.zoomFactor()
 
         def got(text):
@@ -286,3 +415,56 @@ class TourView(WebWindow):
         if 1 <= index < len(self.steps) and index != self.index:
             self.index = index
             self._show_step()
+
+
+class _SettingsLens(WebWindow):
+    """The tour's light and card over the Settings window, for its steps
+    there (see the module's docstring): the same page as TourView's, its
+    buttons handed to the tour."""
+
+    web_dir = TourView.web_dir
+    transparent = True
+
+    def __init__(self, tour, dialog):
+        self.tour = tour
+        self.dialog = dialog
+        super().__init__(tour.shell)
+        self.setParent(dialog)
+        self.setGeometry(dialog.rect())
+        dialog.installEventFilter(self)
+        self.hide()                 # until the page is there to draw
+
+    def eventFilter(self, obj, event):
+        if obj is self.dialog and event.type() == QEvent.Resize:
+            self.setGeometry(obj.rect())
+            self.raise_()
+            self.tour._refit.start()
+        return False
+
+    def web_ready(self):
+        self.show()
+        self.raise_()
+        self.dialog.activateWindow()
+        self.view.setFocus()
+
+    def send(self, payload):
+        self.raise_()
+        self.emit("step", payload)
+
+    def finish(self):
+        if _alive(self.dialog):
+            self.dialog.removeEventFilter(self)
+        self.hide()
+        self.deleteLater()
+
+    def on_start(self, payload=None):
+        self.tour.on_start(payload)
+
+    def on_next(self, payload=None):
+        self.tour.on_next(payload)
+
+    def on_back(self, payload=None):
+        self.tour.on_back(payload)
+
+    def on_skip(self, payload=None):
+        self.tour.on_skip(payload)

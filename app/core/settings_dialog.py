@@ -558,6 +558,11 @@ class SettingsDialog(WebDialog):
         self.raise_()
         self.activateWindow()
 
+    def go_to_page(self, page_id):
+        """Shows one of its pages by id ("appearance", "general") - the
+        tour's Theme and Language steps (core/onboarding.py)."""
+        self.emit("goto", {"page": page_id})
+
     def refresh_soon(self, owner=None):
         self._dirty.add(owner)
         if not self._timer.isActive():
