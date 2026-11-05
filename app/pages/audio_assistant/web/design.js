@@ -8,7 +8,9 @@
  *   Sounds    a riser, an impact or a whoosh (synth.js) on a mini timeline of
  *             its own: its waveform on a beat grid counted from its moment,
  *             a playhead to click or drag - dragging scrubs, playing a moment
- *             of the sound under the pointer - Play from there, Loop; it
+ *             of the sound under the pointer; a sound playing carries on from
+ *             where it's let go, unless that's the very start - Play from
+ *             there, Loop; it
  *             stays in view while the settings scroll under it. Presets to
  *             start from. The settings, in groups - its timing, then the
  *             layers it's made of (each with an on/off switch that keeps its
@@ -47,6 +49,7 @@
     const ON_IT = {riser: "Riser into it", impact: "Impact on it", whoosh: "Whoosh on it"};
     const RULER = 18;                 // px: the mini timeline's ruler
     const GRAIN_MS = 30;              // a scrub plays a moment of sound at most this often
+    const START_PX = 6;               // let go this close to the mini timeline's start: it's "the beginning"
 
     const defaults = kind => Synth.values(kind);
     const groupsOf = kind => [...new Set(Synth.SOUNDS[kind].params.map(p => p.group))];
@@ -616,7 +619,10 @@
         drawUndo();
     }
 
-    /* The mini timeline: a click puts its playhead there; a drag scrubs. */
+    /* The mini timeline: a click puts its playhead there; a drag scrubs. A
+       sound that was playing carries on from where it's let go - except at
+       the very start (within START_PX, or dragged past it): put back to the
+       beginning by hand, it stays stopped there. */
     function scrubbing(canvas) {
         const at = e => {
             const made = current();
@@ -624,6 +630,7 @@
             const r = canvas.getBoundingClientRect();
             return Math.min(made.buffer.duration, Math.max(0, (e.clientX - r.left) / r.width * made.buffer.duration));
         };
+        const atStart = e => e.clientX - canvas.getBoundingClientRect().left <= START_PX;
         const hear = (t, force) => {
             const now = performance.now();
             if (!force && now - scrub.last < GRAIN_MS) return;
@@ -634,7 +641,7 @@
             const t = at(e);
             if (t === null || e.button !== 0) return;
             try { canvas.setPointerCapture(e.pointerId); } catch (_e) { /* a pointer that's already gone */ }
-            scrub = {wasPlaying: SD.playing, last: 0};
+            scrub = {wasPlaying: SD.playing, last: 0, atStart: atStart(e)};
             canvas.classList.add("scrubbing");
             if (SD.playing) { Synth.stop(); SD.playing = false; }
             SD.pos = SD.from = t;
@@ -645,15 +652,18 @@
             if (!scrub) return;
             const t = at(e);
             if (t === null) return;
+            scrub.atStart = atStart(e);
             SD.pos = SD.from = t;
             hear(t, false);
             drawWave();
         });
-        const end = () => {
+        const end = e => {
             if (!scrub) return;
-            const resume = scrub.wasPlaying;
+            const home = e && e.type === "pointerup" && Number.isFinite(e.clientX) ? atStart(e) : scrub.atStart;
+            const resume = scrub.wasPlaying && !home;
             scrub = null;
             canvas.classList.remove("scrubbing");
+            if (home) { SD.pos = SD.from = 0; drawWave(); }
             if (resume) startPlaying(SD.pos); else syncSound();
         };
         canvas.addEventListener("pointerup", end);

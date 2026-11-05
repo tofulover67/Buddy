@@ -12,7 +12,10 @@ Rendering
     faster-whisper reads it directly.
   - StartRendering takes the job id itself; given a LIST it returns False.
     Rarely it returns False for a good job too, so it's retried a couple of
-    times (START_TRIES) before giving up.
+    times (START_TRIES). Now and then it refuses every try, and the same
+    render set up again from scratch - a new job - starts at once (pressing
+    Transcribe again did, 2026-11): so that's done once more by itself
+    (RENDER_ROUNDS) before giving up.
   - There is no GetRenderSettings(), so the user's Deliver settings are
     saved as a temporary preset first and loaded back after, whatever
     happens. Render mode is saved separately. The job is always deleted.
@@ -78,6 +81,8 @@ PLACE_TRIES = 2            # the first can land after the timeline's end; the se
 PLACE_TOLERANCE = 1        # frames a cue may be off (rounding) and still be where it belongs
 START_TRIES = 3            # StartRendering: the first try plus two retries, never more
 START_RETRY_WAIT = 1.0     # seconds between them
+RENDER_ROUNDS = 2          # every try refused: the whole render set up again (a new job) once, never more
+ROUND_WAIT = 2.0           # seconds before it is
 
 
 def _render_finished(status: dict) -> bool:
@@ -97,6 +102,10 @@ class TranscribeResolveError(RuntimeError):
 
 class RenderCancelled(Exception):
     pass
+
+
+class _NotStarted(TranscribeResolveError):
+    """StartRendering refused every try for this job (render_timeline_audio sets it all up again)."""
 
 
 @dataclass
@@ -213,7 +222,22 @@ class TranscribeController:
         (first, last) in timeline frames. Deliver settings, render mode and
         the render queue are left exactly as they were. Audit's sound check
         renders with this too (prefix "buddy_audit"). 16-bit: Resolve 21.1
-        won't start an audio-only render at 24 (StartRendering refuses it)."""
+        won't start an audio-only render at 24 (StartRendering refuses it).
+        A render Resolve won't start at all is set up again once, from the
+        start, after ROUND_WAIT - the settings put back in between."""
+        for round_ in range(RENDER_ROUNDS):
+            if round_:
+                time.sleep(ROUND_WAIT)
+                if cancelled():
+                    raise RenderCancelled()
+            try:
+                return self._render_once(out_dir, progress, cancelled, frame_range, prefix)
+            except _NotStarted:
+                if round_ == RENDER_ROUNDS - 1:
+                    raise TranscribeResolveError("Resolve didn't start rendering the timeline audio.") from None
+
+    def _render_once(self, out_dir, progress, cancelled, frame_range, prefix) -> str:
+        """One render_timeline_audio: its own job, the user's settings put back after it."""
         project = self._project()
         self._timeline(project)
         if project.IsRenderingInProgress():
@@ -251,7 +275,7 @@ class TranscribeController:
             if not job:
                 raise TranscribeResolveError("Resolve couldn't add the audio render job.")
             if not self._start_rendering(project, job):
-                raise TranscribeResolveError("Resolve didn't start rendering the timeline audio.")
+                raise _NotStarted("Resolve didn't start rendering the timeline audio.")
             while project.IsRenderingInProgress():
                 if cancelled():
                     project.StopRendering()

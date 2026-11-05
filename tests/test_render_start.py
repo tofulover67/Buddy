@@ -1,7 +1,9 @@
 """Starting Transcribe's audio render (app/pages/transcribe/resolve_ext.py
 render_timeline_audio) against a fake Resolve whose StartRendering refuses
 a set number of times first - what Resolve now and then does for a job that
-starts fine a moment later. It's retried, but only START_TRIES times."""
+starts fine a moment later. It's retried, but only START_TRIES times; and
+when every try is refused, the whole render is set up again with a new job
+- once (RENDER_ROUNDS), as pressing Transcribe again did."""
 
 import os
 import tempfile
@@ -10,14 +12,15 @@ from unittest import mock
 
 import _paths  # noqa: F401
 from pages.transcribe import resolve_ext
-from pages.transcribe.resolve_ext import START_TRIES, TranscribeController, TranscribeResolveError
+from pages.transcribe.resolve_ext import (RENDER_ROUNDS, START_TRIES, RenderCancelled, TranscribeController,
+                                          TranscribeResolveError)
 
 
 class Project:
     def __init__(self, refusals, starts_anyway=False):
         self.refusals, self.starts_anyway = refusals, starts_anyway
         self.start_calls, self.rendering, self.out = 0, False, None
-        self.presets, self.jobs = set(), []
+        self.presets, self.jobs, self.jobs_added = set(), [], 0
 
     # What render_timeline_audio reads and sets around the render.
     def GetCurrentTimeline(self):
@@ -48,8 +51,10 @@ class Project:
         return True
 
     def AddRenderJob(self):
-        self.jobs.append("job-1")
-        return "job-1"
+        self.jobs_added += 1
+        job = f"job-{self.jobs_added}"
+        self.jobs.append(job)
+        return job
 
     def DeleteRenderJob(self, job):
         self.jobs.remove(job)
@@ -91,12 +96,13 @@ class Controller:
 class RenderStartTests(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
-        patcher = mock.patch.object(resolve_ext, "START_RETRY_WAIT", 0)
-        patcher.start()
-        self.addCleanup(patcher.stop)
+        for name in ("START_RETRY_WAIT", "ROUND_WAIT"):
+            patcher = mock.patch.object(resolve_ext, name, 0)
+            patcher.start()
+            self.addCleanup(patcher.stop)
 
-    def render(self, project):
-        return TranscribeController(Controller(project)).render_timeline_audio(self.dir)
+    def render(self, project, cancelled=lambda: False):
+        return TranscribeController(Controller(project)).render_timeline_audio(self.dir, cancelled=cancelled)
 
     def test_starts_first_time(self):
         project = Project(refusals=0)
@@ -108,13 +114,29 @@ class RenderStartTests(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.render(project)))
         self.assertEqual(project.start_calls, START_TRIES)
 
-    def test_gives_up_after_start_tries(self):
+    def test_every_try_refused_then_set_up_again_and_started(self):
+        project = Project(refusals=START_TRIES)     # the first job never starts; a new one does
+        self.assertTrue(os.path.isfile(self.render(project)))
+        self.assertEqual(project.start_calls, START_TRIES + 1)
+        self.assertEqual(project.jobs_added, 2)     # a job of its own the second time
+        self.assertEqual(project.jobs, [])          # both cleaned up
+        self.assertEqual(project.presets, set())    # and the user's settings restored
+
+    def test_gives_up_after_the_second_round(self):
         project = Project(refusals=100)
         with self.assertRaisesRegex(TranscribeResolveError, "didn't start rendering"):
             self.render(project)
-        self.assertEqual(project.start_calls, START_TRIES)
-        self.assertEqual(project.jobs, [])          # the job is still cleaned up
+        self.assertEqual(project.start_calls, START_TRIES * RENDER_ROUNDS)
+        self.assertEqual(project.jobs_added, RENDER_ROUNDS)
+        self.assertEqual(project.jobs, [])          # the jobs are still cleaned up
         self.assertEqual(project.presets, set())    # and the user's settings restored
+
+    def test_stop_pressed_before_the_second_round(self):
+        project = Project(refusals=100)
+        with self.assertRaises(RenderCancelled):
+            self.render(project, cancelled=lambda: project.start_calls >= START_TRIES)
+        self.assertEqual((project.start_calls, project.jobs_added), (START_TRIES, 1))
+        self.assertEqual((project.jobs, project.presets), ([], set()))
 
     def test_refused_but_rendering_counts_as_started(self):
         project = Project(refusals=1, starts_anyway=True)
@@ -135,6 +157,7 @@ class RenderStartTests(unittest.TestCase):
 
     def test_retries_stay_small(self):
         self.assertLessEqual(START_TRIES, 3)       # a first try plus at most two retries
+        self.assertLessEqual(RENDER_ROUNDS, 2)     # set up again once at most
 
 
 if __name__ == "__main__":

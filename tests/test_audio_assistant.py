@@ -1400,6 +1400,28 @@ class TabTests(unittest.TestCase):
         self.js(press % "'.sd-wave'")
         self.until(f"document.querySelector('.sd-transport .btn:not(.ghost)').textContent !== {json.dumps(before)}")
 
+    def test_dragged_back_to_the_start_the_sound_stays_stopped(self):
+        # Playing, the playhead dragged and let go mid-way: it carries on from there. Dragged back to
+        # the start (past it, even) and let go: it stays stopped, at the start.
+        self.sound_design()
+        self.until("/beats before the moment/.test(document.querySelector('.sd-readout').textContent)")
+        button = "document.querySelector('.sd-transport .btn:not(.ghost)').textContent"
+        drag = """const c = document.querySelector('.sd-wave'), r = c.getBoundingClientRect();
+                  const at = x => ({clientX: x, clientY: r.top + 40, button: 0, pointerId: 1, bubbles: true});
+                  c.dispatchEvent(new PointerEvent('pointerdown', at(r.left + r.width * 0.6)));
+                  c.dispatchEvent(new PointerEvent('pointermove', at(%s)));
+                  c.dispatchEvent(new PointerEvent('pointerup', at(%s))); return true;"""
+        self.js("document.querySelector('.sd-transport .btn:not(.ghost)').click(); return true;")
+        self.until(f"{button} === 'Stop'")
+        self.js(drag % ("r.left + r.width * 0.3", "r.left + r.width * 0.3"))
+        self.assertEqual(self.js(f"return {button};"), "Stop")
+        self.js(drag % ("r.left - 40", "r.left - 40"))
+        self.assertEqual(self.js(f"return {button};"), "Play")
+        self.assertTrue(self.js("return document.querySelector('.sd-readout').textContent.startsWith('0.00 s');"))
+        # Stopped, Play starts it from the start.
+        self.js("document.querySelector('.sd-transport .btn:not(.ghost)').click(); return true;")
+        self.until(f"{button} === 'Stop'")
+
 
 if __name__ == "__main__":
     unittest.main()
