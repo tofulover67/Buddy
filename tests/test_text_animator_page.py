@@ -136,6 +136,9 @@ class Clip:
     def GetTrackTypeAndIndex(self):
         return [self.kind, self.track]
 
+    def GetUniqueId(self):          # how the Resolve reader's process finds it again
+        return f"item-{id(self)}"
+
 
 class Timeline:
     def __init__(self, tracks):
@@ -151,6 +154,9 @@ class Timeline:
 
     def GetName(self):
         return "Promo"
+
+    def GetUniqueId(self):
+        return f"timeline-{id(self)}"
 
     def GetTrackCount(self, kind):
         return len(self.tracks) if kind == "video" else 1

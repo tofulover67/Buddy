@@ -8,7 +8,13 @@ Free functions taking a controller, like the other tools (see
 media_relink/resolve_ext.py). The shell's probed connect() owns connection
 lifetime, so this module is pure per-action calls - both of which change
 the Media Pool (import media, create a sub-bin).
+
+The page's import is made in the Resolve reader's process (import_selection,
+"assets.import" - core/busy_job.py), so Buddy keeps drawing while Resolve
+imports: plain data in and out, and no Qt here.
 """
+
+import os
 
 from core.resolve_bridge import ResolveConnectionError
 
@@ -54,3 +60,20 @@ def import_folder_to_media_pool(controller, folder_name, paths):
             "Resolve reported the import failed (check the files are valid media)."
         )
     return imported
+
+
+def import_selection(controller, loose, groups):
+    """Import to Media Pool, from plain paths: `loose` into the open bin,
+    each of `groups` ([name, paths]) into a new bin of its own under it.
+    Files no longer on disk are left out - a group with none left makes no
+    bin. Returns how many items Resolve imported."""
+    present = lambda paths: [p for p in paths if os.path.exists(p)]  # noqa: E731
+    total = 0
+    paths = present(loose)
+    if paths:
+        total += len(import_to_media_pool(controller, paths))
+    for name, group in groups:
+        paths = present(group)
+        if paths:
+            total += len(import_folder_to_media_pool(controller, name, paths))
+    return total

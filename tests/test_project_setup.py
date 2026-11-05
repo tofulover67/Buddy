@@ -12,6 +12,7 @@ import unittest
 from unittest import mock
 
 import _paths  # noqa: F401
+from core.resolve_reader_child import JOBS as READER_JOBS
 from pages.project_setup import bins, importer, proxy, sync_report
 
 try:
@@ -273,6 +274,190 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(lines[1][1], "warn")
 
 
+# ---------------------------------------------- the reader's process jobs --
+
+# The JOBS lines core/resolve_reader_child.py needs for Project Setup's steps
+# behind the overlay (page.py _busy_job): what the page asks for, by name.
+PROJECT_SETUP_JOBS = {
+    "project_setup.metadata": ("pages.project_setup.resolve_jobs", "apply_metadata"),
+    "project_setup.bins": ("pages.project_setup.resolve_jobs", "create_bins"),
+    "project_setup.import_folder": ("pages.project_setup.resolve_jobs", "import_folder"),
+    "project_setup.populate": ("pages.project_setup.resolve_jobs", "add_to_timeline"),
+    "project_setup.expand": ("pages.project_setup.resolve_jobs", "expand"),
+    "project_setup.align": ("pages.project_setup.resolve_jobs", "align"),
+    "project_setup.shift": ("pages.project_setup.resolve_jobs", "shift"),
+    "project_setup.read_timeline": ("pages.project_setup.resolve_jobs", "read_timeline"),
+    "project_setup.import_timeline": ("pages.project_setup.resolve_jobs", "import_timeline"),
+}
+
+
+def plain(value):
+    """`value` as the pipe between the processes carries it."""
+    return json.loads(json.dumps(value))
+
+
+class TimelinePool(Pool):
+    """A Media Pool that imports a timeline file, as Resolve's does."""
+
+    def __init__(self, project=None):
+        super().__init__()
+        self.project, self.imports = project, []
+
+    def ImportTimelineFromFile(self, path, options):
+        self.imports.append((path, options["timelineName"]))
+        timeline = Timeline(options["timelineName"])
+        self.project.timelines.append(timeline)
+        return timeline
+
+
+class TimelineProject(Project):
+    def __init__(self):
+        super().__init__(TimelinePool(self))
+        self.timelines = []
+
+    def GetTimelineCount(self):
+        return len(self.timelines)
+
+    def GetTimelineByIndex(self, index):
+        return self.timelines[index - 1]
+
+
+class ResolveJobTests(unittest.TestCase):
+    """resolve_jobs: each step from plain args, as the Resolve reader's
+    process calls it (function(controller, **args)), answering plain data."""
+
+    def setUp(self):
+        from pages.project_setup import resolve_jobs
+        self.jobs = resolve_jobs
+        self.shell = ShellController()
+        self.pool = self.shell.pool
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+
+    def test_nothing_it_imports_needs_qt(self):
+        """The reader's process has no Qt: importing the jobs mustn't bring it in."""
+        import subprocess
+        import sys
+        app = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app")
+        code = ("import sys; sys.path.insert(0, sys.argv[1]); import pages.project_setup.resolve_jobs; "
+                "print(sorted(m for m in sys.modules if m.split('.')[0] in ('PySide6', 'shiboken6')))")
+        out = subprocess.run([sys.executable, "-I", "-c", code, app], capture_output=True, text=True, timeout=60)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertEqual(out.stdout.strip(), "[]")
+
+    def test_the_proposed_jobs_are_there(self):
+        for name, (module, function) in PROJECT_SETUP_JOBS.items():
+            self.assertEqual(module, "pages.project_setup.resolve_jobs", name)
+            self.assertTrue(callable(getattr(self.jobs, function, None)), name)
+
+    @unittest.skipUnless(any(name.startswith("project_setup.") for name in READER_JOBS),
+                         "the JOBS lines aren't in resolve_reader_child.py yet")
+    def test_the_reader_process_knows_every_one(self):
+        for name, target in PROJECT_SETUP_JOBS.items():
+            self.assertEqual(READER_JOBS.get(name), target, name)
+
+    def test_create_bins(self):
+        rows = plain(bins.plan("01_Footage\n>A-Cam\n02_Audio"))
+        self.pool.refuse = {"A-Cam"}
+        answer = self.jobs.create_bins(self.shell, **plain({"rows": rows}))
+        self.assertEqual(plain(answer), answer)
+        self.assertEqual((answer["created"], answer["failed"]), (2, 1))
+        self.assertEqual(answer["lines"], [["Resolve didn't create the bin 'A-Cam'.", "error"]])
+        self.assertEqual(self.pool.tree(), ["01_Footage", "02_Audio"])
+
+    def test_import_folder_leaves_its_bin_open_and_answers_plain_data(self):
+        root = os.path.join(self._tmp.name, "Card A")
+        for rel in ("C0001.MP4", "Sound/T01.WAV"):
+            os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True)
+            open(os.path.join(root, rel), "w").close()
+        day = self.pool.AddSubFolder(self.pool.root, "Day 1")
+        self.pool.current = day
+        answer = self.jobs.import_folder(self.shell, **plain({"folder": root, "to_master": False}))
+        self.assertEqual(plain(answer), answer)                 # no Media Pool folder in it
+        self.assertEqual(answer["result"], {"imported": 2, "bin": "Card A", "failed_bins": 0, "skipped_dirs": 0})
+        self.assertFalse(answer["failed"])
+        self.assertEqual(self.pool.tree(), ["Day 1", "  Card A", "    Sound"])
+        self.assertIs(self.pool.current, day.subs[0])
+        answer = self.jobs.import_folder(self.shell, folder=root, to_master=True)
+        self.assertEqual(self.pool.tree()[-2:], ["Card A", "  Sound"])
+
+    def test_import_folder_says_why_it_stopped(self):
+        self.shell.project = None
+        self.shell.resolve.pm.project = None
+        answer = self.jobs.import_folder(self.shell, folder=self._tmp.name)
+        self.assertEqual((answer["result"], answer["failed"]), (None, True))
+        self.assertIn("No project is open", answer["error"])
+
+    def test_metadata_only_for_the_clips_loaded(self):
+        from test_project_metadata import MetadataClip
+        from pages.project_setup import metadata
+        a, b, other = MetadataClip("A"), MetadataClip("B"), MetadataClip("Other")
+        self.pool.selected = [a, b]
+        loaded = self.jobs.plain_signature(metadata.signature(self.shell.project, [a, b]))
+        self.pool.selected = [other]
+        answer = self.jobs.apply_metadata(self.shell, **plain({"changes": {"Scene": "4"}, "signature": loaded}))
+        self.assertIn("selected clips changed", answer["refused"])
+        self.assertEqual(a.writes + b.writes + other.writes, [])
+        self.pool.selected = [b, a]
+        answer = self.jobs.apply_metadata(self.shell, **plain({"changes": {"Scene": "4"}, "signature": loaded}))
+        self.assertEqual(plain(answer), {"updated": 2, "count": 2, "failures": []})
+        self.assertEqual((a.meta["Scene"], b.meta["Scene"]), ("4", "4"))
+
+    def test_add_to_timeline_says_where_it_stopped(self):
+        cams = self.pool.AddSubFolder(self.pool.root, "Cams")
+        self.pool.current = cams
+        self.assertEqual(self.jobs.add_to_timeline(self.shell, recursive=True),
+                         {"stage": "empty", "name": "Cams", "count": 0})
+        cams.clips = [Clip("a"), Clip("b"), Clip("TL", kind="Timeline")]
+        answer = self.jobs.add_to_timeline(self.shell, recursive=False)
+        self.assertEqual(plain(answer), {"stage": "", "name": "Cams", "count": 2, "created_new": True, "placed": 2})
+        self.assertEqual(self.pool.created_timeline, ("Cams", 2))
+        self.shell.project.timeline = Timeline("Edit")
+        self.assertFalse(self.jobs.add_to_timeline(self.shell)["created_new"])
+        with mock.patch.object(Pool, "AppendToTimeline", side_effect=RuntimeError("busy")):
+            self.assertEqual(self.jobs.add_to_timeline(self.shell)["stage"], "append")
+
+    def test_remove_gaps_only_for_a_timeline_synced_here(self):
+        from pages.project_setup import otio_engine
+        self.shell.project.timeline = Timeline("Edit")
+        key = [self.shell.project.GetUniqueId(), "tl-Edit"]
+        stats = {"clips": 2, "lead_in_removed": 0, "gaps": 1, "gap_frames_removed": 20, "name": "Shifted"}
+        with mock.patch.object(otio_engine, "shift_timeline", return_value=(Timeline("Shifted"), stats)) as shift:
+            with self.assertRaises(otio_engine.OtioError):
+                self.jobs.shift(self.shell, **plain({"close_gaps": True, "targets": [["other", "tl-Edit"]]}))
+            shift.assert_not_called()
+            answer = self.jobs.shift(self.shell, **plain({"close_gaps": True, "targets": [key]}))
+            self.assertTrue(shift.call_args.kwargs["close_gaps"])
+        self.assertEqual(plain(answer)["key"], key)
+        self.assertTrue(all(isinstance(text, str) for text, _kind in answer["lines"]))
+
+    def test_a_sync_jobs_export_and_import_go_by_path(self):
+        from pages.project_setup import otio_engine
+        project = TimelineProject()
+        self.shell.project = project
+        self.shell.resolve.pm.project = project
+        project.timeline = Timeline("Day 1")
+        project.timelines = [project.timeline, Timeline("Day 1 (Collapsed)")]
+        document = {"tracks": {"children": [{"kind": "Video", "children": []}]}}
+        workdir = os.path.join(self._tmp.name, "export")
+        os.makedirs(workdir)
+        with mock.patch.object(otio_engine, "read_current_timeline", return_value=(document, [], workdir)):
+            read = self.jobs.read_timeline(self.shell, **plain({"tracks": True}))
+        self.assertEqual(plain(read), {"path": os.path.join(workdir, "current.otio"), "workdir": workdir,
+                                       "name": "Day 1", "tracks": [1, 1]})
+        self.assertEqual(otio_engine.load_document(read["path"]), document)    # what the worker reads
+        rebuilt = otio_engine.write_document({"rebuilt": True}, workdir, "collapsed.otio")
+        answer = self.jobs.import_timeline(self.shell, **plain({"path": rebuilt, "base_name": "Day 1",
+                                                                "suffix": "(Collapsed)", "what": "rebuilt",
+                                                                "key": True}))
+        self.assertEqual(project.pool.imports, [(rebuilt, "Day 1 (Collapsed) (2)")])   # never a name taken
+        self.assertEqual(plain(answer), {"name": "Day 1 (Collapsed) (2)", "tracks": [1, 1],
+                                         "key": [project.GetUniqueId(), "tl-Day 1 (Collapsed) (2)"]})
+        with mock.patch.object(TimelinePool, "ImportTimelineFromFile", return_value=None):
+            with self.assertRaisesRegex(otio_engine.OtioError, "refused to import the synced timeline"):
+                self.jobs.import_timeline(self.shell, rebuilt, "Day 1", "(Audio Synced)", what="synced")
+
+
 # ------------------------------------------------------------------ page --
 
 class Host:
@@ -295,8 +480,9 @@ class Host:
         pass
 
 
-@unittest.skipUnless(HAVE_QT, "PySide6 not installed")
-class PageTests(unittest.TestCase):
+class _PageCase(unittest.TestCase):
+    """The page over the fake Media Pool (no tests of its own)."""
+
     def setUp(self):
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         self.app = QApplication.instance() or QApplication([])
@@ -330,6 +516,9 @@ class PageTests(unittest.TestCase):
                     thread.join(5)
             self.app.processEvents()
 
+
+@unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+class PageTests(_PageCase):
     def test_settings_stay_in_the_scratch_folder(self):
         self.page.on_bins_text({"text": "X\n>Y"})
         self.assertTrue(os.path.exists(os.path.join(self._tmp.name, "settings.json")))
@@ -479,7 +668,7 @@ class PageTests(unittest.TestCase):
 
                 with mock.patch.object(otio_engine, "read_current_timeline", return_value=({}, [], self._tmp.name)), \
                         mock.patch.object(otio_engine, "assemble_document", return_value=({}, {"aligned": 2, "total": 2}, [])), \
-                        mock.patch.object(otio_engine, "import_rebuilt", side_effect=imported):
+                        mock.patch.object(otio_engine, "import_file", side_effect=imported):
                     self.page._read_sync(self.page.controller)
                     self.assertFalse(self.last("sync")["can_remove_gaps"])
                     self.page.on_assemble(None)
@@ -808,7 +997,7 @@ class PageTests(unittest.TestCase):
                 mock.patch("pages.project_setup.proxy.render_one", side_effect=slow_render), \
                 mock.patch.object(otio_engine, "read_current_timeline", return_value=({}, [], self._tmp.name)), \
                 mock.patch.object(otio_engine, "collapse_document_from", side_effect=slow_collapse), \
-                mock.patch.object(otio_engine, "import_rebuilt",
+                mock.patch.object(otio_engine, "import_file",
                                   return_value=mock.Mock(**{"GetName.return_value": "Day 1 (Collapsed)",
                                                             "GetTrackCount.return_value": 2})), \
                 mock.patch("pages.project_setup.resolve_ext.ProjectSetupController.get_current_timeline",
@@ -864,6 +1053,193 @@ class PageTests(unittest.TestCase):
             self.page.on_proxy_go(None)
         self.assertEqual(self.last("alert")["title"], "No clips to proxy")
         self.assertIn("Select one or more clips", self.last("alert")["text"])
+
+
+class ReaderProcess:
+    """The Resolve reader's process, played here: the request as the pipe
+    carries it, answered by resolve_reader_child.answer() with the
+    Project Setup JOBS lines in - its reply as JSON again, and only on a
+    later turn of the event loop, as the pipe's would arrive (never inside
+    ask(): the page has to carry on without it)."""
+
+    def __init__(self, controller):
+        self.controller, self.asked = controller, []
+
+    def available(self):
+        return True
+
+    def ask(self, name, args, done):
+        from core import resolve_reader_child as child
+        from core.resolve_reader import ReadError
+        request = plain({"id": len(self.asked) + 1, "do": name, "args": args})
+        self.asked.append(name)
+
+        def reply():
+            with mock.patch.dict(child.JOBS, PROJECT_SETUP_JOBS):
+                data = json.loads(json.dumps(child.answer(request, self.controller), default=child._plain))
+            if data["ok"]:
+                done(data["result"], None)
+            else:
+                done(None, ReadError(data["error"], data["type"]))
+
+        QTimer.singleShot(0, reply)
+        return True
+
+
+@unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+class ReaderPageTests(_PageCase):
+    """The steps behind the overlay, with a Resolve reader's process there:
+    the page asks it (core/busy_job.py), keeps going meanwhile, and does
+    what it did before once the answer's in."""
+
+    def setUp(self):
+        super().setUp()
+        self.reader = ReaderProcess(self.host.controller)
+        self.page._calls.reader = self.reader
+
+    def wait(self, until, seconds=5):
+        deadline = time.monotonic() + seconds
+        while not until() and time.monotonic() < deadline:
+            self.app.processEvents()
+            time.sleep(0.005)
+        self.assertTrue(until())
+
+    def idle(self):
+        return not self.page._sync_busy and self.page._worker is None and not self.page._job
+
+    def test_create_bins_waits_for_the_reader_with_the_overlay_up(self):
+        self.page.on_bins_text({"text": "01_Footage\n>A-Cam\n02_Audio"})
+        self.page.on_create_bins(None)
+        self.assertEqual(self.reader.asked, ["project_setup.bins"])
+        self.assertEqual(self.pool.tree(), [])              # asked, not made yet: Buddy carries on
+        self.assertEqual(self.host.busy, [True])
+        self.assertEqual(self.page.working_on(), "Creating bins…")      # quitting asks first
+        self.assertTrue(self.last("state")["overlay"])
+        self.page._dispatch("create_bins", None)            # the overlay's actions wait
+        self.assertEqual(self.reader.asked, ["project_setup.bins"])
+        self.wait(self.idle)
+        self.assertEqual(self.pool.tree(), ["01_Footage", "  A-Cam", "02_Audio"])
+        self.assertEqual(self.host.busy, [True, False])
+        self.assertEqual(self.logs("bins")[-1], "Created 3 bins in the Media Pool.")
+        self.assertIsNone(self.page.working_on())
+        self.assertFalse(self.last("state")["overlay"])
+
+    def test_import_and_add_to_the_timeline(self):
+        folder = os.path.join(self._tmp.name, "Card A")
+        os.makedirs(folder)
+        open(os.path.join(folder, "C0001.MP4"), "w").close()
+        self.page.import_folder = folder
+        day = self.pool.AddSubFolder(self.pool.root, "Day 1")
+        self.pool.current = day
+        self.page.on_import_folder(None)
+        self.wait(self.idle)
+        self.assertEqual(self.pool.tree(), ["Day 1", "  Card A"])
+        self.assertIs(self.pool.current, day.subs[0])
+        self.assertEqual(self.last("toast")["text"], "Imported 1 clip into 'Card A'")
+        self.page.on_add_to_timeline(None)
+        self.wait(self.idle)
+        self.assertEqual(self.pool.created_timeline, ("Card A", 1))
+        self.assertEqual(self.logs("populate")[-1], "No timeline was open, so created 'Card A' with 1 clip(s).")
+        self.pool.current = self.pool.AddSubFolder(day.subs[0], "Empty")
+        self.page.on_add_to_timeline(None)
+        self.wait(self.idle)
+        self.assertEqual(self.last("alert")["title"], "No clips found")
+        self.assertEqual(self.reader.asked, ["project_setup.import_folder", "project_setup.populate",
+                                             "project_setup.populate"])
+
+    def test_metadata_is_applied_there_only_to_the_clips_loaded(self):
+        from test_project_metadata import MetadataClip
+        a, b = MetadataClip("A"), MetadataClip("B")
+        self.pool.selected = [a, b]
+        self.page.on_metadata_load(None)
+        revision = self.last("metadata")["revision"]
+        self.page.on_metadata_apply({"revision": revision, "changes": {"Scene": "4"}})
+        self.assertNotIn("Scene", a.meta)
+        self.wait(self.idle)
+        self.assertEqual((a.meta["Scene"], b.meta["Scene"]), ("4", "4"))
+        self.assertEqual(self.last("toast")["text"], "Updated metadata on 2 clips")
+        revision = self.last("metadata")["revision"]
+        self.pool.selected = [MetadataClip("Other")]
+        self.page.on_metadata_apply({"revision": revision, "changes": {"Scene": "5"}})
+        self.wait(self.idle)
+        self.assertIn("selected clips changed", self.last("alert")["text"])
+        self.assertEqual(a.meta["Scene"], "4")
+
+    def test_a_sync_job_exports_and_imports_there_and_its_worker_reads_the_file(self):
+        from pages.project_setup import otio_engine
+        self.host.controller.project.timeline = Timeline("Day 1")
+        exported = {"tracks": {"children": [{"kind": "Video", "children": []}]}}
+        seen = []
+
+        def collapse(document, delete_silent_audio, ffmpeg_path, progress_cb):
+            seen.append(document)
+            return {"collapsed": True}, 1, 0, []
+
+        def imported(controller, path, base_name, suffix, what="rebuilt"):
+            seen.append((otio_engine.load_document(path), base_name, suffix))
+            return Timeline(f"{base_name} {suffix}")
+
+        workdir = os.path.join(self._tmp.name, "export")
+        os.makedirs(workdir)
+        with mock.patch.object(otio_engine, "read_current_timeline", return_value=(exported, [], workdir)), \
+                mock.patch.object(otio_engine, "collapse_document_from", side_effect=collapse), \
+                mock.patch.object(otio_engine, "import_file", side_effect=imported):
+            self.page.on_collapse(None)
+            self.assertIsNone(self.page._job)               # still reading the timeline
+            self.assertEqual(self.host.busy, [True])
+            self.wait(self.idle)
+        self.assertEqual(self.reader.asked, ["project_setup.read_timeline", "project_setup.import_timeline"])
+        self.assertEqual(seen, [exported, ({"collapsed": True}, "Day 1", "(Collapsed)")])
+        self.assertEqual(self.host.busy, [True, False, True, False])
+        self.assertIn('Created "Day 1 (Collapsed)"', " ".join(self.logs("sync")))
+        self.assertRegex(self.logs("sync")[-1], r"^Took \d+s\.$")
+
+    def test_an_error_there_is_said_as_it_was_here(self):
+        from pages.project_setup import otio_engine
+        self.page.on_expand(None)                           # no timeline open
+        self.wait(self.idle)
+        self.assertEqual(self.last("alert")["title"], "Couldn't expand")
+        self.assertIn("No timeline is open", self.last("alert")["text"])
+        self.host.controller.project.timeline = Timeline("Day 1")
+        with mock.patch.object(otio_engine, "expand_timeline", side_effect=KeyError("clips")):
+            self.page.on_expand(None)
+            self.wait(self.idle)
+        self.assertEqual(self.logs("sync")[-1], "Error: KeyError: 'clips'")   # a bug: its class, no stack here
+
+    def test_an_automation_step_waits_for_the_answer(self):
+        class Run:
+            def __init__(self):
+                self.lines, self.result, self.on_stop = [], None, None
+
+            def log(self, text, kind="info"):
+                self.lines.append((text, kind))
+
+            def progress(self, text, pct=None):
+                pass
+
+            def done(self, summary=""):
+                self.result = (True, summary)
+
+            def fail(self, message):
+                self.result = (False, message)
+
+        run = Run()
+        self.page.run_automation_step("bins", {"bin_list": "A\n>B"}, run)
+        self.assertIsNone(run.result)                       # asked, not answered: the step's still going
+        self.assertNotEqual(self.page.data_mgr.settings.get("bin_list"), "A\n>B")    # the tab's put back
+        self.wait(lambda: run.result is not None)
+        self.assertEqual(run.result, (True, "Created 2 bins in the Media Pool."))
+        self.assertIsNone(self.page._auto)
+        self.host.controller.project.timeline = Timeline("Day 1")
+        stats = {"clips": 2, "lead_in_removed": 4, "gaps": 0, "gap_frames_removed": 0, "name": "Day 1 (Shifted)"}
+        from pages.project_setup import otio_engine
+        with mock.patch.object(otio_engine, "shift_timeline", return_value=(Timeline("Day 1 (Shifted)"), stats)):
+            run = Run()
+            self.page.run_automation_step("shift", {"close_gaps": False}, run)
+            self.assertIsNone(run.result)
+            self.wait(lambda: run.result is not None)
+        self.assertEqual(run.result, (True, 'Created "Day 1 (Shifted)" – the timeline you started from is unchanged.'))
+        self.assertIsNone(self.page._auto)
 
 
 if __name__ == "__main__":

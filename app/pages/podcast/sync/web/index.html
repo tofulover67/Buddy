@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Podcast Sync</title>
+    <link rel="stylesheet" href="../../../../web/buddy.css">
+    <link rel="stylesheet" href="sync.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page ps">
+    <header class="page-head">
+        <h1 class="page-title">Podcast</h1>
+    </header>
+
+    <nav class="tabs" role="tablist" id="podcast-tabs" aria-label="Podcast tools">
+        <button type="button" role="tab" data-tab="sync" aria-selected="true">Sync</button>
+        <button type="button" role="tab" data-tab="switch" aria-selected="false">Auto Switch</button>
+        <button type="button" role="tab" data-tab="text" aria-selected="false">Text Edit</button>
+    </nav>
+
+    <div class="ps-scroll">
+        <!-- ---------------------------------------------------- 1. what -->
+        <section class="card ps-card">
+            <div class="card-head">
+                <h2 class="section-title"><span class="ps-num">1</span> The recordings</h2>
+            </div>
+            <p class="muted ps-desc">Every camera and recorder of one recording. Buddy groups the clips by the device
+                they came from - each gets its own track - and keeps a camera's split files one after another.</p>
+            <div class="row wrap">
+                <div class="segmented" id="source" role="group" aria-label="What to sync">
+                    <button type="button" data-value="selected" title="The clips selected in the Media Pool">Selected clips</button>
+                    <button type="button" data-value="bin" title="Every clip in the Media Pool's open bin">Current bin</button>
+                    <button type="button" data-value="timeline" title="The clips on the open timeline">Open timeline</button>
+                </div>
+                <button type="button" class="btn" id="scan">Find the devices</button>
+            </div>
+            <div class="muted small" id="scan-what"></div>
+        </section>
+
+        <!-- ------------------------------------------------- 2. devices -->
+        <section class="card ps-card" id="devices-card" hidden>
+            <div class="card-head">
+                <h2 class="section-title"><span class="ps-num">2</span> Cameras and mics</h2>
+            </div>
+            <p class="muted ps-desc">Rename a device to name its track, put them in the order you want the tracks,
+                and move a clip that landed in the wrong one. The master clock is what every other recording is
+                measured against - usually the podcast's own recorder.</p>
+            <div class="ps-devices" id="devices"></div>
+        </section>
+
+        <!-- ---------------------------------------------------- 3. sync -->
+        <section class="card ps-card">
+            <div class="card-head">
+                <h2 class="section-title"><span class="ps-num">3</span> Sync</h2>
+            </div>
+            <div class="row wrap">
+                <span class="ps-lbl">Sync by</span>
+                <div class="segmented" id="method" role="group" aria-label="Sync by">
+                    <button type="button" data-value="timecode" title="Each clip's own timecode - for cameras and recorders jammed to one clock">Timecode</button>
+                    <button type="button" data-value="waveform" title="Match the recordings by the sound they share - no timecode needed">Sound</button>
+                </div>
+            </div>
+            <label class="check" id="fine-box"><input type="checkbox" id="fine"> Fine-tune with sound and check for drift
+                <span class="muted small">(places recordings with no timecode too)</span></label>
+            <div class="row wrap">
+                <span class="ps-lbl">Cameras' own sound</span>
+                <select class="field" id="camera-audio" aria-label="Cameras' own sound">
+                    <option value="tracks">On its own tracks, below the mics</option>
+                    <option value="muted">On its own tracks, turned off</option>
+                    <option value="none">Leave it out</option>
+                </select>
+            </div>
+            <div class="ps-note" id="ffmpeg-note" hidden>Syncing by sound needs ffmpeg, and Buddy couldn't find it.
+                Install ffmpeg, or say where it is in Project Setup's settings.</div>
+            <div class="row">
+                <button type="button" class="btn accent big" id="sync">Build synced timeline</button>
+            </div>
+            <p class="muted small ps-desc">You get a new timeline: a video track per camera and an audio track per
+                mic. Nothing you already have is changed.</p>
+        </section>
+
+        <!-- ------------------------------------------------------ job -->
+        <section class="card ps-job" id="job" hidden>
+            <div class="row">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="strong" id="job-label"></span>
+                <span class="muted small" id="job-clock"></span>
+                <div class="spacer"></div>
+                <button type="button" class="btn" id="cancel">Cancel</button>
+            </div>
+            <div class="ps-bar"><i id="job-bar"></i></div>
+            <div class="muted small" id="job-stage"></div>
+        </section>
+
+        <!-- --------------------------------------------------- result -->
+        <section class="card ps-card" id="result" hidden>
+            <div class="card-head">
+                <h2 class="section-title">Synced</h2>
+            </div>
+            <div class="ps-result-name" id="result-name" translate="no"></div>
+            <div class="muted" id="result-summary"></div>
+            <div id="result-drift"></div>
+            <div id="result-unplaced"></div>
+            <ul class="ps-warnings" id="result-warnings"></ul>
+        </section>
+
+        <details class="ps-activity" id="activity" hidden><summary class="muted small">Activity</summary><ol class="ps-log" id="log"></ol></details>
+    </div>
+</main>
+<script src="../../web/tabs.js"></script>
+<script src="sync.js"></script>
+</body>
+</html>

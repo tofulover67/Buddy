@@ -1,0 +1,73 @@
+/* Podcast Sync - see index.html. Buddy's shared styles (buddy.css) do the rest. */
+
+.ps { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+.ps-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--card-gap, 12px); padding-bottom: 16px; }
+
+.ps-card { flex: none; display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; }
+.ps-card > :not(.card-head) { margin: 0 16px; }
+.ps-desc { margin-top: 0; margin-bottom: 0; line-height: 1.5; }
+.ps-num {
+    display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 6px;
+    border-radius: var(--r-full); background: var(--raised-bg); color: var(--text-strong);
+    font-size: var(--fs-sm); font-weight: 700;
+}
+.ps-lbl { font-size: var(--fs-sm); font-weight: 600; color: var(--text-dim); margin-right: 4px; }
+.ps-note { font-size: var(--fs-sm); line-height: 1.45; padding: 8px 12px; border-radius: var(--r-sm);
+           background: var(--raised-bg); color: var(--danger-text); }
+
+/* ------------------------------------------------------------ devices -- */
+
+.ps-devices { display: flex; flex-direction: column; gap: 8px; }
+.ps-device { border: var(--bw) solid var(--card-border); border-radius: var(--r-sm); padding: 8px 10px; }
+.ps-device-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ps-device-head .field { width: 14em; max-width: 100%; }
+.ps-kind { font-size: var(--fs-xs); font-weight: 700; padding: 2px 8px; border-radius: var(--r-full);
+           background: var(--raised-bg); color: var(--text-strong); text-transform: uppercase; letter-spacing: .03em; }
+.ps-kind.mic { color: var(--emphasis); }
+.ps-arrows { display: flex; gap: 2px; }
+.ps-arrows .btn { min-width: 0; padding: 0 8px; }
+.ps-master { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--text-dim); cursor: pointer; }
+.ps-master input { accent-color: var(--primary); }
+.ps-clips { margin: 8px 0 0; }
+.ps-clips summary { cursor: pointer; font-size: var(--fs-sm); color: var(--text-dim); width: max-content; }
+.ps-clip { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center;
+           padding: 4px 0 4px 14px; font-size: var(--fs-sm); }
+.ps-clip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ps-clip .field { max-width: 12em; }
+
+/* ---------------------------------------------------------------- job -- */
+
+.ps-job { flex: none; padding: var(--card-pad, 14px); display: flex; flex-direction: column; gap: 8px; border-color: var(--emphasis-line); }
+.ps-bar { height: 6px; border-radius: var(--r-full); background: var(--raised-bg); overflow: hidden; }
+.ps-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--emphasis-fill); transition: width .3s; }
+.ps-bar.indeterminate i { width: 30%; animation: ps-slide 1.4s ease-in-out infinite; }
+@keyframes ps-slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+@media (prefers-reduced-motion: reduce) { .ps-bar.indeterminate i { animation: none; width: 100%; opacity: .6; } }
+
+/* ------------------------------------------------------------- result -- */
+
+.ps-result-name { font-size: var(--fs-lg); font-weight: 700; color: var(--text-strong); overflow-wrap: anywhere; }
+.ps-sub { font-size: var(--fs-sm); font-weight: 700; color: var(--text-strong); margin: 6px 0 4px; }
+.ps-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.ps-table th { text-align: left; color: var(--text-dim); font-weight: 600; padding: 4px 8px 4px 0; }
+.ps-table td { padding: 4px 8px 4px 0; border-top: var(--bw) solid color-mix(in srgb, var(--card-border) 60%, transparent); }
+.ps-table td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ps-table tr.warn td { color: var(--danger-text); }
+.ps-warnings { margin: 0; padding-left: 18px; font-size: var(--fs-sm); color: var(--second-text); display: flex; flex-direction: column; gap: 4px; }
+.ps-warnings:empty { display: none; }
+
+/* ----------------------------------------------------------- activity -- */
+
+.ps-activity { flex: none; }
+.ps-activity summary { cursor: pointer; padding: 2px 4px; width: max-content; }
+.ps-log { list-style: none; margin: 6px 0 0; padding: 0 4px; display: flex; flex-direction: column; gap: 4px;
+          font-size: var(--fs-sm); max-height: 180px; overflow-y: auto; }
+.ps-log li { white-space: pre-wrap; overflow-wrap: anywhere; }
+.ps-log .time { color: var(--text-dim); margin-right: 8px; font-variant-numeric: tabular-nums; }
+.ps-log .k-success { color: var(--text-strong); }
+.ps-log .k-warn { color: var(--second-text); }
+.ps-log .k-error { color: var(--danger-text); }
+
+@media (max-width: 520px) {
+    .ps-clip { grid-template-columns: minmax(0, 1fr); }
+}

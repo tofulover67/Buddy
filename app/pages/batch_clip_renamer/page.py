@@ -27,6 +27,7 @@ import time
 
 from PySide6.QtCore import QTimer
 
+from core import busy_job
 from core.resolve_bridge import ResolveConnectionError
 from core.resolve_reader import ResolveCalls
 from core.web_page import WebToolPage
@@ -45,7 +46,9 @@ SLOW_POLL_SECONDS = 0.25
 ACTION_WAIT_S = 1.5
 BUSY_TEXT = "Resolve isn't answering – usually because the timeline is playing. Stop playback and try again."
 LOG_LIMIT = 50
-# Above this many clips the rename shows the shell's busy overlay.
+# Above this many clips the rename shows the shell's busy overlay - and is
+# made in the Resolve reader's process (core/busy_job.py), Buddy drawing
+# meanwhile; at or below it, here, as quick as the click.
 BUSY_ABOVE = 20
 
 
@@ -102,13 +105,6 @@ class BatchClipRenamerPage(WebToolPage):
             except ResolveConnectionError:
                 return None
         return self.host.controller if getattr(self.host, "connected", False) else None
-
-    def _read(self, controller):
-        """(clips, names, keys, where) for the current scope, or raises
-        TargetError."""
-        clips, where = resolve_ext.read_targets(controller, self.scope)
-        return clips, [resolve_ext.clip_name(c) for c in clips], \
-            [resolve_ext.clip_key(c) for c in clips], where
 
     def _refresh(self, connect):
         """Reads the preview's clips (in the Resolve reader's process); the page
@@ -228,50 +224,52 @@ class BatchClipRenamerPage(WebToolPage):
             return
         if not self._resolve_free():
             return
+        # The rename reads the clips afresh and renames only if they're the
+        # ones the preview shows (resolve_ext.rename) - so as many as the
+        # preview says will change.
+        rows, problem = renamer.plan(self._names, self.inputs)
+        count = 0 if problem else sum(1 for r in rows if r["changed"])
+        args = {"scope": self.scope, "keys": list(self._keys), "names": list(self._names),
+                "inputs": dict(self.inputs)}
+        if count > BUSY_ABOVE:
+            progress = lambda n, total: self.host.pump_busy(f"Renaming clips… {n} of {total}")  # noqa: E731
+            busy_job.run(self.host, self._calls, "renamer.rename", args,
+                         lambda: resolve_ext.rename(controller, progress=progress, **args),
+                         lambda result, error: self._on_renamed(result, error, far=True),
+                         f"Renaming {count} clips…")
+            return
         try:
-            clips, names, keys, where = self._read(controller)
-        except TargetError as exc:
-            self._add_log(str(exc), "error")
+            result, error = resolve_ext.rename(controller, **args), None
+        except Exception as exc:  # noqa: BLE001 - TargetError: nothing to rename
+            result, error = None, exc
+        self._on_renamed(result, error, far=False)
+
+    def _on_renamed(self, result, error, far):
+        """far: made through busy_job - maybe in the reader's process, which
+        then holds the renamed clips - and so its Undo is too."""
+        if error is not None:
+            # TargetError's words (from the reader's process, a ReadError of
+            # that kind) - or the reader's process stopped.
+            self._add_log(str(error), "error")
             self._refresh(connect=False)
             return
-        if keys != self._keys or names != self._names:
+        if result["changed"]:
             # Something changed in Resolve since the preview was drawn.
             # Show the new preview and let the user look before renaming.
-            self._names, self._keys, self._where = names, keys, where
+            self._names, self._keys, self._where = result["names"], result["keys"], result["where"]
             self._push_state()
             self.emit("toast", {"text": "The clips changed in Resolve – check the preview, then Rename again."})
             return
-
-        rows, problem = renamer.plan(names, self.inputs)
-        todo = [(clip, row) for clip, row in zip(clips, rows) if row["changed"]]
-        if problem or not todo:
+        if not result["todo"]:
             return
-
-        busy = len(todo) > BUSY_ABOVE
-        if busy:
-            self.host.set_busy(True, f"Renaming {len(todo)} clips…")
-        done, failed = [], []
-        try:
-            for n, (clip, row) in enumerate(todo, 1):
-                ok = False
-                try:
-                    ok = bool(clip.SetClipProperty("Clip Name", row["new"]))
-                except Exception:
-                    ok = False
-                (done if ok else failed).append((clip, row["old"], row["new"]))
-                if busy and n % 25 == 0:
-                    self.host.pump_busy(f"Renaming clips… {n} of {len(todo)}")
-        finally:
-            if busy:
-                self.host.set_busy(False)
-
+        done, failed, where = result["done"], result["failed"], result["where"]
         if done:
-            self._undo = {"items": done, "where": where}
+            self._undo = {"items": done, "where": where, "far": far}
             self.achieve("renamed", len(done))
             self._add_log(f"Renamed 1 clip in {where}." if len(done) == 1
                           else f"Renamed {len(done)} clips in {where}.", "success")
         if failed:
-            names_failed = ", ".join(old for _c, old, _n in failed[:5])
+            names_failed = ", ".join(old for _k, old, _n in failed[:5])
             more = f" and {len(failed) - 5} more" if len(failed) > 5 else ""
             self._add_log(f"Resolve refused to rename {len(failed)}: {names_failed}{more}.", "error")
         self._refresh(connect=False)
@@ -281,19 +279,30 @@ class BatchClipRenamerPage(WebToolPage):
         still carrying the name it gave them. One renamed again since, in
         Resolve or here, is left alone rather than clobbered."""
         undo, self._undo = self._undo, None
-        if not undo or self._controller(connect=True) is None or not self._resolve_free():
+        controller = self._controller(connect=True) if undo else None
+        if not undo or controller is None or not self._resolve_free():
             self._undo = undo
             self._push_state()
             return
-        restored, skipped = 0, 0
-        for clip, old, new in undo["items"]:
-            try:
-                if resolve_ext.clip_name(clip) == new and clip.SetClipProperty("Clip Name", old):
-                    restored += 1
-                else:
-                    skipped += 1
-            except Exception:
-                skipped += 1
+        items = undo["items"]
+        if undo["far"]:
+            # Where its rename was made (core/busy_job.py).
+            busy_job.run(self.host, self._calls, "renamer.undo", {"items": items},
+                         lambda: resolve_ext.undo(controller, items), self._on_undone,
+                         f"Renaming {len(items)} clips…")
+            return
+        try:
+            result, error = resolve_ext.undo(controller, items), None
+        except Exception as exc:  # noqa: BLE001 - the connection dropped
+            result, error = None, exc
+        self._on_undone(result, error)
+
+    def _on_undone(self, result, error):
+        if error is not None:
+            self._add_log(str(error), "error")
+            self._refresh(connect=False)
+            return
+        restored, skipped = result["restored"], result["skipped"]
         text = ("Undid the rename: 1 clip back to its old name." if restored == 1
                 else f"Undid the rename: {restored} clips back to their old name.")
         if skipped:

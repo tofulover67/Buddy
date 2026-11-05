@@ -159,11 +159,19 @@ def _px_per_size(font_name: str, style: Optional[str] = None) -> float:
     return TEXT_PLUS_HEIGHT / (ascent + descent)
 
 
+def cap_height_factors(font_name: str, style: Optional[str] = None) -> Tuple[float, float]:
+    """(Text+'s font pixel size for Size 1, the capital letters' height in ems): what
+    cap_height_fraction multiplies a Size by - for text_plus_resolve.py, which has no Qt
+    to measure with."""
+    cap = QFontMetricsF(_measure_font(font_name, style)).capHeight() / _MEASURE_PX
+    return _px_per_size(font_name or "Arial", style), cap
+
+
 def cap_height_fraction(font_name: str, size: float, style: Optional[str] = None) -> float:
     """How tall a Text+ clip's capital letters draw at `size`, as a fraction of composition
     width."""
-    cap = QFontMetricsF(_measure_font(font_name, style)).capHeight() / _MEASURE_PX
-    return max(size, 0.0) * _px_per_size(font_name or "Arial", style) * cap
+    px_per_size, cap = cap_height_factors(font_name, style)
+    return max(size, 0.0) * px_per_size * cap
 
 
 def glyph_extent(font_name: str, text: str, style: Optional[str] = None) -> Tuple[float, float]:

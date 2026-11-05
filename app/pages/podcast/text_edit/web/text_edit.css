@@ -1,0 +1,113 @@
+/* Text Edit: the controls on top, the transcript filling the rest, the
+   Build bar at the foot. Theme colours only - the transcript's highlights
+   are mixes of the theme's own. */
+
+.page.te { overflow: hidden; }
+.te-bar { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 0; flex: none; }
+.te-row { flex-wrap: wrap; row-gap: 6px; }
+.te-timeline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
+.te-dot { width: 7px; height: 7px; border-radius: var(--r-full); background: var(--text-dim); flex: none; }
+.te-dot.on { background: var(--accent-text); }
+.te-label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-dim); cursor: help; }
+.te-sep { width: var(--bw); height: 18px; background: var(--card-border); flex: none; margin: 0 4px; }
+.te-toggles { gap: 4px; flex-wrap: wrap; }
+.te-track { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 3px 10px; }
+.te-track .te-track-name { color: var(--text-dim); margin-left: 4px; }
+.te-track[aria-pressed="true"], .te-toggle[aria-pressed="true"] {
+    background: var(--selection-bg); color: var(--selection-fg); border-color: var(--field-focus-border);
+}
+.te-track[aria-pressed="true"] .te-track-name { color: inherit; opacity: .8; }
+.te-track.empty { opacity: .6; }
+.te-inline { gap: 6px; }
+.te-select { min-width: 0; }
+.te-find { width: 190px; }
+.te-count { min-width: 48px; font-variant-numeric: tabular-nums; }
+.te-num { width: 64px; }
+.te-progress { height: 2px; margin: 2px -14px 0; position: relative; overflow: hidden; }
+.te-progress-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--emphasis-fill); transition: width .2s; }
+.te-progress.busy .te-progress-bar { width: 30%; animation: te-slide 1.1s linear infinite; }
+@keyframes te-slide { from { left: -30%; } to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+    .te-progress.busy .te-progress-bar { animation: none; width: 100%; left: 0; opacity: .6; }
+}
+
+/* ---------------------------------------------------------- notices */
+
+.te-notices { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.te-notices:empty { display: none; }
+.te-notice {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--r-md);
+    background: var(--raised-bg); border-left: 2px solid var(--accent-text); line-height: 1.45;
+}
+.te-notice.warn-note { border-left-color: var(--danger-text); }
+.te-notice .te-notice-text { flex: 1; }
+
+/* ------------------------------------------------------- transcript */
+
+.te-doc-card { flex: 1 1 auto; min-height: 120px; display: flex; overflow: hidden; }
+.te-doc {
+    flex: 1; overflow: auto; padding: 18px 20px 40vh 6px; outline: none;
+    --read: var(--font);
+    --read-size: var(--fs-md);
+}
+.te-doc:focus-visible { box-shadow: inset 0 0 0 1px var(--field-focus-border); }
+.te-doc.font-serif { --read: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+.te-doc.font-mono { --read: var(--font-mono); }
+.te-doc.size-small { --read-size: var(--fs-sm); }
+.te-doc.size-large { --read-size: var(--fs-lg); }
+.te-doc.size-xlarge { --read-size: var(--fs-xl); }
+.te-doc.busy { pointer-events: none; opacity: .55; }
+
+.te-para { display: grid; grid-template-columns: 150px 1fr; column-gap: 14px; margin-bottom: .6em; }
+.te-gutter { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; padding-top: .25em; }
+.te-who { font-weight: 600; font-size: var(--fs-xs); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.te-who.s1 { color: var(--accent-text); }
+.te-who.s2 { color: var(--second-text); }
+.te-who.s3 { color: color-mix(in srgb, var(--accent-text) 55%, var(--text)); }
+.te-who.s4 { color: color-mix(in srgb, var(--second-text) 55%, var(--text)); }
+.te-ts {
+    background: none; border: 0; padding: 0; cursor: pointer; color: var(--text-dim); opacity: .75;
+    font: inherit; font-size: var(--fs-xs); font-variant-numeric: tabular-nums;
+}
+.te-ts:hover { opacity: 1; color: var(--text); }
+.te-text {
+    margin: 0; font-family: var(--read); font-size: var(--read-size); line-height: 1.55;
+    user-select: none; overflow-wrap: anywhere; color: var(--text);
+}
+.tk { border-radius: var(--r-xs); cursor: text; }
+.tk:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.tk.f { color: var(--second-text); text-decoration: underline dotted; text-underline-offset: 4px; }
+.tk.lo { text-decoration: underline dotted color-mix(in srgb, var(--text-dim) 80%, transparent); text-underline-offset: 4px; }
+.tk.pz { color: var(--text-dim); font-family: var(--font); font-size: var(--fs-xs); }
+.tk.x { text-decoration: line-through; text-decoration-thickness: 1.5px; color: var(--text-dim); opacity: .6; }
+.tk.x.pz { text-decoration: line-through; }
+.tk.hit { background: color-mix(in srgb, var(--second-text) 28%, transparent); }
+.tk.sel {
+    background: var(--selection-bg); color: var(--selection-fg);
+    box-shadow: 0 0 0 1px var(--selection-bg), .28em 0 0 1px var(--selection-bg);
+}
+.tk.now { color: var(--text-strong); position: relative; }
+.tk.now::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: var(--danger-text); border-radius: 1px;
+}
+.tk.editing {
+    background: var(--field-bg); color: var(--field-fg); outline: 1px solid var(--field-focus-border);
+    user-select: text; cursor: text; padding: 0 2px;
+}
+.te-cut {
+    display: inline-block; width: 1px; height: .95em; background: var(--text-dim); opacity: .7;
+    margin: 0 3px 0 1px; vertical-align: -0.12em;
+}
+
+.te-foot { flex: none; flex-wrap: wrap; row-gap: 6px; padding: 0 2px; }
+.te-hint { overflow: hidden; text-overflow: ellipsis; }
+.te-summary { color: var(--text); font-variant-numeric: tabular-nums; }
+
+.te-keys { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; min-width: 380px; margin-top: 12px; }
+.te-keys .field { width: 100%; }
+
+@media (max-width: 640px) {
+    .te-para { grid-template-columns: 1fr; }
+    .te-gutter { flex-direction: row; justify-content: flex-start; gap: 8px; }
+}

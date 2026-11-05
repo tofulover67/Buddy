@@ -34,6 +34,7 @@ class BusyOverlay(QWidget):
         self._text_color = "#FFFFFF"
         self._tint = QColor(DEFAULT_TINT)
         self._angle = 0
+        self._focus_before = None   # what had the keys before start() took them
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
         parent.installEventFilter(self)
@@ -64,9 +65,17 @@ class BusyOverlay(QWidget):
         self._message = message
         parent = self.parentWidget()
         self.setGeometry(parent.rect())
+        # What has the keys now is handed back in stop() - unless this is a
+        # restart, when it's the overlay and the first one is kept.
+        if self._take_focus and not self.isVisible():
+            before = self.window().focusWidget()
+            self._focus_before = before if before is not self else None
         # Hidden first: grab() paints children too, and a restart while
         # visible (e.g. a theme change mid-job) would blur the overlay's own
-        # previous frame into the new snapshot.
+        # previous frame into the new snapshot. Its focus let go of first:
+        # hidden with it, the overlay would pass it to the next widget.
+        if self.window().focusWidget() is self:
+            self.clearFocus()
         self.hide()
         self._bg_pixmap = self._blurred_snapshot(parent, self._blur)
         self._angle = 0
@@ -81,14 +90,38 @@ class BusyOverlay(QWidget):
         parent repaints in new colours while the overlay is up."""
         self.start(self._message)
 
+    @property
+    def message(self):
+        """The caption it shows ("Building the timeline…")."""
+        return self._message
+
     def set_message(self, message):
         self._message = message
         self.update()
 
     def stop(self):
         self._timer.stop()
+        self._give_focus_back()
         self.hide()
         self._bg_pixmap = None
+
+    def _give_focus_back(self):
+        """Before hiding: hidden while it has the focus, the overlay would
+        pass it to the next widget in the window's tab order - the header's
+        first button (Report a bug) - so it goes back to what had it before
+        the work started, or to nothing if that's gone. A dialog or field
+        that took the focus meanwhile keeps it."""
+        before, self._focus_before = self._focus_before, None
+        if self.window().focusWidget() is not self:
+            return
+        try:
+            usable = before is not None and before.isVisible() and before.isEnabled()
+        except RuntimeError:      # deleted while the work ran
+            usable = False
+        if usable:
+            before.setFocus(Qt.OtherFocusReason)
+        else:
+            self.clearFocus()
 
     def pump(self):
         """Forces one repaint - use after set_message() from synchronous

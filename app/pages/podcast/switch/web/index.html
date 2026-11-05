@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Auto Switch</title>
+    <link rel="stylesheet" href="../../../../web/buddy.css">
+    <link rel="stylesheet" href="switch.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page sw">
+    <header class="page-head">
+        <h1 class="page-title">Podcast</h1>
+        <span class="muted sw-timeline" id="timeline" translate="no"></span>
+        <span class="spacer"></span>
+        <label class="row sw-setup-pick" title="Your cameras and their settings, kept to use again next episode">
+            <span class="muted small">Setup</span>
+            <select class="field" id="setup" aria-label="Camera setup"></select>
+        </label>
+        <button type="button" class="btn ghost icon" id="setup-more" title="New, copy, rename or delete a setup"
+                aria-label="Setup options"></button>
+        <button type="button" class="btn ghost icon" id="analyse" title="Read the open timeline again"
+                aria-label="Read the timeline again"></button>
+    </header>
+
+    <nav class="tabs" role="tablist" id="podcast-tabs" aria-label="Podcast tools">
+        <button type="button" role="tab" data-tab="sync" aria-selected="false">Sync</button>
+        <button type="button" role="tab" data-tab="switch" aria-selected="true">Auto Switch</button>
+        <button type="button" role="tab" data-tab="text" aria-selected="false">Text Edit</button>
+    </nav>
+
+    <ol class="sw-steps" id="steps">
+        <li><button type="button" data-step="1"><span class="sw-n">1</span>Pair audio</button></li>
+        <li><button type="button" data-step="2"><span class="sw-n">2</span>Name voices</button></li>
+        <li><button type="button" data-step="3"><span class="sw-n">3</span>Extra shots and build</button></li>
+    </ol>
+
+    <div class="sw-status" id="status" hidden>
+        <span id="status-text"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn ghost" id="cancel" hidden>Stop</button>
+        <div class="sw-bar"><div id="status-bar"></div></div>
+    </div>
+    <p class="warn" id="problem"></p>
+
+    <section class="card sw-step" data-panel="1">
+        <h2 class="section-title">Which audio goes with each camera?</h2>
+        <div class="sw-pairs" id="pairs"></div>
+    </section>
+
+    <section class="card sw-step" data-panel="2" hidden>
+        <h2 class="section-title">Who's speaking?</h2>
+        <div class="sw-notice" id="engine-notice" hidden>
+            <p>Telling apart people on one mic needs Buddy's speech engine and a 27 MB voice model.</p>
+            <div class="row">
+                <button type="button" class="btn" id="engine" hidden>Set up the speech engine</button>
+                <button type="button" class="btn" id="download" hidden>Download the voice model</button>
+                <span class="muted small" id="download-text" translate="no"></span>
+            </div>
+        </div>
+        <div class="sw-voices" id="voices"></div>
+    </section>
+
+    <section class="card sw-step" data-panel="3" hidden>
+        <h2 class="section-title">Extra shots</h2>
+        <div class="sw-pairs" id="extras"></div>
+        <div class="sw-preview" id="preview" hidden>
+            <div class="row sw-head">
+                <span class="section-title">Preview</span>
+                <span class="muted small" id="summary"></span>
+            </div>
+            <div class="sw-strip" id="strip" title="Click to move Resolve's playhead here"></div>
+            <div class="sw-legend" id="legend"></div>
+        </div>
+    </section>
+
+    <div class="row sw-nav">
+        <button type="button" class="btn" id="cut-settings">Cut settings</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="back">Back</button>
+        <button type="button" class="btn accent" id="next">Next: name voices</button>
+    </div>
+</main>
+<script src="switch.js"></script>
+<script src="../../web/tabs.js"></script>
+</body>
+</html>

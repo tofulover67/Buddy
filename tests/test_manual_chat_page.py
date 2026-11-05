@@ -12,7 +12,7 @@ from pages.manual_chat.conversation import YOU
 
 try:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
-    from PySide6.QtCore import QCoreApplication, Qt
+    from PySide6.QtCore import QCoreApplication, Qt, QTimer
     from PySide6.QtWidgets import QApplication
     from shiboken6 import delete
     from pages.manual_chat.page import ManualChatPage
@@ -167,6 +167,25 @@ class ManualLoadTests(unittest.TestCase):
         threading.Timer(0.1, self.release.set).start()
         self.page._load_manual_now()
         self.assertEqual(len(self.made), 1)           # not read a second time
+        self.assertIs(self.page._retriever, self.made[0][0])
+        self.assertEqual(self.host.busy, [True, False])
+
+    def test_buddy_keeps_drawing_while_a_question_waits_for_the_manual(self):
+        self.release.clear()
+        self.page.on_shown()
+        ticks = []
+
+        def tick():                 # the UI thread, running meanwhile: the third lets the load finish
+            ticks.append(1)
+            if len(ticks) == 3:
+                self.release.set()
+        timer = QTimer()
+        timer.timeout.connect(tick)
+        timer.start(10)
+        self.page._load_manual_now()
+        timer.stop()
+        self.assertGreaterEqual(len(ticks), 3)        # not held in a join() until the load gave up waiting
+        self.assertEqual(len(self.made), 1)
         self.assertIs(self.page._retriever, self.made[0][0])
         self.assertEqual(self.host.busy, [True, False])
 

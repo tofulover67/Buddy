@@ -14,7 +14,10 @@ from core.web_theme import link_bar_vars, web_theme
 
 WEB = _paths.APP / "web"
 # Every web tool page: pages/<tool>/web/index.html next to its page.py.
-PAGE_WEB_DIRS = sorted(p.parent for p in (_paths.APP / "pages").glob("*/web/index.html"))
+# A tool made of sub-tabs keeps a page per sub-tab one folder deeper
+# (pages/podcast/<sub-tab>/web/index.html).
+PAGE_WEB_DIRS = sorted(p.parent for pattern in ("*/web/index.html", "*/*/web/index.html")
+                       for p in (_paths.APP / "pages").glob(pattern))
 # Python a page hosts from elsewhere, whose view shares the page's: Transcribe's Text+
 # tabs are text_animator/text_plus.py (their script sends and hears through the local
 # send()/on() that add the "tp_" prefix).

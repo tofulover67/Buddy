@@ -43,12 +43,14 @@ from PySide6.QtCore import QEventLoop, QTimer, QUrl
 from PySide6.QtGui import QImage
 from PySide6.QtWidgets import QFileDialog
 
+from core import busy_job
 from core.i18n import tr, tr_filter
 from core.media_search import extract as search_extract
 from core.media_search import model as search_model
 from core.media_search import store as search_store
 from core.media_search_ui import MediaSearch
 from core.resolve_bridge import ResolveConnectionError
+from core.resolve_reader import ResolveCalls
 from core.web_page import WebToolPage
 
 from . import library_view, resolve_ext
@@ -93,6 +95,7 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         self._nodes = []
         self._preview_id = None
         self._log = []
+        self._calls = ResolveCalls(self)    # Import to Media Pool, in the Resolve reader's process
         self._load_warnings = self.library.load_warnings + self.projects.load_warnings
         for line in self._load_warnings:
             self._add_log(line, "error")
@@ -572,22 +575,17 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
         except ResolveConnectionError:
             return
         assets = self.library.assets
-        present = lambda ids: [assets[i]["path"] for i in ids if i in assets and os.path.exists(assets[i]["path"])]  # noqa: E731
-        total, error = 0, None
-        self.host.set_busy(True, "Importing into the Media Pool…")
-        try:
-            paths = present(loose)
-            if paths:
-                total += len(resolve_ext.import_to_media_pool(controller, paths))
-            for name, ids in groups:
-                paths = present(ids)
-                if paths:
-                    total += len(resolve_ext.import_folder_to_media_pool(controller, name, paths))
-        except Exception as exc:  # noqa: BLE001 - Resolve refused, or no project is open
-            error = exc
-        finally:
-            self.host.set_busy(False)
-        if error is not None:
+        paths = lambda ids: [assets[i]["path"] for i in ids if i in assets]  # noqa: E731
+        args = {"loose": paths(loose), "groups": [[name, paths(ids)] for name, ids in groups]}
+        # In the Resolve reader's process: Buddy keeps drawing while Resolve
+        # imports (core/busy_job.py). Files gone from disk are left out there.
+        busy_job.run(self.host, self._calls, "assets.import", args,
+                     lambda: resolve_ext.import_selection(controller, **args),
+                     lambda total, error: self._on_imported(groups, total, error),
+                     "Importing into the Media Pool…")
+
+    def _on_imported(self, groups, total, error):
+        if error is not None:      # Resolve refused, or no project is open
             self._add_log(f"Import failed: {error}", "error")
             self.emit("alert", {"title": "Import failed", "text": str(error)})
         elif not total:

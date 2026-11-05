@@ -21,6 +21,12 @@ depends on every stdout line having been read.
 Modes:
   transcribe --audio F [--engine whisper|parakeet|auto] [--model DIR] [--parakeet DIR]
              [--device auto|cuda|cpu] [--language xx | --languages xx,yy] [--hotwords "..."] --out F
+             [--fillers] [--levels F] [--channels 0,1]
+             (--fillers: keep "um", "uh" - Podcast's Text Edit cuts them; every
+              Whisper word also carries "p", its probability; --levels: also
+              write the audio's loudness, every 50 ms, to F - see _write_levels;
+              --channels: hear only these channels of the file, 0-based -
+              one mic of a recorder's multitrack WAV - see decode_channels)
              (--languages: mixed audio - Whisper, each part in its own language;
               every segment then carries "language", and the result "languages")
   download   --model ID|REPO --output DIR [--expected-bytes N] [--files a,b,...]
@@ -105,16 +111,24 @@ def _gpu_failed(device: str, exc: Exception) -> bool:
 PRIMERS = {
     "en": "Hello, and welcome back. Here's what happened today, in full sentences.",
 }
+# --fillers (Podcast's Text Edit, which cuts them): a primer that is itself
+# hesitant, so Whisper writes the "um"s and "uh"s out instead of tidying
+# them away as subtitles want.
+FILLER_PRIMERS = {
+    "en": "Um, so, uh, I was, like, hmm, thinking. Uh, you know, erm, it's, um, fine.",
+}
 
 
-def _whisper_segments(model, audio, language, hotwords, total, offset=0.0, tag=False, vad=True, primer=True):
+def _whisper_segments(model, audio, language, hotwords, total, offset=0.0, tag=False, vad=True, primer=True,
+                      fillers=False):
     """offset: where this audio starts in the timeline's (a piece of it, in
     mixed mode); tag: mark each segment with its language; primer: False
     for a short piece - a second of audio can come back as the primer
     itself ("Here's what happened." between Japanese sentences)."""
     # The primer is English, and an English prompt can pull non-English
     # speech toward English - so it's only used when the audio IS English.
-    hotwords = " ".join(x for x in (PRIMERS.get(language, "") if primer else "", hotwords.strip()) if x) or None
+    primers = FILLER_PRIMERS if fillers else PRIMERS
+    hotwords = " ".join(x for x in (primers.get(language, "") if primer else "", hotwords.strip()) if x) or None
     segments, _info = model.transcribe(
         audio,
         language=language,
@@ -132,7 +146,8 @@ def _whisper_segments(model, audio, language, hotwords, total, offset=0.0, tag=F
             "end": round(seg.end + offset, 3),
             "text": seg.text.strip(),
             "words": [
-                {"start": round(w.start + offset, 3), "end": round(w.end + offset, 3), "word": w.word}
+                {"start": round(w.start + offset, 3), "end": round(w.end + offset, 3), "word": w.word,
+                 "p": round(float(getattr(w, "probability", 0.0) or 0.0), 3)}
                 for w in (seg.words or [])
             ],
         }
@@ -336,7 +351,7 @@ def _parakeet_words(result, offset, limit):
     return words
 
 
-def _parakeet_segments(model_dir, audio, total, language=None):
+def _parakeet_segments(model_dir, audio, total, language=None, fillers=False):
     import onnx_asr
     from faster_whisper.vad import VadOptions, get_speech_timestamps
 
@@ -356,7 +371,9 @@ def _parakeet_segments(model_dir, audio, total, language=None):
         batch = spans[b:b + PARAKEET_BATCH]
         outs = asr.recognize([audio[s["start"]:s["end"]] for s in batch])
         for span, out in zip(batch, outs):
-            words = _drop_fillers(_parakeet_words(out, span["start"] / rate, span["end"] / rate), language)
+            words = _parakeet_words(out, span["start"] / rate, span["end"] / rate)
+            if not fillers:
+                words = _drop_fillers(words, language)
             if not words:
                 continue
             item = {"start": words[0]["start"], "end": words[-1]["end"],
@@ -365,6 +382,30 @@ def _parakeet_segments(model_dir, audio, total, language=None):
             emit("segment", **item)
         emit("progress", done=min(batch[-1]["end"] / rate, total), total=total)
     return result
+
+
+LEVEL_HOP = 0.05     # seconds per --levels reading
+
+
+def _write_levels(audio, rate, path):
+    """--levels: the loudness of every LEVEL_HOP of the audio, as
+    {"hop", "db"}: db is base64 of one byte per hop, dBFS + 100 (0 is
+    -100 dBFS or quieter). What Podcast's Text Edit tells one person's mic
+    from the others' with - each mic hears everyone, but its own person
+    loudest."""
+    import base64
+
+    import numpy as np
+    hop = max(1, int(round(rate * LEVEL_HOP)))
+    n = len(audio) // hop
+    if n:
+        frames = np.asarray(audio[:n * hop], dtype=np.float32).reshape(n, hop)
+        rms = np.sqrt(np.mean(frames * frames, axis=1) + 1e-12)
+        db = np.clip(20.0 * np.log10(rms) + 100.0, 0, 100).astype(np.uint8)
+    else:
+        db = np.zeros(0, dtype=np.uint8)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"hop": hop / float(rate), "db": base64.b64encode(db.tobytes()).decode("ascii")}, f)
 
 
 def _open_media(av, path: str):
@@ -416,6 +457,56 @@ def _decode_audio(path: str, rate: int, skip_other_streams: bool):
     return np.concatenate(chunks).astype(np.float32) / 32768.0
 
 
+def decode_channels(path: str, rate: int, channels):
+    """Only `channels` (0-based) of the file, mixed to mono at `rate`: one
+    person's mic in a recorder's multitrack file, where every mic is a
+    channel of one WAV and Resolve plays each on its own track. Numbered
+    across the file's audio streams, one after another (a camera MOV can
+    keep each channel as a stream of its own). Any other file, or one
+    PyAV can't split, is heard whole (decode_audio)."""
+    import gc
+
+    import av
+    import numpy as np
+    from av.stream import Discard
+    wanted = sorted({int(c) for c in channels})
+    with _open_media(av, path) as container:
+        streams = list(container.streams.audio)
+        firsts, first = [], 0
+        for stream in streams:
+            firsts.append(first)
+            first += int(getattr(stream, "channels", 0) or getattr(stream.codec_context, "channels", 0) or 1)
+        picks = {}          # stream index -> its own channel numbers
+        for c in wanted:
+            for i in range(len(streams) - 1, -1, -1):
+                if c >= firsts[i]:
+                    picks.setdefault(i, []).append(c - firsts[i])
+                    break
+        if not picks or max(wanted) >= first:
+            raise ValueError("no such channel")
+        if len(picks) > 1:
+            raise ValueError("channels in more than one stream")
+        index, own = next(iter(picks.items()))
+        stream = streams[index]
+        for other in container.streams:
+            if other.index != stream.index:
+                other.discard = Discard.all
+        resampler = av.audio.resampler.AudioResampler(format="fltp", layout=stream.layout, rate=rate)
+        chunks = []
+        for packet_frame in container.decode(stream):
+            for frame in resampler.resample(packet_frame):
+                planes = frame.to_ndarray()
+                chunks.append(planes[[c for c in own if c < planes.shape[0]] or [0]].mean(axis=0))
+        for frame in resampler.resample(None):
+            planes = frame.to_ndarray()
+            chunks.append(planes[[c for c in own if c < planes.shape[0]] or [0]].mean(axis=0))
+    del resampler
+    gc.collect()
+    if not chunks:
+        return np.zeros(0, dtype=np.float32)
+    return np.concatenate(chunks).astype(np.float32)
+
+
 def transcribe(args) -> int:
     """--engine whisper: --model is the Whisper model. parakeet: --parakeet
     is the model, and --model (optional) a Whisper model used only to
@@ -424,8 +515,17 @@ def transcribe(args) -> int:
     from env_setup import PARAKEET_LANGS
 
     emit("status", message="Reading the audio…")
-    audio = decode_audio(args.audio, rate=16000)
+    audio = None
+    if args.channels:
+        try:
+            audio = decode_channels(args.audio, 16000, [int(c) for c in args.channels.split(",") if c.strip()])
+        except Exception:  # noqa: BLE001 - an odd file or an older PyAV: the whole of it, as always
+            audio = None
+    if audio is None:
+        audio = decode_audio(args.audio, rate=16000)
     total = len(audio) / 16000.0
+    if args.levels:
+        _write_levels(audio, 16000, args.levels)
     engine, language, probability = args.engine, args.language or None, None
     mixed = [c for c in (args.languages or "").split(",") if c.strip()]
     if len(mixed) >= 2:
@@ -461,18 +561,18 @@ def transcribe(args) -> int:
     if engine == "parakeet":
         del whisper    # free the GPU before the long run
         device = "cpu"
-        result = _parakeet_segments(args.parakeet, audio, total, language)
+        result = _parakeet_segments(args.parakeet, audio, total, language, fillers=args.fillers)
     else:
         emit("status", message=f"Transcribing on the {'GPU' if device == 'cuda' else 'CPU'}…")
         emit("progress", done=0.0, total=total)
         try:
-            result = _whisper_segments(whisper, audio, language, args.hotwords, total)
+            result = _whisper_segments(whisper, audio, language, args.hotwords, total, fillers=args.fillers)
         except Exception as exc:
             if not _gpu_failed(device, exc):
                 raise
             whisper, device = _load_model(args.model, "cpu")
             emit("progress", done=0.0, total=total)
-            result = _whisper_segments(whisper, audio, language, args.hotwords, total)
+            result = _whisper_segments(whisper, audio, language, args.hotwords, total, fillers=args.fillers)
 
     payload = {
         "language": language,
@@ -700,6 +800,9 @@ def main() -> int:
     t.add_argument("--language", default="")
     t.add_argument("--languages", default="", help="mixed audio: the languages spoken, e.g. ja,en")
     t.add_argument("--hotwords", default="")
+    t.add_argument("--fillers", action="store_true", help="keep hesitations (um, uh) in the words")
+    t.add_argument("--levels", default="", help="also write the audio's loudness every 50 ms here")
+    t.add_argument("--channels", default="", help="hear only these channels of the file, 0-based: 0,1")
     t.add_argument("--out", required=True)
     d = sub.add_parser("download")
     d.add_argument("--model", required=True)

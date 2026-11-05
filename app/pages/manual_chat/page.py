@@ -41,7 +41,7 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
-from PySide6.QtCore import QBuffer, QIODevice, QStandardPaths, QThread, Signal
+from PySide6.QtCore import QBuffer, QEventLoop, QIODevice, QStandardPaths, QThread, QTimer, Signal
 from PySide6.QtWidgets import QApplication, QFileDialog
 
 from core.atomic_io import CorruptFileError
@@ -79,6 +79,7 @@ from .settings_panel import ChatSettingsMixin
 
 PICTURE_FILTER = "Pictures (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.tif *.tiff);;All files (*)"
 PICTURE_ENDINGS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff")
+MANUAL_POLL_MS = 15     # how often a question waiting for the manual looks whether it's loaded
 
 
 class _AgentWorker(QThread):
@@ -227,7 +228,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         if thread is not None:
             self.host.set_busy(True, "Loading the Resolve manual…")
             try:
-                thread.join()
+                self._wait_for(thread)
             finally:
                 self.host.set_busy(False)
             QApplication.sendPostedEvents(self)       # its result, if it's been sent
@@ -236,6 +237,23 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             self._manual_thread = None
             self._retriever = self._make_retriever(*self._manual_args())
             self._push_status()
+
+    @staticmethod
+    def _wait_for(thread):
+        """Until the manual's loading thread ends, with the UI thread free
+        meanwhile - not join(), which held it: the busy overlay's spinner
+        stood still, and a slow load could get the window marked "Not
+        Responding". (The overlay keeps clicks off.)"""
+        if not thread.is_alive():
+            return
+        loop = QEventLoop()
+        poll = QTimer(interval=MANUAL_POLL_MS)
+        poll.timeout.connect(lambda: thread.is_alive() or loop.quit())
+        poll.start()
+        if thread.is_alive():
+            loop.exec()
+        poll.stop()
+        thread.join()                 # over by now: only tidies up
 
     def _status_text(self) -> str:
         if self._retriever is None:

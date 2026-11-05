@@ -174,6 +174,50 @@ class StillsRuleTests(unittest.TestCase):
                                                  delete_after=True))
         self.assertEqual(album.deleted, ["a", "b"])
 
+    def test_the_readers_jobs_keep_the_stills_where_they_were_grabbed(self):
+        """grab_here / export_here ("stills.grab", "stills.export"): plain data in
+        and out - a GalleryStill can't leave the process that grabbed it, so it's
+        kept there under a key and exported from there."""
+        import json
+        controller = Controller()
+        album = controller.project.album
+        got = json.loads(json.dumps(stills_ext.grab_here(controller, **json.loads(json.dumps({"color": "Blue"})))))
+        self.assertEqual([tc for tc, _key in got["grabbed"]], ["01:00:00:00", "01:00:30:00", "01:01:35:00"])
+        self.assertEqual((got["error"], got["log"][0]), ("", "Found 3 'Blue' marker(s). Switching to Color page…"))
+        keys = [key for _tc, key in got["grabbed"]]
+        self.addCleanup(stills_ext.release, keys)
+        self.assertTrue(stills_ext.holds(keys))
+        folder = self.folder()
+        args = {"keys": keys[::2], "folder": folder, "prefix": "Shot_", "fmt": "png", "delete_after": True}
+        out = json.loads(json.dumps(stills_ext.export_here(controller, **json.loads(json.dumps(args)))))
+        self.assertEqual(album.exported, (["still@01:00:00:00", "still@01:01:35:00"], folder, "Shot_", "png"))
+        self.assertEqual(out, {"deleted": True, "error": "", "log": [
+            f"Exported 2 still(s) to {folder} as .png", "Deleted 2 still(s) from the Resolve gallery."]})
+        self.assertEqual((stills_ext.holds(keys[::2]), stills_ext.holds(keys[1:2])), (False, True))  # deleted: let go
+        album.exported = None
+        lost = stills_ext.export_here(controller, keys, folder, "Shot_", "png")   # two of them aren't here
+        self.assertEqual(lost, {"deleted": False, "log": [], "error": stills_ext.LOST})
+        self.assertIsNone(album.exported)
+
+    def test_what_the_jobs_said_comes_back_with_their_error(self):
+        controller = Controller()
+
+        def broken():
+            raise RuntimeError("Resolve stopped answering")
+        controller.project.timeline.GrabStill = broken
+        got = stills_ext.grab_here(controller, "Blue")
+        self.assertEqual(got, {"grabbed": [], "error": "Resolve stopped answering",
+                               "log": ["Found 3 'Blue' marker(s). Switching to Color page…"]})
+        self.assertEqual(stills_ext.grab_here(controller, "Green")["error"],
+                         "No 'Green' markers found on the current timeline.")
+        controller = Controller()
+        keys = [key for _tc, key in stills_ext.grab_here(controller, "Red")["grabbed"]]
+        self.addCleanup(stills_ext.release, keys)
+        controller.project.album.export_ok = False
+        self.assertEqual(stills_ext.export_here(controller, keys, self.folder(), "Shot_", "png")["error"],
+                         stills_ext.GALLERY_CLOSED)
+        self.assertTrue(stills_ext.holds(keys))                      # still there to export once it's open
+
 
 # ------------------------------------------------------------ fake Resolve --
 
@@ -265,6 +309,23 @@ class Controller:
 
     def current_project(self):
         return self.project
+
+
+class Reader:
+    """The Resolve reader's process, standing in: takes jobs, answers when told."""
+
+    def __init__(self):
+        self.asked = []
+
+    def available(self):
+        return True
+
+    def ask(self, name, args, done):
+        self.asked.append((name, args, done))
+        return True
+
+    def answer(self, result, error=None):
+        self.asked[-1][2](result, error)
 
 
 class Mem(dict):
@@ -512,6 +573,79 @@ class StillsPageTests(_PageCase):
         self.page.on_export({})
         self.assertEqual(self.last("alert")["title"], "Invalid filename prefix")
         self.assertIsNone(self.host.controller.project.album.exported)
+
+    def _with_reader(self):
+        """Markers read first (here), then the Resolve reader's process standing in."""
+        self.page.on_refresh()
+        self.settle()
+        reader = Reader()
+        self.page._calls.reader = reader
+        return reader
+
+    def test_grab_and_export_are_done_in_the_readers_process(self):
+        reader = self._with_reader()
+        self.page.on_grab()
+        name, args, done = reader.asked[-1]
+        self.assertEqual((name, args), ("stills.grab", {"color": "Blue"}))
+        self.assertEqual((self.host.controller.pages, self.host.busy), ([], [True]))   # not here; overlay up
+        self.page._read(connect=False)                               # the poll waits for it
+        self.page.on_grab()                                          # and so does another press
+        self.assertEqual(len(reader.asked), 1)
+        done({"grabbed": [["01:00:00:00", "k1"], ["01:00:30:00", "k2"]],
+              "log": ["Found 3 'Blue' marker(s). Switching to Color page…"], "error": ""}, None)
+        self.assertEqual(self.host.busy, [True, False])
+        self.assertEqual([(g["timecode"], g["name"]) for g in self.last("grabbed")],
+                         [("01:00:00:00", "Open"), ("01:00:30:00", "Middle")])
+        self.assertEqual(self.last("toast")["text"], "Grabbed 2 stills on the Color page")
+        self.assertIn("Found 3 'Blue' marker(s). Switching to Color page…", [e["text"] for e in self.page._log])
+
+        self.page.settings["folder"] = self._tmp.name
+        self.page.on_options({"delete_after": True})
+        self.page.on_export({"confirmed": True})
+        name, args, done = reader.asked[-1]
+        self.assertEqual((name, args), ("stills.export", {"keys": ["k1", "k2"], "folder": self._tmp.name,
+                                                          "prefix": "Still_", "fmt": "jpg", "delete_after": True}))
+        self.assertIsNone(self.host.controller.project.album.exported)
+        done({"deleted": True, "log": ["Deleted 2 still(s) from the Resolve gallery."], "error": ""}, None)
+        self.assertEqual((self.last("grabbed"), self.last("toast")["text"]), ([], "Exported 2 stills"))
+        self.assertEqual(self.host.busy, [True, False, True, False])
+
+    def test_what_goes_wrong_in_the_readers_process_is_said(self):
+        from core.resolve_reader import ReadError
+        reader = self._with_reader()
+        self.page.on_grab()
+        reader.answer({"grabbed": [], "log": ["Found 3 'Blue' marker(s). Switching to Color page…"],
+                       "error": "Resolve stopped answering"})
+        self.assertEqual([e["text"] for e in self.page._log][-2:],
+                         ["Found 3 'Blue' marker(s). Switching to Color page…",
+                          "Couldn't grab stills: Resolve stopped answering"])
+        self.assertEqual(self.last("alert")["title"], "Couldn't grab stills")
+        self.page.on_grab()
+        reader.answer({"grabbed": [["01:00:00:00", "k1"]], "log": [], "error": ""})
+        self.page.settings["folder"] = self._tmp.name
+        self.page.on_export({})
+        reader.answer({"deleted": False, "log": [], "error": stills_ext.LOST})      # a reader that's ended since
+        self.assertEqual(self.last("alert"), {"title": "Export failed", "text": stills_ext.LOST})
+        self.page.on_export({})
+        reader.answer(None, ReadError("The Resolve reader stopped.", "Ended"))
+        self.assertEqual(self.last("alert"), {"title": "Export failed", "text": "The Resolve reader stopped."})
+        self.assertEqual(len(self.last("grabbed")), 1)
+        self.assertFalse(self.page._action_running)
+
+    def test_stills_grabbed_here_stay_here(self):
+        """Grabbed with no reader: the reader's process doesn't have them, so they're
+        exported here - and more grabbed here to join them - even once it's back."""
+        self.page.on_grab()
+        reader = self._with_reader()
+        self.page.on_grab()
+        self.assertEqual((reader.asked, len(self.last("grabbed"))), ([], 6))
+        self.page.settings["folder"] = self._tmp.name
+        self.page.on_export({})
+        self.assertEqual(reader.asked, [])
+        self.assertEqual(len(self.host.controller.project.album.exported[0]), 6)
+        self.page.on_clear()                                         # let go: the next grab is the reader's
+        self.page.on_grab()
+        self.assertEqual(reader.asked[-1][0], "stills.grab")
 
     def test_poll_during_grab_does_not_start_parallel_resolve_call(self):
         original = self.host.set_busy

@@ -71,6 +71,23 @@ class WorkingTests(unittest.TestCase):
             self.assertIn("Project Setup – Making proxies", confirm.call_args.args[2])
             self.assertEqual(confirm.call_args.kwargs["cancel"], "Keep working")
 
+    def test_the_busy_overlay_up_counts_as_work(self):
+        class Overlay:
+            message, shown = "Building the Auto Switch timeline…", True
+
+            def isVisible(self):
+                return self.shown
+
+        class Stack:
+            def currentWidget(self):
+                return _Page("Podcast")
+
+        shell = self.Shell({"setup": _Page("Project Setup")})
+        shell.busy_overlay, shell.stack = Overlay(), Stack()
+        self.assertEqual(shell.working_tools(), [("Podcast", "Building the Auto Switch timeline…")])
+        shell.busy_overlay.shown = False
+        self.assertEqual(shell.working_tools(), [])
+
     def test_a_broken_tool_never_blocks_quitting(self):
         class Broken(_Page):
             def working_on(self):

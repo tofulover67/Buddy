@@ -151,6 +151,19 @@ TRANSLATION_BY_ID = {m["id"]: m for m in TRANSLATION_MODELS}
 TRANSLATION_FILES = ["model.bin", "config.json", "shared_vocabulary.json", "tokenizer.json",
                      "special_tokens_map.json", "tokenizer_config.json", "generation_config.json"]
 RECOMMENDED_TRANSLATION = "nllb-1.3b"
+
+# Voice prints: Podcast's Auto Switch tells apart the people sharing one mic
+# with them (pages/podcast/switch/voice_worker.py, run in this venv on the
+# onnxruntime and PyAV it already has). WeSpeaker's ResNet34 trained on
+# VoxCeleb2 (CC-BY 4.0, the official WeSpeaker export): 80 filterbanks in,
+# a 256-number print out; 6.6 M weights, ONNX - data, not code. Its own
+# folder in MODELS_DIR, as the speech models have.
+VOICE_MODELS = [
+    {"id": "voice-resnet34", "label": "WeSpeaker ResNet34 (voices)", "size_gb": 0.027, "engine": "voice",
+     "repo": "Wespeaker/wespeaker-voxceleb-resnet34-LM", "files": ["voxceleb_resnet34_LM.onnx", "config.yaml"],
+     "fit": "Tells voices apart for Podcast's Auto Switch. Small and fast on any computer."},
+]
+VOICE_IDS = [m["id"] for m in VOICE_MODELS]
 # What a Whisper download fetches - faster-whisper's own patterns.
 WHISPER_PATTERNS = ["config.json", "preprocessor_config.json", "model.bin", "tokenizer.json", "vocabulary.*"]
 # Files a repo may leave out (small ships no preprocessor_config.json).
@@ -475,7 +488,7 @@ def buddy_model_dir(model_id: str) -> Path:
 def own_models(folder: Path, _own_folder: bool = True) -> list[Path]:
     """Buddy's downloads in folder - each model's folder, by its id (what
     a change of models folder moves; core/model_folders.py)."""
-    return [folder / mid for mid in MODEL_IDS + TRANSLATION_IDS if (folder / mid).is_dir()]
+    return [folder / mid for mid in MODEL_IDS + TRANSLATION_IDS + VOICE_IDS if (folder / mid).is_dir()]
 
 
 def installed_models(extra_paths: dict | None = None) -> dict[str, str]:
@@ -645,14 +658,14 @@ def download_model(model_id: str, progress: Progress = print, cancelled=lambda: 
     the venv: its pinned files from its repo at the pinned commit, into a
     staging folder, each file checked against its SHA-256 before the
     folder replaces what was there. Returns the folder."""
-    if model_id not in MODEL_IDS + TRANSLATION_IDS:
+    if model_id not in MODEL_IDS + TRANSLATION_IDS + VOICE_IDS:
         raise SetupError(f"Unknown model {model_id!r}.")
     if not venv_python().exists():
         raise SetupError("Set up the transcription environment first.")
     pin = model_pins().get(model_id)
     if not pin:
         raise SetupError(f"Buddy has no checksums for {model_id}, so it won't download it.")
-    entry = next(m for m in MODELS + TRANSLATION_MODELS if m["id"] == model_id)
+    entry = next(m for m in MODELS + TRANSLATION_MODELS + VOICE_MODELS if m["id"] == model_id)
     if entry.get("engine") == "parakeet":
         ensure_parakeet_runtime(progress, cancelled)
     target = buddy_model_dir(model_id)

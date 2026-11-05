@@ -30,3 +30,9 @@ The title looks' fonts (`app/assets/fonts/titles/`) are bundled under the SIL Op
 - **Kaushan Script** - https://github.com/google/fonts/tree/main/ofl/kaushanscript - Copyright (c) 2011 Pablo Impallari, Igino Marini, with Reserved Font Name Kaushan Script
 - **Anton** - https://github.com/google/fonts/tree/main/ofl/anton - Copyright 2020 The Anton Project Authors
 - **Poppins** (ExtraBold, Bold) - https://github.com/google/fonts/tree/main/ofl/poppins - Copyright 2020 The Poppins Project Authors
+
+## Voice model for Podcast > Auto Switch
+
+Not bundled: downloaded on request, pinned to one commit and checked file by file (`app/pages/transcribe/model_pins.json`, `voice-resnet34`).
+
+- **WeSpeaker ResNet34 (VoxCeleb2, large-margin fine-tuned)** - https://huggingface.co/Wespeaker/wespeaker-voxceleb-resnet34-LM - from the WeSpeaker project, https://github.com/wenet-e2e/wespeaker - licensed under Creative Commons Attribution 4.0 (CC-BY 4.0), https://creativecommons.org/licenses/by/4.0/ - used unmodified.

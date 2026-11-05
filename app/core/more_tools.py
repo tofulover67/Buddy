@@ -42,6 +42,7 @@ BLURBS = {
     "daw": "A small music studio for making music in the key and tempo of the song on your timeline.",
     "color_palette": "Colour palettes, colours picked from pictures, and contrast checks.",
     "generative": "Takes things out of stills, or the whole background, on this computer – nothing is uploaded.",
+    "podcast": "Syncs podcast cameras and mics, cuts between cameras by who is speaking, and edits by transcript.",
     "marker_manager": "Grabs stills at your markers and exports them, and makes a YouTube chapter list from the "
                       "markers.",
     "time_tracker": "Tracks the time you spend on each project by itself, with reports and invoices.",

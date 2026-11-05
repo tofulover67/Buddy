@@ -3,8 +3,10 @@
 Runs one Sync-tab engine job off the UI thread.
 
 Only pure work belongs in the job: ffmpeg decodes, numpy, plain dict
-manipulation. Every Resolve call stays on the main thread - exporting
-before the job starts, importing when it finishes - because Resolve's
+manipulation, reading the export and writing the rebuilt timeline to disk.
+Every Resolve call stays off this thread - exporting before the job starts,
+importing when it finishes, in the Resolve reader's process (page.py
+_busy_job) or on the main thread where that can't run - because Resolve's
 in-process bridge is not thread-safe and misusing it segfaults rather
 than raising.
 

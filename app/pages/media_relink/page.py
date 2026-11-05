@@ -15,8 +15,10 @@ The folder search runs on a worker thread (walking a big network share or
 a whole drive can take minutes), with its progress and a Cancel in the
 page. It keeps only the filenames the clips could match, and folders it
 can't open are left out and counted in the summary rather than ending the
-search. Every Resolve call - the scan and ReplaceClip - stays on the main
-thread.
+search. The Resolve work - the scan, ReplaceClip and the check after it -
+is done in the Resolve reader's process behind the busy overlay
+(core/busy_job.py), so Buddy keeps drawing meanwhile; with no reader
+process, here on the main thread, never on a worker thread.
 
 A relink is believed only once the Media Pool, read again afterwards, says
 so: Resolve has answered ReplaceClip with True and kept the old file.
@@ -40,8 +42,10 @@ import time
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QFileDialog
 
+from core import busy_job
 from core.i18n import tr
 from core.resolve_bridge import ResolveConnectionError
+from core.resolve_reader import ResolveCalls
 from core.web_page import WebToolPage
 
 from . import relink_rows, resolve_ext
@@ -125,6 +129,8 @@ class MediaRelinkPage(WebToolPage):
         self._log = []
         self._worker = None
         self._search = None   # {"mode", "folder", "seen", "stopping"}
+        # The scan and the relink, in the Resolve reader's process.
+        self._calls = ResolveCalls(self)
 
     def working_on(self):
         return "Searching for media" if self._search is not None else None
@@ -188,13 +194,7 @@ class MediaRelinkPage(WebToolPage):
 
     @staticmethod
     def _project_id(controller):
-        project = controller.current_project()
-        if project is None:
-            return None
-        try:
-            return project.GetUniqueId() or None
-        except Exception:
-            return None
+        return resolve_ext.current_project_id(controller)
 
     def _check_scanned_project(self, mode, controller):
         scanned_id = self._lists[mode]["project_id"]
@@ -238,29 +238,26 @@ class MediaRelinkPage(WebToolPage):
             self._push_state()
             return
         scope = self._lists[mode]["scope"]
-        self.host.set_busy(True, "Reading the timeline…" if scope == resolve_ext.SCOPE_TIMELINE
-                           else "Scanning the Media Pool…")
-        error = None
-        try:
-            entries = resolve_ext.SCANS[scope](controller)
-            rows, skipped = relink_rows.make_rows(
-                entries, resolve_ext.get_clip_file_path,
-                lambda clip: clip.GetClipProperty("Clip Name") or clip.GetName(),
-                get_id=resolve_ext.clip_id)
-        except Exception as exc:  # noqa: BLE001 - no project, or the connection dropped
-            error = exc
-        finally:
-            self.host.set_busy(False)
+        # In the Resolve reader's process: a project's clips are a few calls
+        # each, and Buddy keeps drawing meanwhile (core/busy_job.py).
+        busy_job.run(self.host, self._calls, "relink.scan", {"scope": scope},
+                     lambda: resolve_ext.scan_rows(controller, scope),
+                     lambda result, error: self._on_scanned(mode, result, error),
+                     "Reading the timeline…" if scope == resolve_ext.SCOPE_TIMELINE else "Scanning the Media Pool…")
+
+    def _on_scanned(self, mode, result, error):
         self._push_state()
-        if isinstance(error, resolve_ext.NothingToScan):
-            self._alert(error.title, error.text)
+        if error is None and result.get("nothing"):
+            title, text = result["nothing"]
+            self._alert(title, text)
             return
-        if error is not None:
+        if error is not None:      # no project, or the connection dropped
             self._add_log(f"Couldn't scan the Media Pool: {error}", "error")
             return
+        rows, skipped = result["rows"], result["skipped"]
         data = self._lists[mode]
         data.update(rows=rows, skipped=skipped, scanned=True, generation=data["generation"] + 1,
-                    project_id=self._project_id(controller))
+                    project_id=result["project_id"])
         c = relink_rows.counts(rows)
         parts = [f"Scanned 1 clip – {c['offline']} offline." if c["total"] == 1
                  else f"Scanned {c['total']} clips – {c['offline']} offline."]
@@ -403,20 +400,39 @@ class MediaRelinkPage(WebToolPage):
         is_sequence = lambda row: row["resolved"] and sequence_first_frame(row["old_path"])
         sequences = sum(1 for r in rows if is_sequence(r))
         rows = [r for r in rows if not is_sequence(r)]
-        self.host.set_busy(True, "Relinking 1 clip…" if len(rows) == 1 else f"Relinking {len(rows)} clips…")
-        unchanged, error = 0, None
-        try:
-            relinked, skipped, failed = relink_rows.relink(rows, resolve_ext.replace_clip)
-            if relinked:
-                self.host.set_busy(True, "Checking the relinked clips…")
-                try:
-                    paths = resolve_ext.current_paths(controller, [r["uid"] for r in rows if r.get("before")])
-                except Exception as exc:  # noqa: BLE001 - the connection dropped mid-check
-                    paths, error = {}, exc
-                unchanged = relink_rows.confirm(rows, paths)
-                relinked -= unchanged
-        finally:
-            self.host.set_busy(False)
+        # In the Resolve reader's process, like the scan (core/busy_job.py):
+        # the rows go as plain data, and come back as relink() left them.
+        args = {"project_id": self._lists[mode]["project_id"], "rows": [dict(r) for r in rows]}
+        busy_job.run(self.host, self._calls, "relink.replace", args,
+                     lambda: resolve_ext.relink_by_id(controller, **args),
+                     lambda result, error: self._on_relinked(mode, rows, sequences, controller, result, error),
+                     "Relinking 1 clip…" if len(rows) == 1 else f"Relinking {len(rows)} clips…")
+
+    def _on_relinked(self, mode, rows, sequences, controller, result, error):
+        if error is not None:      # the reader's process stopped mid-way, or the project closed
+            self._summary(mode, [str(error)], "error")
+            self._push_rows(mode)
+            return
+        relinked, skipped, failed = result["relinked"], result["skipped"], result["failed"]
+        answered = {r["id"]: r for r in result["rows"]}
+        for row in rows:
+            row.update(answered.get(row["id"], {}))
+        if not relinked:
+            return self._relinked(mode, sequences, relinked, skipped, failed, 0, None)
+        ids = [r["uid"] for r in rows if r.get("before")]
+        busy_job.run(self.host, self._calls, "relink.check", {"ids": ids},
+                     lambda: resolve_ext.current_paths(controller, ids),
+                     lambda paths, error: self._on_checked(mode, rows, sequences, (relinked, skipped, failed),
+                                                           paths, error),
+                     "Checking the relinked clips…")
+
+    def _on_checked(self, mode, rows, sequences, counts, paths, error):
+        relinked, skipped, failed = counts
+        # An error: the connection dropped mid-check - taken on Resolve's word.
+        unchanged = relink_rows.confirm(rows, paths if error is None else {})
+        self._relinked(mode, sequences, relinked - unchanged, skipped, failed, unchanged, error)
+
+    def _relinked(self, mode, sequences, relinked, skipped, failed, unchanged, error):
         if relinked > 0:
             self.achieve("relinked", relinked)
         parts = ["Relinked 1 clip." if relinked == 1 else f"Relinked {relinked} clips."]

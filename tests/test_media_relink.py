@@ -22,9 +22,18 @@ try:
     from PySide6.QtCore import QCoreApplication, QEventLoop, QTimer, Qt
     from PySide6.QtWidgets import QApplication
     from shiboken6 import delete
+    from _child_reader import ChildReader, load_without_qt
     HAVE_QT = True
 except ImportError:  # pragma: no cover
     HAVE_QT = False
+
+# The page's jobs in the Resolve reader's process: the lines
+# core/resolve_reader_child.py JOBS has for them.
+JOBS = {
+    "relink.scan": ("pages.media_relink.resolve_ext", "scan_rows"),
+    "relink.replace": ("pages.media_relink.resolve_ext", "relink_by_id"),
+    "relink.check": ("pages.media_relink.resolve_ext", "current_paths"),
+}
 
 
 def touch(path):
@@ -390,7 +399,7 @@ class Host:
     def __init__(self, controller):
         self.controller, self.connected = controller, True
         self.shared_settings = {"theme": "Resolve"}
-        self.busy = []
+        self.busy, self.messages = [], []
 
     def ensure_connected(self):
         return self.controller
@@ -401,6 +410,67 @@ class Host:
 
     def set_busy(self, on, message=None):
         self.busy.append(on)
+        if on:
+            self.messages.append(message)
+
+
+class JobTests(Base):
+    """The scan, relink and check as the Resolve reader's process makes
+    them: from plain args, with plain answers - and, in a process that
+    didn't make the scan, the clips found again by their ids."""
+
+    def setUp(self):
+        super().setUp()
+        self.controller = Controller(Folder("Master", [Clip("Edit", "", kind="Timeline")],
+                                            [Folder("Footage", self.clips)]))
+        self.addCleanup(resolve_ext._SCANNED.update, project=None, clips={})
+
+    def plain(self, value):
+        return json.loads(json.dumps(value))
+
+    def test_a_scan_is_plain_data(self):
+        result = resolve_ext.scan_rows(self.controller, resolve_ext.SCOPE_PROJECT)
+        self.assertEqual(self.plain(result), result)
+        self.assertEqual((result["skipped"], result["project_id"]), (1, "project-a"))
+        self.assertEqual([(r["uid"], r["bin"], r["status"]) for r in result["rows"]],
+                         [("id-A001", "Master/Footage", MatchStatus.ONLINE),
+                          ("id-B002", "Master/Footage", MatchStatus.NOT_FOUND),
+                          ("id-C003", "Master/Footage", MatchStatus.NOT_FOUND),
+                          ("id-D004", "Master/Footage", MatchStatus.NOT_FOUND)])
+        self.assertNotIn("clip", result["rows"][0])
+        self.assertEqual(resolve_ext.scan_rows(self.controller, resolve_ext.SCOPE_TIMELINE),
+                         {"nothing": ["No timeline open", "Open a timeline in Resolve, then scan again."]})
+
+    def test_a_relink_in_a_process_that_didnt_scan_finds_the_clips_by_id(self):
+        rows = self.plain(resolve_ext.scan_rows(self.controller, resolve_ext.SCOPE_PROJECT)["rows"])
+        relink_rows.apply_search(rows, build_file_index(self.new), MODE_FIX)
+        relink_rows.pick(rows[2], rows[2]["candidates"][0])
+        self.clips[3].accept = False
+        relink_rows.pick(rows[3], os.path.join(self.new, "Day1", "A001.mov"))    # Resolve refuses this one
+        resolve_ext._SCANNED.update(project=None, clips={})                    # a fresh reader process
+        result = resolve_ext.relink_by_id(self.controller, "project-a", self.plain(rows))
+        self.assertEqual(self.plain(result), result)
+        self.assertEqual((result["relinked"], result["skipped"], result["failed"]), (2, 0, 1))
+        self.assertEqual(self.clips[1].path, os.path.join(self.new, "Day1", "B002.mov"))
+        self.assertEqual(self.clips[2].path, rows[2]["candidates"][0])
+        self.assertEqual(result["rows"][1]["status"], MatchStatus.ONLINE)
+        self.assertEqual(result["rows"][1]["before"]["status"], MatchStatus.MATCH_FOUND)
+        self.assertNotIn("before", result["rows"][3])
+        self.assertEqual(resolve_ext.current_paths(self.controller, ["id-B002", "id-gone"]),
+                         {"id-B002": os.path.join(self.new, "Day1", "B002.mov")})
+
+    def test_a_clip_gone_from_the_media_pool_is_refused(self):
+        rows = resolve_ext.scan_rows(self.controller, resolve_ext.SCOPE_PROJECT)["rows"]
+        relink_rows.apply_search(rows, build_file_index(self.new), MODE_FIX)
+        resolve_ext._SCANNED.update(project=None, clips={})
+        self.controller.project.GetMediaPool().GetRootFolder().subs = []      # deleted in Resolve
+        result = resolve_ext.relink_by_id(self.controller, "project-a", rows)
+        self.assertEqual((result["relinked"], result["failed"]), (0, 1))
+        self.assertEqual(self.clips[1].path, os.path.join(self.old, "B002.mov"))
+
+    @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+    def test_the_jobs_load_without_qt(self):
+        self.assertEqual(load_without_qt(JOBS), "")
 
 
 @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
@@ -631,6 +701,45 @@ class PageTests(Base):
         self.page.on_scope({"scope": "project"})
         self.assertEqual(self.page._lists[MODE_FIX]["scope"], "bin")
         self.page._search = None
+
+    def test_in_the_reader_process_the_scan_relink_and_check_leave_buddy_free(self):
+        reader = self.page._calls.reader = ChildReader(self.host.controller, JOBS)
+        self.page.on_scan(None)
+        self.assertEqual((self.host.busy, self.host.messages), ([True], ["Scanning the Media Pool…"]))
+        self.assertNotIn("rows", [n for n, _ in self.events])        # not read here: sent to the reader
+        reader.run()
+        self.assertEqual(self.host.busy, [True, False])
+        self.assertEqual([r["name"] for r in self.last("rows")["rows"]], ["A001", "B002", "C003", "D004"])
+        self.search(self.new)
+        c003 = self.last("rows")["rows"][2]
+        self.page.on_pick({"id": c003["id"], "path": c003["candidates"][0]})
+        resolve_ext._SCANNED.update(project=None, clips={})          # the reader started afresh since
+        self.clips[2].keeps = True
+        self.page.on_relink_all(None)
+        self.assertEqual(self.clips[1].path, os.path.join(self.old, "B002.mov"))   # not yet: sent
+        reader.run()
+        self.assertEqual([name for name, _ in reader.asked], ["relink.scan", "relink.replace", "relink.check"])
+        self.assertEqual(reader.asked[1][1]["project_id"], "project-a")
+        self.assertEqual(self.host.messages[1:], ["Relinking 2 clips…", "Checking the relinked clips…"])
+        self.assertEqual(self.host.busy, [True, False] * 3)
+        self.assertEqual(self.clips[1].path, os.path.join(self.new, "Day1", "B002.mov"))
+        rows = self.last("rows")
+        self.assertEqual(rows["summary_parts"], ["Relinked 1 clip.", "Resolve accepted 1 more but kept their "
+                                                 "old files, so they're still listed – try them again."])
+        self.assertEqual([r["status"] for r in rows["rows"]], ["online", "online", "match_found", "not_found"])
+        self.assertEqual(self.last("toast")["text"], "Relinked 1 clip")
+
+    def test_a_reader_that_stops_mid_relink_says_so(self):
+        reader = self.page._calls.reader = ChildReader(self.host.controller, JOBS)
+        self.page.on_scan(None)
+        reader.run()
+        self.search(self.new)
+        reader.ends.add("relink.replace")
+        self.page.on_relink_all(None)
+        reader.run()
+        self.assertEqual(self.host.busy[-2:], [True, False])
+        self.assertEqual(self.last("rows")["summary_parts"], ["The Resolve reader stopped."])
+        self.assertEqual(self.last("rows")["counts"]["matched"], 1)  # still there to relink
 
     def test_project_change_requires_new_scan(self):
         self.page.on_scan(None)

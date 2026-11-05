@@ -1789,6 +1789,15 @@ class ShellWindow(QMainWindow):
             what = self._working(tool_id)
             if what:
                 out.append((tr(page.display_name or tool_id), what))
+        # The busy overlay up is work too: a long Resolve job runs in the
+        # reader's process behind it (core/busy_job.py), the UI thread free -
+        # so Quit can be chosen meanwhile, and would stop it halfway.
+        overlay = getattr(self, "busy_overlay", None)
+        if not out and overlay is not None and overlay.isVisible():
+            stack = getattr(self, "stack", None)
+            page = stack.currentWidget() if stack is not None else None
+            name = getattr(page, "display_name", None) or "Buddy"
+            out.append((tr(name), tr(overlay.message)))
         return out
 
     def confirm_quit_while_working(self, parent=None):

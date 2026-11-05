@@ -523,21 +523,49 @@ def _fresh_workdir():
     return tempfile.mkdtemp(prefix=_WORKDIR_PREFIX)
 
 
+def write_document(document, workdir, filename):
+    """Writes a document into workdir as `filename`; its path. Touches no
+    Resolve - a Sync job's worker writes its rebuilt timeline here, for
+    the import (import_file) to find. The folder is made again if it's
+    gone: a job longer than _WORKDIR_KEEP_S can see another export sweep it."""
+    os.makedirs(workdir, exist_ok=True)
+    path = os.path.join(workdir, filename)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(document, handle)
+    return path
+
+
+def load_document(path):
+    """A document write_document (or an export) left on disk."""
+    with open(path, encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def import_file(controller, path, base_name, suffix, what="rebuilt"):
+    """Imports the document at `path` as a new timeline, "<base_name>
+    <suffix>" (made unique). `what` names it in the refusal: "rebuilt",
+    or "synced" for Sync external audio's. MAIN THREAD ONLY - this is the
+    half that talks to Resolve (or the Resolve reader's process:
+    resolve_jobs.import_timeline)."""
+    name = unique_timeline_name(controller.get_project(), f"{base_name} {suffix}")
+    new_timeline = controller.import_timeline_file(path, name)
+    if new_timeline is None:
+        if what == "synced":
+            raise OtioError(
+                "Resolve refused to import the synced timeline. The original "
+                f"timeline is untouched; the rebuilt file is at {path}"
+            )
+        raise OtioError(
+            "Resolve refused to import the rebuilt timeline. The original "
+            f"timeline is untouched; the rebuilt file is at {path}"
+        )
+    return new_timeline
+
+
 def import_rebuilt(controller, result, workdir, base_name, suffix, filename):
     """Writes a rebuilt document out and imports it as a new timeline.
     MAIN THREAD ONLY - this is the half that talks to Resolve."""
-    result_path = os.path.join(workdir, filename)
-    with open(result_path, "w", encoding="utf-8") as handle:
-        json.dump(result, handle)
-
-    name = unique_timeline_name(controller.get_project(), f"{base_name} {suffix}")
-    new_timeline = controller.import_timeline_file(result_path, name)
-    if new_timeline is None:
-        raise OtioError(
-            "Resolve refused to import the rebuilt timeline. The original "
-            f"timeline is untouched; the rebuilt file is at {result_path}"
-        )
-    return new_timeline
+    return import_file(controller, write_document(result, workdir, filename), base_name, suffix)
 
 
 def expand_timeline(controller, progress_cb=None):
@@ -1570,18 +1598,8 @@ def begin_external_sync(controller):
 def finish_external_sync(controller, result, stats, workdir, base_name):
     """Writes the synced document out and imports it as a new timeline.
     MAIN THREAD ONLY, for the same reason as begin_external_sync."""
-    result_path = os.path.join(workdir, "external.otio")
-    with open(result_path, "w", encoding="utf-8") as handle:
-        json.dump(result, handle)
-
-    name = unique_timeline_name(controller.get_project(),
-                                f"{base_name} (Audio Synced)")
-    new_timeline = controller.import_timeline_file(result_path, name)
-    if new_timeline is None:
-        raise OtioError(
-            "Resolve refused to import the synced timeline. The original "
-            f"timeline is untouched; the rebuilt file is at {result_path}"
-        )
+    new_timeline = import_file(controller, write_document(result, workdir, "external.otio"),
+                               base_name, "(Audio Synced)", "synced")
     stats["name"] = new_timeline.GetName()
     return new_timeline
 
@@ -1769,6 +1787,7 @@ SOLO_GAP_SECONDS = 30.0
 
 def _decode_all(clips, ffmpeg_path, rate, warnings, progress_cb):
     """Every clip's audio, decoded once, in parallel."""
+    import numpy as np
     from . import audio_sync
 
     stopped = getattr(progress_cb, "stopped", None)     # worker.py _Report: a cancelled run

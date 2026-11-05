@@ -6859,5 +6859,15 @@
   "中文": "关闭的描边、阴影和方框，会在“字体样式”曾经开启它们的地方关闭",
   "العربية": "يتم إيقاف الحد الخارجي والظل والمربع المعطَّلة حيث كان تنسيق الخط قد شغّلها",
   "Tiếng Việt": "Viền, bóng đổ và hộp đang tắt sẽ được tắt ở những nơi Kiểu chữ đã bật chúng"
+ },
+ "A different timeline is open in Resolve now – nothing was changed.": {
+  "日本語": "Resolve で別のタイムラインが開かれています。何も変更していません。",
+  "Español": "Ahora hay otra línea de tiempo abierta en Resolve: no se ha cambiado nada.",
+  "Deutsch": "In Resolve ist jetzt eine andere Timeline geöffnet – nichts wurde geändert.",
+  "Français": "Une autre timeline est ouverte dans Resolve – rien n'a été modifié.",
+  "한국어": "지금 Resolve에서 다른 타임라인이 열려 있습니다. 아무것도 바꾸지 않았습니다.",
+  "中文": "Resolve 中现在打开的是另一条时间线——没有做任何更改。",
+  "العربية": "يوجد الآن مخطط زمني آخر مفتوح في Resolve – لم يتم تغيير أي شيء.",
+  "Tiếng Việt": "Resolve đang mở một timeline khác – không có gì bị thay đổi."
  }
 }

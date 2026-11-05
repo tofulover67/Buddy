@@ -63,7 +63,7 @@ def sha256_url(url):
 
 def pin_models():
     pins = {}
-    for m in es.MODELS + es.TRANSLATION_MODELS:
+    for m in es.MODELS + es.TRANSLATION_MODELS + es.VOICE_MODELS:
         repo = m["repo"]
         patterns = es.model_patterns(m)
         revision = get_json(f"{API}{repo}/revision/main")["sha"]

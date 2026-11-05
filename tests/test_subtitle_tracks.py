@@ -4,6 +4,7 @@ a real Resolve 21.1 export."""
 
 import os
 import re
+import shutil
 import tempfile
 import unittest
 import zipfile
@@ -111,6 +112,80 @@ class TimelineFileTests(unittest.TestCase):
             f.write("not a zip")
         with self.assertRaises(drt.DrtError):
             drt.with_subtitle_tracks(src, os.path.join(folder, "out.drt"), [], 0, 24.0)
+
+
+class ReaderJobTests(unittest.TestCase):
+    """timeline_with_subtitles_here: the new timeline as the Resolve reader's
+    process makes it ("transcribe.timeline") - tracks as JSON brings them -
+    against a fake Resolve that exports the .drt above and imports what it's
+    given back."""
+
+    class Timeline:
+        def __init__(self, name, subtitles=()):
+            self.name, self.subtitles = name, list(subtitles)
+
+        def GetName(self):
+            return self.name
+
+        def SetName(self, name):
+            self.name = name
+            return True
+
+        def GetSetting(self, key):
+            return "24"
+
+        def GetStartFrame(self):
+            return 86400
+
+        def GetTrackCount(self, kind):
+            return len(self.subtitles) if kind == "subtitle" else 1
+
+        def GetItemListInTrack(self, kind, index):
+            return ["subtitle"] * self.subtitles[index - 1]
+
+        def Export(self, path, kind, subtype):
+            with zipfile.ZipFile(path, "w") as z:
+                z.writestr("project.xml", "<SM_Project/>")
+                z.writestr("SeqContainer/1a33767f.xml", sequence_xml(OLD_TRACK))
+            return kind == "drt"
+
+    def test_a_new_timeline_from_plain_data(self):
+        import json
+        from types import SimpleNamespace
+        from pages.transcribe.resolve_ext import timeline_with_subtitles_here
+        film = self.Timeline("My Film", [1])
+        imported = []
+
+        def import_file(path, options):
+            with zipfile.ZipFile(path) as z:
+                xml = z.read("SeqContainer/1a33767f.xml").decode("utf-8")
+            imported.append((xml, options))
+            subtitle_vec = re.search(r"<SubtitleTrackVec>.*?</SubtitleTrackVec>", xml, re.S).group(0)
+            tracks = re.findall(r"<Sm2TiTrack .*?</Sm2TiTrack>", subtitle_vec, re.S)
+            return self.Timeline("subtitles", [t.count("<Sm2TiGenerator") for t in tracks])
+
+        root = SimpleNamespace(GetSubFolderList=lambda: [])
+        pool = SimpleNamespace(ImportTimelineFromFile=import_file, GetRootFolder=lambda: root)
+        opened = []
+        project = SimpleNamespace(GetCurrentTimeline=lambda: film, GetMediaPool=lambda: pool,
+                                  GetSetting=lambda key: "24", GetTimelineCount=lambda: 1,
+                                  GetTimelineByIndex=lambda i: film, SetCurrentTimeline=opened.append)
+        controller = SimpleNamespace(resolve=SimpleNamespace(EXPORT_DRT="drt", EXPORT_NONE="none"),
+                                     current_project=lambda: project)
+        work = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, work, True)
+        args = json.loads(json.dumps({
+            "tracks": [{"name": "English", "cues": [(1.0, 3.0, "Hello")]},
+                       {"name": "Español", "cues": [(1.0, 3.0, "Hola"), (4.0, 5.5, "Adiós")]}],
+            "work_dir": work}))
+        got = timeline_with_subtitles_here(controller, **args)
+        self.assertEqual(json.loads(json.dumps(got)), {"name": "My Film (Subtitles)", "counts": [1, 2]})
+        xml, options = imported[0]
+        self.assertEqual(re.findall(r"<UserDefinedName>([^<]*)</UserDefinedName>", xml), ["English", "Español"])
+        self.assertEqual(re.findall(r"<Start>(\d+)</Start>", xml), ["86424", "86424", "86496"])
+        self.assertEqual((options["timelineName"], options["importSourceClips"]), ("My Film (Subtitles)", False))
+        self.assertEqual([t.name for t in opened], ["My Film (Subtitles)"])       # opened, the original untouched
+        self.assertEqual(os.listdir(work), [])                                   # its working files gone
 
 
 class SrtLinesTests(unittest.TestCase):

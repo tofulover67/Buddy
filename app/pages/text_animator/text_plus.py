@@ -24,7 +24,11 @@ Ctrl+Shift+Z): positions, sizes, word layouts and animation presets.
 
 Resolve access goes through host.ensure_connected(); while Resolve is unreachable the
 poll retries only every _RECONNECT_COOLDOWN_SECONDS - a failed connect spawns a probe
-subprocess (core/resolve_bridge.py). Long actions run under host.set_busy().
+subprocess (core/resolve_bridge.py). Long actions - the Apply buttons, Space words over
+the timeline, Stack - are made behind the busy overlay in the Resolve reader's process
+(core/busy_job.py, the edits in text_plus_resolve.py), so Buddy keeps drawing meanwhile;
+with no reader, here as before. Which clips they're for is found here first (as ids for
+that process), and Undo keeps this process's clips.
 The poll reads the Text+ (Fusion comps, whose tools the edits then use) on this thread,
 but first asks the Resolve reader's process (core/resolve_reader.py) where Resolve is -
 project, timeline, playhead. While the timeline plays Resolve holds every call, and the
@@ -46,9 +50,7 @@ the page's own):
 
 import os
 import re
-import shutil
 import sys
-import tempfile
 import time
 import traceback
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple
@@ -56,15 +58,14 @@ from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 from PySide6.QtCore import QObject, QTimer
 from PySide6.QtGui import QFontDatabase
 
-from core import resolve_where
+from core import busy_job, resolve_where
 from core.resolve_bridge import ResolveConnectionError
 from core.resolve_reader import ResolveCalls
 from pages.transcribe import drt
 
-from . import canvas_math, overlays, text_measure, word_by_word
+from . import canvas_math, overlays, text_measure, text_plus_resolve as tpr, word_by_word
 from .animation_engine import FusionAnimationEngine
 from .canvas_math import (
-    cap_height_fraction,
     compute_auto_spaced_row,
     compute_bounding_fit_size,
     compute_large_word_layout,
@@ -83,7 +84,7 @@ from .font_utils import (
     split_font_name_and_style,
 )
 from .layout_presets import LAYOUT_PRESETS, compute_vertical_stack_centers, group_overlapping_clips
-from .live_preview import _get_current_frame, _read_text_tool_state, get_active_text_plus_items, parse_point
+from .live_preview import _get_current_frame, get_active_text_plus_items, parse_point
 from .options import Options
 from .subtitle_engine import get_timeline_resolution
 
@@ -169,6 +170,51 @@ class _ScopeUnavailable(Exception):
     """An "Apply to" choice this Resolve can't do - the message says why."""
 
 
+def _unique_id(item) -> str:
+    """A timeline's or timeline item's GetUniqueId(), "" when it has none."""
+    try:
+        return str(item.GetUniqueId() or "")
+    except Exception:
+        return ""
+
+
+def _tuple(value):
+    """A preset or clip key as Undo keeps it - a tuple, though JSON brought a list."""
+    return tuple(value) if isinstance(value, list) else value
+
+
+class _Refs:
+    """Clips as the reader's process finds them again: {"timeline_id", "clips":
+    [[GetUniqueId, track]]} - read from Resolve once, the first time they're asked
+    for (only with a reader there to send them to). picks: some of them, by place."""
+
+    def __init__(self, timeline, clips):
+        self._timeline, self._clips, self._ids = timeline, clips, None
+
+    def __call__(self, picks=None) -> dict:
+        if self._ids is None:
+            self._ids = {"timeline_id": _unique_id(self._timeline),
+                         "clips": [[_unique_id(clip), int(track)] for clip, track in self._clips]}
+        if picks is None:
+            return dict(self._ids)
+        return {"timeline_id": self._ids["timeline_id"], "clips": [self._ids["clips"][i] for i in picks]}
+
+
+class _Held:
+    """The host, for one step of an edit made in two (read in Resolve, measure here
+    with Qt, write in Resolve): the busy overlay goes up with the first step and down
+    with the second - not in between."""
+
+    def __init__(self, host, up, down):
+        self._host, self._up, self._down = host, up, down
+
+    def set_busy(self, on, message=None):
+        if on and self._up:
+            self._host.set_busy(True, message)
+        elif not on and self._down:
+            self._host.set_busy(False)
+
+
 class TextPlusTools(QObject):
     """The Text+ tabs, inside a page that provides: host, emit(name, payload) to its
     view, isVisible(), tab (the tab on screen) and _add_log(text, kind). The page
@@ -207,6 +253,7 @@ class TextPlusTools(QObject):
         self._calls = ResolveCalls(self)     # the look at where Resolve is, before a read here
         self._where_sig = None               # what that look last saw
         self._read_at = 0.0                  # time.monotonic() of the last read here
+        self._working = False                # a long edit is being made (_run): nothing else starts
 
         self._preview_timer = QTimer(self)
         self._preview_timer.setInterval(LIVE_PREVIEW_POLL_INTERVAL_MS)
@@ -297,6 +344,50 @@ class TextPlusTools(QObject):
         """Into the page's activity log."""
         text = str(msg)
         self.page._add_log(text, "error" if _BAD_LOG.search(text) else "info")
+
+    # ------------------------------------------------------------ long edits --
+
+    def _run(self, name, message, args, job, done, where, host=None):
+        """One long edit behind the busy overlay (core/busy_job.py): the reader's job
+        `name` (text_plus_resolve.py) when there's a reader - args() its arguments,
+        worked out only then: the clips as ids - else job() here, as before. done(result,
+        error) once it's made; nothing else of these tabs starts meanwhile. A done that
+        fails is logged as its handler's error (`where`)."""
+        payload = args() if self._calls.reader.available() else {}
+
+        def finished(result, error):
+            self._working = False
+            try:
+                done(result, error)
+            except Exception as err:  # noqa: BLE001 - said, as the handlers always did
+                self.host.set_busy(False)       # a first step's overlay (_Held), left up for the next
+                self._failed(where, err)
+
+        self._working = True
+        try:
+            busy_job.run(host or self.host, self._calls, name, payload, job, finished, message)
+        except Exception:
+            self._working = False
+            raise
+
+    def _failed(self, where, error):
+        """A long edit that went wrong, said in the log the way its handler always did -
+        with the traceback, when it happened in this process."""
+        self.log(f"[Error in {where}]: {error}")
+        if getattr(error, "__traceback__", None) is not None:
+            self.log("".join(traceback.format_exception(type(error), error, error.__traceback__)))
+
+    def _said(self, result):
+        """The log lines a job in the reader's process made (here, they're logged as they come)."""
+        for line in (result or {}).get("log") or []:
+            self.log(line)
+
+    @staticmethod
+    def _position_steps(clips, steps) -> list:
+        """Undo steps for Center changes a job made - {"i", "old", "new"} by the clip's
+        place in `clips` - on this process's clips."""
+        return [_LivePreviewAction(clip=clips[s["i"]][0], kind="position", old_value=list(s["old"]),
+                                   new_value=list(s["new"])) for s in steps]
 
     # ------------------------------------------------------------------ pushes --
 
@@ -506,8 +597,8 @@ class TextPlusTools(QObject):
 
     def _on_where(self, where):
         """The reader's look, answered: read the Text+ here if anything moved, or
-        LIVE_FULL_S on."""
-        if not self.page.isVisible() or self.tab not in _LIVE_TABS:
+        LIVE_FULL_S on - not while a long edit is being made (_run): read once it's done."""
+        if not self.page.isVisible() or self.tab not in _LIVE_TABS or self._working:
             return
         signature = (where["project"], where["timeline"], where["timecode"])
         if signature == self._where_sig and time.monotonic() - self._read_at < LIVE_FULL_S:
@@ -522,8 +613,8 @@ class TextPlusTools(QObject):
         reader's look first (_ask_where); forced (after an edit), it reads straight away."""
         if not force and not self.page.isVisible():
             return
-        if self.tab not in _LIVE_TABS:
-            return
+        if self.tab not in _LIVE_TABS or self._working:
+            return                      # (a long edit: read again once it's made)
         if self._no_connection and (time.monotonic() - self._last_connect_attempt) < _RECONNECT_COOLDOWN_SECONDS:
             return
         if force or not self._ask_where(self._on_where):
@@ -797,15 +888,19 @@ class TextPlusTools(QObject):
             return 0
 
     @staticmethod
-    def _word_entry(key, clip, track, state) -> Optional[dict]:
+    def _word_entry(key, clip, track, state, span=None) -> Optional[dict]:
         """A clip Space words can set out - one word, a known Center - as {clip, track,
-        start, end, word}; None for any other."""
+        start, end, word}; None for any other. span: its [start, end] as already read
+        (tpr.read_words), else they're read from the clip."""
         if not state or state.get("center") is None or not word_by_word.is_single_word(state.get("text")):
             return None
-        try:
-            start, end = int(clip.GetStart()), int(clip.GetEnd())
-        except Exception:
-            start = end = 0
+        if span is not None:
+            start, end = int(span[0]), int(span[1])
+        else:
+            try:
+                start, end = int(clip.GetStart()), int(clip.GetEnd())
+            except Exception:
+                start = end = 0
         cx, cy = state["center"]
         return {"clip": clip, "track": track, "start": start, "end": end, "word": word_by_word.Word(
             key, state["text"], state["font_name"], state["font_style"], state["font_size"],
@@ -832,53 +927,45 @@ class TextPlusTools(QObject):
                 entries.append(entry)
         return entries
 
-    def _timeline_word_groups(self, timeline) -> list:
-        """Every group of single-word Text+ clips on screen together, anywhere on the
-        timeline (each clip overlapping every other in its group), two words or more."""
-        clips, _desc = self._scope_clips(timeline, "timeline", 1)
+    def _word_groups(self, clips, read) -> list:
+        """Every group of single-word Text+ clips on screen together (each clip overlapping
+        every other in its group), two words or more - from `read`, tpr.read_words of
+        `clips`. Each entry's "i" is its clip's place in `clips`."""
         entries = []
-        for clip, track in clips:
-            comp = self._get_fusion_comp(clip)
-            tool = self._find_text_tool(comp) if comp is not None else None
-            entry = self._word_entry(len(entries), clip, track, _read_text_tool_state(tool))
+        for i, ((clip, track), record) in enumerate(zip(clips, read["clips"])):
+            entry = self._word_entry(len(entries), clip, track, record["state"], record["span"])
             if entry is not None:
+                entry["i"] = i
                 entries.append(entry)
         groups = group_overlapping_clips([(i, e["start"], e["end"]) for i, e in enumerate(entries)])
         return [[entries[i] for i in group] for group in groups if len(group) > 1]
 
-    def _space_group(self, entries, lines, aspect, spacing=1.0) -> Tuple[list, int, Any]:
-        """One group set out and put in Resolve: (undo steps, clips moved, the layout)."""
+    @staticmethod
+    def _layout_group(entries, lines, aspect, spacing=1.0) -> Tuple[list, list, Any]:
+        """One group set out: (its entries in order, their new Centers - Fusion's,
+        bottom-up - the layout)."""
         entries = sorted(entries, key=lambda e: (e["start"], e["track"]))
         placed = word_by_word.layout([e["word"] for e in entries], lines, aspect, spacing)
-        sub_actions, moved = [], 0
+        centers = []
         for entry in entries:
             cx, cy = placed.centers[entry["word"].key]
-            new_center = [cx, 1.0 - cy]
-            comp = self._get_fusion_comp(entry["clip"])
-            tool = self._find_text_tool(comp) if comp is not None else None
-            if tool is None:
-                self.log("[Word-by-word] Could not re-locate the Text+ tool for one word – skipped.")
-                continue
-            try:
-                old = parse_point(tool.GetInput("Center"))
-            except Exception:
-                old = None
-            if old is not None and abs(old[0] - new_center[0]) < 1e-6 and abs(old[1] - new_center[1]) < 1e-6:
-                continue
-            try:
-                tool.SetInput("Center", new_center)
-                moved += 1
-                if old is not None:
-                    sub_actions.append(_LivePreviewAction(clip=entry["clip"], kind="position",
-                                                          old_value=list(old), new_value=new_center))
-            except Exception as err:
-                self.log(f"[Word-by-word] Center SetInput Exception: {err}")
-        return sub_actions, moved, placed
+            centers.append([cx, 1.0 - cy])
+        return entries, centers, placed
+
+    def _space_group(self, entries, lines, aspect, spacing=1.0) -> Tuple[list, int, Any]:
+        """One group set out and put in Resolve, here: (undo steps, clips moved, the layout)."""
+        entries, centers, placed = self._layout_group(entries, lines, aspect, spacing)
+        clips = [(e["clip"], e["track"]) for e in entries]
+        done = tpr.space_words(clips, centers, log=self.log, comp_of=self._get_fusion_comp,
+                               tool_of=self._find_text_tool)
+        return self._position_steps(clips, done["steps"]), done["moved"], placed
 
     def on_space_words(self, payload):
         """Space words: the single-word clips under the playhead (those selected in the
         preview, if any), or every group of them on the timeline, set out as one Text+
         clip would show the sentence - see word_by_word.py."""
+        if self._working:
+            return
         payload = payload or {}
         lines, scope, spacing = self.opts.wbw_lines, self.opts.wbw_scope, self.opts.slider("wbw_spacing")
         resolve = self._resolve()
@@ -891,25 +978,16 @@ class TextPlusTools(QObject):
         aspect = width / height if height else 16 / 9
         try:
             if scope == "timeline":
-                self.host.set_busy(True, "Spacing words…")
-                try:
-                    groups = self._timeline_word_groups(timeline)
-                    if not groups:
-                        self.log("[Word-by-word] No single-word Text+ clips are on screen together on this timeline.")
-                        return self.emit("toast", {"text": "No single-word Text+ clips on screen together on this timeline."})
-                    sub_actions, moved, wide = [], 0, 0
-                    for group in groups:
-                        steps, count, placed = self._space_group(group, lines, aspect, spacing)
-                        sub_actions += steps
-                        moved += count
-                        wide += placed.widest > 1.0
-                finally:
-                    self.host.set_busy(False)
-                self.log(f"[Word-by-word] Spaced {sum(len(g) for g in groups)} words in {len(groups)} group(s); "
-                         f"{moved} Text+ clip(s) moved.")
-                if wide:
-                    self.log(f"[Warning] {wide} group(s) are wider than the frame – allow more lines, or make the words smaller.")
-                self.emit("toast", {"text": f"Spaced {len(groups)} groups of words"})
+                # Every clip read in the reader's process, the groups set out here (Qt
+                # measures the words), then put in Resolve there - the overlay up throughout.
+                clips, _desc = self._scope_clips(timeline, "timeline", 1)
+                refs = _Refs(timeline, clips)
+                return self._run(
+                    "textplus.read", "Spacing words…", lambda: {**refs(), "kind": "words"},
+                    lambda: tpr.read_words(clips, log=self.log, comp_of=self._get_fusion_comp,
+                                           tool_of=self._find_text_tool),
+                    lambda read, error: self._space_timeline(read, error, clips, refs, lines, aspect, spacing),
+                    "space_words", host=_Held(self.host, up=True, down=False))
             else:
                 entries = self._playhead_words(payload.get("selected"))
                 if len(entries) < 2:
@@ -927,11 +1005,57 @@ class TextPlusTools(QObject):
             self.log(traceback.format_exc())
         self._refresh_live_preview(force=True)
 
+    def _space_timeline(self, read, error, clips, refs, lines, aspect, spacing):
+        """Space words over the timeline, its clips read (tpr.read_words): each group set
+        out here, then put in Resolve (tpr.space_words) - or, with none, said."""
+        if error is not None:
+            self.host.set_busy(False)
+            self._failed("space_words", error)
+            return self._refresh_live_preview(force=True)
+        self._said(read)
+        try:
+            groups = self._word_groups(clips, read)
+            if not groups:
+                self.host.set_busy(False)
+                self.log("[Word-by-word] No single-word Text+ clips are on screen together on this timeline.")
+                return self.emit("toast", {"text": "No single-word Text+ clips on screen together on this timeline."})
+            picks, centers, wide = [], [], 0
+            for group in groups:
+                entries, placed_centers, placed = self._layout_group(group, lines, aspect, spacing)
+                picks += [entry["i"] for entry in entries]
+                centers += placed_centers
+                wide += placed.widest > 1.0
+        except Exception as err:
+            self.host.set_busy(False)
+            self._failed("space_words", err)
+            return self._refresh_live_preview(force=True)
+        moved = [clips[i] for i in picks]
+        self._run("textplus.space", "Spacing words…", lambda: {**refs(picks), "centers": centers},
+                  lambda: tpr.space_words(moved, centers, log=self.log, comp_of=self._get_fusion_comp,
+                                          tool_of=self._find_text_tool),
+                  lambda result, err: self._spaced_timeline(result, err, moved, groups, wide),
+                  "space_words", host=_Held(self.host, up=False, down=True))
+
+    def _spaced_timeline(self, result, error, clips, groups, wide):
+        if error is not None:
+            self._failed("space_words", error)
+            return self._refresh_live_preview(force=True)
+        self._said(result)
+        self.log(f"[Word-by-word] Spaced {sum(len(g) for g in groups)} words in {len(groups)} group(s); "
+                 f"{result['moved']} Text+ clip(s) moved.")
+        if wide:
+            self.log(f"[Warning] {wide} group(s) are wider than the frame – allow more lines, or make the words smaller.")
+        self.emit("toast", {"text": f"Spaced {len(groups)} groups of words"})
+        self._record_batch_action(self._position_steps(clips, result["steps"]))
+        self._refresh_live_preview(force=True)
+
     def on_stack_words(self, _payload=None):
         """Stack on their own tracks: the Text+ clips selected on Resolve's timeline, each
         on a video track of its own and lasting until the playhead, in a copy of the
         timeline that's then opened (word_by_word.stack_plan, drt.restack_video_clips).
         The timeline itself isn't changed."""
+        if self._working:
+            return
         resolve = self._resolve()
         if resolve is None:
             return
@@ -980,18 +1104,21 @@ class TextPlusTools(QObject):
                 except Exception:
                     continue
         plan = word_by_word.stack_plan(clips, [w[:3] for w in words], playhead)
-        self.host.set_busy(True, "Stacking the clips…")
-        try:
-            name = self._stack_into_new_timeline(resolve, timeline, plan)
-        except drt.DrtError as exc:
-            self.log(f"[Error] {exc}")
-            return self.emit("alert", {"title": "Stack on their own tracks", "text": str(exc)})
-        except Exception as err:
-            self.log(f"[Error in stack_words]: {err}")
-            self.log(traceback.format_exc())
-            return self.emit("alert", {"title": "Stack on their own tracks", "text": str(err)})
-        finally:
-            self.host.set_busy(False)
+        # The export, the rewrite and the import in the reader's process: Buddy keeps drawing.
+        self._run("textplus.stack", "Stacking the clips…",
+                  lambda: {"timeline_id": _unique_id(timeline),
+                           "plan": [[track, start, new, frames] for (track, start), (new, frames) in plan.items()]},
+                  lambda: {"name": self._stack_into_new_timeline(resolve, timeline, plan)},
+                  lambda result, error: self._stacked(result, error, plan), "stack_words")
+
+    def _stacked(self, result, error, plan):
+        if error is not None:
+            if isinstance(error, drt.DrtError) or getattr(error, "kind", "") == "DrtError":
+                self.log(f"[Error] {error}")
+            else:
+                self._failed("stack_words", error)
+            return self.emit("alert", {"title": "Stack on their own tracks", "text": str(error)})
+        name = result["name"]
         tracks = len({new for new, _duration in plan.values()})
         self.log(f"[Word-by-word] Stacked {len(plan)} Text+ clip(s) on {tracks} track(s) until the playhead, "
                  f"in a new timeline, '{name}' (opened). The timeline they came from is unchanged.")
@@ -999,38 +1126,10 @@ class TextPlusTools(QObject):
         self._sync_timeline()
         self._refresh_live_preview(force=True)
 
-    @classmethod
-    def _all_folders(cls, folder) -> list:
-        found = [folder]
-        for sub in folder.GetSubFolderList() or []:
-            found.extend(cls._all_folders(sub))
-        return found
-
     def _stack_into_new_timeline(self, resolve, timeline, plan) -> str:
         """The timeline exported as .drt, its clips restacked by `plan`, imported as a new
-        timeline - bound to the Media Pool clips already there - and opened. Its name."""
-        project = resolve.GetProjectManager().GetCurrentProject()
-        mp = project.GetMediaPool()
-        taken = {project.GetTimelineByIndex(i).GetName() for i in range(1, (project.GetTimelineCount() or 0) + 1)}
-        name, n = f"{timeline.GetName()} (Word-by-word)", 2
-        while name in taken:
-            name, n = f"{timeline.GetName()} (Word-by-word {n})", n + 1
-        folder = tempfile.mkdtemp(prefix="buddy word-by-word ")
-        exported, built = os.path.join(folder, "timeline.drt"), os.path.join(folder, "stacked.drt")
-        try:
-            if not timeline.Export(exported, resolve.EXPORT_DRT, resolve.EXPORT_NONE) or not os.path.isfile(exported):
-                raise drt.DrtError("Resolve couldn't export the timeline.")
-            drt.with_video_clips_restacked(exported, built, plan)
-            made = mp.ImportTimelineFromFile(built, {
-                "timelineName": name, "importSourceClips": False,
-                "sourceClipsFolders": self._all_folders(mp.GetRootFolder())})
-            if not made:
-                raise drt.DrtError("Resolve didn't import the new timeline.")
-            made.SetName(name)          # a .drt comes in named after the file, whatever timelineName says
-            project.SetCurrentTimeline(made)
-            return made.GetName()
-        finally:
-            shutil.rmtree(folder, ignore_errors=True)
+        timeline and opened (tpr.stack_into_new_timeline). Its name."""
+        return tpr.stack_into_new_timeline(resolve, timeline, plan)
 
     # ------------------------------------------------------------ bounding --
 
@@ -1099,6 +1198,8 @@ class TextPlusTools(QObject):
             self._refresh_live_preview(force=True)
 
     def on_apply_bounding(self, _payload=None):
+        if self._working:
+            return
         try:
             if not self.bounding["on"]:
                 self.log("[Warning] Turn on Show bounding lines first.")
@@ -1117,137 +1218,86 @@ class TextPlusTools(QObject):
                 return
             clips, scope_desc = found
             self.log(f"[Action] Applying Bounding to {scope_desc}…")
-
-            self.host.set_busy(True, "Applying bounding…")
-            try:
-                updated = 0
-                scanned = 0
-                processed_clips = []
-                for clip, track_index in clips:
-                    if clip is None:
-                        continue
-                    scanned += 1
-                    clip_name = clip.GetName() if hasattr(clip, "GetName") else f"Clip on Track {track_index}"
-                    comp = self._get_fusion_comp(clip)
-                    if comp is None:
-                        continue
-                    text_tool = self._find_text_tool(comp)
-                    if text_tool is None:
-                        continue
-                    try:
-                        styled_text = FusionAnimationEngine.words_of(text_tool)
-                        font_name = text_tool.GetInput("Font")
-                        font_size = text_tool.GetInput("Size")
-                        center = parse_point(text_tool.GetInput("Center"))
-                    except Exception as err:
-                        self.log(f"  - Warning: Could not read style/position for clip '{clip_name}': {err}")
-                        continue
-                    if center is None or not isinstance(font_size, (int, float)):
-                        self.log(f"  - Warning: Missing Center/Size for clip '{clip_name}' – skipped.")
-                        continue
-                    if styled_text is None and FusionAnimationEngine.chained(text_tool):
-                        self.log(f"  - Skipped clip '{clip_name}': its words are on chained text modifiers, which aren't read.")
-                        continue
-                    processed_clips.append((clip, text_tool, clip_name))
-                    new_size = compute_bounding_fit_size(font_name, float(font_size), styled_text or "", left_frac, right_frac)
-                    if new_size is None:
-                        self.log(f"  - Skipped clip '{clip_name}': the Bounding lines are degenerate (right must be right of left).")
-                        continue
-                    new_center_x = (left_frac + right_frac) / 2.0
-                    try:
-                        text_tool.SetInput("Size", new_size)
-                        text_tool.SetInput("Center", [new_center_x, center[1]])
-                        updated += 1
-                    except Exception as err:
-                        self.log(f"  - Warning: Could not set Size/Center for clip '{clip_name}': {err}")
-
-                self.log(f"Applied Bounding resize to {updated}/{scanned} clip(s) on {scope_desc}.")
-                timeline_width, timeline_height = get_timeline_resolution(timeline)
-                self._snap_all_stacked_groups_vertically(processed_clips, timeline_width, timeline_height)
-            finally:
-                self.host.set_busy(False)
-            self.emit("toast", {"text": f"Bounding applied to {updated} Text+ clip(s)"})
-            self._refresh_live_preview(force=True)
+            timeline_width, timeline_height = get_timeline_resolution(timeline)
+            # Read in the reader's process, each fit measured here (Qt), then put in
+            # Resolve there - the overlay up throughout.
+            refs = _Refs(timeline, clips)
+            self._run("textplus.read", "Applying bounding…", lambda: {**refs(), "kind": "bounding"},
+                      lambda: tpr.read_bounding(clips, log=self.log, comp_of=self._get_fusion_comp,
+                                                tool_of=self._find_text_tool),
+                      lambda read, error: self._fit_bounding(read, error, clips, refs, scope_desc, left_frac,
+                                                             right_frac, timeline_width, timeline_height),
+                      "apply_bounding_to_timeline", host=_Held(self.host, up=True, down=False))
         except Exception as err:
             self.log(f"[Error in apply_bounding_to_timeline]: {err}")
             self.log(traceback.format_exc())
 
-    def _snap_all_stacked_groups_vertically(self, clip_records: list, timeline_width: float, timeline_height: float):
-        clips_for_grouping = []
-        by_key = {}
-        for idx, (clip, text_tool, clip_name) in enumerate(clip_records):
+    @staticmethod
+    def _bounding_plan(records, left_frac, right_frac) -> Tuple[list, int]:
+        """What Bounding does to each clip read (tpr.read_bounding), in order, measured
+        here where there's Qt - (plan, clips scanned) for tpr.bounding: the lines to log,
+        each fit's Size and Center, and the cap height its vertical snap goes by."""
+        plan, scanned = [], 0
+        new_center_x = (left_frac + right_frac) / 2.0
+        for i, record in enumerate(records):
+            if record is None:
+                continue
+            scanned += 1
+            if not record["tool"]:
+                continue
+            clip_name = record["name"]
+            if "error" in record:
+                plan.append({"i": i, "line": f"  - Warning: Could not read style/position for clip '{clip_name}': "
+                                             f"{record['error']}"})
+                continue
+            styled_text, font_name, font_size, center = (record["words"], record["font"], record["size"],
+                                                         record["center"])
+            if center is None or not isinstance(font_size, (int, float)):
+                plan.append({"i": i, "line": f"  - Warning: Missing Center/Size for clip '{clip_name}' – skipped."})
+                continue
+            if styled_text is None and record.get("chained"):
+                plan.append({"i": i, "line": f"  - Skipped clip '{clip_name}': its words are on chained text "
+                                             "modifiers, which aren't read."})
+                continue
+            step = {"i": i, "name": clip_name, "processed": True,
+                    "cap": list(canvas_math.cap_height_factors(font_name or "Arial"))}
+            new_size = compute_bounding_fit_size(font_name, float(font_size), styled_text or "", left_frac, right_frac)
+            if new_size is None:
+                step["line"] = (f"  - Skipped clip '{clip_name}': the Bounding lines are degenerate (right must be "
+                                "right of left).")
+            else:
+                step.update(size=new_size, center=[new_center_x, center[1]])
+            plan.append(step)
+        return plan, scanned
+
+    def _fit_bounding(self, read, error, clips, refs, scope_desc, left_frac, right_frac, width, height):
+        """Bounding's clips read: each one's fit measured here, then put in Resolve."""
+        if error is None:
+            self._said(read)
             try:
-                start = clip.GetStart() if callable(getattr(clip, "GetStart", None)) else None
-                end = clip.GetEnd() if callable(getattr(clip, "GetEnd", None)) else None
-            except Exception as err:
-                self.log(f"  - [Bounding] Could not read start/end for clip '{clip_name}' – excluded from vertical stacking: {err}")
-                continue
-            if start is None or end is None:
-                self.log(f"  - [Bounding] Clip '{clip_name}' has no GetStart()/GetEnd() – excluded from vertical stacking.")
-                continue
-            clips_for_grouping.append((idx, start, end))
-            by_key[idx] = (clip, text_tool, clip_name)
+                plan, scanned = self._bounding_plan(read["clips"], left_frac, right_frac)
+            except Exception as err:  # noqa: BLE001 - said below
+                error = err
+        if error is not None:
+            self.host.set_busy(False)
+            return self._failed("apply_bounding_to_timeline", error)
+        self._run("textplus.bounding", "Applying bounding…",
+                  lambda: {**refs(), "plan": plan, "scanned": scanned, "scope_desc": scope_desc,
+                           "width": width, "height": height},
+                  lambda: tpr.bounding(clips, plan, scanned, scope_desc, width, height, log=self.log,
+                                       comp_of=self._get_fusion_comp, tool_of=self._find_text_tool),
+                  self._bounded, "apply_bounding_to_timeline", host=_Held(self.host, up=False, down=True))
 
-        groups = group_overlapping_clips(clips_for_grouping)
-        aspect_ratio = (timeline_width / timeline_height) if timeline_height else 1.0
-        solo_groups = sum(1 for group_keys in groups if len(group_keys) < 2)
-        if solo_groups:
-            self.log(
-                f"[Bounding] {solo_groups} clip(s) never temporally overlap any other Text+ "
-                "clip – their vertical position is left untouched by design (vertical "
-                "snapping only applies to clips that are actually stacked together at some "
-                "point on the timeline)."
-            )
-
-        groups_snapped = 0
-        clips_moved = 0
-        for group_keys in groups:
-            if len(group_keys) < 2:
-                continue
-            members = []
-            for key in group_keys:
-                clip, text_tool, clip_name = by_key[key]
-                try:
-                    center = parse_point(text_tool.GetInput("Center"))
-                    font_size = text_tool.GetInput("Size")
-                except Exception as err:
-                    self.log(f"  - [Bounding] Could not read Center/Size for clip '{clip_name}' – excluded from vertical stacking: {err}")
-                    continue
-                if center is None or not isinstance(font_size, (int, float)):
-                    self.log(f"  - [Bounding] Clip '{clip_name}' has an unreadable Center/Size – excluded from vertical stacking.")
-                    continue
-                try:
-                    font_name = text_tool.GetInput("Font") or "Arial"
-                except Exception:
-                    font_name = "Arial"
-                # Cap height, as a fraction of composition height (it's measured in widths).
-                height_fraction = cap_height_fraction(font_name, float(font_size)) * aspect_ratio
-                try:
-                    background_enabled = bool(text_tool.GetInput("Enabled4"))
-                    extend_vertical = text_tool.GetInput("ExtendVertical4")
-                except Exception:
-                    background_enabled = False
-                    extend_vertical = None
-                if background_enabled and isinstance(extend_vertical, (int, float)):
-                    height_fraction += 2.0 * float(extend_vertical)
-                members.append((key, center[0], -center[1], height_fraction, clip, text_tool, clip_name))
-            if len(members) < 2:
-                continue
-            new_centers = compute_vertical_stack_centers([(m[0], m[2], m[3]) for m in members])
-            for key, center_x, _neg_center_y, _height_fraction, clip, text_tool, clip_name in members:
-                new_neg_center_y = new_centers.get(key)
-                if new_neg_center_y is None:
-                    continue
-                try:
-                    text_tool.SetInput("Center", [center_x, -new_neg_center_y])
-                    clips_moved += 1
-                except Exception as err:
-                    self.log(f"  - Warning: Could not vertically snap clip '{clip_name}': {err}")
-            groups_snapped += 1
-        if groups_snapped:
-            self.log(f"[Bounding] Vertically snapped {clips_moved} Text+ clip(s) across {groups_snapped} stacked group(s) on the timeline.")
+    def _bounded(self, result, error):
+        if error is not None:
+            return self._failed("apply_bounding_to_timeline", error)
+        self._said(result)
+        self.emit("toast", {"text": f"Bounding applied to {result['updated']} Text+ clip(s)"})
+        self._refresh_live_preview(force=True)
 
     def on_apply_position(self, _payload=None):
+        if self._working:
+            return
         try:
             scope = self.opts.scope("layout_scope")
             if scope == "playhead":
@@ -1269,48 +1319,28 @@ class TextPlusTools(QObject):
                 return
             clips, scope_desc = found
             self.log(f"[Action] Applying Position to {scope_desc}…")
-
-            self.host.set_busy(True, "Applying position…")
-            try:
-                sub_actions = []
-                updated = 0
-                scanned = 0
-                for clip, track_index in clips:
-                    reference_center = reference_by_track.get(track_index)
-                    if clip is None or reference_center is None:
-                        continue                # a track with nothing under the playhead: left alone
-                    scanned += 1
-                    clip_name = clip.GetName() if callable(getattr(clip, "GetName", None)) else f"Clip on Track {track_index}"
-                    comp = self._get_fusion_comp(clip)
-                    text_tool = self._find_text_tool(comp) if comp is not None else None
-                    if text_tool is None:
-                        continue
-                    try:
-                        old_center = parse_point(text_tool.GetInput("Center"))
-                    except Exception:
-                        old_center = None
-                    new_center = [reference_center[0], reference_center[1]]
-                    if (old_center is not None and abs(old_center[0] - new_center[0]) < 1e-9
-                            and abs(old_center[1] - new_center[1]) < 1e-9):
-                        continue
-                    try:
-                        text_tool.SetInput("Center", new_center)
-                        updated += 1
-                        if old_center is not None:
-                            sub_actions.append(_LivePreviewAction(clip=clip, kind="position",
-                                                                  old_value=list(old_center), new_value=new_center))
-                    except Exception as err:
-                        self.log(f"  - Warning: Could not set Center for clip '{clip_name}': {err}")
-                self.log(f"[Apply Position] Updated {updated}/{scanned} Text+ clip(s) across "
-                         f"{len(reference_by_track)} track(s) with a playhead reference.")
-                self._record_batch_action(sub_actions)
-            finally:
-                self.host.set_busy(False)
-            self.emit("toast", {"text": f"Position copied to {updated} Text+ clip(s)"})
-            self._refresh_live_preview(force=True)
+            refs = _Refs(timeline, clips)
+            self._run("textplus.position", "Applying position…",
+                      lambda: {**refs(), "references": [[track, center[0], center[1]]
+                                                        for track, center in reference_by_track.items()]},
+                      lambda: tpr.apply_position(clips, reference_by_track, log=self.log,
+                                                 comp_of=self._get_fusion_comp, tool_of=self._find_text_tool),
+                      lambda result, error: self._positioned(result, error, clips, len(reference_by_track)),
+                      "apply_position_to_timeline")
         except Exception as err:
             self.log(f"[Error in apply_position_to_timeline]: {err}")
             self.log(traceback.format_exc())
+
+    def _positioned(self, result, error, clips, tracks):
+        if error is not None:
+            return self._failed("apply_position_to_timeline", error)
+        self._said(result)
+        updated = result["updated"]
+        self.log(f"[Apply Position] Updated {updated}/{result['scanned']} Text+ clip(s) across "
+                 f"{tracks} track(s) with a playhead reference.")
+        self._record_batch_action(self._position_steps(clips, result["steps"]))
+        self.emit("toast", {"text": f"Position copied to {updated} Text+ clip(s)"})
+        self._refresh_live_preview(force=True)
 
     # ------------------------------------------------------------ undo / redo --
 
@@ -1383,6 +1413,8 @@ class TextPlusTools(QObject):
         return self._apply_live_preview_action_part(action, backward)
 
     def on_undo(self, _payload=None):
+        if self._working:
+            return
         if not self._live_preview_undo_stack:
             self.log("[Undo] Nothing to undo.")
             return self.emit("toast", {"text": "Nothing to undo"})
@@ -1398,6 +1430,8 @@ class TextPlusTools(QObject):
         self._push_history()
 
     def on_redo(self, _payload=None):
+        if self._working:
+            return
         if not self._live_preview_redo_stack:
             self.log("[Redo] Nothing to redo.")
             return self.emit("toast", {"text": "Nothing to redo"})
@@ -1415,87 +1449,15 @@ class TextPlusTools(QObject):
     # ------------------------------------------------------------ fusion lookups --
 
     def _get_fusion_comp(self, clip: Any) -> Optional[Any]:
-        if clip is None:
-            return None
-        if callable(getattr(clip, "GetFusionCompByIndex", None)):
-            try:
-                comp = clip.GetFusionCompByIndex(1)
-                if comp is not None:
-                    return comp
-            except Exception as err:
-                self.log(f"  - [GetFusionCompByIndex Error]: {err}")
-        if callable(getattr(clip, "GetFusionCompByName", None)):
-            try:
-                comp = clip.GetFusionCompByName()
-                if comp is not None:
-                    return comp
-            except Exception as err:
-                self.log(f"  - [GetFusionCompByName Error]: {err}")
-        if callable(getattr(clip, "GetFusionCompList", None)):
-            try:
-                comps = clip.GetFusionCompList()
-                if comps and len(comps) > 0:
-                    return comps[0]
-            except Exception as err:
-                self.log(f"  - [GetFusionCompList Error]: {err}")
-        return None
-
-    def _lock_comp(self, comp: Any, lock: bool) -> None:
-        """comp.Lock() / comp.Unlock(), as the animation features do around their edits:
-        Fusion renders nothing while locked, and once on Unlock. Never raises."""
-        method = getattr(comp, "Lock" if lock else "Unlock", None)
-        if callable(method):
-            try:
-                method()
-            except Exception as err:
-                self.log(f"  - [{'Lock' if lock else 'Unlock'} Error]: {err}")
+        return tpr.fusion_comp(clip, self.log)
 
     def _find_text_tools(self, comp: Any) -> List[Any]:
         """Every Text+ in a comp - a Buddy title (Animation > Titles) is one per
         word, and a restyle is for all of them. [] when there's none."""
-        if comp is None:
-            return []
-        found = []
-        if callable(getattr(comp, "GetToolList", None)):
-            try:
-                tools = comp.GetToolList(False, "TextPlus")
-                found = (list(tools.values()) if isinstance(tools, dict) else list(tools)) if tools else []
-            except Exception as err:
-                self.log(f"  - [GetToolList TextPlus Error]: {err}")
-        if not found:
-            one = self._find_text_tool(comp)
-            found = [one] if one is not None else []
-        return found
+        return tpr.text_tools(comp, self.log, self._find_text_tool)
 
     def _find_text_tool(self, comp: Any) -> Optional[Any]:
-        if comp is None:
-            return None
-        if callable(getattr(comp, "GetToolList", None)):
-            try:
-                tools = comp.GetToolList(False, "TextPlus")
-                if tools:
-                    return list(tools.values())[0] if isinstance(tools, dict) else tools[0]
-            except Exception as err:
-                self.log(f"  - [GetToolList TextPlus Error]: {err}")
-        if callable(getattr(comp, "GetToolList", None)):
-            try:
-                tools = comp.GetToolList(False)
-                if tools:
-                    tool_list = list(tools.values()) if isinstance(tools, dict) else tools
-                    for t in tool_list:
-                        if getattr(t, "ID", None) in ["TextPlus", "Text1", "Text"]:
-                            return t
-            except Exception as err:
-                self.log(f"  - [GetToolList All Error]: {err}")
-        for tool_name in ["TextPlus_1", "TextPlus1", "Text1", "Template"]:
-            if callable(getattr(comp, "FindTool", None)):
-                try:
-                    tool = comp.FindTool(tool_name)
-                    if tool is not None:
-                        return tool
-                except Exception as err:
-                    self.log(f"  - [FindTool '{tool_name}' Error]: {err}")
-        return None
+        return tpr.text_tool(comp, self.log)
 
     # ------------------------------------------------------------ animations --
 
@@ -1552,67 +1514,12 @@ class TextPlusTools(QObject):
     def _apply_animation_to_tool(self, text_tool, comp, clip_name: str, preset_choice: str,
                                  speed: Optional[str] = None, direction: Optional[str] = None,
                                  fps: float = 24.0) -> bool:
-        if speed is None:
-            speed = self.opts.anim_speed
-        if direction is None:
-            direction = self.opts.anim_direction
-        try:
-            start_frame = float((comp.GetAttrs() or {}).get("COMPN_RenderStart", 0))
-        except (AttributeError, TypeError, ValueError):
-            start_frame = 0
-        if FusionAnimationEngine.conflict(text_tool, comp, preset_choice):
-            # Something that isn't this tab's already animates what the preset would
-            # (the callers count these): nothing of the clip is changed.
-            self.log(f"  - Left clip '{clip_name}' as it is: something else already animates it there.")
-            return False
-        # Only this tab's own earlier animation comes off - see remove_animations_from_clip.
-        FusionAnimationEngine.remove_animations_from_clip(text_tool, comp)
-        if preset_choice in FusionAnimationEngine.LETTER_PRESETS:   # before "Pop": "Letter Pop" has it too
-            success, preset_logs = FusionAnimationEngine.apply_letter_preset_to_clip(
-                text_tool, comp, preset_choice, speed=speed, start_frame=start_frame, fps=fps)
-        elif "Bounce" in preset_choice:
-            duration = FusionAnimationEngine.scaled_duration(20, speed, fps)
-            success, preset_logs = FusionAnimationEngine.apply_bounce_preset_to_clip(
-                text_tool, comp, start_frame=start_frame, duration=duration)
-        elif "Pop" in preset_choice:
-            duration = FusionAnimationEngine.scaled_duration(15, speed, fps)
-            success, preset_logs = FusionAnimationEngine.apply_pop_preset_to_clip(
-                text_tool, comp, start_frame=start_frame, duration=duration)
-        elif "Slide" in preset_choice:
-            target_center = self.current_fusion_pos
-            if hasattr(text_tool, "GetInput"):
-                try:
-                    existing_center = parse_point(text_tool.GetInput("Center"))
-                except Exception:
-                    existing_center = None
-                if existing_center is not None:
-                    target_center = existing_center
-            duration = FusionAnimationEngine.scaled_duration(15, speed, fps)
-            success, preset_logs = FusionAnimationEngine.apply_slide_preset_to_clip(
-                text_tool, comp, target_center=target_center, direction=direction,
-                start_frame=start_frame, duration=duration)
-        else:
-            duration = FusionAnimationEngine.scaled_duration(15, speed, fps)
-            success, preset_logs = FusionAnimationEngine.apply_fade_preset_to_clip(
-                text_tool, comp, start_frame=start_frame, duration=duration)
-        for log_msg in preset_logs:
-            self.log(log_msg)
-        if success:
-            FusionAnimationEngine.mark_preset(text_tool, preset_choice, speed, direction, fps)
-        else:
-            self.log(f"  - Warning: Could not apply '{preset_choice}' animation to clip '{clip_name}'.")
-        return success
-
-    def _animation_clip_key(self, clip: Any, track_index: int) -> Optional[tuple]:
-        try:
-            name = clip.GetName() if callable(getattr(clip, "GetName", None)) else None
-            start = clip.GetStart() if callable(getattr(clip, "GetStart", None)) else None
-            end = clip.GetEnd() if callable(getattr(clip, "GetEnd", None)) else None
-        except Exception:
-            return None
-        if name is None or start is None or end is None:
-            return None
-        return (name, start, end, track_index)
+        """One Text+ animated (tpr.apply_preset) - at the tab's speed and direction, unless
+        given (Undo's, the ones it went on with)."""
+        return tpr.apply_preset(text_tool, comp, clip_name, preset_choice,
+                                self.opts.anim_speed if speed is None else speed,
+                                self.opts.anim_direction if direction is None else direction,
+                                fps, self.current_fusion_pos, self.log)
 
     @staticmethod
     def _timeline_fps(timeline: Any) -> float:
@@ -1622,28 +1529,9 @@ class TextPlusTools(QObject):
             return 24.0
         return fps if fps > 0 else 24.0
 
-    @staticmethod
-    def _comp_fps(clip: Any, comp: Any, fps: float) -> float:
-        """The clip's comp frames per second (FusionAnimationEngine.comp_fps)."""
-        try:
-            clip_frames = int(clip.GetDuration() or 0)
-        except Exception:
-            clip_frames = 0
-        return FusionAnimationEngine.comp_fps(comp, clip_frames, fps)
-
-    def _preset_before(self, text_tool: Any, comp: Any, fps: float) -> Optional[tuple]:
-        """The animation this tab has on a clip, for Undo to put back: what the Text+ itself
-        records (so it's right after the clip is moved, trimmed or Buddy restarted) - or,
-        on a clip an earlier Buddy animated, the preset its keys are, at the speed and
-        direction chosen now (those weren't kept). Not the session's memory of clips
-        (name, start, end, track): another clip can come to sit at the same spot."""
-        recorded = FusionAnimationEngine.preset_on(text_tool)
-        if recorded is not None:
-            return recorded
-        earlier = FusionAnimationEngine.legacy_preset(text_tool, comp)
-        return (earlier, None, None, fps) if earlier else None
-
     def on_apply_animation(self, _payload=None):
+        if self._working:
+            return
         scope = self.opts.scope("anim_scope")
         try:
             resolve = self._resolve()
@@ -1660,57 +1548,39 @@ class TextPlusTools(QObject):
                 return
             video_clips_with_tracks, scope_desc = found
             self.log(f"Found {len(video_clips_with_tracks)} clip(s) on {scope_desc}. Applying animations…")
-            self.host.set_busy(True, "Applying animations…")
-            try:
-                sub_actions = []
-                count = left = 0
-                total = len(video_clips_with_tracks)
-                for idx, (clip, track_index) in enumerate(video_clips_with_tracks, start=1):
-                    if clip is None:
-                        continue
-                    clip_name = clip.GetName() if callable(getattr(clip, "GetName", None)) else f"Clip_{idx}"
-                    comp = self._get_fusion_comp(clip)
-                    if comp is None:
-                        self.log(f"  - [{idx}/{total}] Warning: Could not access Fusion comp for clip '{clip_name}'.")
-                        continue
-                    text_tool = self._find_text_tool(comp)
-                    if text_tool is None:
-                        self.log(f"  - [{idx}/{total}] Warning: Could not find TextPlus tool inside comp for clip '{clip_name}'.")
-                        continue
-                    held = FusionAnimationEngine.conflict(text_tool, comp, preset_choice)
-                    if held:
-                        # Previews' Animate by, the highlight's pop, Character Level Styling or
-                        # the person's own keys: theirs stays, and this clip is left as it is.
-                        what = ("its text is already on another Follower or modifier" if held == "text"
-                                else "its size, opacity or pivot is already animated")
-                        self.log(f"  - [{idx}/{total}] Left '{clip_name}' as it is: {what}.")
-                        left += 1
-                        continue
-                    clip_key = self._animation_clip_key(clip, track_index)
-                    current_speed = self.opts.anim_speed
-                    current_direction = self.opts.anim_direction
-                    comp_fps = self._comp_fps(clip, comp, fps)
-                    old_preset = self._preset_before(text_tool, comp, comp_fps)
-                    new_preset_tuple = (preset_choice, current_speed, current_direction, comp_fps)
-                    if self._apply_animation_to_tool(text_tool, comp, clip_name, preset_choice,
-                                                     speed=current_speed, direction=current_direction, fps=comp_fps):
-                        count += 1
-                        if clip_key is not None:
-                            sub_actions.append(_LivePreviewAction(clip=clip, kind="animation", old_value=old_preset,
-                                                                  new_value=new_preset_tuple, clip_key=clip_key))
-                self.log(f"Successfully animated {count}/{total} Text+ clips on {scope_desc} using '{preset_choice}'.")
-                self._record_batch_action(sub_actions)
-            finally:
-                self.host.set_busy(False)
-            # "has", not "animates": Character Level Styling holds the text without animating it.
-            self.emit("toast", {"text": f"Animated {count} Text+ clip(s)" if not left else
-                                f"Animated {count} Text+ clip(s). Left {left} alone: something else already has the "
-                                "text, size, opacity or pivot there."})
+            speed, direction, center = self.opts.anim_speed, self.opts.anim_direction, self.current_fusion_pos
+            refs = _Refs(timeline, video_clips_with_tracks)
+            self._run("textplus.animate", "Applying animations…",
+                      lambda: {**refs(), "preset": preset_choice, "speed": speed, "direction": direction, "fps": fps,
+                               "fallback_center": list(center)},
+                      lambda: tpr.apply_animation(video_clips_with_tracks, preset_choice, speed, direction, fps, center,
+                                                  log=self.log, comp_of=self._get_fusion_comp,
+                                                  tool_of=self._find_text_tool),
+                      lambda result, error: self._animated(result, error, video_clips_with_tracks, scope_desc,
+                                                           preset_choice),
+                      "apply_animations")
         except Exception as err:
             self.log(f"[Error in apply_animations]: {err}")
             self.log(traceback.format_exc())
 
+    def _animated(self, result, error, clips, scope_desc, preset_choice):
+        if error is not None:
+            return self._failed("apply_animations", error)
+        self._said(result)
+        count, left = result["count"], result["left"]
+        self.log(f"Successfully animated {count}/{result['total']} Text+ clips on {scope_desc} using '{preset_choice}'.")
+        self._record_batch_action([
+            _LivePreviewAction(clip=clips[s["i"]][0], kind="animation", old_value=_tuple(s["old"]),
+                               new_value=_tuple(s["new"]), clip_key=_tuple(s["key"]))
+            for s in result["steps"]])
+        # "has", not "animates": Character Level Styling holds the text without animating it.
+        self.emit("toast", {"text": f"Animated {count} Text+ clip(s)" if not left else
+                            f"Animated {count} Text+ clip(s). Left {left} alone: something else already has the "
+                            "text, size, opacity or pivot there."})
+
     def on_remove_animations(self, _payload=None):
+        if self._working:
+            return
         try:
             resolve = self._resolve()
             if resolve is None:
@@ -1724,54 +1594,34 @@ class TextPlusTools(QObject):
             if found is None:
                 return
             video_clips_with_tracks, scope_desc = found
-            self.host.set_busy(True, "Removing animations…")
-            count = stuck = 0
-            try:
-                sub_actions = []
-                total = len(video_clips_with_tracks)
-                for idx, (clip, track_index) in enumerate(video_clips_with_tracks, start=1):
-                    if clip is None:
-                        continue
-                    clip_name = clip.GetName() if callable(getattr(clip, "GetName", None)) else f"Clip_{idx}"
-                    comp = self._get_fusion_comp(clip)
-                    if comp is None:
-                        self.log(f"  - [{idx}/{total}] Warning: Could not access Fusion comp for clip '{clip_name}'.")
-                        continue
-                    text_tool = self._find_text_tool(comp)
-                    if text_tool is None:
-                        self.log(f"  - [{idx}/{total}] Warning: Could not find TextPlus tool inside comp for clip '{clip_name}'.")
-                        continue
-                    clip_key = self._animation_clip_key(clip, track_index)
-                    old_preset = self._preset_before(text_tool, comp, self._comp_fps(clip, comp, fps))
-                    # True only where there was an animation of this tab's to take off.
-                    success, remove_logs = FusionAnimationEngine.remove_animations_from_clip(text_tool, comp)
-                    for log_msg in remove_logs:
-                        self.log(log_msg)
-                    if success:
-                        count += 1
-                        if clip_key is not None:
-                            # Undo can put back a preset it can name (the record, or an earlier
-                            # Buddy's by its keys); what it can't is no step to undo.
-                            if old_preset is not None:
-                                sub_actions.append(_LivePreviewAction(clip=clip, kind="animation", old_value=old_preset,
-                                                                      new_value=None, clip_key=clip_key))
-                    elif (FusionAnimationEngine.animation_on(text_tool) or {}).get("follower"):
-                        stuck += 1      # its letter animation is still on: a chain behind the Follower
-                self.log(f"Removed animations from {count}/{total} Text+ clips on {scope_desc}.")
-                self._record_batch_action(sub_actions)
-            finally:
-                self.host.set_busy(False)
-            if stuck:
-                text = (f"Removed animations from {count} Text+ clip(s). On {stuck}, a letter animation stays: another "
-                        "text modifier is chained behind its Follower – take the Follower off in Fusion.")
-            elif count:
-                text = f"Removed animations from {count} Text+ clip(s)"
-            else:
-                text = "None of those clips has an animation from this tab."
-            self.emit("toast", {"text": text})
+            refs = _Refs(timeline, video_clips_with_tracks)
+            self._run("textplus.unanimate", "Removing animations…", lambda: {**refs(), "fps": fps},
+                      lambda: tpr.remove_animations(video_clips_with_tracks, fps, log=self.log,
+                                                    comp_of=self._get_fusion_comp, tool_of=self._find_text_tool),
+                      lambda result, error: self._unanimated(result, error, video_clips_with_tracks, scope_desc),
+                      "remove_animations_from_timeline")
         except Exception as err:
             self.log(f"[Error in remove_animations_from_timeline]: {err}")
             self.log(traceback.format_exc())
+
+    def _unanimated(self, result, error, clips, scope_desc):
+        if error is not None:
+            return self._failed("remove_animations_from_timeline", error)
+        self._said(result)
+        count, stuck = result["count"], result["stuck"]
+        self.log(f"Removed animations from {count}/{result['total']} Text+ clips on {scope_desc}.")
+        self._record_batch_action([
+            _LivePreviewAction(clip=clips[s["i"]][0], kind="animation", old_value=_tuple(s["old"]), new_value=None,
+                               clip_key=_tuple(s["key"]))
+            for s in result["steps"]])
+        if stuck:
+            text = (f"Removed animations from {count} Text+ clip(s). On {stuck}, a letter animation stays: another "
+                    "text modifier is chained behind its Follower – take the Follower off in Fusion.")
+        elif count:
+            text = f"Removed animations from {count} Text+ clip(s)"
+        else:
+            text = "None of those clips has an animation from this tab."
+        self.emit("toast", {"text": text})
 
     def on_dump(self, _payload=None):
         self.log("[Action] Dumping selected node settings from Fusion…")
@@ -1834,6 +1684,8 @@ class TextPlusTools(QObject):
             self._push_options()
 
     def on_reset_font(self, _payload=None):
+        if self._working:
+            return
         self.opts.set("font_face", (DEFAULT_FONT_NAME, DEFAULT_FONT_STYLE))
         self.opts.set("font_size", 0.08)
         self._push_options()
@@ -1853,65 +1705,33 @@ class TextPlusTools(QObject):
             results.append((item.clip, text_tool))
         return results
 
-    def _apply_font_style_to_tool(self, text_tool, clip_name: str, force_font_only=False) -> bool:
+    def _style_settings(self) -> dict:
+        """Font Styling's controls, as tpr.style_tool takes them."""
         o = self.opts
-        success = False
-        if o.toggle("font_on") or force_font_only:
-            family, style = o.font_face
-            success, style_logs = FusionAnimationEngine.apply_text_style(
-                text_tool, font_name=family, font_size=o.slider("font_size"), color=o.color("font_color"),
-                font_style=style)
-            for log_msg in style_logs:
-                self.log(log_msg)
-        if force_font_only:
-            return success
+        settings = {name: o.toggle(name) for name in ("font_on", "outline_on", "shadow_on", "background_on")}
+        settings.update({name: o.slider(name) for name in (
+            "font_size", "outline_thickness", "outline_opacity", "shadow_offset_x", "shadow_offset_y", "shadow_blur",
+            "shadow_opacity", "background_opacity", "background_corner_radius", "background_extend_horizontal",
+            "background_extend_vertical")})
+        settings.update({name: o.color(name) for name in ("font_color", "outline_color", "shadow_color",
+                                                          "background_color")})
+        settings["font_face"] = o.font_face
+        return settings
 
-        # Outline, Shadow, Box: a ticked one is set (and noted on the Text+ as Font
-        # Styling's); an unticked one is switched off only where Font Styling switched it
-        # on - an outline the person set in the Inspector is theirs and stays.
-        E = FusionAnimationEngine
-        groups = (
-            ("outline_on", E.OUTLINE_ELEMENT, "Outline", lambda: E.apply_outline_style(
-                text_tool, color=o.color("outline_color"), thickness=o.slider("outline_thickness"),
-                opacity=o.slider("outline_opacity"))),
-            ("shadow_on", E.SHADOW_ELEMENT, "Shadow", lambda: E.apply_shadow_style(
-                text_tool, color=o.color("shadow_color"),
-                offset=(o.slider("shadow_offset_x"), o.slider("shadow_offset_y")),
-                blur=o.slider("shadow_blur"), opacity=o.slider("shadow_opacity"))),
-            ("background_on", E.BACKGROUND_ELEMENT, "Background", lambda: E.apply_background_style(
-                text_tool, color=o.color("background_color"), opacity=o.slider("background_opacity"),
-                corner_radius=o.slider("background_corner_radius"),
-                extend_horizontal=o.slider("background_extend_horizontal"),
-                extend_vertical=o.slider("background_extend_vertical"))),
-        )
-        ours = E.styled_elements(text_tool)
-        tried = [success] if o.toggle("font_on") else []
-        kept = False
-        for toggle, element, label, apply in groups:
-            if o.toggle(toggle):
-                done, logs = apply()
-                if done:
-                    E.note_element(text_tool, element, True)
-            elif element in ours:
-                done, logs = E.disable_shading_element(text_tool, element, label)
-                if done:
-                    E.note_element(text_tool, element, False)
-            else:
-                kept = kept or E.element_is_on(text_tool, element)
-                continue
-            tried.append(done)
-            for log_msg in logs:
-                self.log(log_msg)
+    def _apply_font_style_to_tool(self, text_tool, clip_name: str, force_font_only=False) -> bool:
+        """Font Styling on one Text+ (tpr.style_tool), counted in _style_kept if it keeps
+        an outline, shadow or box that isn't Font Styling's."""
+        styled, kept = tpr.style_tool(text_tool, clip_name, self._style_settings(), force_font_only, self.log)
         if kept:
             self._style_kept += 1
-        if tried and not any(tried):
-            self.log(f"  - Warning: Could not apply font style to clip {clip_name}.")
-        return any(tried)
+        return styled
 
     def on_apply_style(self, _payload=None):
         self._apply_style()
 
     def _apply_style(self, force_font_only=False):
+        if self._working:
+            return
         try:
             scope = self.opts.style_scope
             resolve = self._resolve()
@@ -1925,47 +1745,36 @@ class TextPlusTools(QObject):
                 return
             clips, scope_desc = found
             self.log(f"[Action] Applying font style to {scope_desc}…")
-            self.host.set_busy(True, "Applying font style…")
-            # Each clip is pumped below (the window would otherwise go "Not Responding"
-            # for the whole run): the poll mustn't call Resolve between two clips.
+            settings = self._style_settings()
+            refs = _Refs(timeline, clips)
+            # Made here (no reader), each clip is pumped (the window would otherwise go "Not
+            # Responding" for the whole run): the poll mustn't call Resolve between two clips.
             self._preview_timer.stop()
-            try:
-                updated = scanned = 0
-                self._style_kept = 0
-                for n, (clip, track_index) in enumerate(clips, 1):
-                    self.host.pump_busy(f"Applying font style… {n} of {len(clips)}")
-                    if clip is None:
-                        continue
-                    scanned += 1
-                    comp = self._get_fusion_comp(clip)
-                    text_tools = self._find_text_tools(comp)
-                    if not text_tools:
-                        continue
-                    clip_name = clip.GetName() if hasattr(clip, "GetName") else "Clip"
-                    # Every Text+ of the clip: a Buddy title is one per word. Locked meanwhile:
-                    # unlocked, Resolve redraws after every one of the ~30 inputs set per
-                    # Text+ and holds the next call until it has (~0.3 s each, ~10 s a clip).
-                    self._lock_comp(comp, True)
-                    try:
-                        styled = [self._apply_font_style_to_tool(text_tool, f"'{clip_name}' on Track {track_index}",
-                                                                 force_font_only=force_font_only)
-                                  for text_tool in text_tools]
-                    finally:
-                        self._lock_comp(comp, False)
-                    if any(styled):
-                        updated += 1
-                self.log(f"Applied font style ('{face_label(*self.opts.font_face)}', size {self.opts.slider('font_size')}) "
-                         f"to {updated}/{scanned} clip(s) on {scope_desc}.")
-                if self._style_kept:
-                    self.log(f"{self._style_kept} clip(s) keep an outline, shadow or box Font Styling has no note of "
-                             "switching on (set in the Inspector, or by an earlier Buddy) – tick it here and apply to "
-                             "take it over; unticked after that, it goes off.")
-            finally:
-                self.host.set_busy(False)
-                self._preview_timer.start()
-            self.emit("toast", {"text": f"Styled {updated} Text+ clip(s)" if not self._style_kept else
-                                f"Styled {updated} Text+ clip(s). On {self._style_kept}, an outline, shadow or box stays "
-                                "that Buddy has no note of setting – tick it and apply to take it over."})
+            self._run("textplus.style", "Applying font style…",
+                      lambda: {**refs(), "settings": settings, "force_font_only": force_font_only},
+                      lambda: tpr.apply_style(
+                          clips, settings, force_font_only, log=self.log, comp_of=self._get_fusion_comp,
+                          tool_of=self._find_text_tool,
+                          progress=lambda n, total: self.host.pump_busy(f"Applying font style… {n} of {total}")),
+                      lambda result, error: self._styled(result, error, scope_desc), "apply_style")
         except Exception as err:
+            self._preview_timer.start()
             self.log(f"[Error in apply_style]: {err}")
             self.log(traceback.format_exc())
+
+    def _styled(self, result, error, scope_desc):
+        self._preview_timer.start()
+        if error is not None:
+            return self._failed("apply_style", error)
+        self._said(result)
+        updated, scanned = result["updated"], result["scanned"]
+        self._style_kept = result["kept"]
+        self.log(f"Applied font style ('{face_label(*self.opts.font_face)}', size {self.opts.slider('font_size')}) "
+                 f"to {updated}/{scanned} clip(s) on {scope_desc}.")
+        if self._style_kept:
+            self.log(f"{self._style_kept} clip(s) keep an outline, shadow or box Font Styling has no note of "
+                     "switching on (set in the Inspector, or by an earlier Buddy) – tick it here and apply to "
+                     "take it over; unticked after that, it goes off.")
+        self.emit("toast", {"text": f"Styled {updated} Text+ clip(s)" if not self._style_kept else
+                            f"Styled {updated} Text+ clip(s). On {self._style_kept}, an outline, shadow or box stays "
+                            "that Buddy has no note of setting – tick it and apply to take it over."})

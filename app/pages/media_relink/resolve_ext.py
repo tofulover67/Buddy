@@ -5,15 +5,25 @@ core/resolve_bridge.py, which only owns the shared connect/bootstrap
 plumbing every tool needs.
 
 Free functions taking a controller, like the other tools (see
-image_importer/resolve_ext.py). Read-only except replace_clip, which is
-the one call that actually changes a clip's linked media.
+image_importer/resolve_ext.py). Read-only except replace_clip (and
+relink_by_id, which calls it), the one call that actually changes a clip's
+linked media.
 
 Every scan returns (clip, bin_path) pairs of Media Pool items - a timeline
 item is not itself a MediaPoolItem, so the timeline and selection scans
 map theirs back, and look their bins up in the pool.
+
+The page's scan, relink and check run in the Resolve reader's process
+(core/busy_job.py) - a project's worth of clips is thousands of calls, and
+Buddy keeps drawing meanwhile - as plain data: scan_rows ("relink.scan"),
+relink_by_id ("relink.replace") and current_paths ("relink.check"). The
+clips a scan found stay in the process that found it (_SCANNED), by id, for
+the relink after it. No Qt here: that process has none.
 """
 
 from core.resolve_bridge import ResolveConnectionError
+
+from . import relink_rows
 
 SCOPE_PROJECT = "project"
 SCOPE_BIN = "bin"
@@ -197,8 +207,83 @@ def current_paths(controller, ids):
     return paths
 
 
+def find_clips(controller, ids):
+    """{id: clip} for the Media Pool clips with these ids, walked for bin by
+    bin - those that aren't there any more left out."""
+    wanted, found = {i for i in ids if i}, {}
+    root = _project(controller).GetMediaPool().GetRootFolder() if wanted else None
+    stack = [root] if root else []
+    while stack and len(found) < len(wanted):
+        folder = stack.pop()
+        for clip in folder.GetClipList() or []:
+            uid = clip_id(clip)
+            if uid in wanted and uid not in found:
+                found[uid] = clip
+        stack.extend(folder.GetSubFolderList() or [])
+    return found
+
+
 SCANS = {SCOPE_PROJECT: scan_all_clips, SCOPE_BIN: scan_current_bin,
          SCOPE_TIMELINE: scan_timeline, SCOPE_SELECTED: scan_selected}
+
+# The clips this process's scans found, by id, for the relink after them -
+# Resolve's objects can't go to the page and back. One project's at a time.
+_SCANNED = {"project": None, "clips": {}}
+
+
+def current_project_id(controller):
+    """The open project's id, or None."""
+    project = controller.current_project()
+    if project is None:
+        return None
+    try:
+        return project.GetUniqueId() or None
+    except Exception:
+        return None
+
+
+def clip_name(clip):
+    """What the Media Pool shows the clip as."""
+    return clip.GetClipProperty("Clip Name") or clip.GetName()
+
+
+def scan_rows(controller, scope):
+    """The page's scan of `scope`, as plain data: {"rows" (relink_rows'
+    rows, without their clips), "skipped", "project_id"} - or {"nothing":
+    [title, text]} when the scope has nothing in it (NothingToScan, said
+    as data: its title wouldn't survive the trip back as an exception)."""
+    try:
+        entries = SCANS[scope](controller)
+    except NothingToScan as exc:
+        return {"nothing": [exc.title, exc.text]}
+    rows, skipped = relink_rows.make_rows(entries, get_clip_file_path, clip_name, get_id=clip_id)
+    project = current_project_id(controller)
+    if _SCANNED["project"] != project:
+        _SCANNED.update(project=project, clips={})
+    for row in rows:
+        clip = row.pop("clip")
+        if row["uid"] is not None:
+            _SCANNED["clips"][row["uid"]] = clip
+    return {"rows": rows, "skipped": skipped, "project_id": project}
+
+
+def relink_by_id(controller, project_id, rows):
+    """relink_rows.relink() for rows as the page holds them (plain data):
+    each row's clip the one this process's scan found - or, when it made no
+    scan of that project (a fresh reader process), found again in the Media
+    Pool by its id. A clip that can't be found is refused, like any other.
+    {"rows" - as relink() left them, "relinked", "skipped", "failed"}."""
+    clips = _SCANNED["clips"] if _SCANNED["project"] == project_id else {}
+    missing = [r["uid"] for r in rows if r.get("uid") and r["uid"] not in clips]
+    if missing:
+        clips = {**clips, **find_clips(controller, missing)}
+    for row in rows:
+        row["clip"] = clips.get(row.get("uid"))
+    relinked, skipped, failed = relink_rows.relink(
+        rows, lambda clip, path: clip is not None and replace_clip(clip, path))
+    for row in rows:
+        row.pop("clip", None)
+    return {"rows": rows, "relinked": relinked, "skipped": skipped, "failed": failed}
 
 
 def get_clip_file_path(clip):

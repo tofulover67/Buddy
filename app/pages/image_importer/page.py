@@ -33,8 +33,10 @@ import uuid
 from PySide6.QtCore import QThread, QUrl
 from PySide6.QtWidgets import QFileDialog
 
+from core import busy_job
 from core.i18n import tr, tr_filter
 from core.resolve_bridge import ResolveConnectionError
+from core.resolve_reader import ResolveCalls
 from core.web_page import WebToolPage
 
 from . import resolve_ext, staging
@@ -60,6 +62,7 @@ class ImageImporterPage(WebToolPage):
         self._downloads = {}   # id -> {"url", "thread", "worker"}, until its result is in
         self._running = []     # (thread, worker) until the thread has finished
         self._log = []
+        self._calls = ResolveCalls(self)    # the import, in the Resolve reader's process
 
     def working_on(self):
         return "Downloading" if self._downloads else None
@@ -274,25 +277,31 @@ class ImageImporterPage(WebToolPage):
         except ResolveConnectionError:
             return
         n = len(present)
-        self.host.set_busy(True, "Importing 1 image…" if n == 1 else f"Importing {n} images…")
-        error = None
-        try:
-            imported = resolve_ext.import_to_bin(controller, [i["path"] for i in present], bin_name,
-                                                 log=lambda text: self._add_log(text))
-        except Exception as exc:  # noqa: BLE001 - shown to the user
-            error = exc
-        finally:
-            self.host.set_busy(False)
+        args = {"paths": [i["path"] for i in present], "bin_name": bin_name}
+        # What's listed now: a download landing while Resolve imports stays.
+        listed = [i["id"] for i in self.staging.items]
+        # In the Resolve reader's process: Buddy keeps drawing while Resolve
+        # imports (core/busy_job.py).
+        busy_job.run(self.host, self._calls, "importer.import", args,
+                     lambda: resolve_ext.import_here(controller, **args),
+                     lambda result, error: self._on_imported(bin_name, missing, listed, result, error),
+                     "Importing 1 image…" if n == 1 else f"Importing {n} images…")
+
+    def _on_imported(self, bin_name, missing, listed, result, error):
+        for line in (result or {}).get("log", []):
+            self._add_log(line)
+        # Resolve said no - or, an error, the reader's process stopped.
+        error = str(error) if error is not None else result["error"]
         if error is not None:
             self._add_log(f"Import failed: {error}", "error")
-            self.emit("alert", {"title": "Import failed", "text": str(error)})
+            self.emit("alert", {"title": "Import failed", "text": error})
             return
-        count = len(imported)
+        count = result["count"]
         self._add_log(f"Imported 1 image into the '{bin_name}' bin." if count == 1
                       else f"Imported {count} images into the '{bin_name}' bin.", "success")
         if missing:
             self._add_log(f"Left out {len(missing)} that were no longer on disk: {', '.join(missing)}", "warn")
         self.emit("toast", {"text": f"Imported 1 image into '{bin_name}'" if count == 1
                             else f"Imported {count} images into '{bin_name}'"})
-        self.staging.clear()
+        self.staging.remove(listed)
         self._push_items()

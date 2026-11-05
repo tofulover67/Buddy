@@ -8,12 +8,13 @@ it puts nothing at all, so the track is switched on (and unlocked) first.
 Resolve appends to its destination subtitle track, which scripts can't set:
 when that isn't ST1, what landed elsewhere is taken off and that's said."""
 
+import json
 import os
 import tempfile
 import unittest
 
 import _paths  # noqa: F401
-from pages.transcribe.resolve_ext import PLACE_TRIES, TranscribeController, TranscribeResolveError
+from pages.transcribe.resolve_ext import PLACE_TRIES, TranscribeController, TranscribeResolveError, place_here
 
 FPS = 24
 START = 86400          # 01:00:00:00
@@ -222,6 +223,37 @@ class PlacementTests(unittest.TestCase):
         tl = Timeline(has_content=False, always_off=1)
         placed, _ = self.place(tl)
         self.assertEqual((placed, tl.appends), (len(self.STARTS), 1))
+
+
+class ReaderJobTests(unittest.TestCase):
+    """place_here: the placing as the Resolve reader's process does it
+    ("transcribe.place") - from JSON's plain data, back as JSON's."""
+
+    def place_here(self, timeline, replace=False):
+        project = Project(timeline, PlacementTests.STARTS)
+        controller = type("C", (), {"current_project": lambda s: project})()
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "t.srt")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(srt(PlacementTests.STARTS))
+            args = json.loads(json.dumps({"srt_path": path, "replace_existing": replace}))
+            return json.loads(json.dumps(place_here(controller, **args)))
+
+    def test_placed_with_what_it_said(self):
+        tl = Timeline(enabled=False)
+        self.assertEqual(self.place_here(tl), {
+            "placed": len(PlacementTests.STARTS), "error": "",
+            "log": ["Subtitle track 1 was switched off in Resolve, so Buddy switched it on."]})
+        self.assertEqual(sorted(s.GetStart() for s in tl.subs), [START + round(t * FPS) for t in PlacementTests.STARTS])
+
+    def test_a_refusal_comes_back_with_what_was_said_before_it(self):
+        got = self.place_here(Timeline(has_content=False, locked=True, always_off=2 * FPS))
+        self.assertEqual((got["placed"], got["log"]), (0, ["Subtitle track 1 was locked in Resolve, so Buddy unlocked it."]))
+        self.assertIn("2.0 s late", got["error"])
+        got = self.place_here(Timeline(subs=[Item(START)]))                  # track 1 has some: not unasked
+        self.assertEqual(got["error"], "Subtitle track 1 already has 1 subtitle(s).")
+        self.assertEqual(self.place_here(Timeline(subs=[Item(START)]), replace=True)["placed"],
+                         len(PlacementTests.STARTS))
 
 
 if __name__ == "__main__":

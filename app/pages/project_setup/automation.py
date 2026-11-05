@@ -10,7 +10,10 @@ instead (page.py routes _log and _alert here): an alert is the step
 failing, an error line too, the last success line is what the step says it
 did. A step that starts a job - Sync, Collapse, the proxies - is waited
 for: _end_job concludes it (after the finish has logged its lines), and
-Stop is the job's Cancel. Meanwhile the tab's own buttons wait.
+Stop is the job's Cancel. So is one made behind the overlay in the Resolve
+reader's process (Create bins, Import, Shift...: page.py _busy_job), which
+answers after its handler returns - concluded once its answer's handled.
+Meanwhile the tab's own buttons wait.
 
 Each step leaves Resolve ready for the next: Import opens the bin it made,
 Populate opens the timeline it made, and the proxies, Populate and Sync go
@@ -188,6 +191,29 @@ class ProjectSetupAutomationMixin:
         if a is not None and a["slot"] == slot_name:
             a["run"].progress(f"{stage} ({done + 1} of {total})" if total and total > 1 else stage,
                               100 * done / total if total else None)
+
+    def _auto_busy_started(self):
+        """A step behind the overlay begins (page.py _busy_job). Made in the
+        Resolve reader's process, it's answered after its handler has
+        returned - so the automation's step waits for it, as for a job.
+        What _auto_busy_ended takes: None when there's nothing to wait for
+        (no automation, or a job's slot says when it's over)."""
+        a = self._auto
+        if a is None or a["slot"] is not None:
+            return None
+        a["slot"] = "overlay"
+        return a
+
+    def _auto_busy_ended(self, a, later):
+        """Its answer's been handled - what it did logged. Unless that started
+        a job (whose end concludes the step), the step's over: concluded here
+        when its handler had returned already (`later`), else by
+        run_automation_step as it returns."""
+        if a is None or a is not self._auto or a["slot"] != "overlay":
+            return
+        a["slot"] = None
+        if later:
+            QTimer.singleShot(0, self._auto_conclude)
 
     def _auto_job_ended(self, slot_name, cancelled=False):
         a = self._auto

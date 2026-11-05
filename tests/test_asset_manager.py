@@ -15,14 +15,20 @@ from unittest import mock
 
 import _paths  # noqa: F401
 from pages.asset_manager import library_view as lv
+from pages.asset_manager import resolve_ext
 
 try:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     from PySide6.QtCore import QCoreApplication, Qt
     from PySide6.QtWidgets import QApplication
+    from _child_reader import ChildReader, load_without_qt
     HAVE_QT = True
 except ImportError:  # pragma: no cover
     HAVE_QT = False
+
+# Import to Media Pool in the Resolve reader's process: the line
+# core/resolve_reader_child.py JOBS has for it.
+JOBS = {"assets.import": ("pages.asset_manager.resolve_ext", "import_selection")}
 
 
 def asset(i, path, added="2026-01-01 10:00", category="Image"):
@@ -139,6 +145,28 @@ class Host:
 
     def set_busy(self, on, message=None):
         self.busy.append(on)
+
+
+class ImportJobTests(unittest.TestCase):
+    """Import to Media Pool as the Resolve reader's process makes it: plain
+    paths in, a count back - files gone from disk left out there."""
+
+    def test_an_import_from_plain_paths(self):
+        host = Host()
+        with tempfile.TemporaryDirectory() as folder:
+            here = [os.path.join(folder, n) for n in ("logo.png", "one.wav", "two.wav")]
+            for path in here:
+                open(path, "wb").close()
+            gone = os.path.join(folder, "gone.wav")
+            total = resolve_ext.import_selection(host.controller, [here[0], gone],
+                                                 [["Music", here[1:]], ["Empty", [gone]]])
+        self.assertEqual(total, 3)
+        self.assertEqual(host.pool.imports, [("Day 1", ["logo.png"]), ("Day 1/Music", ["one.wav", "two.wav"])])
+        self.assertEqual(host.pool.current.name, "Day 1")         # no bin for a group with nothing left
+
+    @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+    def test_the_job_loads_without_qt(self):
+        self.assertEqual(load_without_qt(JOBS), "")
 
 
 def make_wav(path, seconds=1.0, rate=8000):
@@ -310,6 +338,21 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.host.pool.imports, [("Day 1", ["logo.png"]), ("Day 1/Music", ["one.wav", "two.wav"])])
         self.assertEqual(self.host.pool.current.name, "Day 1")    # the open bin is put back
         self.assertEqual(self.host.busy, [True, False])
+
+    def test_an_import_in_the_reader_process_leaves_buddy_free(self):
+        reader = self.page._calls.reader = ChildReader(self.host.controller, JOBS)
+        self.page.on_files_dropped([self.media])
+        listing = self.last("list")
+        music = next(n for n in listing["nodes"] if n["type"] == "folder")
+        logo = next(n for n in listing["nodes"] if n["type"] == "asset")
+        self.page.on_import_selected({"ids": [logo["id"]], "folders": [music["path"]]})
+        self.assertEqual((self.host.busy, self.host.pool.imports), ([True], []))        # sent, the overlay up
+        reader.run()
+        name, args = reader.asked[0]
+        self.assertEqual((name, [os.path.basename(p) for p in args["loose"]]), ("assets.import", ["logo.png"]))
+        self.assertEqual(self.host.pool.imports, [("Day 1", ["logo.png"]), ("Day 1/Music", ["one.wav", "two.wav"])])
+        self.assertEqual(self.host.busy, [True, False])
+        self.assertEqual(self.last("toast")["text"], "Imported 3 items into the Media Pool")
 
     def test_projects_link_into_the_library(self):
         self.page.on_files_dropped([self.files[2]])

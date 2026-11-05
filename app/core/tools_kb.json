@@ -277,6 +277,27 @@
       ],
       "notes": "Each task downloads its model once, the first time it's picked (removal 93 MB, subject 115 MB Standard or 490 MB Best, plus a ~70 MB engine). Runs on the CPU. Footage runs on the CPU: removal is a few seconds a frame, Cut out and Split about 12 s a frame (the subject model). High quality (the add-on): pictures about 7 s with FLUX.2 klein, footage about a minute per 2 seconds with ROSE, on an NVIDIA RTX[[mac: - Windows only]]."
     },
+    "podcast": {
+      "name": "Podcast",
+      "summary": "A main tab of its own for podcasts, with three sub-tabs: Sync (lines up every camera and recorder and builds a new stacked timeline), Auto Switch (cuts between the cameras by who is speaking) and Text Edit (edit the timeline by editing its transcript).",
+      "needs_resolve": true,
+      "capabilities": [
+        "Sync tab: takes the selected Media Pool clips, the current bin or the open timeline; groups the clips by camera and recorder (by folder, else file name; a multitrack recorder's Tr1/Tr2 files each get a track), which you can rename, merge, reorder or reassign, and pick the master clock",
+        "Sync tab: syncs by timecode or by sound (waveform), optionally fine-tuning timecode with sound; checks each recording against the master at several points and reports drift in ms per hour, flagging any that drifts a frame or more (nothing is retimed)",
+        "Sync tab: builds a new timeline \"<name> (Podcast Sync)\" with a video track per camera (split files one after another), the mic tracks first and the cameras' own sound below them (kept, kept but off, or left out), tracks named after their device; clips that couldn't be synced are listed with the reason. The clips and timelines you had are left as they were",
+        "Auto Switch tab: reads the open timeline as the tab opens (typically the one Sync builds) and works in three steps; who's talking on each mic is worked out by loudness, ignoring bleed, and on a mic that carries several voices a local voice model tells them apart (downloaded once, about 27 MB, runs on this computer)",
+        "Auto Switch, step 1 Pair audio: each camera is shown by a still from it and its file name, with a dropdown of the synced audio it's heard through (only audio tracks with clips; cameras' own sound is left out). A camera with audio paired has its own sound cut at the same points as its picture and turned off in the built timeline",
+        "Auto Switch, step 2 Name voices: each mic with the voices found on it (People on this mic: 1-6 or Find out); each voice has a play button (moves Resolve's playhead to it), a name, and a camera",
+        "Auto Switch, step 3 Extra shots and build: every camera with no one on it gets a use - Wide shot, Second angle of a person's camera, Random cutaway or Not used - then a coloured preview of the cuts and Build timeline. Cut settings holds the numbers: shortest shot, cut ahead, ignore talk under; reaction shots (show the listener in long answers, after and for how long); the wide (when people talk at once, during long silences, first and last seconds, a cutaway every N s); second angles' turns; random cutaways' gaps and length",
+        "Auto Switch: the cameras, pairings, names and cut settings are a setup, saved by name and reused next episode (Setup menu: New setup from this timeline, Save a copy, Rename, Delete)",
+        "Auto Switch builds a new timeline \"<name> (Auto Switch)\" that keeps every camera on its own track, razored at each switch, with the clips not on screen turned off - so swapping an angle is turning a clip on; mics and other tracks are untouched",
+        "Text Edit tab: transcribes the dialogue tracks with Buddy's speech engine (each source once, cached), merges several mics into speaker turns named after the tracks with bleed rejected, and follows edits made in Resolve",
+        "Text Edit tab: click a word to move the playhead, drag or Shift+click to select and set In/Out, Ctrl+F to find, double-click to fix a misheard word; pauses show as […], filler words and low-confidence words are marked; Remove pauses over N s and Remove filler words",
+        "Text Edit tab, Build an edited timeline (default): Delete strikes words or pauses (they can be put back), then Build makes a new timeline \"<name> (Text Edit)\" with them cut from the dialogue and picture tracks; the original is never changed",
+        "Text Edit tab, Cut the open timeline live (a setting): each cut sets In/Out and presses your Ripple Delete shortcut in Resolve, checks the result and undoes it if a track didn't cut; the shortcuts must match your Resolve keyboard (Shortcuts...)[[mac:, and Buddy needs Accessibility permission to press keys]]"
+      ],
+      "notes": "Sync needs ffmpeg (Project Setup's setting). Auto Switch's voice model and Text Edit's transcription need the speech engine Subtitles sets up. Nothing is uploaded."
+    },
     "marker_manager": {
       "name": "Marker Manager",
       "summary": "Stills Exporter and YouTube Chapters in separate tabs: export marker-based stills or turn timeline markers into a YouTube chapter list.",

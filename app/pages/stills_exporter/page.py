@@ -9,7 +9,11 @@ This tool WRITES to Resolve: it adds markers, switches to the Color page
 and moves the playhead to grab stills, and - only when asked, and after a
 confirmation - deletes the grabbed stills from the gallery after export.
 Each is behind its own button. Grabbing and exporting run behind the
-shell's busy overlay: they're Resolve calls that must stay on this thread.
+shell's busy overlay, in the Resolve reader's process (core/busy_job.py):
+a page switch and a grab per marker, or one long export, with Buddy drawing
+meanwhile. The stills stay in the process that grabbed them
+(resolve_ext.grab_here) - stills grabbed here, with no reader, are exported
+(and joined by more) here too.
 Reading the markers (every POLL_MS while on screen) runs in the Resolve
 reader's process (core/resolve_reader.py ResolveCalls), and adding one on a
 ResolveWorker thread: Resolve holds calls while the timeline plays, and a
@@ -35,12 +39,13 @@ Protocol:
 import os
 import time
 import uuid
+from types import SimpleNamespace
 
 from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QFileDialog
 
-from core import marker_colors
+from core import busy_job, marker_colors
 from core.i18n import tr
 from core.resolve_bridge import ResolveConnectionError
 from core.resolve_reader import ResolveCalls
@@ -61,6 +66,8 @@ BUSY_TITLE = "Resolve isn't answering"
 BUSY_TEXT = "Resolve is holding Buddy's requests – usually because the timeline is playing. Stop playback and try again."
 LOG_LIMIT = 60
 DEFAULTS = {"format": "JPEG", "prefix": DEFAULT_PREFIX, "folder": "", "delete_after": False, "color": "Blue"}
+# busy_job.run's calls for stills held in this process: their job is done here, never by the reader.
+_HERE = SimpleNamespace(reader=SimpleNamespace(available=lambda: False))
 
 
 class StillsExporterPage(WebToolPage):
@@ -257,18 +264,31 @@ class StillsExporterPage(WebToolPage):
         color = self.color
         self._add_log(f"Grabbing stills at every {color} marker…")
         self._action_running = True
-        self.host.set_busy(True, f"Grabbing stills at the {color} markers…")
-        try:
-            grabbed = resolve_ext.grab_stills_for_color(controller, color, log=self._add_log)
-        except Exception as exc:  # noqa: BLE001 - shown to the user
-            return self._fail("Couldn't grab stills", exc)
-        finally:
-            self.host.set_busy(False)
-            self._action_running = False
+        busy_job.run(self.host, self._calls_for_stills(), "stills.grab", {"color": color},
+                     lambda: resolve_ext.grab_here(controller, color),
+                     lambda result, error: self._on_grabbed(color, result, error),
+                     f"Grabbing stills at the {color} markers…")
+
+    def _calls_for_stills(self):
+        """Where the grabbed stills' jobs are done: in Buddy's process when the
+        stills on the list were grabbed here (no reader then) - the reader's
+        process doesn't have them - else in the reader's."""
+        keys = [g["still"] for g in self.grabbed]
+        return _HERE if resolve_ext.holds(keys) else self._calls
+
+    def _on_grabbed(self, color, result, error):
+        self._action_running = False
+        for line in (result or {}).get("log") or []:
+            self._add_log(line)
+        if error is None and result.get("error"):
+            error = result["error"]
+        if error is not None:
+            return self._fail("Couldn't grab stills", error)
+        grabbed = result["grabbed"]
         names = {m["timecode"]: m["name"] for m in self.markers}
-        for timecode, still in grabbed:
+        for timecode, key in grabbed:
             self.grabbed.append({"id": uuid.uuid4().hex, "timecode": timecode, "color": color,
-                                 "name": names.get(timecode, ""), "still": still})
+                                 "name": names.get(timecode, ""), "still": key})
         self._push_grabbed()
         self.emit("toast", {"text": "Grabbed 1 still on the Color page" if len(grabbed) == 1
                             else f"Grabbed {len(grabbed)} stills on the Color page"})
@@ -276,11 +296,13 @@ class StillsExporterPage(WebToolPage):
     def on_remove_grabbed(self, payload):
         """Off this session's list only - the gallery still has it."""
         gid = (payload or {}).get("id")
+        resolve_ext.release([g["still"] for g in self.grabbed if g["id"] == gid])
         self.grabbed = [g for g in self.grabbed if g["id"] != gid]
         self._push_grabbed()
 
     def on_clear(self, _payload=None):
         count = len(self.grabbed)
+        resolve_ext.release([g["still"] for g in self.grabbed])
         self.grabbed = []
         self._push_grabbed()
         if count:
@@ -311,18 +333,23 @@ class StillsExporterPage(WebToolPage):
         count = len(self.grabbed)
         self._add_log(f"Exporting {count} still(s) as .{fmt}…")
         self._action_running = True
-        self.host.set_busy(True, "Exporting stills…")
-        try:
-            gallery_deleted = resolve_ext.export_stills(
-                controller, [g["still"] for g in self.grabbed], folder, prefix, fmt,
-                delete_after=delete_after, log=self._add_log)
-        except Exception as exc:  # noqa: BLE001 - shown to the user
-            return self._fail("Export failed", exc)
-        finally:
-            self.host.set_busy(False)
-            self._action_running = False
+        args = {"keys": [g["still"] for g in self.grabbed], "folder": folder, "prefix": prefix, "fmt": fmt,
+                "delete_after": delete_after}
+        busy_job.run(self.host, self._calls_for_stills(), "stills.export", args,
+                     lambda: resolve_ext.export_here(controller, **args),
+                     lambda result, error: self._on_exported(count, delete_after, result, error),
+                     "Exporting stills…")
+
+    def _on_exported(self, count, delete_after, result, error):
+        self._action_running = False
+        for line in (result or {}).get("log") or []:
+            self._add_log(line)
+        if error is None and result.get("error"):
+            error = result["error"]
+        if error is not None:
+            return self._fail("Export failed", error)
         if delete_after:
-            if not gallery_deleted:
+            if not result["deleted"]:
                 self.emit("alert", {"title": "Exported, but gallery cleanup failed",
                                     "text": "The image files were exported, but the stills weren't deleted from Resolve's gallery – the log says why. They remain in this list."})
                 return

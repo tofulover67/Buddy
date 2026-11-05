@@ -590,6 +590,16 @@
     "العربية": "آلة حاسبة تتعامل أيضًا مع رمز الوقت ومعدلات البيانات ونسب العرض إلى الارتفاع، مع مؤقت وملاحظات وساعة عالمية.",
     "Tiếng Việt": "Máy tính tính được cả timecode, tốc độ dữ liệu và tỉ lệ khung hình, kèm hẹn giờ, ghi chú và đồng hồ thế giới."
   },
+  "Syncs podcast cameras and mics, cuts between cameras by who is speaking, and edits by transcript.": {
+    "日本語": "ポッドキャストのカメラとマイクを同期し、話している人に合わせてカメラを切り替え、文字起こしで編集します。",
+    "Español": "Sincroniza las cámaras y micrófonos del pódcast, cambia de cámara según quién habla y edita con la transcripción.",
+    "Deutsch": "Synchronisiert Podcast-Kameras und -Mikrofone, schneidet je nach Sprecher zwischen den Kameras und schneidet per Transkript.",
+    "Français": "Synchronise les caméras et micros du podcast, passe d'une caméra à l'autre selon qui parle et monte par la transcription.",
+    "한국어": "팟캐스트 카메라와 마이크를 동기화하고, 말하는 사람에 따라 카메라를 전환하며, 대본으로 편집합니다.",
+    "中文": "同步播客的摄像机和麦克风，按说话人切换机位，并通过文字稿剪辑。",
+    "العربية": "يزامن كاميرات البودكاست وميكروفوناته، ويقطع بين الكاميرات حسب المتحدث، ويحرّر من خلال النص المفرّغ.",
+    "Tiếng Việt": "Đồng bộ máy quay và micro của podcast, chuyển máy quay theo người đang nói và dựng bằng bản chép lời."
+  },
   "Pong, Snake, Solitaire, Chess and more, for a break.": {
     "日本語": "休憩に、ポン、スネーク、ソリティア、チェスなど。",
     "Español": "Pong, Snake, Solitario, Ajedrez y más, para tomarte un respiro.",

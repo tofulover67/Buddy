@@ -38,6 +38,14 @@ to timeline" places it later, on the timeline it was made from). If track 1
 already has subtitles the user chooses: replace them (the count is shown),
 or keep the SRT file only. Nothing is overwritten without that choice.
 
+Placing the subtitles, reading track 1's subtitles to translate them, and
+making the timeline with a track per language run behind the busy overlay
+in the Resolve reader's process (core/busy_job.py; resolve_ext.place_here,
+track_subtitles_here, timeline_with_subtitles_here), so Buddy keeps drawing
+meanwhile - or, with no reader, here as before. Subtitle Conversion stays
+on this thread: styling each Text+ asks Qt's font database on a Mac
+(font_utils.regular_style_for), and the reader's process has no Qt.
+
 Translate: the open timeline's subtitles (read off subtitle track 1, or
 Buddy's own transcript of them while they still match it - see
 on_translate_last), or any SRT, become one SRT per chosen
@@ -101,9 +109,11 @@ from PySide6.QtWidgets import QFileDialog
 
 if sys.platform == "win32":
     from core import crash_log      # the crash trail (core/crash_log.py) is kept on Windows only
+from core import busy_job
 from core.settings_dialog import refresh_open
 from core.i18n import tr, tr_filter
 from core.resolve_bridge import ResolveConnectionError
+from core.resolve_reader import ResolveCalls
 from core.web_page import WebToolPage
 from pages.text_animator.text_plus import TABS as TEXT_PLUS_TABS
 from pages.text_animator.text_plus import TextPlusTools
@@ -114,6 +124,7 @@ from . import env_setup as es
 from . import jobs
 from . import languages as L
 from . import plan
+from . import resolve_ext
 from . import subtitles as st
 from .resolve_ext import TranscribeController, TranscribeResolveError
 from .automation import TranscribeAutomationMixin
@@ -147,6 +158,8 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         self._pending_translate = None   # a transcript to translate once the placing is done
         self._translating = None         # {"source", "srt", "label"} of the translation running
         self._placing = False
+        self._calls = ResolveCalls(self)    # the long Resolve jobs' way to the reader (_reader_job)
+        self._in_reader = False          # one of them is out there now
         self._auto = None                # an Automation step running here (automation.py)
         self._last_output_dir = None
         self._log = []
@@ -217,7 +230,7 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
             if handler is not None and name.isidentifier():
                 handler(data)
             return
-        if self.job is not None and name not in _WHILE_BUSY:
+        if (self.job is not None or self._in_reader) and name not in _WHILE_BUSY:
             return
         super()._dispatch(name, data)
 
@@ -456,6 +469,8 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
     # ------------------------------------------------------------ timeline --
 
     def _read_timeline(self):
+        if self._in_reader:     # a read now would only wait on that job; its end reads the timeline
+            return
         controller = self.host.controller if getattr(self.host, "connected", False) else None
         available = self.own["available"]
         self._open = dict(NO_TIMELINE)
@@ -714,27 +729,45 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         """Subtitle track 1, asking first if that would replace subtitles
         already there."""
         try:
-            resolve = TranscribeController(self.host.ensure_connected())
-            existing = resolve.timeline_info().subtitle_items_on_track1
+            controller = self.host.ensure_connected()
+            existing = TranscribeController(controller).timeline_info().subtitle_items_on_track1
         except (ResolveConnectionError, TranscribeResolveError) as exc:
             self._add_log(f"Couldn't add to the timeline: {exc}", "error")
             return self._placed(0)
         if not existing:
-            return self._placed(self._place_now(resolve, srt_path, False))
+            return self._place_now(controller, srt_path, False)
         self._ask("replace", {"count": existing},
-                  lambda _v: self._placed(self._place_now(resolve, srt_path, True)),
+                  lambda _v: self._place_now(controller, srt_path, True),
                   lambda: self._placed(0))
 
-    def _place_now(self, resolve, srt_path, replace):
-        self.host.set_busy(True, "Adding subtitles to the timeline…")
-        try:
-            return resolve.place_subtitles(srt_path, replace_existing=replace,
-                                           log=lambda message: self._add_log(message, "info"))
-        except TranscribeResolveError as exc:
-            self._add_log(f"Couldn't add to the timeline: {exc}", "error")
-            return 0
-        finally:
-            self.host.set_busy(False)
+    def _place_now(self, controller, srt_path, replace):
+        """The import and the placing, checked cue by cue (resolve_ext.place_here),
+        then _placed() with how many went on."""
+        def back(result, error):
+            for message in (result or {}).get("log") or []:
+                self._add_log(message, "info")
+            if error is None and not result.get("error"):
+                return self._placed(int(result.get("placed") or 0))
+            self._add_log(f"Couldn't add to the timeline: {error if error is not None else result['error']}",
+                          "error")
+            self._placed(0)
+
+        args = {"srt_path": str(srt_path), "replace_existing": bool(replace)}
+        self._reader_job("transcribe.place", args, lambda: resolve_ext.place_here(controller, **args), back,
+                         "Adding subtitles to the timeline…")
+
+    def _reader_job(self, name, args, job, done, message):
+        """A long Resolve job behind the busy overlay, in the Resolve reader's
+        process (core/busy_job.py, its JOBS `name`): Buddy keeps drawing
+        meanwhile. done(result, error) on this thread once it's over - and
+        till then the timeline isn't read (_read_timeline)."""
+        self._in_reader = True
+
+        def back(result, error):
+            self._in_reader = False
+            done(result, error)
+
+        busy_job.run(self.host, self._calls, name, args, job, back, message)
 
     def _placed(self, count, unplaced="Done – saved as an SRT file (not added to the timeline)."):
         self._placing = False
@@ -743,6 +776,9 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
             self.result["message"] = f"Done – {count} subtitles on subtitle track 1." if count else unplaced
         self.emit("result", self.result)
         self._read_timeline()
+        if self._auto is not None and self.job is None:
+            # Placed in the reader's process, after the job's end (_on_finished) left the step to this.
+            return self._auto_conclude()
         self._maybe_translate_pending()
 
     def on_save_srt(self, _payload=None):
@@ -951,15 +987,26 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         if shown and name != shown:
             return self._alert(f"'{name}' is open in Resolve now, not '{shown}'. Press Translate again "
                                "to translate it.", "Another timeline is open")
-        cues = []
-        if self._open["subtitles"]:
-            self.host.set_busy(True, "Reading the timeline's subtitles…")
-            try:
-                _name, cues = TranscribeController(self.host.ensure_connected()).track_subtitles(1)
-            except (ResolveConnectionError, TranscribeResolveError) as exc:
-                return self._alert(str(exc), "Translate")
-            finally:
-                self.host.set_busy(False)
+        if not self._open["subtitles"]:
+            return self._translate_cues(name, [], last)
+        try:
+            controller = self.host.ensure_connected()
+        except ResolveConnectionError as exc:
+            return self._alert(str(exc), "Translate")
+
+        def read(result, error):
+            if error is not None:
+                return self._alert(str(error), "Translate")
+            self._translate_cues(name, [tuple(cue) for cue in result["cues"]], last)
+
+        # A few calls per subtitle (resolve_ext.track_subtitles_here).
+        self._reader_job("transcribe.subtitles", {"index": 1},
+                         lambda: resolve_ext.track_subtitles_here(controller, 1), read,
+                         "Reading the timeline's subtitles…")
+
+    def _translate_cues(self, name, cues, last):
+        """on_translate_last, with the subtitles on track 1 of the timeline
+        called `name` as (start, end, text) - none if it has none."""
         if cues and not self._same_subtitles(last, cues):
             return self._translate_subtitles(name, cues, last)
         if last and (cues or self._of_timeline(last, name)):
@@ -1152,20 +1199,35 @@ class TranscribePage(TranscribeAutomationMixin, TranscribeSettingsMixin, WebTool
         tracks += [drt.Track(f["language"], f["timed"]) for f in files if f.get("timed")]
         if not tracks:
             return
-        self.host.set_busy(True, "Making a timeline with a subtitle track per language…")
         try:
-            resolve = TranscribeController(self.host.ensure_connected())
-            name, counts = resolve.timeline_with_subtitles(tracks, str(jobs.RENDER_DIR))
-        except (ResolveConnectionError, TranscribeResolveError) as exc:
+            controller = self.host.ensure_connected()
+        except ResolveConnectionError as exc:
             self._add_log(f"Couldn't make the timeline with subtitle tracks: {exc} The SRT files are saved.", "error")
             return
-        finally:
-            self.host.set_busy(False)
-        each = ", ".join(f"{t.name} {n}" for t, n in zip(tracks, counts))
-        self._add_log(f"New timeline '{name}' – subtitle tracks: {each}.", "ok")
-        if self.result:
-            self.result["timeline"] = name
-            self.result["message"] += f" '{name}' has a subtitle track for each language."
+        # An export, a rewrite and an import (resolve_ext.timeline_with_subtitles_here).
+        args = {"tracks": [{"name": t.name, "cues": [list(cue) for cue in t.cues]} for t in tracks],
+                "work_dir": str(jobs.RENDER_DIR)}
+        self._reader_job("transcribe.timeline", args,
+                         lambda: resolve_ext.timeline_with_subtitles_here(controller, **args),
+                         lambda result, error: self._on_subtitle_timeline(tracks, result, error),
+                         "Making a timeline with a subtitle track per language…")
+
+    def _on_subtitle_timeline(self, tracks, result, error):
+        if error is not None:
+            self._add_log(f"Couldn't make the timeline with subtitle tracks: {error} The SRT files are saved.",
+                          "error")
+        else:
+            name = result["name"]
+            each = ", ".join(f"{t.name} {n}" for t, n in zip(tracks, result["counts"]))
+            self._add_log(f"New timeline '{name}' – subtitle tracks: {each}.", "ok")
+            if self.result:
+                self.result["timeline"] = name
+                self.result["message"] += f" '{name}' has a subtitle track for each language."
+        if self.job is None:
+            # Made in the reader's process, after the translation's end (_on_finished) showed
+            # its result: shown again with the timeline, and the new timeline read.
+            self.emit("result", self.result)
+            self._read_timeline()
 
     # --------------------------------------------------------------- setup --
 

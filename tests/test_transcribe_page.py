@@ -152,9 +152,14 @@ class FakeResolve:
     own = {"available": False, "uid": "", "existing": False}   # Resolve Studio 21.1+'s own transcription
     open_timeline = "Interview"
     track = []                           # subtitle track 1: (start, end, text)
+    made = []                            # timeline_with_subtitles: ([(track name, cues)], work folder)
 
     def __init__(self, controller):
         pass
+
+    def timeline_with_subtitles(self, tracks, work_dir):
+        FakeResolve.made.append(([(t.name, list(t.cues)) for t in tracks], work_dir))
+        return f"{FakeResolve.open_timeline} (Subtitles)", [len(t.cues) for t in tracks]
 
     def track_subtitles(self, index=1):
         return FakeResolve.open_timeline, list(FakeResolve.track)
@@ -211,6 +216,43 @@ class Host:
         self.busy.append(on)
 
 
+class Reader:
+    """The Resolve reader's process, standing in: takes jobs, answers when told."""
+
+    def __init__(self):
+        self.asked = []
+
+    def available(self):
+        return True
+
+    def ask(self, name, args, done):
+        self.asked.append((name, args, done))
+        return True
+
+    def answer(self, result, error=None):
+        _name, _args, done = self.asked[-1]
+        done(result, error)
+
+
+class Run:
+    """An Automation run's step, as automation.py hands it in."""
+
+    def __init__(self):
+        self.result, self.on_stop = None, None
+
+    def log(self, _text, _kind="info"):
+        pass
+
+    def progress(self, *_args):
+        pass
+
+    def done(self, text):
+        self.result = (True, text)
+
+    def fail(self, text):
+        self.result = (False, text)
+
+
 @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
 class PageTests(unittest.TestCase):
     def setUp(self):
@@ -225,12 +267,14 @@ class PageTests(unittest.TestCase):
         FakeResolve.existing, FakeResolve.placed = 0, []
         FakeResolve.timeline, FakeResolve.empty, FakeResolve.subtitles, FakeResolve.converted = "Interview", 4, 12, []
         FakeResolve.own = {"available": False, "uid": "", "existing": False}
-        FakeResolve.open_timeline, FakeResolve.track = "Interview", []
+        FakeResolve.open_timeline, FakeResolve.track, FakeResolve.made = "Interview", [], []
         self._patch(page_mod.TranscribePage, "_settings_path", lambda s: tmp / "settings.json")
         self._patch(page_mod.jobs, "ProbeJob", FakeProbe)
         for name in ("TranscribeJob", "TranslateJob", "AITranslateJob", "SetupJob"):
             self._patch(page_mod.jobs, name, FakeJob)
         self._patch(page_mod, "TranscribeController", FakeResolve)
+        # The reader's jobs (resolve_ext.place_here...), done here: the tests have no reader.
+        self._patch(page_mod.resolve_ext, "TranscribeController", FakeResolve)
         self.host = Host()
         self.page = page_mod.TranscribePage(self.host)
         self.addCleanup(self.page.deleteLater)
@@ -265,8 +309,8 @@ class PageTests(unittest.TestCase):
         o = self.last("options")
         self.assertEqual((o["max_chars"], o["max_lines"], o["mixed_label"]), (60, 1, "Mixed: English + Japanese"))
 
-    def _run_and_finish(self):
-        self.page.on_run()
+    def _run_and_finish(self, start=None):
+        (start or self.page.on_run)()
         job = FakeJob.made[-1]
         srt = self.tmp / "out.srt"
         srt.write_text("1\n00:00:01,000 --> 00:00:02,000\nHi\n", encoding="utf-8")
@@ -381,6 +425,72 @@ class PageTests(unittest.TestCase):
         self.page.on_answer({"id": ask["id"], "ok": True})
         self.assertEqual(FakeResolve.placed[-1][1], True)
 
+    def _with_reader(self):
+        reader = Reader()
+        self.page._calls.reader = reader
+        return reader
+
+    def texts(self):
+        return [e["text"] for e in self.page._log]
+
+    def test_placing_is_done_in_the_readers_process_and_buddy_keeps_drawing(self):
+        reader = self._with_reader()
+        self._run_and_finish()
+        name, args, _done = reader.asked[-1]
+        self.assertEqual((name, args), ("transcribe.place", {"srt_path": str(self.tmp / "out.srt"),
+                                                              "replace_existing": False}))
+        self.assertEqual(FakeResolve.placed, [])                    # not in Buddy's process
+        self.assertEqual(self.host.busy, [True])                    # the overlay up, this thread free
+        self.assertTrue(self.last("result")["placing"])
+        self.page._dispatch("run", None)                            # nothing else starts meanwhile
+        self.assertEqual(len(FakeJob.made), 1)
+        reader.answer({"placed": 12, "log": ["Subtitle track 1 was locked in Resolve, so Buddy unlocked it."],
+                       "error": ""})
+        self.assertEqual(self.host.busy, [True, False])
+        r = self.last("result")
+        self.assertEqual((r["placed"], r["placing"]), (12, False))
+        self.assertIn("12 subtitles on subtitle track 1", r["message"])
+        self.assertIn("Subtitle track 1 was locked in Resolve, so Buddy unlocked it.", self.texts())
+
+    def test_replacing_asks_first_then_the_reader_places_them(self):
+        FakeResolve.existing = 30
+        reader = self._with_reader()
+        self._run_and_finish()
+        self.assertEqual(reader.asked, [])                          # not before the question's answered
+        self.page.on_answer({"id": self.last("ask")["id"], "ok": True})
+        self.assertEqual(reader.asked[-1][1]["replace_existing"], True)
+
+    def test_a_placing_that_fails_in_the_reader_is_said(self):
+        from core.resolve_reader import ReadError
+        reader = self._with_reader()
+        self._run_and_finish()
+        reader.answer({"placed": 0, "log": ["Subtitle track 1 was switched off in Resolve, so Buddy switched it on."],
+                       "error": "Resolve put the subtitles 2.0 s late, so they were taken off again – the SRT "
+                                "file is saved."})
+        self.assertEqual(self.texts()[-2:], [
+            "Subtitle track 1 was switched off in Resolve, so Buddy switched it on.",
+            "Couldn't add to the timeline: Resolve put the subtitles 2.0 s late, so they were taken off again – "
+            "the SRT file is saved."])
+        self.assertIn("not added", self.last("result")["message"])
+        self.page.on_place_last()                                   # "Add to timeline": the reader stops
+        reader.answer(None, ReadError("The Resolve reader stopped.", "Ended"))
+        self.assertEqual(self.texts()[-1], "Couldn't add to the timeline: The Resolve reader stopped.")
+        self.assertFalse(self.page._placing)
+        self.assertEqual(self.host.busy, [True, False, True, False])
+
+    def test_an_automation_step_ends_once_the_reader_has_placed_them(self):
+        reader = self._with_reader()
+        run = Run()
+        self._run_and_finish(lambda: self.page.run_automation_step(
+            "transcribe", {"model": "same", "language": "same", "place": True, "replace": False, "reuse": True},
+            run))
+        self.assertIsNone(run.result)                               # the job's over, the placing isn't
+        reader.answer({"placed": 12, "log": [], "error": ""})
+        ok, text = run.result
+        self.assertTrue(ok)
+        self.assertIn("12 subtitles on subtitle track 1", text)
+        self.assertIsNone(self.page._auto)
+
     def test_nothing_else_runs_while_a_job_does(self):
         self.page.on_run()
         self.assertEqual(len(FakeJob.made), 1)
@@ -476,6 +586,80 @@ class PageTests(unittest.TestCase):
         self.assertEqual(FakeJob.made, [])
         self.assertIn("'Trailer' is open in Resolve now, not 'Interview'", self.last("alert")["text"])
         self.assertEqual(self.last("translate")["name"], "")     # and the button is Trailer's now
+
+    JAPANESE = {"files": [{"language": "Japanese", "cues": 1, "path": "ja.srt", "timed": [(0.0, 4.0, "おはよう。")]}],
+                "seconds": 3, "where": "on the GPU"}
+
+    def _translate_track_1(self, cues, answer=None):
+        """Translate pressed on 'Interview', whose track 1 has `cues`, into Japanese -
+        `answer`: the reader's, when there's one."""
+        self.page._rescan()
+        self.page.settings["translate_targets"] = ["jpn_Jpan"]
+        FakeResolve.existing, FakeResolve.track = len(cues), list(cues)
+        self.page.on_shown()
+        self.page.on_translate_last()
+        if answer is not None:
+            answer()
+        ask = self.last("ask")
+        self.assertEqual(ask["kind"], "language")
+        self.page.on_answer({"id": ask["id"], "ok": True, "value": "eng_Latn"})
+        return FakeJob.made[-1]
+
+    def test_track_1_and_the_new_timeline_are_done_in_the_readers_process(self):
+        reader = self._with_reader()
+        cues = [(0.0, 2.0, "Good morning."), (2.0, 4.0, "Shall we\nstart?")]
+
+        def read():
+            name, args, _done = reader.asked[-1]
+            self.assertEqual((name, args, self.host.busy), ("transcribe.subtitles", {"index": 1}, [True]))
+            reader.answer({"name": "Interview", "cues": [list(c) for c in cues]})     # as JSON brings them
+            self.assertEqual(self.host.busy, [True, False])
+
+        job = self._translate_track_1(cues, read)
+        self.assertEqual(job.kwargs["follow"], cues)                # (start, end, text) again
+        job.succeed(self.JAPANESE)
+        name, args, _done = reader.asked[-1]
+        self.assertEqual(name, "transcribe.timeline")
+        self.assertEqual(args["tracks"], [{"name": "English", "cues": [list(c) for c in cues]},
+                                          {"name": "Japanese", "cues": [[0.0, 4.0, "おはよう。"]]}])
+        self.assertEqual(FakeResolve.made, [])                      # not in Buddy's process
+        self.assertNotIn("timeline", self.last("result"))           # the translation's done, the timeline isn't
+        reader.answer({"name": "Interview (Subtitles)", "counts": [2, 1]})
+        r = self.last("result")
+        self.assertEqual(r["timeline"], "Interview (Subtitles)")
+        self.assertTrue(r["message"].endswith("'Interview (Subtitles)' has a subtitle track for each language."))
+        self.assertIn("New timeline 'Interview (Subtitles)' – subtitle tracks: English 2, Japanese 1.", self.texts())
+        self.assertEqual(self.host.busy, [True, False, True, False])
+
+    def test_with_no_reader_both_are_done_here_as_before(self):
+        job = self._translate_track_1([(0.0, 2.0, "Good morning.")])
+        self.assertEqual(job.kwargs["follow"], [(0.0, 2.0, "Good morning.")])
+        job.succeed(self.JAPANESE)
+        self.assertEqual(FakeResolve.made, [([("English", [(0.0, 2.0, "Good morning.")]),
+                                              ("Japanese", [(0.0, 4.0, "おはよう。")])], str(self.page_mod.jobs.RENDER_DIR))])
+        self.assertEqual(self.last("result")["timeline"], "Interview (Subtitles)")
+        self.assertEqual(self.host.busy, [True, False, True, False])
+
+    def test_reading_track_1_failing_in_the_reader_is_said(self):
+        from core.resolve_reader import ReadError
+        reader = self._with_reader()
+        self.page._rescan()
+        FakeResolve.existing = 1
+        self.page.on_shown()
+        self.page.on_translate_last()
+        reader.answer(None, ReadError("Open a timeline in Resolve first.", "TranscribeResolveError"))
+        self.assertEqual(self.last("alert"), {"title": "Translate", "text": "Open a timeline in Resolve first."})
+        self.assertEqual(FakeJob.made, [])
+
+    def test_a_new_timeline_that_fails_in_the_reader_keeps_the_srt_files(self):
+        reader = self._with_reader()
+        job = self._translate_track_1([(0.0, 2.0, "Good morning.")],
+                                      lambda: reader.answer({"name": "Interview", "cues": [[0.0, 2.0, "Good morning."]]}))
+        job.succeed(self.JAPANESE)
+        reader.answer(None, RuntimeError("Resolve couldn't export the timeline."))
+        self.assertEqual(self.texts()[-1], "Couldn't make the timeline with subtitle tracks: Resolve couldn't export "
+                                           "the timeline. The SRT files are saved.")
+        self.assertNotIn("timeline", self.last("result"))
 
     def test_consent_to_cloud_translation_belongs_to_the_address(self):
         from pages.manual_chat.llm import LLMClient

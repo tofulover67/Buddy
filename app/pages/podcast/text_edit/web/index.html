@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Text Edit</title>
+    <link rel="stylesheet" href="../../../../web/buddy.css">
+    <link rel="stylesheet" href="text_edit.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page te">
+    <header class="page-head">
+        <h1 class="page-title">Podcast</h1>
+    </header>
+
+    <nav class="tabs" role="tablist" id="podcast-tabs" aria-label="Podcast tools">
+        <button type="button" role="tab" data-tab="sync" aria-selected="false">Sync</button>
+        <button type="button" role="tab" data-tab="switch" aria-selected="false">Auto Switch</button>
+        <button type="button" role="tab" data-tab="text" aria-selected="true">Text Edit</button>
+    </nav>
+
+    <section class="card te-bar">
+        <div class="row te-row">
+            <span class="te-timeline strong" id="te-timeline" translate="no"></span>
+            <span class="spacer"></span>
+            <span class="te-dot" id="te-dot" aria-hidden="true"></span>
+            <span class="muted small" id="te-conn">Connecting…</span>
+            <button type="button" class="btn ghost" id="te-refresh"
+                    title="Reconnect to Resolve and read the open timeline again">Refresh</button>
+        </div>
+
+        <div class="row te-row te-tracks">
+            <span class="te-label" title="The tracks transcribed and cut. Every cut takes the same stretch out of each of them, so the mics stay in sync.">Dialogue</span>
+            <span class="row te-toggles" id="te-audio"></span>
+            <span class="te-sep" aria-hidden="true"></span>
+            <span class="te-label" title="The picture tracks cut with the dialogue – the cameras. Leave B-roll off.">Picture</span>
+            <span class="row te-toggles" id="te-video"></span>
+        </div>
+
+        <div class="row te-row">
+            <label class="row te-inline"><span class="muted small">Model</span>
+                <select class="field te-select" id="te-model" aria-label="Model"></select></label>
+            <label class="row te-inline"><span class="muted small">Language</span>
+                <select class="field te-select" id="te-language" aria-label="Language"></select></label>
+            <button type="button" class="btn accent" id="te-transcribe">Transcribe</button>
+            <button type="button" class="btn ghost" id="te-retranscribe" hidden
+                    title="Transcribe every dialogue clip again (words you fixed by hand are lost)">Re-transcribe</button>
+            <button type="button" class="btn ghost" id="te-cancel" hidden>Stop</button>
+            <span class="te-sep" aria-hidden="true"></span>
+            <div class="segmented" id="te-mode" role="group" aria-label="How cuts are made">
+                <button type="button" data-mode="build"
+                        title="Strike words out here, then build a new timeline without them. Your timeline never changes.">Build an edited timeline</button>
+                <button type="button" data-mode="live"
+                        title="Each cut is made on the open timeline straight away, by your own Ripple Delete key in Resolve.">Cut the open timeline live</button>
+            </div>
+            <button type="button" class="btn ghost" id="te-shortcuts" hidden>Shortcuts…</button>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost" id="te-undo" title="Undo (Ctrl+Z)" disabled>Undo</button>
+            <button type="button" class="btn ghost" id="te-redo" title="Redo (Ctrl+Shift+Z)" disabled>Redo</button>
+        </div>
+
+        <div class="row te-row">
+            <input class="field te-find" id="te-find" type="search" placeholder="Find in transcript"
+                   aria-label="Find in transcript" spellcheck="false" autocomplete="off">
+            <span class="muted small te-count" id="te-count"></span>
+            <span class="te-sep" aria-hidden="true"></span>
+            <button type="button" class="btn" id="te-pauses">Remove pauses over</button>
+            <input class="field te-num" id="te-pause-over" type="number" min="0.5" max="30" step="0.1" value="1.0"
+                   aria-label="Pause length in seconds">
+            <span class="muted small">s</span>
+            <button type="button" class="btn" id="te-fillers" disabled>Remove filler words</button>
+            <span class="spacer"></span>
+            <label class="row te-inline"><span class="muted small">Text</span>
+                <select class="field te-select" id="te-font" aria-label="Font">
+                    <option value="sans">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option>
+                </select>
+                <select class="field te-select" id="te-size" aria-label="Text size">
+                    <option value="small">Small</option><option value="medium">Medium</option>
+                    <option value="large">Large</option><option value="xlarge">Extra large</option>
+                </select></label>
+            <button type="button" class="btn ghost te-toggle" id="te-back" aria-pressed="false"
+                    title="After you click or select words, bring Resolve to the front so your own keys work there">Back to Resolve</button>
+            <button type="button" class="btn ghost te-toggle" id="te-follow" aria-pressed="true"
+                    title="Scroll the transcript with the playhead">Follow</button>
+            <button type="button" class="btn ghost te-toggle" id="te-inout" aria-pressed="true"
+                    title="Set the timeline's In and Out to the words you select">Set In/Out</button>
+        </div>
+        <div class="te-progress" id="te-progress" aria-hidden="true"><div class="te-progress-bar" id="te-progress-bar"></div></div>
+    </section>
+
+    <div class="te-notices" id="te-notices"></div>
+
+    <section class="card te-doc-card">
+        <div class="te-doc" id="te-doc" tabindex="0" aria-label="Transcript"></div>
+    </section>
+
+    <footer class="row te-foot">
+        <span class="muted small te-hint" id="te-hint">Click a word to move Resolve's playhead · Drag across words to set In and Out · Delete strikes them out · Double-click to fix a word</span>
+        <span class="spacer"></span>
+        <span class="small te-summary" id="te-summary"></span>
+        <button type="button" class="btn ghost" id="te-restore-all" hidden>Restore all</button>
+        <button type="button" class="btn accent" id="te-build" disabled
+                title="A new timeline without what's struck out. The open timeline isn't changed.">Build edited timeline</button>
+    </footer>
+</main>
+<script src="../../web/tabs.js"></script>
+<script src="text_edit.js"></script>
+</body>
+</html>

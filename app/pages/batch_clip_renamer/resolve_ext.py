@@ -3,7 +3,14 @@
 Batch Clip Renamer's own Resolve calls - kept separate from
 core/resolve_bridge.py, which only owns the shared connect/bootstrap
 plumbing every tool needs, not any tool-specific logic.
+
+The preview's reads ("renamer.signature", "renamer.preview") and a big
+rename and its Undo ("renamer.rename", "renamer.undo" - core/busy_job.py)
+are made in the Resolve reader's process, so plain data in and out, and no
+Qt here: that process has none.
 """
+
+from . import renamer
 
 
 def _is_real_media_clip(clip):
@@ -132,7 +139,7 @@ def preview(controller, scope):
     inside Buddy: {"names", "keys", "where", "error", "signature"}. Nothing to
     rename is an "error" here (TargetError's words), not raised: the
     signature still comes, or every poll would read it all again. The rename
-    itself reads the clips afresh in Buddy."""
+    itself reads the clips afresh (rename())."""
     signature = plain_signature(target_signature(controller, scope))
     try:
         clips, where = read_targets(controller, scope)
@@ -140,3 +147,93 @@ def preview(controller, scope):
         return {"names": [], "keys": [], "where": "", "error": str(exc), "signature": signature}
     return {"names": [clip_name(c) for c in clips], "keys": [clip_key(c) for c in clips],
             "where": where, "error": "", "signature": signature}
+
+
+# How often a rename made in Buddy says how far it's got.
+PROGRESS_EVERY = 25
+
+# The clips the latest rename here renamed, by key - for its Undo, in the
+# same process: Resolve's objects can't go to the page and back.
+_RENAMED = {}
+
+
+def rename(controller, scope, keys, names, inputs, progress=None):
+    """The rename, as plain data. The targets are read afresh first, and
+    nothing is written unless they are exactly the clips and names the
+    preview showed (`keys`, `names`) - else {"changed": True, "names",
+    "keys", "where"}, for the page to show. Otherwise every clip whose name
+    the rules (`inputs`, renamer.plan) change is renamed: {"changed":
+    False, "where", "todo", "done", "failed"}, done and failed [key, old,
+    new]. Raises TargetError when there's nothing to rename. progress(n,
+    total) every PROGRESS_EVERY clips - in Buddy only (it's no JSON)."""
+    clips, where = read_targets(controller, scope)
+    names_now, keys_now = [clip_name(c) for c in clips], [clip_key(c) for c in clips]
+    if keys_now != list(keys) or names_now != list(names):
+        return {"changed": True, "names": names_now, "keys": keys_now, "where": where}
+    rows, problem = renamer.plan(names_now, inputs)
+    todo = [] if problem else [(clip, key, row) for clip, key, row in zip(clips, keys_now, rows) if row["changed"]]
+    done, failed, renamed = [], [], {}
+    for n, (clip, key, row) in enumerate(todo, 1):
+        try:
+            ok = bool(clip.SetClipProperty("Clip Name", row["new"]))
+        except Exception:
+            ok = False
+        (done if ok else failed).append([key, row["old"], row["new"]])
+        if ok:
+            renamed[key] = clip
+        if progress is not None and n % PROGRESS_EVERY == 0:
+            progress(n, len(todo))
+    if done:                        # the page's Undo is for this rename now
+        _RENAMED.clear()
+        _RENAMED.update(renamed)
+    return {"changed": False, "where": where, "todo": len(todo), "done": done, "failed": failed}
+
+
+def find_clips(controller, keys):
+    """{key: clip} for the Media Pool clips with these keys (clip_key) -
+    the open bin looked in first, then every bin."""
+    wanted, found = set(keys), {}
+    project = controller.current_project() if wanted else None
+    if not project:
+        return found
+
+    def look(folder):
+        for clip in folder.GetClipList() or []:
+            key = clip_key(clip)
+            if key in wanted and key not in found:
+                found[key] = clip
+
+    pool = project.GetMediaPool()
+    current = pool.GetCurrentFolder()
+    if current:
+        look(current)
+    root = pool.GetRootFolder()
+    stack = [root] if root else []
+    while stack and len(found) < len(wanted):
+        folder = stack.pop()
+        look(folder)
+        stack.extend(folder.GetSubFolderList() or [])
+    return found
+
+
+def undo(controller, items):
+    """Puts back the names a rename replaced (items: its done, [key, old,
+    new]) - but only on clips still carrying the name it gave them: one
+    renamed again since is left alone. The clips are the rename's own when
+    it was made in this process, else found again in the Media Pool by key.
+    {"restored", "skipped"}."""
+    clips = {key: _RENAMED[key] for key, _old, _new in items if key in _RENAMED}
+    missing = [key for key, _old, _new in items if key not in clips]
+    if missing:
+        clips.update(find_clips(controller, missing))
+    restored = skipped = 0
+    for key, old, new in items:
+        clip = clips.get(key)
+        try:
+            if clip is not None and clip_name(clip) == new and clip.SetClipProperty("Clip Name", old):
+                restored += 1
+            else:
+                skipped += 1
+        except Exception:
+            skipped += 1
+    return {"restored": restored, "skipped": skipped}

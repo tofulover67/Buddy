@@ -18,7 +18,11 @@ The Sync tab's discipline: every operation
 writes a new timeline and never edits the current one, so a failure at any
 point leaves what you started from untouched. Jobs that read audio run on a
 worker thread (worker.py) with their progress and a Cancel button in the
-page; everything that touches Resolve stays on the main thread.
+page; nothing on a thread of Buddy's touches Resolve. The long Resolve
+steps behind the overlay - Apply metadata, Create bins, Import, Add to the
+timeline, every Sync step's export and import - are made in the Resolve
+reader's process (_busy_job, resolve_jobs.py), so Buddy keeps drawing and
+answering meanwhile; where that process can't run, here on the main thread.
 
 The page also has a live tree preview of the bin list; a look
 inside the chosen folder before importing it (clips by kind, image
@@ -43,17 +47,19 @@ import os
 import shutil
 import time
 import traceback
+from collections import namedtuple
 
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QFileDialog
 
 from core.i18n import tr
-from core import resolve_where
+from core import busy_job, resolve_where
 from core.resolve_bridge import ResolveConnectionError
-from core.resolve_reader import ResolveCalls
+from core.resolve_reader import ReadError, ResolveCalls
 from core.web_page import WebToolPage
 
-from . import align_engine, bins, data_manager, importer, metadata, otio_engine, proxy, resolve_ext, sync_report
+from . import (align_engine, bins, data_manager, importer, metadata, otio_engine, proxy, resolve_ext, resolve_jobs,
+               sync_report)
 from .automation import ProjectSetupAutomationMixin
 from .ffmpeg_utils import find_ffmpeg
 from .settings_panel import ProjectSetupSettingsMixin
@@ -89,6 +95,45 @@ _WHILE_BUSY = {"tab", "bins_text", "sync_option", "proxy_option", "proxy_folder"
 _PROXY_ACTIONS = {"proxy_go", "proxy_relink", "proxy_use", "proxy_unlink", "proxy_status"}
 _PROXY_JOB_BLOCKS = _PROXY_ACTIONS - {"proxy_status"}
 
+# The refusals a step's engines word to be read - said plainly, no stack -
+# and the same as the Resolve reader's process names them (ReadError.kind),
+# with that process stopping mid-step ("Ended") said as plainly.
+_EXPECTED = (otio_engine.OtioError, align_engine.AlignError, ResolveConnectionError)
+_EXPECTED_KINDS = {"OtioError", "AlignError", "ResolveConnectionError", "Ended"}
+
+# A step made in the Resolve reader's process (_busy_job): its job `name`
+# there with `args`, here(controller) the same work where that process can't
+# run, then(answer) what the caller makes of the answer - a job's context,
+# or its log lines.
+_Step = namedtuple("_Step", "name args here then")
+
+
+def _trace(exc):
+    """The stack an exception raised here carries, as traceback.format_exc
+    gives it - none for one from the Resolve reader's process."""
+    if exc is None or isinstance(exc, ReadError) or exc.__traceback__ is None:
+        return ""
+    return "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+
+
+def _read_step(tracks=False):
+    """A Sync job's prepare: the open timeline exported (resolve_jobs.read_timeline).
+    Its context: (the export's path, workdir, the timeline's name[, (video, audio) tracks]) -
+    the worker reads the document from that path."""
+    args = {"tracks": tracks}
+    return _Step("project_setup.read_timeline", args,
+                 lambda controller: resolve_jobs.read_timeline(controller, **args),
+                 lambda answer: (answer["path"], answer["workdir"], answer["name"])
+                 + ((tuple(answer["tracks"]),) if tracks else ()))
+
+
+def _import_step(path, base_name, suffix, then, what="rebuilt", key=False):
+    """A Sync job's finish: the timeline its worker wrote at `path` imported
+    as a NEW one (resolve_jobs.import_timeline); then(answer) its log lines."""
+    args = {"path": path, "base_name": base_name, "suffix": suffix, "what": what, "key": key}
+    return _Step("project_setup.import_timeline", args,
+                 lambda controller: resolve_jobs.import_timeline(controller, **args), then)
+
 
 class _Slot:
     """One job slot: its job (what the view shows), worker, and the finish
@@ -98,6 +143,12 @@ class _Slot:
         self.job = None             # {"action", "label", "stage", "done", "total", "log_tab", "started_at"}
         self.worker = None
         self.finish = None
+        # True: finish(result) works with Resolve here, behind the overlay (the
+        # proxies' links - their MediaPoolItems are this process's). False: it
+        # returns the _Step that does it in the Resolve reader's process (a Sync
+        # job's import), on `controller` where that process can't run.
+        self.finish_here = True
+        self.controller = None
         self.title = ""
         self.started = 0.0          # time.monotonic() at the start: what "Took 14m 32s" is from
 
@@ -124,7 +175,8 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         self._wrapped_ref = None
         self._wrapped = None
         self._logs = {tab: [] for tab in TABS}
-        self._sync_busy = False     # a synchronous step has the overlay up
+        self._sync_busy = False     # a step has the overlay up (here, or in the Resolve reader's process)
+        self._busy_label = None     # what that step's overlay says, while it's in the reader's process
         self._slots = {"main": _Slot(), "proxy": _Slot()}
         self._auto = None           # an Automation step running here (automation.py)
 
@@ -183,8 +235,11 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         return next((slot.worker for slot in self._slots.values() if slot.worker is not None), None)
 
     def working_on(self):
-        """A Sync and/or Proxy job on its thread (the steps behind the overlay block quitting anyway)."""
-        labels = [slot.job["label"] for slot in self._slots.values() if slot.job]
+        """A Sync and/or Proxy job on its thread, and a step behind the overlay
+        made in the Resolve reader's process - Buddy answers meanwhile, so
+        quitting asks first (one made here blocks quitting anyway)."""
+        labels = [self._busy_label] if self._busy_label else []
+        labels += [slot.job["label"] for slot in self._slots.values() if slot.job]
         return " · ".join(labels) or None
 
     def _push_jobs(self):
@@ -416,34 +471,36 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             return
         try:
             changes = metadata.validate(payload.get("changes"))
-            project = controller.get_project()
-            clips = metadata.selected_clips(project)
-            if metadata.signature(project, clips) != self._metadata_signature:
-                raise metadata.MetadataError("The project or selected clips changed. Load the selection again before applying.")
         except Exception as exc:
             self._alert("Couldn't apply metadata", str(exc))
             return
-        self._sync_busy = True
-        self._push_state()
-        self.host.set_busy(True, "Applying metadata…")
-        try:
-            updated, failures = metadata.apply(clips, changes)
-            self._log("metadata", f"Applied the chosen fields to {updated} of {len(clips)} clips.",
-                      "warn" if failures else "success")
-            for message in failures:
-                self._log("metadata", message, "error")
-            if failures:
-                self._alert("Some metadata could not be applied",
-                            "Some fields were updated, but Resolve refused others. See Activity for the clip and field details.")
+        # A read and a write per field per clip: made in the Resolve reader's
+        # process, which finds the selection again - and writes only if it's
+        # still the one loaded (resolve_jobs.apply_metadata).
+        args = {"changes": changes, "signature": resolve_jobs.plain_signature(self._metadata_signature)}
+
+        def applied(answer, error):
+            if error is None and "refused" in answer:      # changed since it was loaded: nothing written
+                self._alert("Couldn't apply metadata", answer["refused"])
+                return
+            if error is None:
+                updated, failures = answer["updated"], answer["failures"]
+                self._log("metadata", f"Applied the chosen fields to {updated} of {answer['count']} clips.",
+                          "warn" if failures else "success")
+                for message in failures:
+                    self._log("metadata", message, "error")
+                if failures:
+                    self._alert("Some metadata could not be applied",
+                                "Some fields were updated, but Resolve refused others. See Activity for the clip and field details.")
+                else:
+                    self.emit("toast", {"text": f"Updated metadata on {updated} clips"})
             else:
-                self.emit("toast", {"text": f"Updated metadata on {updated} clips"})
-        except Exception as exc:
-            self._alert("Couldn't apply metadata", str(exc))
-        finally:
-            self._sync_busy = False
-            self.host.set_busy(False)
-        self._read_metadata(controller)
-        self._push_state()
+                self._alert("Couldn't apply metadata", str(error))
+            self._read_metadata(controller)
+            self._push_state()
+
+        self._busy_job("project_setup.metadata", args, lambda: resolve_jobs.apply_metadata(controller, **args),
+                       applied, "Applying metadata…")
 
     def _set_setting(self, key, value):
         """Saves one of the settings shared with the Settings dialog, and
@@ -479,25 +536,25 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         if controller is None:
             return
         log = lambda text, kind="info": self._log("bins", text, kind)  # noqa: E731
-        self._overlay(True, "Creating bins…")
-        try:
-            pool = controller.get_project().GetMediaPool()
-            created, failed = bins.create(pool, rows, log)
-        except Exception as exc:  # noqa: BLE001 - no project open, or the connection dropped
-            created = failed = None
-            error = exc
-        finally:
-            self._overlay(False)
-        if created is None:
-            log(f"Couldn't create the bins: {error}", "error")
-            return
-        if created:
-            self.achieve("bins", created)
-            log("Created 1 bin in the Media Pool." if created == 1 else f"Created {created} bins in the Media Pool.", "success")
-            self.emit("toast", {"text": "Created 1 bin" if created == 1 else f"Created {created} bins"})
-        if failed:
-            self._alert("Some bins weren't created",
-                        f"Created {created}, but {failed} failed. The log below has the details.")
+
+        def made(answer, error):
+            if error is not None:       # no project open, or the connection dropped
+                log(f"Couldn't create the bins: {error}", "error")
+                return
+            for text, kind in answer["lines"]:
+                log(text, kind)
+            created, failed = answer["created"], answer["failed"]
+            if created:
+                self.achieve("bins", created)
+                log("Created 1 bin in the Media Pool." if created == 1 else f"Created {created} bins in the Media Pool.", "success")
+                self.emit("toast", {"text": "Created 1 bin" if created == 1 else f"Created {created} bins"})
+            if failed:
+                self._alert("Some bins weren't created",
+                            f"Created {created}, but {failed} failed. The log below has the details.")
+
+        # In the Resolve reader's process, Buddy drawing meanwhile (_busy_job).
+        self._busy_job("project_setup.bins", {"rows": rows}, lambda: resolve_jobs.create_bins(controller, rows),
+                       made, "Creating bins…")
 
     # ------------------------------------------------------------- Import --
 
@@ -555,44 +612,42 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         if controller is None:
             return
         log = lambda text, kind="info": self._log("import", text, kind)  # noqa: E731
-        self._sync_busy = True
-        self.host.set_busy(True, "Importing folder…")
-        try:
-            pool = controller.get_project().GetMediaPool()
-            if self.data_mgr.settings.get("import_to_master", False):
-                destination = pool.GetRootFolder()
+        args = {"folder": folder, "to_master": bool(self.data_mgr.settings.get("import_to_master", False))}
+
+        def here():
+            # Where the Resolve reader's process can't run: here, the overlay saying each folder.
+            return resolve_jobs.import_folder(controller, progress=lambda text: self.host.pump_busy(text + "…"),
+                                              **args)
+
+        def imported(answer, error):
+            if error is None:
+                for text, kind in answer["lines"]:
+                    log(text, kind)
+                if answer["failed"]:
+                    error = answer["error"]
+            if error is not None:       # no project open, or the connection dropped
+                log(f"Couldn't import the folder: {error}", "error")
+            result = answer["result"] if error is None else None
+            if result is None:
+                self._refresh_tab(connect=False)
+                return
+            n = result["imported"]
+            self.achieve("imported", n)
+            log(f"Imported 1 clip into '{result['bin']}', matching the folder's structure." if n == 1
+                else f"Imported {n} clips into '{result['bin']}', matching the folder's structure.",
+                "success" if n else "warn")
+            if result["skipped_dirs"]:
+                log(f"{result['skipped_dirs']} subfolder(s) were skipped because their bin couldn't be created.", "warn")
+            if n:
+                self.emit("toast", {"text": f"Imported 1 clip into '{result['bin']}'" if n == 1
+                                    else f"Imported {n} clips into '{result['bin']}'"})
             else:
-                destination = pool.GetCurrentFolder() or pool.GetRootFolder()
-            result = importer.import_folder(pool, folder, destination, log,
-                                            progress=lambda text: self.host.pump_busy(text + "…"))
-            if result is not None:
-                # Leave the new bin open, so what came in is what's on screen.
-                try:
-                    pool.SetCurrentFolder(result["top_bin"])
-                except Exception:
-                    pass
-        except Exception as exc:  # noqa: BLE001 - no project open, or the connection dropped
-            result = None
-            log(f"Couldn't import the folder: {exc}", "error")
-        finally:
-            self._sync_busy = False
-            self.host.set_busy(False)
-        if result is None:
+                self._alert("No media found", f"Nothing under '{folder}' was a media file Resolve could import.")
             self._refresh_tab(connect=False)
-            return
-        n = result["imported"]
-        self.achieve("imported", n)
-        log(f"Imported 1 clip into '{result['bin']}', matching the folder's structure." if n == 1
-            else f"Imported {n} clips into '{result['bin']}', matching the folder's structure.",
-            "success" if n else "warn")
-        if result["skipped_dirs"]:
-            log(f"{result['skipped_dirs']} subfolder(s) were skipped because their bin couldn't be created.", "warn")
-        if n:
-            self.emit("toast", {"text": f"Imported 1 clip into '{result['bin']}'" if n == 1
-                                else f"Imported {n} clips into '{result['bin']}'"})
-        else:
-            self._alert("No media found", f"Nothing under '{folder}' was a media file Resolve could import.")
-        self._refresh_tab(connect=False)
+
+        # Bins made and media imported a folder at a time: in the Resolve
+        # reader's process, Buddy drawing meanwhile (_busy_job).
+        self._busy_job("project_setup.import_folder", args, here, imported, "Importing folder…")
 
     # ----------------------------------------------------------- Populate --
 
@@ -624,6 +679,9 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             return
         log = lambda text, kind="info": self._log("populate", text, kind)  # noqa: E731
         # Read the bin fresh: it may have changed in Resolve since the last poll.
+        # Its name here, for the overlay (a few calls); its clips - a call or
+        # two each - are read and added in the Resolve reader's process, which
+        # finds the open bin again (resolve_jobs.add_to_timeline).
         try:
             folder = controller.get_current_bin()
         except Exception as exc:  # noqa: BLE001
@@ -633,39 +691,46 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             self._alert("No bin found", "Couldn't tell which bin is open in the Media Pool.")
             return
         name = folder.GetName() or "Master"
-        try:
-            clips = controller.get_bin_clips(folder, recursive=self.recursive)
-        except Exception as exc:  # noqa: BLE001
-            log(f"Couldn't read the clips in '{name}': {exc}", "error")
-            return
-        if not clips:
-            log(f"'{name}' has no media clips to add.", "warn")
-            self._alert("No clips found", f"'{name}' has no media clips to add.")
-            return
-        self._overlay(True, f"Adding '{name}' to the timeline…")
-        try:
-            created_new, placed = controller.append_clips_to_timeline(clips, new_timeline_name=name)
-            error = None
-        except Exception as exc:  # noqa: BLE001
-            error = exc
-        finally:
-            self._overlay(False)
-        if error is not None:
-            log(f"Couldn't add the bin to the timeline: {error}", "error")
-            return
-        if created_new:
-            log(f"No timeline was open, so created '{name}' with {placed} clip(s).", "success")
-        elif placed == len(clips):
-            log(f"Added {placed} clip(s) from '{name}' to the end of the timeline.", "success")
-        elif placed:
-            log(f"Added {placed} of {len(clips)} clip(s) from '{name}' – Resolve couldn't place the rest.", "warn")
-        else:
-            log(f"Resolve couldn't add any of the {len(clips)} clip(s) from '{name}'.", "error")
-            self._alert("Nothing was added", "Resolve didn't place any of the clips. The log below has the details.")
-        if placed:
-            self.emit("toast", {"text": "Added 1 clip to the timeline" if placed == 1
-                                else f"Added {placed} clips to the timeline"})
-        self._refresh_tab(connect=False)
+        args = {"recursive": self.recursive}
+
+        def added(answer, error):
+            if error is not None:
+                log(f"Couldn't add the bin to the timeline: {error}", "error")
+                return
+            stage, name = answer["stage"], answer.get("name") or "Master"
+            if stage == "bin":
+                if answer["error"]:
+                    log(f"Couldn't find the open bin: {answer['error']}", "error")
+                else:
+                    self._alert("No bin found", "Couldn't tell which bin is open in the Media Pool.")
+                return
+            if stage == "clips":
+                log(f"Couldn't read the clips in '{name}': {answer['error']}", "error")
+                return
+            if stage == "empty":
+                log(f"'{name}' has no media clips to add.", "warn")
+                self._alert("No clips found", f"'{name}' has no media clips to add.")
+                return
+            if stage == "append":
+                log(f"Couldn't add the bin to the timeline: {answer['error']}", "error")
+                return
+            count, created_new, placed = answer["count"], answer["created_new"], answer["placed"]
+            if created_new:
+                log(f"No timeline was open, so created '{name}' with {placed} clip(s).", "success")
+            elif placed == count:
+                log(f"Added {placed} clip(s) from '{name}' to the end of the timeline.", "success")
+            elif placed:
+                log(f"Added {placed} of {count} clip(s) from '{name}' – Resolve couldn't place the rest.", "warn")
+            else:
+                log(f"Resolve couldn't add any of the {count} clip(s) from '{name}'.", "error")
+                self._alert("Nothing was added", "Resolve didn't place any of the clips. The log below has the details.")
+            if placed:
+                self.emit("toast", {"text": "Added 1 clip to the timeline" if placed == 1
+                                    else f"Added {placed} clips to the timeline"})
+            self._refresh_tab(connect=False)
+
+        self._busy_job("project_setup.populate", args, lambda: resolve_jobs.add_to_timeline(controller, **args),
+                       added, f"Adding '{name}' to the timeline…")
 
     # --------------------------------------------------------------- Sync --
 
@@ -732,11 +797,12 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         """A step stopped before or after its work: say so plainly for the
         engines' own refusals, with the stack for anything else (a bug -
         kept so a report can be copied straight out of the log)."""
-        if isinstance(exc, (otio_engine.OtioError, align_engine.AlignError, ResolveConnectionError)):
+        if isinstance(exc, _EXPECTED) or (isinstance(exc, ReadError) and exc.kind in _EXPECTED_KINDS):
             self._log("sync", str(exc), "error")
             self._alert(title, str(exc))
             return
-        self._log("sync", f"Error: {type(exc).__name__}: {exc}", "error")
+        kind = (exc.kind or type(exc).__name__) if isinstance(exc, ReadError) else type(exc).__name__
+        self._log("sync", f"Error: {kind}: {exc}", "error")
         for line in (trace or "").rstrip().splitlines():
             self._log("sync", f"    {line}", "error")
 
@@ -750,40 +816,72 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         else:
             self.host.set_busy(False)
 
-    def _run_step(self, busy_text, title, work):
-        """A step that runs on the main thread with the overlay up (it
-        calls Resolve throughout). `work(progress)` returns log lines."""
+    def _busy_job(self, name, args, here, done, message):
+        """A step behind the overlay, made in the Resolve reader's process
+        (core/busy_job.py: its job `name`, with `args`) so Buddy keeps
+        drawing and answering - or here(), on this thread, where that
+        process can't run. done(answer, error) once the overlay's down.
+
+        Marked as the overlay's, as _overlay's steps are: the poll and the
+        other actions wait, and so does a job finishing (_finish_job);
+        quitting asks first (working_on); and an automation's step waits for
+        done() to have said how it went (automation.py _auto_busy_started)."""
+        self._sync_busy, self._busy_label = True, message
+        self._push_state()
+        waiting = self._auto_busy_started()
+        returned = []
+
+        def finished(answer, error):
+            self._sync_busy, self._busy_label = False, None
+            self._push_state()
+            try:
+                done(answer, error)
+            finally:
+                self._auto_busy_ended(waiting, bool(returned))
+
+        busy_job.run(self.host, self._calls, name, args, here, finished, message)
+        returned.append(True)
+
+    def _run_step(self, busy_text, title, name, args, here, then=None):
+        """A Sync step that's all Resolve - export, rebuild, import a NEW
+        timeline - made in the Resolve reader's process behind the overlay
+        (_busy_job: resolve_jobs' `name`, with `args`), or here as
+        here(controller, progress) where that process can't run. Its answer
+        is {"lines": what to log, ...}; then(answer) first keeps what the page
+        needs of it."""
         controller = self.ensure_connected()
         if controller is None:
             return
-        self._sync_busy = True
-        self._push_state()
-        self.host.set_busy(True, busy_text)
 
         def progress(stage, done=0, total=1):
             self.host.pump_busy(f"{stage} ({done + 1} of {total})" if total and total > 1 else f"{stage}…")
 
-        lines, error = [], None
-        try:
-            lines = work(controller, progress)
-        except Exception as exc:  # noqa: BLE001
-            error = exc
-            trace = traceback.format_exc()
-        finally:
-            self._sync_busy = False
-            self.host.set_busy(False)
-        if error is None:
-            self._sync_log(lines)
-        else:
-            self._sync_failed(title, error, trace)
-        self._refresh_tab(connect=False)
+        def finished(answer, error):
+            if error is None:
+                try:
+                    if then is not None:
+                        then(answer)
+                    lines = answer["lines"]
+                except Exception as exc:  # noqa: BLE001 - a bug: said with its stack
+                    error = exc
+            if error is None:
+                self._sync_log(lines)
+            else:
+                self._sync_failed(title, error, _trace(error))
+            self._refresh_tab(connect=False)
+
+        self._busy_job(name, args, lambda: here(controller, progress), finished, busy_text)
 
     def _start_job(self, action, label, prepare, job, finish, title, log_tab="sync"):
-        """Runs `job(report)` on a worker, then `finish(result)` back here.
-        prepare(controller) does the main-thread reading first and returns
-        the context job/finish need. log_tab is the tab whose Activity the
-        job reports in - and the Proxy tab's jobs have their own slot, so
-        they run alongside a Sync job (see _PROXY_ACTIONS)."""
+        """Runs `job(context, report)` on a worker, then `finish(controller,
+        context, result)` back here. prepare(controller) does the main-thread
+        reading first and returns the context job/finish need - or, as a
+        _Step, is that reading made in the Resolve reader's process
+        (_busy_job; a Sync job's export, _read_step), then(answer) the
+        context. A job read there is finished there too: its finish returns
+        the _Step that imports (_import_step). log_tab is the tab whose
+        Activity the job reports in - and the Proxy tab's jobs have their
+        own slot, so they run alongside a Sync job (see _PROXY_ACTIONS)."""
         name = "proxy" if log_tab == "proxy" else "main"
         slot = self._slots[name]
         if slot.worker is not None and slot.worker.isRunning():
@@ -792,10 +890,25 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         controller = self.ensure_connected()
         if controller is None:
             return
+        message = "Reading the timeline…" if log_tab == "sync" else "Reading the clips…"
+        if isinstance(prepare, _Step):
+            def read(answer, error):
+                if error is None:
+                    try:
+                        context = prepare.then(answer)
+                    except Exception as exc:  # noqa: BLE001 - a bug: said with its stack
+                        error = exc
+                if error is not None:       # no timeline open, say
+                    self._sync_failed(title, error, _trace(error))
+                    return
+                self._launch(name, action, label, controller, context, job, finish, title, log_tab, False)
+
+            self._busy_job(prepare.name, prepare.args, lambda: prepare.here(controller), read, message)
+            return
         # Marked as the overlay's, so a job finishing while this reads waits
         # its turn (_finish_job) rather than running in the middle of it.
         self._sync_busy = True
-        self.host.set_busy(True, "Reading the timeline…" if log_tab == "sync" else "Reading the clips…")
+        self.host.set_busy(True, message)
         try:
             context = prepare(controller)
         except Exception as exc:  # noqa: BLE001 - no timeline open, say
@@ -805,10 +918,15 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             return
         self._sync_busy = False
         self.host.set_busy(False)
+        self._launch(name, action, label, controller, context, job, finish, title, log_tab, True)
 
+    def _launch(self, name, action, label, controller, context, job, finish, title, log_tab, finish_here):
+        """_start_job's second half: the job on its worker, in slot `name`."""
+        slot = self._slots[name]
         slot.job = {"action": action, "label": label, "stage": "Starting", "done": 0, "total": 0,
                     "log_tab": log_tab, "started_at": time.time()}
         slot.finish = lambda result: finish(controller, context, result)
+        slot.finish_here, slot.controller = finish_here, controller
         slot.title = title
         slot.started = time.monotonic()
         try:
@@ -837,7 +955,7 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
     def _end_job(self, name="main"):
         slot = self._slots[name]
         slot.job = None
-        slot.finish = None
+        slot.finish, slot.finish_here, slot.controller = None, True, None
         # Release the worker and its closure (it holds the whole exported
         # timeline) - Qt would otherwise keep every one alive on the page.
         worker, slot.worker = slot.worker, None
@@ -890,19 +1008,39 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         self._finish_job(self._slot_of(self.sender()), result)
 
     def _finish_job(self, name, result):
-        """A job's main-thread finish (importing the timeline, linking the
-        proxies), behind the overlay. When the other slot's job - or any
-        step - has Resolve busy on this thread already, this waits its turn:
-        the overlay's processEvents would otherwise run it in the middle."""
+        """A job's finish (importing the timeline, linking the proxies),
+        behind the overlay - a Sync job's import made in the Resolve reader's
+        process (slot.finish_here False: _busy_job), the proxies' links here.
+        When the other slot's job - or any step - has Resolve busy already,
+        this waits its turn: the overlay's processEvents would otherwise run
+        it in the middle."""
         if self._sync_busy:
             QTimer.singleShot(250, lambda: self._finish_job(name, result))
             return
         slot = self._slots[name]
         finish, title, length = slot.finish, slot.title, self._took(name)
         log_tab = slot.job.get("log_tab", "sync") if slot.job else "sync"
+        message = "Linking the proxies…" if log_tab == "proxy" else "Importing the new timeline…"
+        if finish is not None and not slot.finish_here:
+            try:
+                step = finish(result)       # no Resolve in it: the _Step that imports
+            except Exception as exc:  # noqa: BLE001 - a bug: said with its stack
+                return self._job_finished(name, title, length, log_tab, [], exc, _trace(exc))
+            controller = slot.controller
+
+            def imported(answer, error):
+                lines = []
+                if error is None:
+                    try:
+                        lines = step.then(answer)
+                    except Exception as exc:  # noqa: BLE001 - a bug: said with its stack
+                        error = exc
+                self._job_finished(name, title, length, log_tab, lines, error, _trace(error))
+
+            self._busy_job(step.name, step.args, lambda: step.here(controller), imported, message)
+            return
         self._sync_busy = True
-        self.host.set_busy(True, "Linking the proxies…" if log_tab == "proxy"
-                           else "Importing the new timeline…")
+        self.host.set_busy(True, message)
         lines, error, trace = [], None, ""
         try:
             if finish is not None:
@@ -912,7 +1050,11 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         finally:
             self._sync_busy = False
             self.host.set_busy(False)
-            self._end_job(name)
+        self._job_finished(name, title, length, log_tab, lines, error, trace)
+
+    def _job_finished(self, name, title, length, log_tab, lines, error, trace):
+        """A job's end, after its finish: the slot's free, and the Activity says how it went."""
+        self._end_job(name)
         if error is None:
             self._sync_log(list(lines or []) + [(f"Took {length}.", "info")], log_tab)
         else:
@@ -932,7 +1074,10 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
                 slot.job["stage"] = "Stopping"
                 self._push_jobs()
 
-    # The steps, in order.
+    # The steps, in order. Resolve's part of each - the export, the import,
+    # the whole of Expand, Align and Shift - is made in the Resolve reader's
+    # process (resolve_jobs.py); the audio jobs' worker reads the export from
+    # disk and writes the rebuilt timeline back there for the import.
 
     def on_assemble(self, _payload):
         method = self.sync_options["method"]
@@ -941,54 +1086,39 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         if sync_audio and not ffmpeg_path:
             self._log("sync", "ffmpeg not found – carrying on without the steps that read audio.", "warn")
 
-        def prepare(controller):
-            document, _clips, workdir = otio_engine.read_current_timeline(controller)
-            return document, workdir, controller.get_current_timeline().GetName()
-
         def job(context, report):
-            document, _workdir, _name = context
+            path, workdir, _name = context
             # Deleting silent clips and closing gaps are edit decisions,
             # left to the Collapse and Shift steps.
-            return otio_engine.assemble_document(
-                document, method, ffmpeg_path=ffmpeg_path, sync_audio=sync_audio,
+            result, stats, warnings = otio_engine.assemble_document(
+                otio_engine.load_document(path), method, ffmpeg_path=ffmpeg_path, sync_audio=sync_audio,
                 remove_silent=False, collapse=True, close_gaps=False, progress_cb=report)
+            return otio_engine.write_document(result, workdir, "assembled.otio"), stats, warnings
 
         def finish(controller, context, payload):
-            _document, workdir, base_name = context
-            result, stats, warnings = payload
-            timeline = otio_engine.import_rebuilt(controller, result, workdir, base_name,
-                                                  "(Synced)", "assembled.otio")
-            self._gap_targets.add(self._sync_key(controller, timeline))
-            self.achieve("syncs", 1)
-            return sync_report.assemble(stats, method, timeline.GetTrackCount("video"),
-                                        timeline.GetTrackCount("audio"), timeline.GetName(), warnings)
+            _path, _workdir, base_name = context
+            path, stats, warnings = payload
 
-        self._start_job("assemble", "Syncing everything", prepare, job, finish, "Couldn't sync")
+            def then(answer):
+                self._gap_targets.add(tuple(answer["key"]))
+                self.achieve("syncs", 1)
+                video, audio = answer["tracks"]
+                return sync_report.assemble(stats, method, video, audio, answer["name"], warnings)
+
+            return _import_step(path, base_name, "(Synced)", then, key=True)
+
+        self._start_job("assemble", "Syncing everything", _read_step(), job, finish, "Couldn't sync")
 
     def on_expand(self, _payload):
-        def work(controller, progress):
-            _timeline, stats, warnings = otio_engine.expand_timeline(controller, progress_cb=progress)
-            return sync_report.expand(stats, warnings)
-        self._run_step("Expanding timeline…", "Couldn't expand", work)
+        self._run_step("Expanding timeline…", "Couldn't expand", "project_setup.expand", {},
+                       lambda controller, progress: resolve_jobs.expand(controller, progress=progress))
 
     def on_align(self, _payload):
-        def work(controller, progress):
-            document, clips, workdir = otio_engine.read_current_timeline(controller)
-            offsets, warnings = otio_engine.compute_offsets_timecode(clips)
-            fps = controller.get_timeline_fps()
-            by_id = {c.clip_id: c for c in clips}
-            anchor_id = min(offsets, key=offsets.get)
-            anchor = by_id.get(anchor_id)
-            # Where the group ends up is Shift's job, so Align only
-            # positions clips relative to the anchor.
-            frames, shifted = align_engine.offsets_to_frames(
-                offsets, fps, snap_to_start=False, anchor_id=anchor_id,
-                anchor_frame=anchor.record_frame if anchor else 0)
-            _timeline, stats = otio_engine.apply_alignment(controller, document, clips, frames, workdir)
-            self._gap_targets.add(self._sync_key(controller, _timeline))
-            return sync_report.align(stats, anchor.name if anchor else None,
-                                     anchor.record_frame if anchor else 0, shifted, warnings)
-        self._run_step("Aligning clips…", "Couldn't align", work)
+        # Where the group ends up is Shift's job, so Align only positions
+        # clips relative to the anchor (resolve_jobs.align).
+        self._run_step("Aligning clips…", "Couldn't align", "project_setup.align", {},
+                       lambda controller, _progress: resolve_jobs.align(controller),
+                       then=lambda answer: self._gap_targets.add(tuple(answer["key"])))
 
     def on_sync_external(self, _payload):
         ffmpeg_path = self._ffmpeg()
@@ -997,20 +1127,23 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
             self._alert("ffmpeg needed", "Syncing external audio needs ffmpeg installed, or its path set in Settings.")
             return
 
-        def prepare(controller):
-            return otio_engine.begin_external_sync(controller)
-
         def job(context, report):
-            document, _workdir, _name = context
-            return otio_engine.sync_external_audio_document(document, ffmpeg_path, progress_cb=report)
+            path, workdir, _name = context
+            result, stats, warnings = otio_engine.sync_external_audio_document(
+                otio_engine.load_document(path), ffmpeg_path, progress_cb=report)
+            return otio_engine.write_document(result, workdir, "external.otio"), stats, warnings
 
         def finish(controller, context, payload):
-            _document, workdir, base_name = context
-            result, stats, warnings = payload
-            otio_engine.finish_external_sync(controller, result, stats, workdir, base_name)
-            return sync_report.external(stats, warnings)
+            _path, _workdir, base_name = context
+            path, stats, warnings = payload
 
-        self._start_job("sync_external", "Syncing external audio", prepare, job, finish, "Couldn't sync")
+            def then(answer):
+                stats["name"] = answer["name"]
+                return sync_report.external(stats, warnings)
+
+            return _import_step(path, base_name, "(Audio Synced)", then, what="synced")
+
+        self._start_job("sync_external", "Syncing external audio", _read_step(), job, finish, "Couldn't sync")
 
     def on_collapse(self, _payload):
         delete_silent = bool(self.data_mgr.settings.get("collapse_delete_silent_audio", False))
@@ -1018,43 +1151,37 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         if delete_silent and not ffmpeg_path:
             self._log("sync", "ffmpeg not found – collapsing without checking for silent audio.", "warn")
 
-        def prepare(controller):
-            document, _clips, workdir = otio_engine.read_current_timeline(controller)
-            timeline = controller.get_current_timeline()
-            return (document, workdir, timeline.GetName(),
-                    (timeline.GetTrackCount("video"), timeline.GetTrackCount("audio")))
-
         def job(context, report):
-            return otio_engine.collapse_document_from(
-                context[0], delete_silent_audio=delete_silent, ffmpeg_path=ffmpeg_path, progress_cb=report)
+            path, workdir = context[0], context[1]
+            result, kept, dropped, warnings = otio_engine.collapse_document_from(
+                otio_engine.load_document(path), delete_silent_audio=delete_silent, ffmpeg_path=ffmpeg_path,
+                progress_cb=report)
+            return otio_engine.write_document(result, workdir, "collapsed.otio"), kept, dropped, warnings
 
         def finish(controller, context, payload):
-            _document, workdir, base_name, was = context
-            result, kept, dropped, warnings = payload
-            timeline = otio_engine.import_rebuilt(controller, result, workdir, base_name,
-                                                  "(Collapsed)", "collapsed.otio")
-            now = (timeline.GetTrackCount("video"), timeline.GetTrackCount("audio"))
-            return sync_report.collapse(kept, dropped, was, now, timeline.GetName(), warnings)
+            _path, _workdir, base_name, was = context
+            path, kept, dropped, warnings = payload
 
-        self._start_job("collapse", "Collapsing the timeline", prepare, job, finish, "Couldn't collapse")
+            def then(answer):
+                return sync_report.collapse(kept, dropped, was, tuple(answer["tracks"]), answer["name"], warnings)
+
+            return _import_step(path, base_name, "(Collapsed)", then)
+
+        self._start_job("collapse", "Collapsing the timeline", _read_step(tracks=True), job, finish,
+                        "Couldn't collapse")
 
     def on_shift(self, _payload):
-        close_gaps = bool(self.data_mgr.settings.get("shift_close_gaps", False))
-
-        def work(controller, progress):
-            _timeline, stats = otio_engine.shift_timeline(controller, close_gaps=close_gaps, progress_cb=progress)
-            return sync_report.shift(stats, close_gaps)
-        self._run_step("Shifting timeline…", "Couldn't shift", work)
+        args = {"close_gaps": bool(self.data_mgr.settings.get("shift_close_gaps", False))}
+        self._run_step("Shifting timeline…", "Couldn't shift", "project_setup.shift", args,
+                       lambda controller, progress: resolve_jobs.shift(controller, progress=progress, **args))
 
     def on_remove_gaps(self, _payload):
-        def work(controller, progress):
-            key = self._sync_key(controller, controller.get_current_timeline())
-            if key not in self._gap_targets:
-                raise otio_engine.OtioError("Open a timeline successfully synced or aligned in this session first.")
-            _timeline, stats = otio_engine.shift_timeline(controller, close_gaps=True, progress_cb=progress)
-            self._gap_targets.discard(key)
-            return sync_report.shift(stats, True)
-        self._run_step("Shifting left…", "Couldn't shift left", work)
+        # Only for a timeline synced or aligned in this session - checked where
+        # it's shifted, against these (resolve_jobs.shift).
+        args = {"close_gaps": True, "targets": [list(key) for key in self._gap_targets]}
+        self._run_step("Shifting left…", "Couldn't shift left", "project_setup.shift", args,
+                       lambda controller, progress: resolve_jobs.shift(controller, progress=progress, **args),
+                       then=lambda answer: self._gap_targets.discard(tuple(answer["key"])))
 
     # -------------------------------------------------------------- Proxy --
 

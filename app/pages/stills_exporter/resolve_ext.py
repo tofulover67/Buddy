@@ -13,10 +13,19 @@ This tool WRITES to Resolve: it adds
 markers, switches to the Color page, moves the playhead, grabs stills, and
 can delete them from the gallery afterward. Every such call is behind an
 explicit button.
+
+Grabbing and exporting run in the Resolve reader's process (grab_here,
+export_here; core/busy_job.py), so Buddy keeps drawing while Resolve
+switches pages and grabs. A GalleryStill can't be sent from one process to
+another, and Resolve gives a still nothing to find it by again, so the
+process that grabbed the stills keeps them, each under a key the page lists,
+and exports them from there. With no reader the page grabs and exports in
+Buddy's own process, and the stills are kept there the same way.
 """
 
 import os
 import time
+import uuid
 
 from core.marker_colors import numeric_markers
 from core.resolve_bridge import ResolveConnectionError
@@ -245,3 +254,58 @@ def export_stills(controller, stills, folder, prefix, fmt,
         else "WARNING: Resolve reported the gallery deletion failed."
     )
     return deleted
+
+
+# ------------------------------------------- in the reader's process --
+
+_HELD = {}          # key -> GalleryStill, in the process that grabbed it
+LOST = ("Buddy no longer has hold of these stills – its connection to Resolve restarted since they were "
+        "grabbed. They're still in Resolve's gallery: clear the list, grab them again, then export.")
+
+
+def holds(keys):
+    """Every one of these stills was grabbed in this process."""
+    return bool(keys) and all(key in _HELD for key in keys)
+
+
+def release(keys):
+    """Lets go of stills taken off the page's list (the gallery keeps them)."""
+    for key in keys:
+        _HELD.pop(key, None)
+
+
+def grab_here(controller, color):
+    """grab_stills_for_color() from plain data, as the page sends it to the
+    Resolve reader's process ("stills.grab"): {"grabbed": [[timecode, key]],
+    "log": [what it said], "error": why it stopped, or ""}. Each still is kept
+    here under its key. What was said before something went wrong comes back
+    with the error, so the page's log reads as it always did."""
+    lines = []
+    try:
+        grabbed = grab_stills_for_color(controller, color, log=lines.append)
+    except Exception as exc:  # noqa: BLE001 - said by the page, after what was logged
+        return {"grabbed": [], "log": lines, "error": str(exc)}
+    out = []
+    for timecode, still in grabbed:
+        key = uuid.uuid4().hex
+        _HELD[key] = still
+        out.append([timecode, key])
+    return {"grabbed": out, "log": lines, "error": ""}
+
+
+def export_here(controller, keys, folder, prefix, fmt, delete_after=False):
+    """export_stills() for stills grab_here() kept in this process, by key
+    ("stills.export"): {"deleted": export_stills()'s answer, "log", "error"}.
+    If any of them was grabbed elsewhere - by a reader that has ended since -
+    nothing is exported (LOST). Stills deleted from the gallery are let go."""
+    if keys and not holds(keys):
+        return {"deleted": False, "log": [], "error": LOST}
+    lines = []
+    try:
+        deleted = export_stills(controller, [_HELD[key] for key in keys], folder, prefix, fmt,
+                                delete_after=bool(delete_after), log=lines.append)
+    except Exception as exc:  # noqa: BLE001 - said by the page, after what was logged
+        return {"deleted": False, "log": lines, "error": str(exc)}
+    if delete_after and deleted:
+        release(keys)
+    return {"deleted": bool(deleted), "log": lines, "error": ""}

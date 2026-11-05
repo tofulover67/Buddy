@@ -1,0 +1,43 @@
+{
+ "_comment": "Podcast. English -> each language; see core/i18n.py.",
+ "Podcast": {
+  "日本語": "ポッドキャスト",
+  "Español": "Pódcast",
+  "Deutsch": "Podcast",
+  "Français": "Podcast",
+  "한국어": "팟캐스트",
+  "中文": "播客",
+  "العربية": "بودكاست",
+  "Tiếng Việt": "Podcast"
+ },
+ "Auto Switch": {
+  "日本語": "自動切り替え",
+  "Español": "Cambio automático",
+  "Deutsch": "Auto-Umschalten",
+  "Français": "Changement auto",
+  "한국어": "자동 전환",
+  "中文": "自动切换",
+  "العربية": "تبديل تلقائي",
+  "Tiếng Việt": "Tự động chuyển"
+ },
+ "Text Edit": {
+  "日本語": "テキスト編集",
+  "Español": "Edición por texto",
+  "Deutsch": "Textschnitt",
+  "Français": "Montage par texte",
+  "한국어": "텍스트 편집",
+  "中文": "文本剪辑",
+  "العربية": "تحرير بالنص",
+  "Tiếng Việt": "Dựng bằng văn bản"
+ },
+ "Podcast tools": {
+  "日本語": "ポッドキャストのツール",
+  "Español": "Herramientas de pódcast",
+  "Deutsch": "Podcast-Werkzeuge",
+  "Français": "Outils pour podcast",
+  "한국어": "팟캐스트 도구",
+  "中文": "播客工具",
+  "العربية": "أدوات البودكاست",
+  "Tiếng Việt": "Công cụ podcast"
+ }
+}

@@ -542,3 +542,37 @@ class TranscribeController:
             if folder.GetName() == TRANSCRIPTS_BIN:
                 return folder
         return mp.AddSubFolder(root, TRANSCRIPTS_BIN)
+
+
+# ------------------------------------------- in the reader's process --
+#
+# The page's long Resolve jobs, from plain data, as it sends them to the
+# Resolve reader's process (core/busy_job.py) - and runs them itself when
+# there's no reader. Each looks the project and timeline up again.
+
+def place_here(controller, srt_path, replace_existing=False):
+    """place_subtitles() ("transcribe.place"): {"placed": how many, "log":
+    what it said, "error": why it placed none, or ""}. What was said before
+    something went wrong comes back with the error, as it was logged before."""
+    lines = []
+    try:
+        placed = TranscribeController(controller).place_subtitles(
+            str(srt_path), replace_existing=bool(replace_existing), log=lines.append)
+    except TranscribeResolveError as exc:
+        return {"placed": 0, "log": lines, "error": str(exc)}
+    return {"placed": int(placed or 0), "log": lines, "error": ""}
+
+
+def track_subtitles_here(controller, index=1):
+    """track_subtitles() ("transcribe.subtitles"): {"name", "cues": [[start, end, text]]}."""
+    name, cues = TranscribeController(controller).track_subtitles(int(index))
+    return {"name": name, "cues": [list(cue) for cue in cues]}
+
+
+def timeline_with_subtitles_here(controller, tracks, work_dir):
+    """timeline_with_subtitles() ("transcribe.timeline") - tracks as {"name",
+    "cues": [[start, end, text]]}, in order: {"name", "counts"}."""
+    made = [drt.Track(str(t["name"]), [(float(start), float(end), str(text)) for start, end, text in t["cues"]])
+            for t in tracks]
+    name, counts = TranscribeController(controller).timeline_with_subtitles(made, str(work_dir))
+    return {"name": name, "counts": [int(n) for n in counts]}

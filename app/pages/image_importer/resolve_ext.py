@@ -11,6 +11,10 @@ diagnosable after the fact.
 
 WRITES to Resolve: creates a Media Pool bin, changes the current folder,
 and imports media into it.
+
+The page's import is made in the Resolve reader's process (import_here,
+"importer.import" - core/busy_job.py), so Buddy keeps drawing while
+Resolve imports: plain data in and out, and no Qt here.
 """
 
 from core.resolve_bridge import ResolveConnectionError
@@ -71,3 +75,15 @@ def import_to_bin(controller, paths, bin_name, log=lambda msg: None):
         )
     log(f"ImportMedia returned {len(imported)} item(s).")
     return imported
+
+
+def import_here(controller, paths, bin_name):
+    """import_to_bin() as plain data: {"count" imported, "log" - its
+    commentary, in order, "error" - why it failed, or None}. A failure is
+    said, not raised, so the lines before it still reach the page's log."""
+    lines = []
+    try:
+        imported = import_to_bin(controller, paths, bin_name, log=lines.append)
+    except Exception as exc:  # noqa: BLE001 - shown to the user
+        return {"count": 0, "log": lines, "error": str(exc)}
+    return {"count": len(imported), "log": lines, "error": None}

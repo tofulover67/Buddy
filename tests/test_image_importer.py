@@ -2,22 +2,28 @@
 Pool, a fake clipboard and files in a temp folder - never a real Resolve,
 never the real ~/.image_importer settings or the real Downloads folder."""
 
+import json
 import os
 import tempfile
 import unittest
 from unittest import mock
 
 import _paths  # noqa: F401
-from pages.image_importer import staging
+from pages.image_importer import resolve_ext, staging
 
 try:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     from PySide6.QtCore import QCoreApplication, QMimeData, QPointF, Qt, QUrl, QEvent
     from PySide6.QtGui import QDropEvent, QImage
     from PySide6.QtWidgets import QApplication
+    from _child_reader import ChildReader, load_without_qt
     HAVE_QT = True
 except ImportError:  # pragma: no cover
     HAVE_QT = False
+
+# The import in the Resolve reader's process: the line
+# core/resolve_reader_child.py JOBS has for it.
+JOBS = {"importer.import": ("pages.image_importer.resolve_ext", "import_here")}
 
 
 def touch(path, data=b"x"):
@@ -89,7 +95,7 @@ class Pool:
 
     def ImportMedia(self, paths):
         self.imported = (self.current.name, [os.path.basename(p) for p in paths])
-        return [object() for _ in paths]
+        return [object() for _ in paths] if self.current.name != "Refuses" else []
 
 
 class Controller:
@@ -100,6 +106,30 @@ class Controller:
 
     def current_project(self):
         return self.project
+
+
+class JobTests(unittest.TestCase):
+    """The import as the Resolve reader's process makes it: from plain
+    args, its commentary and any refusal sent back as data."""
+
+    def test_an_import_from_plain_args(self):
+        controller = Controller()
+        result = resolve_ext.import_here(controller, ["D:\\Stills\\a.png", "D:\\Stills\\b.png"], "Stills")
+        self.assertEqual(json.loads(json.dumps(result)), result)
+        self.assertEqual((result["count"], result["error"]), (2, None))
+        self.assertEqual(controller.pool.imported, ("Stills", ["a.png", "b.png"]))
+        self.assertEqual(result["log"][0], "Using project 'Test'.")
+        self.assertIn("No existing bin named 'Stills' (found: Footage) – creating it.", result["log"])
+
+    def test_a_refusal_comes_back_with_the_lines_before_it(self):
+        result = resolve_ext.import_here(Controller(), ["D:\\Stills\\a.png"], "Refuses")
+        self.assertEqual(result["count"], 0)
+        self.assertTrue(result["error"].startswith("Resolve's ImportMedia() returned nothing."))
+        self.assertEqual(result["log"][-1], "Calling ImportMedia with 1 path(s)…")
+
+    @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+    def test_the_job_loads_without_qt(self):
+        self.assertEqual(load_without_qt(JOBS), "")
 
 
 class Host:
@@ -156,6 +186,33 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.host.controller.pool.imported, ("Stills", [item["name"]]))
         self.assertEqual(self.last("items"), [])
         self.assertEqual(self.host.busy, [True, False])
+
+    def test_in_the_reader_process_buddy_stays_free_and_a_download_meanwhile_stays_listed(self):
+        reader = self.page._calls.reader = ChildReader(self.host.controller, JOBS)
+        first = self.page.staging.add(touch(os.path.join(self.save, "one.png")), "Copied file")
+        self.page.staging.add(os.path.join(self.save, "gone.png"), "Copied file")
+        self.page.on_import_images(None)
+        self.assertEqual((self.host.busy, self.host.controller.pool.imported), ([True], None))   # sent
+        later = self.page.staging.add(touch(os.path.join(self.save, "later.png")), "Downloaded")
+        reader.run()
+        self.assertEqual(reader.asked[0], ("importer.import", {"paths": [first["path"]], "bin_name": "Downloads"}))
+        self.assertEqual(self.host.busy, [True, False])
+        self.assertEqual(self.host.controller.pool.imported, ("Downloads", ["one.png"]))
+        self.assertEqual([i["id"] for i in self.last("items")], [later["id"]])
+        log = [e["text"] for e in self.last("log")]
+        self.assertIn("No existing bin named 'Downloads' (found: Footage) – creating it.", log)   # the reader's
+        self.assertIn("Imported 1 image into the 'Downloads' bin.", log)
+        self.assertIn("Left out 1 that were no longer on disk: gone.png", log)
+
+    def test_a_refused_import_is_said(self):
+        reader = self.page._calls.reader = ChildReader(self.host.controller, JOBS)
+        self.page.on_bin_name({"value": "Refuses"})
+        self.page.staging.add(touch(os.path.join(self.save, "one.png")), "Copied file")
+        self.page.on_import_images(None)
+        reader.run()
+        self.assertEqual(self.last("alert")["title"], "Import failed")
+        self.assertTrue(self.last("log")[-1]["text"].startswith("Import failed: Resolve's ImportMedia()"))
+        self.assertEqual(len(self.page.staging.items), 1)       # still listed, to try again
 
     def test_dropped_files_are_copied_and_non_images_skipped(self):
         src = os.path.join(self._tmp.name, "src")

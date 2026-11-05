@@ -789,5 +789,15 @@
   "中文": "图像文件已导出，但静帧没有从 Resolve 的画廊中删除——原因见日志。它们仍保留在此列表中。",
   "العربية": "صُدِّرت ملفات الصور، لكن اللقطات الثابتة لم تُحذف من معرض Resolve – السجل يوضح السبب. تبقى في هذه القائمة.",
   "Tiếng Việt": "Các tệp ảnh đã được xuất, nhưng ảnh tĩnh chưa bị xóa khỏi thư viện của Resolve – nhật ký cho biết lý do. Chúng vẫn còn trong danh sách này."
+ },
+ "Buddy no longer has hold of these stills – its connection to Resolve restarted since they were grabbed. They're still in Resolve's gallery: clear the list, grab them again, then export.": {
+  "日本語": "これらのスチルは Buddy の手元にありません。取り込んだ後に Resolve との接続が再起動しました。スチルは Resolve のギャラリーに残っています。リストをクリアして取り込み直してから書き出してください。",
+  "Español": "Buddy ya no tiene estas capturas: su conexión con Resolve se reinició después de tomarlas. Siguen en la galería de Resolve: vacía la lista, vuelve a capturarlas y luego expórtalas.",
+  "Deutsch": "Buddy hat diese Standbilder nicht mehr – seine Verbindung zu Resolve wurde seit dem Erfassen neu gestartet. Sie sind noch in der Galerie von Resolve: Leere die Liste, erfasse sie erneut und exportiere dann.",
+  "Français": "Buddy n'a plus ces images fixes – sa connexion à Resolve a redémarré depuis leur capture. Elles sont toujours dans la galerie de Resolve : videz la liste, capturez-les à nouveau, puis exportez.",
+  "한국어": "Buddy가 이 스틸을 더 이상 갖고 있지 않습니다. 가져온 뒤 Resolve와의 연결이 다시 시작되었습니다. 스틸은 Resolve 갤러리에 그대로 있습니다. 목록을 지우고 다시 가져온 다음 내보내세요.",
+  "中文": "Buddy 已不再持有这些静帧——抓取之后它与 Resolve 的连接重新启动了。静帧仍在 Resolve 的画廊中：请清空列表，重新抓取，然后导出。",
+  "العربية": "لم يعد Buddy يحتفظ بهذه اللقطات الثابتة – أُعيد تشغيل اتصاله بـ Resolve منذ التقاطها. لا تزال في معرض Resolve: امسح القائمة، والتقطها مرة أخرى، ثم صدّرها.",
+  "Tiếng Việt": "Buddy không còn giữ các ảnh tĩnh này – kết nối của nó với Resolve đã khởi động lại kể từ khi chụp. Chúng vẫn ở trong thư viện của Resolve: xóa danh sách, chụp lại, rồi xuất."
  }
 }

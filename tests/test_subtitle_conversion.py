@@ -79,6 +79,17 @@ class ReadingTests(unittest.TestCase):
         self.assertEqual(controller(tl).track_subtitles(1),
                          ("Interview", [(0.0, 1.5, "Good morning."), (2.0, 4.0, "Shall we\nstart?")]))
 
+    def test_read_as_the_readers_process_does_it(self):
+        """track_subtitles_here ("transcribe.subtitles"): plain data in and out."""
+        import json
+        from pages.transcribe.resolve_ext import track_subtitles_here
+        tl = self.Open([[]], [Item(86448, 86496, "Shall we start?"), Item(86400, 86436, "Good morning.")])
+        project = types.SimpleNamespace(GetCurrentTimeline=lambda: tl)
+        got = track_subtitles_here(types.SimpleNamespace(resolve=None, current_project=lambda: project),
+                                   **json.loads(json.dumps({"index": 1})))
+        self.assertEqual(json.loads(json.dumps(got)),
+                         {"name": "Interview", "cues": [[0.0, 1.5, "Good morning."], [2.0, 4.0, "Shall we start?"]]})
+
 
 class CountTests(unittest.TestCase):
     def test_a_clip_without_its_words_isnt_counted_and_is_said(self):

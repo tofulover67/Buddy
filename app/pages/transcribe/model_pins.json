@@ -256,5 +256,19 @@
     "sha256": "641fc660745306dfb935f666a68f8bc10a44c39241cfb357be518fda8c09662d"
    }
   }
+ },
+ "voice-resnet34": {
+  "repo": "Wespeaker/wespeaker-voxceleb-resnet34-LM",
+  "revision": "f0c48c298fd835726c27956a5d617bad7115627e",
+  "files": {
+   "config.yaml": {
+    "size": 1673,
+    "sha256": "3cf7d3243464cd939083e29d2be65c2abcdd954c1a64559bad73b74ffdb0db3e"
+   },
+   "voxceleb_resnet34_LM.onnx": {
+    "size": 26530309,
+    "sha256": "7bb2f06e9df17cdf1ef14ee8a15ab08ed28e8d0ef5054ee135741560df2ec068"
+   }
+  }
  }
 }

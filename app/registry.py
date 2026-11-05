@@ -72,6 +72,8 @@ REGISTRY = [
 
     ("Generative", _tool("generative", "Generative", "Generative", "pages.generative.page", "GenerativePage", mac=True)),
 
+    ("Podcast", _tool("podcast", "Podcast", "Podcast", "pages.podcast.page", "PodcastPage", mac=True)),
+
     # Stills Exporter and YouTube Chapters, as its two tabs - both checked on a Mac.
     ("Export & Delivery", _tool("marker_manager", "Marker Manager", "Export & Delivery", "pages.marker_manager.page", "MarkerManagerPage", mac=True)),
 
