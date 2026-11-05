@@ -136,6 +136,19 @@ class QueuedReaderTests(unittest.TestCase):
         self.assertEqual(got, [("b", 2), ("a", 1)])
         self.assertFalse(reader.busy())
 
+    def test_args_json_cannot_carry_leave_nothing_in_hand(self):
+        reader = resolve_reader.ResolveReader(queue=True)
+        got = []
+        with mock.patch.object(reader, "_start", return_value=True):
+            reader._proc = mock.Mock()
+            with self.assertRaises(TypeError):
+                reader.ask("a", {"ids": {1, 2}}, lambda r, e: got.append(r))
+            reader._proc.stdin.write.assert_not_called()
+            self.assertFalse(reader.busy())             # never "still busy" over a read that can't end
+            self.assertTrue(reader.ask("b", {}, lambda r, e: got.append(r)))
+        reader._on_line({"id": 1, "ok": True, "result": "b"})
+        self.assertEqual(got, ["b"])
+
     def test_one_at_a_time_unless_queued(self):
         reader = resolve_reader.ResolveReader()
         with mock.patch.object(reader, "_start", return_value=True):

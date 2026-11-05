@@ -108,13 +108,19 @@ class Controller:
         return self.project
 
 
+def stills(name):
+    """A path in the platform's own form (D:\\Stills\\a.png, /Stills/a.png):
+    the fake pool reads its file name with os.path, as Resolve would."""
+    return os.path.join(os.path.abspath(os.sep), "Stills", name)
+
+
 class JobTests(unittest.TestCase):
     """The import as the Resolve reader's process makes it: from plain
     args, its commentary and any refusal sent back as data."""
 
     def test_an_import_from_plain_args(self):
         controller = Controller()
-        result = resolve_ext.import_here(controller, ["D:\\Stills\\a.png", "D:\\Stills\\b.png"], "Stills")
+        result = resolve_ext.import_here(controller, [stills("a.png"), stills("b.png")], "Stills")
         self.assertEqual(json.loads(json.dumps(result)), result)
         self.assertEqual((result["count"], result["error"]), (2, None))
         self.assertEqual(controller.pool.imported, ("Stills", ["a.png", "b.png"]))
@@ -122,7 +128,7 @@ class JobTests(unittest.TestCase):
         self.assertIn("No existing bin named 'Stills' (found: Footage) – creating it.", result["log"])
 
     def test_a_refusal_comes_back_with_the_lines_before_it(self):
-        result = resolve_ext.import_here(Controller(), ["D:\\Stills\\a.png"], "Refuses")
+        result = resolve_ext.import_here(Controller(), [stills("a.png")], "Refuses")
         self.assertEqual(result["count"], 0)
         self.assertTrue(result["error"].startswith("Resolve's ImportMedia() returned nothing."))
         self.assertEqual(result["log"][-1], "Calling ImportMedia with 1 path(s)…")

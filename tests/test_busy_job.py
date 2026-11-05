@@ -8,6 +8,14 @@ import unittest
 import _paths  # noqa: F401
 from core import busy_job
 
+try:
+    from core.resolve_reader import ReadError
+except ImportError:  # pragma: no cover - no PySide6: the same shape
+    class ReadError(RuntimeError):
+        def __init__(self, message, kind=""):
+            super().__init__(message)
+            self.kind = kind
+
 
 class Host:
     def __init__(self):
@@ -66,6 +74,38 @@ class RunTests(unittest.TestCase):
         result, error, busy = self.got[0]
         self.assertIsNone(result)
         self.assertEqual(str(error), "no timeline")
+        self.assertEqual(busy, [True, False])
+
+    def test_a_reader_that_never_reached_resolve_leaves_the_job_to_be_done_here(self):
+        # What the real reader does where nothing outside Resolve may connect
+        # (the free Resolve on a Mac, external scripting off): its process says
+        # it couldn't, and ends - the job "Ended", the reader unavailable for a while.
+        reader = Reader()
+        here = []
+        busy_job.run(self.host, Calls(reader), "x.build", {}, lambda: here.append(1) or 7, self.done, "Building")
+        reader._available = False
+        reader.asked[0][2](None, ReadError("Couldn't reach Resolve: Could not connect to DaVinci Resolve.", "Ended"))
+        self.assertEqual(here, [1])
+        self.assertEqual(self.got, [(7, None, [True, False])])
+
+    def test_a_job_the_readers_process_died_in_isnt_made_twice(self):
+        reader = Reader()               # still available: it had reached Resolve
+        here = []
+        busy_job.run(self.host, Calls(reader), "x.build", {}, lambda: here.append(1), self.done, "Building")
+        reader.asked[0][2](None, ReadError("The Resolve reader stopped.", "Ended"))
+        self.assertEqual(here, [])
+        result, error, busy = self.got[0]
+        self.assertEqual((result, error.kind, busy), (None, "Ended", [True, False]))
+
+    def test_args_the_pipe_cant_carry_are_said_and_the_overlay_comes_down(self):
+        class Strict(Reader):
+            def ask(self, name, args, done):
+                raise TypeError("Object of type set is not JSON serializable")
+        here = []
+        busy_job.run(self.host, Calls(Strict()), "x.build", {"ids": {1}}, lambda: here.append(1), self.done, "Building")
+        self.assertEqual(here, [])
+        result, error, busy = self.got[0]
+        self.assertIsInstance(error, TypeError)
         self.assertEqual(busy, [True, False])
 
 

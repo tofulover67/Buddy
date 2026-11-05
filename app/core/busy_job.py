@@ -20,7 +20,11 @@ job(): the same work, here (the fallback). done(result, error) on the UI
 thread once the overlay is down: the job's answer, or the exception - from
 the reader's process, a ReadError whose `kind` is the exception's class
 there. A job the reader's process died in isn't run again here: it may have
-got halfway, and twice would make two of whatever it makes.
+got halfway, and twice would make two of whatever it makes. One whose
+process never reached Resolve is - that process made nothing. That's every
+first try after a quiet spell where nothing outside Resolve may connect (the
+free Resolve on a Mac, external scripting off): the reader is tried again
+every RETRY_AFTER_S, and ResolveCalls falls back the same way for a read.
 """
 
 
@@ -29,11 +33,25 @@ def run(host, calls, name, args, job, done, message):
         host.set_busy(False)
         done(result, error)
 
+    def here():
+        try:
+            result, error = job(), None
+        except Exception as exc:  # noqa: BLE001 - done() says what went wrong
+            result, error = None, exc
+        finished(result, error)
+
+    def answered(result, error):
+        # Ended, and the reader not available again at once: its process
+        # never got as far as Resolve (resolve_reader.ResolveReader._ended).
+        if getattr(error, "kind", "") == "Ended" and not calls.reader.available():
+            here()
+        else:
+            finished(result, error)
+
     host.set_busy(True, message)
-    if calls.reader.available() and calls.reader.ask(name, args, finished):
-        return
     try:
-        result, error = job(), None
-    except Exception as exc:  # noqa: BLE001 - done() says what went wrong
-        result, error = None, exc
-    finished(result, error)
+        sent = calls.reader.available() and calls.reader.ask(name, args, answered)
+    except Exception as exc:  # noqa: BLE001 - a bug (args the pipe can't carry): said, the overlay down
+        return finished(None, exc)
+    if not sent:
+        here()

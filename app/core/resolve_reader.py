@@ -101,10 +101,13 @@ class ResolveReader(QObject):
         started, or - without queue - one's already in hand."""
         if (self._pending and not self._queue) or not self._start():
             return False
+        # Written out before anything's pending: args JSON can't carry (a
+        # TypeError - a bug) leave no read "in hand" that never ends.
+        line = json.dumps({"id": self._next_id + 1, "do": name, "args": args or {}}) + "\n"
         self._next_id += 1
         self._pending[self._next_id] = (done, time.monotonic())
         try:
-            self._proc.stdin.write(json.dumps({"id": self._next_id, "do": name, "args": args or {}}) + "\n")
+            self._proc.stdin.write(line)
             self._proc.stdin.flush()
         except (OSError, ValueError):
             # False promises this request's callback was never called:
