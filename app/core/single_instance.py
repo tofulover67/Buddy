@@ -99,6 +99,11 @@ class SingleInstanceServer(QObject):
             self._show_when_attached = False
             window.bring_to_front()
 
+    def stop(self):
+        """Quitting: stops answering, so a launch from now on starts a new
+        Buddy instead of asking this one to come to the front."""
+        self.server.close()
+
     def _handle_connection(self):
         socket = self.server.nextPendingConnection()
         message = b""

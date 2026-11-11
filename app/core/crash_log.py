@@ -75,6 +75,21 @@ def enable(path, version=""):
     return True
 
 
+def dump_stacks(reason):
+    """Every thread's Python stack into the log, under `reason` - for a Buddy
+    that's stuck rather than crashed (core/quitting.py). Never raises."""
+    if _handle is None:
+        return False
+    try:
+        _handle.write(f"{datetime.datetime.now():%H:%M:%S} {reason}\n")
+        _handle.flush()
+        faulthandler.dump_traceback(file=_handle, all_threads=True)
+        _handle.flush()
+    except (OSError, ValueError, RuntimeError):
+        return False
+    return True
+
+
 def enable_trail(path):
     """Starts crash_trail.log: what the web pages were doing, one line per
     event (see trail()). Written straight through - no buffer a native

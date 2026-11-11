@@ -11,7 +11,14 @@
     <script src="../../buddy.js"></script>
 </head>
 <body class="chrome">
-<nav class="shell-rail" id="rail" aria-label="Tools"></nav>
+<nav class="shell-rail" id="rail" aria-label="Tools">
+    <div class="rail-search" role="search">
+        <input type="search" class="field" id="search" placeholder="Search tools" aria-label="Search tools"
+               aria-controls="rail-list" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="rail-list" id="rail-list"></div>
+</nav>
+<script src="../tool_search.js"></script>
 <script src="rail.js"></script>
 </body>
 </html>

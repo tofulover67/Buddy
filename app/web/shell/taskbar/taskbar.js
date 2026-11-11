@@ -20,6 +20,16 @@ $("settings").onclick = () => send("settings");
 $("orb").onclick = () => send("orb");
 $("conn").onclick = () => send("reconnect");
 
+// Search, as on Windows' taskbar: clicking it or typing in it opens
+// Programs above it, searching (deskmenu.js) - what's typed here before
+// that's up carries on there, and the box empties again.
+const searchBox = $("search");
+const openSearch = () => send("search", {q: searchBox.value, left: left($("task-search"))});
+searchBox.addEventListener("mousedown", () => setTimeout(openSearch, 0));
+searchBox.addEventListener("input", openSearch);
+searchBox.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); openSearch(); } });
+searchBox.addEventListener("blur", () => { searchBox.value = ""; });
+
 function tick() {
     $("clock").textContent = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
 }

@@ -39,6 +39,14 @@ Buddy's integrated tools include the following:
 
 The sidebar can be reordered and tools hidden from Settings.
 
+A search field at the top of the sidebar finds a tool by its name or by what
+it does ("offline" finds Media Relink, with the line that matched) - every
+tool that works, those hidden from the sidebar and those on another page's
+tab too. ↑/↓ choose, Enter opens, Esc clears. The Desktop theme has the same
+search as a Search box beside Programs on its taskbar, as on Windows' own:
+typing there opens Programs, searching. See `core/tool_search.py` and
+`web/shell/tool_search.js`.
+
 A new install starts with a few key tools in the sidebar - Ask Buddy, Project
 Setup, Media Manager, Animation, Subtitles, Audio Assistant, Time Tracker and
 Buddy Network. The rest are installed and running, one click away under

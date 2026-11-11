@@ -119,13 +119,20 @@ class HeaderView(_ChromeView):
 class RailView(_ChromeView):
     web_dir = os.path.join(SHELL_WEB_DIR, "rail")
 
+    _tools_sent = None
+
     def web_ready(self):
+        self._tools_sent = None
         self.shell.push_rail()
 
-    def show_items(self, items, more=0):
+    def show_items(self, items, more=0, tools=None):
         """more: how many tools More tools can add - its button shows while
-        there are any."""
-        self.emit("rail", {"items": items, "more": more})
+        there are any. tools: what the search finds (core/tool_search.py),
+        sent when it's changed."""
+        state = {"items": items, "more": more}
+        if tools is not None and tools != self._tools_sent:
+            state["tools"] = self._tools_sent = tools
+        self.emit("rail", state)
 
     def fit(self, size):
         width = size.get("width")
@@ -134,7 +141,7 @@ class RailView(_ChromeView):
 
     def on_switch(self, payload):
         tool_id = (payload or {}).get("id")
-        if tool_id in self.shell.pages:
+        if self.shell.can_open(tool_id):
             self.shell.switch_tool(tool_id)
 
     def on_menu(self, payload):

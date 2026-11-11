@@ -53,7 +53,7 @@ else:
 from core.app_version import buddy_version  # noqa: E402
 from core.i18n import tr  # noqa: E402
 from core.settings_store import BUDDY_DIR, SharedSettings  # noqa: E402
-from core import tool_dirs  # noqa: E402
+from core import quitting, tool_dirs  # noqa: E402
 
 # Each tool's folder into ~/.buddy/tools, from the home directory where
 # earlier Buddys kept them (core/tool_dirs.py) - before the pages are
@@ -130,6 +130,9 @@ def main(start_hidden=False):
     # the moment the (now only) top-level window goes away, defeating the
     # point of minimizing to tray instead of closing.
     app.setQuitOnLastWindowClosed(False)
+    # However Buddy comes to quit, a watchdog sees that it really ends.
+    quitting.enable()
+    app.aboutToQuit.connect(lambda: quitting.begin("about to quit"))
 
     # Relaunching from Resolve's Scripts menu while an instance is already
     # running (e.g. minimized to tray, easy to forget about) must NOT start
@@ -189,7 +192,10 @@ def main(start_hidden=False):
     if restored:
         window.show_restored(restored)
 
-    sys.exit(app.exec())
+    # Everything is written by the time the loop returns; the teardown left
+    # is where a quit could stall, so Buddy's own process just ends
+    # (core/quitting.py).
+    sys.exit(quitting.finish(app.exec()))
 
 
 if __name__ == "__main__":

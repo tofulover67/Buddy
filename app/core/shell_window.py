@@ -43,6 +43,8 @@ from core.achievements import Achievements
 from core.render_watch import RenderWatch
 from core import nav_layout
 from core import onboarding
+from core import quitting
+from core import tool_search
 from core.more_tools import MoreToolsDialog
 from core.announcements_window import AnnouncementsDialog
 from core.announcements import SEEN_KEY, AnnouncementChecker
@@ -483,6 +485,7 @@ class ShellWindow(QMainWindow):
         self.tray_icon = None
         self._quitting = False
         self._pages_told_quitting = False
+        self._quit_begun = False
 
         self.setWindowTitle("Buddy")
         self.resize(1180, 760)
@@ -1131,6 +1134,7 @@ class ShellWindow(QMainWindow):
         if not confirmed and not self.confirm_quit_while_working():
             return
         self._quitting = True
+        self._begin_quit()
         self.close()
         self.app.quit()
 
@@ -1165,6 +1169,7 @@ class ShellWindow(QMainWindow):
         if not self._quitting and not self.confirm_quit_while_working():
             event.ignore()              # the window's [X], really quitting: a tool at work asks first
             return
+        self._begin_quit()
         self._notify_pages_quitting()
         event.accept()
 
@@ -1176,6 +1181,26 @@ class ShellWindow(QMainWindow):
             # this automatically once a tray icon exists, so it has to
             # happen explicitly here instead.
             self.app.quit()
+
+    def _begin_quit(self):
+        """Quitting for real: out of sight at once - the window and the tray
+        icon, so nothing is left on screen that no longer answers while the
+        pages flush - and the single-instance pipe let go, so opening Buddy
+        again from Resolve's Scripts menu starts a new one rather than
+        knocking on this one. The watchdog (core/quitting.py) sees that the
+        process really ends."""
+        if self._quit_begun:
+            return
+        self._quit_begun = True
+        quitting.begin("closing" if not self._quitting else "quitting")
+        self.hide()
+        for dialog in SettingsDialog.on_screen():
+            dialog.close()
+        if self.tray_icon is not None:
+            self.tray_icon.hide()
+        server = getattr(self, "_single_instance_server", None)
+        if server is not None:
+            server.stop()
 
     def _notify_pages_quitting(self):
         """Calls every page's on_app_quitting() - at most once per run, since
@@ -1523,10 +1548,26 @@ class ShellWindow(QMainWindow):
                     "pinned": tool_id in self.pins,
                     "state": self.desktop.window_state(tool_id) or "closed",
                 })
-        return {"mode": "programs", "groups": [g for g in groups if g["items"]]}
+        return {"mode": "programs", "groups": [g for g in groups if g["items"]], "tools": self.search_tools()}
 
     def open_programs(self, anchor):
         self.desk_menu.popup("programs", self._programs_state(), anchor)
+
+    def open_search(self, query, anchor):
+        """The taskbar's Search box: Programs, searching for what was typed -
+        or, already open, the typing carried on into it."""
+        if self.desk_menu.isVisible() and self.desk_menu._kind == "programs":
+            self.desk_menu.emit("query", {"q": query})
+            return
+        self.desk_menu.popup("programs", {**self._programs_state(), "query": query}, anchor)
+
+    def search_tools(self):
+        """What the tool search finds (core/tool_search.py)."""
+        return tool_search.entries(self.registry, self.nav_layout)
+
+    def can_open(self, tool_id):
+        """A page of its own, or a tool on another page's tab (switch_tool)."""
+        return tool_id in self.pages or any(tool_id in getattr(page, "SUB_TOOLS", ()) for page in self.pages.values())
 
     def open_task_menu(self, tool_id, anchor):
         state = self.desktop.window_state(tool_id)
@@ -1737,7 +1778,7 @@ class ShellWindow(QMainWindow):
                 items.append({"type": "tool", "id": tool_id, "label": self.pages[tool_id].display_name,
                               "active": tool_id == self._current_tool_id, "badge": self._badge(tool_id),
                               "working": self._working(tool_id)})
-        self.rail.show_items(items, more=len(self.more_tool_ids()))
+        self.rail.show_items(items, more=len(self.more_tool_ids()), tools=self.search_tools())
 
     def more_tool_ids(self):
         """Tools hidden from the rail that More tools can put back (a

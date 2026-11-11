@@ -16,9 +16,9 @@ draw over them.
 
 Protocol (taskbar):
     to the view    taskbar
-    from the view  programs, task, task_menu, reconnect, arrange, orb, bug, settings, size
+    from the view  programs, search, task, task_menu, reconnect, arrange, orb, bug, settings, size
 Protocol (menu):
-    to the view    menu
+    to the view    menu, query (the Search box's typing, while it's open)
     from the view  open, pin, act, settings, size
 """
 
@@ -59,6 +59,12 @@ class TaskbarView(_ChromeView):
 
     def on_programs(self, payload):
         self.shell.open_programs(self._anchor(payload))
+
+    def on_search(self, payload):
+        """The Search box, clicked or typed in: Programs opens over it,
+        searching (core/tool_search.py)."""
+        query = (payload or {}).get("q")
+        self.shell.open_search(query[:200] if isinstance(query, str) else "", self._anchor(payload))
 
     def on_task(self, payload):
         tool_id = (payload or {}).get("id")
@@ -151,7 +157,7 @@ class DeskMenu(WebWindow):
     def on_open(self, payload):
         tool_id = (payload or {}).get("id")
         self.hide()
-        if tool_id in self.shell.pages:
+        if self.shell.can_open(tool_id):
             self.shell.switch_tool(tool_id)
 
     def on_pin(self, payload):

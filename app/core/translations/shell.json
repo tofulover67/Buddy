@@ -4769,5 +4769,15 @@
   "中文": "按描述搜索、转录、每日素材的转录和 Generative 在哪张显卡上运行。自动会让它们各自选择：第一张独立显卡。选择 Resolve 没有使用的显卡，可将两者分开。转录和 Generative 需要 NVIDIA 显卡：选择其他类型的显卡时，它们会在处理器上运行。Ask Buddy 的聊天在 Ollama 或 LM Studio 中运行，由它们自行选择显卡。下次启动 Buddy 时生效。",
   "العربية": "المكان الذي يعمل فيه البحث بالوصف والتفريغ النصي وتفريغ اللقطات اليومية وGenerative. في الوضع التلقائي تختار كل أداة بنفسها: أول بطاقة رسومات مستقلة. اختر البطاقة التي لا يستخدمها Resolve للفصل بينهما. يحتاج التفريغ النصي وGenerative إلى بطاقة NVIDIA: وإذا اخترت نوعًا آخر فإنهما يعملان على المعالج. تعمل دردشة Ask Buddy في Ollama أو LM Studio، وهما يختاران بطاقتهما بنفسيهما. يسري ذلك عند تشغيل Buddy في المرة القادمة.",
   "Tiếng Việt": "Nơi Tìm theo mô tả, Phiên âm, bản phiên âm của Dailies và Generative chạy. Tự động để mỗi công cụ tự chọn - card đồ họa rời đầu tiên. Hãy chọn card Resolve không dùng để tách riêng hai bên. Phiên âm và Generative cần card NVIDIA: nếu chọn loại khác, chúng chạy trên bộ xử lý. Trò chuyện của Ask Buddy chạy trong Ollama hoặc LM Studio, các ứng dụng này tự chọn card. Có hiệu lực từ lần khởi động Buddy tiếp theo."
+ },
+ "No tools match that": {
+  "日本語": "一致するツールはありません",
+  "Español": "Ninguna herramienta coincide",
+  "Deutsch": "Keine passenden Werkzeuge",
+  "Français": "Aucun outil ne correspond",
+  "한국어": "일치하는 도구가 없습니다",
+  "中文": "没有匹配的工具",
+  "العربية": "لا توجد أدوات مطابقة",
+  "Tiếng Việt": "Không có công cụ nào khớp"
  }
 }

@@ -262,7 +262,7 @@ class ShellTests(unittest.TestCase):
         self.assertEqual(self.win.more_tool_ids(), ["audit"])
         self.assertTrue(self.settings[onboarding.TOUR_KEY])
         shown = []
-        self.win.rail.show_items = lambda items, more=0: shown.append((items, more))
+        self.win.rail.show_items = lambda items, more=0, tools=None: shown.append((items, more))
         self.win.push_rail()
         items, more = shown[-1]
         self.assertEqual(more, 1)
