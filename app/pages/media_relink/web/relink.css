@@ -75,6 +75,18 @@
 }
 .pick-list label:has(input:checked) { border-color: var(--accent-text); background: color-mix(in srgb, var(--accent-text) 10%, transparent); }
 .pick-list input { accent-color: var(--primary); margin-top: 2px; }
+.pick-list.flat { max-height: none; overflow: visible; }
+.pick-option { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pick-option .loc { color: var(--text-strong); font-weight: 600; }
+.pick-option .example { font-size: var(--fs-xs); color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-tag { flex: none; font-size: var(--fs-xs); font-weight: 600; color: var(--success); white-space: nowrap; margin-top: 2px; }
+.pick-same { align-self: flex-start; }
+.results-head #pick-groups { padding: 3px 12px; font-size: var(--fs-sm); }
+
+.pick-groups { display: flex; flex-direction: column; gap: 16px; }
+.pick-group { display: flex; flex-direction: column; gap: 6px; }
+.pick-group-clips summary { cursor: pointer; font-weight: 600; color: var(--text-strong); width: max-content; }
+.pick-group-clips div { margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
 
 .activity { flex: none; }
 .activity summary { cursor: pointer; padding: 2px 4px; width: max-content; }

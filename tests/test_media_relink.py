@@ -234,6 +234,74 @@ class RuleTests(Base):
                          {"r[0010-0012].jpg", "r0010.jpg", "a001.mov"})
 
 
+class PickManyTests(unittest.TestCase):
+    """Clips with more than one file: grouped by where the files are, so
+    one choice does for many."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmp = self._tmp.name
+        self.main = os.path.join(self.tmp, "Main")
+        self.backup = os.path.join(self.tmp, "Backup", "Copy")
+        old = os.path.join(self.tmp, "Server")
+        # Two cards copied to two places, and a camera that reused R1's name on Day2.
+        for card, name in (("Card1", "X1.mov"), ("Card2", "X2.MOV")):
+            touch(os.path.join(self.main, "Footage", card, name))
+            touch(os.path.join(self.backup, "Footage", card, name))
+        for day in ("Day1", "Day2"):
+            touch(os.path.join(self.main, "Footage", day, "R1.mov"))
+        self.clips = [
+            Clip("X1", os.path.join(old, "Footage", "Card1", "X1.mov")),
+            Clip("X2", os.path.join(old, "Footage", "Card2", "x2.mov")),
+            Clip("R1 day 1", os.path.join(old, "Day1", "R1.mov")),
+            Clip("R1 day 2", os.path.join(old, "Day2", "R1.mov")),
+        ]
+        self.rows, _ = relink_rows.make_rows([(c, "Bin") for c in self.clips], lambda c: c.path, lambda c: c.name)
+        relink_rows.apply_search(self.rows, build_file_index(self.tmp), MODE_FIX)
+
+    def test_a_place_is_what_comes_before_the_folders_the_copies_share(self):
+        self.assertEqual(sorted(relink_rows.locations(self.rows[0]["candidates"])), [self.backup, self.main])
+        day = os.path.join(self.main, "Footage")
+        self.assertEqual(relink_rows.locations(self.rows[2]["candidates"]),
+                         [os.path.join(day, "Day1"), os.path.join(day, "Day2")])
+        # Never less than the top folder - here the drive's own.
+        s = os.sep
+        self.assertEqual(relink_rows.locations([f"{s}Footage{s}A001.mov", f"{s}Old{s}Footage{s}A001.mov"]),
+                         [s, f"{s}Old"])
+
+    def test_clips_with_the_same_places_are_one_group(self):
+        groups = relink_rows.pick_groups(self.rows)
+        self.assertEqual([g["ids"] for g in groups], [[0, 1], [2], [3]])
+        copies = groups[0]
+        self.assertEqual(copies["locations"], [self.backup, self.main])
+        self.assertIsNone(copies["closest"])     # both copies end like the recorded path
+        self.assertEqual(copies["examples"][1], os.path.join(self.main, "Footage", "Card1", "X1.mov"))
+        # R1's two clips have the same places, but each was recorded in its own day.
+        self.assertEqual([os.path.basename(g["closest"]).lower() for g in groups[1:]], ["day1", "day2"])
+
+    def test_one_place_picks_every_clip_with_a_file_there(self):
+        self.assertEqual(relink_rows.pick_location(self.rows, self.main), 2)
+        self.assertEqual([r["resolved"] for r in self.rows[:2]],
+                         [os.path.join(self.main, "Footage", "Card1", "X1.mov"),
+                          os.path.join(self.main, "Footage", "Card2", "X2.MOV")])
+        self.assertEqual(relink_rows.counts(self.rows)["ambiguous"], 2)
+        self.assertEqual([g["ids"] for g in relink_rows.pick_groups(self.rows)], [[2], [3]])
+
+    def test_a_place_never_overrules_the_recorded_path_unless_asked(self):
+        day1 = relink_rows.locations(self.rows[2]["candidates"])[0]
+        self.assertEqual(relink_rows.pick_location(self.rows, day1), 1)
+        self.assertEqual(self.rows[3]["status"], MatchStatus.AMBIGUOUS)   # recorded in Day2
+        self.assertEqual(relink_rows.pick_location(self.rows, day1, ids=[3]), 1)
+        self.assertEqual(self.rows[3]["resolved"], os.path.join(day1, "R1.mov"))
+
+    def test_the_table_knows_each_candidates_place_and_the_closest(self):
+        view = relink_rows.view(self.rows[3])
+        self.assertEqual(len(view["locations"]), 2)
+        self.assertEqual(view["closest"], os.path.join(self.main, "Footage", "Day2", "R1.mov"))
+        self.assertIsNone(relink_rows.view(self.rows[0])["closest"])
+
+
 class DriveSearchTests(unittest.TestCase):
     """A search of a whole drive: its trash and system folders, folders
     nobody may open, and links back into it."""
@@ -740,6 +808,66 @@ class PageTests(Base):
         self.assertEqual(self.host.busy[-2:], [True, False])
         self.assertEqual(self.last("rows")["summary_parts"], ["The Resolve reader stopped."])
         self.assertEqual(self.last("rows")["counts"]["matched"], 1)  # still there to relink
+
+    def copies(self):
+        """E005 and F006 in both of C003's places: three clips, one choice."""
+        for name in ("E005.mov", "F006.mov"):
+            for day in ("Day1", "Day2"):
+                touch(os.path.join(self.new, day, name))
+            self.clips.append(Clip(name[:4], os.path.join(self.old, name)))
+        self.page.on_scan(None)
+        self.search(self.new)
+        return self.last("rows")
+
+    def test_one_pick_can_do_for_every_clip_in_the_same_places(self):
+        rows = self.copies()
+        self.assertEqual([g["ids"] for g in rows["groups"]], [[2, 4, 5]])
+        c003 = rows["rows"][2]
+        day1 = os.path.join(self.new, "Day1")
+        self.assertEqual(c003["locations"], [day1, os.path.join(self.new, "Day2")])
+        self.page.on_pick({"id": 2, "path": c003["candidates"][0], "same_place": True})
+        rows = self.last("rows")
+        self.assertEqual([r["new_path"] for r in rows["rows"][4:]],
+                         [os.path.join(day1, "E005.mov"), os.path.join(day1, "F006.mov")])
+        self.assertEqual(rows["groups"], [])
+        self.assertEqual(self.last("toast")["text"], f"Used {day1} for 2 more clips")
+
+    def test_pick_for_all_takes_one_choice_per_group(self):
+        group = self.copies()["groups"][0]
+        self.page.on_pick_groups({"picks": [{"ids": group["ids"], "location": group["locations"][1]},
+                                            {"ids": ["nope"], "location": group["locations"][0]}]})
+        rows = self.last("rows")
+        self.assertEqual([os.path.basename(os.path.dirname(rows["rows"][i]["new_path"])) for i in (2, 4, 5)],
+                         ["Day2"] * 3)
+        self.assertEqual(rows["counts"]["ambiguous"], 0)
+        self.assertEqual(self.last("toast")["text"], "Picked files for 3 clips")
+
+    def test_the_pick_for_all_dialog(self):
+        self.page.show()
+        deadline = time.monotonic() + 10
+        while not self.js("typeof pickGroupsDialog === 'function'"):
+            self.app.processEvents()
+            if time.monotonic() > deadline:
+                self.fail("Media Relink web view did not load")
+        rows = self.copies()
+        self.js(f"Buddy.receive('state', {json.dumps(self.last('state'))});"
+                f"Buddy.receive('rows', {json.dumps(rows)});")
+        self.assertEqual(self.js("document.getElementById('pick-groups').hidden"), False)
+        self.assertEqual(self.js("document.getElementById('pick-groups').textContent"), "Pick for all 3…")
+        self.js("document.getElementById('pick-groups').click()")
+        self.assertEqual(self.js("document.querySelectorAll('.pick-group').length"), 1)
+        # Two places and Decide later, which starts chosen: neither place is closer.
+        self.assertEqual(self.js("[...document.querySelectorAll('.pick-group input')].map(i => i.checked).join()"),
+                         "false,false,true")
+        sent = []
+        self.page._dispatch = lambda name, data: sent.append((name, data))
+        self.js("document.querySelectorAll('.pick-group input')[1].click();"
+                "[...document.querySelectorAll('.modal-buttons .btn')].pop().click()")
+        deadline = time.monotonic() + 5
+        while not sent and time.monotonic() < deadline:
+            self.app.processEvents()
+        self.assertEqual(sent, [("pick_groups", {"picks": [{"ids": [2, 4, 5],
+                                                            "location": os.path.join(self.new, "Day2")}]})])
 
     def test_project_change_requires_new_scan(self):
         self.page.on_scan(None)

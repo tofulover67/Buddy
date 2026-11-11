@@ -142,7 +142,7 @@
         "Search a folder or drive… takes a whole drive ([[win:D:\\ or even C:\\]][[mac:a volume, or the Mac's own disk]]) when you don't know which folder the media is in: it skips the trash, the system's own folders and links, and a folder it can't open is left out and counted in the summary (the first few named in Activity) rather than stopping the search",
         "Move to a new location: points clips at copies somewhere else even when nothing is broken; only the clips you tick are relinked",
         "Shows each clip's recorded folder and the proposed new one before anything changes; the folder search shows progress and can be cancelled",
-        "When a search finds several files with a clip's name, you pick which one (or browse for another) in the page",
+        "When a search finds several files with a clip's name, you pick which one (or browse for another) in the page. With many such clips, Pick for all… groups them by where their files are (say the main drive and a backup copy) so one choice does for each group, and a single pick can be used for every other clip with a file in the same place; where a clip's recorded folders match one copy best (a camera that reused names on another day), that copy is suggested and kept apart",
         "Which clips: the current bin, the current timeline (every clip used on it), the selected clips (Media Pool selection, or the timeline's when none), or the entire project",
         "Checks every relink by reading the Media Pool again afterwards, and image sequences (R[0001-0100].jpg) are found by their first frame"
       ],

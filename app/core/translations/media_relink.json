@@ -1089,5 +1089,165 @@
   "中文": "按住 Shift 点击可选择一个范围",
   "العربية": "انقر مع Shift لتحديد نطاق",
   "Tiếng Việt": "Shift-bấm để chọn một dải"
+ },
+ "Pick for all…": {
+  "日本語": "すべてを選択…",
+  "Español": "Elegir para todos…",
+  "Deutsch": "Für alle auswählen…",
+  "Français": "Choisir pour tous…",
+  "한국어": "모두 선택…",
+  "中文": "全部选择…",
+  "العربية": "اختر للجميع…",
+  "Tiếng Việt": "Chọn cho tất cả…"
+ },
+ "Pick for all {count}…": {
+  "日本語": "{count} 個すべてを選択…",
+  "Español": "Elegir para los {count}…",
+  "Deutsch": "Für alle {count} auswählen…",
+  "Français": "Choisir pour les {count}…",
+  "한국어": "{count}개 모두 선택…",
+  "中文": "为全部 {count} 个选择…",
+  "العربية": "اختر للـ {count} كلها…",
+  "Tiếng Việt": "Chọn cho cả {count}…"
+ },
+ "Choose once for every clip whose files are in the same places": {
+  "日本語": "ファイルが同じ場所にあるクリップは、まとめて一度で選択します",
+  "Español": "Elige una sola vez para todos los clips cuyos archivos están en los mismos lugares",
+  "Deutsch": "Einmal für alle Clips wählen, deren Dateien an denselben Orten liegen",
+  "Français": "Choisissez une seule fois pour tous les clips dont les fichiers sont aux mêmes endroits",
+  "한국어": "파일이 같은 위치에 있는 클립은 한 번에 선택합니다",
+  "中文": "文件位于相同位置的片段只需选择一次",
+  "العربية": "اختر مرة واحدة لكل المقاطع التي توجد ملفاتها في الأماكن نفسها",
+  "Tiếng Việt": "Chọn một lần cho mọi clip có tệp ở cùng các vị trí"
+ },
+ "Closest to where it was": {
+  "日本語": "元の場所に最も近い",
+  "Español": "La más cercana a donde estaba",
+  "Deutsch": "Am nächsten am alten Ort",
+  "Français": "La plus proche de l'emplacement d'origine",
+  "한국어": "원래 위치와 가장 가까움",
+  "中文": "最接近原来的位置",
+  "العربية": "الأقرب إلى مكانه السابق",
+  "Tiếng Việt": "Gần nhất với vị trí cũ"
+ },
+ "Its folders match the clip's recorded path the most": {
+  "日本語": "フォルダーがクリップの記録パスに最も一致しています",
+  "Español": "Sus carpetas son las que más coinciden con la ruta registrada del clip",
+  "Deutsch": "Seine Ordner stimmen am meisten mit dem gespeicherten Pfad des Clips überein",
+  "Français": "Ses dossiers correspondent le plus au chemin enregistré du clip",
+  "한국어": "폴더가 클립의 기록된 경로와 가장 많이 일치합니다",
+  "中文": "其文件夹与片段记录的路径最为一致",
+  "العربية": "مجلداته هي الأكثر تطابقًا مع المسار المسجَّل للمقطع",
+  "Tiếng Việt": "Các thư mục của nó khớp nhất với đường dẫn đã ghi của clip"
+ },
+ "Also use {place} for the other clip that has a file there": {
+  "日本語": "そこにファイルがあるもう 1 つのクリップにも {place} を使用",
+  "Español": "Usar también {place} para el otro clip que tiene un archivo ahí",
+  "Deutsch": "{place} auch für den anderen Clip verwenden, der dort eine Datei hat",
+  "Français": "Utiliser aussi {place} pour l'autre clip qui y a un fichier",
+  "한국어": "그곳에 파일이 있는 다른 클립 1개에도 {place} 사용",
+  "中文": "对另一个在该位置有文件的片段也使用 {place}",
+  "العربية": "استخدم {place} أيضًا للمقطع الآخر الذي له ملف هناك",
+  "Tiếng Việt": "Cũng dùng {place} cho clip còn lại có tệp ở đó"
+ },
+ "Also use {place} for the {count} other clips that have a file there": {
+  "日本語": "そこにファイルがある他の {count} 個のクリップにも {place} を使用",
+  "Español": "Usar también {place} para los otros {count} clips que tienen un archivo ahí",
+  "Deutsch": "{place} auch für die {count} anderen Clips verwenden, die dort eine Datei haben",
+  "Français": "Utiliser aussi {place} pour les {count} autres clips qui y ont un fichier",
+  "한국어": "그곳에 파일이 있는 다른 클립 {count}개에도 {place} 사용",
+  "中文": "对其他 {count} 个在该位置有文件的片段也使用 {place}",
+  "العربية": "استخدم {place} أيضًا للمقاطع الـ {count} الأخرى التي لها ملفات هناك",
+  "Tiếng Việt": "Cũng dùng {place} cho {count} clip khác có tệp ở đó"
+ },
+ "Decide later": {
+  "日本語": "後で決める",
+  "Español": "Decidir más tarde",
+  "Deutsch": "Später entscheiden",
+  "Français": "Décider plus tard",
+  "한국어": "나중에 결정",
+  "中文": "稍后决定",
+  "العربية": "قرِّر لاحقًا",
+  "Tiếng Việt": "Quyết định sau"
+ },
+ "Pick files for 1 clip": {
+  "日本語": "1 個のクリップのファイルを選択",
+  "Español": "Elegir archivos para 1 clip",
+  "Deutsch": "Dateien für 1 Clip auswählen",
+  "Français": "Choisir les fichiers pour 1 clip",
+  "한국어": "클립 1개의 파일 선택",
+  "中文": "为 1 个片段选择文件",
+  "العربية": "اختر ملفات لمقطع واحد",
+  "Tiếng Việt": "Chọn tệp cho 1 clip"
+ },
+ "Pick files for {count} clips": {
+  "日本語": "{count} 個のクリップのファイルを選択",
+  "Español": "Elegir archivos para {count} clips",
+  "Deutsch": "Dateien für {count} Clips auswählen",
+  "Français": "Choisir les fichiers pour {count} clips",
+  "한국어": "클립 {count}개의 파일 선택",
+  "中文": "为 {count} 个片段选择文件",
+  "العربية": "اختر ملفات لـ {count} مقاطع",
+  "Tiếng Việt": "Chọn tệp cho {count} clip"
+ },
+ "Clips whose files are in the same places are grouped, so one choice does for the whole group. Nothing is relinked yet.": {
+  "日本語": "ファイルが同じ場所にあるクリップはグループにまとめられるので、グループごとに一度選ぶだけで済みます。まだ何も再リンクされません。",
+  "Español": "Los clips cuyos archivos están en los mismos lugares se agrupan, así que basta una elección para todo el grupo. Todavía no se revincula nada.",
+  "Deutsch": "Clips, deren Dateien an denselben Orten liegen, werden gruppiert – eine Wahl gilt für die ganze Gruppe. Noch wird nichts neu verknüpft.",
+  "Français": "Les clips dont les fichiers sont aux mêmes endroits sont regroupés : un seul choix vaut pour tout le groupe. Rien n'est encore relié.",
+  "한국어": "파일이 같은 위치에 있는 클립은 그룹으로 묶이므로 그룹마다 한 번만 선택하면 됩니다. 아직 아무것도 다시 연결되지 않습니다.",
+  "中文": "文件位于相同位置的片段会被归为一组，每组只需选择一次。目前还不会重新链接任何内容。",
+  "العربية": "تُجمَّع المقاطع التي توجد ملفاتها في الأماكن نفسها، فيكفي اختيار واحد للمجموعة كلها. لن يُعاد ربط أي شيء بعد.",
+  "Tiếng Việt": "Các clip có tệp ở cùng các vị trí được gộp nhóm, nên chỉ cần chọn một lần cho cả nhóm. Chưa có gì được liên kết lại."
+ },
+ "Use these": {
+  "日本語": "これらを使用",
+  "Español": "Usar estos",
+  "Deutsch": "Diese verwenden",
+  "Français": "Utiliser ces choix",
+  "한국어": "이것으로 사용",
+  "中文": "使用这些",
+  "العربية": "استخدم هذه",
+  "Tiếng Việt": "Dùng các lựa chọn này"
+ },
+ "Picked a file for 1 clip": {
+  "日本語": "1 個のクリップのファイルを選択しました",
+  "Español": "Archivo elegido para 1 clip",
+  "Deutsch": "Datei für 1 Clip ausgewählt",
+  "Français": "Fichier choisi pour 1 clip",
+  "한국어": "클립 1개의 파일을 선택했습니다",
+  "中文": "已为 1 个片段选择文件",
+  "العربية": "تم اختيار ملف لمقطع واحد",
+  "Tiếng Việt": "Đã chọn tệp cho 1 clip"
+ },
+ "Picked files for {count} clips": {
+  "日本語": "{count} 個のクリップのファイルを選択しました",
+  "Español": "Archivos elegidos para {count} clips",
+  "Deutsch": "Dateien für {count} Clips ausgewählt",
+  "Français": "Fichiers choisis pour {count} clips",
+  "한국어": "클립 {count}개의 파일을 선택했습니다",
+  "中文": "已为 {count} 个片段选择文件",
+  "العربية": "تم اختيار ملفات لـ {count} مقاطع",
+  "Tiếng Việt": "Đã chọn tệp cho {count} clip"
+ },
+ "Used {place} for 1 more clip": {
+  "日本語": "さらに 1 個のクリップに {place} を使用しました",
+  "Español": "Se usó {place} para 1 clip más",
+  "Deutsch": "{place} für 1 weiteren Clip verwendet",
+  "Français": "{place} utilisé pour 1 clip de plus",
+  "한국어": "클립 1개에 {place}을(를) 추가로 사용했습니다",
+  "中文": "已对另外 1 个片段使用 {place}",
+  "العربية": "تم استخدام {place} لمقطع آخر",
+  "Tiếng Việt": "Đã dùng {place} cho thêm 1 clip"
+ },
+ "Used {place} for {count} more clips": {
+  "日本語": "さらに {count} 個のクリップに {place} を使用しました",
+  "Español": "Se usó {place} para {count} clips más",
+  "Deutsch": "{place} für {count} weitere Clips verwendet",
+  "Français": "{place} utilisé pour {count} clips de plus",
+  "한국어": "클립 {count}개에 {place}을(를) 추가로 사용했습니다",
+  "中文": "已对另外 {count} 个片段使用 {place}",
+  "العربية": "تم استخدام {place} لـ {count} مقاطع أخرى",
+  "Tiếng Việt": "Đã dùng {place} cho thêm {count} clip"
  }
 }

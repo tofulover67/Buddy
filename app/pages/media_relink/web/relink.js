@@ -213,6 +213,11 @@ function draw() {
     scan.textContent = list.scanned ? "Scan again" : scopeInfo().scan;
     const search = $("search");
     search.classList.toggle("accent", list.scanned && !list.counts.matched && !list.counts.ambiguous);
+    const toPick = list.counts.ambiguous || 0;
+    const pickGroups = $("pick-groups");
+    pickGroups.hidden = toPick < 2;
+    pickGroups.textContent = `Pick for all ${toPick}…`;
+    pickGroups.disabled = state.busy;
 
     const set = selected[mode];
     const picked = list.rows.filter(r => set.has(r.id));
@@ -241,23 +246,115 @@ function draw() {
 
 // ---------------------------------------------------------------- picking
 
+const CLOSEST = "Closest to where it was";
+const closestTag = () => el("span.pick-tag", {text: CLOSEST, title: "Its folders match the clip's recorded path the most"});
+
+// How many other clips still to pick have a file at the place with this
+// key - the ones "same_place" would pick too (relink_rows.pick_location):
+// not those whose recorded path points at another of their places.
+function othersAt(key, exceptId) {
+    const groups = (lists[state.mode] || {}).groups || [];
+    return groups.filter(g => g.keys.includes(key) && (!g.closest || g.closest === key))
+        .reduce((n, g) => n + g.ids.filter(id => id !== exceptId).length, 0);
+}
+
 function pickDialog(r) {
-    let choice = r.new_path || r.candidates[0];
-    const list = el("div.pick-list", {translate: "no"}, r.candidates.map(path => el("label", {}, [
-        el("input", {type: "radio", name: "pick", checked: path === choice, onchange: () => { choice = path; }}),
-        el("span", {text: path}),
+    let choice = r.new_path || r.closest || r.candidates[0];
+    const sameBox = el("input", {type: "checkbox", checked: true});
+    const sameText = el("span");
+    const same = el("label.check.small.pick-same", {}, [sameBox, sameText]);
+    const showSame = () => {
+        const at = r.candidates.indexOf(choice);
+        const n = r.status === "ambiguous" && at >= 0 ? othersAt(r.location_keys[at], r.id) : 0;
+        same.hidden = !n;
+        if (n) sameText.textContent = n === 1 ? `Also use ${r.locations[at]} for the other clip that has a file there`
+            : `Also use ${r.locations[at]} for the ${n} other clips that have a file there`;
+    };
+    const list = el("div.pick-list", {}, r.candidates.map(path => el("label", {}, [
+        el("input", {type: "radio", name: "pick", checked: path === choice, onchange: () => { choice = path; showSame(); }}),
+        el("span.pick-option", {text: path, translate: "no"}),
+        path === r.closest ? closestTag() : null,
     ])));
+    showSame();
     Buddy.modal({
         title: `Which file is "${r.name}"?`,
-        body: [el("p.modal-text.muted", {text: `${plural(r.candidates.length, "file")} in that folder share its name.`}), list],
+        body: [el("p.modal-text.muted", {text: `${plural(r.candidates.length, "file")} in that folder share its name.`}), list, same],
         wide: true,
         buttons: [
             {label: "Browse for another…", onClick: close => { close(); send("browse", {id: r.id}); }},
             {label: "Cancel"},
-            {label: "Use this file", kind: "accent", onClick: close => { close(); send("pick", {id: r.id, path: choice}); }},
+            {label: "Use this file", kind: "accent", onClick: close => {
+                close();
+                send("pick", {id: r.id, path: choice, same_place: !same.hidden && sameBox.checked});
+            }},
         ],
     });
 }
+
+// Every clip still to pick, grouped by the places its files are in - one
+// choice per group. Picking a place fills it in for the other groups that
+// have it and haven't been answered yet.
+function pickGroupsDialog() {
+    const list = lists[state.mode];
+    const groups = (list && list.groups) || [];
+    if (!groups.length) return;
+    const names = new Map(list.rows.map(r => [r.id, r.name]));
+    const choices = groups.map(g => g.closest);
+    const radios = groups.map(() => new Map());
+    const choose = (gi, key) => {
+        choices[gi] = key;
+        if (key === null) return;
+        groups.forEach((g, gj) => {
+            if (choices[gj] !== null || !g.keys.includes(key) || (g.closest && g.closest !== key)) return;
+            choices[gj] = key;
+            radios[gj].get(key).checked = true;
+        });
+    };
+    const sections = groups.map((g, gi) => {
+        const option = (key, content) => {
+            const radio = el("input", {type: "radio", name: `group-${gi}`, checked: choices[gi] === key,
+                                       onchange: () => choose(gi, key)});
+            radios[gi].set(key, radio);
+            return el("label", {}, [radio, ...content]);
+        };
+        const clips = g.ids.map(id => names.get(id));
+        return el("section.pick-group", {}, [
+            el("details.pick-group-clips", {}, [
+                el("summary", {text: g.ids.length === 1 ? "1 clip" : `${g.ids.length} clips`}),
+                el("div.small.muted", {text: clips.join(", "), translate: "no"}),
+            ]),
+            el("div.pick-list.flat", {}, [
+                ...g.keys.map((key, i) => option(key, [
+                    el("span.pick-option", {translate: "no"}, [
+                        el("span.loc", {text: g.locations[i]}),
+                        el("span.example", {text: g.examples[i], title: g.examples[i]}),
+                    ]),
+                    key === g.closest ? closestTag() : null,
+                ])),
+                option(null, [el("span.pick-option", {text: "Decide later"})]),
+            ]),
+        ]);
+    });
+    const clips = groups.reduce((n, g) => n + g.ids.length, 0);
+    Buddy.modal({
+        title: `Pick files for ${plural(clips, "clip")}`,
+        body: [
+            el("p.modal-text.muted", {text: "Clips whose files are in the same places are grouped, so one choice does for the whole group. Nothing is relinked yet."}),
+            el("div.pick-groups", {}, sections),
+        ],
+        wide: true,
+        buttons: [
+            {label: "Cancel"},
+            {label: "Use these", kind: "accent", onClick: close => {
+                close();
+                const picks = groups.map((g, gi) => choices[gi] === null ? null
+                    : {ids: g.ids, location: g.locations[g.keys.indexOf(choices[gi])]}).filter(Boolean);
+                if (picks.length) send("pick_groups", {picks});
+            }},
+        ],
+    });
+}
+$("pick-groups").onclick = pickGroupsDialog;
 
 // ---------------------------------------------------------------- events
 

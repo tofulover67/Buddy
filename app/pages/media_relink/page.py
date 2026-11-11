@@ -30,7 +30,11 @@ with Cancel, and selecting by checkbox.
 Protocol:
     to the view    state, rows, search, log, alert, toast
     from the view  mode, scope, connect, scan, search, cancel_search, pick,
-                   browse, relink_selected, relink_all
+                   pick_groups, browse, relink_selected, relink_all
+
+Clips to pick are grouped by the places their files are in (relink_rows
+pick_groups), so picking for many takes one choice per group - and a
+single pick can be used for every other clip with a file in that place.
 """
 
 from __future__ import annotations
@@ -173,6 +177,7 @@ class MediaRelinkPage(WebToolPage):
             "summary_parts": data.get("summary_parts") or ([data["summary"]] if data["summary"] else []),
             "counts": relink_rows.counts(data["rows"]),
             "rows": [relink_rows.view(r) for r in data["rows"]],
+            "groups": relink_rows.pick_groups(data["rows"]),
         })
 
     def _add_log(self, text, kind="info"):
@@ -354,8 +359,32 @@ class MediaRelinkPage(WebToolPage):
         path = payload.get("path")
         if not rows or path not in rows[0]["candidates"]:
             return
+        place = None
+        if payload.get("same_place"):
+            row = rows[0]
+            place = relink_rows.locations(row["candidates"])[row["candidates"].index(path)]
         relink_rows.pick(rows[0], path)
+        if place is not None:
+            self._picked_more(relink_rows.pick_location(self._lists[self.mode]["rows"], place), place)
         self._push_rows(self.mode)
+
+    def on_pick_groups(self, payload):
+        """One choice for each group of clips with the same places to pick
+        from (relink_rows.pick_groups): {"picks": [{"ids", "location"}]}."""
+        picked = 0
+        for choice in (payload or {}).get("picks") or []:
+            ids = self._rows_for(self.mode, choice.get("ids"))
+            if ids and choice.get("location"):
+                picked += relink_rows.pick_location(ids, choice["location"], ids=[r["id"] for r in ids])
+        if picked:
+            self.emit("toast", {"text": "Picked a file for 1 clip" if picked == 1
+                                else f"Picked files for {picked} clips"})
+        self._push_rows(self.mode)
+
+    def _picked_more(self, picked, place):
+        if picked:
+            self.emit("toast", {"text": f"Used {place} for 1 more clip" if picked == 1
+                                else f"Used {place} for {picked} more clips"})
 
     def on_browse(self, payload):
         rows = self._rows_for(self.mode, [(payload or {}).get("id")])

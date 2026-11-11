@@ -10,6 +10,9 @@ Two modes, each with its own list:
               only the clips the user selected are relinked
 """
 
+import os
+import re
+
 from .relink_engine import MatchStatus, classify_match, find_candidates, media_exists, same_path
 
 MODE_FIX = "fix"
@@ -89,6 +92,108 @@ def pick(row, path):
         row["candidates"] = [path]
 
 
+# ------------------------------------------------- picking many at once --
+#
+# A clip that's "Pick one" has the same file in several places - usually
+# because the media was copied: D:\Footage\Day1\A001\X.MXF and
+# E:\Backup\Footage\Day1\A001\X.MXF. What tells the copies apart is where
+# each copy is: the part of its path before the folders they share. Here
+# that's "D:\" and "E:\Backup". Every clip from those copies has the same
+# two places, so one choice can do for all of them.
+
+def _parts(path):
+    return [p.casefold() for p in re.split(r"[\\/]+", path.rstrip("\\/"))]
+
+
+def _key(location):
+    return os.path.normcase(os.path.normpath(location))
+
+
+def locations(candidates):
+    """Where each candidate is, as the part of its path before the folders
+    and name all the candidates share. Each candidate keeps at least its
+    first folder (or drive), so no place is empty."""
+    if len(candidates) < 2:
+        return list(candidates)
+    parts = [_parts(c) for c in candidates]
+    shared, shortest = 0, min(len(p) for p in parts)
+    while shared < shortest - 1 and len({p[-1 - shared] for p in parts}) == 1:
+        shared += 1
+    out = []
+    for path in candidates:
+        for _ in range(shared):
+            path = os.path.dirname(path)
+        out.append(path)
+    return out
+
+
+def _closest(old_path, candidates):
+    """The candidate whose path ends the most like the clip's recorded
+    path, when one does more than every other - otherwise None. A camera
+    that reuses its numbering puts A001.MXF in Day1 and Day2; a clip
+    recorded at ...\\Day2\\A001.MXF is the Day2 one."""
+    old = _parts(old_path)
+
+    def shared(path):
+        parts, n = _parts(path), 0
+        while n < min(len(parts), len(old)) and parts[-1 - n] == old[-1 - n]:
+            n += 1
+        return n
+    scores = [shared(c) for c in candidates]
+    best = max(scores, default=0)
+    return scores.index(best) if scores.count(best) == 1 else None
+
+
+def pick_groups(rows):
+    """The clips still to pick, grouped by the places their files are in:
+    one choice per group. Clips with the same places but a different
+    closest one (_closest) are separate groups, so one choice is never
+    wrong for some of them. Biggest groups first. JSON-able."""
+    groups = {}
+    for row in rows:
+        if row["status"] != MatchStatus.AMBIGUOUS:
+            continue
+        places = locations(row["candidates"])
+        closest = _closest(row["old_path"], row["candidates"])
+        order = sorted(range(len(places)), key=lambda i: _key(places[i]))
+        key = (tuple(_key(places[i]) for i in order), None if closest is None else _key(places[closest]))
+        group = groups.get(key)
+        if group is None:
+            group = groups[key] = {
+                "locations": [places[i] for i in order],
+                "keys": list(key[0]),
+                "examples": [row["candidates"][i] for i in order],
+                "closest": key[1],
+                "ids": [],
+            }
+        group["ids"].append(row["id"])
+    return sorted(groups.values(), key=lambda g: (-len(g["ids"]), g["ids"][0]))
+
+
+def pick_location(rows, location, ids=None):
+    """Picks, for clips still to pick, their file at `location` (one of
+    locations()). With ids, just those clips - the user's choice for that
+    group stands. Without, every clip with a file there, except one whose
+    recorded path points at another of its places (_closest). Returns how
+    many were picked."""
+    wanted = None if ids is None else set(ids)
+    key, picked = _key(location), 0
+    for row in rows:
+        if row["status"] != MatchStatus.AMBIGUOUS or (wanted is not None and row["id"] not in wanted):
+            continue
+        places = [_key(p) for p in locations(row["candidates"])]
+        if places.count(key) != 1:
+            continue
+        at = places.index(key)
+        if wanted is None:
+            closest = _closest(row["old_path"], row["candidates"])
+            if closest is not None and closest != at:
+                continue
+        pick(row, row["candidates"][at])
+        picked += 1
+    return picked
+
+
 def matched_rows(rows):
     return [r for r in rows if r["status"] == MatchStatus.MATCH_FOUND and r["resolved"]]
 
@@ -139,8 +244,16 @@ def counts(rows):
 
 
 def view(row):
-    """What the table shows for one row (JSON-able)."""
+    """What the table shows for one row (JSON-able). With several
+    candidates: where each one is (locations(), and the same normalised
+    for comparing) and which is closest to the recorded path."""
+    many = len(row["candidates"]) > 1
+    places = locations(row["candidates"]) if many else []
+    closest = _closest(row["old_path"], row["candidates"]) if many else None
     return {
+        "locations": places,
+        "location_keys": [_key(p) for p in places],
+        "closest": None if closest is None else row["candidates"][closest],
         "id": row["id"],
         "name": row["name"],
         "bin": row["bin"],
