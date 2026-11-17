@@ -78,6 +78,12 @@ class ViewTests(unittest.TestCase):
         self.assertEqual([p["name"] for p in view.library(self.dm, query="GREY")["loose"]], ["Mono"])
         self.assertEqual([f["name"] for f in view.library(self.dm, query="empt")["folders"]], ["Empty"])
 
+    def test_not_in_a_folder_folds_away_but_a_search_opens_it(self):
+        self.assertTrue(view.library(self.dm)["loose_open"])
+        lib = view.library(self.dm, loose_open=False)
+        self.assertEqual((lib["loose_open"], [p["name"] for p in lib["loose"]]), (False, ["Warm", "Mono"]))
+        self.assertTrue(view.library(self.dm, query="GREY", loose_open=False)["loose_open"])
+
     def test_moving_a_colour(self):
         colors = ["a", "b", "c", "d"]
         self.assertTrue(view.move_color(colors, 0, 3))
@@ -388,6 +394,24 @@ class PageTests(unittest.TestCase):
         self.page.on_delete_folder({"name": "Acme"})
         self.assertIsNone(self.dm.get_palette_folder("Night"))
         self.assertIn("Night", self.dm.palettes)
+
+    def test_not_in_a_folder_folds_away_and_opens_for_what_lands_there(self):
+        loose_open = lambda: self.last("library")["loose_open"]          # noqa: E731
+        self.page.on_toggle_loose({})
+        self.assertFalse(loose_open())
+        self.page.on_toggle_loose({})
+        self.assertTrue(loose_open())
+        self.page.on_toggle_loose({})
+        self.page.on_toggle_palette({"name": "Mono"})                  # opened from a toast's Show
+        self.assertTrue(loose_open())
+        self.page.on_toggle_loose({})
+        self.page.on_move_palette({"name": "Night", "folder": None})   # dragged out of its folder
+        self.assertTrue(loose_open())
+        self.page.on_toggle_loose({})
+        self.page.on_new_palette({"name": "Fresh", "folder": "Empty"})  # into a folder: that one opens
+        self.assertEqual((loose_open(), self.last("library")["folders"][1]["open"]), (False, True))
+        self.page.on_new_palette({"name": "Loose one"})
+        self.assertTrue(loose_open())
 
     def test_versions_and_tags(self):
         self.page.on_save_version({"name": "Warm", "label": "v1"})

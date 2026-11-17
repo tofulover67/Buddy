@@ -197,7 +197,6 @@ function nameCheck(existing, what, keep) {
 // ------------------------------------------------------------ palettes --
 
 let LIB = {folders: [], loose: [], current: null, folders_all: []};
-let collapsedLoose = false;
 
 function allPaletteNames() {
     return [...LIB.folders.flatMap(f => f.palettes.map(p => p.name)), ...LIB.loose.map(p => p.name)];
@@ -233,13 +232,20 @@ function drawLibrary() {
     const nodes = [];
     for (const folder of LIB.folders) nodes.push(folderEl(folder));
     if (LIB.loose.length || LIB.folders.length) {
+        // With folders above it, "Not in a folder" folds away like one of them.
+        const open = !LIB.folders.length || LIB.loose_open !== false;
         if (LIB.folders.length) {
-            nodes.push(dropHead(el("div.loose-head", {}, [
+            const toggle = () => send("toggle_loose", {});
+            nodes.push(dropHead(el("div.loose-head", {
+                tabindex: "0", role: "button", "aria-expanded": String(open), onclick: toggle,
+                onkeydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } },
+            }, [
+                el("span.caret", {text: open ? "▾" : "▸"}),
                 el("span.section-title.small-title", {text: "Not in a folder"}),
                 el("span.muted.small", {text: String(LIB.loose.length)}),
             ]), null));
         }
-        for (const row of LIB.loose) nodes.push(paletteEl(row));
+        if (open) for (const row of LIB.loose) nodes.push(paletteEl(row));
     }
     if (!nodes.length || (!LIB.loose.length && LIB.folders.every(f => !f.palettes.length) && LIB.query)) {
         nodes.push(el("div.empty", {}, [

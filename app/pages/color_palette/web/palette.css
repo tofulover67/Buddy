@@ -99,7 +99,8 @@ body.simulating .vision select { border-color: var(--accent-text); }
 }
 .folder-head { background: var(--raised-bg); border-color: var(--card-border); }
 .folder-head:hover { border-color: var(--text-dim); }
-.loose-head { cursor: default; padding-top: 10px; gap: 10px; }
+.loose-head { cursor: pointer; padding-top: 10px; gap: 8px; }
+.loose-head:hover .section-title { color: var(--text-strong); }
 .small-title { font-size: var(--fs-sm); }
 .folder-icon { display: flex; color: var(--emphasis); }
 .folder-name { font-weight: 700; color: var(--text-strong); }

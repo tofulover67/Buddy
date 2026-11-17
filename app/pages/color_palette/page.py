@@ -33,7 +33,7 @@ Protocol:
     to the view    strings, state, library, history, extract, visualize,
                    tools, generator, picked, import_name, alert, toast
     from the view  tab, vision, search, toggle_palette, toggle_folder,
-                   new_palette, new_folder, rename_palette, delete_palette,
+                   toggle_loose, new_palette, new_folder, rename_palette, delete_palette,
                    rename_folder, delete_folder, move_palette, set_tags,
                    save_version, history, restore_version, add_color,
                    change_color, remove_color, undo_remove, move_color, copy,
@@ -113,6 +113,7 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         # palette that Extract's "Add to" and new colours go to.
         self.query = ""
         self.open_folders = set()
+        self.loose_open = True          # "Not in a folder", collapsible like a folder
         self.current = next(iter(self.data_mgr.palettes))
         self.expanded = True
         self._last_removed = None
@@ -212,7 +213,7 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
 
     def _push_library(self):
         data = view.library(self.data_mgr, self.query, self.open_folders,
-                            self.current if self.expanded else None, self.vision)
+                            self.current if self.expanded else None, self.vision, self.loose_open)
         data.update(current=self.current, folders_all=list(self.data_mgr.palette_folders))
         self.emit("library", data)
 
@@ -340,7 +341,17 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
             self.expanded = False
         else:
             self.current, self.expanded = name, True
+            self._reveal(name)
         self._push_library()
+
+    def _reveal(self, name):
+        """Opens the folder a palette is in - or "Not in a folder" - so the
+        palette just opened, made or moved is in sight."""
+        folder = self.data_mgr.get_palette_folder(name)
+        if folder:
+            self.open_folders.add(folder)
+        else:
+            self.loose_open = True
         self._push_extract()
         self._push_generator()          # its "Add colour" names the palette that's current
 
@@ -349,6 +360,10 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         if name in self.data_mgr.palette_folders:
             self.open_folders.symmetric_difference_update({name})
             self._push_library()
+
+    def on_toggle_loose(self, _payload=None):
+        self.loose_open = not self.loose_open
+        self._push_library()
 
     def on_new_palette(self, payload):
         name = str((payload or {}).get("name") or "").strip()
@@ -360,8 +375,8 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         folder = (payload or {}).get("folder")
         if folder in self.data_mgr.palette_folders:
             self.data_mgr.move_palette_to_folder(name, folder)
-            self.open_folders.add(folder)
         self.current, self.expanded = name, True
+        self._reveal(name)
         self._save_palettes()
 
     def on_new_folder(self, payload):
@@ -443,8 +458,7 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         if folder == self.data_mgr.get_palette_folder(name):
             return
         self.data_mgr.move_palette_to_folder(name, folder)
-        if folder:
-            self.open_folders.add(folder)
+        self._reveal(name)
         self._push_library()
 
     def on_set_tags(self, payload):
@@ -848,6 +862,7 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
         self.data_mgr.palettes[name] = list(self.extracted)
         self.achieve("palettes", 1)
         self.current, self.expanded = name, True
+        self._reveal(name)
         self._save_palettes()
         self._toast(tr("Created '{name}'").format(name=name), show=name)
 

@@ -77,11 +77,12 @@ def palette_row(data, name, vision, open_name):
     }
 
 
-def library(data, query="", open_folders=(), open_name=None, vision="None"):
+def library(data, query="", open_folders=(), open_name=None, vision="None", loose_open=True):
     """The Palettes list: folders (each with the palettes in it), then the
     palettes that aren't in one - accordion rules: a
     search opens every folder, and a folder is left out only when neither
-    its name nor any palette in it matches."""
+    its name nor any palette in it matches. loose_open: whether "Not in a
+    folder" is open - a search opens it too."""
     query = (query or "").strip()
     in_folders = {p for names in data.palette_folders.values() for p in names if p in data.palettes}
     folders = []
@@ -97,7 +98,8 @@ def library(data, query="", open_folders=(), open_name=None, vision="None"):
         })
     loose = [palette_row(data, n, vision, open_name)
              for n in data.palettes if n not in in_folders and matches(data, n, query)]
-    return {"folders": folders, "loose": loose, "query": query, "total": len(data.palettes)}
+    return {"folders": folders, "loose": loose, "loose_open": bool(loose_open or query), "query": query,
+            "total": len(data.palettes)}
 
 
 def versions(data, name, vision="None"):
