@@ -45,8 +45,14 @@ SETTINGS_SIZES = ((560, 720), (480, 460))
 # more than 8px each way. Ignores what isn't drawn: display none, hidden,
 # zero-sized, out of flow (overlays position themselves on purpose), the
 # inside of an SVG, and a closed <details>' content (laid out, not drawn) -
-# and runs of text within a sentence (display: inline).
+# and runs of text within a sentence (display: inline). A sticky bar (Apply
+# held to the foot of Subtitles' Font styling) covers what scrolls under it
+# on purpose, so it's measured where the flow puts it, unstuck - an overlap
+# there is still one.
 FIND = r"""(() => {
+  const stuck = [...document.querySelectorAll('body *')].filter(n => getComputedStyle(n).position === 'sticky');
+  const was = stuck.map(n => n.style.position);
+  stuck.forEach(n => { n.style.position = 'relative'; });
   const collapsed = n => { const d = n.parentElement && n.parentElement.closest('details:not([open])');
     return !!d && !(n.closest('summary') && n.closest('summary').parentElement === d); };
   const vis = n => { const cs = getComputedStyle(n); const r = n.getBoundingClientRect();
@@ -77,8 +83,10 @@ FIND = r"""(() => {
     }
   }
   const root = document.querySelector('.page') || document.documentElement;
-  return {overlaps: out.slice(0, 20), sideways: root.scrollWidth - root.clientWidth,
-          elements: document.querySelectorAll('body *').length};
+  const result = {overlaps: out.slice(0, 20), sideways: root.scrollWidth - root.clientWidth,
+                  elements: document.querySelectorAll('body *').length};
+  stuck.forEach((n, i) => { n.style.position = was[i]; });
+  return result;
 })()"""
 
 TAB_BUTTONS = "[...document.querySelectorAll('[role=tab]')].filter(n => n.offsetParent)"

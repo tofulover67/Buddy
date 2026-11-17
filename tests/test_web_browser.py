@@ -247,7 +247,10 @@ class VideoQualityTests(unittest.TestCase):
         _wait(1200)
         self.assertEqual(_js(page, "window.set.length"), 1)                  # not again: YouTube's menu still works
         page.runJavaScript(b.youtube_quality_script("auto"))
-        _wait(1200)
+        for _ in range(40):                     # its timer ticks each second - a slow runner, a little later
+            _wait(100)
+            if _js(page, "window.set[window.set.length - 1]") == "auto/auto":
+                break
         self.assertEqual(_js(page, "window.set[window.set.length - 1]"), "auto/auto")
 
     def test_other_sites_are_left_alone(self):
