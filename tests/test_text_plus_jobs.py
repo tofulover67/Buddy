@@ -453,6 +453,14 @@ class TabTests(unittest.TestCase):
         self.assertEqual(host.pumped, [])                                    # Buddy was free: nothing to pump
         self.assertTrue(tools._preview_timer.isActive())
         self.assertEqual(self.last(tools, "toast")["text"], "Styled 2 Text+ clip(s)")
+        self.assertEqual(self.last(tools, "styled"), {"updated": 2})          # the page: "Applied in Resolve"
+
+    def test_resetting_the_font_is_not_the_whole_style_applied(self):
+        tools, host, reader = self.tools(tab="style")
+        tools.on_reset_font()
+        reader.answer()
+        self.assertIn("Styled", self.last(tools, "toast")["text"])
+        self.assertNotIn("tp_styled", [name for name, _payload in tools.page.sent])
 
     def stack_tools(self, canned):
         s = 86400

@@ -66,29 +66,167 @@ $("bounding-on").onchange = e => send("bounding", {on: e.target.checked});
 // ------------------------------------------------------------ options --
 
 let OPT = null;
-let FONTS = [];
-const set = (name, value) => send("set", {name, value});
+// Whether the style on the controls is on the clips: null until something says, false once a
+// control changes, true after an Apply style that went through.
+let APPLIED = null;
+const STYLE_CONTROL = /^(font|outline|shadow|background)_/;
+function set(name, value) {
+    if (STYLE_CONTROL.test(name)) styleChanged(false);
+    else if (name.startsWith("style_") && APPLIED) styleChanged(null);     // other clips now
+    send("set", {name, value});
+}
+function styleChanged(applied) {
+    APPLIED = applied;
+    const state = $("style-state");
+    state.hidden = applied === null;
+    state.classList.toggle("done", !!applied);
+    state.replaceChildren(applied ? icon("check") : el("i"), applied ? "Applied in Resolve" : "Not in Resolve yet");
+}
+on("styled", () => styleChanged(true));
 
-on("fonts", list => {
-    FONTS = list;
-    $("font").replaceChildren(...list.map(f => el("option", {value: f, text: f})));
-    if (OPT) $("font").value = OPT.font_display;
-});
-$("font").onchange = e => set("font_name", e.target.value);
+// ---------------------------------------------------------------- font --
 
-// How a slider's value reads: Size as the text's height in pixels on this timeline's frame
-// (Text+ makes ascent + descent TEXT_PLUS_HEIGHT x Size x the frame's width), opacity as a %.
-// scale: shown = value x scale; it's typed in the same units.
-const frameWidth = () => ((STATE && STATE.resolution) || [1920, 1080])[0];
+// Every face Resolve can draw, as [family, style]: the picker lists the families, each in its
+// own letters, and the dropdown beside it the picked family's styles.
+let FACES = [];
+on("fonts", list => { FACES = list; drawFont(); });
+
+const stylesOf = family => FACES.filter(f => f[0] === family).map(f => f[1])
+    .sort((a, b) => (b === "Regular") - (a === "Regular") || a.localeCompare(b));
+const inItsOwnLetters = (node, family) => { node.style.fontFamily = `"${family.replace(/["\\]/g, "")}", var(--font)`; };
+
+function drawFont() {
+    if (!OPT) return;
+    const button = $("font-family"), select = $("font-style");
+    button.textContent = OPT.font_name;
+    inItsOwnLetters(button, OPT.font_name);
+    const styles = stylesOf(OPT.font_name);
+    if (!styles.includes(OPT.font_style)) styles.unshift(OPT.font_style);     // not one of Resolve's (yet)
+    if (styles.join("\n") !== [...select.options].map(o => o.value).join("\n")) {
+        select.replaceChildren(...styles.map(s => el("option", {value: s, text: s})));
+    }
+    if (document.activeElement !== select) select.value = OPT.font_style;
+}
+$("font-style").onchange = e => set("font_face", [OPT.font_name, e.target.value]);
+
+// A family picked: in the style it's in now if the family has it, else its Regular, else its first.
+function pickFamily(family) {
+    const styles = stylesOf(family);
+    const style = styles.includes(OPT.font_style) ? OPT.font_style : styles[0] || "Regular";
+    closeFonts();
+    $("font-family").focus();
+    if (family !== OPT.font_name) set("font_face", [family, style]);
+}
+
+// The font list, under its button: type to narrow it, Up/Down and Enter to pick, Esc to close.
+let fontPop = null;
+function closeFonts() {
+    if (!fontPop) return;
+    fontPop.node.remove();
+    fontPop = null;
+    $("font-family").setAttribute("aria-expanded", "false");
+}
+function openFonts() {
+    if (fontPop) return closeFonts();
+    const button = $("font-family");
+    const families = [...new Set(FACES.map(f => f[0]))];
+    const rows = families.map(family => {
+        const row = el("button.font-opt", {type: "button", role: "option", text: family,
+                                           "aria-selected": String(family === OPT.font_name), onclick: () => pickFamily(family)});
+        inItsOwnLetters(row, family);
+        return row;
+    });
+    const none = el("p.muted.small.font-none", {text: "No font by that name", hidden: true});
+    const list = el("div.font-list", {role: "listbox", translate: "no", "aria-label": "Font"}, rows);
+    const search = el("input.field", {type: "text", placeholder: "Search fonts", "aria-label": "Search fonts", spellcheck: "false"});
+    const node = el("div.font-pop", {}, [search, list, none]);
+    const shownRows = () => rows.filter(r => !r.hidden);
+    const activate = row => {
+        for (const r of rows) r.classList.toggle("active", r === row);
+        if (row) row.scrollIntoView({block: "nearest"});
+    };
+    search.oninput = () => {
+        const q = search.value.trim().toLowerCase();
+        for (const r of rows) r.hidden = !r.textContent.toLowerCase().includes(q);
+        none.hidden = shownRows().length > 0;
+        activate(q ? shownRows()[0] : null);
+    };
+    node.addEventListener("keydown", e => {
+        e.stopPropagation();
+        const visible = shownRows(), at = visible.findIndex(r => r.classList.contains("active"));
+        if (e.key === "Escape") { closeFonts(); button.focus(); }
+        else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+            const start = at >= 0 ? at : visible.findIndex(r => r.getAttribute("aria-selected") === "true");
+            activate(visible[Math.max(0, Math.min(visible.length - 1, start + (e.key === "ArrowDown" ? 1 : -1)))]);
+        } else if (e.key === "Enter" && visible[at]) { e.preventDefault(); visible[at].click(); }
+    });
+    document.body.append(node);
+    const r = button.getBoundingClientRect();
+    const width = Math.max(r.width, 260);
+    node.style.width = `${width}px`;
+    node.style.left = `${Math.max(6, Math.min(r.left, innerWidth - width - 6))}px`;
+    const below = innerHeight - r.bottom - 12, above = r.top - 12, up = below < 220 && above > below;
+    list.style.maxHeight = `${Math.max(120, Math.min(340, (up ? above : below) - 52))}px`;
+    if (up) node.style.bottom = `${innerHeight - r.top + 4}px`;
+    else node.style.top = `${r.bottom + 4}px`;
+    fontPop = {node};
+    button.setAttribute("aria-expanded", "true");
+    const current = rows.find(row => row.getAttribute("aria-selected") === "true");
+    if (current) current.scrollIntoView({block: "center"});
+    search.focus();
+}
+$("font-family").onclick = openFonts;
+document.addEventListener("mousedown", e => {
+    if (fontPop && !fontPop.node.contains(e.target) && !e.target.closest("#font-family")) closeFonts();
+}, true);
+addEventListener("resize", closeFonts);
+document.addEventListener("buddy-tab", closeFonts);
+
+// ------------------------------------------------------------- sliders --
+
+// How a slider's value reads, in place of Text+'s own fractions. Size is the text's height in
+// pixels on this timeline's frame (Text+ makes ascent + descent TEXT_PLUS_HEIGHT x Size x the
+// frame's width); a shadow's offsets and a box's padding are pixels of the frame too (Offset Y
+// counted downwards, where Text+'s goes up); an outline's thickness is a share of the text's
+// size; opacity and rounding are a %. scale: shown = value x scale; it's typed in the same units.
+const frame = () => (STATE && STATE.resolution) || [1920, 1080];
+const frameWidth = () => frame()[0];
 const PCT = {scale: () => 100, digits: 0, suffix: "%"};
+const ACROSS = {scale: () => frame()[0], digits: 0, suffix: " px"};
 const UNITS = {
     font_size: {scale: () => TEXT_PLUS_HEIGHT * frameWidth(), digits: 0, suffix: " px"},
-    outline_opacity: PCT, shadow_opacity: PCT, background_opacity: PCT,
+    outline_thickness: {scale: () => 100, digits: 1, suffix: "%"},
+    outline_opacity: PCT, shadow_opacity: PCT, background_opacity: PCT, background_corner_radius: PCT,
+    shadow_blur: {scale: () => 1, digits: 1, suffix: ""},
+    shadow_offset_x: ACROSS,
+    shadow_offset_y: {scale: () => -frame()[0], digits: 0, suffix: " px"},
+    background_extend_horizontal: ACROSS,
+    background_extend_vertical: {scale: () => frame()[1], digits: 0, suffix: " px"},
 };
-const shown = (unit, v) => `${(v * unit.scale()).toFixed(unit.digits)}${unit.suffix}`;
+function shown(unit, v) {
+    const text = (v * unit.scale()).toFixed(unit.digits);
+    return `${Number(text) === 0 ? text.replace("-", "") : text}${unit.suffix}`;
+}
 
-// A value a slider's steps don't land on (a typed one) is kept as it is, not snapped to a step.
+// The part of a setting's range its slider covers, and its step: [from, to, step]. Text+'s own
+// ranges run far past anything a subtitle uses, which left the useful values within a few
+// pixels of one end. A value outside it - typed, or from a look - widens the slider to hold it.
+const REACH = {
+    font_size: [0.01, 0.3, 0.005],
+    outline_thickness: [0, 0.2, 0.005],
+    shadow_offset_x: [-0.03, 0.03, 0.001],
+    shadow_offset_y: [-0.03, 0.03, 0.001],
+    shadow_blur: [0, 30, 0.5],
+    background_extend_horizontal: [-0.02, 0.1, 0.001],
+    background_extend_vertical: [-0.02, 0.1, 0.001],
+};
+
+// A value a slider's steps don't land on (a typed one) is kept as it is, not snapped to a step,
+// and one past either end moves that end.
 function place(input, v, step) {
+    if (v < Number(input.min)) input.min = v;
+    if (v > Number(input.max)) input.max = v;
     const n = (v - Number(input.min)) / step;
     input.step = Math.abs(n - Math.round(n)) < 1e-6 ? step : "any";
     input.value = v;
@@ -115,8 +253,9 @@ function typeIn(out, input, unit, decimals, put) {
             out.textContent = old;
             const n = Number(box.value);
             if (!keep || box.value.trim() === "" || !Number.isFinite(n)) return;
-            const v = Math.min(Number(input.max), Math.max(Number(input.min), +(n / unit.scale()).toFixed(decimals)));
-            put(v);
+            // Between the setting's own ends (data-lo, data-hi), which a slider may not reach.
+            const lo = Number(input.dataset.lo || input.min), hi = Number(input.dataset.hi || input.max);
+            put(Math.min(hi, Math.max(lo, +(n / unit.scale()).toFixed(decimals))));
         };
         box.addEventListener("keydown", ev => {
             ev.stopPropagation();
@@ -130,10 +269,12 @@ function typeIn(out, input, unit, decimals, put) {
 }
 
 function buildSlider(host, name, spec) {
-    const input = el("input", {type: "range", min: spec.min, max: spec.max, step: spec.step, "aria-label": spec.label,
-                               title: `Double-click to reset to ${spec.default}`});
+    const [from, to, step] = REACH[name] || [spec.min, spec.max, spec.step];
+    const input = el("input", {type: "range", min: from, max: to, step, "aria-label": spec.label,
+                               dataset: {lo: spec.min, hi: spec.max}, title: `Double-click to reset to ${spec.default}`});
     const value = el("b.val");
     const unit = UNITS[name] || {scale: () => 1, digits: spec.decimals, suffix: ""};
+    spec = {...spec, step};
     const show = () => {
         const v = Number(input.value);
         value.textContent = shown(unit, v);
@@ -146,10 +287,13 @@ function buildSlider(host, name, spec) {
     // Double-click puts it back to its default; double-clicking its value types one.
     input.addEventListener("dblclick", () => put(spec.default));
     typeIn(value, input, unit, spec.decimals, put);
-    host.replaceChildren(el("label.slider", {}, [el("span", {text: spec.label}), input, value]));
+    // data-compact: the name and the value alone (a shadow's offsets, set on the pad beside them).
+    host.replaceChildren(el(`label.slider${"compact" in host.dataset ? ".compact" : ""}`, {},
+                            [el("span", {text: spec.label}), input, value]));
     host._input = input;
     host._show = show;
     host._place = v => place(input, v, spec.step);
+    host._put = put;
 }
 
 // A colour: a few usual ones to click, and any colour from Buddy's own picker.
@@ -185,8 +329,7 @@ on("options", o => {
     }
     for (const host of $$("[data-color]")) colours(host, host.dataset.color, o.colors[host.dataset.color]);
     for (const input of $$("[data-toggle-input]")) input.checked = o.toggles[input.dataset.toggleInput];
-    for (const group of $$("[data-toggle]")) group.classList.toggle("off", !o.toggles[group.dataset.toggle]);
-    if (FONTS.length) $("font").value = o.font_display;
+    drawFont();
 
     segmented($("anim-direction"), o.anim_directions.map(d => [d, d.replace("From ", "")]), o.anim_direction, v => set("anim_direction", v));
     segmented($("anim-speed"), o.anim_speeds.map(s => [s, s]), o.anim_speed, v => set("anim_speed", v));
@@ -204,29 +347,112 @@ on("options", o => {
     drawPreview();
 });
 
-for (const input of $$("[data-toggle-input]")) {
-    input.onchange = () => {
-        const name = input.dataset.toggleInput;
-        for (const group of $$(`[data-toggle="${name}"]`)) group.classList.toggle("off", !input.checked);
-        // Switching a layer on shows its settings.
-        const tab = input.closest("[data-layer]");
-        if (tab && input.checked) showLayer(tab.dataset.layer);
-        if (OPT) { OPT.toggles[name] = input.checked; drawPreview(); }
-        set(name, input.checked);
-    };
+/* Font Styling's four parts - Text, Outline, Shadow, Box - one under the other, each with its
+   switch and, beside its name, what it's set to. A part that's on shows its settings, unless
+   it's been folded shut; one that's off is a single row, and clicking it switches it on. */
+const PARTS = {font: "font_on", outline: "outline_on", shadow: "shadow_on", background: "background_on"};
+const folded = new Set();
+
+function switchPart(part, on) {
+    const name = PARTS[part];
+    if (on) folded.delete(part);
+    if (OPT) { OPT.toggles[name] = on; drawPreview(); }
+    set(name, on);
 }
 
-// Font Styling's layers - Text, Outline, Shadow, Box: one's settings at a time.
-function showLayer(layer) {
-    for (const tab of $$("[data-layer]")) {
-        tab.classList.toggle("selected", tab.dataset.layer === layer);
-        tab.querySelector("[role=tab]").setAttribute("aria-selected", String(tab.dataset.layer === layer));
-    }
-    for (const body of $$("[data-layer-body]")) body.hidden = body.dataset.layerBody !== layer;
+// What a part is set to, for its row: a few words and its colour.
+function partSummary(part, v) {
+    const words = text => el("span", {text, translate: "no"});
+    const dot = hex => el("i.part-dot", {style: `background:${hex}`});
+    if (part === "font") return [words(`${OPT.font_display} · ${shown(UNITS.font_size, v.font_size)}`), dot(v.font_color)];
+    if (part === "outline") return [words(shown(UNITS.outline_thickness, v.outline_thickness)), dot(v.outline_color)];
+    if (part === "shadow") return [dot(v.shadow_color)];
+    return [words(shown(PCT, v.background_opacity)), dot(v.background_color)];
 }
-for (const tab of $$("[data-layer]")) tab.querySelector("[role=tab]").onclick = () => showLayer(tab.dataset.layer);
-showLayer("font");
+
+function drawParts() {
+    if (!OPT) return;
+    const v = currentValues();
+    for (const node of $$("[data-part]")) {
+        const part = node.dataset.part, on = !!OPT.toggles[PARTS[part]], open = on && !folded.has(part);
+        node.classList.toggle("off", !on);
+        node.querySelector(".part-body").hidden = !open;
+        node.querySelector(".part-open").setAttribute("aria-expanded", String(open));
+        node.querySelector(".part-summary").replaceChildren(
+            ...(on ? partSummary(part, v) : [part === "font" ? "Clips keep their own" : "Off"]));
+    }
+}
+
+for (const node of $$("[data-part]")) {
+    const part = node.dataset.part, input = node.querySelector("[data-toggle-input]");
+    node.querySelector(".part-chevron").append(icon("right"));
+    input.onchange = () => switchPart(part, input.checked);
+    node.querySelector(".part-open").onclick = () => {
+        if (!OPT) return;
+        if (!OPT.toggles[PARTS[part]]) { input.checked = true; return switchPart(part, true); }
+        if (!folded.delete(part)) folded.add(part);
+        drawParts();
+    };
+}
 $("reset-font").append(icon("refresh"));
+
+/* A shadow's position: a dot to drag about a square, its middle the text itself - no offset, a
+   glow. The square reaches PAD_REACH of the frame's width each way, or as far as the shadow
+   already is. The offsets themselves are the two values beside it (typed with a double-click). */
+const PAD_REACH = 0.03;
+const pad = $("shadow-pad");
+let padHeld = null;         // while the dot is dragged: the reach it started with
+const offsetHost = axis => document.querySelector(`[data-slider="shadow_offset_${axis}"]`);
+const offsetNow = axis => (offsetHost(axis)._input ? Number(offsetHost(axis)._input.value) : 0);
+
+function drawPad() {
+    const x = offsetNow("x"), y = offsetNow("y");
+    const reach = padHeld || Math.max(PAD_REACH, Math.abs(x), Math.abs(y));
+    pad.firstElementChild.style.left = `${50 + 42 * x / reach}%`;
+    pad.firstElementChild.style.top = `${50 - 42 * y / reach}%`;       // Text+'s Offset Y goes up
+}
+
+// The offsets while the dot moves: on the page only, until keep says the move is over.
+function moveShadow(x, y, keep) {
+    for (const [axis, v] of [["x", x], ["y", y]]) {
+        const host = offsetHost(axis);
+        if (!host._input) return;
+        const value = Math.max(-1, Math.min(1, +v.toFixed(3)));
+        if (keep) { if (value !== OPT.sliders[`shadow_offset_${axis}`].value) host._put(value); }
+        else { host._place(value); host._show(); }
+    }
+    drawPreview();
+}
+
+function padPoint(e) {
+    const r = pad.getBoundingClientRect();
+    const fx = Math.max(-1, Math.min(1, (e.clientX - r.left - r.width / 2) / (r.width * 0.42)));
+    const fy = Math.max(-1, Math.min(1, (e.clientY - r.top - r.height / 2) / (r.height * 0.42)));
+    const snap = Math.hypot(fx, fy) < 0.1;          // near the middle is the middle
+    return snap ? [0, 0] : [fx * padHeld, -fy * padHeld];
+}
+pad.addEventListener("pointerdown", e => {
+    if (e.button !== 0 || !OPT) return;
+    padHeld = Math.max(PAD_REACH, Math.abs(offsetNow("x")), Math.abs(offsetNow("y")));
+    pad.setPointerCapture(e.pointerId);
+    moveShadow(...padPoint(e), false);
+});
+pad.addEventListener("pointermove", e => { if (padHeld) moveShadow(...padPoint(e), false); });
+for (const type of ["pointerup", "pointercancel"]) {
+    pad.addEventListener(type, () => {
+        if (!padHeld) return;
+        padHeld = null;
+        moveShadow(offsetNow("x"), offsetNow("y"), true);
+    });
+}
+pad.addEventListener("dblclick", () => { if (OPT) moveShadow(0, 0, true); });
+pad.addEventListener("keydown", e => {
+    const step = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1]}[e.key];
+    if (!step || !OPT) return;
+    e.preventDefault();
+    const by = e.shiftKey ? 0.005 : 0.001;
+    moveShadow(offsetNow("x") + step[0] * by, offsetNow("y") + step[1] * by, true);
+});
 
 // Each Text+ tab's "Apply to": which clips its Apply buttons change, and for Specific
 // track, which one. Resolve can report selected clips (21.0.4 and later), not tracks.
@@ -392,6 +618,8 @@ function drawPreview() {
     sample.style.lineHeight = OPT.font_css.line ? String(OPT.font_css.line) : "normal";   // Text+'s line step
     dressText(sample, v, OPT.font_css, w, h, fs);
     drawSafe(w, h);
+    drawParts();
+    drawPad();
 }
 
 // Where a phone app's own buttons and caption go, shaded over a tall preview (the placement
@@ -442,60 +670,68 @@ addEventListener("resize", () => { if (isTall()) drawPreview(); });
 
 // --------------------------------------------------------------- looks --
 
-/* The ready-made looks for this timeline's shape, each a card drawn with its own colours over
-   the controls' other values; the one picked last, and whether it's been changed since. */
+/* The looks, in one strip: the ready-made ones for this timeline's shape, then the saved ones,
+   then a tile that saves what's on the controls. Each is a card drawn with its own colours over
+   the controls' other values (a saved one in its own font too). Above them: the look picked
+   last, whether it's been changed since, and - if it has - putting it back, or keeping the
+   changes in it. */
+function lookTile(kind, look, values, css, o) {
+    const tall = isTall(), cur = o.looks.current;
+    const span = el("span", {text: tall ? "Big text" : "Subtitle"});
+    const thumb = el(`div.look-thumb.${BACKDROP === "light" ? "light" : "dark"}`, {}, [span]);
+    dressText(span, {...currentValues(), ...values}, css, tall ? 90 : 160, tall ? 160 : 90, tall ? 15 : 13);
+    return el("button.look", {
+        type: "button", "aria-pressed": String(!!cur && cur[0] === kind && cur[1] === look.name),
+        onclick: () => { styleChanged(false); send("look", {kind, name: look.name}); },
+    }, [thumb, el("span.look-name", {text: look.name, translate: kind === "saved" ? "no" : undefined})]);
+}
+
+function savedLookMenu(name, x, y) {
+    Buddy.menu({x, y, items: [
+        {label: "Rename…", onClick: () => askName(name)},
+        {label: "Delete", danger: true, onClick: () => deleteLook(name)},
+    ]});
+}
+
 function drawLooks(o) {
     const L = o.looks, tall = isTall(), kind = tall ? "tall" : "wide", cur = L.current;
-    const base = currentValues();
-    $("looks-hint").textContent = tall ? "Made for vertical video – start from one, then adjust it below"
-                                       : "Start from one, then adjust it below";
     $("looks").replaceChildren(...L[kind].map(look => {
-        const span = el("span", {text: tall ? "Big text" : "Subtitle"});
-        const thumb = el(`div.look-thumb.${BACKDROP === "light" ? "light" : "dark"}`, {}, [span]);
         const css = look.bold ? {...o.font_css, weight: Math.max(o.font_css.weight, 800)} : o.font_css;
-        const v = {...base, ...look.values}, w = tall ? 90 : 160, h = tall ? 160 : 90;
-        dressText(span, v, css, w, h, tall ? 15 : 13);
-        return el("button.look", {
-            type: "button", "aria-pressed": String(!!cur && cur[0] === kind && cur[1] === look.name),
-            onclick: () => send("look", {kind, name: look.name}),
-        }, [thumb, el("span.look-name", {text: look.name})]);
+        return lookTile(kind, look, look.values, css, o);
     }));
 
-    const now = $("look-now"), update = $("update-look");
-    update.hidden = true;
+    const add = el("button.look.look-new", {type: "button", onclick: () => askName(),
+                                            title: "Keeps what's on the controls, font included, to use again in any project"},
+                   [el("div.look-thumb", {}, [icon("plus")]), el("span.look-name", {text: "Save this look"})]);
+    $("saved-looks").replaceChildren(...L.saved.map(look => {
+        const tile = lookTile("saved", look, look.look.values, look.css || o.font_css, o);
+        // Made for the other shape of timeline: it says so.
+        if (look.tall !== tall) tile.lastChild.append(el("span.muted", {text: look.tall ? " 9:16" : " 16:9"}));
+        const more = el("button.btn.icon.look-more", {type: "button", title: "Rename or delete", "aria-haspopup": "menu", onclick: () => {
+            const r = more.getBoundingClientRect();
+            savedLookMenu(look.name, r.left, r.bottom + 4);
+        }}, [icon("more")]);
+        return el("div.look-wrap", {oncontextmenu: e => { e.preventDefault(); savedLookMenu(look.name, e.clientX, e.clientY); }},
+                  [tile, more]);
+    }), add);
+
+    const now = $("look-now"), update = $("update-look"), revert = $("revert-look");
+    const changed = !!cur && L.changed;
+    $("look-edited").hidden = !changed;
+    revert.hidden = !changed;
+    update.hidden = !(changed && cur[0] === "saved");
     if (!cur) {
-        now.replaceChildren("Your own settings – Save look keeps them to use again");
+        now.replaceChildren("Your own settings");
     } else {
-        const name = el("b", {text: cur[1], translate: cur[0] === "saved" ? "no" : undefined});
-        now.replaceChildren(...(L.changed ? ["Changed from ", name] : ["Using ", name]));
-        if (cur[0] === "saved" && L.changed) {
-            update.hidden = false;
+        now.replaceChildren(el("b", {text: cur[1], translate: cur[0] === "saved" ? "no" : undefined}));
+        revert.onclick = () => { styleChanged(false); send("look", {kind: cur[0], name: cur[1]}); };
+        if (!update.hidden) {
             update.translate = false;
             update.textContent = `Update "${cur[1]}"`;
             update.onclick = () => send("save_look", {name: cur[1]});
         }
     }
-    $("look-tag").textContent = !cur ? "" : L.changed ? `${cur[1]} – changed` : cur[1];
 }
-
-$("saved-looks").append(icon("bookmark"));
-$("saved-looks").onclick = () => {
-    const L = OPT.looks, cur = L.current, at = $("saved-looks").getBoundingClientRect();
-    const items = [{heading: "Your saved looks"}];
-    if (!L.saved.length) items.push({label: "None yet – Save look keeps the one on screen", disabled: true});
-    for (const look of L.saved) {
-        items.push({label: `${look.name}   ${look.tall ? "9:16" : "16:9"}`, raw: true, swatch: look.look.values.font_color,
-                    checked: !!cur && cur[0] === "saved" && cur[1] === look.name,
-                    onClick: () => send("look", {kind: "saved", name: look.name})});
-    }
-    items.push({sep: true}, {label: "Save current look…", onClick: () => askName()});
-    if (cur && cur[0] === "saved") {
-        items.push({label: `Rename "${cur[1]}"…`, raw: true, onClick: () => askName(cur[1])},
-                   {label: `Delete "${cur[1]}"`, raw: true, danger: true, onClick: () => deleteLook(cur[1])});
-    }
-    Buddy.menu({x: at.left, y: at.bottom + 4, items});
-};
-$("save-look").onclick = () => askName();
 
 /* Asks a name to save the look on screen as - or, renaming, a saved look's new name. */
 function askName(renaming) {

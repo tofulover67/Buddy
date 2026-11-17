@@ -733,12 +733,14 @@ class PageTests(unittest.TestCase):
         with mock.patch.object(canvas_math, "set_font_files", return_value=False):   # not the real metrics
             tools._fonts_read = False
             tools._read_font_files(resolve)
-        self.assertEqual(self.last("tp_fonts"), ["Arial Black", "Arial Regular", "Franklin Gothic Medium Regular",
-                                                 "Sitka Text Bold"])
+        self.assertEqual(self.last("tp_fonts"), [["Arial", "Black"], ["Arial", "Regular"],
+                                                 ["Franklin Gothic Medium", "Regular"], ["Sitka", "Text Bold"]])
         self.assertEqual(self.last("tp_options")["font_display"], "Franklin Gothic Medium Regular")
 
-        self.page._dispatch("tp_set", {"name": "font_name", "value": "Sitka Text Bold"})
+        self.page._dispatch("tp_set", {"name": "font_face", "value": ["Sitka", "Text Bold"]})   # as the page picks one
         self.assertEqual(self.last("tp_options")["font_display"], "Sitka Text Bold")
+        self.assertEqual((self.last("tp_options")["font_name"], self.last("tp_options")["font_style"]),
+                         ("Sitka", "Text Bold"))
         with mock.patch.object(text_plus.FusionAnimationEngine, "apply_text_style",
                                return_value=(True, [])) as apply:
             tools._apply_font_style_to_tool(object(), "clip", force_font_only=True)

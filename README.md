@@ -337,11 +337,12 @@ clauses), and puts them on subtitle track 1 as well as saving an SRT in
 Text+ clips, and the tabs after it style, place and animate them.
 
 Font styling starts from a look - ready-made ones for wide and for vertical
-(9:16) timelines - then Text, Outline, Shadow and Box tabs to adjust it, each
-switched on or off, over a stand-in picture. A look you make can be saved by
-name and picked again in any project (Saved looks). The page follows the
-timeline's shape: a vertical one gets a tall preview, with the buttons of
-Instagram, TikTok or YouTube Shorts shaded over it.
+(9:16) timelines, and the ones you've saved by name, there in any project -
+then adjusts its four parts, Text, Outline, Shadow and Box: one under the
+other, each switched on or off, over a stand-in picture. Nothing reaches
+Resolve until Apply style. The page follows the timeline's shape: a vertical
+one gets a tall preview, with the buttons of Instagram, TikTok or YouTube
+Shorts shaded over it.
 
 - **One-time setup** (Subtitles > Setup): installs the engine into its
   own environment in `~/.buddy/transcribe/`, built from the Python Buddy runs

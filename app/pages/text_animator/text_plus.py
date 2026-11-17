@@ -500,7 +500,9 @@ class TextPlusTools(QObject):
         return changed
 
     def _push_fonts(self):
-        self.emit("fonts", sorted(self._faces, key=str.casefold))
+        """The picker's faces, as [family, style] in the order of their labels: the page lists
+        the families, and a family's styles beside it."""
+        self.emit("fonts", [list(self._faces[label]) for label in sorted(self._faces, key=str.casefold)])
 
     def _face_key(self, family, style) -> str:
         """A measured baseline's key: the face and the file it's drawn from, so a font
@@ -1756,19 +1758,24 @@ class TextPlusTools(QObject):
                           clips, settings, force_font_only, log=self.log, comp_of=self._get_fusion_comp,
                           tool_of=self._find_text_tool,
                           progress=lambda n, total: self.host.pump_busy(f"Applying font style… {n} of {total}")),
-                      lambda result, error: self._styled(result, error, scope_desc), "apply_style")
+                      lambda result, error: self._styled(result, error, scope_desc, whole=not force_font_only),
+                      "apply_style")
         except Exception as err:
             self._preview_timer.start()
             self.log(f"[Error in apply_style]: {err}")
             self.log(traceback.format_exc())
 
-    def _styled(self, result, error, scope_desc):
+    def _styled(self, result, error, scope_desc, whole=True):
+        """An Apply style that ran. whole: every part of the style (Reset font's is the font
+        alone) - the page then says the style on its controls is the clips'."""
         self._preview_timer.start()
         if error is not None:
             return self._failed("apply_style", error)
         self._said(result)
         updated, scanned = result["updated"], result["scanned"]
         self._style_kept = result["kept"]
+        if whole and updated:
+            self.emit("styled", {"updated": updated})
         self.log(f"Applied font style ('{face_label(*self.opts.font_face)}', size {self.opts.slider('font_size')}) "
                  f"to {updated}/{scanned} clip(s) on {scope_desc}.")
         if self._style_kept:

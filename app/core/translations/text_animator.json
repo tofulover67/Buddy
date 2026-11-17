@@ -6869,5 +6869,235 @@
   "中文": "Resolve 中现在打开的是另一条时间线——没有做任何更改。",
   "العربية": "يوجد الآن مخطط زمني آخر مفتوح في Resolve – لم يتم تغيير أي شيء.",
   "Tiếng Việt": "Resolve đang mở một timeline khác – không có gì bị thay đổi."
+ },
+ "Looks": {
+  "日本語": "ルック",
+  "Español": "Estilos",
+  "Deutsch": "Looks",
+  "Français": "Looks",
+  "한국어": "룩",
+  "中文": "外观",
+  "العربية": "المظاهر",
+  "Tiếng Việt": "Kiểu dáng"
+ },
+ "Ready-made": {
+  "日本語": "既製",
+  "Español": "Predefinidos",
+  "Deutsch": "Vorgefertigt",
+  "Français": "Prêts à l'emploi",
+  "한국어": "기본 제공",
+  "中文": "预设",
+  "العربية": "جاهزة",
+  "Tiếng Việt": "Có sẵn"
+ },
+ "Yours": {
+  "日本語": "自分のルック",
+  "Español": "Tuyos",
+  "Deutsch": "Eigene",
+  "Français": "Les vôtres",
+  "한국어": "내 룩",
+  "中文": "我的",
+  "العربية": "الخاصة بك",
+  "Tiếng Việt": "Của bạn"
+ },
+ "edited": {
+  "日本語": "編集済み",
+  "Español": "editado",
+  "Deutsch": "bearbeitet",
+  "Français": "modifié",
+  "한국어": "수정됨",
+  "中文": "已修改",
+  "العربية": "معدَّل",
+  "Tiếng Việt": "đã sửa"
+ },
+ "Reset look": {
+  "日本語": "ルックをリセット",
+  "Español": "Restablecer estilo",
+  "Deutsch": "Look zurücksetzen",
+  "Français": "Réinitialiser le look",
+  "한국어": "룩 초기화",
+  "中文": "重置外观",
+  "العربية": "إعادة ضبط المظهر",
+  "Tiếng Việt": "Đặt lại kiểu dáng"
+ },
+ "Puts the look back on the controls as it was picked": {
+  "日本語": "選んだときの状態のルックをコントロールに戻します",
+  "Español": "Vuelve a poner el estilo en los controles tal como se eligió",
+  "Deutsch": "Setzt die Regler auf den Look zurück, wie er gewählt wurde",
+  "Français": "Remet le look sur les réglages tel qu'il a été choisi",
+  "한국어": "선택했을 때의 룩을 컨트롤에 다시 적용합니다",
+  "中文": "将控件恢复为选择该外观时的状态",
+  "العربية": "يعيد المظهر إلى عناصر التحكم كما كان عند اختياره",
+  "Tiếng Việt": "Đưa kiểu dáng trở lại các điều khiển như lúc được chọn"
+ },
+ "Save this look": {
+  "日本語": "このルックを保存",
+  "Español": "Guardar este estilo",
+  "Deutsch": "Diesen Look speichern",
+  "Français": "Enregistrer ce look",
+  "한국어": "이 룩 저장",
+  "中文": "保存此外观",
+  "العربية": "حفظ هذا المظهر",
+  "Tiếng Việt": "Lưu kiểu dáng này"
+ },
+ "Keeps what's on the controls, font included, to use again in any project": {
+  "日本語": "コントロールの内容をフォントも含めて保存し、どのプロジェクトでも使えるようにします",
+  "Español": "Guarda lo que hay en los controles, incluida la fuente, para usarlo de nuevo en cualquier proyecto",
+  "Deutsch": "Behält die Einstellungen der Regler samt Schrift, um sie in jedem Projekt wiederzuverwenden",
+  "Français": "Conserve les réglages, police comprise, pour les réutiliser dans n'importe quel projet",
+  "한국어": "컨트롤의 설정을 글꼴까지 저장해 어느 프로젝트에서나 다시 사용할 수 있습니다",
+  "中文": "保留控件上的设置（包括字体），以便在任何项目中再次使用",
+  "العربية": "يحتفظ بما في عناصر التحكم، بما فيه الخط، لاستخدامه مجددًا في أي مشروع",
+  "Tiếng Việt": "Giữ lại những gì trên các điều khiển, kể cả phông chữ, để dùng lại trong mọi dự án"
+ },
+ "Rename…": {
+  "日本語": "名前を変更…",
+  "Español": "Cambiar nombre…",
+  "Deutsch": "Umbenennen…",
+  "Français": "Renommer…",
+  "한국어": "이름 바꾸기…",
+  "中文": "重命名…",
+  "العربية": "إعادة التسمية…",
+  "Tiếng Việt": "Đổi tên…"
+ },
+ "Rename or delete": {
+  "日本語": "名前を変更または削除",
+  "Español": "Cambiar nombre o eliminar",
+  "Deutsch": "Umbenennen oder löschen",
+  "Français": "Renommer ou supprimer",
+  "한국어": "이름 바꾸기 또는 삭제",
+  "中文": "重命名或删除",
+  "العربية": "إعادة التسمية أو الحذف",
+  "Tiếng Việt": "Đổi tên hoặc xóa"
+ },
+ "Your own settings": {
+  "日本語": "独自の設定",
+  "Español": "Tus propios ajustes",
+  "Deutsch": "Eigene Einstellungen",
+  "Français": "Vos propres réglages",
+  "한국어": "직접 지정한 설정",
+  "中文": "你自己的设置",
+  "العربية": "إعداداتك الخاصة",
+  "Tiếng Việt": "Thiết lập riêng của bạn"
+ },
+ "Shadow": {
+  "日本語": "シャドウ",
+  "Español": "Sombra",
+  "Deutsch": "Schatten",
+  "Français": "Ombre",
+  "한국어": "그림자",
+  "中文": "阴影",
+  "العربية": "الظل",
+  "Tiếng Việt": "Bóng đổ"
+ },
+ "Dark": {
+  "日本語": "ダーク",
+  "Español": "Oscuro",
+  "Deutsch": "Dunkel",
+  "Français": "Sombre",
+  "한국어": "어둡게",
+  "中文": "深色",
+  "العربية": "داكن",
+  "Tiếng Việt": "Tối"
+ },
+ "Light": {
+  "日本語": "ライト",
+  "Español": "Claro",
+  "Deutsch": "Hell",
+  "Français": "Clair",
+  "한국어": "밝게",
+  "中文": "浅色",
+  "العربية": "فاتح",
+  "Tiếng Việt": "Sáng"
+ },
+ "Rounding": {
+  "日本語": "角の丸み",
+  "Español": "Redondeo",
+  "Deutsch": "Rundung",
+  "Français": "Arrondi",
+  "한국어": "둥글기",
+  "中文": "圆角",
+  "العربية": "الاستدارة",
+  "Tiếng Việt": "Bo tròn"
+ },
+ "Padding across": {
+  "日本語": "左右の余白",
+  "Español": "Relleno horizontal",
+  "Deutsch": "Abstand seitlich",
+  "Français": "Marge horizontale",
+  "한국어": "좌우 여백",
+  "中文": "左右内边距",
+  "العربية": "الحشو الأفقي",
+  "Tiếng Việt": "Khoảng đệm ngang"
+ },
+ "Padding up and down": {
+  "日本語": "上下の余白",
+  "Español": "Relleno vertical",
+  "Deutsch": "Abstand oben und unten",
+  "Français": "Marge verticale",
+  "한국어": "상하 여백",
+  "中文": "上下内边距",
+  "العربية": "الحشو العمودي",
+  "Tiếng Việt": "Khoảng đệm dọc"
+ },
+ "Clips keep their own": {
+  "日本語": "クリップ自身の設定を保持",
+  "Español": "Los clips conservan lo suyo",
+  "Deutsch": "Clips behalten ihre eigene",
+  "Français": "Les clips gardent le leur",
+  "한국어": "클립의 설정 유지",
+  "中文": "片段保留各自的设置",
+  "العربية": "تحتفظ المقاطع بإعداداتها",
+  "Tiếng Việt": "Clip giữ thiết lập riêng"
+ },
+ "Search fonts": {
+  "日本語": "フォントを検索",
+  "Español": "Buscar fuentes",
+  "Deutsch": "Schriften suchen",
+  "Français": "Rechercher une police",
+  "한국어": "글꼴 검색",
+  "中文": "搜索字体",
+  "العربية": "ابحث عن الخطوط",
+  "Tiếng Việt": "Tìm phông chữ"
+ },
+ "No font by that name": {
+  "日本語": "その名前のフォントはありません",
+  "Español": "Ninguna fuente con ese nombre",
+  "Deutsch": "Keine Schrift mit diesem Namen",
+  "Français": "Aucune police de ce nom",
+  "한국어": "해당 이름의 글꼴이 없습니다",
+  "中文": "没有该名称的字体",
+  "العربية": "لا يوجد خط بهذا الاسم",
+  "Tiếng Việt": "Không có phông chữ nào tên như vậy"
+ },
+ "Not in Resolve yet": {
+  "日本語": "まだ Resolve に未適用",
+  "Español": "Aún no está en Resolve",
+  "Deutsch": "Noch nicht in Resolve",
+  "Français": "Pas encore dans Resolve",
+  "한국어": "아직 Resolve에 적용 안 됨",
+  "中文": "尚未应用到 Resolve",
+  "العربية": "لم يُطبَّق في Resolve بعد",
+  "Tiếng Việt": "Chưa áp dụng trong Resolve"
+ },
+ "Applied in Resolve": {
+  "日本語": "Resolve に適用済み",
+  "Español": "Aplicado en Resolve",
+  "Deutsch": "In Resolve angewendet",
+  "Français": "Appliqué dans Resolve",
+  "한국어": "Resolve에 적용됨",
+  "中文": "已应用到 Resolve",
+  "العربية": "تم التطبيق في Resolve",
+  "Tiếng Việt": "Đã áp dụng trong Resolve"
+ },
+ "Drag the dot to where the shadow falls. The arrow keys nudge it; double-click puts it back in the middle.": {
+  "日本語": "点をドラッグして影の落ちる位置を決めます。矢印キーで微調整、ダブルクリックで中央に戻します。",
+  "Español": "Arrastra el punto hasta donde cae la sombra. Las flechas lo desplazan un poco; doble clic lo devuelve al centro.",
+  "Deutsch": "Den Punkt dorthin ziehen, wohin der Schatten fällt. Die Pfeiltasten verschieben ihn leicht; ein Doppelklick setzt ihn zurück in die Mitte.",
+  "Français": "Faites glisser le point là où tombe l'ombre. Les flèches le décalent légèrement ; un double-clic le remet au centre.",
+  "한국어": "점을 드래그해 그림자가 떨어질 위치를 정합니다. 화살표 키로 조금씩 옮기고, 더블 클릭하면 가운데로 돌아갑니다.",
+  "中文": "将圆点拖到阴影落下的位置。方向键可微调；双击可将其放回中间。",
+  "العربية": "اسحب النقطة إلى حيث يسقط الظل. مفاتيح الأسهم تحرّكها قليلًا، والنقر المزدوج يعيدها إلى الوسط.",
+  "Tiếng Việt": "Kéo chấm đến nơi bóng đổ xuống. Các phím mũi tên dịch nó từng chút; nhấp đúp để đưa nó về giữa."
  }
 }

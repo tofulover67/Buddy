@@ -168,30 +168,14 @@
     <!-- The Text+ tabs (textplus.js, canvas.js; text_animator/text_plus.py). -->
     <!-- --------------------------------------------------------- style -->
     <section class="panel" id="panel-style" hidden>
-        <!-- Wide timelines: looks across the top, the preview beside the controls. Tall (9:16) ones:
-             the preview down the left, everything else beside it. textplus.js sets .tall. -->
+        <!-- The preview and the looks on the left, the style's four parts (Text, Outline, Shadow,
+             Box) beside them, Apply along the bottom. A tall (9:16) timeline has the preview down
+             the left and everything else beside it; textplus.js sets .tall. -->
         <div class="style-layout" id="style-layout">
-            <div class="style-looks">
-                <div class="row">
-                    <span class="section-title">Looks</span>
-                    <span class="muted small" id="looks-hint">Start from one, then adjust it below</span>
-                    <div class="spacer"></div>
-                    <button type="button" class="btn" id="saved-looks" aria-haspopup="menu">Saved looks</button>
-                </div>
-                <div class="looks" id="looks"></div>
-                <div class="row look-state" id="look-state">
-                    <span class="muted small" id="look-now"></span>
-                    <div class="spacer"></div>
-                    <button type="button" class="btn ghost" id="update-look" hidden></button>
-                    <button type="button" class="btn" id="save-look">Save look…</button>
-                </div>
-            </div>
-
             <div class="style-stage" id="style-stage">
                 <div class="preview" id="preview">
                     <svg class="safe-shade" id="safe-shade" aria-hidden="true"></svg>
                     <span class="sample" id="sample"></span>
-                    <span class="preview-tag" id="look-tag" translate="no"></span>
                 </div>
                 <div class="row wrap stage-bar">
                     <div class="segmented" id="backdrop" role="group" aria-label="Behind the text">
@@ -199,39 +183,51 @@
                         <button type="button" data-value="light">Light</button>
                         <button type="button" data-value="clear">Clear</button>
                     </div>
-                    <div class="spacer"></div>
                     <label class="row safe-pick" id="safe-pick"><span class="muted small">App buttons</span>
                         <select class="field" id="style-safe" aria-label="Show where an app's buttons go"></select></label>
+                    <div class="spacer"></div>
+                    <span class="muted small">Approximate – Resolve draws the real thing.</span>
                 </div>
-                <p class="muted small note">Approximate – Resolve draws the real thing.</p>
             </div>
 
-            <div class="style-controls">
-                <section class="card layers">
-                    <div class="layer-tabs" role="tablist" id="layer-tabs">
-                        <div class="layer-tab" data-layer="font">
-                            <button type="button" role="tab">Text</button>
-                            <input type="checkbox" class="switch" data-toggle-input="font_on" aria-label="Set the text's font, size and colour"
-                                   title="Off: the clips keep their own font, size and colour">
-                        </div>
-                        <div class="layer-tab" data-layer="outline">
-                            <button type="button" role="tab">Outline</button>
-                            <input type="checkbox" class="switch" data-toggle-input="outline_on" aria-label="Outline">
-                        </div>
-                        <div class="layer-tab" data-layer="shadow">
-                            <button type="button" role="tab">Shadow</button>
-                            <input type="checkbox" class="switch" data-toggle-input="shadow_on" aria-label="Shadow">
-                        </div>
-                        <div class="layer-tab" data-layer="background">
-                            <button type="button" role="tab">Box</button>
-                            <input type="checkbox" class="switch" data-toggle-input="background_on" aria-label="Box behind the text">
-                        </div>
+            <section class="card style-looks">
+                <div class="row wrap look-state" id="look-state">
+                    <span class="section-title">Looks</span>
+                    <span class="muted" id="look-now"></span>
+                    <span class="chip" id="look-edited" hidden>edited</span>
+                    <div class="spacer"></div>
+                    <button type="button" class="btn ghost" id="revert-look" hidden
+                            title="Puts the look back on the controls as it was picked">Reset look</button>
+                    <button type="button" class="btn" id="update-look" hidden></button>
+                </div>
+                <div class="look-groups">
+                    <div class="look-group">
+                        <span class="look-group-title">Ready-made</span>
+                        <div class="looks" id="looks"></div>
                     </div>
-                    <div class="layer-body" data-layer-body="font" data-toggle="font_on">
+                    <div class="look-group">
+                        <span class="look-group-title">Yours</span>
+                        <div class="looks" id="saved-looks"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="style-controls">
+                <section class="card part" data-part="font">
+                    <div class="part-head">
+                        <button type="button" class="part-open">
+                            <span class="part-chevron"></span><b>Text</b>
+                            <span class="part-summary muted"></span>
+                        </button>
+                        <input type="checkbox" class="switch" data-toggle-input="font_on" aria-label="Set the text's font, size and colour"
+                               title="Off: the clips keep their own font, size and colour">
+                    </div>
+                    <div class="part-body">
                         <div class="srow"><span>Font</span>
-                            <div class="row">
-                                <select class="field grow" id="font" translate="no"
-                                        title="Resolve's own fonts, once Buddy reaches Resolve. A font installed while Resolve was open shows up after Resolve restarts."></select>
+                            <div class="row font-row">
+                                <button type="button" class="field font-pick" id="font-family" aria-haspopup="listbox" translate="no"
+                                        title="Resolve's own fonts, once Buddy reaches Resolve. A font installed while Resolve was open shows up after Resolve restarts."></button>
+                                <select class="field" id="font-style" aria-label="Font style" translate="no"></select>
                                 <button type="button" class="btn ghost icon" data-tp="reset_font" id="reset-font"
                                         title="Reset to Arial Regular, size 0.08 – applied straight away to the clips in Apply to"></button>
                             </div>
@@ -239,19 +235,57 @@
                         <div data-slider="font_size"></div>
                         <div class="srow"><span>Colour</span><div class="colours" data-color="font_color" data-quick="#FFFFFF #FFE600 #000000"></div></div>
                     </div>
-                    <div class="layer-body" data-layer-body="outline" data-toggle="outline_on" hidden>
+                </section>
+
+                <section class="card part" data-part="outline">
+                    <div class="part-head">
+                        <button type="button" class="part-open">
+                            <span class="part-chevron"></span><b>Outline</b>
+                            <span class="part-summary muted"></span>
+                        </button>
+                        <input type="checkbox" class="switch" data-toggle-input="outline_on" aria-label="Outline">
+                    </div>
+                    <div class="part-body">
                         <div class="srow"><span>Colour</span><div class="colours" data-color="outline_color" data-quick="#000000 #FFFFFF"></div></div>
                         <div data-slider="outline_thickness"></div>
                         <div data-slider="outline_opacity"></div>
                     </div>
-                    <div class="layer-body" data-layer-body="shadow" data-toggle="shadow_on" hidden>
-                        <div class="srow"><span>Colour</span><div class="colours" data-color="shadow_color" data-quick="#000000"></div></div>
-                        <div data-slider="shadow_offset_x"></div>
-                        <div data-slider="shadow_offset_y"></div>
+                </section>
+
+                <section class="card part" data-part="shadow">
+                    <div class="part-head">
+                        <button type="button" class="part-open">
+                            <span class="part-chevron"></span><b>Shadow</b>
+                            <span class="part-summary muted"></span>
+                        </button>
+                        <input type="checkbox" class="switch" data-toggle-input="shadow_on" aria-label="Shadow">
+                    </div>
+                    <div class="part-body">
+                        <div class="srow"><span>Colour</span><div class="colours" data-color="shadow_color" data-quick="#000000 #FFFFFF"></div></div>
+                        <div class="srow offset-row"><span>Position</span>
+                            <div class="row">
+                                <div class="offset-pad" id="shadow-pad" tabindex="0" role="group" aria-label="Where the shadow falls"
+                                     title="Drag the dot to where the shadow falls. The arrow keys nudge it; double-click puts it back in the middle."><i class="pad-dot"></i></div>
+                                <div class="pad-values">
+                                    <div data-slider="shadow_offset_x" data-compact></div>
+                                    <div data-slider="shadow_offset_y" data-compact></div>
+                                </div>
+                            </div>
+                        </div>
                         <div data-slider="shadow_blur"></div>
                         <div data-slider="shadow_opacity"></div>
                     </div>
-                    <div class="layer-body" data-layer-body="background" data-toggle="background_on" hidden>
+                </section>
+
+                <section class="card part" data-part="background">
+                    <div class="part-head">
+                        <button type="button" class="part-open">
+                            <span class="part-chevron"></span><b>Box</b>
+                            <span class="part-summary muted"></span>
+                        </button>
+                        <input type="checkbox" class="switch" data-toggle-input="background_on" aria-label="Box behind the text">
+                    </div>
+                    <div class="part-body">
                         <div class="srow"><span>Colour</span><div class="colours" data-color="background_color" data-quick="#000000 #FFFFFF"></div></div>
                         <div data-slider="background_opacity"></div>
                         <div data-slider="background_corner_radius"></div>
@@ -259,23 +293,24 @@
                         <div data-slider="background_extend_vertical"></div>
                     </div>
                 </section>
-
-                <section class="card box apply-bar">
-                    <div class="row wrap scope-row">
-                        <span class="muted small">Apply to</span>
-                        <select class="field" data-scope-select="style_scope" aria-label="Apply to">
-                            <option value="timeline">Entire timeline</option>
-                            <option value="selected">Selected clips</option>
-                            <option value="playhead">Under the playhead</option>
-                            <option value="track">Specific track</option>
-                        </select>
-                        <label class="row" data-scope-track="style_scope"><span class="muted small">Video track</span> <select class="field" id="style-track"></select></label>
-                        <div class="spacer"></div>
-                        <button type="button" class="btn accent big" data-tp="apply_style"
-                                title="Outline, shadow and box that are switched off are turned off where Font styling switched them on">Apply style</button>
-                    </div>
-                </section>
             </div>
+
+            <section class="card box apply-bar style-apply">
+                <div class="row wrap scope-row">
+                    <span class="muted small">Apply to</span>
+                    <select class="field" data-scope-select="style_scope" aria-label="Apply to">
+                        <option value="timeline">Entire timeline</option>
+                        <option value="selected">Selected clips</option>
+                        <option value="playhead">Under the playhead</option>
+                        <option value="track">Specific track</option>
+                    </select>
+                    <label class="row" data-scope-track="style_scope"><span class="muted small">Video track</span> <select class="field" id="style-track"></select></label>
+                    <div class="spacer"></div>
+                    <span class="apply-state" id="style-state" hidden></span>
+                    <button type="button" class="btn accent big" data-tp="apply_style"
+                            title="Outline, shadow and box that are switched off are turned off where Font styling switched them on">Apply style</button>
+                </div>
+            </section>
         </div>
     </section>
 
