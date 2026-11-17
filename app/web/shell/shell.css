@@ -399,6 +399,14 @@ body.window { background: var(--surface); }
 .set-label > .field, .set-inline > .field { width: 100%; }
 .set-inline { display: flex; align-items: center; gap: 8px; }
 .set-inline input[type="range"] { flex: 1; accent-color: var(--primary); cursor: pointer; }
+/* A combo (settings_form.combo): the dropdown or typed name, then Refresh. */
+.set-combo > .field, .set-combo-typed { flex: 1; min-width: 0; }
+.set-combo-typed > .field { width: 100%; }
+.set-combo > .btn { flex: none; }
+.set-combo > .btn.icon { height: auto; align-self: stretch; width: 28px; }
+.set-combo .spinning svg { animation: set-spin 1s linear infinite; }
+@keyframes set-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .set-combo .spinning svg { animation: none; } }
 .set-readout { min-width: 58px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-strong); }
 .set-num { width: 90px !important; flex: none; }
 .set-textarea { resize: vertical; min-height: 96px; line-height: 1.45; font-weight: 400; }

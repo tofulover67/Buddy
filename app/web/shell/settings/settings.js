@@ -30,6 +30,15 @@ Buddy.on("status", s => {
 });
 
 const set = (section, key, value) => send("set", {section, key, value});
+
+// A combo's "Type a name…": which ones are typed into instead of picked
+// from ("section/key"), kept across redraws until the name is entered.
+const typing = new Set();
+const TYPE_OWN = "\u0000type";
+const focusField = (section, key) => {
+    const node = form.querySelector(`[data-section="${section}"] input[data-key="${CSS.escape(key)}"]`);
+    if (node) { node.focus(); node.select(); }
+};
 const act = (section, action) => send("action", {section, action});
 const pageById = id => DATA.pages.find(p => p.id === id);
 
@@ -100,6 +109,50 @@ const FIELDS = {
             ? el("div.set-inline", {}, [input, el("button.btn", {type: "button", text: "Browse…", disabled: !!f.disabled, onclick: () => act(s, f.browse)})])
             : input;
         return labelled(f, control, list ? [list] : []);
+    },
+    combo: (f, s) => {
+        const id = `${s}/${f.key}`;
+        const typed = f.options.length && typing.has(id);
+        let control;
+        if (f.options.length && !typed) {
+            // The fetched names, the saved one kept even when it isn't among
+            // them, and a way to type one that isn't.
+            const names = f.value && !f.options.includes(f.value) ? [f.value, ...f.options] : f.options;
+            control = el("select.field", {"data-key": f.key, disabled: !!f.disabled, onchange: e => {
+                if (e.target.value === TYPE_OWN) { typing.add(id); draw(); focusField(s, f.key); }
+                else set(s, f.key, e.target.value);
+            }}, [
+                f.value ? null : el("option", {value: "", text: "Choose a model", disabled: true}),
+                ...names.map(n => el("option", {value: n, text: n, translate: "no"})),
+                el("option", {value: TYPE_OWN, text: "Type a name…"}),
+            ]);
+            control.value = f.value || "";
+        } else if (f.loading && !f.value) {
+            control = el("select.field", {disabled: true, "data-key": f.key},
+                         [el("option", {value: "", text: "Loading models…"})]);
+        } else {
+            const input = el("input.field", {type: "text", placeholder: f.placeholder || "", spellcheck: "false",
+                                             autocomplete: "off", "data-key": f.key, disabled: !!f.disabled});
+            input.value = f.value;
+            input.addEventListener("change", () => { typing.delete(id); set(s, f.key, input.value.trim()); });
+            control = input;
+            const suggest = typed ? f.options : f.suggest;
+            if (suggest && suggest.length) {
+                const list = el("datalist", {id: `list-${s}-${f.key}`}, suggest.map(v => el("option", {value: v})));
+                input.setAttribute("list", list.id);
+                control = el("div.set-combo-typed", {}, [input, list]);
+            }
+        }
+        const back = typed ? el("button.btn.small.ghost", {type: "button", text: "Show the list",
+                                                           onclick: () => { typing.delete(id); draw(); }}) : null;
+        const refresh = f.refresh ? el(`button.btn.icon${f.loading ? ".spinning" : ""}`, {
+            type: "button", disabled: f.loading, "data-key": f.refresh,
+            title: f.loading ? "Fetching the list…" : "Fetch the list again",
+            "aria-label": f.loading ? "Fetching the list…" : "Fetch the list again",
+            onclick: () => act(s, f.refresh),
+        }, [icon("refresh")]) : null;
+        const note = f.loading && !f.options.length && f.value ? [el("div.set-hint", {text: "Loading models…"})] : [];
+        return labelled(f, el("div.set-inline.set-combo", {}, [control, back, refresh]), note);
     },
     textarea: (f, s) => {
         const box = el("textarea.field.set-textarea", {rows: String(f.rows || 8), placeholder: f.placeholder || "",

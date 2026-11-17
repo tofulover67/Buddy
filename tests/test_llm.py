@@ -132,6 +132,86 @@ class ProviderTests(unittest.TestCase):
                 llm.list_openai_models("http://127.0.0.1:1234/v1")
 
 
+class ModelListTests(unittest.TestCase):
+    """Settings' Model dropdown: each provider's own list, read with the key
+    and address it's set up with - urlopen faked, never the network."""
+
+    def listed(self, client, body):
+        with mock.patch.object(llm.safe_http, "urlopen", return_value=io.BytesIO(json.dumps(body).encode())) as opened:
+            models = client.list_models()
+        request = opened.call_args[0][0]
+        return models, request
+
+    def test_gemini_lists_what_can_chat_without_the_prefix(self):
+        models, request = self.listed(llm.LLMClient(llm.PROVIDER_GEMINI, "g-key", ""), {"models": [
+            {"name": "models/gemini-3.8-flash", "supportedGenerationMethods": ["generateContent", "countTokens"]},
+            {"name": "models/text-embedding-004", "supportedGenerationMethods": ["embedContent"]},
+            {"name": "models/gemini-3.8-pro", "supportedGenerationMethods": ["generateContent"]}]})
+        self.assertEqual(models, ["gemini-3.8-flash", "gemini-3.8-pro"])
+        self.assertTrue(request.full_url.startswith(llm.GEMINI_MODELS_URL))
+        self.assertEqual(request.get_header("X-goog-api-key"), "g-key")
+
+    def test_anthropic(self):
+        models, request = self.listed(llm.LLMClient(llm.PROVIDER_ANTHROPIC, "a-key", ""),
+                                      {"data": [{"id": "claude-sonnet-5"}, {"id": "claude-opus-5"}], "has_more": False})
+        self.assertEqual(models, ["claude-opus-5", "claude-sonnet-5"])
+        self.assertTrue(request.full_url.startswith(llm.ANTHROPIC_MODELS_URL))
+        self.assertEqual((request.get_header("X-api-key"), request.get_header("Anthropic-version")),
+                         ("a-key", llm.ANTHROPIC_VERSION))
+
+    def test_openai_shaped_providers_ask_their_own_address(self):
+        for provider, base in ((llm.PROVIDER_OPENAI_API, "https://api.openai.com/v1"),
+                               (llm.PROVIDER_OPENROUTER, "https://openrouter.ai/api/v1"),
+                               (llm.PROVIDER_GROQ, "https://api.groq.com/openai/v1")):
+            models, request = self.listed(llm.LLMClient(provider, "k", ""), {"data": [{"id": "m1"}, {"id": "m2"}]})
+            self.assertEqual((models, request.full_url, request.get_header("Authorization")),
+                             (["m1", "m2"], f"{base}/models", "Bearer k"))
+        models, request = self.listed(llm.LLMClient(llm.PROVIDER_OPENAI, "", "", base_url="https://api.example.com/v1"),
+                                      {"data": [{"id": "custom-1"}]})
+        self.assertEqual((models, request.full_url, request.get_header("Authorization")),
+                         (["custom-1"], "https://api.example.com/v1/models", None))
+        models, request = self.listed(llm.LLMClient(llm.PROVIDER_LMSTUDIO, "", ""), {"data": [{"id": "qwen3-14b"}]})
+        self.assertEqual(request.full_url, "http://127.0.0.1:1234/v1/models")
+
+    def test_ollama_lists_its_installed_models(self):
+        models, request = self.listed(llm.LLMClient(llm.PROVIDER_OLLAMA, "", "", base_url="192.168.1.20:11434"),
+                                      {"models": [{"name": "qwen3:14b"}, {"name": "nomic-embed-text"}]})
+        self.assertEqual((models, request), (["qwen3:14b"], "http://192.168.1.20:11434/api/tags"))
+        with mock.patch.object(llm.safe_http, "urlopen", side_effect=OSError("refused")):
+            with self.assertRaises(llm.LLMError) as caught:
+                llm.LLMClient(llm.PROVIDER_OLLAMA, "", "").list_models()
+        self.assertIn("Couldn't reach", str(caught.exception))
+
+    def test_azure_lists_the_resources_deployments(self):
+        client = llm.LLMClient(llm.PROVIDER_AZURE, "az-key", "", base_url="https://r.openai.azure.com")
+        models, request = self.listed(client, {"data": [{"id": "my-gpt", "model": "gpt-4.1"}, {"id": "mini"}]})
+        self.assertEqual(models, ["mini", "my-gpt"])
+        self.assertEqual(request.full_url, "https://r.openai.azure.com/openai/deployments"
+                                           f"?api-version={llm.AZURE_LIST_API_VERSION}")
+        self.assertEqual((request.get_header("Api-key"), request.get_header("Authorization")), ("az-key", None))
+
+    def test_nothing_is_sent_without_a_key_or_an_address(self):
+        with mock.patch.object(llm.safe_http, "urlopen") as opened:
+            for client, why in ((llm.LLMClient(llm.PROVIDER_GEMINI, "", ""), "Add the API key to list the models."),
+                                (llm.LLMClient(llm.PROVIDER_GROQ, "", ""), "Add the API key to list the models."),
+                                (llm.LLMClient(llm.PROVIDER_OPENAI, "", ""), "Enter the base URL to list the models."),
+                                (llm.LLMClient(llm.PROVIDER_AZURE, "k", ""), "Enter the endpoint to list the deployments.")):
+                self.assertEqual(client.list_problem(), why)
+                with self.assertRaises(llm.LLMError) as caught:
+                    client.list_models()
+                self.assertEqual(str(caught.exception), why)
+        opened.assert_not_called()
+        self.assertEqual(llm.LLMClient(llm.PROVIDER_OLLAMA, "", "").list_problem(), "")      # no key needed
+
+    def test_a_refused_key_says_so(self):
+        import urllib.error
+        refused = urllib.error.HTTPError("https://api.anthropic.com/v1/models", 401, "Unauthorized", {}, None)
+        with mock.patch.object(llm.safe_http, "urlopen", side_effect=refused):
+            with self.assertRaises(llm.LLMError) as caught:
+                llm.LLMClient(llm.PROVIDER_ANTHROPIC, "wrong", "").list_models()
+        self.assertEqual(str(caught.exception), "Couldn't list the models: HTTP 401 – check the API key.")
+
+
 class PictureTests(unittest.TestCase):
     """A question with a picture goes the way each provider takes images."""
     IMAGE = {"mime": "image/jpeg", "data": "QUJD"}

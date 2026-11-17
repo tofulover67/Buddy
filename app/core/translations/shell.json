@@ -4779,5 +4779,65 @@
   "中文": "没有匹配的工具",
   "العربية": "لا توجد أدوات مطابقة",
   "Tiếng Việt": "Không có công cụ nào khớp"
+ },
+ "Choose a model": {
+  "日本語": "モデルを選択",
+  "Español": "Elige un modelo",
+  "Deutsch": "Modell wählen",
+  "Français": "Choisir un modèle",
+  "한국어": "모델 선택",
+  "中文": "选择模型",
+  "العربية": "اختر نموذجًا",
+  "Tiếng Việt": "Chọn mô hình"
+ },
+ "Type a name…": {
+  "日本語": "名前を入力…",
+  "Español": "Escribir un nombre…",
+  "Deutsch": "Namen eingeben…",
+  "Français": "Saisir un nom…",
+  "한국어": "이름 입력…",
+  "中文": "输入名称…",
+  "العربية": "اكتب اسمًا…",
+  "Tiếng Việt": "Nhập tên…"
+ },
+ "Loading models…": {
+  "日本語": "モデルを読み込み中…",
+  "Español": "Cargando modelos…",
+  "Deutsch": "Modelle werden geladen…",
+  "Français": "Chargement des modèles…",
+  "한국어": "모델을 불러오는 중…",
+  "中文": "正在加载模型…",
+  "العربية": "جارٍ تحميل النماذج…",
+  "Tiếng Việt": "Đang tải mô hình…"
+ },
+ "Show the list": {
+  "日本語": "一覧を表示",
+  "Español": "Mostrar la lista",
+  "Deutsch": "Liste anzeigen",
+  "Français": "Afficher la liste",
+  "한국어": "목록 보기",
+  "中文": "显示列表",
+  "العربية": "عرض القائمة",
+  "Tiếng Việt": "Hiện danh sách"
+ },
+ "Fetch the list again": {
+  "日本語": "一覧をもう一度取得",
+  "Español": "Volver a obtener la lista",
+  "Deutsch": "Liste neu abrufen",
+  "Français": "Récupérer à nouveau la liste",
+  "한국어": "목록 다시 가져오기",
+  "中文": "重新获取列表",
+  "العربية": "جلب القائمة مرة أخرى",
+  "Tiếng Việt": "Tải lại danh sách"
+ },
+ "Fetching the list…": {
+  "日本語": "一覧を取得中…",
+  "Español": "Obteniendo la lista…",
+  "Deutsch": "Liste wird abgerufen…",
+  "Français": "Récupération de la liste…",
+  "한국어": "목록을 가져오는 중…",
+  "中文": "正在获取列表…",
+  "العربية": "جارٍ جلب القائمة…",
+  "Tiếng Việt": "Đang tải danh sách…"
  }
 }

@@ -17,6 +17,14 @@ ToolPage.settings_fields() and handling on_setting() / on_settings_action()
     text      key, label, value, [placeholder], [password], [hint],
               [live] (sent as it's typed, not when the field is left),
               [suggest] (a list the field offers), [browse] (an action)
+    combo     key, label, value, options [names], [loading], [refresh] (an
+              action), [placeholder], [suggest], [hint] - a dropdown of
+              names (shown as they are: a model's) fetched from somewhere,
+              with "Type a name…" for one that isn't in it. A value that
+              isn't in it stays, as an option of its own. While loading
+              with nothing to show, a disabled "Loading…"; with no options
+              (the list couldn't be fetched), a typed field - suggest is
+              then what it offers. refresh: a button that fetches again
     textarea  key, label, value, [placeholder], [rows], [hint] - several
               lines, saved when the field is left; what's typed is the
               user's, never translated
@@ -107,6 +115,15 @@ def text(key, label, value, placeholder="", password=False, hint_text=None, live
     return {"kind": "text", "key": key, "label": label, "value": value or "", "placeholder": placeholder,
             "password": password, "hint": hint_text, "live": live, "suggest": suggest, "browse": browse,
             "error": error}
+
+
+def combo(key, label, value, options, loading=False, refresh=None, placeholder="", suggest=None,
+          hint_text=None, error=None):
+    """A dropdown of fetched names, or a typed field when there are none
+    (see the module's docstring)."""
+    return {"kind": "combo", "key": key, "label": label, "value": value or "", "options": list(options or []),
+            "loading": bool(loading), "refresh": refresh, "placeholder": placeholder,
+            "suggest": list(suggest or []), "hint": hint_text, "error": error}
 
 
 def textarea(key, label, value, placeholder="", rows=8, hint_text=None, error=None):

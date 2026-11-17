@@ -337,6 +337,59 @@ class ViewTests(_Shell):
         self.view_dialog.on_action.assert_called_once_with({"section": "shell", "action": "models_move:yes"})
         self.assertTrue(self._js("document.querySelector('.modal') === null"))
 
+    def test_a_combo_picks_from_its_list_takes_a_typed_name_and_falls_back(self):
+        smart = self.win.pages["smart"]
+        state = {"value": "qwen3:14b", "options": ["llama3", "qwen3:14b"], "loading": False}
+
+        def pages(_self):
+            return [sf.page("ai_chat", "ai", "Chat assistant", [
+                sf.combo("model", "Model", state["value"], state["options"], loading=state["loading"],
+                         refresh="refresh_models", suggest=["suggested-model"])])]
+
+        def until_got(item):
+            for _ in range(40):
+                if item in smart.got:
+                    return
+                _wait(50)
+            self.fail(f"never sent: {item}")
+
+        model = "#form select[data-key=model]"
+        with mock.patch.object(type(smart), "settings_pages", pages):
+            self.view_dialog.push()
+            self._js("document.querySelector('.set-rail-item[title=AI]').click()")
+            self._js("[...document.querySelectorAll('#pages .set-page')].find(b => b.textContent === 'Chat assistant').click()")
+            self._until(f"document.querySelector('{model}') !== null")
+            self.assertEqual(self._js(f"document.querySelector('{model}').value"), "qwen3:14b")   # the saved one
+            self.assertEqual(self._js(f"[...document.querySelector('{model}').options].map(o => o.textContent).join()"),
+                             "llama3,qwen3:14b,Type a name…")
+            self._js(f"{{ const s = document.querySelector('{model}'); s.value = 'llama3'; s.dispatchEvent(new Event('change')); }}")
+            until_got(("model", "llama3"))
+            # Type a name…: a field to type in, until it's entered.
+            self._js(f"{{ const s = document.querySelector('{model}'); s.value = s.options[s.options.length - 1].value; "
+                     "s.dispatchEvent(new Event('change')); }")
+            self._until("document.querySelector('#form input[data-key=model]') !== null")
+            self._js("{ const i = document.querySelector('#form input[data-key=model]'); i.value = 'my-own:7b'; "
+                     "i.dispatchEvent(new Event('change')); }")
+            until_got(("model", "my-own:7b"))
+            state["value"] = "my-own:7b"                     # saved: kept, as an option of its own
+            self.view_dialog.push()
+            self._until(f"document.querySelector('{model}') !== null && document.querySelector('{model}').value === 'my-own:7b'")
+            # Still fetching, nothing to show yet: a disabled "Loading models…".
+            state.update(value="", options=[], loading=True)
+            self.view_dialog.push()
+            self._until(f"document.querySelector('{model}') !== null && document.querySelector('{model}').disabled")
+            self.assertEqual(self._js(f"document.querySelector('{model}').textContent"), "Loading models…")
+            self.assertTrue(self._js("document.querySelector('#form button[data-key=refresh_models]').disabled"))
+            # Couldn't be fetched: typed, with what's offered while there's no list.
+            state.update(value="typed-model", loading=False)
+            self.view_dialog.push()
+            self._until("document.querySelector('#form input[data-key=model]') !== null")
+            self.assertEqual(self._js("document.querySelector('#form input[data-key=model]').value"), "typed-model")
+            self.assertEqual(self._js("[...document.querySelectorAll('#form datalist option')].map(o => o.value).join()"),
+                             "suggested-model")
+            self._js("document.querySelector('#form button[data-key=refresh_models]').click()")
+            until_got(("action", "refresh_models"))
+
 
 class TranscribeRowTests(unittest.TestCase):
     """Subtitles' rows: the Setup tab's, in Settings' words."""

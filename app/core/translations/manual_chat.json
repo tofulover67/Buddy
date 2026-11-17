@@ -1310,16 +1310,6 @@
   "العربية": "جارٍ الاختبار…",
   "Tiếng Việt": "Đang kiểm tra…"
  },
- "Load models": {
-  "日本語": "モデルを読み込む",
-  "Español": "Cargar modelos",
-  "Deutsch": "Modelle laden",
-  "Français": "Charger les modèles",
-  "한국어": "모델 불러오기",
-  "中文": "加载模型",
-  "العربية": "تحميل النماذج",
-  "Tiếng Việt": "Tải mô hình"
- },
  "Conversation memory": {
   "日本語": "会話の記憶",
   "Español": "Memoria de la conversación",
@@ -1480,16 +1470,6 @@
   "العربية": "جارٍ سؤال {name}…",
   "Tiếng Việt": "Đang hỏi {name}…"
  },
- "Add the API key first – the model list needs it.": {
-  "日本語": "先に API キーを追加してください – モデル一覧の取得に必要です。",
-  "Español": "Añade primero la clave de API: la lista de modelos la necesita.",
-  "Deutsch": "Fügen Sie zuerst den API-Schlüssel hinzu – die Modellliste benötigt ihn.",
-  "Français": "Ajoutez d'abord la clé API – la liste des modèles en a besoin.",
-  "한국어": "먼저 API 키를 추가하세요 – 모델 목록을 가져오려면 필요합니다.",
-  "中文": "请先添加 API 密钥——获取模型列表需要它。",
-  "العربية": "أضف مفتاح API أولًا – تحتاجه قائمة النماذج.",
-  "Tiếng Việt": "Hãy thêm khóa API trước – danh sách mô hình cần nó."
- },
  "Ollama isn't answering at that address – type a model name.": {
   "日本語": "そのアドレスで Ollama が応答しません – モデル名を入力してください。",
   "Español": "Ollama no responde en esa dirección: escribe un nombre de modelo.",
@@ -1549,16 +1529,6 @@
   "中文": "一个密钥即可使用各大实验室的数百个模型，其中一些免费。获取地址：",
   "العربية": "مفتاح واحد لمئات النماذج من كل المختبرات الكبرى، بعضها مجاني. احصل عليه من",
   "Tiếng Việt": "Một khóa cho hàng trăm mô hình từ mọi phòng thí nghiệm lớn, một số miễn phí. Lấy tại"
- },
- ", then Load models to pick. Leave the key empty to use $OPENROUTER_API_KEY from your environment instead.": {
-  "日本語": "、その後「モデルを読み込む」で選択します。キーを空欄にすると、環境変数の $OPENROUTER_API_KEY を使います。",
-  "Español": "y luego usa Cargar modelos para elegir. Deja la clave vacía para usar $OPENROUTER_API_KEY de tu entorno.",
-  "Deutsch": ", dann „Modelle laden“ zum Auswählen. Lassen Sie den Schlüssel leer, um stattdessen $OPENROUTER_API_KEY aus Ihrer Umgebung zu verwenden.",
-  "Français": ", puis Charger les modèles pour choisir. Laissez la clé vide pour utiliser $OPENROUTER_API_KEY de votre environnement.",
-  "한국어": "에서 받은 뒤 모델 불러오기로 고르세요. 키를 비워 두면 환경 변수의 $OPENROUTER_API_KEY를 사용합니다.",
-  "中文": "，然后用“加载模型”选择。将密钥留空则使用环境中的 $OPENROUTER_API_KEY。",
-  "العربية": "، ثم اختر من تحميل النماذج. اترك المفتاح فارغًا لاستخدام $OPENROUTER_API_KEY من بيئتك بدلًا من ذلك.",
-  "Tiếng Việt": ", rồi dùng Tải mô hình để chọn. Để trống khóa để dùng $OPENROUTER_API_KEY từ môi trường của bạn."
  },
  ". Leave the key empty to use $GEMINI_API_KEY from your environment instead.": {
   "日本語": "。キーを空欄にすると、環境変数の $GEMINI_API_KEY を使います。",
@@ -3259,5 +3229,95 @@
   "中文": "{name} 将移到废纸篓。素材管理器和视频素材搜索的按描述搜索需要它 —— 它们的“设置”会重新下载。",
   "العربية": "سينتقل {name} إلى سلة المهملات. يحتاج إليه البحث بالوصف في مدير الأصول والبحث في اللقطات – ويعيد «إعداد» فيهما تنزيله.",
   "Tiếng Việt": "{name} sẽ vào Thùng rác. Tìm theo mô tả của Trình quản lý tài nguyên và Tìm cảnh quay cần nó – Thiết lập của chúng sẽ tải lại."
+ },
+ "Add the API key to list the models.": {
+  "日本語": "モデルの一覧を表示するには API キーを追加してください。",
+  "Español": "Añade la clave de API para ver la lista de modelos.",
+  "Deutsch": "Fügen Sie den API-Schlüssel hinzu, um die Modelle aufzulisten.",
+  "Français": "Ajoutez la clé d'API pour afficher la liste des modèles.",
+  "한국어": "모델 목록을 보려면 API 키를 추가하세요.",
+  "中文": "添加 API 密钥即可列出模型。",
+  "العربية": "أضف مفتاح API لعرض قائمة النماذج.",
+  "Tiếng Việt": "Thêm khóa API để liệt kê các mô hình."
+ },
+ "Enter the endpoint to list the deployments.": {
+  "日本語": "デプロイの一覧を表示するにはエンドポイントを入力してください。",
+  "Español": "Introduce el endpoint para ver la lista de implementaciones.",
+  "Deutsch": "Geben Sie den Endpunkt ein, um die Bereitstellungen aufzulisten.",
+  "Français": "Saisissez le point de terminaison pour afficher la liste des déploiements.",
+  "한국어": "배포 목록을 보려면 엔드포인트를 입력하세요.",
+  "中文": "输入终结点即可列出部署。",
+  "العربية": "أدخل نقطة النهاية لعرض قائمة عمليات النشر.",
+  "Tiếng Việt": "Nhập điểm cuối để liệt kê các bản triển khai."
+ },
+ "Enter the base URL to list the models.": {
+  "日本語": "モデルの一覧を表示するにはベース URL を入力してください。",
+  "Español": "Introduce la URL base para ver la lista de modelos.",
+  "Deutsch": "Geben Sie die Basis-URL ein, um die Modelle aufzulisten.",
+  "Français": "Saisissez l'URL de base pour afficher la liste des modèles.",
+  "한국어": "모델 목록을 보려면 기본 URL을 입력하세요.",
+  "中文": "输入基础 URL 即可列出模型。",
+  "العربية": "أدخل عنوان URL الأساسي لعرض قائمة النماذج.",
+  "Tiếng Việt": "Nhập URL gốc để liệt kê các mô hình."
+ },
+ "Couldn't list the models: HTTP {code}": {
+  "日本語": "モデルの一覧を取得できませんでした: HTTP {code}",
+  "Español": "No se pudo obtener la lista de modelos: HTTP {code}",
+  "Deutsch": "Die Modelle konnten nicht aufgelistet werden: HTTP {code}",
+  "Français": "Impossible d'obtenir la liste des modèles : HTTP {code}",
+  "한국어": "모델 목록을 가져올 수 없습니다: HTTP {code}",
+  "中文": "无法列出模型：HTTP {code}",
+  "العربية": "تعذّر عرض قائمة النماذج: HTTP {code}",
+  "Tiếng Việt": "Không thể liệt kê các mô hình: HTTP {code}"
+ },
+ "Couldn't list the models: HTTP {code} – check the API key.": {
+  "日本語": "モデルの一覧を取得できませんでした: HTTP {code} – API キーを確認してください。",
+  "Español": "No se pudo obtener la lista de modelos: HTTP {code} – revisa la clave de API.",
+  "Deutsch": "Die Modelle konnten nicht aufgelistet werden: HTTP {code} – prüfen Sie den API-Schlüssel.",
+  "Français": "Impossible d'obtenir la liste des modèles : HTTP {code} – vérifiez la clé d'API.",
+  "한국어": "모델 목록을 가져올 수 없습니다: HTTP {code} – API 키를 확인하세요.",
+  "中文": "无法列出模型：HTTP {code} – 请检查 API 密钥。",
+  "العربية": "تعذّر عرض قائمة النماذج: HTTP {code} – تحقّق من مفتاح API.",
+  "Tiếng Việt": "Không thể liệt kê các mô hình: HTTP {code} – hãy kiểm tra khóa API."
+ },
+ "Couldn't reach {where}: {reason}": {
+  "日本語": "{where} に接続できませんでした: {reason}",
+  "Español": "No se pudo conectar con {where}: {reason}",
+  "Deutsch": "{where} ist nicht erreichbar: {reason}",
+  "Français": "Impossible de joindre {where} : {reason}",
+  "한국어": "{where}에 연결할 수 없습니다: {reason}",
+  "中文": "无法连接到 {where}：{reason}",
+  "العربية": "تعذّر الوصول إلى {where}: {reason}",
+  "Tiếng Việt": "Không thể kết nối tới {where}: {reason}"
+ },
+ "The server's model list wasn't JSON.": {
+  "日本語": "サーバーのモデル一覧が JSON ではありませんでした。",
+  "Español": "La lista de modelos del servidor no estaba en JSON.",
+  "Deutsch": "Die Modellliste des Servers war kein JSON.",
+  "Français": "La liste des modèles du serveur n'était pas au format JSON.",
+  "한국어": "서버의 모델 목록이 JSON 형식이 아닙니다.",
+  "中文": "服务器返回的模型列表不是 JSON。",
+  "العربية": "لم تكن قائمة النماذج من الخادم بتنسيق JSON.",
+  "Tiếng Việt": "Danh sách mô hình của máy chủ không phải JSON."
+ },
+ "Azure OpenAI's endpoint has to start with https://.": {
+  "日本語": "Azure OpenAI のエンドポイントは https:// で始まる必要があります。",
+  "Español": "El endpoint de Azure OpenAI tiene que empezar por https://.",
+  "Deutsch": "Der Endpunkt von Azure OpenAI muss mit https:// beginnen.",
+  "Français": "Le point de terminaison d'Azure OpenAI doit commencer par https://.",
+  "한국어": "Azure OpenAI 엔드포인트는 https://로 시작해야 합니다.",
+  "中文": "Azure OpenAI 的终结点必须以 https:// 开头。",
+  "العربية": "يجب أن تبدأ نقطة نهاية Azure OpenAI بـ https://.",
+  "Tiếng Việt": "Điểm cuối của Azure OpenAI phải bắt đầu bằng https://."
+ },
+ ", then pick one of its models. Leave the key empty to use $OPENROUTER_API_KEY from your environment instead.": {
+  "日本語": "、その後モデルを選びます。キーを空欄にすると、環境変数の $OPENROUTER_API_KEY を使います。",
+  "Español": "y luego elige uno de sus modelos. Deja la clave vacía para usar $OPENROUTER_API_KEY de tu entorno.",
+  "Deutsch": ", dann eines der Modelle wählen. Lassen Sie den Schlüssel leer, um stattdessen $OPENROUTER_API_KEY aus Ihrer Umgebung zu verwenden.",
+  "Français": ", puis choisissez l'un de ses modèles. Laissez la clé vide pour utiliser $OPENROUTER_API_KEY de votre environnement.",
+  "한국어": "에서 받은 뒤 모델을 고르세요. 키를 비워 두면 환경 변수의 $OPENROUTER_API_KEY를 사용합니다.",
+  "中文": "，然后选择其中一个模型。将密钥留空则使用环境中的 $OPENROUTER_API_KEY。",
+  "العربية": "، ثم اختر أحد نماذجه. اترك المفتاح فارغًا لاستخدام $OPENROUTER_API_KEY من بيئتك بدلًا من ذلك.",
+  "Tiếng Việt": ", rồi chọn một mô hình của nó. Để trống khóa để dùng $OPENROUTER_API_KEY từ môi trường của bạn."
  }
 }

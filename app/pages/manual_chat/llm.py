@@ -65,6 +65,12 @@ PROVIDER_AZURE = "azure"
 
 # Azure OpenAI versions its API by date, like Anthropic; this one is GA.
 AZURE_API_VERSION = "2024-10-21"
+# The last GA version whose data plane lists a resource's deployments.
+AZURE_LIST_API_VERSION = "2022-12-01"
+
+# Where Settings reads each cloud provider's model list.
+GEMINI_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models"
 
 ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages"
 # Pinned, not "latest": Anthropic versions its API by date and a silent
@@ -140,18 +146,46 @@ def _chat_names(names) -> list[str]:
     return sorted({n for n in names if n and not any(bad in n.lower() for bad in _NOT_CHAT)})
 
 
-def list_ollama_models(base_url: str = "", timeout: int = 3) -> list[str]:
-    """Model names installed in Ollama (this PC's, or the one at base_url),
-    for the Settings list. [] when it isn't reachable - the field stays
-    free text, so a typed model name still works."""
+def _ollama_tags(base_url: str, timeout: int) -> list[str]:
+    """Ollama's installed models (GET /api/tags). Raises LLMError."""
     root = normalize_base_url(PROVIDER_OLLAMA, base_url or OLLAMA_BASE_URL)
     root = root[:-3] if root.endswith("/v1") else root
     try:
         with safe_http.urlopen(f"{root}/api/tags", timeout=timeout) as resp:
             models = json.load(resp).get("models") or []
-    except (urllib.error.URLError, OSError, ValueError, TimeoutError):
+    except urllib.error.HTTPError as e:
+        raise LLMError(f"Couldn't list the models: HTTP {e.code}")
+    except (urllib.error.URLError, OSError, TimeoutError) as e:
+        raise LLMError(f"Couldn't reach {root}: {getattr(e, 'reason', e)}")
+    except (ValueError, AttributeError):
+        raise LLMError("The server's model list wasn't JSON.")
+    return _chat_names(m.get("name", "") for m in models if isinstance(m, dict))
+
+
+def list_ollama_models(base_url: str = "", timeout: int = 3) -> list[str]:
+    """Model names installed in Ollama (this PC's, or the one at base_url),
+    for the Settings list. [] when it isn't reachable - the field stays
+    free text, so a typed model name still works."""
+    try:
+        return _ollama_tags(base_url, timeout)
+    except LLMError:
         return []
-    return _chat_names(m.get("name", "") for m in models)
+
+
+def _get_json(url: str, headers: dict, timeout: int, where: str):
+    """GET a model list. Raises LLMError saying why it couldn't be read."""
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with safe_http.urlopen(req, timeout=timeout) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as e:
+        if e.code in (401, 403):
+            raise LLMError(f"Couldn't list the models: HTTP {e.code} – check the API key.")
+        raise LLMError(f"Couldn't list the models: HTTP {e.code}")
+    except (urllib.error.URLError, OSError, TimeoutError) as e:
+        raise LLMError(f"Couldn't reach {where}: {getattr(e, 'reason', e)}")
+    except ValueError:
+        raise LLMError("The server's model list wasn't JSON.")
 
 
 def list_openai_models(base_url: str, api_key: str = "", timeout: int = 5) -> list[str]:
@@ -162,18 +196,36 @@ def list_openai_models(base_url: str, api_key: str = "", timeout: int = 5) -> li
         raise LLMError("That address starts with http:// - your API key would be sent unencrypted. "
                        "Use https://, or leave the key empty for a server on your own network that doesn't need one.")
     headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
-    req = urllib.request.Request(f"{base_url.rstrip('/')}/models", headers=headers)
-    try:
-        with safe_http.urlopen(req, timeout=timeout) as resp:
-            data = json.load(resp)
-    except urllib.error.HTTPError as e:
-        raise LLMError(f"Couldn't list the models: HTTP {e.code}")
-    except (urllib.error.URLError, OSError, TimeoutError) as e:
-        raise LLMError(f"Couldn't reach {base_url}: {getattr(e, 'reason', e)}")
-    except ValueError:
-        raise LLMError("The server's model list wasn't JSON.")
+    data = _get_json(f"{base_url.rstrip('/')}/models", headers, timeout, base_url)
     items = data.get("data") if isinstance(data, dict) else data
     return _chat_names(m.get("id", "") for m in (items or []) if isinstance(m, dict))
+
+
+def _list_gemini_models(api_key: str, timeout: int) -> list[str]:
+    """Gemini's models that can chat (generateContent), without "models/"."""
+    data = _get_json(f"{GEMINI_MODELS_URL}?pageSize=1000", {"x-goog-api-key": api_key}, timeout, "Google")
+    items = data.get("models") if isinstance(data, dict) else None
+    return _chat_names((m.get("name") or "").removeprefix("models/") for m in (items or [])
+                       if isinstance(m, dict) and "generateContent" in (m.get("supportedGenerationMethods") or []))
+
+
+def _list_anthropic_models(api_key: str, timeout: int) -> list[str]:
+    data = _get_json(f"{ANTHROPIC_MODELS_URL}?limit=1000",
+                     {"x-api-key": api_key, "anthropic-version": ANTHROPIC_VERSION}, timeout, "Anthropic")
+    items = data.get("data") if isinstance(data, dict) else None
+    return _chat_names(m.get("id", "") for m in (items or []) if isinstance(m, dict))
+
+
+def _list_azure_deployments(base_url: str, api_key: str, timeout: int) -> list[str]:
+    """An Azure OpenAI resource's deployments - the names its chat calls take.
+    Only an older API version lists them, so some resources won't: Settings
+    then takes the deployment's name typed."""
+    if not _safe_to_send_key(base_url):
+        raise LLMError("Azure OpenAI's endpoint has to start with https://.")
+    data = _get_json(f"{base_url.rstrip('/')}/openai/deployments?api-version={AZURE_LIST_API_VERSION}",
+                     {"api-key": api_key}, timeout, base_url)
+    items = data.get("data") if isinstance(data, dict) else None
+    return sorted({m.get("id", "") for m in (items or []) if isinstance(m, dict) and m.get("id")})
 
 
 class LLMError(RuntimeError):
@@ -346,6 +398,34 @@ class LLMClient:
         hint = (" Start llama-server with --jinja so it can." if self.provider == PROVIDER_LLAMACPP
                 else " Ask Buddy needs a model with tool calling – try a larger or instruction-tuned one.")
         return False, f"Connected, but {name} didn't call the tool it was asked to.{hint}"
+
+    def list_problem(self) -> str:
+        """Why the model list can't be asked for yet - no key, no address -
+        or "". Nothing is sent to find out."""
+        if self.key_required and not self.api_key:
+            return "Add the API key to list the models."
+        if self.provider not in (PROVIDER_GEMINI, PROVIDER_ANTHROPIC) and not self.base_url:
+            return ("Enter the endpoint to list the deployments." if self.provider == PROVIDER_AZURE
+                    else "Enter the base URL to list the models.")
+        return ""
+
+    def list_models(self, timeout: int = 5) -> list[str]:
+        """The models this provider offers, for Settings' Model dropdown,
+        with the key and address it's set up with. Raises LLMError with a
+        short reason when there's no list to show (no key yet, no address,
+        the server isn't running, offline)."""
+        problem = self.list_problem()
+        if problem:
+            raise LLMError(problem)
+        if self.provider == PROVIDER_GEMINI:
+            return _list_gemini_models(self.api_key, timeout)
+        if self.provider == PROVIDER_ANTHROPIC:
+            return _list_anthropic_models(self.api_key, timeout)
+        if self.provider == PROVIDER_AZURE:
+            return _list_azure_deployments(self.base_url, self.api_key, timeout)
+        if self.provider == PROVIDER_OLLAMA:
+            return _ollama_tags(self.base_url, timeout)
+        return list_openai_models(self.base_url, self.api_key, timeout)
 
     def chat(self, system: str, messages: list[dict], tools: list[dict] | None = None) -> Reply:
         problem = self.validate()

@@ -48,10 +48,8 @@ MAX_HISTORY_TURNS = 50
 # network, then any other OpenAI-compatible endpoint. Per provider:
 #   api_key_key / key_label    where its key is stored ("" = no key field)
 #   base_url_key / base_label  an editable address ("" = fixed, llm.ENDPOINTS)
-#   list_models                "ollama" or "openai": Settings can list the
-#                              server's models; auto_list does so on its own
-#                              (local servers - a cloud list waits for Load models)
-#   models                     suggestions offered while nothing's listed
+#   models                     suggestions offered while the provider's own
+#                              list can't be fetched (LLMClient.list_models)
 #   api_version_key            Azure's API version
 PROVIDER_SPEC = {
     PROVIDER_GEMINI: {
@@ -74,8 +72,8 @@ PROVIDER_SPEC = {
         "base_url_key": "",
         "env_vars": ("BUDDY_LLM_API_KEY", "ANTHROPIC_API_KEY"),
         "model_placeholder": "claude-sonnet-5",
-        # Offered in the dropdown, but the field stays editable - a model
-        # released after this build still has to be typeable.
+        # Offered while the list can't be fetched; a model released after
+        # this build still has to be typeable.
         "models": ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"],
         "note": (
             'Get a key at <a href="https://console.anthropic.com/settings/keys">'
@@ -91,7 +89,6 @@ PROVIDER_SPEC = {
         "env_vars": ("BUDDY_LLM_API_KEY", "OPENAI_API_KEY"),
         "model_placeholder": "gpt-4.1-mini",
         "models": ["gpt-4.1", "gpt-4.1-mini", "gpt-4o", "gpt-4o-mini", "o4-mini"],
-        "list_models": "openai",
         "note": (
             'Get a key at <a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a>. '
             "Leave the key empty to use $OPENAI_API_KEY from your environment instead."
@@ -104,10 +101,9 @@ PROVIDER_SPEC = {
         "base_url_key": "",
         "env_vars": ("OPENROUTER_API_KEY",),
         "model_placeholder": "provider/model, e.g. meta-llama/llama-3.3-70b-instruct",
-        "list_models": "openai",
         "note": (
             "One key for hundreds of models from every major lab, some of them free. Get one at "
-            '<a href="https://openrouter.ai/keys">openrouter.ai/keys</a>, then Load models to pick. '
+            '<a href="https://openrouter.ai/keys">openrouter.ai/keys</a>, then pick one of its models. '
             "Leave the key empty to use $OPENROUTER_API_KEY from your environment instead."
         ),
     },
@@ -119,7 +115,6 @@ PROVIDER_SPEC = {
         "env_vars": ("GROQ_API_KEY",),
         "model_placeholder": "llama-3.3-70b-versatile",
         "models": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"],
-        "list_models": "openai",
         "note": (
             'Very fast hosted open models. Get a key at <a href="https://console.groq.com/keys">'
             "console.groq.com/keys</a>. Leave the key empty to use $GROQ_API_KEY from your environment instead."
@@ -151,8 +146,6 @@ PROVIDER_SPEC = {
         "base_placeholder": "This PC (127.0.0.1:11434)",
         "env_vars": (),
         "model_placeholder": "qwen3:14b",
-        "list_models": "ollama",
-        "auto_list": True,
         "note": (
             "Runs on your own hardware – no API key, and nothing goes to a cloud service. Ollama must "
             "be running; the list above shows what it has installed. Leave the address empty for this "
@@ -169,8 +162,6 @@ PROVIDER_SPEC = {
         "base_placeholder": "This PC (127.0.0.1:8080)",
         "env_vars": (),
         "model_placeholder": "optional – it answers with the model it loaded",
-        "list_models": "openai",
-        "auto_list": True,
         "note": (
             "llama.cpp's own server, llama-server. Start it with <b>--jinja</b>, or the model can't use "
             "the tools Ask Buddy works through. Leave the address empty for this PC on port 8080; the "
@@ -187,8 +178,6 @@ PROVIDER_SPEC = {
         "base_placeholder": "This PC (127.0.0.1:1234)",
         "env_vars": (),
         "model_placeholder": "a model you've downloaded in LM Studio",
-        "list_models": "openai",
-        "auto_list": True,
         "note": (
             "Start LM Studio's local server (the Developer tab). Leave the address empty for this PC on "
             "port 1234 – the list above shows the models it has. Nothing goes to a cloud service."
@@ -204,7 +193,6 @@ PROVIDER_SPEC = {
         "base_placeholder": "https://api.example.com/v1",
         "env_vars": ("BUDDY_LLM_API_KEY", "OPENAI_API_KEY"),
         "model_placeholder": "the model name the service uses",
-        "list_models": "openai",
         "note": (
             "Any other endpoint that speaks OpenAI's /chat/completions – vLLM, Jan, KoboldCpp, LocalAI, "
             "DeepSeek, Mistral, xAI, Together and more. The base URL is what picks the service; the key is "

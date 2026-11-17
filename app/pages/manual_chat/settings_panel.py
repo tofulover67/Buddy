@@ -11,9 +11,11 @@ holding THAT provider's own stored value - switching provider never
 overwrites another's model or key.
 
 Test connection sends one tiny request that asks for a tool call (Ask Buddy
-works through tools), and Load models reads a cloud provider's model list;
-both run on a thread, since a local model can take a while to answer. A
-local server's models are listed on their own when the section is drawn.
+works through tools), on a thread, since a local model can take a while to
+answer. The Model dropdown is the provider's own list (LLMClient.list_models),
+fetched on a thread when the section is drawn with a key and address to ask
+with, and again on Refresh; until then, or when it can't be fetched, the
+model is typed.
 
 Semantic search picks what embeds the manual's passages and the questions
 (embedder.py). Set up downloads Buddy's own - llama.cpp and EmbeddingGemma,
@@ -25,6 +27,7 @@ against the manual's index, not just that something answers.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import sys
 import time
@@ -64,17 +67,21 @@ from .config import (
     provider_spec,
     rebuild_target,
 )
-from .llm import AZURE_API_VERSION, PROVIDER_GEMINI, LLMError, list_ollama_models, list_openai_models
+from .llm import AZURE_API_VERSION, PROVIDER_AZURE, PROVIDER_GEMINI, PROVIDER_OLLAMA, LLMError
 from .retrieval import check_embedder
 
-# How long a server's model list is trusted: the fields are redrawn on
-# every change, and asking a server that isn't there can take a moment.
+# How long a model list is trusted: the fields are redrawn on every change,
+# and asking a server that isn't there can take a moment. A server on this
+# PC or network gets a model pulled now and then; a cloud catalogue seldom
+# changes, and Refresh asks again anyway.
 MODEL_LIST_SECONDS = 20
+CLOUD_LIST_SECONDS = 600
 LOCAL_LIST_TIMEOUT = 2
+CLOUD_LIST_TIMEOUT = 8
 
 
 class _LLMJob(QThread):
-    """Test connection / Load models, off the UI thread."""
+    """Test connection, off the UI thread."""
 
     done = Signal(str, object)   # kind, result
 
@@ -103,8 +110,9 @@ def _outliving(job):
 
 
 class _ListModelsJob(QThread):
-    """A local server's model list (auto_list), off the UI thread - one
-    that isn't there kept Settings frozen for LOCAL_LIST_TIMEOUT or so."""
+    """A provider's model list, off the UI thread - a server that isn't
+    there, or a slow network, would otherwise freeze Settings while it's
+    asked."""
 
     done = Signal(object, object, str)   # the list's cache key, models, error
 
@@ -200,53 +208,72 @@ class ChatSettingsMixin:
     # ------------------------------------------------------ model lists --
 
     def _list_key(self, provider):
+        """What a model list depends on: the provider, its address and key
+        (a digest - a new key may see other models), Azure's version."""
         client = llm_client_from_settings(self.settings)
-        return provider, client.base_url, bool(client.api_key)
+        key = hashlib.sha256(client.api_key.encode("utf-8")).hexdigest()[:16] if client.api_key else ""
+        return provider, client.base_url, key, client.api_version if provider == PROVIDER_AZURE else ""
 
-    def _cached_models(self, provider):
-        """(models, error) already fetched for this provider/address - the
-        last ones, if any, while a local server's (auto_list) is asked
-        again off the UI thread, then shown."""
-        spec = PROVIDER_SPEC[provider]
+    def _model_list(self, provider):
+        """(models, note, loading) for the Model dropdown: the list already
+        fetched for this provider, address and key - asked for again off the
+        UI thread once it's old - and why there's none, if there isn't."""
+        client = llm_client_from_settings(self.settings)
+        problem = client.list_problem()
+        if problem:
+            return [], problem, False           # no key or address yet: nothing to ask
         cache = self.__dict__.setdefault("_model_lists", {})
         key = self._list_key(provider)
         hit = cache.get(key)
-        if hit and time.monotonic() - hit[0] < MODEL_LIST_SECONDS:
-            return hit[1], hit[2]
-        if spec.get("auto_list"):
-            self._list_soon(key, self._list_work(provider))
-        return (hit[1], hit[2]) if hit else ([], "")
+        ttl = MODEL_LIST_SECONDS if client.local else CLOUD_LIST_SECONDS
+        if not hit or time.monotonic() - hit[0] >= ttl:
+            self._list_soon(key, self._list_work(client))
+        loading = getattr(self, "_listing", None) == key
+        return (hit[1], hit[2], loading) if hit else ([], "", loading)
 
-    def _list_work(self, provider):
-        """What asks the provider's local server for its models: (models, error)."""
-        client = llm_client_from_settings(self.settings)
-        if PROVIDER_SPEC[provider]["list_models"] == "ollama":
-            def work():
-                models = list_ollama_models(client.base_url, timeout=LOCAL_LIST_TIMEOUT)
-                return models, "" if models else "Ollama isn't answering at that address – type a model name."
-        else:
-            def work():
-                try:
-                    return list_openai_models(client.base_url, client.api_key, timeout=LOCAL_LIST_TIMEOUT), ""
-                except LLMError:
-                    return [], f"{client.label} isn't answering at {client.base_url} – is the server running?"
+    @staticmethod
+    def _list_work(client):
+        """What asks the provider for its models: (models, note)."""
+        def work():
+            try:
+                models = client.list_models(timeout=LOCAL_LIST_TIMEOUT if client.local else CLOUD_LIST_TIMEOUT)
+            except LLMError as exc:
+                if not client.local or not str(exc).startswith("Couldn't reach"):
+                    return [], str(exc)
+                if client.provider == PROVIDER_OLLAMA:
+                    return [], "Ollama isn't answering at that address – type a model name."
+                return [], f"{client.label} isn't answering at {client.base_url} – is the server running?"
+            return models, "" if models else "The server listed no chat models."
         return work
 
     def _list_soon(self, key, work):
         if getattr(self, "_list_job", None) is not None:
-            return                  # one at a time - a changed address is asked once this one's back
+            return                  # one at a time - a changed address or key is asked once this one's back
         job = _outliving(_ListModelsJob(key, work))
         job.done.connect(self._on_models_listed)
         job.finished.connect(self._list_job_finished)
-        self._list_job = job
+        self._list_job, self._listing = job, key
         job.start()
 
     def _on_models_listed(self, key, models, error):
         self.__dict__.setdefault("_model_lists", {})[key] = (time.monotonic(), models, error)
-        refresh_open(self.tool_id)              # the Model field's suggestions, or why there are none
+        self._listing = None
+        refresh_open(self.tool_id)              # the Model dropdown, or why it's a typed field
 
     def _list_job_finished(self):
-        self._list_job = None
+        self._list_job = self._listing = None
+
+    def _refresh_models(self, ui):
+        """Refresh: the list fetched again now, whatever its age - the one
+        shown stays until the new one's back."""
+        provider = self.settings.get("provider", PROVIDER_GEMINI)
+        if provider not in PROVIDER_SPEC:
+            provider = PROVIDER_GEMINI
+        cache, key = self.__dict__.setdefault("_model_lists", {}), self._list_key(provider)
+        if key in cache:
+            cache[key] = (float("-inf"), *cache[key][1:])
+        self._model_list(provider)
+        ui.refresh()
 
     def _start_job(self, kind, work, ui):
         if getattr(self, "_llm_job", None) is not None:
@@ -267,15 +294,9 @@ class ChatSettingsMixin:
         self._ending_job, self._llm_job = getattr(self, "_llm_job", None), None
         ui = getattr(self, "_job_ui", None)
         provider = self.settings.get("provider", PROVIDER_GEMINI)
-        if kind == "models":
-            models, error = (([], str(result)) if isinstance(result, LLMError)
-                             else (result, "" if result else "The server listed no chat models."))
-            self.__dict__.setdefault("_model_lists", {})[self._list_key(provider)] = (time.monotonic(), models, error)
-            message, tone = (error, "danger") if error else (f"{len(models):,} models listed.", "success")
-        else:
-            ok, message = (False, str(result)) if isinstance(result, LLMError) else result
-            tone = "success" if ok else "danger"
-            self._test_result = (provider, message, tone)
+        ok, message = (False, str(result)) if isinstance(result, LLMError) else result
+        tone = "success" if ok else "danger"
+        self._test_result = (provider, message, tone)
         if ui is not None:
             try:
                 ui.status(message, tone)
@@ -290,14 +311,11 @@ class ChatSettingsMixin:
         if provider not in PROVIDER_SPEC:
             provider = PROVIDER_GEMINI
         spec = provider_spec(self.settings, provider)
-        listed, list_error = self._cached_models(provider) if spec.get("list_models") else ([], "")
-        models = listed or spec.get("models") or []
+        listed, list_note, loading = self._model_list(provider)
         test = getattr(self, "_test_result", None)
         test = test if test and test[0] == provider else None
         busy = getattr(self, "_llm_job", None) is not None
         buttons = [("Testing…" if busy else "Test connection", "test_connection")]
-        if spec.get("list_models") and not spec.get("auto_list"):
-            buttons.append(("Load models", "load_models"))
         history, steps = history_limit(self.settings), max_steps_limit(self.settings)
         return [
             sf.heading("AI provider"),
@@ -306,9 +324,11 @@ class ChatSettingsMixin:
             # asks the server there for its models.
             sf.text("base_url", spec.get("base_label", "Base URL"), self.settings.get(spec["base_url_key"], ""),
                     placeholder=spec.get("base_placeholder", "")) if spec["base_url_key"] else None,
-            sf.text("model", spec.get("model_label", "Model"), self.settings.get(spec["model_key"], ""),
-                    placeholder=spec["model_placeholder"], live=True, suggest=models),
-            sf.hint(list_error, tone="danger") if list_error else None,
+            # The provider's own list once it's fetched; a typed field, with
+            # why, when it can't be (no key yet, the server isn't running).
+            sf.combo("model", spec.get("model_label", "Model"), self.settings.get(spec["model_key"], ""),
+                     listed, loading=loading, refresh="refresh_models", placeholder=spec["model_placeholder"],
+                     suggest=spec.get("models"), hint_text=list_note or None),
             sf.text("api_key", spec.get("key_label", "API key"), secrets_store.unlock(self.settings.get(spec["api_key_key"], "")),
                     placeholder="Paste your API key", password=True, live=True) if spec["api_key_key"] else None,
             sf.text("api_version", "API version", self.settings.get(spec["api_version_key"], ""),
@@ -707,11 +727,8 @@ class ChatSettingsMixin:
             client = llm_client_from_settings(self.settings)
             ui.status(f"Asking {client.label}…", "")
             self._start_job("test", client.test, ui)
-        elif action == "load_models":
-            client = llm_client_from_settings(self.settings)
-            if client.key_required and not client.api_key:
-                return ui.status("Add the API key first – the model list needs it.", "danger")
-            self._start_job("models", lambda: list_openai_models(client.base_url, client.api_key), ui)
+        elif action == "refresh_models":
+            self._refresh_models(ui)
         elif action == "open_ask_folder":
             try:
                 folder = ensure_folder(self.ask_folder)

@@ -21,7 +21,7 @@
         "Checks the current timeline for format mismatches and missing local media paths, and explains the selected clip or clip under the playhead",
         "Uses the detected Free or Studio edition for every question when connected to Resolve",
         "Points you at whichever other Buddy tool automates what you are asking about",
-        "Runs on the AI model you choose in Settings > Ask Buddy: Google Gemini, Anthropic Claude, OpenAI, OpenRouter, Groq or Azure OpenAI in the cloud; Ollama, llama.cpp's llama-server (started with --jinja) or LM Studio on your own computer or network; or any other OpenAI-compatible endpoint. Test connection checks the key, the model and that it can call tools"
+        "Runs on the AI model you choose in Settings > AI > Chat assistant: Google Gemini, Anthropic Claude, OpenAI, OpenRouter, Groq or Azure OpenAI in the cloud; Ollama, llama.cpp's llama-server (started with --jinja) or LM Studio on your own computer or network; or any other OpenAI-compatible endpoint. The Model dropdown lists the models that provider has once its key or server address is in (Ollama's installed models, an Azure resource's deployments); Refresh fetches the list again, Type a name… takes one that isn't listed, and when the list can't be fetched the model is typed instead. Test connection checks the key, the model and that it can call tools"
       ]
     },
     "audit": {

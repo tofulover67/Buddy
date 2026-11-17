@@ -341,16 +341,16 @@ class ToolSectionTests(unittest.TestCase):
             self.assertEqual(fields["api_key"]["value"], "")      # its own key, not Gemini's
             page.on_setting("provider", "llamacpp", UI())
             asked = []
-            with mock.patch("pages.manual_chat.settings_panel.list_openai_models", return_value=["qwen3-14b"]) as listed, \
+            with mock.patch("pages.manual_chat.llm.LLMClient.list_models", return_value=["qwen3-14b"]) as listed, \
                     mock.patch.object(Page, "_list_soon", lambda self, key, work: asked.append((key, work))):
                 fields = kinds(page.settings_fields())           # Settings doesn't wait on the server
-                self.assertEqual((fields["model"]["suggest"], listed.call_count, len(asked)), ([], 0, 1))
+                self.assertEqual((fields["model"]["options"], listed.call_count, len(asked)), ([], 0, 1))
                 key, work = asked[0]
                 page._on_models_listed(key, *work())             # what the job does, then hands back
                 fields = kinds(page.settings_fields())
                 page.settings_fields()                           # listed once, then cached
             self.assertEqual((listed.call_count, len(asked)), (1, 1))
-            self.assertEqual(fields["model"]["suggest"], ["qwen3-14b"])
+            self.assertEqual((fields["model"]["kind"], fields["model"]["options"]), ("combo", ["qwen3-14b"]))
             self.assertEqual(fields["api_key"]["label"], "API key (optional)")
             self.assertEqual(fields["base_url"]["label"], "Server address")
             page.on_setting("provider", "azure", UI())
@@ -366,6 +366,107 @@ class ToolSectionTests(unittest.TestCase):
         with mock.patch("pages.manual_chat.settings_panel.WriteConsentDialog.obtain", return_value=False):
             page.on_setting("allow_project_writes", True, UI())
         self.assertIs(page.settings["allow_project_writes"], False)   # no consent, stays off
+
+    def chat_page(self, **settings):
+        from pages.manual_chat.settings_panel import ChatSettingsMixin
+
+        class Page(ChatSettingsMixin):
+            tool_id = "manual_chat"
+            ask_folder = os.path.join(tempfile.mkdtemp(), "ask_buddy")   # never the real ~/.buddy
+
+            def __init__(self):
+                self.settings = Mem(**settings)
+                self.asked = []
+
+            def _save(self, key, value):
+                self.settings[key] = value
+
+            def _list_soon(self, key, work):                 # the job, without its thread
+                self.asked.append((key, work))
+                self._listing = key
+
+            def run_job(self):
+                key, work = self.asked.pop(0)
+                self._on_models_listed(key, *work())
+
+            def model(self):
+                with mock.patch("pages.manual_chat.settings_panel.default_data_paths", return_value=("", "")), \
+                        mock.patch("pages.manual_chat.settings_panel.refresh_open"):
+                    return kinds(self.settings_fields())["model"]
+
+        return Page()
+
+    def test_the_model_dropdown_lists_each_providers_models(self):
+        from core import secrets_store
+        lists = {"gemini": ["gemini-3.8-flash", "gemini-3.8-pro"], "anthropic": ["claude-opus-5", "claude-sonnet-5"],
+                 "openai_api": ["gpt-4.1", "o4-mini"], "openrouter": ["meta-llama/llama-3.3-70b-instruct"],
+                 "groq": ["llama-3.3-70b-versatile"], "azure": ["my-deployment"], "ollama": ["qwen3:14b"],
+                 "llamacpp": ["local-model"], "lmstudio": ["qwen3-14b"], "openai": ["custom-1"]}
+        page = self.chat_page(provider="gemini", api_key_gemini=secrets_store.lock("g-key"),
+                              api_key_anthropic=secrets_store.lock("a-key"), api_key_openai_api=secrets_store.lock("o-key"),
+                              api_key_openrouter=secrets_store.lock("r-key"), api_key_groq=secrets_store.lock("q-key"),
+                              api_key_azure=secrets_store.lock("z-key"), base_url_azure="https://r.openai.azure.com",
+                              base_url_openai="https://api.example.com/v1", model_anthropic="claude-sonnet-5")
+        from pages.manual_chat.llm import LLMClient
+        seen = []
+
+        def fake_list(client, timeout=5):
+            seen.append((client.provider, client.api_key, client.base_url))
+            return lists[client.provider]
+
+        with mock.patch.object(LLMClient, "list_models", fake_list), \
+                mock.patch.dict(os.environ, {}, clear=True):           # no key from the environment
+            for provider, models in lists.items():
+                page.on_setting("provider", provider, UI())
+                field = page.model()
+                self.assertEqual((field["kind"], field["options"], field["loading"]), ("combo", [], True), provider)
+                page.run_job()
+                field = page.model()
+                self.assertEqual((field["options"], field["loading"], field["hint"]), (models, False, None), provider)
+                self.assertEqual(page.asked, [], provider)                # cached: not asked again
+        self.assertEqual(dict((p, (k, b)) for p, k, b in seen)["azure"], ("z-key", "https://r.openai.azure.com"))
+        self.assertEqual(dict((p, (k, b)) for p, k, b in seen)["openai"], ("", "https://api.example.com/v1"))
+        page.on_setting("provider", "anthropic", UI())
+        self.assertEqual(page.model()["value"], "claude-sonnet-5")           # the saved model stays selected
+        page.on_setting("model", " claude-next-preview ", UI())              # typed, not in the list: kept
+        field = page.model()
+        self.assertEqual((field["value"], field["options"]), ("claude-next-preview", lists["anthropic"]))
+        self.assertEqual(page.settings["model_anthropic"], "claude-next-preview")
+        ui = mock.Mock()
+        page.on_settings_action("refresh_models", ui)                         # fetched again, whatever its age
+        self.assertEqual((len(page.asked), ui.refresh.call_count), (1, 1))
+        field = page.model()
+        self.assertEqual((field["loading"], field["options"]), (True, lists["anthropic"]))   # the old list meanwhile
+
+    def test_the_model_is_typed_when_the_list_cant_be_fetched(self):
+        from pages.manual_chat.llm import LLMClient, LLMError
+        page = self.chat_page(provider="ollama", model_ollama="qwen3:14b")
+        with mock.patch.object(LLMClient, "list_models", side_effect=LLMError("Couldn't reach http://127.0.0.1:11434: refused")):
+            page.model()
+            page.run_job()
+        field = page.model()
+        self.assertEqual((field["options"], field["value"], field["loading"]), ([], "qwen3:14b", False))
+        self.assertEqual(field["hint"], "Ollama isn't answering at that address – type a model name.")
+        with mock.patch.dict(os.environ, {}, clear=True):
+            page.on_setting("provider", "openai_api", UI())                  # no key yet: nothing asked
+            field = page.model()
+        self.assertEqual((field["options"], field["hint"], page.asked), ([], "Add the API key to list the models.", []))
+        self.assertEqual(field["suggest"], ["gpt-4.1", "gpt-4.1-mini", "gpt-4o", "gpt-4o-mini", "o4-mini"])
+        page.on_setting("api_key", "o-key", UI())
+        with mock.patch.object(LLMClient, "list_models", side_effect=LLMError("Couldn't reach OpenAI: offline")), \
+                mock.patch.dict(os.environ, {}, clear=True):
+            page.model()
+            page.run_job()
+            field = page.model()
+        self.assertEqual((field["options"], field["hint"]), ([], "Couldn't reach OpenAI: offline"))
+
+    def test_the_list_is_fetched_off_the_ui_thread(self):
+        from pages.manual_chat.settings_panel import _ListModelsJob
+        got = []
+        job = _ListModelsJob(("ollama",), lambda: (_ for _ in ()).throw(ValueError("bad")))
+        job.done.connect(lambda key, models, error: got.append((key, models, error)))
+        job.run()                                                              # what the thread runs
+        self.assertEqual(got, [(("ollama",), [], "ValueError: bad")])
 
 
 if __name__ == "__main__":
