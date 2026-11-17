@@ -43,7 +43,9 @@ def enable():
 
 def own_process(executable=None):
     """Whether this process is Buddy's to end: Python itself, or fuscript."""
-    name = os.path.basename(executable if executable is not None else sys.executable or "").lower()
+    # Split at either slash: os.path on a Mac keeps a Windows path whole.
+    path = executable if executable is not None else sys.executable or ""
+    name = path.replace("\\", "/").rsplit("/", 1)[-1].lower()
     return name.startswith(("python", "fuscript"))
 
 
