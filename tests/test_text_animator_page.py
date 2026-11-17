@@ -666,11 +666,18 @@ class PageTests(unittest.TestCase):
             return [p for n, p in self.events if n == f"tp_{name}"]
 
         self.show("style")
-        self.assertEqual(self.last("state")["sample"], "Big Title")       # the lowest track's clip
-        self.tool(0).inputs["StyledText"] = "Two\nlines"
+        self.assertEqual(self.last("state")["sample"], "World")           # the topmost track's clip
+        self.tool(2).inputs["StyledText"] = "Two\nlines"
         self.events.clear()
         self.page._refresh_live_preview(force=True)
         self.assertEqual(self.last("state")["sample"], "Two\nlines")      # every line, breaks kept
+        self.page.on_set({"name": "style_scope", "value": "track"})
+        self.page.on_set({"name": "style_track", "value": 1})
+        self.page._refresh_live_preview(force=True)
+        self.assertEqual(self.last("state")["sample"], "Big Title")       # Apply to's track, when it's one
+        self.page.on_set({"name": "style_track", "value": 3})
+        self.page._refresh_live_preview(force=True)
+        self.assertEqual(self.last("state")["sample"], "Two\nlines")
         self.assertFalse(sent("canvas"))                                  # no canvas on this tab
         self.events.clear()
         self.page._refresh_live_preview(force=True)

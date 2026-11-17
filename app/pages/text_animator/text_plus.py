@@ -647,13 +647,27 @@ class TextPlusTools(QObject):
             self._items[self.tab] = {self._item_id(item): item for item in items}
             self._push_canvas(self.tab)
 
+    def _sample_item(self, items):
+        """The Text+ under the playhead the style preview shows: the one on Apply to's
+        track when that's Specific track, else the topmost - what the viewer shows on top,
+        and where Subtitle Conversion puts the subtitles (the topmost empty track)."""
+        items = [item for item in items if item.text]
+        if self.opts.style_scope == "track":
+            track = self.opts.track("style_track")
+            mine = [item for item in items if item.track_index == track]
+            if mine:
+                return mine[0]
+        return max(items, key=lambda item: item.track_index, default=None)
+
     def _update_sample(self, items):
-        """The style preview's text: the playhead's Text+, every line as Resolve draws
-        them - capped only for sanity, not a cut a subtitle would hit. With nothing
-        under the playhead the last one stays, rather than flicking back to a stand-in."""
-        if not items or not items[0].text:
+        """The style preview's text: the playhead's Text+ (_sample_item), every line as
+        Resolve draws them - capped only for sanity, not a cut a subtitle would hit. With
+        nothing under the playhead the last one stays, rather than flicking back to a
+        stand-in."""
+        item = self._sample_item(items)
+        if item is None:
             return
-        sample = "\n".join(items[0].text.split("\n")[:_SAMPLE_MAX_LINES])[:_SAMPLE_MAX_CHARS]
+        sample = "\n".join(item.text.split("\n")[:_SAMPLE_MAX_LINES])[:_SAMPLE_MAX_CHARS]
         if sample != self._sample:
             self._sample = sample
             self._push_state()

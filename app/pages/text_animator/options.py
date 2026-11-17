@@ -35,7 +35,8 @@ SLIDERS = {
     "outline_thickness": ("Thickness", 0.0, 1.0, 0.005, 3, 0.04, "outline_thickness"),
     "outline_opacity": ("Opacity", 0.0, 1.0, 0.01, 2, 1.0, "outline_opacity"),
     "shadow_offset_x": ("Offset X", -1.0, 1.0, 0.01, 3, 0.0, "shadow_offset_x"),
-    "shadow_offset_y": ("Offset Y", -1.0, 1.0, 0.01, 3, -0.02, "shadow_offset_y"),
+    # A shadow's offsets are shares of Size x the frame's width (Text+'s own default: -0.05, below).
+    "shadow_offset_y": ("Offset Y", -1.0, 1.0, 0.01, 3, -0.05, "shadow_offset_y"),
     "shadow_blur": ("Blur", 0.0, 100.0, 0.5, 2, 5.0, "shadow_blur"),
     "shadow_opacity": ("Opacity", 0.0, 1.0, 0.01, 2, 0.75, "shadow_opacity"),
     "background_outline_width": ("Outline width", 0.0, 1.0, 0.01, 3, 0.0, "background_outline_width"),
@@ -93,13 +94,16 @@ MAX_LOOKS = 60
 MAX_LOOK_NAME = 40
 
 _PLAIN = {"outline_on": False, "shadow_on": False, "background_on": False}
-_SOFT_SHADOW = {"shadow_on": True, "shadow_color": "#000000", "shadow_offset_x": 0.0, "shadow_offset_y": -0.004,
+_SOFT_SHADOW = {"shadow_on": True, "shadow_color": "#000000", "shadow_offset_x": 0.0, "shadow_offset_y": -0.05,
                 "shadow_blur": 5.0, "shadow_opacity": 0.8}
 _BLACK_OUTLINE = {"outline_on": True, "outline_color": "#000000", "outline_opacity": 1.0}
+# A box's Extend and Round are shares of Size x the frame's width, like a shadow's offsets; Text+
+# already leaves 0.15 of it either side (measured on Studio 21.1.2), and Round 1 or more is as
+# round as the box goes: a pill.
 _PILL = {"background_on": True, "background_color": "#FFFFFF", "background_opacity": 1.0,
-         "background_corner_radius": 0.3, "background_extend_horizontal": 0.015, "background_extend_vertical": 0.008}
+         "background_corner_radius": 1.0, "background_extend_horizontal": 0.1, "background_extend_vertical": 0.08}
 _BOX = {"background_on": True, "background_color": "#000000", "background_opacity": 0.65,
-        "background_corner_radius": 0.0, "background_extend_horizontal": 0.01, "background_extend_vertical": 0.005}
+        "background_corner_radius": 0.0, "background_extend_horizontal": 0.0, "background_extend_vertical": 0.05}
 # The ready-made looks, for a wide (16:9-ish) timeline and a tall (9:16) one: (name, values,
 # bold - the boldest style of the picked font's family, if it has one). They leave the font
 # itself alone, and a wide one leaves the size too.

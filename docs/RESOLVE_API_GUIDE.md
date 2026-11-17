@@ -314,6 +314,15 @@ the Fusion page, not that the connection failed.
     shadow (`Offset3 = (0.05, -0.05)`, `SoftnessX3`/`SoftnessY3 = 5`).
     `GetInputList()` doesn't list them at all. Element 1 has a native gradient:
     `Type1` and `ShadingGradient1`.
+  - **The box behind the text** (element 4, `Level4 = 0`, "Text"), measured on
+    Studio 21.1.2, 2026-11-17, from `TimelineItem.ExportFrame` of a Text+ alone
+    (Arial, 1920x1080, Size 0.1 and 0.2): as tall as the lines themselves
+    (ascent to descent each, no padding), as wide as the widest line's advance
+    plus 0.15 x Size x width either side. `ExtendHorizontal4` and
+    `ExtendVertical4` each add themselves x Size x width a side - the vertical
+    one goes by the frame's width too - and negative ones shrink it. `Round4` is
+    the corners' radius in the same units, capped at half the box (1.0 at Size
+    0.1 is a full pill).
   - **Animation in the comp text works too:** `BezierSpline` tools with
     `KeyFrames = { [frame] = { value, LH = {...}, RH = {...}, Flags = { Linear = true } } }`
     wired to `Merge.Blend`, `Transform.Size`/`Angle`, `Blur.XBlurSize`, and an

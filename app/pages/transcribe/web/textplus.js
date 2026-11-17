@@ -187,23 +187,38 @@ document.addEventListener("buddy-tab", closeFonts);
 
 // How a slider's value reads, in place of Text+'s own fractions. Size is the text's height in
 // pixels on this timeline's frame (Text+ makes ascent + descent TEXT_PLUS_HEIGHT x Size x the
-// frame's width); a shadow's offsets and a box's padding are pixels of the frame too (Offset Y
-// counted downwards, where Text+'s goes up); an outline's thickness is a share of the text's
-// size; opacity and rounding are a %. scale: shown = value x scale; it's typed in the same units.
+// frame's width). Text+ scales an outline and a shadow's offsets with Size x the frame's width
+// (measured on Studio 21.1, titles/textplus_comp.py): an outline reaches OUTLINE_REACH x
+// Thickness of that, and Offset is a share of it - so they read in pixels of the frame at the
+// size on the controls, Offset Y as Text+ counts it (up is +, so a shadow below is -). A box's
+// Extend and Round go by Size x width as well (dressText), so its padding and rounding read
+// in pixels the same way; opacity is a %. scale: shown = value x scale; it's typed in the same
+// units.
+const OUTLINE_REACH = 0.716;
+const SOFTNESS_PER_EM = 55;          // a shadow's Softness per em of blur (titles' SOFTNESS_PER_BLUR)
+const BOX_SIDE = 0.15;               // a box's own room either side of the text, x Size x width
 const frame = () => (STATE && STATE.resolution) || [1920, 1080];
 const frameWidth = () => frame()[0];
+function sizeNow() {
+    const host = document.querySelector('[data-slider="font_size"]');
+    return host && host._input ? Number(host._input.value) : OPT ? OPT.sliders.font_size.value : 0.08;
+}
 const PCT = {scale: () => 100, digits: 0, suffix: "%"};
-const ACROSS = {scale: () => frame()[0], digits: 0, suffix: " px"};
+const BY_SIZE = {scale: () => sizeNow() * frameWidth(), digits: 0, suffix: " px"};
 const UNITS = {
     font_size: {scale: () => TEXT_PLUS_HEIGHT * frameWidth(), digits: 0, suffix: " px"},
-    outline_thickness: {scale: () => 100, digits: 1, suffix: "%"},
-    outline_opacity: PCT, shadow_opacity: PCT, background_opacity: PCT, background_corner_radius: PCT,
+    outline_thickness: {scale: () => OUTLINE_REACH * sizeNow() * frameWidth(), digits: 1, suffix: " px"},
+    outline_opacity: PCT, shadow_opacity: PCT, background_opacity: PCT,
     shadow_blur: {scale: () => 1, digits: 1, suffix: ""},
-    shadow_offset_x: ACROSS,
-    shadow_offset_y: {scale: () => -frame()[0], digits: 0, suffix: " px"},
-    background_extend_horizontal: ACROSS,
-    background_extend_vertical: {scale: () => frame()[1], digits: 0, suffix: " px"},
+    shadow_offset_x: BY_SIZE,
+    shadow_offset_y: BY_SIZE,
+    background_corner_radius: BY_SIZE,
+    background_extend_horizontal: BY_SIZE,
+    background_extend_vertical: BY_SIZE,
 };
+// Values that read by the size on the controls: shown again as it changes.
+const BY_SIZE_NAMES = ["outline_thickness", "shadow_offset_x", "shadow_offset_y", "background_corner_radius",
+                       "background_extend_horizontal", "background_extend_vertical"];
 function shown(unit, v) {
     const text = (v * unit.scale()).toFixed(unit.digits);
     return `${Number(text) === 0 ? text.replace("-", "") : text}${unit.suffix}`;
@@ -214,12 +229,12 @@ function shown(unit, v) {
 // pixels of one end. A value outside it - typed, or from a look - widens the slider to hold it.
 const REACH = {
     font_size: [0.01, 0.3, 0.005],
-    outline_thickness: [0, 0.2, 0.005],
-    shadow_offset_x: [-0.03, 0.03, 0.001],
-    shadow_offset_y: [-0.03, 0.03, 0.001],
+    outline_thickness: [0, 0.3, 0.005],
+    shadow_offset_x: [-0.3, 0.3, 0.005],
+    shadow_offset_y: [-0.3, 0.3, 0.005],
     shadow_blur: [0, 30, 0.5],
-    background_extend_horizontal: [-0.02, 0.1, 0.001],
-    background_extend_vertical: [-0.02, 0.1, 0.001],
+    background_extend_horizontal: [-0.15, 0.6, 0.005],
+    background_extend_vertical: [-0.1, 0.6, 0.005],
 };
 
 // A value a slider's steps don't land on (a typed one) is kept as it is, not snapped to a step,
@@ -232,11 +247,27 @@ function place(input, v, step) {
     input.value = v;
 }
 
-/* Double-click a slider's value to type one, in the units it reads in. Enter or clicking
-   away sets it, Esc leaves it as it was. put(value) gets it in the slider's own units,
-   rounded to decimals and kept between the slider's ends. */
+// The value on screen after (step 1) or before (step -1) this one, in the same panel or popup.
+function nextValue(out, step) {
+    const all = [...out.closest(".panel, .guides-pop, body").querySelectorAll(".val")]
+        .filter(node => node === out || node.getClientRects().length);
+    const at = all.indexOf(out);
+    return all[at + step] || null;
+}
+
+/* Double-click a slider's value (or press Enter on it) to type one, in the units it reads in.
+   Enter or clicking away sets it, Esc leaves it as it was, Tab sets it and goes on to the next
+   value. put(value) gets it in the slider's own units, rounded to decimals and kept between
+   the setting's own ends. */
 function typeIn(out, input, unit, decimals, put) {
     out.title = "Double-click to type a value";
+    out.tabIndex = 0;
+    out.addEventListener("keydown", e => {
+        if (e.target === out && (e.key === "Enter" || e.key === "F2")) {
+            e.preventDefault();
+            out.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+        }
+    });
     out.addEventListener("dblclick", e => {
         e.preventDefault();
         if (out.querySelector("input")) return;
@@ -261,6 +292,13 @@ function typeIn(out, input, unit, decimals, put) {
             ev.stopPropagation();
             if (ev.key === "Enter") finish(true);
             else if (ev.key === "Escape") finish(false);
+            else if (ev.key === "Tab") {
+                // On to the next value's box (Shift+Tab: the one before), not the slider.
+                ev.preventDefault();
+                const next = nextValue(out, ev.shiftKey ? -1 : 1);
+                finish(true);
+                if (next) next.dispatchEvent(new MouseEvent("dblclick", {bubbles: true}));
+            }
         });
         box.addEventListener("blur", () => finish(true));
         // Clicks in the box stay in it: not the label's, which would hand them to the slider.
@@ -397,9 +435,9 @@ for (const node of $$("[data-part]")) {
 $("reset-font").append(icon("refresh"));
 
 /* A shadow's position: a dot to drag about a square, its middle the text itself - no offset, a
-   glow. The square reaches PAD_REACH of the frame's width each way, or as far as the shadow
-   already is. The offsets themselves are the two values beside it (typed with a double-click). */
-const PAD_REACH = 0.03;
+   glow. The square reaches PAD_REACH (of Size x the frame's width) each way, or as far as the
+   shadow already is. The offsets themselves are the two values beside it (typed with a double-click). */
+const PAD_REACH = 0.15;
 const pad = $("shadow-pad");
 let padHeld = null;         // while the dot is dragged: the reach it started with
 const offsetHost = axis => document.querySelector(`[data-slider="shadow_offset_${axis}"]`);
@@ -450,7 +488,7 @@ pad.addEventListener("keydown", e => {
     const step = {ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1]}[e.key];
     if (!step || !OPT) return;
     e.preventDefault();
-    const by = e.shiftKey ? 0.005 : 0.001;
+    const by = e.shiftKey ? 0.02 : 0.005;
     moveShadow(offsetNow("x") + step[0] * by, offsetNow("y") + step[1] * by, true);
 });
 
@@ -583,18 +621,27 @@ function dressText(span, v, css, w, h, fs) {
     span.style.fontStyle = css.italic ? "italic" : "normal";
     span.style.fontSize = `${fs}px`;
     span.style.color = v.font_color;
+    // Text+ scales its outline and shadow with Size x the frame's width - here, from the
+    // font size (Text+ makes ascent + descent TEXT_PLUS_HEIGHT x that).
+    const sizeW = fs * (css.height || fontHeightPerPx(css)) / TEXT_PLUS_HEIGHT;
+    // CSS strokes both sides of the edge and the fill covers the inner half: twice the reach.
     span.style.webkitTextStroke = v.outline_on
-        ? `${Math.max(0.5, v.outline_thickness * fs * 2)}px ${rgba(v.outline_color, v.outline_opacity)}` : "0";
+        ? `${Math.max(0.5, 2 * OUTLINE_REACH * v.outline_thickness * sizeW)}px ${rgba(v.outline_color, v.outline_opacity)}` : "0";
     span.style.paintOrder = "stroke fill";
     span.style.textShadow = v.shadow_on
-        // Offsets are fractions of the frame width, like Size.
-        ? `${v.shadow_offset_x * w}px ${-v.shadow_offset_y * w}px ${v.shadow_blur * w / 400}px ${rgba(v.shadow_color, v.shadow_opacity)}` : "none";
+        ? `${v.shadow_offset_x * sizeW}px ${-v.shadow_offset_y * sizeW}px ${v.shadow_blur / SOFTNESS_PER_EM * fs}px ${rgba(v.shadow_color, v.shadow_opacity)}`
+        : "none";
     if (v.background_on) {
-        const ph = Math.max(2, w * 0.017 + v.background_extend_horizontal * w);
-        const pv = Math.max(1, h * 0.02 + v.background_extend_vertical * h);
+        // Text+'s box at Level Text, measured on Studio 21.1.2 (2026-11-17): the lines' own
+        // height (ascent to descent each - the span's line box) by their widest advance, plus
+        // BOX_SIDE x Size x width either side; each Extend adds itself x Size x width a side
+        // (Vertical too goes by the width); Round is the corners' radius in the same units,
+        // no more than half the box (CSS caps it the same way).
+        const ph = Math.max(0, (BOX_SIDE + v.background_extend_horizontal) * sizeW);
+        const pv = Math.max(0, v.background_extend_vertical * sizeW);
         span.style.background = rgba(v.background_color, v.background_opacity);
         span.style.padding = `${pv}px ${ph}px`;
-        span.style.borderRadius = `${v.background_corner_radius * fs}px`;
+        span.style.borderRadius = `${v.background_corner_radius * sizeW}px`;
     } else {
         span.style.background = "none";
         span.style.padding = "0";
@@ -618,6 +665,10 @@ function drawPreview() {
     sample.style.lineHeight = OPT.font_css.line ? String(OPT.font_css.line) : "normal";   // Text+'s line step
     dressText(sample, v, OPT.font_css, w, h, fs);
     drawSafe(w, h);
+    for (const name of BY_SIZE_NAMES) {
+        const host = document.querySelector(`[data-slider="${name}"]`);
+        if (host && host._show && !host.querySelector(".typein")) host._show();
+    }
     drawParts();
     drawPad();
 }
