@@ -7,7 +7,8 @@ track per mic, the cameras' own sound below the mics.
 No Qt and no Resolve in here. It works on an OTIO document - the export of
 a timeline holding the clips (page.py makes one) - and hands back a new
 document for page.py to import, so the clips and timelines the person
-already has are never changed.
+already has are never changed. Asked to sync the open timeline where it is
+instead (in_place), it hands back only how far each item has to move.
 
 It stands on Project Setup's sync (pages/project_setup/):
 
@@ -516,12 +517,46 @@ def layout(document, clips, devices, positions, camera_audio="tracks"):
     return out, tracks
 
 
+def moves_in_place(clips, devices, positions, master=None):
+    """For syncing the open timeline where it is, instead of laying out a
+    new one: how far each item has to move, every one staying on its own
+    track - [{"kind", "track", "start", "to"}] in frames from the timeline's
+    start, only the items that move. The master clock's first clip stays
+    where it is and the rest come to it; if that would start something
+    before the timeline does, everything placed moves later together.
+    Clips that couldn't be placed aren't moved."""
+    by_id = {c.id: c for c in clips}
+    rate = clips[0].rate if clips else 24.0
+    target = {cid: round(seconds * rate) for cid, seconds in positions.items() if cid in by_id}
+    if not target:
+        return []
+    chosen = master_device(devices, master) if not isinstance(master, Device) else master
+    placed = [c for c in (chosen.clips if chosen is not None else []) if c.id in target] or \
+             [c for c in clips if c.id in target]
+    anchor = min(placed, key=lambda c: c.logical.record_frame)
+    offset = round(anchor.logical.record_frame) - target[anchor.id]
+    shifts = {cid: frame + offset - round(by_id[cid].logical.record_frame) for cid, frame in target.items()}
+    low = min(round(e["start"]) + shifts[cid] for cid in shifts for e in by_id[cid].logical.entries)
+    if low < 0:
+        shifts = {cid: shift - low for cid, shift in shifts.items()}
+    rows = []
+    for cid, shift in shifts.items():
+        if shift:
+            for entry in by_id[cid].logical.entries:
+                start = int(round(entry["start"]))
+                rows.append({"kind": entry["kind"], "track": int(entry["track"]), "start": start, "to": start + shift})
+    rows.sort(key=lambda r: (r["kind"], r["track"], r["start"]))
+    return rows
+
+
 # ------------------------------------------------------------------- run --
 
 def sync(document, method, ffmpeg_path=None, report=None, names=None, order=None, fine=True,
-         camera_audio="tracks", master=None, loader=None):
+         camera_audio="tracks", master=None, loader=None, in_place=False):
     """The whole run: (new document, result). result: {devices, tracks,
-    placed, unplaced {clip name: why}, drift [...], warnings, master, method}."""
+    placed, unplaced {clip name: why}, drift [...], warnings, master, method}.
+    in_place: no new document (None) - result["moves"] says how far each item
+    of the timeline read has to move instead (moves_in_place)."""
     def say(stage, done=0, total=1):
         if report is not None:
             report(stage, done, total)
@@ -564,8 +599,12 @@ def sync(document, method, ffmpeg_path=None, report=None, names=None, order=None
                                   margin=REFINE_MARGIN_S if method == "waveform" else REFINE_MARGIN_TC_S,
                                   master=chosen, loader=loader)
 
-    say("Building the timeline")
-    out, tracks = layout(document, clips, devices, positions, camera_audio)
+    if in_place:
+        out, tracks = None, []
+        moves = moves_in_place(clips, devices, positions, chosen)
+    else:
+        say("Building the timeline")
+        out, tracks = layout(document, clips, devices, positions, camera_audio)
     drift_rows = []
     for cid, info in drift.items():
         clip = by_id[cid]
@@ -588,6 +627,8 @@ def sync(document, method, ffmpeg_path=None, report=None, names=None, order=None
         "drift": drift_rows,
         "warnings": warnings,
     }
+    if in_place:
+        result["moves"] = moves
     return out, result
 
 

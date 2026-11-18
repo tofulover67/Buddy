@@ -1,18 +1,19 @@
 "use strict";
 
-// Auto Switch's view (page.py says what each event carries): three steps -
-// pair audio with the cameras, name the voices, the extra shots and Build.
-// Python owns the state; this draws it and says what was clicked.
+// Auto Switch's view (page.py says what each event carries), all on one
+// screen: the people heard and the camera each is on, the cameras (the sound
+// each is heard through, and what the ones with nobody on them are for), how
+// it will cut, and Build. Python owns the state; this draws it and says what
+// was clicked.
 
 const $ = id => document.getElementById(id);
 const el = Buddy.el;
 const COLORS = ["#4e9be0", "#e0884e", "#5bbf7a", "#c66bd1", "#d6c14e", "#5ec9c9", "#e06a7a", "#9a8be0"];
 const PEOPLE = [["1", "1 person"], ["2", "2 people"], ["3", "3 people"], ["4", "4 people"],
                 ["5", "5 people"], ["6", "6 people"], ["auto", "Find out"]];
-const NEXT = {1: "Next: name voices", 2: "Next: extra shots", 3: "Build timeline"};
 
 let state = {}, setup = {audio: [], cameras: [], setups: [], setup: ""}, voices = {mics: [], voices: []},
-    plan = {shots: [], rows: []}, cut = {}, step = 1;
+    plan = {shots: [], rows: []}, cut = {};
 
 function onTimeline() {
     return setup.cameras.filter(c => c.track != null);
@@ -46,29 +47,9 @@ function thumb(cam) {
                      : el("span.sw-thumb.sw-thumb-empty", {}, [Buddy.icon("film")]);
 }
 
-function cameraBox(cam) {
-    return el("div.sw-camera", {}, [
-        thumb(cam),
-        el("span.sw-dot", {style: `background:${cameraColor(cam.track)}`}),
-        el("span.sw-file", {text: cam.file || cam.label, title: cam.label, translate: "no"}),
-        el("span.muted.small", {text: `V${cam.track}`}),
-    ]);
+function drawBuild() {
+    $("build").disabled = busy() || !plan.shots.length;
 }
-
-// ------------------------------------------------------------------ steps --
-
-function showStep(n) {
-    step = n;
-    for (const panel of document.querySelectorAll("[data-panel]")) panel.hidden = Number(panel.dataset.panel) !== n;
-    for (const b of document.querySelectorAll("[data-step]")) b.setAttribute("aria-current", Number(b.dataset.step) === n ? "step" : "false");
-    $("back").hidden = n === 1;
-    $("next").textContent = NEXT[n];
-    $("next").disabled = n === 3 && (busy() || !plan.shots.length);
-}
-
-for (const b of document.querySelectorAll("[data-step]")) b.addEventListener("click", () => showStep(Number(b.dataset.step)));
-$("back").addEventListener("click", () => showStep(Math.max(1, step - 1)));
-$("next").addEventListener("click", () => step < 3 ? showStep(step + 1) : Buddy.send("build"));
 
 // ------------------------------------------------------------------ state --
 
@@ -89,10 +70,10 @@ Buddy.on("state", s => {
     $("download").disabled = s.downloading;
     $("download").textContent = s.downloading ? "Downloading…" : "Download the voice model";
     $("download-text").textContent = s.downloading ? (s.download_text || "") : "";
-    showStep(step);
+    drawBuild();
 });
 
-// ---------------------------------------------------- step 1: pair audio --
+// ---------------------------------------------------------------- cameras --
 
 function sendCam(cam, key, value) {
     Buddy.send("cam", {id: cam.id, key, value});
@@ -103,24 +84,64 @@ Buddy.on("setup", s => {
     const pick = $("setup");
     pick.replaceChildren(...s.setups.map(x => el("option", {value: x.id, text: x.name, translate: "no"})));
     pick.value = s.setup;
-    $("pairs").replaceChildren(...onTimeline().map(cam => {
-        const audio = el("select.field", {"aria-label": "Synced audio",
-                                          onchange: e => sendCam(cam, "audio", e.target.value === "" ? [] : [Number(e.target.value)])},
-            [el("option", {value: "", text: "No audio"}),
-             ...s.audio.map(a => el("option", {value: String(a.index), text: a.label, translate: "no",
-                                               selected: cam.audio[0] === a.index}))]);
-        if (!cam.audio.length) audio.value = "";
-        return el("div.sw-pair", {}, [cameraBox(cam), el("span.sw-link-icon", {}, [Buddy.icon(cam.audio.length ? "check" : "minus")]), audio]);
-    }));
     drawVoices();
-    drawExtras();
+    drawCameras();
 });
 
-// --------------------------------------------------- step 2: name voices --
+function useOf(cam) {
+    return cam.role === "angle" ? `angle:${cam.of || ""}` : cam.role;
+}
+
+// A card per camera: a still from it, the sound it's heard through, and -
+// when nobody is on it - what it's for (wide shot, second angle, cutaway).
+function drawCameras() {
+    const cams = onTimeline();
+    const speakers = cams.filter(c => c.role === "speaker");
+    $("cams").replaceChildren(...cams.map(cam => {
+        const audio = el("select.field", {"aria-label": "Sound",
+                                          onchange: e => sendCam(cam, "audio", e.target.value === "" ? [] : [Number(e.target.value)])},
+            [el("option", {value: "", text: "No audio"}),
+             ...setup.audio.map(a => el("option", {value: String(a.index), text: a.label, translate: "no",
+                                                   selected: cam.audio[0] === a.index}))]);
+        if (!cam.audio.length) audio.value = "";
+        let second;
+        if (cam.role === "speaker") {
+            const names = voices.voices.filter(v => v.camera === cam.id).map(v => v.name).filter(Boolean);
+            second = el("div.lbl", {}, ["Shows", el("div.sw-shows", {text: names.join(", ") || cam.person || "", translate: "no"})]);
+        } else {
+            const use = el("select.field", {"aria-label": "Used as", onchange: e => {
+                const [role, of] = e.target.value.split(":");
+                sendCam(cam, "role", role);
+                if (role === "angle") sendCam(cam, "of", of || null);
+            }}, [
+                el("option", {value: "wide", text: "Wide shot"}),
+                ...speakers.map(s => el("option", {value: `angle:${s.id}`, text: `Second angle of ${cameraName(s)}`})),
+                el("option", {value: "cutaway", text: "Random cutaway"}),
+                el("option", {value: "off", text: "Not used"}),
+            ]);
+            use.value = useOf(cam);
+            if (use.selectedIndex < 0) use.value = "off";
+            second = el("label.lbl", {}, ["Used as", use]);
+        }
+        const still = thumb(cam);
+        still.style.borderBottomColor = cameraColor(cam.track);
+        return el("div.sw-cam", {}, [
+            still,
+            el("div.sw-cam-name", {}, [el("span.sw-file", {text: cam.file || cam.label, title: cam.label, translate: "no"}),
+                                       el("span.muted.small", {text: `V${cam.track}`})]),
+            second,
+            el("label.lbl", {}, ["Sound", audio]),
+        ]);
+    }));
+    if (!cams.length) $("cams").append(el("p.muted.small", {text: "No cameras on this timeline yet."}));
+}
+
+// ----------------------------------------------------------------- people --
 
 Buddy.on("voices", v => {
     voices = v;
     drawVoices();
+    drawCameras();
 });
 
 function drawVoices() {
@@ -161,33 +182,7 @@ function drawVoices() {
     }));
 }
 
-// ----------------------------------------- step 3: extra shots and build --
-
-function useOf(cam) {
-    return cam.role === "angle" ? `angle:${cam.of || ""}` : cam.role;
-}
-
-function drawExtras() {
-    const cams = onTimeline();
-    const speakers = cams.filter(c => c.role === "speaker");
-    const extras = cams.filter(c => c.role !== "speaker");
-    $("extras").replaceChildren(...extras.map(cam => {
-        const use = el("select.field", {"aria-label": "Used for", onchange: e => {
-            const [role, of] = e.target.value.split(":");
-            sendCam(cam, "role", role);
-            if (role === "angle") sendCam(cam, "of", of || null);
-        }}, [
-            el("option", {value: "wide", text: "Wide shot"}),
-            ...speakers.map(s => el("option", {value: `angle:${s.id}`, text: `Second angle of ${cameraName(s)}`})),
-            el("option", {value: "cutaway", text: "Random cutaway"}),
-            el("option", {value: "off", text: "Not used"}),
-        ]);
-        use.value = useOf(cam);
-        if (use.selectedIndex < 0) use.value = "off";
-        return el("div.sw-pair", {}, [cameraBox(cam), el("span.sw-link-icon"), use]);
-    }));
-    if (!extras.length) $("extras").append(el("p.muted.small", {text: "Every camera shows a person."}));
-}
+// ---------------------------------------------------------------- preview --
 
 function place(node, a, b, span) {
     const total = Math.max(1, span[1] - span[0]);
@@ -199,7 +194,7 @@ function place(node, a, b, span) {
 Buddy.on("plan", p => {
     plan = p;
     $("preview").hidden = !p.shots.length;
-    showStep(step);
+    drawBuild();
     if (!p.shots.length) return;
     const span = p.span;
     $("strip").replaceChildren(...p.shots.map(s => place(el("div.sw-shot", {
@@ -240,7 +235,7 @@ function cutGroup(title, items) {
 }
 
 $("cut-settings").addEventListener("click", () => Buddy.modal({
-    title: "Cut settings",
+    title: "Pacing",
     wide: true,
     body: [
         cutGroup("Every cut", [cutNumber("min_shot", "Shortest shot (s)", 0.5, 20, 0.5),
@@ -303,4 +298,4 @@ Buddy.on("toast", t => Buddy.toast(t.text));
 Buddy.on("alert", a => Buddy.modal({title: a.title, body: el("p.modal-text", {text: a.text}),
                                     buttons: [{label: "OK", kind: "accent"}]}));
 
-showStep(1);
+$("build").addEventListener("click", () => Buddy.send("build"));

@@ -109,6 +109,8 @@ JOBS = {
     # deleted, for Media Pool clips), and the synced timeline imported as a NEW one.
     "podsync.read": ("pages.podcast.sync.resolve_ext", "read_here"),
     "podsync.build": ("pages.podcast.sync.resolve_ext", "build_here"),
+    # ...or, asked to sync the OPEN timeline where it is: its clips moved along their own tracks.
+    "podsync.move": ("pages.podcast.sync.resolve_ext", "move_here"),
     "podswitch.read": ("pages.podcast.switch.resolve_ext", "read_here"),
     # ...and its Build: a NEW timeline only, when the person presses Build.
     "podswitch.build": ("pages.podcast.switch.resolve_ext", "build_here"),
@@ -128,11 +130,11 @@ JOBS = {
     # Podcast's Text Edit: the open timeline and its playhead; a click on a word
     # moves the playhead, a selection sets In/Out - nothing else is written here.
     "podcast_text.read": ("pages.podcast.text_edit.resolve_ext", "read_here"),
+    # A subtitle track's text, read to use as the transcript when the person asks.
+    "podcast_text.subtitles": ("pages.podcast.text_edit.resolve_ext", "subtitles_here"),
     "podcast_text.live": ("pages.podcast.text_edit.resolve_ext", "live_here"),
     "podcast_text.seek": ("pages.podcast.text_edit.resolve_ext", "seek_here"),
     "podcast_text.marks": ("pages.podcast.text_edit.resolve_ext", "marks_here"),
-    # ...and its Build: a NEW timeline from the struck words, when the person presses Build.
-    "podcast_text.build": ("pages.podcast.text_edit.resolve_ext", "build_here"),
 }
 # Reads failing this many times in a row, with Resolve itself not answering
 # (_alive): the connection's gone (Resolve closed or restarted) - this

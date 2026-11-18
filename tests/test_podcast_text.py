@@ -1,7 +1,7 @@
 """Podcast's Text Edit (app/pages/podcast/text_edit/): the transcript laid on
-the timeline, bleed rejection between mics, the cuts, the edited timeline
-built offline, live cuts checked clip by clip - against fakes of Resolve
-and of the keyboard, nothing real."""
+the timeline, bleed rejection between mics, subtitles used as the transcript,
+the cuts made on the open timeline and checked clip by clip, and their undo -
+against fakes of Resolve and of the keyboard, nothing real."""
 
 import copy
 import importlib.util
@@ -19,7 +19,7 @@ import _paths
 from pages.podcast.text_edit import keys as K
 from pages.podcast.text_edit import levels as LV
 from pages.podcast.text_edit import model as M
-from pages.podcast.text_edit import otio_cut, resolve_ext, transcripts
+from pages.podcast.text_edit import resolve_ext, transcripts
 
 try:
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -104,7 +104,6 @@ class WordTests(unittest.TestCase):
                 {"key": "c", "s": 3.0, "e": 3.01, "k": "w"}]
         self.assertEqual(M.cut_frames(toks, {"a", "b"}, FPS), [(25, 50)])
         self.assertEqual(M.cut_frames(toks, {"c"}, FPS), [])        # less than a frame
-        self.assertAlmostEqual(M.cut_seconds([(25, 50)], FPS), 1.0)
 
     def test_find_matches_a_phrase_the_last_word_by_its_start(self):
         toks = [{"id": 0, "k": "w", "t": "We're"}, {"id": 1, "k": "p"}, {"id": 2, "k": "w", "t": "going"},
@@ -132,6 +131,39 @@ class WordTests(unittest.TestCase):
         tl = timeline([item("audio", 1, "a.wav", 0, 100), item("audio", 1, "a.wav", 100, 200, offset=10)], audio=1)
         toks = [{"id": 0, "s": 0.0, "e": 2.0}, {"id": 1, "s": 2.0, "e": 4.5}, {"id": 2, "s": 4.5, "e": 8.0}]
         self.assertEqual(M.edit_points(tl, {1}, toks), [2])        # before the first token after the edit
+
+
+class SubtitleTests(unittest.TestCase):
+    """Subtitles already on the timeline, kept as the transcript of the clips under them."""
+
+    def test_a_subtitles_words_share_its_time_by_their_length(self):
+        got = M.cue_words(2.0, 4.0, "Hi <i>there</i>  Tess")
+        self.assertEqual([w for _s, _e, w in got], ["Hi", "there", "Tess"])
+        self.assertEqual((got[0][0], got[-1][1]), (2.0, 4.0))
+        self.assertLess(got[0][1] - got[0][0], got[1][1] - got[1][0])       # "Hi" is the shortest
+        self.assertEqual(M.cue_words(4.0, 4.0, "nothing"), [])
+
+    def test_words_land_in_the_source_of_the_clip_under_them(self):
+        # tess.wav from 10 s into the file sits at 0-4 s; sam.wav follows at 4-8 s; A2 lies under both.
+        tl = timeline([item("audio", 1, "D:/Audio/tess.wav", 0, 100, offset=10.0),
+                       item("audio", 1, "D:/Audio/sam.wav", 100, 200),
+                       item("audio", 2, "D:/Audio/room.wav", 0, 200)])
+        found, lost = M.words_from_cues(tl, {1, 2}, [(25, 75, "Welcome back"), (125, 150, "Thanks"),
+                                                      (400, 450, "nobody here")])
+        self.assertEqual(lost, 2)
+        self.assertEqual(sorted(found), ["D:/Audio/sam.wav", "D:/Audio/tess.wav"])      # the lowest track's clip
+        tess = found["D:/Audio/tess.wav"]
+        self.assertEqual([w["w"] for w in tess], ["Welcome", "back"])
+        self.assertAlmostEqual(tess[0]["s"], 11.0)          # 1 s into the clip, 10 s into the file
+        self.assertAlmostEqual(tess[-1]["e"], 13.0)
+        # Laid back onto the timeline, the words are where the subtitles were.
+        words_ = M.collect_words(tl, {1, 2}, {src: {"words": w} for src, w in found.items()})
+        self.assertEqual([(w["t"], round(w["s"], 2)) for w in words_], [("Welcome", 1.0), ("back", 2.23), ("Thanks", 5.0)])
+
+    def test_a_source_on_the_timeline_twice_keeps_each_word_once(self):
+        tl = timeline([item("audio", 1, "D:/Audio/tess.wav", 0, 100), item("audio", 1, "D:/Audio/tess.wav", 100, 200)])
+        found, _lost = M.words_from_cues(tl, {1}, [(0, 50, "Welcome"), (100, 150, "Welcome")])
+        self.assertEqual(len(found["D:/Audio/tess.wav"]), 1)
 
 
 class BleedTests(unittest.TestCase):
@@ -192,74 +224,6 @@ class BleedTests(unittest.TestCase):
         self.assertEqual([(w["t"], w["tr"]) for w in LV.filter_words(ws, None)], [("hi", 2), ("there", 1)])
 
 
-def otio_clip(name, frames, start, link):
-    return {"OTIO_SCHEMA": "Clip.2", "name": name, "metadata": {"Resolve_OTIO": {"Link Group ID": link}},
-            "source_range": {"OTIO_SCHEMA": "TimeRange.1", "duration": {"OTIO_SCHEMA": "RationalTime.1", "rate": FPS, "value": frames},
-                             "start_time": {"OTIO_SCHEMA": "RationalTime.1", "rate": FPS, "value": start}},
-            "effects": [], "markers": [], "enabled": True, "media_references": {}}
-
-
-def otio_track(kind, children):
-    return {"OTIO_SCHEMA": "Track.1", "name": "", "kind": kind, "children": children, "metadata": {},
-            "source_range": None, "effects": [], "markers": [], "enabled": True}
-
-
-def gap(frames):
-    from pages.project_setup import otio_engine as oe
-    return oe._make_gap(frames, FPS)
-
-
-class OtioCutTests(unittest.TestCase):
-    def document(self):
-        return {"OTIO_SCHEMA": "Timeline.1", "name": "Tess and Sam", "tracks": {
-            "OTIO_SCHEMA": "Stack.1", "markers": [
-                {"OTIO_SCHEMA": "Marker.2", "name": "Ad", "marked_range": {
-                    "start_time": {"rate": FPS, "value": 300}, "duration": {"rate": FPS, "value": 1}}}],
-            "children": [
-                otio_track("Video", [otio_clip("cam.mov", 500, 1000, 1)]),
-                otio_track("Audio", [otio_clip("cam.mov", 500, 1000, 1)]),
-                otio_track("Audio", [gap(100), otio_clip("music.wav", 400, 0, None)]),
-            ]}}
-
-    def test_cuts_split_clips_and_close_up(self):
-        doc = self.document()
-        out, warnings = otio_cut.cut_document(doc, [(100, 150), (200, 250)], {"Video": {1}, "Audio": {1}}, FPS)
-        self.assertEqual(warnings, [])
-        v1, a1, a2 = out["tracks"]["children"]
-        for track in (v1, a1):
-            pieces = [(c["source_range"]["start_time"]["value"], c["source_range"]["duration"]["value"])
-                      for c in track["children"]]
-            self.assertEqual(pieces, [(1000, 100), (1150, 50), (1250, 250)])
-        # Each piece's picture and sound linked to each other, not to the other pieces.
-        links_v = [c["metadata"]["Resolve_OTIO"]["Link Group ID"] for c in v1["children"]]
-        links_a = [c["metadata"]["Resolve_OTIO"]["Link Group ID"] for c in a1["children"]]
-        self.assertEqual(links_v, links_a)
-        self.assertEqual(len(set(links_v)), 3)
-        self.assertEqual(a2, doc["tracks"]["children"][2])      # music not chosen: as it was
-        self.assertEqual(out["tracks"]["markers"][0]["marked_range"]["start_time"]["value"], 200)
-        self.assertEqual(doc["tracks"]["children"][0]["children"][0]["source_range"]["duration"]["value"], 500)
-
-    def test_a_gap_shrinks_and_transitions_are_named(self):
-        doc = self.document()
-        a2 = doc["tracks"]["children"][2]
-        a2["children"].insert(1, {"OTIO_SCHEMA": "Transition.1", "name": "Cross Fade"})
-        out, warnings = otio_cut.cut_document(doc, [(50, 120)], {"Audio": {2}}, FPS)
-        kids = out["tracks"]["children"][2]["children"]
-        self.assertEqual(kids[0]["source_range"]["duration"]["value"], 50)          # the gap, shortened
-        self.assertEqual(kids[1]["source_range"]["start_time"]["value"], 20)        # the music, trimmed at its head
-        self.assertTrue(warnings and "transition" in warnings[0])
-
-    def test_a_compound_clip_on_a_cut_track_refuses(self):
-        doc = self.document()
-        doc["tracks"]["children"][1]["children"].append({"OTIO_SCHEMA": "Stack.1", "name": "Nested", "children": []})
-        from pages.project_setup import otio_engine as oe
-        with self.assertRaises(oe.OtioError):
-            otio_cut.cut_document(doc, [(10, 20)], {"Audio": {1}}, FPS)
-
-    def test_the_new_name_never_doubles_the_suffix(self):
-        self.assertEqual(otio_cut.build_name("Tess and Sam (Text Edit)"), "Tess and Sam")
-
-
 class LiveLayoutTests(unittest.TestCase):
     def test_a_ripple_moves_splits_and_removes(self):
         snap = {("audio", 1): [(0, 100, 0), (100, 300, 500)], ("video", 1): [(0, 300, 0)]}
@@ -269,6 +233,17 @@ class LiveLayoutTests(unittest.TestCase):
         # Resolve keeping a clip whole where nothing's missing in it counts the same.
         self.assertTrue(M.same_layout({("v", 1): [(0, 100, 0), (100, 200, 100)]}, {("v", 1): [(0, 200, 0)]}))
         self.assertFalse(M.same_layout({("v", 1): [(0, 100, 0)]}, {("v", 1): [(0, 99, 0)]}))
+        # Resolve's own rounding of where a split clip starts in its source: a frame, no more.
+        cut = {("v", 1): [(0, 150, 0), (150, 250, 200)]}
+        self.assertTrue(M.same_layout(cut, {("v", 1): [(0, 150, 0), (150, 250, 199)]}))
+        self.assertFalse(M.same_layout(cut, {("v", 1): [(0, 150, 0), (150, 250, 198)]}))
+        self.assertFalse(M.same_layout(cut, {("v", 1): [(0, 150, 0), (151, 250, 200)]}))
+        # A recording razored into pieces whose source frames don't quite follow on (as Resolve
+        # reads them): the cut's second half runs on into the next piece, or doesn't - the same.
+        before = {("v", 1): [(0, 300, 0), (300, 400, 299)]}
+        self.assertTrue(M.same_layout(M.rippled(before, 100, 150), {("v", 1): [(0, 100, 0), (100, 250, 149), (250, 350, 299)]}))
+        self.assertTrue(M.same_layout(M.rippled(before, 100, 150), {("v", 1): [(0, 100, 0), (100, 350, 149)]}))
+        self.assertFalse(M.same_layout(M.rippled(before, 100, 150), before))
 
     def test_what_went_wrong_is_named(self):
         before = {("audio", 1): [(0, 300, 0)], ("audio", 2): [(0, 300, 0)]}
@@ -395,6 +370,8 @@ class FakeMpi:
 
 
 class FakeItem:
+    text = None             # a subtitle's: what it says
+
     def __init__(self, path, start, end, source):
         self.path, self.start, self.end, self.source = path, start, end, source
 
@@ -414,7 +391,7 @@ class FakeItem:
         return f"{self.path}@{self.start}"
 
     def GetName(self):
-        return os.path.basename(self.path or "Text+")
+        return self.text if self.text is not None else os.path.basename(self.path or "Text+")
 
     def GetSourceAudioChannelMapping(self):
         return json.dumps({"track_mapping": {"1": {"channel_idx": [2]}}})
@@ -449,7 +426,7 @@ class FakeTimeline:
         return START + 500
 
     def GetTrackCount(self, kind):
-        return max(n for k, n in self.tracks if k == kind)
+        return max((n for k, n in self.tracks if k == kind), default=0)
 
     def GetTrackName(self, kind, n):
         return {("audio", 1): "Tess", ("audio", 2): "Sam"}.get((kind, n), "")
@@ -512,6 +489,17 @@ class FakeTimeline:
             self.future.append(self._state())
             self._restore(self.history.pop())
 
+    def redo(self):
+        if self.future:
+            self.history.append(self._state())
+            self._restore(self.future.pop())
+
+
+def subtitle(first, end, text):
+    it = FakeItem("", START + first, START + end, 0)
+    it.text = text
+    return it
+
 
 class FakeController:
     def __init__(self, tl):
@@ -535,6 +523,17 @@ class ResolveReadTests(unittest.TestCase):
         before = data["sig"]
         tl.tracks[("audio", 1)][0].start += 1
         self.assertNotEqual(resolve_ext.read_timeline(FakeController(tl), {})["sig"], before)
+
+    def test_subtitle_tracks_are_counted_and_read_as_text(self):
+        tl = FakeTimeline()
+        self.assertEqual(resolve_ext.read_timeline(FakeController(tl), {})["subtitles"], [])
+        tl.tracks[("subtitle", 1)] = [subtitle(150, 175, "Thanks  Tess."), subtitle(25, 60, "Welcome back.")]
+        data = resolve_ext.subtitle_cues(FakeController(tl), {}, 1, "tl-a")
+        self.assertEqual(data["timeline"]["subtitles"], [{"index": 1, "count": 2, "name": ""}])
+        self.assertEqual(data["cues"], [[25, 60, "Welcome back."], [150, 175, "Thanks Tess."]])
+        self.assertFalse([i for i in data["timeline"]["items"] if i["kind"] == "subtitle"])
+        with self.assertRaises(resolve_ext.ResolveConnectionError):
+            resolve_ext.subtitle_cues(FakeController(tl), {}, 1, "another")
 
     def test_in_and_out_find_which_frames_resolve_counts_from(self):
         tl = FakeTimeline()
@@ -588,6 +587,8 @@ class KeysFor:
             self.tl.ripple()
         elif combo == "Ctrl+Z":
             self.tl.undo()
+        elif combo == "Ctrl+Shift+Z":
+            self.tl.redo()
 
 
 @unittest.skipUnless(HAVE_QT, "PySide6 not installed")
@@ -647,60 +648,57 @@ class PageTests(unittest.TestCase):
         self.assertTrue(any(t.get("lo") for t in doc["tokens"]))       # "um" was unsure
         self.assertIsNotNone(page.timeline)
 
-    def test_strike_undo_redo_and_struck_survives_a_reread(self):
+    def test_a_stale_selection_is_refused(self):
         page = self.make()
-        doc = self.last("doc")
-        um = next(i for i, t in enumerate(doc["tokens"]) if t.get("t") == "um")
-        page.on_strike({"ids": [um], "version": doc["version"]})
-        self.assertEqual(self.last("doc")["struck"], 1)
-        page.on_undo()
-        self.assertEqual(self.last("doc")["struck"], 0)
-        page.on_redo()
-        self.assertEqual(self.last("doc")["struck"], 1)
-        page.on_strike({"ids": [um], "version": doc["version"]})        # struck already: put back
-        self.assertEqual(self.last("doc")["struck"], 0)
-        page.on_remove_fillers()
-        self.assertEqual(self.last("doc")["struck"], 1)
-        # Moved in Resolve: read again, still struck.
+        page._presser = KeysFor(self.tl)
+        page.on_strike({"ids": [0], "version": -1})
+        self.assertEqual(self.last("toast")["text"], "The transcript changed – try again.")
+        self.assertEqual(page._presser.pressed, [])
+
+    def test_several_cuts_are_undone_and_redone_a_step_at_a_time(self):
+        page = self.make()
+        page._presser = KeysFor(self.tl)
+        ends = [self.tl.tracks[("audio", 1)][-1].end]
+        with mock.patch.object(K, "available", return_value=""), mock.patch("pages.podcast.text_edit.page.time.sleep"):
+            for word in ("um", "Thanks", "Welcome"):
+                doc = self.last("doc")
+                at = next(i for i, t in enumerate(doc["tokens"]) if t.get("t") == word)
+                page.on_strike({"ids": [at], "version": doc["version"]})
+                ends.append(self.tl.tracks[("audio", 1)][-1].end)
+            self.assertEqual(len(page.undo_stack), 3)
+            self.assertTrue(ends[0] > ends[1] > ends[2] > ends[3])
+            self.assertNotIn("um", [t.get("t") for t in self.last("doc")["tokens"]])
+            for back in (2, 1, 0):          # each Undo: one cut back, no more
+                page.on_undo()
+                self.assertEqual(self.tl.tracks[("audio", 1)][-1].end, ends[back])
+            self.assertFalse(self.last("state")["can_undo"])
+            self.assertIn("um", [t.get("t") for t in self.last("doc")["tokens"]])
+            for again in (1, 2):
+                page.on_redo()
+                self.assertEqual(self.tl.tracks[("audio", 1)][-1].end, ends[again])
+            self.assertTrue(self.last("state")["can_redo"])
+        self.assertFalse([p for n, p in self.events if n == "alert"])
+        # An edit made in Resolve itself: Buddy's steps no longer line up with Resolve's, and go.
         for items in self.tl.tracks.values():
             for it in items:
                 it.start += 50
                 it.end += 50
         page._read()
-        self.assertEqual(self.last("doc")["struck"], 1)
-        # A stale version is refused.
-        page.on_strike({"ids": [0], "version": -1})
-        self.assertEqual(self.last("toast")["text"], "The transcript changed – try again.")
+        self.assertFalse(self.last("state")["can_undo"] or self.last("state")["can_redo"])
 
-    def test_build_makes_a_new_timeline_from_the_struck_cuts(self):
+    def test_filler_words_are_cut_in_one_step(self):
         page = self.make()
+        page._presser = KeysFor(self.tl)
+        self.assertEqual(self.last("doc")["fillers"], 1)
+        with mock.patch.object(K, "available", return_value=""), mock.patch("pages.podcast.text_edit.page.time.sleep"):
+            page.on_remove_fillers()
+        self.assertEqual(self.last("doc")["fillers"], 0)
+        self.assertEqual(len(page.undo_stack), 1)
         page.on_remove_fillers()
-        page.on_remove_pauses({"seconds": 1.0})
-        seen = {}
-
-        def export(controller, path):
-            return {"tracks": {"children": [otio_track("Video", [otio_clip("cam.mov", 500, 0, 1)]),
-                                            otio_track("Audio", [otio_clip("tess.wav", 500, 0, 1)]),
-                                            otio_track("Audio", [otio_clip("sam.wav", 500, 0, None)])]}}
-
-        def import_new(controller, document, folder, name):
-            seen["doc"], seen["name"] = document, name
-            tl = mock.Mock()
-            tl.GetName.return_value = name
-            return tl
-
-        with mock.patch.object(resolve_ext, "export_otio", export), mock.patch.object(resolve_ext, "import_new", import_new):
-            page.on_build()
-        self.assertEqual(seen["name"], "Tess and Sam (Text Edit)")
-        kept = sum(c["source_range"]["duration"]["value"] for c in seen["doc"]["tracks"]["children"][1]["children"]
-                   if c["OTIO_SCHEMA"].startswith("Clip"))
-        self.assertLess(kept, 500)
-        self.assertIn("Built", self.last("toast")["text"])
-        self.assertEqual(self.host.busy[-1][0], False)
+        self.assertEqual(self.last("toast")["text"], "No filler words to remove.")
 
     def test_a_live_cut_is_made_by_resolve_and_checked(self):
         page = self.make()
-        page.settings["mode"] = "live"
         page._presser = KeysFor(self.tl)
         doc = self.last("doc")
         um = next(i for i, t in enumerate(doc["tokens"]) if t.get("t") == "um")
@@ -718,7 +716,6 @@ class PageTests(unittest.TestCase):
 
     def test_a_track_resolve_didnt_cut_is_undone_and_named(self):
         page = self.make()
-        page.settings["mode"] = "live"
         page._presser = KeysFor(self.tl)
         self.tl.selected.discard(("audio", 2))          # its Auto Track Selector off
         doc = self.last("doc")
@@ -732,6 +729,53 @@ class PageTests(unittest.TestCase):
         alert = self.last("alert")
         self.assertIn("A2", alert["title"])
         self.assertEqual(self.tl.tracks[("audio", 1)][0].end, START + 500)       # put back
+
+    def test_subtitles_on_the_timeline_become_the_transcript(self):
+        page = self.make()
+        page.transcripts.clear()
+        self.tl.tracks[("subtitle", 1)] = [subtitle(25, 60, "Welcome um back."), subtitle(150, 175, "Thanks Tess."),
+                                           subtitle(900, 950, "Past the end.")]
+        page._sig = None
+        page._read()
+        doc = self.last("doc")
+        self.assertEqual(doc["subtitles"], [{"index": 1, "count": 3, "name": ""}])
+        self.assertFalse([t for t in doc["tokens"] if t["k"] == "w"])
+        self.assertFalse(doc["estimated"])
+        saved = {}
+        with mock.patch.object(transcripts, "save", lambda path, data, channels=None, language="", folder=None:
+                               saved.update({path: data}) or True):
+            page.on_use_subtitles({"index": 1})
+            doc = self.last("doc")
+            self.assertEqual([t["t"] for t in doc["tokens"] if t["k"] == "w"], ["Welcome", "um", "back.", "Thanks", "Tess."])
+            self.assertTrue(doc["estimated"])
+            self.assertEqual(doc["fillers"], 1)
+            self.assertEqual(list(saved), ["D:/Audio/tess.wav"])           # A1, the lowest dialogue track
+            self.assertEqual(saved["D:/Audio/tess.wav"]["engine"], transcripts.SUBTITLES)
+            toasts = [p["text"] for n, p in self.events if n == "toast"]
+            self.assertIn("Using the timeline's subtitles – 5 words.", toasts)
+            self.assertIn("3 subtitle words have no dialogue clip under them and were left out.", toasts)
+            # The words sit where their subtitle does: "Welcome" starts the one at frame 25.
+            welcome = next(t for t in doc["tokens"] if t.get("t") == "Welcome")
+            self.assertLessEqual(welcome["s"], 1.0)
+            self.assertGreater(welcome["e"], 1.0)
+            # Transcribe still offers to hear it properly: subtitles' text isn't "already transcribed".
+            with mock.patch.object(transcripts, "engine_plan", return_value=(None, "No engine in this test.")):
+                page.on_transcribe()
+            self.assertEqual(self.last("alert")["text"], "No engine in this test.")
+            # A track with nothing on it, or one that isn't there, is refused.
+            page.on_use_subtitles({"index": 4})
+            self.assertEqual(self.last("toast")["text"], "There are no subtitles on this timeline.")
+
+    def test_subtitles_over_no_dialogue_say_so(self):
+        page = self.make()
+        self.tl.tracks[("subtitle", 1)] = [subtitle(900, 950, "Past the end.")]
+        page._sig = None
+        page._read()
+        before = dict(page.transcripts)
+        with mock.patch.object(transcripts, "save", return_value=True):
+            page.on_use_subtitles()
+        self.assertEqual(self.last("alert")["title"], "No subtitles over the dialogue")
+        self.assertEqual(page.transcripts, before)
 
     def test_tracks_are_shown_by_the_files_they_play(self):
         self.make()
@@ -749,8 +793,10 @@ class PageTests(unittest.TestCase):
 
     def test_options_are_checked(self):
         page = self.make()
-        page.on_option({"key": "mode", "value": "nope"})
-        self.assertEqual(page.settings["mode"], "build")
+        page.on_option({"key": "text_size", "value": "nope"})
+        self.assertEqual(page.settings["text_size"], "medium")
+        page.on_option({"key": "mode", "value": "build"})          # no such choice any more
+        self.assertNotIn("mode", page.settings)
         page.on_option({"key": "pause_over", "value": 0.1})
         self.assertEqual(page.settings["pause_over"], M.PAUSE_REMOVE_MIN)
         page.on_option({"key": "follow", "value": False})
@@ -831,11 +877,11 @@ class TranslationTests(unittest.TestCase):
                   for s in re.findall(r'"(?:text|title)":\s*f"([^"]{3,})"', py)}
         found |= {c for c in K.LABELS.values()} | {p["label"] for p in K.PRESETS.values()}
         found |= {"Best installed", page_strings.ADVICE, "Removing {n} filler words…", "Removing {n} pauses…",
-                  "Built “{name}” – {n} cuts, {time} shorter. Your original timeline is unchanged.",
-                  "Building the edited timeline…", "Importing the edited timeline…", "Cutting…", "Undoing…", "Redoing…",
+                  "Cutting…", "Undoing…", "Redoing…",
                   "Press Transcribe: each dialogue clip is transcribed once, on this computer.",
-                  "Put the recording on the timeline, and pick its tracks under Dialogue.",
-                  "Click to leave {track} out", "Click to include {track}"}
+                  "Put the recording on the timeline, and pick its tracks in Options.",
+                  "Click to leave {track} out", "Click to include {track}", page_strings.NO_OVERLAP,
+                  "Use them as the transcript straight away, or press Transcribe for exact word timings."}
         found |= {"Pressing keys in Resolve needs the pynput package, which isn't installed.",
                   "Text Edit transcription", "Text Edit is transcribing – try again when it's done."}
         return {s for s in found if not s.startswith("A1") and re.search(r"[A-Za-z]{2}", s)}

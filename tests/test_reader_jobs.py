@@ -41,7 +41,7 @@ class JobTests(unittest.TestCase):
         self.assertEqual(run.stdout.strip(), "", run.stdout)
 
     def test_the_podcast_jobs_are_there(self):
-        for name in ("podswitch.read", "podswitch.build", "podsync.read", "podsync.build", "podcast_text.build"):
+        for name in ("podswitch.read", "podswitch.build", "podsync.read", "podsync.build", "podcast_text.subtitles"):
             self.assertIn(name, resolve_reader_child.JOBS)
 
 

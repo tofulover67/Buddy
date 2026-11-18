@@ -1179,5 +1179,345 @@
   "中文": "已生成“{name}”——1 处剪切，缩短 {time}。原时间线没有改动。",
   "العربية": "تم إنشاء «{name}» – قصّ واحد، أقصر بـ {time}. لم يتغيّر خطك الزمني الأصلي.",
   "Tiếng Việt": "Đã dựng “{name}” – 1 chỗ cắt, ngắn hơn {time}. Timeline gốc của bạn không đổi."
+ },
+ "Use subtitles": {
+  "日本語": "字幕を使う",
+  "Español": "Usar subtítulos",
+  "Deutsch": "Untertitel verwenden",
+  "Français": "Utiliser les sous-titres",
+  "한국어": "자막 사용",
+  "中文": "使用字幕",
+  "العربية": "استخدام الترجمة النصية",
+  "Tiếng Việt": "Dùng phụ đề"
+ },
+ "Use the subtitles already on this timeline as the transcript, with nothing to transcribe": {
+  "日本語": "このタイムラインにすでにある字幕を、文字起こしをせずにそのままテキストとして使います",
+  "Español": "Usa los subtítulos que ya hay en esta línea de tiempo como transcripción, sin transcribir nada",
+  "Deutsch": "Die Untertitel, die schon in dieser Timeline liegen, als Transkript verwenden – ohne etwas zu transkribieren",
+  "Français": "Utilise les sous-titres déjà présents sur cette timeline comme transcription, sans rien transcrire",
+  "한국어": "이 타임라인에 이미 있는 자막을 받아쓰기 없이 대본으로 사용합니다",
+  "中文": "把这条时间线上已有的字幕直接用作文字稿，无需转写",
+  "العربية": "استخدم الترجمة النصية الموجودة على هذا الخط الزمني كنص، دون نسخ أي شيء",
+  "Tiếng Việt": "Dùng phụ đề đã có trên timeline này làm bản chép lời, không cần chép lời gì thêm"
+ },
+ "Live edit": {
+  "日本語": "ライブ編集",
+  "Español": "Edición en vivo",
+  "Deutsch": "Live-Schnitt",
+  "Français": "Montage en direct",
+  "한국어": "라이브 편집",
+  "中文": "实时剪辑",
+  "العربية": "تحرير مباشر",
+  "Tiếng Việt": "Dựng trực tiếp"
+ },
+ "On: deleting words here ripple-cuts them out of the open timeline straight away, by your own Ripple Delete key in Resolve. Off: Delete strikes words out, and Build makes a new timeline without them.": {
+  "日本語": "オン：ここで単語を削除すると、Resolve のリップル削除キーで、開いているタイムラインからすぐにリップルカットされます。オフ：Delete は単語に取り消し線を引き、「作成」でそれらを除いた新しいタイムラインを作ります。",
+  "Español": "Activado: al eliminar palabras aquí se cortan con desplazamiento de la línea de tiempo abierta al momento, con tu propia tecla de Eliminar con desplazamiento en Resolve. Desactivado: Supr tacha las palabras y Crear hace una línea de tiempo nueva sin ellas.",
+  "Deutsch": "Ein: Wörter, die du hier löschst, werden sofort per Ripple Delete aus der geöffneten Timeline geschnitten – mit deiner eigenen Ripple-Delete-Taste in Resolve. Aus: Entf streicht Wörter durch, und „Erstellen“ baut eine neue Timeline ohne sie.",
+  "Français": "Activé : supprimer des mots ici les coupe aussitôt de la timeline ouverte avec décalage, par ta propre touche de Suppression avec décalage dans Resolve. Désactivé : Suppr barre les mots, et Créer fait une nouvelle timeline sans eux.",
+  "한국어": "켜짐: 여기서 단어를 삭제하면 Resolve의 리플 삭제 키로 열린 타임라인에서 바로 리플 컷됩니다. 꺼짐: Delete는 단어에 취소선을 긋고, 만들기가 그 단어들을 뺀 새 타임라인을 만듭니다.",
+  "中文": "开：在这里删除词语，会用你在 Resolve 中的波纹删除键立即从打开的时间线上波纹剪掉。关：Delete 只给词语加删除线，“生成”会做出一条不含它们的新时间线。",
+  "العربية": "تشغيل: حذف الكلمات هنا يقصّها فورًا من الخط الزمني المفتوح بحذف متموّج، بمفتاح الحذف المتموّج الخاص بك في Resolve. إيقاف: Delete يشطب الكلمات، و«إنشاء» يصنع خطًا زمنيًا جديدًا بدونها.",
+  "Tiếng Việt": "Bật: xóa chữ ở đây sẽ cắt ripple chúng khỏi timeline đang mở ngay lập tức, bằng chính phím Ripple Delete của bạn trong Resolve. Tắt: Delete gạch bỏ chữ, và Tạo sẽ làm một timeline mới không có chúng."
+ },
+ "Use the subtitles as the transcript?": {
+  "日本語": "字幕をテキストとして使いますか？",
+  "Español": "¿Usar los subtítulos como transcripción?",
+  "Deutsch": "Untertitel als Transkript verwenden?",
+  "Français": "Utiliser les sous-titres comme transcription ?",
+  "한국어": "자막을 대본으로 사용할까요?",
+  "中文": "把字幕用作文字稿吗？",
+  "العربية": "استخدام الترجمة النصية كنص؟",
+  "Tiếng Việt": "Dùng phụ đề làm bản chép lời?"
+ },
+ "The text of the clips under the subtitles is replaced by the subtitles' own, and words you fixed by hand there are lost.": {
+  "日本語": "字幕の下にあるクリップのテキストは字幕のテキストに置き換わり、そこで手で直した単語は失われます。",
+  "Español": "El texto de los clips que hay bajo los subtítulos se sustituye por el de los subtítulos, y las palabras que corregiste a mano ahí se pierden.",
+  "Deutsch": "Der Text der Clips unter den Untertiteln wird durch den der Untertitel ersetzt, und Wörter, die du dort von Hand korrigiert hast, gehen verloren.",
+  "Français": "Le texte des clips situés sous les sous-titres est remplacé par celui des sous-titres, et les mots que tu y as corrigés à la main sont perdus.",
+  "한국어": "자막 아래 클립의 텍스트가 자막의 텍스트로 바뀌고, 거기서 직접 고친 단어는 사라집니다.",
+  "中文": "字幕下方片段的文字会被字幕的文字取代，你在那里手动改过的词会丢失。",
+  "العربية": "يُستبدل نص المقاطع الواقعة تحت الترجمة النصية بنص الترجمة نفسها، وتضيع الكلمات التي صحّحتها يدويًا هناك.",
+  "Tiếng Việt": "Chữ của các clip nằm dưới phụ đề được thay bằng chữ của phụ đề, và những chữ bạn đã sửa tay ở đó sẽ mất."
+ },
+ "Subtitle track {n} ({count})": {
+  "日本語": "字幕トラック {n}（{count}）",
+  "Español": "Pista de subtítulos {n} ({count})",
+  "Deutsch": "Untertitelspur {n} ({count})",
+  "Français": "Piste de sous-titres {n} ({count})",
+  "한국어": "자막 트랙 {n} ({count})",
+  "中文": "字幕轨道 {n}（{count}）",
+  "العربية": "مسار الترجمة النصية {n} ({count})",
+  "Tiếng Việt": "Track phụ đề {n} ({count})"
+ },
+ "This timeline already has subtitles": {
+  "日本語": "このタイムラインにはすでに字幕があります",
+  "Español": "Esta línea de tiempo ya tiene subtítulos",
+  "Deutsch": "Diese Timeline hat schon Untertitel",
+  "Français": "Cette timeline a déjà des sous-titres",
+  "한국어": "이 타임라인에는 이미 자막이 있습니다",
+  "中文": "这条时间线已经有字幕",
+  "العربية": "هذا الخط الزمني يحتوي على ترجمة نصية بالفعل",
+  "Tiếng Việt": "Timeline này đã có phụ đề"
+ },
+ "Use them as the transcript straight away, or press Transcribe for exact word timings.": {
+  "日本語": "そのまますぐにテキストとして使うか、単語ごとの正確なタイミングが必要なら「文字起こし」を押してください。",
+  "Español": "Úsalos como transcripción al momento, o pulsa Transcribir para tener el tiempo exacto de cada palabra.",
+  "Deutsch": "Verwende sie gleich als Transkript, oder drücke „Transkribieren“ für genaue Wortzeiten.",
+  "Français": "Utilise-les tout de suite comme transcription, ou appuie sur Transcrire pour un minutage exact des mots.",
+  "한국어": "바로 대본으로 사용하거나, 단어별 정확한 타이밍이 필요하면 받아쓰기를 누르세요.",
+  "中文": "直接把它们用作文字稿，或者按“转写”获得每个词的准确时间。",
+  "العربية": "استخدمها كنص فورًا، أو اضغط «نسخ» للحصول على توقيت دقيق لكل كلمة.",
+  "Tiếng Việt": "Dùng ngay làm bản chép lời, hoặc bấm Chép lời để có thời điểm chính xác của từng chữ."
+ },
+ "This text comes from the timeline's subtitles, so when each word is said is estimated – cuts can land a little early or late. Transcribe for exact word timings.": {
+  "日本語": "このテキストはタイムラインの字幕から取ったもので、各単語の位置は推定です。カットが少し早い・遅い位置になることがあります。正確なタイミングには文字起こしをしてください。",
+  "Español": "Este texto viene de los subtítulos de la línea de tiempo, así que el momento de cada palabra es una estimación: los cortes pueden caer un poco antes o después. Transcribe para tener tiempos exactos.",
+  "Deutsch": "Dieser Text stammt aus den Untertiteln der Timeline, daher ist geschätzt, wann jedes Wort gesagt wird – Schnitte können etwas zu früh oder zu spät sitzen. Transkribiere für genaue Wortzeiten.",
+  "Français": "Ce texte vient des sous-titres de la timeline, donc le moment où chaque mot est dit est estimé – les coupes peuvent tomber un peu tôt ou un peu tard. Transcris pour un minutage exact des mots.",
+  "한국어": "이 텍스트는 타임라인의 자막에서 가져온 것이라 각 단어의 시점은 추정값입니다. 컷이 조금 이르거나 늦게 들어갈 수 있습니다. 정확한 타이밍이 필요하면 받아쓰기를 하세요.",
+  "中文": "这些文字来自时间线上的字幕，所以每个词的时间是估算的——剪切点可能略早或略晚。要准确的时间请转写。",
+  "العربية": "هذا النص مأخوذ من الترجمة النصية على الخط الزمني، لذا توقيت كل كلمة تقديري – قد يقع القص أبكر أو أبعد قليلًا. انسخ للحصول على توقيت دقيق للكلمات.",
+  "Tiếng Việt": "Chữ này lấy từ phụ đề của timeline, nên thời điểm nói từng chữ chỉ là ước lượng – vết cắt có thể hơi sớm hoặc hơi muộn. Hãy Chép lời để có thời điểm chính xác."
+ },
+ "There are no subtitles on this timeline.": {
+  "日本語": "このタイムラインには字幕がありません。",
+  "Español": "No hay subtítulos en esta línea de tiempo.",
+  "Deutsch": "In dieser Timeline gibt es keine Untertitel.",
+  "Français": "Il n'y a pas de sous-titres sur cette timeline.",
+  "한국어": "이 타임라인에는 자막이 없습니다.",
+  "中文": "这条时间线上没有字幕。",
+  "العربية": "لا توجد ترجمة نصية على هذا الخط الزمني.",
+  "Tiếng Việt": "Timeline này không có phụ đề."
+ },
+ "Couldn't read the subtitles": {
+  "日本語": "字幕を読み取れませんでした",
+  "Español": "No se pudieron leer los subtítulos",
+  "Deutsch": "Die Untertitel konnten nicht gelesen werden",
+  "Français": "Impossible de lire les sous-titres",
+  "한국어": "자막을 읽지 못했습니다",
+  "中文": "无法读取字幕",
+  "العربية": "تعذّرت قراءة الترجمة النصية",
+  "Tiếng Việt": "Không đọc được phụ đề"
+ },
+ "None of the subtitles sit over a clip on the dialogue tracks – check the tracks picked under Dialogue.": {
+  "日本語": "会話トラックのクリップの上にある字幕がひとつもありません。「会話」で選んだトラックを確認してください。",
+  "Español": "Ningún subtítulo está sobre un clip de las pistas de diálogo: revisa las pistas elegidas en Diálogo.",
+  "Deutsch": "Kein Untertitel liegt über einem Clip auf den Dialogspuren – prüfe die unter „Dialog“ gewählten Spuren.",
+  "Français": "Aucun sous-titre ne se trouve au-dessus d'un clip des pistes de dialogue – vérifie les pistes choisies sous Dialogue.",
+  "한국어": "대화 트랙의 클립 위에 놓인 자막이 하나도 없습니다. 대화에서 고른 트랙을 확인하세요.",
+  "中文": "没有任何字幕位于对白轨道的片段上方——请检查“对白”下所选的轨道。",
+  "العربية": "لا توجد أي ترجمة نصية فوق مقطع على مسارات الحوار – تحقق من المسارات المختارة تحت «الحوار».",
+  "Tiếng Việt": "Không có phụ đề nào nằm trên một clip ở các track thoại – hãy kiểm tra các track đã chọn dưới Thoại."
+ },
+ "No subtitles over the dialogue": {
+  "日本語": "会話の上に字幕がありません",
+  "Español": "No hay subtítulos sobre el diálogo",
+  "Deutsch": "Keine Untertitel über dem Dialog",
+  "Français": "Aucun sous-titre au-dessus du dialogue",
+  "한국어": "대화 위에 자막이 없습니다",
+  "中文": "对白上方没有字幕",
+  "العربية": "لا توجد ترجمة نصية فوق الحوار",
+  "Tiếng Việt": "Không có phụ đề trên phần thoại"
+ },
+ "Using the timeline's subtitles – {count} words.": {
+  "日本語": "タイムラインの字幕を使用中 – {count} 語。",
+  "Español": "Usando los subtítulos de la línea de tiempo: {count} palabras.",
+  "Deutsch": "Die Untertitel der Timeline werden verwendet – {count} Wörter.",
+  "Français": "Sous-titres de la timeline utilisés – {count} mots.",
+  "한국어": "타임라인의 자막을 사용합니다 – 단어 {count}개.",
+  "中文": "正在使用时间线上的字幕——{count} 个词。",
+  "العربية": "تُستخدم الترجمة النصية على الخط الزمني – {count} كلمة.",
+  "Tiếng Việt": "Đang dùng phụ đề của timeline – {count} chữ."
+ },
+ "{lost} subtitle words have no dialogue clip under them and were left out.": {
+  "日本語": "字幕の {lost} 語は下に会話クリップがないため除外されました。",
+  "Español": "{lost} palabras de los subtítulos no tienen un clip de diálogo debajo y se han dejado fuera.",
+  "Deutsch": "{lost} Untertitelwörter haben keinen Dialogclip unter sich und wurden weggelassen.",
+  "Français": "{lost} mots des sous-titres n'ont pas de clip de dialogue en dessous et ont été laissés de côté.",
+  "한국어": "자막 단어 {lost}개는 아래에 대화 클립이 없어 제외했습니다.",
+  "中文": "有 {lost} 个字幕词语下方没有对白片段，已略过。",
+  "العربية": "{lost} من كلمات الترجمة النصية لا يوجد تحتها مقطع حوار، فتم استبعادها.",
+  "Tiếng Việt": "{lost} chữ phụ đề không có clip thoại nào bên dưới nên đã bị bỏ qua."
+ },
+ "Resolve is busy – try again in a moment.": {
+  "日本語": "Resolve が処理中です。少ししてからもう一度お試しください。",
+  "Español": "Resolve está ocupado: inténtalo de nuevo en un momento.",
+  "Deutsch": "Resolve ist beschäftigt – versuche es gleich noch einmal.",
+  "Français": "Resolve est occupé – réessaie dans un instant.",
+  "한국어": "Resolve가 바쁩니다. 잠시 후 다시 시도하세요.",
+  "中文": "Resolve 正忙——请稍后再试。",
+  "العربية": "Resolve مشغول – حاول مرة أخرى بعد قليل.",
+  "Tiếng Việt": "Resolve đang bận – hãy thử lại sau giây lát."
+ },
+ "The Resolve shortcuts Buddy presses to make a cut and to undo it": {
+  "日本語": "カットと取り消しのために Buddy が押す Resolve のショートカット",
+  "Español": "Los atajos de Resolve que Buddy pulsa para hacer un corte y para deshacerlo",
+  "Deutsch": "Die Resolve-Tastenkürzel, die Buddy drückt, um einen Schnitt zu machen und rückgängig zu machen",
+  "Français": "Les raccourcis Resolve que Buddy presse pour faire une coupe et pour l'annuler",
+  "한국어": "컷을 만들고 실행 취소할 때 Buddy가 누르는 Resolve 단축키",
+  "中文": "Buddy 在剪切和撤销时按下的 Resolve 快捷键",
+  "العربية": "اختصارات Resolve التي يضغطها Buddy لإجراء قص وللتراجع عنه",
+  "Tiếng Việt": "Các phím tắt Resolve mà Buddy bấm để cắt và để hoàn tác"
+ },
+ "A pause to clean up is longer than (s)": {
+  "日本語": "クリーンアップ対象の間の長さ（秒以上）",
+  "Español": "Una pausa a limpiar dura más de (s)",
+  "Deutsch": "Eine Pause zum Bereinigen ist länger als (s)",
+  "Français": "Une pause à nettoyer dure plus de (s)",
+  "한국어": "정리할 쉼의 최소 길이(초)",
+  "中文": "要清理的停顿长于（秒）",
+  "العربية": "الوقفة المطلوب تنظيفها أطول من (ث)",
+  "Tiếng Việt": "Khoảng lặng cần dọn dài hơn (giây)"
+ },
+ "Clean up": {
+  "日本語": "クリーンアップ",
+  "Español": "Limpiar",
+  "Deutsch": "Bereinigen",
+  "Français": "Nettoyer",
+  "한국어": "정리",
+  "中文": "清理",
+  "العربية": "تنظيف",
+  "Tiếng Việt": "Dọn dẹp"
+ },
+ "Correct a word that was heard wrong (double-click)": {
+  "日本語": "聞き間違えた単語を直す（ダブルクリック）",
+  "Español": "Corrige una palabra mal entendida (doble clic)",
+  "Deutsch": "Ein falsch verstandenes Wort korrigieren (Doppelklick)",
+  "Français": "Corrige un mot mal compris (double-clic)",
+  "한국어": "잘못 들은 단어 고치기(더블 클릭)",
+  "中文": "修正听错的词（双击）",
+  "العربية": "صحّح كلمة سُمعت خطأ (نقر مزدوج)",
+  "Tiếng Việt": "Sửa một chữ nghe nhầm (bấm đúp)"
+ },
+ "Cut every filler word, or every long pause, in one go": {
+  "日本語": "つなぎ言葉や長い間をまとめてカット",
+  "Español": "Corta todas las muletillas, o todas las pausas largas, de una vez",
+  "Deutsch": "Alle Füllwörter oder alle langen Pausen auf einmal schneiden",
+  "Français": "Coupe tous les mots de remplissage, ou toutes les longues pauses, en une fois",
+  "한국어": "군말 전체 또는 긴 쉼 전체를 한 번에 자르기",
+  "中文": "一次剪掉所有口头语或所有长停顿",
+  "العربية": "قصّ كل كلمات الحشو أو كل الوقفات الطويلة دفعة واحدة",
+  "Tiếng Việt": "Cắt mọi từ đệm, hoặc mọi khoảng lặng dài, trong một lần"
+ },
+ "Cut these words from the open timeline (Delete)": {
+  "日本語": "これらの単語を開いているタイムラインからカット（Delete）",
+  "Español": "Corta estas palabras de la línea de tiempo abierta (Supr)",
+  "Deutsch": "Diese Wörter aus der geöffneten Timeline schneiden (Entf)",
+  "Français": "Coupe ces mots de la timeline ouverte (Suppr)",
+  "한국어": "이 단어들을 열린 타임라인에서 자르기(Delete)",
+  "中文": "从打开的时间线上剪掉这些词（Delete）",
+  "العربية": "قصّ هذه الكلمات من الخط الزمني المفتوح (Delete)",
+  "Tiếng Việt": "Cắt các chữ này khỏi timeline đang mở (Delete)"
+ },
+ "Deleting text cuts the open timeline straight away. Ctrl+Z puts it back.": {
+  "日本語": "テキストを削除すると、開いているタイムラインがすぐにカットされます。Ctrl+Z で元に戻せます。",
+  "Español": "Al eliminar texto se corta la línea de tiempo abierta al momento. Ctrl+Z lo deshace.",
+  "Deutsch": "Text zu löschen schneidet sofort die geöffnete Timeline. Ctrl+Z macht es rückgängig.",
+  "Français": "Supprimer du texte coupe aussitôt la timeline ouverte. Ctrl+Z l'annule.",
+  "한국어": "텍스트를 삭제하면 열린 타임라인이 바로 잘립니다. Ctrl+Z로 되돌립니다.",
+  "中文": "删除文字会立即剪切打开的时间线。Ctrl+Z 可撤销。",
+  "العربية": "حذف النص يقصّ الخط الزمني المفتوح فورًا. Ctrl+Z يعيده.",
+  "Tiếng Việt": "Xóa chữ sẽ cắt timeline đang mở ngay lập tức. Ctrl+Z để hoàn tác."
+ },
+ "Fix word": {
+  "日本語": "単語を直す",
+  "Español": "Corregir palabra",
+  "Deutsch": "Wort korrigieren",
+  "Français": "Corriger le mot",
+  "한국어": "단어 고치기",
+  "中文": "修正词语",
+  "العربية": "تصحيح الكلمة",
+  "Tiếng Việt": "Sửa chữ"
+ },
+ "Options": {
+  "日本語": "オプション",
+  "Español": "Opciones",
+  "Deutsch": "Optionen",
+  "Français": "Options",
+  "한국어": "옵션",
+  "中文": "选项",
+  "العربية": "الخيارات",
+  "Tiếng Việt": "Tùy chọn"
+ },
+ "Play from here in Resolve (Space)": {
+  "日本語": "Resolve でここから再生（Space）",
+  "Español": "Reproducir desde aquí en Resolve (Espacio)",
+  "Deutsch": "Ab hier in Resolve abspielen (Leertaste)",
+  "Français": "Lire à partir d'ici dans Resolve (Espace)",
+  "한국어": "Resolve에서 여기부터 재생(Space)",
+  "中文": "在 Resolve 中从这里播放（空格）",
+  "العربية": "التشغيل من هنا في Resolve (مسافة)",
+  "Tiếng Việt": "Phát từ đây trong Resolve (Space)"
+ },
+ "Reading": {
+  "日本語": "表示",
+  "Español": "Lectura",
+  "Deutsch": "Lesen",
+  "Français": "Lecture",
+  "한국어": "읽기",
+  "中文": "阅读",
+  "العربية": "القراءة",
+  "Tiếng Việt": "Đọc"
+ },
+ "Remove pauses over {s} s": {
+  "日本語": "{s} 秒を超える間を削除",
+  "Español": "Quitar pausas de más de {s} s",
+  "Deutsch": "Pausen über {s} s entfernen",
+  "Français": "Supprimer les pauses de plus de {s} s",
+  "한국어": "{s}초 넘는 쉼 제거",
+  "中文": "移除超过 {s} 秒的停顿",
+  "العربية": "إزالة الوقفات الأطول من {s} ث",
+  "Tiếng Việt": "Xóa khoảng lặng dài hơn {s} giây"
+ },
+ "Selection": {
+  "日本語": "選択範囲",
+  "Español": "Selección",
+  "Deutsch": "Auswahl",
+  "Français": "Sélection",
+  "한국어": "선택",
+  "中文": "所选内容",
+  "العربية": "التحديد",
+  "Tiếng Việt": "Vùng chọn"
+ },
+ "The text": {
+  "日本語": "テキスト",
+  "Español": "El texto",
+  "Deutsch": "Der Text",
+  "Français": "Le texte",
+  "한국어": "텍스트",
+  "中文": "文字",
+  "العربية": "النص",
+  "Tiếng Việt": "Phần chữ"
+ },
+ "Tracks, where the text comes from, text size and shortcuts": {
+  "日本語": "トラック、テキストの取得元、文字サイズ、ショートカット",
+  "Español": "Pistas, de dónde viene el texto, tamaño del texto y atajos",
+  "Deutsch": "Spuren, Herkunft des Texts, Textgröße und Tastenkürzel",
+  "Français": "Pistes, origine du texte, taille du texte et raccourcis",
+  "한국어": "트랙, 텍스트 출처, 글자 크기, 단축키",
+  "中文": "轨道、文字来源、文字大小和快捷键",
+  "العربية": "المسارات، مصدر النص، حجم النص والاختصارات",
+  "Tiếng Việt": "Track, nguồn của chữ, cỡ chữ và phím tắt"
+ },
+ "Put the recording on the timeline, and pick its tracks in Options.": {
+  "日本語": "収録素材をタイムラインに置き、オプションでトラックを選んでください。",
+  "Español": "Pon la grabación en la línea de tiempo y elige sus pistas en Opciones.",
+  "Deutsch": "Lege die Aufnahme in die Timeline und wähle ihre Spuren in den Optionen.",
+  "Français": "Place l'enregistrement sur la timeline et choisis ses pistes dans Options.",
+  "한국어": "녹음을 타임라인에 올리고 옵션에서 트랙을 고르세요.",
+  "中文": "把录音放到时间线上，并在“选项”中选择它的轨道。",
+  "العربية": "ضع التسجيل على الخط الزمني واختر مساراته من «الخيارات».",
+  "Tiếng Việt": "Đặt bản ghi lên timeline và chọn các track của nó trong Tùy chọn."
+ },
+ "Connection": {
+  "日本語": "接続",
+  "Español": "Conexión",
+  "Deutsch": "Verbindung",
+  "Français": "Connexion",
+  "한국어": "연결",
+  "中文": "连接",
+  "العربية": "الاتصال",
+  "Tiếng Việt": "Kết nối"
  }
 }

@@ -5,7 +5,10 @@ Podcast Sync - the Podcast tab's first sub-tab (see pages/podcast/page.py).
 Lines up every camera and recorder of a podcast recording, by timecode or
 by sound, and builds a NEW timeline with a video track per camera and an
 audio track per mic - the clips and timelines already there are never
-changed. The engine is engine.py; this is its page.
+changed. Or, the person's choice ("Sync this timeline"): the clips of the
+open timeline are moved into sync where they are, each along its own
+track, nothing cut or deleted - and "Put the clips back" moves them back.
+The engine is engine.py; this is its page.
 
 What it reads, the person's choice:
     selected   the clips selected in the Media Pool
@@ -23,7 +26,7 @@ never touches Resolve.
 Protocol:
     to the view    state, devices, job, result, log, alert
     from the view  option, scan, rename_device, move_clip, move_device,
-                   master, sync, cancel, switch_tab
+                   master, sync, put_back, cancel, switch_tab
 """
 
 import json
@@ -41,7 +44,8 @@ from pages.podcast.sync import engine
 from pages.podcast.sync import resolve_ext as sync_ext
 
 SOURCES = ("selected", "bin", "timeline")
-DEFAULTS = {"source": "selected", "method": "timecode", "fine": True, "camera_audio": "tracks"}
+TARGETS = ("new", "here")       # a new timeline, or the open one synced where it is
+DEFAULTS = {"source": "selected", "method": "timecode", "fine": True, "camera_audio": "tracks", "target": "new"}
 SUFFIX = sync_ext.SUFFIX
 MAX_NAME = 60
 MAX_LOG = 200
@@ -77,6 +81,9 @@ class PodcastSyncPage(WebToolPage):
             self.options["method"] = "timecode"
         if self.options["camera_audio"] not in engine.CAMERA_AUDIO:
             self.options["camera_audio"] = "tracks"
+        if self.options["target"] not in TARGETS or self.options["source"] != "timeline":
+            self.options["target"] = "new"      # in place is the open timeline's, and nothing else's
+        self._undo = None        # an in-place sync's way back: {"name", "moves"}
         self.names = {}          # {file path: device name} the person changed
         self.order = []          # device names, as the person ordered them
         self.master = ""         # the device chosen as the master clock ("" = Buddy picks)
@@ -166,6 +173,14 @@ class PodcastSyncPage(WebToolPage):
         key, value = payload.get("key"), payload.get("value")
         if key == "source" and value in SOURCES:
             self._save_option(key, value)
+            if value != "timeline":
+                self._save_option("target", "new")
+        elif key == "target" and value in TARGETS:
+            self._save_option(key, value)
+            if value == "here" and self.options["source"] != "timeline":
+                self._save_option("source", "timeline")
+                self.scanned = None             # what was read came from somewhere else
+                self._push_devices()
         elif key == "method" and value in engine.METHODS:
             self._save_option(key, value)
         elif key == "camera_audio" and value in engine.CAMERA_AUDIO:
@@ -307,23 +322,35 @@ class PodcastSyncPage(WebToolPage):
             return
         if self._busy:
             return
+        here = self.options["target"] == "here" and self.options["source"] == "timeline"
         self._read(controller, lambda document, workdir, base, what: self._sync(
-            controller, document, workdir, base, what, method, fine, ffmpeg))
+            controller, document, workdir, base, what, method, fine, ffmpeg, here))
 
-    def _sync(self, controller, document, workdir, base, what, method, fine, ffmpeg):
+    def _sync(self, controller, document, workdir, base, what, method, fine, ffmpeg, here=False):
         """The sync itself, on a worker (pure work: ffmpeg, numpy), then the
-        new timeline imported (resolve_ext.build_here)."""
+        new timeline imported (resolve_ext.build_here) - or, `here`, the open
+        timeline's own clips moved into sync (resolve_ext.move_here)."""
         names, order, master = dict(self.names), list(self.order), self.master
         camera_audio = self.options["camera_audio"]
 
         def job(report):
             return engine.sync(document, method, ffmpeg_path=ffmpeg, report=report, names=names, order=order,
-                               fine=fine, camera_audio=camera_audio, master=master)
+                               fine=fine, camera_audio=camera_audio, master=master, in_place=here)
 
         def finish(payload):
             """(the reader job's name, its args, the job here, and what to
             make of its answer) - the import, for _finish_now to run."""
             new_doc, result = payload
+            if here:
+                shutil.rmtree(workdir, ignore_errors=True)
+                args = {"moves": result.pop("moves"), "name": base}
+
+                def moved(answer):
+                    result.update(timeline=answer["timeline"], what=what, in_place=True, moved=answer["moved"],
+                                  can_undo=bool(answer["undo"]))
+                    self._undo = {"name": answer["timeline"], "moves": answer["undo"]} if answer["undo"] else None
+                    return result
+                return "podsync.move", args, lambda: sync_ext.move_here(controller, **args), moved
             path = os.path.join(workdir, "synced.otio")
             with open(path, "w", encoding="utf-8") as handle:
                 json.dump(new_doc, handle)
@@ -336,6 +363,7 @@ class PodcastSyncPage(WebToolPage):
                 return result
             return "podsync.build", args, lambda: sync_ext.build_here(controller, **args), made
 
+        self._here = here
         self._start("Syncing the recordings", job, finish)
 
     def _start(self, label, job, finish):
@@ -415,11 +443,14 @@ class PodcastSyncPage(WebToolPage):
             name, args, job, made = finish(payload)
         except Exception as exc:  # noqa: BLE001
             return self._build_failed(exc)
-        self._resolve("Building the synced timeline…", name, args, job,
-                      lambda answer, error: self._built(made, answer, error, length))
+        self._resolve("Moving the clips into sync…" if getattr(self, "_here", False) else "Building the synced timeline…",
+                      name, args, job, lambda answer, error: self._built(made, answer, error, length))
 
     def _build_failed(self, exc):
         self._end()
+        if getattr(self, "_here", False):
+            self._log(f"Couldn't sync the timeline: {exc}", "error")
+            return self._alert("Couldn't sync the timeline", str(exc))
         self._log(f"Couldn't build the timeline: {exc}", "error")
         self._alert("Couldn't build the timeline", str(exc))
 
@@ -431,8 +462,13 @@ class PodcastSyncPage(WebToolPage):
         result["drift_by_device"] = engine.device_drift(result["drift"])
         self.result = result
         self.emit("result", result)
-        self._log(f'Built "{result["timeline"]}": {result["placed"]} of {result["total"]} clips placed '
-                  f"({length}).", "success")
+        if result.get("in_place"):
+            self._log(f'Synced "{result["timeline"]}" where it is: {result["placed"]} of {result["total"]} clips in sync, '
+                      f'{result["moved"]} moved ({length}).', "success")
+        else:
+            self._undo = None
+            self._log(f'Built "{result["timeline"]}": {result["placed"]} of {result["total"]} clips placed '
+                      f"({length}).", "success")
         for row in result["unplaced"]:
             self._log(f'Not synced: "{row["clip"]}" - {row["why"]}', "warn")
         for text in result["warnings"]:
@@ -442,3 +478,26 @@ class PodcastSyncPage(WebToolPage):
                 self._log(f'"{row["clip"]}" drifts {abs(row["ms_per_hour"]):.0f} ms per hour against '
                           f'{row["against"]} - its ends are up to {row["frames"] / 2:.1f} frames out.', "warn")
         self.achieve("syncs", 1)
+
+    # ------------------------------------------------- an in-place sync, undone --
+
+    def on_put_back(self, _payload=None):
+        """The clips an in-place sync moved, moved back to where they were."""
+        if self.job or self._busy or not self._undo:
+            return
+        controller = self._controller()
+        if controller is None:
+            return
+        undo = self._undo
+        args = {"moves": undo["moves"], "name": undo["name"]}
+
+        def back(answer, error):
+            if error is not None:
+                self._log(f"Couldn't put the clips back: {error}", "error")
+                return self._alert("Couldn't put the clips back", str(error))
+            self._undo = None
+            self.result = None
+            self.emit("result", None)
+            self._log(f'Put {answer["moved"]} clips back where they were on "{answer["timeline"]}".', "success")
+        self._resolve("Putting the clips back…", "podsync.move", args,
+                      lambda: sync_ext.move_here(controller, **args), back)

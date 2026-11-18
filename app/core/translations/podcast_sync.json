@@ -989,5 +989,345 @@
   "中文": "正在同步播客",
   "العربية": "جارٍ مزامنة بودكاست",
   "Tiếng Việt": "Đang đồng bộ podcast"
+ },
+ "Line up your recordings": {
+  "日本語": "収録素材をそろえる",
+  "Español": "Alinea tus grabaciones",
+  "Deutsch": "Richte deine Aufnahmen aus",
+  "Français": "Aligne tes enregistrements",
+  "한국어": "녹음 맞추기",
+  "中文": "对齐你的录制素材",
+  "العربية": "حاذِ تسجيلاتك",
+  "Tiếng Việt": "Căn khớp các bản ghi"
+ },
+ "Pick what to sync. Buddy sorts the clips into cameras and mics, each on its own track.": {
+  "日本語": "同期するものを選んでください。Buddy がクリップをカメラとマイクに分け、それぞれ専用のトラックに置きます。",
+  "Español": "Elige qué sincronizar. Buddy ordena los clips en cámaras y micros, cada uno en su propia pista.",
+  "Deutsch": "Wähle, was synchronisiert wird. Buddy sortiert die Clips nach Kameras und Mikros, jedes auf einer eigenen Spur.",
+  "Français": "Choisis quoi synchroniser. Buddy trie les clips par caméras et micros, chacun sur sa propre piste.",
+  "한국어": "동기화할 것을 고르세요. Buddy가 클립을 카메라와 마이크별로 나눠 각각의 트랙에 놓습니다.",
+  "中文": "选择要同步的内容。Buddy 会把片段按摄影机和麦克风分开，各占一条轨道。",
+  "العربية": "اختر ما تريد مزامنته. يفرز Buddy المقاطع إلى كاميرات وميكروفونات، كلٌّ على مساره.",
+  "Tiếng Việt": "Chọn thứ cần đồng bộ. Buddy xếp clip theo máy quay và micro, mỗi thứ một track riêng."
+ },
+ "Find cameras and mics": {
+  "日本語": "カメラとマイクを探す",
+  "Español": "Buscar cámaras y micros",
+  "Deutsch": "Kameras und Mikros finden",
+  "Français": "Trouver les caméras et micros",
+  "한국어": "카메라와 마이크 찾기",
+  "中文": "查找摄影机和麦克风",
+  "العربية": "البحث عن الكاميرات والميكروفونات",
+  "Tiếng Việt": "Tìm máy quay và micro"
+ },
+ "Change": {
+  "日本語": "変更",
+  "Español": "Cambiar",
+  "Deutsch": "Ändern",
+  "Français": "Modifier",
+  "한국어": "변경",
+  "中文": "更改",
+  "العربية": "تغيير",
+  "Tiếng Việt": "Thay đổi"
+ },
+ "You get a new timeline. Nothing you already have is changed.": {
+  "日本語": "新しいタイムラインが作られます。既存のものは何も変わりません。",
+  "Español": "Obtienes una línea de tiempo nueva. Nada de lo que ya tienes cambia.",
+  "Deutsch": "Du bekommst eine neue Timeline. Nichts Vorhandenes wird verändert.",
+  "Français": "Tu obtiens une nouvelle timeline. Rien de ce que tu as déjà n'est modifié.",
+  "한국어": "새 타임라인이 만들어집니다. 기존의 것은 아무것도 바뀌지 않습니다.",
+  "中文": "会生成一条新时间线。你已有的内容不会改变。",
+  "العربية": "تحصل على خط زمني جديد. لا يتغير شيء مما لديك.",
+  "Tiếng Việt": "Bạn nhận được một timeline mới. Những gì đã có không bị thay đổi."
+ },
+ "Syncing by sound": {
+  "日本語": "音で同期",
+  "Español": "Sincronizando por sonido",
+  "Deutsch": "Synchronisation per Ton",
+  "Français": "Synchronisation par le son",
+  "한국어": "소리로 동기화",
+  "中文": "按声音同步",
+  "العربية": "المزامنة بالصوت",
+  "Tiếng Việt": "Đồng bộ theo âm thanh"
+ },
+ "Syncing by timecode": {
+  "日本語": "タイムコードで同期",
+  "Español": "Sincronizando por código de tiempo",
+  "Deutsch": "Synchronisation per Timecode",
+  "Français": "Synchronisation par timecode",
+  "한국어": "타임코드로 동기화",
+  "中文": "按时间码同步",
+  "العربية": "المزامنة بالتايم كود",
+  "Tiếng Việt": "Đồng bộ theo timecode"
+ },
+ "Syncing by timecode, fine-tuned with sound": {
+  "日本語": "タイムコードで同期し、音で微調整",
+  "Español": "Sincronizando por código de tiempo, afinado con sonido",
+  "Deutsch": "Synchronisation per Timecode, mit Ton feinjustiert",
+  "Français": "Synchronisation par timecode, affinée par le son",
+  "한국어": "타임코드로 동기화하고 소리로 미세 조정",
+  "中文": "按时间码同步，并用声音微调",
+  "العربية": "المزامنة بالتايم كود مع ضبط دقيق بالصوت",
+  "Tiếng Việt": "Đồng bộ theo timecode, tinh chỉnh bằng âm thanh"
+ },
+ "cameras' own sound kept": {
+  "日本語": "カメラ自体の音は残す",
+  "Español": "el sonido propio de las cámaras se conserva",
+  "Deutsch": "Kameraton bleibt erhalten",
+  "Français": "son propre des caméras conservé",
+  "한국어": "카메라 자체 소리 유지",
+  "中文": "保留摄影机自带的声音",
+  "العربية": "يُحتفظ بصوت الكاميرات نفسها",
+  "Tiếng Việt": "giữ âm thanh riêng của máy quay"
+ },
+ "cameras' own sound kept, turned off": {
+  "日本語": "カメラ自体の音は残してオフにする",
+  "Español": "el sonido propio de las cámaras se conserva, desactivado",
+  "Deutsch": "Kameraton bleibt erhalten, ausgeschaltet",
+  "Français": "son propre des caméras conservé, désactivé",
+  "한국어": "카메라 자체 소리 유지, 꺼 둠",
+  "中文": "保留摄影机自带的声音，但关闭",
+  "العربية": "يُحتفظ بصوت الكاميرات نفسها مع إيقافه",
+  "Tiếng Việt": "giữ âm thanh riêng của máy quay, đã tắt"
+ },
+ "cameras' own sound left out": {
+  "日本語": "カメラ自体の音は入れない",
+  "Español": "el sonido propio de las cámaras se omite",
+  "Deutsch": "Kameraton wird weggelassen",
+  "Français": "son propre des caméras laissé de côté",
+  "한국어": "카메라 자체 소리 제외",
+  "中文": "不包含摄影机自带的声音",
+  "العربية": "يُستبعد صوت الكاميرات نفسها",
+  "Tiếng Việt": "bỏ âm thanh riêng của máy quay"
+ },
+ "Order, master clock and clips": {
+  "日本語": "順番、マスタークロック、クリップ",
+  "Español": "Orden, reloj maestro y clips",
+  "Deutsch": "Reihenfolge, Master-Clock und Clips",
+  "Français": "Ordre, horloge maître et clips",
+  "한국어": "순서, 마스터 클록, 클립",
+  "中文": "顺序、主时钟和片段",
+  "العربية": "الترتيب والساعة الرئيسية والمقاطع",
+  "Tiếng Việt": "Thứ tự, đồng hồ chủ và clip"
+ },
+ "Device options": {
+  "日本語": "デバイスのオプション",
+  "Español": "Opciones del dispositivo",
+  "Deutsch": "Geräteoptionen",
+  "Français": "Options de l'appareil",
+  "한국어": "장치 옵션",
+  "中文": "设备选项",
+  "العربية": "خيارات الجهاز",
+  "Tiếng Việt": "Tùy chọn thiết bị"
+ },
+ "Make this the master clock": {
+  "日本語": "これをマスタークロックにする",
+  "Español": "Usar como reloj maestro",
+  "Deutsch": "Als Master-Clock verwenden",
+  "Français": "En faire l'horloge maître",
+  "한국어": "이것을 마스터 클록으로 지정",
+  "中文": "设为主时钟",
+  "العربية": "اجعل هذا الساعة الرئيسية",
+  "Tiếng Việt": "Đặt làm đồng hồ chủ"
+ },
+ "Hide its clips": {
+  "日本語": "クリップを隠す",
+  "Español": "Ocultar sus clips",
+  "Deutsch": "Clips ausblenden",
+  "Français": "Masquer ses clips",
+  "한국어": "클립 숨기기",
+  "中文": "隐藏其片段",
+  "العربية": "إخفاء مقاطعه",
+  "Tiếng Việt": "Ẩn các clip của nó"
+ },
+ "Show its clips": {
+  "日本語": "クリップを表示",
+  "Español": "Mostrar sus clips",
+  "Deutsch": "Clips anzeigen",
+  "Français": "Afficher ses clips",
+  "한국어": "클립 보기",
+  "中文": "显示其片段",
+  "العربية": "إظهار مقاطعه",
+  "Tiếng Việt": "Hiện các clip của nó"
+ },
+ "Where the sync goes": {
+  "日本語": "同期の出力先",
+  "Español": "Dónde va la sincronización",
+  "Deutsch": "Wohin die Synchronisation geht",
+  "Français": "Où va la synchronisation",
+  "한국어": "동기화 결과 위치",
+  "中文": "同步到哪里",
+  "العربية": "أين تذهب المزامنة",
+  "Tiếng Việt": "Nơi đặt kết quả đồng bộ"
+ },
+ "New timeline": {
+  "日本語": "新しいタイムライン",
+  "Español": "Línea de tiempo nueva",
+  "Deutsch": "Neue Timeline",
+  "Français": "Nouvelle timeline",
+  "한국어": "새 타임라인",
+  "中文": "新时间线",
+  "العربية": "خط زمني جديد",
+  "Tiếng Việt": "Timeline mới"
+ },
+ "This timeline": {
+  "日本語": "このタイムライン",
+  "Español": "Esta línea de tiempo",
+  "Deutsch": "Diese Timeline",
+  "Français": "Cette timeline",
+  "한국어": "이 타임라인",
+  "中文": "当前时间线",
+  "العربية": "هذا الخط الزمني",
+  "Tiếng Việt": "Timeline này"
+ },
+ "A new timeline, a track per camera and mic. Nothing you already have is changed.": {
+  "日本語": "カメラとマイクごとにトラックを持つ新しいタイムラインを作ります。既存のものは何も変わりません。",
+  "Español": "Una línea de tiempo nueva, con una pista por cámara y micro. Nada de lo que ya tienes cambia.",
+  "Deutsch": "Eine neue Timeline, eine Spur pro Kamera und Mikro. Nichts Vorhandenes wird verändert.",
+  "Français": "Une nouvelle timeline, une piste par caméra et micro. Rien de ce que tu as déjà n'est modifié.",
+  "한국어": "카메라와 마이크마다 트랙이 있는 새 타임라인입니다. 기존의 것은 아무것도 바뀌지 않습니다.",
+  "中文": "一条新时间线，每台摄影机和麦克风各占一条轨道。你已有的内容不会改变。",
+  "العربية": "خط زمني جديد، مسار لكل كاميرا وميكروفون. لا يتغير شيء مما لديك.",
+  "Tiếng Việt": "Một timeline mới, mỗi máy quay và micro một track. Những gì đã có không bị thay đổi."
+ },
+ "Move the clips on the open timeline into sync, each along its own track. Nothing is cut or deleted.": {
+  "日本語": "開いているタイムラインのクリップを、それぞれのトラック上で動かして同期させます。カットも削除もしません。",
+  "Español": "Mueve los clips de la línea de tiempo abierta hasta sincronizarlos, cada uno a lo largo de su pista. No se corta ni se elimina nada.",
+  "Deutsch": "Verschiebt die Clips der geöffneten Timeline in den Gleichlauf, jeden auf seiner eigenen Spur. Nichts wird geschnitten oder gelöscht.",
+  "Français": "Déplace les clips de la timeline ouverte pour les synchroniser, chacun le long de sa piste. Rien n'est coupé ni supprimé.",
+  "한국어": "열린 타임라인의 클립을 각자의 트랙에서 옮겨 동기화합니다. 자르거나 삭제하는 것은 없습니다.",
+  "中文": "把打开的时间线上的片段沿各自的轨道移动到同步位置。不会剪切或删除任何内容。",
+  "العربية": "ينقل المقاطع على الخط الزمني المفتوح إلى وضع المزامنة، كلٌّ على مساره. لا يُقص ولا يُحذف شيء.",
+  "Tiếng Việt": "Dời các clip trên timeline đang mở cho khớp nhau, mỗi clip dọc theo track của nó. Không cắt hay xóa gì."
+ },
+ "Sync this timeline": {
+  "日本語": "このタイムラインを同期",
+  "Español": "Sincronizar esta línea de tiempo",
+  "Deutsch": "Diese Timeline synchronisieren",
+  "Français": "Synchroniser cette timeline",
+  "한국어": "이 타임라인 동기화",
+  "中文": "同步当前时间线",
+  "العربية": "مزامنة هذا الخط الزمني",
+  "Tiếng Việt": "Đồng bộ timeline này"
+ },
+ "Put the clips back": {
+  "日本語": "クリップを元に戻す",
+  "Español": "Devolver los clips a su sitio",
+  "Deutsch": "Clips zurücksetzen",
+  "Français": "Remettre les clips en place",
+  "한국어": "클립 되돌리기",
+  "中文": "把片段放回原处",
+  "العربية": "إعادة المقاطع إلى مكانها",
+  "Tiếng Việt": "Đưa các clip về chỗ cũ"
+ },
+ "Move the clips back to where they were before this sync": {
+  "日本語": "この同期の前にあった位置へクリップを戻します",
+  "Español": "Devuelve los clips a donde estaban antes de esta sincronización",
+  "Deutsch": "Verschiebt die Clips dorthin zurück, wo sie vor dieser Synchronisation lagen",
+  "Français": "Remet les clips là où ils étaient avant cette synchronisation",
+  "한국어": "이번 동기화 전의 위치로 클립을 되돌립니다",
+  "中文": "把片段移回这次同步之前的位置",
+  "العربية": "يعيد المقاطع إلى حيث كانت قبل هذه المزامنة",
+  "Tiếng Việt": "Dời các clip về vị trí trước lần đồng bộ này"
+ },
+ "{n} of {total} clips in sync on this timeline - {moved} moved.": {
+  "日本語": "このタイムラインで {total} 個中 {n} 個のクリップが同期済み – {moved} 個を移動しました。",
+  "Español": "{n} de {total} clips sincronizados en esta línea de tiempo: {moved} movidos.",
+  "Deutsch": "{n} von {total} Clips in dieser Timeline synchron – {moved} verschoben.",
+  "Français": "{n} clips sur {total} synchronisés sur cette timeline – {moved} déplacés.",
+  "한국어": "이 타임라인에서 클립 {total}개 중 {n}개 동기화됨 – {moved}개 이동.",
+  "中文": "当前时间线上 {total} 个片段中有 {n} 个已同步——移动了 {moved} 个。",
+  "العربية": "{n} من {total} مقطعًا متزامنة على هذا الخط الزمني – نُقل {moved}.",
+  "Tiếng Việt": "{n} trên {total} clip đã khớp trên timeline này – đã dời {moved}."
+ },
+ "{n} of {total} clips in sync on this timeline - {moved} moved. Measured against {name}.": {
+  "日本語": "このタイムラインで {total} 個中 {n} 個のクリップが同期済み – {moved} 個を移動しました。基準：{name}。",
+  "Español": "{n} de {total} clips sincronizados en esta línea de tiempo: {moved} movidos. Medido respecto a {name}.",
+  "Deutsch": "{n} von {total} Clips in dieser Timeline synchron – {moved} verschoben. Gemessen an {name}.",
+  "Français": "{n} clips sur {total} synchronisés sur cette timeline – {moved} déplacés. Mesuré par rapport à {name}.",
+  "한국어": "이 타임라인에서 클립 {total}개 중 {n}개 동기화됨 – {moved}개 이동. 기준: {name}.",
+  "中文": "当前时间线上 {total} 个片段中有 {n} 个已同步——移动了 {moved} 个。以 {name} 为基准。",
+  "العربية": "{n} من {total} مقطعًا متزامنة على هذا الخط الزمني – نُقل {moved}. القياس بالنسبة إلى {name}.",
+  "Tiếng Việt": "{n} trên {total} clip đã khớp trên timeline này – đã dời {moved}. Đo theo {name}."
+ },
+ "Not synced - left where they were": {
+  "日本語": "同期できず – 元の位置のまま",
+  "Español": "Sin sincronizar: se quedan donde estaban",
+  "Deutsch": "Nicht synchronisiert – an ihrem Platz gelassen",
+  "Français": "Non synchronisés – laissés à leur place",
+  "한국어": "동기화 안 됨 – 원래 위치에 둠",
+  "中文": "未同步——留在原处",
+  "العربية": "غير متزامنة – تُركت في مكانها",
+  "Tiếng Việt": "Chưa đồng bộ – để nguyên chỗ cũ"
+ },
+ "Moving the clips into sync…": {
+  "日本語": "クリップを同期位置へ移動中…",
+  "Español": "Moviendo los clips para sincronizarlos…",
+  "Deutsch": "Clips werden in den Gleichlauf verschoben…",
+  "Français": "Déplacement des clips pour les synchroniser…",
+  "한국어": "클립을 동기화 위치로 옮기는 중…",
+  "中文": "正在把片段移到同步位置…",
+  "العربية": "جارٍ نقل المقاطع إلى وضع المزامنة…",
+  "Tiếng Việt": "Đang dời các clip cho khớp…"
+ },
+ "Putting the clips back…": {
+  "日本語": "クリップを元に戻しています…",
+  "Español": "Devolviendo los clips a su sitio…",
+  "Deutsch": "Clips werden zurückgesetzt…",
+  "Français": "Remise en place des clips…",
+  "한국어": "클립을 되돌리는 중…",
+  "中文": "正在把片段放回原处…",
+  "العربية": "جارٍ إعادة المقاطع إلى مكانها…",
+  "Tiếng Việt": "Đang đưa các clip về chỗ cũ…"
+ },
+ "Couldn't sync the timeline": {
+  "日本語": "タイムラインを同期できませんでした",
+  "Español": "No se pudo sincronizar la línea de tiempo",
+  "Deutsch": "Die Timeline konnte nicht synchronisiert werden",
+  "Français": "Impossible de synchroniser la timeline",
+  "한국어": "타임라인을 동기화하지 못했습니다",
+  "中文": "无法同步时间线",
+  "العربية": "تعذّرت مزامنة الخط الزمني",
+  "Tiếng Việt": "Không đồng bộ được timeline"
+ },
+ "Couldn't put the clips back": {
+  "日本語": "クリップを元に戻せませんでした",
+  "Español": "No se pudieron devolver los clips a su sitio",
+  "Deutsch": "Die Clips konnten nicht zurückgesetzt werden",
+  "Français": "Impossible de remettre les clips en place",
+  "한국어": "클립을 되돌리지 못했습니다",
+  "中文": "无法把片段放回原处",
+  "العربية": "تعذّرت إعادة المقاطع إلى مكانها",
+  "Tiếng Việt": "Không đưa được các clip về chỗ cũ"
+ },
+ "The timeline has changed since Buddy read it - nothing was moved. Sync again.": {
+  "日本語": "Buddy が読み取ってからタイムラインが変わりました。何も移動していません。もう一度同期してください。",
+  "Español": "La línea de tiempo ha cambiado desde que Buddy la leyó: no se movió nada. Sincroniza de nuevo.",
+  "Deutsch": "Die Timeline hat sich geändert, seit Buddy sie gelesen hat – nichts wurde verschoben. Synchronisiere erneut.",
+  "Français": "La timeline a changé depuis que Buddy l'a lue – rien n'a été déplacé. Synchronise à nouveau.",
+  "한국어": "Buddy가 읽은 뒤 타임라인이 바뀌었습니다. 아무것도 옮기지 않았습니다. 다시 동기화하세요.",
+  "中文": "自 Buddy 读取后时间线已发生变化——没有移动任何内容。请重新同步。",
+  "العربية": "تغيّر الخط الزمني منذ أن قرأه Buddy – لم يُنقل شيء. أعد المزامنة.",
+  "Tiếng Việt": "Timeline đã thay đổi từ khi Buddy đọc – chưa dời gì. Hãy đồng bộ lại."
+ },
+ "Syncing the open timeline where it is needs a newer DaVinci Resolve - build a new timeline instead. Nothing was moved.": {
+  "日本語": "開いているタイムラインをその場で同期するには、より新しい DaVinci Resolve が必要です。代わりに新しいタイムラインを作成してください。何も移動していません。",
+  "Español": "Sincronizar la línea de tiempo abierta en su sitio necesita un DaVinci Resolve más reciente: crea una línea de tiempo nueva en su lugar. No se movió nada.",
+  "Deutsch": "Die geöffnete Timeline an Ort und Stelle zu synchronisieren braucht ein neueres DaVinci Resolve – erstelle stattdessen eine neue Timeline. Nichts wurde verschoben.",
+  "Français": "Synchroniser la timeline ouverte sur place demande un DaVinci Resolve plus récent – crée plutôt une nouvelle timeline. Rien n'a été déplacé.",
+  "한국어": "열린 타임라인을 그 자리에서 동기화하려면 더 새로운 DaVinci Resolve가 필요합니다. 대신 새 타임라인을 만드세요. 아무것도 옮기지 않았습니다.",
+  "中文": "在原处同步打开的时间线需要更新版本的 DaVinci Resolve——请改为生成新时间线。没有移动任何内容。",
+  "العربية": "مزامنة الخط الزمني المفتوح في مكانه تحتاج إلى إصدار أحدث من DaVinci Resolve – أنشئ خطًا زمنيًا جديدًا بدلًا من ذلك. لم يُنقل شيء.",
+  "Tiếng Việt": "Đồng bộ timeline đang mở ngay tại chỗ cần DaVinci Resolve mới hơn – hãy tạo timeline mới thay vào đó. Chưa dời gì."
+ },
+ "Each camera and recorder needs to be on its own track. Their clips are moved into sync along it – nothing is cut or deleted.": {
+  "日本語": "カメラとレコーダーは、それぞれ専用のトラックに置く必要があります。クリップはそのトラック上で同期位置に移動します。カットも削除もしません。",
+  "Español": "Cada cámara y cada grabadora tiene que estar en su propia pista. Sus clips se mueven a lo largo de ella hasta sincronizarse: no se corta ni se elimina nada.",
+  "Deutsch": "Jede Kamera und jeder Rekorder braucht eine eigene Spur. Ihre Clips werden darauf in den Gleichlauf verschoben – nichts wird geschnitten oder gelöscht.",
+  "Français": "Chaque caméra et chaque enregistreur doit être sur sa propre piste. Leurs clips y sont déplacés pour être synchronisés – rien n'est coupé ni supprimé.",
+  "한국어": "카메라와 녹음기는 각각 자기 트랙에 있어야 합니다. 클립은 그 트랙에서 동기화 위치로 이동하며, 자르거나 삭제하는 것은 없습니다.",
+  "中文": "每台摄影机和录音机都需要单独占一条轨道。它们的片段会沿该轨道移动到同步位置——不会剪切或删除任何内容。",
+  "العربية": "يجب أن تكون كل كاميرا وكل مسجِّل على مسار خاص به. تُنقل مقاطعها على ذلك المسار إلى وضع المزامنة – لا يُقص ولا يُحذف شيء.",
+  "Tiếng Việt": "Mỗi máy quay và máy ghi âm cần nằm trên track riêng của nó. Các clip được dời dọc theo track đó cho khớp nhau – không cắt hay xóa gì."
  }
 }

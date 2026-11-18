@@ -14,7 +14,9 @@ A finished transcript is kept on disk, keyed by the file (path, size,
 modified time), the channels heard and the language asked for - so opening
 the panel again, or trimming in Resolve, costs nothing. Words corrected by
 hand are kept in the same file ("overrides", by the word's index), until
-the source is transcribed again.
+the source is transcribed again. Text taken from subtitles already on the
+timeline (page.on_use_subtitles) is kept the same way, its engine SUBTITLES:
+Transcribe replaces it.
 """
 
 import hashlib
@@ -29,6 +31,7 @@ from core import tool_dirs
 from .model import source_key
 
 VERSION = 1
+SUBTITLES = "subtitles"     # a transcript's "engine" when its text was read off a subtitle track
 # The models worth editing with, best first: Whisper's word times and
 # probabilities, then Parakeet.
 EDIT_PREFERENCE = ("large-v3", "large-v3-turbo", "distil-large-v3.5", "small", "parakeet-v3")

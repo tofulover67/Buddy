@@ -3,17 +3,19 @@
 Text Edit's Resolve calls. Qt-free: the reads, the playhead and the In/Out
 marks run in the Resolve reader's process (core/resolve_reader_child.py
 JOBS "podcast_text.*") - Resolve holds every call while the timeline plays,
-and one made inside Buddy froze it. Building a new timeline and the live
-cuts (keys.py) run on Buddy's main thread, behind the busy overlay.
+and one made inside Buddy froze it. The cuts (keys.py) run on Buddy's main
+thread, behind the busy overlay.
+
+Subtitles already on the timeline are read too (subtitle_cues), to be used
+as the transcript without transcribing.
 
 Writes: SetCurrentTimecode (a click on a word), SetMarkInOut / ClearMarkInOut
-(a selection), ImportTimelineFromFile (Build), and - only with "Cut the open
-timeline live" - the person's own Ripple Delete key, pressed for them.
+(a selection), and the person's own Ripple Delete key, pressed for them
+when they delete words.
 """
 
 import hashlib
 import json
-import os
 
 from core.resolve_bridge import ResolveConnectionError
 from pages.stills_exporter.resolve_ext import frames_to_timecode, timecode_to_frames
@@ -121,8 +123,37 @@ def read_timeline(controller, cache):
                     "start": int(first), "end": int(end), "offset": float(offset) / float(src_fps),
                     "locked": media is None,
                 })
+    data["subtitles"] = subtitle_tracks(timeline)
     data["sig"] = signature(data)
     return data
+
+
+def subtitle_tracks(timeline):
+    """[{index, name, count}] - the subtitle tracks with subtitles on them."""
+    out = []
+    for index in range(1, int(_call(timeline, "GetTrackCount", "subtitle", default=0) or 0) + 1):
+        count = len(_call(timeline, "GetItemListInTrack", "subtitle", index, default=[]) or [])
+        if count:
+            out.append({"index": index, "count": count,
+                        "name": str(_call(timeline, "GetTrackName", "subtitle", index, default="") or "")})
+    return out
+
+
+def subtitle_cues(controller, cache, index, timeline_id=""):
+    """Subtitle track `index` read as text: {"timeline": read_timeline()'s,
+    "cues": [[first, end, text]] in frames from the timeline's start, in
+    time order}. A subtitle's text is its clip's name. Read-only."""
+    timeline = get_timeline(controller)
+    if timeline_id and str(_call(timeline, "GetUniqueId", default="")) != timeline_id:
+        raise ResolveConnectionError("Another timeline is open now.")
+    start = int(_call(timeline, "GetStartFrame", default=0) or 0)
+    cues = []
+    for item in _call(timeline, "GetItemListInTrack", "subtitle", int(index), default=[]) or []:
+        first, end = _call(item, "GetStart"), _call(item, "GetEnd")
+        text = " ".join(str(_call(item, "GetName", default="") or "").split())
+        if first is not None and end is not None and text:
+            cues.append([int(first) - start, int(end) - start, text])
+    return {"timeline": read_timeline(controller, cache), "cues": sorted(cues)}
 
 
 def signature(data):
@@ -206,6 +237,10 @@ def read_here(controller, fresh=False):
     return read_timeline(controller, _HERE["media"])
 
 
+def subtitles_here(controller, index, timeline_id=""):
+    return subtitle_cues(controller, _HERE["media"], index, timeline_id)
+
+
 def live_here(controller):
     return playhead(controller)
 
@@ -220,51 +255,3 @@ def marks_here(controller, first, end, timeline_id=""):
 
 def clear_marks_here(controller):
     return clear_marks(controller)
-
-
-# ----------------------------------------------------- on the main thread --
-
-def export_otio(controller, path):
-    """The open timeline written to `path` as OTIO, with every item where
-    Resolve really has it (Project Setup's correct_positions). The document."""
-    from pages.project_setup import otio_engine as oe
-    timeline = get_timeline(controller)
-    resolve = controller.resolve
-    if not timeline.Export(path, resolve.EXPORT_OTIO, resolve.EXPORT_NONE):
-        raise oe.OtioError("Resolve could not export the timeline.")
-    with open(path, encoding="utf-8") as handle:
-        document = json.load(handle)
-    oe._correct_from(timeline, document)
-    return document
-
-
-def build_here(controller, cuts, audio, video, fps, name):
-    """Build: the open timeline exported, `cuts` ([first, end) frames from
-    its start) taken out of the `audio` and `video` tracks, and imported as a
-    new timeline `name` - a reader job ("podcast_text.build"), so Buddy keeps
-    drawing through the round trip. {"name": the new timeline's, "warnings"}."""
-    from pages.project_setup import otio_engine as oe
-    from . import otio_cut
-    folder = oe._fresh_workdir()
-    document = export_otio(controller, os.path.join(folder, "source.otio"))
-    edited, warnings = otio_cut.cut_document(document, cuts, {"Audio": set(audio), "Video": set(video)}, float(fps))
-    timeline = import_new(controller, edited, folder, name)
-    return {"name": str(_call(timeline, "GetName", default="") or ""), "warnings": list(warnings)}
-
-
-def import_new(controller, document, folder, name):
-    """`document` imported as a new timeline named `name` (made unique), and
-    opened. The Timeline."""
-    from pages.project_setup import otio_engine as oe
-    from pages.project_setup.resolve_ext import ProjectSetupController
-    psc = ProjectSetupController(controller)
-    project = psc.get_project()
-    path = os.path.join(folder, "edited.otio")
-    with open(path, "w", encoding="utf-8") as handle:
-        json.dump(document, handle)
-    unique = oe.unique_timeline_name(project, name)
-    timeline = psc.import_timeline_file(path, unique)
-    if timeline is None:
-        raise oe.OtioError("Resolve refused to import the edited timeline. The original is untouched.")
-    _call(project, "SetCurrentTimeline", timeline)
-    return timeline

@@ -29,8 +29,8 @@ Buddy.on("state", state => {
     $("te-timeline").textContent = state.timeline ? state.timeline.name : "";
     $("te-dot").classList.toggle("on", !!state.connected);
     if (!state.job.running) {
-        $("te-conn").textContent = state.waiting ? "Waiting for Resolve…"
-            : state.connected ? "Connected to Resolve" : "Not connected";
+        // Connected: the timeline's name says so. Otherwise, what's the matter.
+        $("te-conn").textContent = state.waiting ? "Waiting for Resolve…" : state.connected ? "" : "Not connected";
     }
     fillSelect($("te-model"), state.models, state.model);
     fillSelect($("te-language"), state.languages, state.language);
@@ -38,8 +38,6 @@ Buddy.on("state", state => {
     $("te-size").value = state.text_size;
     docEl.classList.remove("font-sans", "font-serif", "font-mono", "size-small", "size-medium", "size-large", "size-xlarge");
     docEl.classList.add(`font-${state.text_font}`, `size-${state.text_size}`);
-    for (const b of $("te-mode").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode));
-    $("te-shortcuts").hidden = state.mode !== "live";
     pressed($("te-back"), state.back_to_resolve);
     pressed($("te-follow"), state.follow);
     pressed($("te-inout"), state.set_inout);
@@ -47,6 +45,7 @@ Buddy.on("state", state => {
     $("te-undo").disabled = !state.can_undo;
     $("te-redo").disabled = !state.can_redo;
     $("te-transcribe").disabled = state.job.running || !state.connected;
+    $("te-subs").disabled = state.job.running || !state.connected;
     $("te-cancel").hidden = !state.job.running;
     showJob(state.job);
     drawFoot();
@@ -129,13 +128,38 @@ function clock(t) {
     return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function shorter(t) {
-    return t < 60 ? `${t.toFixed(1)} s` : clock(t);
+function empty(title, text, ...buttons) {
+    return Buddy.el("div.empty", {}, [Buddy.el("div.strong", {text: title}), text ? Buddy.el("div", {text}) : null,
+                                      buttons.length ? Buddy.el("div.te-empty-act", {}, buttons) : null].filter(Boolean));
 }
 
-function empty(title, text) {
-    return Buddy.el("div.empty", {}, [Buddy.el("div.strong", {text: title}), text ? Buddy.el("div", {text}) : null]
-        .filter(Boolean));
+function transcribeButton(kind) {
+    return Buddy.el(`button.btn${kind || ""}`, {type: "button", text: "Transcribe", disabled: !!(S && S.job && S.job.running),
+                                                onclick: () => send("transcribe", {force: false})});
+}
+
+/* Subtitles already on the timeline, used as the transcript: the one track
+   that has some, or the one picked from a menu when several do. */
+function useSubtitles(e) {
+    const tracks = (D && D.subtitles) || [];
+    if (!tracks.length) return;
+    const go = async index => {
+        if (D.tokens && D.tokens.some(t => t.k === "w")) {
+            const ok = await Buddy.confirm({title: "Use the subtitles as the transcript?", ok: "Use subtitles",
+                text: "The text of the clips under the subtitles is replaced by the subtitles' own, and words you fixed by hand there are lost."});
+            if (!ok) return;
+        }
+        send("use_subtitles", {index});
+    };
+    if (tracks.length === 1) return go(tracks[0].index);
+    const r = e.currentTarget.getBoundingClientRect();
+    Buddy.menu({x: r.left, y: r.bottom + 2, items: tracks.map(t => ({
+        label: Buddy.t("Subtitle track {n} ({count})").replace("{n}", t.index).replace("{count}", t.count),
+        raw: true, onClick: () => go(t.index)}))});
+}
+
+function subsButton() {
+    return Buddy.el("button.btn.accent", {type: "button", text: "Use subtitles", onclick: useSubtitles});
 }
 
 function drawDoc() {
@@ -147,9 +171,14 @@ function drawDoc() {
         return;
     }
     if (!D.tokens.length || D.tokens.every(t => t.k === "p")) {
-        docEl.replaceChildren(D.missing && D.missing.length
-            ? empty("Transcribe to see the text", "Press Transcribe: each dialogue clip is transcribed once, on this computer.")
-            : empty("No dialogue clips", "Put the recording on the timeline, and pick its tracks under Dialogue."));
+        const subs = D.subtitles && D.subtitles.length && !(S && S.job && S.job.running);
+        docEl.replaceChildren(!(D.missing && D.missing.length)
+            ? empty("No dialogue clips", "Put the recording on the timeline, and pick its tracks in Options.")
+            : subs ? empty("This timeline already has subtitles",
+                           "Use them as the transcript straight away, or press Transcribe for exact word timings.",
+                           subsButton(), transcribeButton())
+            : empty("Transcribe to see the text", "Press Transcribe: each dialogue clip is transcribed once, on this computer.",
+                    transcribeButton(".accent")));
         return;
     }
     const ticks = new Set(D.ticks || []);
@@ -163,9 +192,8 @@ function drawDoc() {
                 {text: (D.speakers || {})[track] || `A${track}`, title: `A${track}`, translate: "no"}));
         }
         const firstWord = D.tokens.slice(first, last + 1).find(t => t.k === "w") || D.tokens[first];
-        const lastWord = [...D.tokens.slice(first, last + 1)].reverse().find(t => t.k === "w") || D.tokens[last];
         gutter.append(Buddy.el("button.te-ts", {type: "button", title: "Jump here", translate: "no",
-            text: `${clock(firstWord.s)}–${clock(lastWord.e)}`, dataset: {i: String(first)}}));
+            text: clock(firstWord.s), dataset: {i: String(first)}}));
         const p = Buddy.el("p.te-text", {translate: "no"});
         for (let i = first; i <= last; i++) {
             const tok = D.tokens[i];
@@ -182,7 +210,6 @@ function drawDoc() {
                 if (tok.f) span.classList.add("f");
                 if (tok.lo) { span.classList.add("lo"); span.title = Buddy.t("Low confidence – double-click to fix"); }
             }
-            if (tok.x) span.classList.add("x");
             els[i] = span;
             p.append(span, " ");
         }
@@ -195,23 +222,9 @@ function drawDoc() {
 }
 
 function drawFoot() {
-    const live = S && S.mode === "live";
-    $("te-hint").textContent = live
-        ? "Click a word to move Resolve's playhead · Drag across words to set In and Out · Delete cuts them from the timeline · Double-click to fix a word"
-        : "Click a word to move Resolve's playhead · Drag across words to set In and Out · Delete strikes them out · Double-click to fix a word";
-    const struck = D && D.struck ? D.struck : 0;
-    $("te-build").hidden = live;
-    $("te-restore-all").hidden = live || !struck;
-    $("te-build").disabled = !(D && D.cuts);
-    $("te-summary").hidden = live;
-    $("te-summary").textContent = D && D.cuts
-        ? Buddy.t(D.cuts === 1 ? "1 cut · {time} shorter" : "{n} cuts · {time} shorter")
-            .replace("{n}", D.cuts).replace("{time}", shorter(D.cut_seconds))
-        : "";
-    const n = D ? D.fillers || 0 : 0;
-    $("te-fillers").disabled = !n;
-    $("te-fillers").textContent = n ? Buddy.t("Remove filler words ({n})").replace("{n}", n) : Buddy.t("Remove filler words");
+    $("te-clean").disabled = !(D && D.tokens && D.tokens.length);
     $("te-retranscribe").hidden = !(D && D.tokens && D.tokens.some(t => t.k === "w"));
+    $("te-subs").hidden = !(D && D.subtitles && D.subtitles.length);
 }
 
 function notice(text, kind, button) {
@@ -224,18 +237,18 @@ function notice(text, kind, button) {
 function drawNotices() {
     const box = $("te-notices");
     const out = [];
-    if (S && !S.tip_seen && D && D.timeline) {
-        out.push(notice(S.mode === "live"
-            ? "Click a word to move Resolve's playhead; drag across words to set In and Out. Delete cuts the selected words from the open timeline with your own Ripple Delete key."
-            : "Click a word to move Resolve's playhead; drag across words to set In and Out. Delete strikes words out, then Build makes a new timeline without them – your timeline is never changed.",
-            "info", Buddy.el("button.btn.ghost", {type: "button", text: "Got it", onclick: () => send("option", {key: "tip_seen", value: true})})));
-    }
-    if (S && S.mode === "live" && S.keys_problem) out.push(notice(S.keys_problem, "warn"));
-    if (D && D.missing && D.missing.length && D.tokens && D.tokens.some(t => t.k === "w")) {
+    if (S && S.keys_problem) out.push(notice(S.keys_problem, "warn"));
+    // Text taken from subtitles sits on one track's clips: the other mics aren't "missing".
+    if (D && !D.estimated && D.missing && D.missing.length && D.tokens && D.tokens.some(t => t.k === "w")) {
         const text = D.missing.length === 1
             ? Buddy.t("“{name}” isn't transcribed yet.").replace("{name}", D.missing[0])
             : Buddy.t("{n} clips aren't transcribed yet.").replace("{n}", D.missing.length);
         out.push(notice(text, "info", S && S.job && S.job.running ? null
+            : Buddy.el("button.btn", {type: "button", text: "Transcribe", onclick: () => send("transcribe", {force: false})})));
+    }
+    if (D && D.estimated) {
+        out.push(notice("This text comes from the timeline's subtitles, so when each word is said is estimated – cuts can land a little early or late. Transcribe for exact word timings.",
+            "info", S && S.job && S.job.running ? null
             : Buddy.el("button.btn", {type: "button", text: "Transcribe", onclick: () => send("transcribe", {force: false})})));
     }
     for (const why of (D && D.failed) || []) out.push(notice(why, "warn"));
@@ -258,7 +271,33 @@ function range() {
 function paintSel() {
     for (const e of docEl.querySelectorAll(".tk.sel")) e.classList.remove("sel");
     for (const i of range()) if (els[i]) els[i].classList.add("sel");
+    placeSelbar();
 }
+
+/* The bar on the selection - Cut, Play, Fix word - just above its first
+   word (below it when there's no room), inside the transcript's card. Not
+   while the selection is still being dragged out, or a word is being fixed. */
+const selbar = $("te-selbar");
+
+function placeSelbar() {
+    const first = sel ? els[Math.min(...sel)] : null;
+    if (!first || dragging || editing || !D) { selbar.hidden = true; return; }
+    const word = first.getBoundingClientRect(), card = selbar.parentElement.getBoundingClientRect();
+    if (word.bottom < card.top || word.top > card.bottom) { selbar.hidden = true; return; }
+    $("te-sel-fix").hidden = !(sel[0] === sel[1] && D.tokens[sel[0]] && D.tokens[sel[0]].k === "w");
+    selbar.hidden = false;
+    let top = word.top - card.top - selbar.offsetHeight - 6;
+    if (top < 4) top = word.bottom - card.top + 6;
+    selbar.style.top = `${top}px`;
+    selbar.style.left = `${Math.max(6, Math.min(card.width - selbar.offsetWidth - 6, word.left - card.left))}px`;
+}
+
+selbar.addEventListener("mousedown", e => e.preventDefault());      // the transcript keeps the keyboard
+$("te-sel-cut").addEventListener("click", () => { if (sel && D) send("strike", {ids: range(), version: D.version}); });
+$("te-sel-play").addEventListener("click", () => { if (sel) { seek(Math.min(...sel), true); send("play"); } });
+$("te-sel-fix").addEventListener("click", () => { if (sel) startEdit(sel[0]); });
+docEl.addEventListener("scroll", placeSelbar, {passive: true});
+addEventListener("resize", placeSelbar);
 
 function setSel(a, b) {
     sel = a == null ? null : [a, b == null ? a : b];
@@ -275,11 +314,44 @@ function seek(i, keepFocus) {
     if (D && D.tokens[i]) send("seek", {id: i, version: D.version, keep_focus: !!keepFocus});
 }
 
+/* A click beside the words - the space between two, the end of a line, the
+   paragraph's edge - is a click on the word nearest to it. */
+function nearestToken(e) {
+    const p = e.target.closest(".te-text");
+    if (!p) return null;
+    let best = null, bestD = Infinity;
+    for (const tk of p.querySelectorAll(".tk")) {
+        for (const r of tk.getClientRects()) {
+            const dy = e.clientY < r.top ? r.top - e.clientY : e.clientY > r.bottom ? e.clientY - r.bottom : 0;
+            const dx = e.clientX < r.left ? r.left - e.clientX : e.clientX > r.right ? e.clientX - r.right : 0;
+            const d = dy * 10000 + dx;          // the line first, then along it
+            if (d < bestD) { bestD = d; best = tk; }
+        }
+    }
+    return best;
+}
+
+/* The token above or below `from` (step -1 / 1): on the next line of text,
+   the one nearest to straight up or down. */
+function lineStep(from, step) {
+    const box = i => els[i].getBoundingClientRect();
+    const x = box(from).left, y = box(from).top;
+    let i = from + step;
+    while (els[i] && Math.abs(box(i).top - y) < 3) i += step;
+    if (!els[i]) return from;
+    const line = box(i).top;
+    let best = i;
+    for (; els[i] && Math.abs(box(i).top - line) < 3; i += step) {
+        if (Math.abs(box(i).left - x) < Math.abs(box(best).left - x)) best = i;
+    }
+    return best;
+}
+
 docEl.addEventListener("mousedown", e => {
     if (editing) return;
     const ts = e.target.closest(".te-ts");
     if (ts) return;
-    const tk = e.target.closest(".tk");
+    const tk = e.target.closest(".tk") || nearestToken(e);
     if (!tk) { setSel(null); return; }
     e.preventDefault();
     docEl.focus({preventScroll: true});
@@ -311,6 +383,7 @@ docEl.addEventListener("mouseover", e => {
 addEventListener("mouseup", () => {
     if (!dragging) return;
     dragging = false;
+    placeSelbar();
     if (sel && sel[0] !== sel[1]) markSel();
     else if (S && S.back_to_resolve && sel) seek(sel[0]);
 });
@@ -335,6 +408,7 @@ function startEdit(i) {
     const span = els[i];
     if (!span) return;
     editing = {i, before: span.textContent};
+    placeSelbar();
     span.classList.add("editing");
     span.contentEditable = "true";
     span.focus();
@@ -355,6 +429,7 @@ function startEdit(i) {
         if (commit && text && text !== before) send("correct", {id: i, text, version: D.version});
         else span.textContent = before;
         docEl.focus({preventScroll: true});
+        placeSelbar();
     };
     const onKey = ev => {
         if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
@@ -394,12 +469,13 @@ document.addEventListener("keydown", e => {
         send("strike", {ids: range(), version: D.version});
         return;
     }
-    if (e.key === "Escape") { setSel(null); return; }
-    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    if (e.key === "Escape") { if (!optionsEl.hidden) showOptions(false); else setSel(null); return; }
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
         e.preventDefault();
-        const step = e.key === "ArrowLeft" ? -1 : 1;
+        const step = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1;
         const from = sel ? (e.shiftKey ? sel[1] : (step < 0 ? Math.min(...sel) : Math.max(...sel))) : (nowId != null ? nowId : -1);
-        const i = Math.max(0, Math.min(D.tokens.length - 1, from + step));
+        const lines = e.key === "ArrowUp" || e.key === "ArrowDown";
+        const i = lines && els[from] ? lineStep(from, step) : Math.max(0, Math.min(D.tokens.length - 1, from + step));
         if (e.shiftKey && anchor != null) { setSel(anchor, i); markSel(); }
         else { anchor = i; setSel(i); seek(i, true); }
         if (els[i]) els[i].scrollIntoView({block: "nearest"});
@@ -501,20 +577,40 @@ $("te-model").addEventListener("change", e => send("option", {key: "model", valu
 $("te-language").addEventListener("change", e => send("option", {key: "language", value: e.target.value}));
 $("te-font").addEventListener("change", e => send("option", {key: "text_font", value: e.target.value}));
 $("te-size").addEventListener("change", e => send("option", {key: "text_size", value: e.target.value}));
-$("te-mode").addEventListener("click", e => {
-    const b = e.target.closest("button[data-mode]");
-    if (b) send("option", {key: "mode", value: b.dataset.mode});
-});
+$("te-subs").addEventListener("click", useSubtitles);
 for (const [id, key] of [["te-back", "back_to_resolve"], ["te-follow", "follow"], ["te-inout", "set_inout"]]) {
     $(id).addEventListener("click", e => send("option", {key, value: e.currentTarget.getAttribute("aria-pressed") !== "true"}));
 }
 $("te-undo").addEventListener("click", () => send("undo"));
 $("te-redo").addEventListener("click", () => send("redo"));
-$("te-pauses").addEventListener("click", () => send("remove_pauses", {seconds: Number($("te-pause-over").value)}));
 $("te-pause-over").addEventListener("change", e => send("option", {key: "pause_over", value: Number(e.target.value)}));
-$("te-fillers").addEventListener("click", () => send("remove_fillers"));
-$("te-restore-all").addEventListener("click", () => send("restore_all"));
-$("te-build").addEventListener("click", () => send("build"));
+
+/* Clean up: every filler word, or every long pause, cut in one go. */
+$("te-clean").addEventListener("click", e => {
+    const box = e.currentTarget.getBoundingClientRect();
+    const n = D ? D.fillers || 0 : 0;
+    const seconds = Number($("te-pause-over").value) || 1;
+    Buddy.menu({x: box.left, y: box.bottom + 4, items: [
+        {label: n ? Buddy.t("Remove filler words ({n})").replace("{n}", n) : Buddy.t("Remove filler words"), raw: true,
+         disabled: !n, onClick: () => send("remove_fillers")},
+        {label: Buddy.t("Remove pauses over {s} s").replace("{s}", seconds.toFixed(1)), raw: true,
+         onClick: () => send("remove_pauses", {seconds})},
+    ]});
+});
+
+/* Options: beside the transcript, there until closed. */
+const optionsEl = $("te-options");
+
+function showOptions(on) {
+    optionsEl.hidden = !on;
+    $("te-options-btn").setAttribute("aria-expanded", String(on));
+    placeSelbar();
+}
+
+$("te-options-btn").addEventListener("click", () => showOptions(optionsEl.hidden));
+$("te-options-close").addEventListener("click", () => showOptions(false));
+$("te-find-icon").append(Buddy.icon("search"));
+$("te-options-btn").prepend(Buddy.icon("sliders"));
 $("te-shortcuts").addEventListener("click", openShortcuts);
 
 /* ---------------------------------------------------- Shortcuts dialog -- */

@@ -547,5 +547,199 @@ class PageTests(unittest.TestCase):
         self.assertIsNone(self.page._worker)
 
 
+    def test_this_timeline_is_the_open_timelines_choice(self):
+        self.page.on_option({"key": "target", "value": "here"})
+        state = self.last("state")
+        self.assertEqual((state["target"], state["source"]), ("here", "timeline"))       # it reads the open timeline
+        self.page.on_option({"key": "source", "value": "bin"})
+        self.assertEqual(self.last("state")["target"], "new")
+        self.page.on_option({"key": "target", "value": "nowhere"})
+        self.assertEqual(self.last("state")["target"], "new")
+
+    def test_syncing_this_timeline_moves_its_clips_and_puts_them_back(self):
+        self.page.on_option({"key": "target", "value": "here"})
+        self.page.on_option({"key": "fine", "value": False})
+        asked = []
+
+        def move_here(controller, moves, name=""):
+            asked.append((moves, name))
+            return {"timeline": name, "moved": len(moves), "warnings": [],
+                    "undo": [dict(m, start=m["to"], to=m["start"]) for m in moves]}
+
+        with mock.patch.object(self.mod.PodcastSyncPage, "_ffmpeg", return_value=None), \
+                mock.patch.object(self.mod.sync_ext, "move_here", move_here):
+            self.page.on_sync()
+            self.page._worker.wait(10000)
+            for _ in range(20):
+                self.app.processEvents()
+            result = self.last("result")
+            self.assertEqual(self.controller.imported, [])                  # no new timeline
+            self.assertTrue(result["in_place"] and result["can_undo"])
+            self.assertEqual(asked[0][1], "Edit")
+            self.assertEqual(result["moved"], len(asked[0][0]))
+            self.assertNotIn("moves", result)
+            self.page.on_put_back()
+            self.assertEqual(asked[1][0], [dict(m, start=m["to"], to=m["start"]) for m in asked[0][0]])
+            self.assertIsNone(self.last("result"))
+            self.page.on_put_back()                                         # once only
+            self.assertEqual(len(asked), 2)
+
+
+def stacked():
+    """A camera each on V1/A1 and V2/A2 and the recorder on A3, all starting together -
+    a timeline someone stacked by hand, not yet in sync."""
+    a = ("A001_0001", 600, "D:/Footage/CamA/A001_0001.MXF", 36000.0)
+    b = ("B001_0001", 1000, "D:/Footage/CamB/B001_0001.MXF", 36010.0)
+    tracks = [oe._make_track("Video", "Video 1", [clip(*a[:3], link=1, tc=a[3])]),
+              oe._make_track("Video", "Video 2", [clip(*b[:3], link=2, tc=b[3])]),
+              oe._make_track("Audio", "Audio 1", [clip(*a[:3], link=1, tc=a[3])]),
+              oe._make_track("Audio", "Audio 2", [clip(*b[:3], link=2, tc=b[3])]),
+              oe._make_track("Audio", "Audio 3", [clip("ZOOM0001_Tr1", 1100, "D:/Footage/Recorder/ZOOM0001_Tr1.WAV", tc=35995.0)])]
+    return {"OTIO_SCHEMA": "Timeline.1", "name": "T", "metadata": {},
+            "tracks": {"OTIO_SCHEMA": "Stack.1", "children": tracks}}
+
+
+class InPlaceTests(unittest.TestCase):
+    """Syncing the open timeline where it is: how far each item moves."""
+
+    def test_every_item_moves_along_its_own_track_to_the_master(self):
+        out, result = engine.sync(stacked(), "timecode", fine=False, in_place=True)
+        self.assertIsNone(out)
+        self.assertEqual(result["placed"], 3)
+        # The recorder (the master clock) stays; Cam A comes 5 s later, Cam B 15 s - picture and sound alike.
+        self.assertEqual(result["moves"], [
+            {"kind": "Audio", "track": 1, "start": 0, "to": 120}, {"kind": "Audio", "track": 2, "start": 0, "to": 360},
+            {"kind": "Video", "track": 1, "start": 0, "to": 120}, {"kind": "Video", "track": 2, "start": 0, "to": 360}])
+
+    def test_nothing_starts_before_the_timeline_does(self):
+        # Cam B as the master: the recorder belongs 15 s before it, so everything moves later instead.
+        _out, result = engine.sync(stacked(), "timecode", fine=False, in_place=True, master="CamB")
+        # (the recorder ends up where it was: at the start).
+        self.assertEqual({(m["kind"], m["track"]): m["to"] for m in result["moves"]},
+                         {("Audio", 1): 120, ("Video", 1): 120, ("Audio", 2): 360, ("Video", 2): 360})
+
+    def test_a_timeline_already_in_sync_has_nothing_to_move(self):
+        clips = engine.read_clips(stacked())
+        devices = engine.group_devices(clips)
+        positions = {c.id: c.logical.record_frame / RATE for c in clips}
+        self.assertEqual(engine.moves_in_place(clips, devices, positions), [])
+        self.assertEqual(engine.moves_in_place(clips, devices, {}), [])
+
+
+class _Live:
+    """A timeline item as Resolve has it: where it is, and SetPosition."""
+
+    def __init__(self, start, end, stuck=False):
+        self.start, self.end, self.stuck, self.asked, self.track = start, end, stuck, [], []
+
+    def GetStart(self):
+        return self.start
+
+    def GetEnd(self):
+        return self.end
+
+    def GetPosition(self, *_a):
+        return {"startFrame": self.start}
+
+    def SetPosition(self, position, linked=True, *_a):
+        self.asked.append((position["startFrame"], linked))
+        if self.stuck and len(self.asked) == 2:         # parked, then refuses its place
+            return False
+        if any(o is not self and o.start < position["startFrame"] + self.end - self.start and position["startFrame"] < o.end
+               for o in self.track):
+            raise AssertionError("moved onto another clip - Resolve would have overwritten it")
+        self.end += position["startFrame"] - self.start
+        self.start = position["startFrame"]
+        return True
+
+
+class _LiveTimeline:
+    START = 86400
+
+    def __init__(self, tracks, locked=()):
+        self.tracks, self.locked = tracks, set(locked)
+
+    def GetName(self):
+        return "Edit"
+
+    def GetStartFrame(self):
+        return self.START
+
+    def GetTrackCount(self, kind):
+        return max((n for k, n in self.tracks if k == kind), default=0)
+
+    def GetItemListInTrack(self, kind, number):
+        return list(self.tracks.get((kind, number), []))
+
+    def GetIsTrackLocked(self, kind, number):
+        return (kind, number) in self.locked
+
+
+class MoveHereTests(unittest.TestCase):
+    """resolve_ext.move_here against a fake timeline: all of it, or none of it."""
+
+    def setUp(self):
+        from pages.podcast.sync import resolve_ext
+        self.ext = resolve_ext
+        s = _LiveTimeline.START
+        self.cam = _Live(s, s + 600)
+        self.rec = _Live(s, s + 1000)
+        self.other = _Live(s + 700, s + 900)             # on the camera's track, not part of the sync
+        self.timeline = _LiveTimeline({("video", 1): [self.cam, self.other], ("audio", 1): [self.rec]})
+        self.cam.track = self.other.track = [self.cam, self.other]
+        project = mock.Mock()
+        project.GetCurrentTimeline.return_value = self.timeline
+        patcher = mock.patch.object(resolve_ext, "_wrapped", lambda _c: mock.Mock(get_project=lambda: project))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def where(self):
+        s = _LiveTimeline.START
+        return [(i.start - s, i.end - s) for i in (self.cam, self.other, self.rec)]
+
+    def test_items_are_parked_then_placed_and_can_be_put_back(self):
+        moves = [{"kind": "Video", "track": 1, "start": 0, "to": 50}]
+        answer = self.ext.move_here(None, moves, "Edit")
+        self.assertEqual(self.where(), [(50, 650), (700, 900), (0, 1000)])
+        self.assertEqual(answer["moved"], 1)
+        self.assertEqual([linked for _f, linked in self.cam.asked], [False, False])      # its sound isn't dragged along
+        self.assertGreater(self.cam.asked[0][0], _LiveTimeline.START + 1000)             # parked past everything first
+        self.ext.move_here(None, answer["undo"], "Edit")
+        self.assertEqual(self.where(), [(0, 600), (700, 900), (0, 1000)])
+
+    def test_a_long_move_never_passes_through_a_clip_still_waiting(self):
+        # The camera goes 5000 frames later - past where the waiting place would be if it were
+        # measured from today's end alone - and the other clip on its track moves too.
+        moves = [{"kind": "Video", "track": 1, "start": 0, "to": 5000}, {"kind": "Video", "track": 1, "start": 700, "to": 6000}]
+        self.ext.move_here(None, moves, "Edit")
+        self.assertEqual(self.where()[:2], [(5000, 5600), (6000, 6200)])
+
+    def test_nothing_moves_if_clips_would_land_on_each_other(self):
+        with self.assertRaises(oe.OtioError) as raised:
+            self.ext.move_here(None, [{"kind": "Video", "track": 1, "start": 0, "to": 200}], "Edit")
+        self.assertIn("V1", str(raised.exception))
+        self.assertEqual(self.where(), [(0, 600), (700, 900), (0, 1000)])
+        self.assertEqual(self.cam.asked, [])
+
+    def test_a_changed_timeline_a_locked_track_or_another_timeline_is_refused(self):
+        for moves, name, locked, said in (
+                ([{"kind": "Video", "track": 1, "start": 5, "to": 50}], "Edit", (), "changed"),
+                ([{"kind": "Video", "track": 1, "start": 0, "to": 50}], "Edit", [("video", 1)], "locked"),
+                ([{"kind": "Video", "track": 1, "start": 0, "to": 50}], "Another", (), "Another timeline")):
+            self.timeline.locked = set(locked)
+            with self.assertRaises(oe.OtioError) as raised:
+                self.ext.move_here(None, moves, name)
+            self.assertIn(said, str(raised.exception))
+        self.assertEqual(self.cam.asked, [])
+
+    def test_a_move_resolve_refuses_puts_the_rest_back(self):
+        self.rec.stuck = True
+        moves = [{"kind": "Video", "track": 1, "start": 0, "to": 50}, {"kind": "Audio", "track": 1, "start": 0, "to": 20}]
+        with self.assertRaises(oe.OtioError) as raised:
+            self.ext.move_here(None, moves, "Edit")
+        self.assertIn("back where they were", str(raised.exception))
+        self.assertEqual(self.where(), [(0, 600), (700, 900), (0, 1000)])
+
+
 if __name__ == "__main__":
     unittest.main()

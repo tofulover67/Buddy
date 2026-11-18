@@ -546,7 +546,7 @@
   "Deutsch": "Kameras",
   "Français": "Caméras",
   "한국어": "카메라",
-  "中文": "摄像机",
+  "中文": "摄影机",
   "العربية": "الكاميرات",
   "Tiếng Việt": "Máy quay"
  },
@@ -1029,5 +1029,125 @@
   "中文": "使用它的时间线将改用其他设置。",
   "العربية": "المخططات الزمنية التي كانت تستخدمه ستستخدم إعدادًا آخر.",
   "Tiếng Việt": "Các timeline đang dùng nó sẽ dùng bộ thiết lập khác."
+ },
+ "Who is on each camera?": {
+  "日本語": "各カメラに映っているのは誰？",
+  "Español": "¿Quién sale en cada cámara?",
+  "Deutsch": "Wer ist auf welcher Kamera?",
+  "Français": "Qui est sur chaque caméra ?",
+  "한국어": "각 카메라에 누가 나오나요?",
+  "中文": "每台摄影机拍的是谁？",
+  "العربية": "من يظهر في كل كاميرا؟",
+  "Tiếng Việt": "Ai ở trên mỗi máy quay?"
+ },
+ "Buddy listens to the mics and cuts to whoever is talking. Check the names and cameras, then build.": {
+  "日本語": "Buddy がマイクを聞き、話している人に切り替えます。名前とカメラを確認してから作成してください。",
+  "Español": "Buddy escucha los micros y corta a quien esté hablando. Revisa los nombres y las cámaras, y luego crea.",
+  "Deutsch": "Buddy hört die Mikros ab und schneidet auf die Person, die spricht. Prüfe Namen und Kameras, dann erstelle.",
+  "Français": "Buddy écoute les micros et coupe sur la personne qui parle. Vérifie les noms et les caméras, puis crée.",
+  "한국어": "Buddy가 마이크를 듣고 말하는 사람으로 전환합니다. 이름과 카메라를 확인한 뒤 만드세요.",
+  "中文": "Buddy 会听各个麦克风，并切到正在说话的人。检查姓名和摄影机，然后生成。",
+  "العربية": "يستمع Buddy إلى الميكروفونات ويقطع إلى من يتكلم. راجع الأسماء والكاميرات ثم أنشئ.",
+  "Tiếng Việt": "Buddy nghe các micro và cắt sang người đang nói. Kiểm tra tên và máy quay rồi tạo."
+ },
+ "People": {
+  "日本語": "人物",
+  "Español": "Personas",
+  "Deutsch": "Personen",
+  "Français": "Personnes",
+  "한국어": "사람",
+  "中文": "人物",
+  "العربية": "الأشخاص",
+  "Tiếng Việt": "Người"
+ },
+ "How it will cut": {
+  "日本語": "カットのプレビュー",
+  "Español": "Cómo cortará",
+  "Deutsch": "So wird geschnitten",
+  "Français": "Comment ce sera coupé",
+  "한국어": "이렇게 잘립니다",
+  "中文": "剪切预览",
+  "العربية": "كيف سيكون القص",
+  "Tiếng Việt": "Sẽ cắt như thế này"
+ },
+ "Pacing…": {
+  "日本語": "テンポ…",
+  "Español": "Ritmo…",
+  "Deutsch": "Tempo…",
+  "Français": "Rythme…",
+  "한국어": "속도감…",
+  "中文": "节奏…",
+  "العربية": "الإيقاع…",
+  "Tiếng Việt": "Nhịp cắt…"
+ },
+ "Pacing": {
+  "日本語": "テンポ",
+  "Español": "Ritmo",
+  "Deutsch": "Tempo",
+  "Français": "Rythme",
+  "한국어": "속도감",
+  "中文": "节奏",
+  "العربية": "الإيقاع",
+  "Tiếng Việt": "Nhịp cắt"
+ },
+ "How long shots last, reaction shots, when the wide shot is used": {
+  "日本語": "ショットの長さ、リアクションショット、ワイドショットを使うタイミング",
+  "Español": "Cuánto duran los planos, planos de reacción, cuándo se usa el plano general",
+  "Deutsch": "Wie lange Einstellungen dauern, Reaktionsaufnahmen, wann die Totale kommt",
+  "Français": "Durée des plans, plans de réaction, quand le plan large est utilisé",
+  "한국어": "샷 길이, 리액션 샷, 와이드 샷을 쓰는 때",
+  "中文": "镜头时长、反应镜头、何时使用全景",
+  "العربية": "مدة اللقطات، لقطات رد الفعل، ومتى تُستخدم اللقطة الواسعة",
+  "Tiếng Việt": "Độ dài cảnh, cảnh phản ứng, khi nào dùng cảnh rộng"
+ },
+ "Build switched timeline": {
+  "日本語": "切り替え済みタイムラインを作成",
+  "Español": "Crear línea de tiempo conmutada",
+  "Deutsch": "Geschnittene Timeline erstellen",
+  "Français": "Créer la timeline commutée",
+  "한국어": "전환된 타임라인 만들기",
+  "中文": "生成切换后的时间线",
+  "العربية": "إنشاء الخط الزمني المبدَّل",
+  "Tiếng Việt": "Tạo timeline đã chuyển cảnh"
+ },
+ "Shows": {
+  "日本語": "映っている人",
+  "Español": "Muestra",
+  "Deutsch": "Zeigt",
+  "Français": "Montre",
+  "한국어": "나오는 사람",
+  "中文": "画面中是",
+  "العربية": "تُظهر",
+  "Tiếng Việt": "Hiển thị"
+ },
+ "Used as": {
+  "日本語": "用途",
+  "Español": "Se usa como",
+  "Deutsch": "Verwendet als",
+  "Français": "Utilisée comme",
+  "한국어": "용도",
+  "中文": "用作",
+  "العربية": "تُستخدم كـ",
+  "Tiếng Việt": "Dùng làm"
+ },
+ "Sound": {
+  "日本語": "音",
+  "Español": "Sonido",
+  "Deutsch": "Ton",
+  "Français": "Son",
+  "한국어": "소리",
+  "中文": "声音",
+  "العربية": "الصوت",
+  "Tiếng Việt": "Âm thanh"
+ },
+ "No cameras on this timeline yet.": {
+  "日本語": "このタイムラインにはまだカメラがありません。",
+  "Español": "Aún no hay cámaras en esta línea de tiempo.",
+  "Deutsch": "In dieser Timeline sind noch keine Kameras.",
+  "Français": "Pas encore de caméras sur cette timeline.",
+  "한국어": "이 타임라인에는 아직 카메라가 없습니다.",
+  "中文": "这条时间线上还没有摄影机。",
+  "العربية": "لا توجد كاميرات على هذا الخط الزمني بعد.",
+  "Tiếng Việt": "Timeline này chưa có máy quay nào."
  }
 }

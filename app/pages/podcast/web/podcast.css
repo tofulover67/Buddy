@@ -1,0 +1,30 @@
+/* What Podcast's three tabs share (sync/, switch/, text_edit/), on top of
+   web/buddy.css: the tabs drawn as numbered steps beside the title, where
+   in Resolve it's working, one centred column, and the bar at the foot
+   with the tab's one main button. Theme colours only. */
+
+.pod-head { gap: 14px; }
+.pod-head .page-title { flex: none; }
+.pod-steps { border-bottom: 0; gap: 6px; flex-wrap: wrap; }
+.pod-steps button {
+    display: inline-flex; align-items: center; gap: 8px; margin: 0; border: 0;
+    border-radius: var(--r-full); padding: 6px 14px;
+}
+.pod-steps button[aria-selected="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.pod-n { opacity: .7; font-variant-numeric: tabular-nums; }
+
+.pod-where { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--text-dim); font-size: var(--fs-sm); }
+.pod-where-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pod-dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--text-dim); flex: none; }
+.pod-dot.on { background: var(--accent-text); }
+
+.pod-col { width: 100%; max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.pod-title { margin: 0; font-size: var(--fs-xl); font-weight: 700; color: var(--text-strong); }
+.pod-sub { margin: 4px 0 0; color: var(--text-dim); line-height: 1.5; }
+
+.pod-foot {
+    flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+    padding-top: 10px; border-top: var(--bw) solid var(--card-border);
+}
+.pod-foot .pod-note { flex: 1 1 220px; color: var(--text-dim); font-size: var(--fs-sm); }
+.pod-main-btn { padding: 8px 22px; border-radius: var(--r-full); font-size: var(--fs-md); }

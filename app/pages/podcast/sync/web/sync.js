@@ -31,6 +31,8 @@ function pressed(id, value) {
 
 segmented("source", "source");
 segmented("method", "method");
+segmented("target", "target");
+$("put-back").onclick = () => Buddy.send("put_back");
 $("fine").onchange = e => Buddy.send("option", {key: "fine", value: e.target.checked});
 $("camera-audio").onchange = e => Buddy.send("option", {key: "camera_audio", value: e.target.value});
 $("scan").onclick = () => Buddy.send("scan");
@@ -51,30 +53,32 @@ Buddy.on("state", s => {
     state = s;
     pressed("source", s.source);
     pressed("method", s.method);
+    // Where the sync goes: a new timeline, or the open one synced where it is
+    // (which reads the open timeline, whatever was picked above).
+    const here = s.target === "here";
+    pressed("target", s.target);
+    $("target-note").textContent = here ? "Each camera and recorder needs to be on its own track. Their clips are moved into sync along it – nothing is cut or deleted."
+        : "You get a new timeline. Nothing you already have is changed.";
+    $("sync").textContent = here ? "Sync this timeline" : "Build synced timeline";
+    $("put-back").disabled = Boolean(s.busy);
     $("fine").checked = Boolean(s.fine);
     $("fine-box").hidden = s.method !== "timecode";
     $("camera-audio").value = s.camera_audio;
+    // How it will sync, in a line: the choices themselves open under "Change".
+    const by = s.method === "waveform" ? "Syncing by sound" : s.fine ? "Syncing by timecode, fine-tuned with sound" : "Syncing by timecode";
+    const own = {tracks: "cameras' own sound kept", muted: "cameras' own sound kept, turned off", none: "cameras' own sound left out"}[s.camera_audio];
+    $("how-summary").replaceChildren(el("span", {text: by}), el("span", {text: " · "}), el("span", {text: own || ""}));
     drawEnabled();
 });
 
 // ------------------------------------------------------------- devices
 
 function deviceRow(device, index, all, master) {
-    const name = el("input.field", {type: "text", value: device.name, maxlength: "60", spellcheck: "false",
-                                    "aria-label": "Device name", translate: "no"});
+    const name = el("input.field.ps-name", {type: "text", value: device.name, maxlength: "60", spellcheck: "false",
+                                            "aria-label": "Device name", translate: "no"});
     name.addEventListener("change", () => Buddy.send("rename_device", {device: device.name, name: name.value}));
     name.addEventListener("keydown", e => { if (e.key === "Enter") name.blur(); });
 
-    const up = el("button.btn.ghost", {type: "button", text: "▲", title: "Move up", "aria-label": "Move up",
-                                       disabled: index === 0 || all[index - 1].kind !== device.kind,
-                                       onclick: () => Buddy.send("move_device", {device: device.name, step: -1})});
-    const down = el("button.btn.ghost", {type: "button", text: "▼", title: "Move down", "aria-label": "Move down",
-                                         disabled: index === all.length - 1 || all[index + 1].kind !== device.kind,
-                                         onclick: () => Buddy.send("move_device", {device: device.name, step: 1})});
-
-    const radio = el("input", {type: "radio", name: "master", checked: master === device.name,
-                               disabled: !device.sound,
-                               onchange: () => Buddy.send("master", {device: device.name})});
     const facts = [`${device.clips.length === 1 ? "1 clip" : `${device.clips.length} clips`}`, length(device.seconds)];
     if (device.timecode) facts.push(device.timecode === device.clips.length ? "timecode" : `timecode on ${device.timecode}`);
     if (!device.sound) facts.push("no sound");
@@ -94,18 +98,36 @@ function deviceRow(device, index, all, master) {
         }),
     ]);
 
+    // Everything done to a device now and then - its place in the order, the
+    // master clock, its clips - is behind one button.
+    const isMaster = master === device.name;
+    const more = el("button.btn.ghost.icon", {type: "button", title: "Order, master clock and clips", "aria-label": "Device options",
+        onclick: e => {
+            const box = e.currentTarget.getBoundingClientRect();
+            Buddy.menu({x: box.left, y: box.bottom + 4, items: [
+                {label: "Move up", disabled: index === 0 || all[index - 1].kind !== device.kind,
+                 onClick: () => Buddy.send("move_device", {device: device.name, step: -1})},
+                {label: "Move down", disabled: index === all.length - 1 || all[index + 1].kind !== device.kind,
+                 onClick: () => Buddy.send("move_device", {device: device.name, step: 1})},
+                {sep: true},
+                {label: "Make this the master clock", disabled: !device.sound || isMaster,
+                 onClick: () => Buddy.send("master", {device: device.name})},
+                {label: clips.open ? "Hide its clips" : "Show its clips", onClick: () => { clips.open = !clips.open; }},
+            ]});
+        }}, [Buddy.icon("more")]);
+
     return el("div.ps-device", {}, [
         el("div.ps-device-head", {}, [
-            el("span.ps-arrows", {}, [up, down]),
-            name,
-            el(`span.ps-kind${device.kind === "mic" ? ".mic" : ""}`, {text: device.kind === "mic" ? "Mic" : "Camera"}),
-            // One span each, so each is translated on its own.
-            el("span.muted.small", {}, facts.flatMap((f, i) => i ? [el("span", {text: " · "}), el("span", {text: f})]
-                                                                  : [el("span", {text: f})])),
-            el("span.spacer"),
-            el("label.ps-master", {title: "Every other recording is measured against this one"},
-               [radio, el("span", {text: "Master clock"})]),
-        ]),
+            el("span.ps-kind", {title: device.kind === "mic" ? "Mic" : "Camera"}, [Buddy.icon(device.kind === "mic" ? "mic" : "camera")]),
+            el("div.ps-device-text", {}, [
+                name,
+                // One span each, so each is translated on its own.
+                el("span.muted.small", {}, facts.flatMap((f, i) => i ? [el("span", {text: " · "}), el("span", {text: f})]
+                                                                      : [el("span", {text: f})])),
+            ]),
+            isMaster ? el("span.ps-master", {text: "Master clock", title: "Every other recording is measured against this one"}) : null,
+            more,
+        ].filter(Boolean)),
         clips,
     ]);
 }
@@ -161,8 +183,10 @@ Buddy.on("result", r => {
     const video = r.tracks.filter(t => t.kind === "Video").length;
     const audio = r.tracks.filter(t => t.kind === "Audio").length;
     $("result-summary").textContent =
-        `${r.placed} of ${r.total} clips synced, on ${video} video and ${audio} audio tracks.` +
+        (r.in_place ? `${r.placed} of ${r.total} clips in sync on this timeline - ${r.moved} moved.`
+                    : `${r.placed} of ${r.total} clips synced, on ${video} video and ${audio} audio tracks.`) +
         (r.master && r.fine ? ` Measured against ${r.master}.` : "");
+    $("put-back").hidden = !(r.in_place && r.can_undo);
 
     const drift = $("result-drift");
     drift.replaceChildren();
@@ -186,7 +210,7 @@ Buddy.on("result", r => {
     const unplaced = $("result-unplaced");
     unplaced.replaceChildren();
     if (r.unplaced.length) {
-        unplaced.append(el("div.ps-sub", {text: "Not synced - put after the rest"}), table(
+        unplaced.append(el("div.ps-sub", {text: r.in_place ? "Not synced - left where they were" : "Not synced - put after the rest"}), table(
             ["Clip", "Device", "Why"],
             r.unplaced.map(row => el("tr", {}, [
                 el("td", {text: row.clip, translate: "no"}),

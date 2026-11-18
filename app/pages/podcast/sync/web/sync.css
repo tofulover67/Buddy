@@ -3,37 +3,48 @@
 .ps { display: flex; flex-direction: column; min-height: 0; height: 100%; }
 .ps-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--card-gap, 12px); padding-bottom: 16px; }
 
-.ps-card { flex: none; display: flex; flex-direction: column; gap: 12px; padding-bottom: 14px; }
-.ps-card > :not(.card-head) { margin: 0 16px; }
-.ps-desc { margin-top: 0; margin-bottom: 0; line-height: 1.5; }
-.ps-num {
-    display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 6px;
-    border-radius: var(--r-full); background: var(--raised-bg); color: var(--text-strong);
-    font-size: var(--fs-sm); font-weight: 700;
-}
+.ps-card { flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; }
 .ps-lbl { font-size: var(--fs-sm); font-weight: 600; color: var(--text-dim); margin-right: 4px; }
 .ps-note { font-size: var(--fs-sm); line-height: 1.45; padding: 8px 12px; border-radius: var(--r-sm);
            background: var(--raised-bg); color: var(--danger-text); }
+.row.wrap { flex-wrap: wrap; row-gap: 8px; }
 
 /* ------------------------------------------------------------ devices -- */
 
-.ps-devices { display: flex; flex-direction: column; gap: 8px; }
-.ps-device { border: var(--bw) solid var(--card-border); border-radius: var(--r-sm); padding: 8px 10px; }
-.ps-device-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ps-device-head .field { width: 14em; max-width: 100%; }
-.ps-kind { font-size: var(--fs-xs); font-weight: 700; padding: 2px 8px; border-radius: var(--r-full);
-           background: var(--raised-bg); color: var(--text-strong); text-transform: uppercase; letter-spacing: .03em; }
-.ps-kind.mic { color: var(--emphasis); }
-.ps-arrows { display: flex; gap: 2px; }
-.ps-arrows .btn { min-width: 0; padding: 0 8px; }
-.ps-master { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--text-dim); cursor: pointer; }
-.ps-master input { accent-color: var(--primary); }
-.ps-clips { margin: 8px 0 0; }
-.ps-clips summary { cursor: pointer; font-size: var(--fs-sm); color: var(--text-dim); width: max-content; }
+/* One list, a row per camera and mic: what it is, its name (typed over to
+   rename), what's in it, and one button for the rest. */
+.ps-list { flex: none; overflow: hidden; }
+.ps-devices { display: flex; flex-direction: column; }
+.ps-device { padding: 10px 14px; }
+.ps-device + .ps-device { border-top: var(--bw) solid var(--card-border); }
+.ps-device-head { display: flex; align-items: center; gap: 12px; }
+.ps-kind { display: inline-flex; color: var(--text-dim); flex: none; }
+.ps-kind .icon-svg { width: 20px; height: 20px; }
+.ps-device-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ps-name {
+    width: 100%; max-width: 22em; padding: 2px 6px; margin-left: -6px; background: transparent;
+    border-color: transparent; font-weight: 600; color: var(--text-strong);
+}
+.ps-name:hover { border-color: var(--card-border); }
+.ps-name:focus { background: var(--field-bg); }
+.ps-master {
+    flex: none; font-size: var(--fs-xs); font-weight: 700; padding: 3px 10px; border-radius: var(--r-full);
+    background: var(--raised-bg); color: var(--text-strong);
+}
+.ps-clips { margin: 0; }
+.ps-clips:not([open]) { display: none; }
+.ps-clips summary { display: none; }
 .ps-clip { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center;
-           padding: 4px 0 4px 14px; font-size: var(--fs-sm); }
+           padding: 4px 0 4px 32px; font-size: var(--fs-sm); }
 .ps-clip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ps-clip .field { max-width: 12em; }
+
+/* How it will sync: a line, and the choices under "Change". */
+.ps-how { flex: none; }
+.ps-how summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; cursor: pointer; list-style: none; }
+.ps-how summary::-webkit-details-marker { display: none; }
+.ps-change { font-weight: 600; color: var(--accent-text); }
+.ps-how-body { display: flex; flex-direction: column; gap: 10px; padding: 12px 0 2px; }
 
 /* ---------------------------------------------------------------- job -- */
 

@@ -10,16 +10,17 @@ who talks when worked out (talk.py). Where more than one person spoke into
 a mic, their voices are told apart on this computer (voice_worker.py in the
 speech engine, cluster.py).
 
-The view is three steps. 1: each camera (its file and a still of it)
-gets the synced audio it's heard through. 2: the voices found are named
-and each given a camera. 3: the cameras left - a wide, a second angle, a
-random cutaway, or not used - and Build. The numbers (shortest shot,
-reaction shots, cutaway timings...) are behind Cut settings.
+The view is one screen. People: the voices found are named and each given
+a camera. Cameras: a card each (its file and a still of it) with the synced
+audio it's heard through and, for the ones with nobody on them, their use -
+a wide, a second angle, a random cutaway, or not used. Then how it will cut,
+and Build. The numbers (shortest shot, reaction shots, cutaway timings...)
+are behind Pacing.
 
 The cameras come from a saved setup (rig.py), kept by name and found again
 on each timeline (by track names, then in order; a timeline's own choices
 are kept with it). A camera with audio paired or a voice given is a
-speaker's camera; the rest have the use step 3 gives them. The cut plan
+speaker's camera; the rest have the use their card gives them. The cut plan
 (cutplan.py) shows as a strip, and Build makes a NEW timeline, "<name>
 (Auto Switch)": every camera still on its own track, razored at each
 switch, the clips not on screen turned off - so any shot can be swapped by

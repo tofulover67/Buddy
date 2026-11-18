@@ -16,13 +16,12 @@ text at the next read, with nothing to re-transcribe.
                seconds from the timeline's start - {s, e, t, tr, src, idx,
                p, key, lang}
     tokens     build_tokens(): the words, and the pauses between them,
-               tiling the dialogue from end to end - so striking any run of
-               tokens is a stretch of time to cut, and nothing is left over
-    cuts       cut_frames(): struck tokens as [first, end) frame ranges
+               tiling the dialogue from end to end - so any run of tokens
+               is a stretch of time to cut, and nothing is left over
+    cuts       cut_frames(): the tokens to delete as [first, end) frame ranges
 
-Words carry stable keys (their source and index there), so what's struck
-survives a re-read of the timeline - the same word is struck wherever its
-clip has moved to.
+Words carry stable keys (their source and index there), so a word is the
+same word wherever its clip has moved to.
 
 More than one mic: each mic hears everyone, its own person loudest. Each
 word is checked against the levels of every mic at that moment (the
@@ -37,7 +36,7 @@ import re
 
 import numpy as np
 
-# A word next to a long pause keeps this much air either side of it: striking
+# A word next to a long pause keeps this much air either side of it: cutting
 # the pause leaves 2 x PAD of it - a breath, not a jump cut.
 PAD = 0.12
 PAUSE_MIN = 0.5             # a gap this long or longer is a pause token of its own
@@ -141,6 +140,69 @@ def collect_words(timeline, tracks, transcripts):
     words = [w for w in words if w["t"] and w["e"] > w["s"]]
     words.sort(key=lambda w: (w["s"], w["tr"]))
     return words
+
+
+def cue_words(first, end, text):
+    """A subtitle's words spread over its time, each by its length - the
+    subtitle says when the line is on screen, not when each word is said, so
+    these times are estimates. [(start, end, word)]."""
+    words = re.sub(r"<[^>]+>", " ", str(text or "")).split()
+    first, end = float(first), float(end)
+    if not words or end <= first:
+        return []
+    weights = [len(w) + 1 for w in words]
+    total, out, at = float(sum(weights)), [], first
+    for word, weight in zip(words, weights):
+        nxt = at + (end - first) * weight / total
+        out.append((at, nxt, word))
+        at = nxt
+    return out
+
+
+def words_from_cues(timeline, tracks, cues):
+    """Subtitles already on the timeline, as transcripts of the sources under
+    them: ({source key: [{s, e, w, p}]}, words with no dialogue clip under
+    them). cues: [(first frame, end frame, text)], frames from the timeline's
+    start. Each word goes to the clip playing at its middle - the lowest of
+    `tracks` when several do - at that clip's place in its source, so from
+    here on the text follows the clips like any other transcript."""
+    fps = float(timeline["fps"])
+    clips = []
+    for item in timeline.get("items") or []:
+        if item["kind"] == "audio" and item["track"] in tracks and item.get("path") and not item.get("locked"):
+            a, _b, rec0 = clip_window(item, timeline)
+            clips.append((rec0, rec0 + (int(item["end"]) - int(item["start"])) / fps, item["track"], a,
+                          source_key(item["path"], item.get("channels"))))
+    clips.sort()
+    starts = [c[0] for c in clips]
+    longest = max((c[1] - c[0] for c in clips), default=0.0)
+    out, lost = {}, 0
+    for first, end, text in sorted(cues, key=lambda c: (c[0], c[1])):
+        for s, e, word in cue_words(first / fps, end / fps, text):
+            mid = (s + e) / 2.0
+            under = None
+            i = bisect.bisect_right(starts, mid) - 1
+            while i >= 0 and starts[i] >= mid - longest:
+                rec0, rec1, track, a, src = clips[i]
+                if rec0 <= mid < rec1 and (under is None or track < under[2]):
+                    under = clips[i]
+                i -= 1
+            if under is None:
+                lost += 1
+                continue
+            rec0, rec1, _track, a, src = under
+            out.setdefault(src, []).append({"s": round(a + max(s, rec0) - rec0, 3),
+                                            "e": round(a + min(e, rec1) - rec0, 3), "w": word, "p": None})
+    for src, words in out.items():
+        words.sort(key=lambda w: (w["s"], w["e"]))
+        kept = []
+        for w in words:         # the same stretch of a source twice on the timeline: said once
+            if kept and (w["s"] + w["e"]) / 2.0 < kept[-1]["e"]:
+                continue
+            if w["e"] > w["s"]:
+                kept.append(w)
+        out[src] = kept
+    return {src: words for src, words in out.items() if words}, lost
 
 
 def managed_span(timeline, tracks):
@@ -274,12 +336,12 @@ def edit_points(timeline, tracks, tokens):
     return sorted(out)
 
 
-def cut_frames(tokens, struck, fps):
-    """The struck tokens as [first, end) frame ranges from the timeline's
-    start, merged where they touch. struck: a set of token keys."""
+def cut_frames(tokens, keys, fps):
+    """The tokens to cut as [first, end) frame ranges from the timeline's
+    start, merged where they touch. keys: a set of token keys."""
     spans = []
     for tok in tokens:
-        if tok["key"] in struck:
+        if tok["key"] in keys:
             first, end = int(round(tok["s"] * fps)), int(round(tok["e"] * fps))
             if end > first:
                 spans.append([first, end])
@@ -291,10 +353,6 @@ def cut_frames(tokens, struck, fps):
         else:
             merged.append([first, end])
     return [tuple(s) for s in merged]
-
-
-def cut_seconds(cuts, fps):
-    return sum(e - s for s, e in cuts) / float(fps)
 
 
 def fillers(tokens):
@@ -326,8 +384,8 @@ def find(tokens, query):
 
 # ----------------------------------------------------------------- live cuts --
 #
-# "Cut the open timeline live" checks each cut against what a ripple delete
-# of exactly that range should leave: every clip on the cut tracks, start,
+# Each cut is checked against what a ripple delete of exactly that range
+# should leave: every clip on the cut tracks, start,
 # end and where in its source it starts.
 
 def snapshot(timeline, audio, video):
@@ -369,21 +427,39 @@ def rippled(snap, first, end):
     return out
 
 
+# Where in its source a clip starts reads a frame off what the arithmetic
+# says, now and then: Resolve rounds it its own way. Measured on 21.1.2, on a
+# recording razored into 273 clips: the clip after a through edit started a
+# frame "early" (40829 where 40830 follows on), and the second half of a clip
+# split by a correct 6-frame cut read 40632 where 40633 was expected - which
+# was undone as "cut differently".
+OFFSET_SLACK = 1
+
+
 def same_layout(a, b):
-    """Two snapshots alike, a clip split in two halves that Resolve may keep
-    as one (nothing removed between them) counted the same. A one-frame
-    difference anywhere is not."""
-    def joined(rows):
+    """Two snapshots alike: the same frames covered on every track, to the
+    frame, each showing the same place in its source (within OFFSET_SLACK).
+    Where the clips are divided doesn't count - Resolve may keep as one clip
+    two halves with nothing removed between them, or the other way round -
+    so both are compared piece by piece between every edit either has."""
+    def pieces(rows, edits):
         out = []
         for s, e, off in rows:
-            if out and out[-1][1] == s and out[-1][2] + (out[-1][1] - out[-1][0]) == off:
-                out[-1] = (out[-1][0], e, out[-1][2])
-            else:
-                out.append((s, e, off))
+            at = s
+            for cut in edits[bisect.bisect_right(edits, s):bisect.bisect_left(edits, e)]:
+                out.append((at, cut, off + at - s))
+                at = cut
+            out.append((at, e, off + at - s))
         return out
+
     if set(a) != set(b):
         return False
-    return all(joined(a[k]) == joined(b[k]) for k in a)
+    for key in a:
+        edits = sorted({f for rows in (a[key], b[key]) for s, e, _off in rows for f in (s, e)})
+        x, y = pieces(sorted(a[key]), edits), pieces(sorted(b[key]), edits)
+        if len(x) != len(y) or any(p[:2] != q[:2] or abs(p[2] - q[2]) > OFFSET_SLACK for p, q in zip(x, y)):
+            return False
+    return True
 
 
 def layout_problem(expected, actual, names):

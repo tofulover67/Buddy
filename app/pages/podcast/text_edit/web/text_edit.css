@@ -1,52 +1,43 @@
-/* Text Edit: the controls on top, the transcript filling the rest, the
-   Build bar at the foot. Theme colours only - the transcript's highlights
-   are mixes of the theme's own. */
+/* Text Edit: one row of controls, the transcript filling the rest, Options
+   beside it when asked for. Theme colours only - the transcript's
+   highlights are mixes of the theme's own. The header and the foot bar are
+   Podcast's (../../web/podcast.css). */
 
 .page.te { overflow: hidden; }
-.te-bar { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 0; flex: none; }
-.te-row { flex-wrap: wrap; row-gap: 6px; }
-.te-timeline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 50%; }
-.te-dot { width: 7px; height: 7px; border-radius: var(--r-full); background: var(--text-dim); flex: none; }
-.te-dot.on { background: var(--accent-text); }
-.te-label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-dim); cursor: help; }
-.te-sep { width: var(--bw); height: 18px; background: var(--card-border); flex: none; margin: 0 4px; }
-.te-toggles { gap: 4px; flex-wrap: wrap; }
-.te-track { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 3px 10px; }
-.te-track .te-track-name { color: var(--text-dim); margin-left: 4px; }
-.te-track[aria-pressed="true"], .te-toggle[aria-pressed="true"] {
-    background: var(--selection-bg); color: var(--selection-fg); border-color: var(--field-focus-border);
-}
-.te-track[aria-pressed="true"] .te-track-name { color: inherit; opacity: .8; }
-.te-track.empty { opacity: .6; }
-.te-inline { gap: 6px; }
-.te-select { min-width: 0; }
-.te-find { width: 190px; }
-.te-count { min-width: 48px; font-variant-numeric: tabular-nums; }
-.te-num { width: 64px; }
-.te-progress { height: 2px; margin: 2px -14px 0; position: relative; overflow: hidden; }
-.te-progress-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--emphasis-fill); transition: width .2s; }
-.te-progress.busy .te-progress-bar { width: 30%; animation: te-slide 1.1s linear infinite; }
-@keyframes te-slide { from { left: -30%; } to { left: 100%; } }
-@media (prefers-reduced-motion: reduce) {
-    .te-progress.busy .te-progress-bar { animation: none; width: 100%; left: 0; opacity: .6; }
-}
 
-/* ---------------------------------------------------------- notices */
+/* ------------------------------------------------------------ controls */
+
+.te-tools { flex: none; flex-wrap: wrap; row-gap: 6px; }
+.te-search {
+    flex: 1 1 220px; max-width: 340px; display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    min-height: 32px; border-radius: var(--r-full); background: var(--field-bg); color: var(--text-dim);
+    border: var(--bw) solid var(--card-border);
+}
+.te-search:focus-within { border-color: var(--field-focus-border); }
+.te-search-icon { display: inline-flex; }
+.te-search-icon .icon-svg { width: 15px; height: 15px; }
+.te-find { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--text); font: inherit; }
+.te-count { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.te-progress { flex: none; height: 2px; position: relative; overflow: hidden; }
+.te-progress-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--emphasis-fill); transition: width .2s; }
+
+/* ------------------------------------------------------------- notices */
 
 .te-notices { display: flex; flex-direction: column; gap: 6px; flex: none; }
 .te-notices:empty { display: none; }
 .te-notice {
     display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--r-md);
-    background: var(--raised-bg); border-left: 2px solid var(--accent-text); line-height: 1.45;
+    background: var(--raised-bg); line-height: 1.45;
 }
-.te-notice.warn-note { border-left-color: var(--danger-text); }
+.te-notice.warn-note { color: var(--danger-text); }
 .te-notice .te-notice-text { flex: 1; }
 
-/* ------------------------------------------------------- transcript */
+/* ------------------------------------------------- transcript, options */
 
-.te-doc-card { flex: 1 1 auto; min-height: 120px; display: flex; overflow: hidden; }
+.te-body { flex: 1 1 auto; min-height: 120px; display: flex; gap: var(--section-gap); overflow: hidden; }
+.te-doc-card { flex: 1 1 0; min-width: 0; display: flex; overflow: hidden; position: relative; }
 .te-doc {
-    flex: 1; overflow: auto; padding: 18px 20px 40vh 6px; outline: none;
+    flex: 1; overflow: auto; padding: 22px 24px 40vh 10px; outline: none;
     --read: var(--font);
     --read-size: var(--fs-md);
 }
@@ -56,11 +47,28 @@
 .te-doc.size-small { --read-size: var(--fs-sm); }
 .te-doc.size-large { --read-size: var(--fs-lg); }
 .te-doc.size-xlarge { --read-size: var(--fs-xl); }
-.te-doc.busy { pointer-events: none; opacity: .55; }
 
-.te-para { display: grid; grid-template-columns: 150px 1fr; column-gap: 14px; margin-bottom: .6em; }
+.te-options { flex: 0 0 300px; max-width: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; }
+.te-options[hidden] { display: none; }
+.te-opt-head { display: flex; align-items: center; }
+.te-opt-group { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: var(--bw) solid var(--card-border); }
+.te-opt-title { margin: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); }
+.te-opt-title[title] { cursor: help; }
+.te-opt-row { flex-wrap: wrap; row-gap: 6px; }
+.te-toggles { gap: 4px; flex-wrap: wrap; }
+.te-track { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 3px 10px; }
+.te-track .te-track-name { color: var(--text-dim); margin-left: 4px; }
+.te-track[aria-pressed="true"], .te-toggle[aria-pressed="true"] {
+    background: var(--selection-bg); color: var(--selection-fg); border-color: var(--field-focus-border);
+}
+.te-track[aria-pressed="true"] .te-track-name { color: inherit; opacity: .8; }
+.te-track.empty { opacity: .6; }
+.te-num { width: 80px; }
+.te-empty-act { margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+.te-para { display: grid; grid-template-columns: 110px 1fr; column-gap: 16px; margin-bottom: 1.1em; }
 .te-gutter { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; padding-top: .25em; }
-.te-who { font-weight: 600; font-size: var(--fs-xs); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.te-who { font-weight: 600; font-size: var(--fs-sm); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .te-who.s1 { color: var(--accent-text); }
 .te-who.s2 { color: var(--second-text); }
 .te-who.s3 { color: color-mix(in srgb, var(--accent-text) 55%, var(--text)); }
@@ -71,7 +79,7 @@
 }
 .te-ts:hover { opacity: 1; color: var(--text); }
 .te-text {
-    margin: 0; font-family: var(--read); font-size: var(--read-size); line-height: 1.55;
+    margin: 0; font-family: var(--read); font-size: var(--read-size); line-height: 1.7;
     user-select: none; overflow-wrap: anywhere; color: var(--text);
 }
 .tk { border-radius: var(--r-xs); cursor: text; }
@@ -79,8 +87,6 @@
 .tk.f { color: var(--second-text); text-decoration: underline dotted; text-underline-offset: 4px; }
 .tk.lo { text-decoration: underline dotted color-mix(in srgb, var(--text-dim) 80%, transparent); text-underline-offset: 4px; }
 .tk.pz { color: var(--text-dim); font-family: var(--font); font-size: var(--fs-xs); }
-.tk.x { text-decoration: line-through; text-decoration-thickness: 1.5px; color: var(--text-dim); opacity: .6; }
-.tk.x.pz { text-decoration: line-through; }
 .tk.hit { background: color-mix(in srgb, var(--second-text) 28%, transparent); }
 .tk.sel {
     background: var(--selection-bg); color: var(--selection-fg);
@@ -100,13 +106,21 @@
     margin: 0 3px 0 1px; vertical-align: -0.12em;
 }
 
-.te-foot { flex: none; flex-wrap: wrap; row-gap: 6px; padding: 0 2px; }
-.te-hint { overflow: hidden; text-overflow: ellipsis; }
-.te-summary { color: var(--text); font-variant-numeric: tabular-nums; }
+/* On the selection: Cut, Play, Fix word. */
+.te-selbar {
+    position: absolute; z-index: 2; display: flex; gap: 2px; padding: 3px; border-radius: var(--r-md);
+    background: var(--raised-bg); border: var(--bw) solid var(--card-border); box-shadow: var(--card-shadow);
+}
+.te-selbar[hidden] { display: none; }
 
 .te-keys { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; min-width: 380px; margin-top: 12px; }
 .te-keys .field { width: 100%; }
 
+@media (max-width: 760px) {
+    .te-body { flex-direction: column; overflow-y: auto; }
+    .te-options { flex: none; }
+    .te-doc-card { min-height: 240px; }
+}
 @media (max-width: 640px) {
     .te-para { grid-template-columns: 1fr; }
     .te-gutter { flex-direction: row; justify-content: flex-start; gap: 8px; }

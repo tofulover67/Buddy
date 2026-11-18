@@ -6,18 +6,19 @@ edit the open timeline by editing what's said in it.
 The dialogue tracks are transcribed source by source (transcripts.py, the
 Subtitles tool's engine, keeping "um"s and "uh"s), laid onto the timeline
 from where each clip sits now (model.py), more than one mic merged into one
-conversation with each person's words from their own mic (levels.py). The
-view (web/) shows it as text: click a word and Resolve's playhead goes
-there; drag across words and Resolve's In and Out are set on them.
+conversation with each person's words from their own mic (levels.py). A
+timeline that already has subtitles needn't be transcribed: "Use subtitles"
+reads a subtitle track and keeps its text as the transcript of the clips
+under it (model.words_from_cues - word times estimated inside each
+subtitle). The view (web/) shows it as text: click a word, or anywhere in
+a paragraph, and Resolve's playhead goes there; drag across words and
+Resolve's In and Out are set on them.
 
-Two ways to cut, a setting:
-- Build an edited timeline (the default): Delete strikes words, pauses and
-  fillers out in the text - struck stays readable and can be put back - and
-  Build makes a NEW timeline without them (otio_cut.py). The original never
-  changes; build again after more edits as often as you like.
-- Cut the open timeline live: Delete sets In/Out on the words and presses
-  your Ripple Delete key in Resolve (keys.py), so Resolve makes the cut,
-  each one checked clip by clip and undone if it didn't come out right.
+Every cut is made on the open timeline, straight away: Delete sets In/Out
+on the words selected and presses your Ripple Delete key in Resolve
+(keys.py), so Resolve makes the cut - each one checked clip by clip and
+undone if it didn't come out right. Undo and Redo here press Resolve's own,
+a step per Delete (or per "Remove filler words"), up to HISTORY of them.
 
 The transcript follows the timeline: an edit made in Resolve shows in the
 text within a couple of seconds, with nothing re-transcribed.
@@ -25,9 +26,8 @@ text within a couple of seconds, with nothing re-transcribed.
 Protocol:
     to the view    state, doc, playhead, job, toast, alert
     from the view  refresh, toggle_track, transcribe, cancel_transcribe, seek,
-                   select, strike, restore, restore_all, remove_fillers,
-                   remove_pauses, undo, redo, correct, option, save_keys, build,
-                   play, switch_tab
+                   select, strike, remove_fillers, remove_pauses, undo, redo,
+                   correct, option, save_keys, play, use_subtitles, switch_tab
 """
 
 import hashlib
@@ -36,7 +36,7 @@ import time
 
 from PySide6.QtCore import QTimer
 
-from core import atomic_io, busy_job, tool_dirs
+from core import atomic_io, tool_dirs
 from core.resolve_bridge import ResolveConnectionError
 from core.resolve_reader import ResolveCalls
 from core.resolve_worker import ResolveWorker
@@ -45,7 +45,7 @@ from core.web_page import WebToolPage
 from . import keys as K
 from . import levels as LV
 from . import model as M
-from . import otio_cut, resolve_ext, transcripts
+from . import resolve_ext, transcripts
 
 READ_MS = 1500          # the timeline, looking for edits made in Resolve
 PLAYHEAD_MS = 250
@@ -54,17 +54,18 @@ HISTORY = 200
 CUT_WAIT_S = 2.5        # a live cut: how long Resolve has to make it
 FONTS = ("sans", "serif", "mono")
 SIZES = ("small", "medium", "large", "xlarge")
-DEFAULTS = {"mode": "build", "model": "auto", "language": "", "pause_over": 1.0, "back_to_resolve": False,
+DEFAULTS = {"model": "auto", "language": "", "pause_over": 1.0, "back_to_resolve": False,
             "follow": True, "set_inout": True, "text_font": "sans", "text_size": "medium", "keys": {},
             "tip_seen": False}
-OPTIONS = {"mode": ("build", "live"), "text_font": FONTS, "text_size": SIZES}
+OPTIONS = {"text_font": FONTS, "text_size": SIZES}
 TOGGLES = ("back_to_resolve", "follow", "set_inout", "tip_seen")
 ADVICE = ("Click once on Resolve's timeline, check that Shortcuts… matches your Resolve keyboard, and that the "
           "Auto Track Selector is on for the dialogue and picture tracks.")
+NO_OVERLAP = "None of the subtitles sit over a clip on the dialogue tracks – check the tracks picked under Dialogue."
 
 
 class CutFailed(RuntimeError):
-    """A live cut that didn't come out as it should (and was undone)."""
+    """A cut that didn't come out as it should (and was undone)."""
 
 
 def _edits_file(timeline_id):
@@ -90,8 +91,7 @@ class TextEditPage(WebToolPage):
         self.waiting = False            # Resolve is holding our reads (playing)
         self.tokens = []
         self.version = 0
-        self.edits = {}                 # this timeline's: audio, video, struck
-        self.struck = set()
+        self.edits = {}                 # this timeline's: audio, video
         self.undo_stack, self.redo_stack = [], []
         self.transcripts = {}           # source key -> data, this session
         self.levels = {}                # source key -> (hop, dB)
@@ -151,7 +151,6 @@ class TextEditPage(WebToolPage):
             "problem": self.problem,
             "waiting": self.waiting,
             "timeline": {"name": self.timeline["name"], "id": self.timeline["id"]} if self.timeline else None,
-            "mode": self.settings.get("mode"),
             "model": self.settings.get("model"),
             "models": [{"value": "auto", "label": "Best installed"}] +
                       [{"value": mid, "label": label} for mid, label in transcripts.installed()],
@@ -168,7 +167,7 @@ class TextEditPage(WebToolPage):
             "presets": [{"value": k, "label": v["label"]} for k, v in K.PRESETS.items()],
             "preset_keys": {k: v["keys"] for k, v in K.PRESETS.items()},
             "commands": [{"id": c, "label": K.LABELS[c]} for c in K.COMMANDS],
-            "keys_problem": K.available() if self.settings.get("mode") == "live" else "",
+            "keys_problem": K.available(),
             "job": {"running": self.job is not None, "done": info.get("done", 0), "total": info.get("total", 0),
                     "fraction": info.get("fraction", 0.0), "file": info.get("file", "")},
             "can_undo": bool(self.undo_stack), "can_redo": bool(self.redo_stack),
@@ -234,9 +233,10 @@ class TextEditPage(WebToolPage):
             self._push_state()
         if changed:
             if not switched and not getattr(self, "_own_edit", False):
-                # Edited in Resolve: the panel's live undo no longer lines up.
-                self.undo_stack = [u for u in self.undo_stack if u.get("kind") != "live"]
-                self.redo_stack = [u for u in self.redo_stack if u.get("kind") != "live"]
+                # Edited in Resolve: the panel's undo no longer lines up with Resolve's.
+                if self.undo_stack or self.redo_stack:
+                    self.undo_stack, self.redo_stack = [], []
+                    self._push_state()
             self._own_edit = False
             self._rebuild()
 
@@ -266,13 +266,12 @@ class TextEditPage(WebToolPage):
     def _open_edits(self, timeline):
         data = atomic_io.read_json(_edits_file(timeline.get("id")), default=None)
         self.edits = data if isinstance(data, dict) else {}
-        self.struck = {str(k) for k in self.edits.get("struck") or []}
+        self.edits.pop("struck", None)      # from when words were struck out for a built timeline
         self.undo_stack, self.redo_stack = [], []
 
     def _save_edits(self):
         if self.timeline is None:
             return
-        self.edits["struck"] = sorted(self.struck)
         self.edits["name"] = self.timeline.get("name", "")
         try:
             path = _edits_file(self.timeline["id"])
@@ -338,6 +337,8 @@ class TextEditPage(WebToolPage):
         self._paras = M.paragraphs(self.tokens, multi)
         self._ticks = M.edit_points(self.timeline, set(audio), self.tokens)
         self._missing = missing
+        used = {w["src"] for w in words}
+        self._estimated = any((self.transcripts.get(src) or {}).get("engine") == transcripts.SUBTITLES for src in used)
         self._multi = multi
         self._audio, self._video = audio, video
         self.version += 1
@@ -367,7 +368,6 @@ class TextEditPage(WebToolPage):
         if self.timeline is None:
             return self.emit("doc", {"version": self.version, "timeline": None, "problem": self.problem})
         tl = self.timeline
-        fps = float(tl["fps"])
         audio, video = getattr(self, "_audio", []), getattr(self, "_video", [])
         has_media = {(i["kind"], i["track"]) for i in tl["items"] if i.get("path")}
         tracks = {kind: [{"index": t["index"], "short": self._track_label(kind, t["index"])[0],
@@ -386,10 +386,7 @@ class TextEditPage(WebToolPage):
                     row["f"] = 1
                 if tok.get("p") is not None and tok["p"] < M.LOW_CONFIDENCE and not tok.get("fixed"):
                     row["lo"] = 1
-            if tok["key"] in self.struck:
-                row["x"] = 1
             tokens.append(row)
-        cuts = M.cut_frames(self.tokens, self.struck, fps)
         locked = [self._track_label(i["kind"], i["track"])[0] for i in tl["items"]
                   if i.get("locked") and i["kind"] == "audio" and i["track"] in audio]
         self.emit("doc", {
@@ -398,10 +395,11 @@ class TextEditPage(WebToolPage):
             "tokens": tokens, "paras": [list(p) for p in getattr(self, "_paras", [])],
             "ticks": getattr(self, "_ticks", []),
             "missing": list(getattr(self, "_missing", [])),
+            "subtitles": [{"index": t["index"], "count": t["count"], "name": t.get("name", "")}
+                          for t in tl.get("subtitles") or []],
+            "estimated": bool(getattr(self, "_estimated", False)),
             "failed": [why for src, why in self.failed.items()],
-            "fillers": sum(1 for t in self.tokens if t["k"] == "w" and t.get("f") and t["key"] not in self.struck),
-            "struck": len(self.struck & {t["key"] for t in self.tokens}),
-            "cut_seconds": round(M.cut_seconds(cuts, fps), 2), "cuts": len(cuts),
+            "fillers": sum(1 for t in self.tokens if t["k"] == "w" and t.get("f")),
             "locked": sorted(set(locked)),
         })
 
@@ -464,7 +462,8 @@ class TextEditPage(WebToolPage):
         audio, _video = self._tracks()
         wanted = []
         for src, (path, channels, _name) in self._sources(audio).items():
-            if force or self._load(src, path, channels) is None:
+            data = self._load(src, path, channels)
+            if force or data is None or data.get("engine") == transcripts.SUBTITLES:
                 wanted.append((src, path, channels))
         if not wanted:
             return self.emit("toast", {"text": "Everything is already transcribed."})
@@ -481,6 +480,53 @@ class TextEditPage(WebToolPage):
         self.job.finished.connect(self._on_job_end)
         self.job.start()
         self._push_state()
+
+    def on_use_subtitles(self, payload=None):
+        """A subtitle track's text as the transcript of the dialogue clips under it."""
+        if self.job is not None or self.timeline is None:
+            return
+        tracks = [t["index"] for t in self.timeline.get("subtitles") or []]
+        index = (payload or {}).get("index", tracks[0] if tracks else None)
+        if index not in tracks:
+            return self.emit("toast", {"text": "There are no subtitles on this timeline."})
+        controller = self._controller(True)
+        if controller is None:
+            return self.emit("alert", {"title": "Not connected", "text": self.problem})
+        tid = self.timeline["id"]
+        self._calls.wait_idle(3.0)
+        cache = self._media
+        if not self._calls.call("podcast_text.subtitles", {"index": index, "timeline_id": tid},
+                                lambda: resolve_ext.subtitle_cues(controller, cache, index, tid), self._on_subtitles):
+            self.emit("toast", {"text": "Resolve is busy – try again in a moment."})
+
+    def _on_subtitles(self, result, error):
+        if error is not None or not result:
+            return self.emit("alert", {"title": "Couldn't read the subtitles", "text": str(error or "")})
+        self._on_read(result["timeline"], None)
+        if self.timeline is None:
+            return
+        audio, _video = self._tracks()
+        found, lost = M.words_from_cues(self.timeline, set(audio), [tuple(c) for c in result.get("cues") or []])
+        sources = self._sources(audio)
+        count = 0
+        for src, words in found.items():
+            if src not in sources:
+                continue
+            path, channels, _name = sources[src]
+            data = {"v": transcripts.VERSION, "language": self._language(), "engine": transcripts.SUBTITLES,
+                    "duration": 0, "words": words, "levels": None, "overrides": {}, "source": src}
+            transcripts.save(path, data, channels, self._language())
+            self.transcripts[src] = data
+            self.levels.pop(src, None)
+            self.failed.pop(src, None)
+            count += len(words)
+        self._rebuild()
+        if not count:
+            return self.emit("alert", {"title": "No subtitles over the dialogue",
+                                       "text": NO_OVERLAP})
+        self.emit("toast", {"text": f"Using the timeline's subtitles – {count} words."})
+        if lost:
+            self.emit("toast", {"text": f"{lost} subtitle words have no dialogue clip under them and were left out."})
 
     def on_cancel_transcribe(self, _payload=None):
         if self.job is not None:
@@ -595,48 +641,17 @@ class TextEditPage(WebToolPage):
         ids = (payload or {}).get("ids") or []
         return [self.tokens[i]["key"] for i in ids if isinstance(i, int) and 0 <= i < len(self.tokens)]
 
-    def _strike_keys(self, keys, on):
-        keys = set(keys)
-        new = (self.struck | keys) if on else (self.struck - keys)
-        if new == self.struck:
-            return False
-        self.undo_stack.append({"kind": "strike", "struck": set(self.struck)})
-        del self.undo_stack[:-HISTORY]
-        self.redo_stack.clear()
-        self.struck = new
-        self._save_edits()
-        self._push_doc()
-        self._push_state()
-        return True
-
     def on_strike(self, payload):
-        keys = self._keys_for(payload)
-        if not keys:
-            return
-        if self.settings.get("mode") == "live":
-            return self._live_cut(keys, "Cutting…")
-        # Struck already, all of them: Delete puts them back.
-        self._strike_keys(keys, on=not set(keys) <= self.struck)
-
-    def on_restore(self, payload):
+        """Delete: the tokens selected, cut from the open timeline."""
         keys = self._keys_for(payload)
         if keys:
-            self._strike_keys(keys, on=False)
-
-    def on_restore_all(self, _payload=None):
-        here = {t["key"] for t in self.tokens}
-        if self.struck & here:
-            self._strike_keys(self.struck & here, on=False)
+            self._live_cut(keys, "Cutting…")
 
     def on_remove_fillers(self, _payload=None):
-        keys = [k for k in M.fillers(self.tokens) if k not in self.struck]
+        keys = M.fillers(self.tokens)
         if not keys:
             return self.emit("toast", {"text": "No filler words to remove."})
-        if self.settings.get("mode") == "live":
-            return self._live_cut(keys, f"Removing {len(keys)} filler words…")
-        self._strike_keys(keys, on=True)
-        self.emit("toast", {"text": "Struck 1 filler word – Build to make the edited timeline." if len(keys) == 1 else
-                            f"Struck {len(keys)} filler words – Build to make the edited timeline."})
+        self._live_cut(keys, f"Removing {len(keys)} filler words…")
 
     def on_remove_pauses(self, payload):
         seconds = (payload or {}).get("seconds", self.settings.get("pause_over"))
@@ -644,14 +659,10 @@ class TextEditPage(WebToolPage):
             seconds = max(M.PAUSE_REMOVE_MIN, float(seconds))
         except (TypeError, ValueError):
             return
-        keys = [k for k in M.pauses_over(self.tokens, seconds) if k not in self.struck]
+        keys = M.pauses_over(self.tokens, seconds)
         if not keys:
             return self.emit("toast", {"text": f"No pauses longer than {seconds:g} s."})
-        if self.settings.get("mode") == "live":
-            return self._live_cut(keys, f"Removing {len(keys)} pauses…")
-        self._strike_keys(keys, on=True)
-        self.emit("toast", {"text": "Struck 1 pause – Build to make the edited timeline." if len(keys) == 1 else
-                            f"Struck {len(keys)} pauses – Build to make the edited timeline."})
+        self._live_cut(keys, f"Removing {len(keys)} pauses…")
 
     def on_correct(self, payload):
         tok = self._token((payload or {}).get("id"))
@@ -688,16 +699,10 @@ class TextEditPage(WebToolPage):
         if not stack:
             return
         entry = stack.pop()
-        if entry["kind"] == "strike":
-            other.append({"kind": "strike", "struck": set(self.struck)})
-            self.struck = set(entry["struck"])
-            self._save_edits()
-            self._push_doc()
-        else:
-            if not self._live_step(entry, which):
-                stack.append(entry)
-                return self._push_state()
-            other.append(entry)
+        if not self._live_step(entry, which):
+            stack.append(entry)
+            return self._push_state()
+        other.append(entry)
         self._push_state()
 
     def on_save_keys(self, payload):
@@ -714,40 +719,6 @@ class TextEditPage(WebToolPage):
         self.settings.save()
         self._push_state()
         self.emit("toast", {"text": "Shortcuts saved."})
-
-    # ------------------------------------------------- build a new timeline --
-
-    def on_build(self, _payload=None):
-        if self.timeline is None:
-            return
-        fps = float(self.timeline["fps"])
-        cuts = M.cut_frames(self.tokens, self.struck, fps)
-        if not cuts:
-            return self.emit("toast", {"text": "Strike out some words or pauses first (select them, then Delete)."})
-        controller = self._controller(True)
-        if controller is None:
-            return self.emit("alert", {"title": "Not connected", "text": self.problem})
-        audio, video = self._tracks()
-        self._calls.wait_idle(3.0)
-        args = {"cuts": [list(c) for c in cuts], "audio": list(audio), "video": list(video), "fps": fps,
-                "name": f"{otio_cut.build_name(self.timeline['name'])} {otio_cut.SUFFIX}"}
-        # The export, the cut and the import in the Resolve reader's process:
-        # Buddy keeps drawing meanwhile (core/busy_job.py).
-        busy_job.run(self.host, self._calls, "podcast_text.build", args,
-                     lambda: resolve_ext.build_here(controller, **args),
-                     lambda result, error: self._built(cuts, fps, result, error), "Building the edited timeline…")
-
-    def _built(self, cuts, fps, result, error):
-        if error is not None:      # shown; the original is untouched either way
-            return self.emit("alert", {"title": "Couldn't build the timeline", "text": str(error)})
-        name, warnings = result["name"], result["warnings"]
-        saved = M.cut_seconds(cuts, fps)
-        text = (f"Built “{name}” – 1 cut, {_duration(saved)} shorter. Your original timeline is unchanged." if len(cuts) == 1
-                else f"Built “{name}” – {len(cuts)} cuts, {_duration(saved)} shorter. Your original timeline is unchanged.")
-        self.emit("toast", {"text": text})
-        for warning in warnings:
-            self.emit("toast", {"text": warning})
-        self._read(connect=False)
 
     # ------------------------------------------------------------ live cuts --
 
@@ -891,10 +862,3 @@ class TextEditPage(WebToolPage):
         self._own_edit = True
         self._read(connect=False)
         return ok
-
-
-def _duration(seconds):
-    if seconds < 60:
-        return f"{seconds:.1f} s"
-    seconds = int(round(seconds))
-    return f"{seconds // 60}:{seconds % 60:02d}"
