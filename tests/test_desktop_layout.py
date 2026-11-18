@@ -27,6 +27,25 @@ class ClampTests(unittest.TestCase):
     def test_a_desk_smaller_than_the_minimum_is_filled(self):
         self.assertEqual(dl.clamp((0, 0, 50, 50), (200, 100)), (0, 0, 200, 100))
 
+    def test_a_dragged_window_may_leave_the_desk_but_for_its_title_bar(self):
+        keep_x, keep_y = dl.KEEP
+        # Free inside the desk, as before.
+        self.assertEqual(dl.reach((100, 80, 400, 300), AREA), (100, 80, 400, 300))
+        # Past the left, right and bottom edges: KEEP of the title bar stays on.
+        self.assertEqual(dl.reach((-5000, 80, 400, 300), AREA), (keep_x - 400, 80, 400, 300))
+        self.assertEqual(dl.reach((5000, 80, 400, 300), AREA), (AREA[0] - keep_x, 80, 400, 300))
+        self.assertEqual(dl.reach((100, 5000, 400, 300), AREA), (100, AREA[1] - keep_y, 400, 300))
+        # Never past the top: the title bar is what it's moved by.
+        self.assertEqual(dl.reach((100, -200, 400, 300), AREA)[1], 0)
+        # A window as big as the desk (tiled, or just large) can still be moved aside.
+        x, y, w, h = dl.reach((300, 250, *AREA), AREA)
+        self.assertEqual((x, y, w, h), (300, 250, *AREA))
+        # Sized like clamp: no bigger than the desk, no smaller than the minimum.
+        self.assertEqual(dl.reach((0, 0, 5000, 5000), AREA)[2:], AREA)
+        self.assertEqual(dl.reach((0, 0, 10, 10), AREA)[2:], (dl.MIN_WIDTH, dl.MIN_HEIGHT))
+        # Resizing one that's partly off the desk doesn't pull it back on.
+        self.assertEqual(dl.resize((-200, 80, 400, 300), frozenset({"right"}), 50, 0, AREA), (-200, 80, 450, 300))
+
 
 class ResizeTests(unittest.TestCase):
     FRAME = (0, 0, 600, 400)     # left, top, right, bottom
@@ -204,6 +223,100 @@ class SettingsTests(unittest.TestCase):
         self.assertTrue(state.windows["a"]["open"])
         self.assertEqual(state.order, ["a"])
         self.assertEqual(dl.DesktopState.from_dict("junk", {"a"}).windows, {})
+
+
+
+class ArrangementTests(unittest.TestCase):
+    """The Tile button's arrangements: where the windows go, who is where, and trading places."""
+
+    def state(self, *ids):
+        state = dl.DesktopState()
+        for tool_id in ids:
+            state.open(tool_id)
+        return state
+
+    def test_every_arrangement_keeps_the_windows_apart_and_on_the_desk(self):
+        for preset in dl.PRESET_IDS:
+            for count in range(1, 7):
+                got = dl.cells(preset, count, AREA)
+                self.assertEqual(len(got), count, preset)
+                for x, y, w, h in got:
+                    self.assertTrue(x >= dl.MARGIN and y >= dl.MARGIN and w > 0 and h > 0, (preset, count))
+                    self.assertTrue(x + w <= AREA[0] - dl.MARGIN + 1 and y + h <= AREA[1] - dl.MARGIN + 1, (preset, count))
+                for i, a in enumerate(got):
+                    for b in got[i + 1:]:
+                        apart = a[0] + a[2] <= b[0] or b[0] + b[2] <= a[0] or a[1] + a[3] <= b[1] or b[1] + b[3] <= a[1]
+                        self.assertTrue(apart, (preset, count, a, b))
+
+    def test_a_grid_is_even_when_it_can_be(self):
+        wide, squarish = (2560, 1277), (1200, 800)
+        for area in (wide, squarish):
+            four = dl.tile(4, area)
+            self.assertEqual(len({c[0] for c in four}), 2, area)       # two by two, not three and one
+            self.assertEqual(len({c[1] for c in four}), 2, area)
+            self.assertEqual(len({(c[2], c[3]) for c in four}), 1, area)   # all four the same size
+            self.assertEqual(6 % dl.grid_columns(6, area), 0)          # six: an even grid either way round
+            self.assertEqual(dl.grid_columns(2, area), 2)              # two side by side
+            self.assertEqual(dl.grid_columns(1, area), 1)
+        self.assertEqual(dl.grid_columns(6, wide), 3)                  # three by two on a wide desk
+        self.assertEqual(dl.grid_columns(8, wide), 4)
+        self.assertEqual(dl.grid_columns(5, wide), 3)                  # no even grid: three and two
+        self.assertEqual(dl.grid_columns(4, (500, 1600)), 1)           # a tall narrow desk: stacked
+
+    def test_the_main_window_is_the_big_one_where_the_name_says(self):
+        left, right, top = (dl.cells(p, 3, AREA) for p in ("main_left", "main_right", "main_top"))
+        self.assertGreater(left[0][2], left[1][2])
+        self.assertLess(left[0][0], left[1][0])                    # the main one on the left, the rest stacked beside it
+        self.assertEqual(left[1][0], left[2][0])
+        self.assertGreater(right[0][0], right[1][0])
+        self.assertLess(top[0][1], top[1][1])                      # on top, the rest in a row below
+        self.assertEqual(top[1][1], top[2][1])
+        self.assertEqual([c[1] for c in dl.cells("columns", 3, AREA)], [dl.MARGIN] * 3)
+        self.assertEqual([c[0] for c in dl.cells("rows", 3, AREA)], [dl.MARGIN] * 3)
+        self.assertEqual(dl.cells("grid", 4, AREA), dl.tile(4, AREA))
+        self.assertEqual(dl.cells("no such thing", 2, AREA), dl.tile(2, AREA))
+
+    def test_the_front_window_takes_the_main_place_and_tile_remembers_the_choice(self):
+        state = self.state("a", "b", "c")
+        state.raise_("b")
+        state.arrange("main_left", AREA)
+        self.assertEqual(state.slots, ["b", "a", "c"])             # in front first, then as they were opened
+        self.assertEqual(state.windows["b"]["geom"], dl.cells("main_left", 3, AREA)[0])
+        state.set_geom("a", (5, 5, 300, 200))                      # moved by hand: no longer arranged
+        self.assertIsNone(state.slots)
+        state.tile(AREA)                                           # Tile: the arrangement last chosen
+        self.assertEqual(state.preset, "main_left")
+        self.assertEqual(state.windows["c"]["geom"], dl.cells("main_left", 3, AREA)[2])
+
+    def test_two_arranged_windows_trade_places(self):
+        state = self.state("a", "b", "c")
+        state.arrange("columns", AREA)
+        first, _second, third = dl.cells("columns", 3, AREA)
+        self.assertEqual(state.slots, ["c", "a", "b"])
+        self.assertEqual(state.slot_at(third[0] + 10, 100, AREA), "b")
+        self.assertIsNone(state.slot_at(2, 2, AREA))               # the margin is nobody's
+        self.assertTrue(state.swap("c", "b", AREA))
+        self.assertEqual(state.slots, ["b", "a", "c"])
+        self.assertEqual((state.windows["b"]["geom"], state.windows["c"]["geom"]), (first, third))
+        self.assertFalse(state.swap("c", "c", AREA))
+        self.assertFalse(state.swap("c", "nobody", AREA))
+        state.close("a")
+        self.assertFalse(state.swap("c", "b", AREA))               # one closed: not arranged any more
+
+    def test_an_arrangement_follows_the_desk_and_is_saved(self):
+        state = self.state("a", "b")
+        state.arrange("rows", AREA)
+        state.reflow((1000, 600))
+        self.assertEqual(state.windows["b"]["geom"], dl.cells("rows", 2, (1000, 600))[0])
+        again = dl.DesktopState.from_dict(state.to_dict(), {"a", "b"})
+        self.assertEqual((again.preset, again.slots), ("rows", ["b", "a"]))
+        saved = state.to_dict()
+        saved["slots"] = ["b", "gone"]                             # not the windows on show: not arranged
+        self.assertIsNone(dl.DesktopState.from_dict(saved, {"a", "b"}).slots)
+        self.assertEqual(dl.DesktopState.from_dict({"preset": "sideways"}, set()).preset, "grid")
+        state.cascade(AREA)
+        self.assertIsNone(state.slots)
+        state.reflow((900, 500))                                   # nothing arranged: nothing moves
 
 
 if __name__ == "__main__":

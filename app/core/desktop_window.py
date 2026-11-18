@@ -34,16 +34,24 @@ window of its own that Windows moves without Buddy drawing anything
 drag - still shown, so it keeps the mouse - and lands once, under the
 picture, which goes once it has painted.
 
-Resizing from an edge or corner works the same way, worse before: every
-step also re-laid the page out in Chromium. The picture is the window's
-frame drawn at the new size around the page as it was (anchored top left,
-the rest the page's colour); the page takes its new size once, on release.
+A window can be dragged partly off the desk (desktop_layout.reach): a
+native window isn't clipped by the desk, which isn't one, so each window -
+and the picture being dragged - is masked to the part of it on the desk,
+and never draws over the taskbar or the link bar.
+
+Resizing from an edge or corner is the window itself, live: it takes each
+new size as the pointer moves - at most once a tick of the drag's timer
+(DRAG_CHECK_MS), however many mouse moves arrive in between, so the page
+inside is never asked to lay itself out faster than it can draw. (It was a
+picture of the frame around the page as it had been, the page taking its new
+size only on release - quick, but the page looked cut off or stretched thin
+until then, and people resize by looking at the page.)
 """
 
 import sys
 
 from PySide6.QtCore import QEvent, QPoint, QPointF, QRect, QRectF, QSize, Qt, QTimer
-from PySide6.QtGui import QBrush, QColor, QFont, QGuiApplication, QPainter, QPainterPath, QPen, QPixmap, QRegion
+from PySide6.QtGui import QBrush, QColor, QCursor, QFont, QGuiApplication, QPainter, QPainterPath, QPen, QPixmap, QRegion
 from PySide6.QtWidgets import QApplication, QFrame, QScrollArea, QWidget
 
 from core import desktop_layout as dl
@@ -61,9 +69,8 @@ BTN_GAP = 6
 DOT_STEP = 16       # the desk's dot grid
 DRAG_START = 3      # how far the pointer goes before a press on the title becomes a drag
 OFF_DESK = -30000   # where a window waits while its picture is dragged
-LAND_MS = 80        # the picture stays this long over the window that's landed (it paints in ~20 ms)...
-LAND_RESIZED_MS = 300   # ...or resized (the page lays itself out again and redraws first)
-DRAG_CHECK_MS = 100 # how often a drag checks the button is still down (a release it never heard of)
+LAND_MS = 80        # the picture stays this long over the window that's landed (it paints in ~20 ms)
+DRAG_CHECK_MS = 16  # how often a drag looks where the pointer is, and that the button is still down
 
 # Edges a resize drags, by where the press landed.
 _CURSORS = {
@@ -90,6 +97,17 @@ def _primary_button_down():
         return bool(user32.GetAsyncKeyState(vk) & 0x8000)
     except (AttributeError, OSError):
         return bool(QGuiApplication.mouseButtons() & Qt.LeftButton)
+
+
+def _pointer():
+    """Where the pointer is on the screen, asked of the system - not read
+    off a mouse event. The window being dragged waits far off the desk
+    (OFF_DESK), and a mouse event's position is worked out from the window
+    it's sent to: events arriving after the window stepped off have said the
+    pointer was thirty thousand pixels up and to the left, which threw the
+    window into the desk's top-left corner (seen 2026-11-18: windows that
+    "shot off" and stuck there). The cursor itself is never wrong."""
+    return QCursor.pos()
 
 
 def _frame_rect(size):
@@ -127,8 +145,16 @@ class _DragGhost(QWidget):
         self._paint = paint
 
     def resizeEvent(self, event):
-        self.setMask(_shape(self.size()))
+        self._whole = _shape(self.size())
+        self.setMask(self._whole)
         super().resizeEvent(event)
+
+    def clip_to(self, rect):
+        """Only the part inside `rect` (global) shows - the desk."""
+        shape = getattr(self, "_whole", None) or _shape(self.size())
+        seen = shape.intersected(QRegion(rect.translated(-self.pos())))
+        if not seen.isEmpty():
+            self.setMask(seen)
 
     def paintEvent(self, _event):
         p = QPainter(self)
@@ -152,7 +178,6 @@ class ToolWindow(QWidget):
         self._title_color = color
         self._ghost = None          # the picture being dragged in this window's place
         self._ghost_geom = None     # where it is on the desk: where the window lands
-        self._resizing = False      # the picture is of a resize, not a move
         self._lifted = False        # the window has stepped off the desk for the drag
         self._lift_timer = QTimer(self, singleShot=True, interval=30, timeout=self._step_off)
         self._drag_check = QTimer(self, interval=DRAG_CHECK_MS, timeout=self._check_button)
@@ -194,10 +219,20 @@ class ToolWindow(QWidget):
         self._clip_to_shape()
         super().resizeEvent(event)
 
+    def moveEvent(self, event):
+        self._clip_to_shape()
+        super().moveEvent(event)
+
     def _clip_to_shape(self):
         """A native window is a rectangle: clip it to the rounded frame and
-        its shadow, so what's behind shows through the corners."""
-        self.setMask(_shape(self.size()))
+        its shadow, so what's behind shows through the corners - and to the
+        desk, for a window dragged partly off it (the desk isn't a native
+        window, so nothing else would clip it there)."""
+        shape = _shape(self.size())
+        desk = QRect(-self.x(), -self.y(), self.desk.width(), self.desk.height())
+        seen = shape.intersected(QRegion(desk))
+        # Off the desk altogether - waiting out a drag: its whole shape (an empty mask is no mask).
+        self.setMask(shape if seen.isEmpty() else seen)
 
     def _buttons(self, size=None):
         """{"close"|"max"|"min": QRect}, right to left along the title bar."""
@@ -238,26 +273,40 @@ class ToolWindow(QWidget):
             return
         edges = self._edges(pos)
         if edges:
-            self._drag = (edges, event.globalPosition().toPoint(), self.geometry())
+            self._drag = (edges, _pointer(), self.geometry())
+            self._drag_check.start()        # a resize is applied on the drag's tick (_follow)
         elif self._on_title(pos) and not self.maximized:
-            self._drag = ("move", event.globalPosition().toPoint(), self.geometry())
+            self._drag = ("move", _pointer(), self.geometry())
+
+    def _follow(self):
+        """The drag follows the pointer (_pointer: the cursor itself): the
+        picture goes where the window would. Called for every mouse move and
+        on a timer too, so the drag doesn't depend on what the events say."""
+        if not self._drag:
+            return
+        kind, start, geom = self._drag
+        d = _pointer() - start
+        g = (geom.x(), geom.y(), geom.width(), geom.height())
+        if kind != "move":
+            # A resize: the window itself, at its new size now.
+            new = dl.resize(g, kind, d.x(), d.y(), self.desk.area())
+            if QRect(*new) != self.geometry():
+                self.desk.state.set_geom(self.tool_id, new)     # so the desk laying itself out keeps it
+                self.setGeometry(QRect(*new))
+            return
+        if self._ghost is None:
+            if d.manhattanLength() < DRAG_START:
+                return
+            self._lift()
+        self._ghost_geom = dl.reach((g[0] + d.x(), g[1] + d.y(), g[2], g[3]), self.desk.area())
+        if self._lifted:
+            self._place_ghost()
 
     def mouseMoveEvent(self, event):
         pos = event.position().toPoint()
         if self._drag:
-            kind, start, geom = self._drag
-            d = event.globalPosition().toPoint() - start
-            g = (geom.x(), geom.y(), geom.width(), geom.height())
-            if self._ghost is None:
-                if d.manhattanLength() < DRAG_START:
-                    return
-                self._lift(resizing=kind != "move")
-            if kind == "move":
-                self._ghost_geom = dl.clamp((g[0] + d.x(), g[1] + d.y(), g[2], g[3]), self.desk.area())
-            else:
-                self._ghost_geom = dl.resize(g, kind, d.x(), d.y(), self.desk.area())
-            if self._lifted:
-                self._place_ghost()
+            if self._drag[0] == "move":     # a resize waits for the drag's tick: one new size a frame
+                self._follow()
             return
         hover = self._button_at(pos)
         if hover != self._hover:
@@ -276,7 +325,9 @@ class ToolWindow(QWidget):
                  "min": self.desk.minimize}[name](self.tool_id)
             return
         if self._drag:
+            self._follow()                  # where the pointer is now, whatever this event says
             self._drag = None
+            self._drag_check.stop()
             if self._ghost is not None:
                 self._land()
                 return
@@ -284,29 +335,15 @@ class ToolWindow(QWidget):
             self.desk.moved(self.tool_id, (g.x(), g.y(), g.width(), g.height()))
 
     # -------------------------------------------------------------- drag --
-    def _lift(self, resizing=False):
-        """The drag starts: a picture of the window goes over it, and once
-        that's on screen the window steps off the desk (_step_off). Moving,
-        it's the window as it is; resizing, the frame is drawn at each new
-        size around the page as it was."""
+    def _lift(self):
+        """A move starts: a picture of the window as it is goes over it, and
+        once that's on screen the window steps off the desk (_step_off)."""
         g = self.geometry()
         self._ghost_geom = (g.x(), g.y(), g.width(), g.height())
-        self._resizing = resizing
-        if resizing:
-            page = self.scroller.grab()
-            fill = QColor(self.desk.palette_colors["surface"])
+        picture = self.grab()
 
-            def paint(p, size):
-                self.paint_chrome(p, size)
-                r = _content_rect(size)
-                p.setClipRect(r)
-                p.fillRect(r, fill)
-                p.drawPixmap(r.topLeft(), page)
-        else:
-            picture = self.grab()
-
-            def paint(p, _size):
-                p.drawPixmap(0, 0, picture)
+        def paint(p, _size):
+            p.drawPixmap(0, 0, picture)
         self._ghost = _DragGhost(self.window(), paint)
         self._ghost.setGeometry(QRect(self.mapToGlobal(QPoint(0, 0)), self.size()))
         self._ghost.show()
@@ -324,6 +361,7 @@ class ToolWindow(QWidget):
     def _place_ghost(self):
         x, y, w, h = self._ghost_geom
         self._ghost.setGeometry(QRect(self.desk.mapToGlobal(QPoint(x, y)), QSize(w, h)))
+        self._ghost.clip_to(QRect(self.desk.mapToGlobal(QPoint(0, 0)), self.desk.size()))
 
     def _land(self):
         """The drag ends: the window goes where the picture is, under it, and
@@ -334,25 +372,35 @@ class ToolWindow(QWidget):
         self._lifted = False
         g = self._ghost_geom
         self.setGeometry(QRect(*g))
-        self.desk.moved(self.tool_id, g)
-        QTimer.singleShot(LAND_RESIZED_MS if self._resizing else LAND_MS, ghost.close)
+        # Dropped on another window's place in an arrangement, the two trade places.
+        if not self.desk.dropped_on(self.tool_id, self.desk.mapFromGlobal(_pointer())):
+            self.desk.moved(self.tool_id, g)
+        QTimer.singleShot(LAND_MS, ghost.close)
 
     def drop_drag(self):
         """Put a drag down where it is now (the window is closing, the
         layout changing)."""
+        resized = bool(self._drag) and self._drag[0] != "move"
         self._drag = None
+        self._drag_check.stop()
         if self._ghost is not None:
             self._land()
+        elif resized:
+            g = self.geometry()
+            self.desk.moved(self.tool_id, (g.x(), g.y(), g.width(), g.height()))
 
     def _check_button(self):
-        """The release a drag never heard of (the mouse let go elsewhere):
-        it lands where it is."""
+        """The drag's own tick: the picture follows the pointer, and a
+        release the drag never heard of (the mouse let go elsewhere) lands
+        it where it is."""
         if not _primary_button_down():
             self.drop_drag()
+        else:
+            self._follow()
 
     def hideEvent(self, event):
-        # Closed, minimised or the layout changing mid-drag: no picture left behind.
-        if self._ghost is not None:
+        # Closed, minimised or the layout changing mid-drag: no picture left behind, no drag going on.
+        if self._ghost is not None or self._drag:
             self.drop_drag()
         super().hideEvent(event)
 
@@ -600,12 +648,28 @@ class DesktopArea(QWidget):
         self.state.set_geom(tool_id, geom)
         self._changed()
 
+    def dropped_on(self, tool_id, point):
+        """A window dragged by its title and let go at `point` (desk pixels):
+        if the windows are arranged and that's another window's place, the
+        two trade places. True if they did."""
+        other = self.state.slot_at(point.x(), point.y(), self.area())
+        if other is None or not self.state.swap(tool_id, other, self.area()):
+            return False
+        self.sync()
+        self._changed()
+        return True
+
     def cascade(self):
         self.state.cascade(self.area())
         self._restore_minimised()
 
     def tile(self):
         self.state.tile(self.area())
+        self._restore_minimised()
+
+    def arrange(self, preset):
+        """One of desktop_layout.PRESETS, which Tile applies from now on."""
+        self.state.arrange(preset, self.area())
         self._restore_minimised()
 
     def _restore_minimised(self):
@@ -643,7 +707,7 @@ class DesktopArea(QWidget):
             win = self._window(tool_id)
             win.color = self._color(tool_id)
             win.maximized = w["max"]
-            geom = (0, 0, *area) if w["max"] else dl.clamp(w["geom"] or (0, 0, *area), area)
+            geom = (0, 0, *area) if w["max"] else dl.reach(w["geom"] or (0, 0, *area), area)
             if win._ghost is None:          # mid-drag it stays off the desk until it lands
                 win.setGeometry(QRect(*geom))
             win.active = tool_id == front
@@ -654,7 +718,12 @@ class DesktopArea(QWidget):
     # ------------------------------------------------------------ events --
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        area = self.area()
+        if area[0] >= dl.MIN_DESK[0] and area[1] >= dl.MIN_DESK[1]:
+            self.state.reflow(area)             # arranged windows stay arranged at the desk's new size
         self.sync()
+        for win in self.windows.values():       # the desk's edge moved: what shows of each window
+            win._clip_to_shape()
 
     def moveEvent(self, event):
         # The windows are native and the desk isn't, so they're placed

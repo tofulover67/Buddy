@@ -1503,9 +1503,39 @@ class ShellWindow(QMainWindow):
             self.shared_settings.save()
 
     def arrange_windows(self, how):
-        """The taskbar's Cascade / Tile buttons."""
-        if self._layout == "desktop":
-            (self.desktop.tile if how == "tile" else self.desktop.cascade)()
+        """The taskbar's Cascade / Tile buttons - Tile applies the
+        arrangement last chosen - or one picked from Tile's right-click menu
+        (desktop_layout.PRESETS)."""
+        if self._layout != "desktop":
+            return
+        if how in desktop_layout.PRESET_IDS:
+            self.desktop.arrange(how)
+        elif how == "tile":
+            self.desktop.tile()
+        elif how == "cascade":
+            self.desktop.cascade()
+
+    def open_arrange_menu(self, anchor):
+        """Tile's right-click: the arrangements, each drawn as it would lay
+        out the windows open now."""
+        if self._layout != "desktop":
+            return
+        state = self.desktop.state
+        count = max(2, min(6, len(state.open_ids())))
+        unit = self.desktop.area()          # drawn for this desk: a grid depends on its shape
+        if unit[0] < desktop_layout.MIN_DESK[0] or unit[1] < desktop_layout.MIN_DESK[1]:
+            unit = (300, 200)
+        items = []
+        for preset, label in desktop_layout.PRESETS:
+            drawn = [[x / unit[0], y / unit[1], w / unit[0], h / unit[1]]
+                     for x, y, w, h in desktop_layout.cells(preset, count, unit)]
+            items.append({"action": f"arrange:{preset}", "label": label, "cells": drawn,
+                          "checked": preset == state.preset})
+        items.append({"action": "arrange:cascade", "label": "Cascade"})
+        self.desk_menu.popup("arrange", {
+            "mode": "actions", "id": "", "title": "Arrange windows", "items": items,
+            "note": "The window in front becomes the main one. Drag a window onto another to swap their places."},
+            anchor)
 
     # ------------------------------------------------------------ taskbar --
     def push_taskbar(self):

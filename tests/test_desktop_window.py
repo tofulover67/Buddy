@@ -137,6 +137,11 @@ class DraggingAWindow(unittest.TestCase):
         patch = mock.patch.object(desktop_window, "_primary_button_down", lambda: self.button_down)
         patch.start()
         self.addCleanup(patch.stop)
+        # The drag asks the system where the pointer is, not the event: here, where the test last put it.
+        self.pointer = QPoint(0, 0)
+        patch = mock.patch.object(desktop_window, "_pointer", lambda: QPoint(self.pointer))
+        patch.start()
+        self.addCleanup(patch.stop)
         self.app = QApplication.instance() or QApplication([])
         self.top = QWidget()
         self.top.resize(1200, 800)
@@ -170,6 +175,8 @@ class DraggingAWindow(unittest.TestCase):
         types = {"press": QEvent.MouseButtonPress, "move": QEvent.MouseMove, "release": QEvent.MouseButtonRelease}
         buttons = Qt.NoButton if kind == "release" else Qt.LeftButton
         point = QPointF(local)
+        if kind != "release":                   # let go where the pointer already is
+            self.pointer = self.win.mapToGlobal(local)
         event = QMouseEvent(types[kind], point, QPointF(self.win.mapToGlobal(local)), Qt.LeftButton, buttons, Qt.NoModifier)
         {"press": self.win.mousePressEvent, "move": self.win.mouseMoveEvent,
          "release": self.win.mouseReleaseEvent}[kind](event)
@@ -210,6 +217,89 @@ class DraggingAWindow(unittest.TestCase):
         self.wait(self.dw.LAND_MS + 60)
         self.assertFalse(shiboken6.isValid(ghost))              # closed and gone
 
+    def test_a_window_can_be_dragged_partly_off_the_desk_and_shows_only_whats_on_it(self):
+        from core import desktop_layout as dl
+        move = self.drag_to(5000, 5000)
+        self.wait(60)
+        move()
+        ghost = self.win._ghost
+        # The picture: stopped with KEEP of the title bar on the desk, and clipped to the desk.
+        self.assertEqual(ghost.x(), self.desk.mapToGlobal(QPoint(1200 - dl.KEEP[0], 0)).x())
+        self.assertLessEqual(ghost.mask().boundingRect().right(), dl.KEEP[0])
+        self.mouse("release", QPoint(0, 0))
+        self.assertEqual((self.win.x(), self.win.y()), (1200 - dl.KEEP[0], 800 - dl.KEEP[1]))
+        seen = self.win.mask().boundingRect()
+        self.assertLessEqual(seen.right(), dl.KEEP[0])                 # nothing drawn past the desk's edge
+        self.assertLessEqual(seen.bottom(), dl.KEEP[1])
+        # It stays there: laying the desk out again doesn't pull it back on.
+        self.desk.sync()
+        self.assertEqual((self.win.x(), self.win.y()), (1200 - dl.KEEP[0], 800 - dl.KEEP[1]))
+        # Brought back, it's whole again.
+        self.win.setGeometry(self.start)
+        self.assertEqual(self.win.mask(), self.dw._shape(self.start.size()))
+
+    def test_the_drag_goes_by_the_cursor_not_by_what_an_event_says(self):
+        """Events sent to the window while it waits off the desk have carried
+        positions thirty thousand pixels out: the window must not follow them."""
+        from PySide6.QtCore import QEvent, QPointF, Qt
+        from PySide6.QtGui import QMouseEvent
+        move = self.drag_to(120, 70)
+        self.wait(60)
+        move()
+        where = self.pointer
+        wild = QMouseEvent(QEvent.MouseMove, QPointF(40, 10), QPointF(-29000, -29000), Qt.LeftButton, Qt.LeftButton,
+                           Qt.NoModifier)
+        self.win.mouseMoveEvent(wild)
+        target = self.start.translated(120, 70)
+        self.assertEqual(self.win._ghost.pos(), self.desk.mapToGlobal(target.topLeft()))
+        gone = QMouseEvent(QEvent.MouseButtonRelease, QPointF(40, 10), QPointF(-29000, -29000), Qt.LeftButton,
+                           Qt.NoButton, Qt.NoModifier)
+        self.pointer = where
+        self.win.mouseReleaseEvent(gone)
+        self.assertEqual(self.win.geometry(), target)
+
+    def test_the_picture_follows_the_pointer_between_events(self):
+        self.drag_to(120, 70)
+        self.wait(60)
+        self.pointer = self.pointer + QPoint(30, 10)             # the pointer moves; no event says so
+        self.wait(self.dw.DRAG_CHECK_MS + 40)
+        self.assertEqual(self.win._ghost.pos(), self.desk.mapToGlobal(self.start.translated(150, 80).topLeft()))
+
+    def test_dropped_on_another_arranged_windows_place_they_trade_places(self):
+        from core import desktop_layout as dl
+        from core.desktop_window import DesktopArea
+
+        class Page(QWidget):
+            display_name = "Other"
+
+            def on_shown(self):
+                pass
+
+        self.desk.pages["other"] = Page()
+        self.desk.titles["other"] = "Other"
+        self.desk.open("other")
+        self.desk.arrange("columns")
+        self.wait()
+        left, right = dl.cells("columns", 2, self.desk.area())
+        self.assertEqual(self.desk.state.slots, ["other", "tool"])
+        self.assertEqual(self.win.geometry().getRect(), right)
+        self.start = self.win.geometry()
+        move = self.drag_to(-(right[0] - left[0]), 30)             # its title, over the other window's place
+        self.wait(60)
+        move()
+        self.mouse("release", QPoint(0, 0))
+        self.assertEqual(self.desk.state.slots, ["tool", "other"])
+        self.assertEqual(self.win.geometry().getRect(), left)      # each in the other's place, exactly
+        self.assertEqual(self.desk.windows["other"].geometry().getRect(), right)
+        # Let go over empty desk (the margin), it's just moved - and nothing is arranged any more.
+        self.start = self.win.geometry()
+        move = self.drag_to(0, 300)
+        self.wait(60)
+        self.pointer = self.desk.mapToGlobal(QPoint(3, 3))
+        self.win._follow()
+        self.mouse("release", QPoint(0, 0))
+        self.assertIsNone(self.desk.state.slots)
+
     def test_a_release_that_never_comes_still_lands_it(self):
         self.drag_to(80, 40)
         self.wait(60)
@@ -218,25 +308,44 @@ class DraggingAWindow(unittest.TestCase):
         self.assertIsNone(self.win._ghost)
         self.assertEqual(self.win.geometry(), self.start.translated(80, 40))
 
-    def test_a_resize_draws_the_frame_at_the_new_size_and_lands_once(self):
+    def test_a_resize_is_the_window_itself_live(self):
         f = self.win.frame_rect()
         corner = QPoint(f.right() - 2, f.bottom() - 2)
         self.mouse("press", corner)
-        origin = self.win.mapToGlobal(corner)
-        self.mouse("move", self.win.mapFromGlobal(origin + QPoint(150, 90)))
-        ghost = self.win._ghost
-        self.assertIsNotNone(ghost)
-        self.wait(60)
-        self.assertEqual(self.win.x(), self.dw.OFF_DESK)
-        self.assertEqual(self.win.size(), self.start.size())           # the window itself waits
-        self.mouse("move", self.win.mapFromGlobal(origin + QPoint(150, 90)))
-        target = self.start.adjusted(0, 0, 150, 90)
-        self.assertEqual(ghost.geometry(), QRect(self.desk.mapToGlobal(target.topLeft()), target.size()))
+        origin = QPoint(self.pointer)
+        changes = []
+        self.desk.on_change = lambda front: changes.append(front)
+        sizes = []
+        for step in (50, 100, 150):
+            self.pointer = origin + QPoint(step, step * 3 // 5)        # the pointer moves; the drag's tick sees it
+            self.wait(self.dw.DRAG_CHECK_MS + 30)
+            sizes.append(self.win.size())
+        self.assertIsNone(self.win._ghost)                             # no picture: the window itself
+        self.assertEqual(self.win.pos(), self.start.topLeft())         # and it never leaves the desk
+        self.assertEqual([s.width() - self.start.width() for s in sizes], [50, 100, 150])
+        self.assertEqual(self.win.scroller.geometry(), self.win.content_rect())     # the page has its new size now
+        self.assertEqual(changes, [])                                  # nothing saved until it's let go
         self.mouse("release", QPoint(0, 0))
+        target = self.start.adjusted(0, 0, 150, 90)
         self.assertEqual(self.win.geometry(), target)
         self.assertEqual(tuple(self.desk.state.windows["tool"]["geom"]), target.getRect())
-        self.wait(self.dw.LAND_RESIZED_MS + 60)
-        self.assertFalse(shiboken6.isValid(ghost))
+        self.assertEqual(len(changes), 1)
+        self.pointer = origin + QPoint(400, 400)                       # let go: the pointer no longer resizes it
+        self.wait(self.dw.DRAG_CHECK_MS + 30)
+        self.assertEqual(self.win.geometry(), target)
+
+    def test_a_resize_let_go_elsewhere_stops_where_it_is(self):
+        f = self.win.frame_rect()
+        corner = QPoint(f.right() - 2, f.bottom() - 2)
+        self.mouse("press", corner)
+        self.pointer = self.pointer + QPoint(60, 30)
+        self.wait(self.dw.DRAG_CHECK_MS + 30)
+        self.button_down = False
+        self.wait(self.dw.DRAG_CHECK_MS + 30)
+        self.pointer = self.pointer + QPoint(300, 300)
+        self.wait(self.dw.DRAG_CHECK_MS + 30)
+        self.assertEqual(self.win.geometry(), self.start.adjusted(0, 0, 60, 30))
+        self.assertEqual(tuple(self.desk.state.windows["tool"]["geom"]), self.start.adjusted(0, 0, 60, 30).getRect())
 
     def test_closing_mid_drag_leaves_no_picture(self):
         self.drag_to(80, 40)

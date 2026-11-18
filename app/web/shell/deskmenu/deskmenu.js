@@ -112,13 +112,23 @@ Buddy.on("query", q => {
     search.focus();
 });
 
+// An arrangement drawn small: its windows' places (fractions of the desk),
+// the main window's - the first - filled in.
+function layoutSketch(cells) {
+    return el("span.menu-sketch", {"aria-hidden": "true"}, cells.map(([x, y, w, h], i) =>
+        el(`i${i ? "" : ".main"}`, {style: `left:${x * 100}%;top:${y * 100}%;width:${w * 100}%;height:${h * 100}%`})));
+}
+
 function actions(m) {
-    menu.className = "desk-menu actions";
+    const sketched = m.items.some(item => item.cells);      // those without a drawing keep its room: the names line up
+    menu.className = `desk-menu actions${sketched ? " sketched" : ""}`;
     menu.replaceChildren(el("div.menu-title", {text: m.title}), ...m.items.map(item =>
         el(`button.menu-act${item.danger ? ".danger" : ""}`, {
-            type: "button", role: "menuitem", text: item.label,
+            type: "button", role: item.checked === undefined ? "menuitem" : "menuitemradio",
+            "aria-checked": item.checked === undefined ? undefined : String(item.checked),
             onclick: () => send("act", {action: item.action, id: m.id}),
-        })));
+        }, [sketched ? layoutSketch(item.cells || []) : null, el("span", {text: item.label})].filter(Boolean))),
+        ...(m.note ? [el("div.menu-note", {text: m.note})] : []));
     requestAnimationFrame(() => { const first = menu.querySelector("button"); if (first) first.focus(); });
 }
 

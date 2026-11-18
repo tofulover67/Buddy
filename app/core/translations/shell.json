@@ -4839,5 +4839,105 @@
   "中文": "正在获取列表…",
   "العربية": "جارٍ جلب القائمة…",
   "Tiếng Việt": "Đang tải danh sách…"
+ },
+ "Arrange windows": {
+  "日本語": "ウィンドウの配置",
+  "Español": "Organizar ventanas",
+  "Deutsch": "Fenster anordnen",
+  "Français": "Disposer les fenêtres",
+  "한국어": "창 배치",
+  "中文": "排列窗口",
+  "العربية": "ترتيب النوافذ",
+  "Tiếng Việt": "Sắp xếp cửa sổ"
+ },
+ "Grid": {
+  "日本語": "グリッド",
+  "Español": "Cuadrícula",
+  "Deutsch": "Raster",
+  "Français": "Grille",
+  "한국어": "격자",
+  "中文": "网格",
+  "العربية": "شبكة",
+  "Tiếng Việt": "Lưới"
+ },
+ "Side by side": {
+  "日本語": "横に並べる",
+  "Español": "Lado a lado",
+  "Deutsch": "Nebeneinander",
+  "Français": "Côte à côte",
+  "한국어": "나란히",
+  "中文": "并排",
+  "العربية": "جنبًا إلى جنب",
+  "Tiếng Việt": "Cạnh nhau"
+ },
+ "Stacked": {
+  "日本語": "縦に積む",
+  "Español": "Apiladas",
+  "Deutsch": "Übereinander",
+  "Français": "Empilées",
+  "한국어": "위아래로",
+  "中文": "上下堆叠",
+  "العربية": "متراصّة",
+  "Tiếng Việt": "Xếp chồng"
+ },
+ "Main window on the left": {
+  "日本語": "メインウィンドウを左に",
+  "Español": "Ventana principal a la izquierda",
+  "Deutsch": "Hauptfenster links",
+  "Français": "Fenêtre principale à gauche",
+  "한국어": "주 창을 왼쪽에",
+  "中文": "主窗口在左",
+  "العربية": "النافذة الرئيسية على اليسار",
+  "Tiếng Việt": "Cửa sổ chính bên trái"
+ },
+ "Main window on the right": {
+  "日本語": "メインウィンドウを右に",
+  "Español": "Ventana principal a la derecha",
+  "Deutsch": "Hauptfenster rechts",
+  "Français": "Fenêtre principale à droite",
+  "한국어": "주 창을 오른쪽에",
+  "中文": "主窗口在右",
+  "العربية": "النافذة الرئيسية على اليمين",
+  "Tiếng Việt": "Cửa sổ chính bên phải"
+ },
+ "Main window on top": {
+  "日本語": "メインウィンドウを上に",
+  "Español": "Ventana principal arriba",
+  "Deutsch": "Hauptfenster oben",
+  "Français": "Fenêtre principale en haut",
+  "한국어": "주 창을 위에",
+  "中文": "主窗口在上",
+  "العربية": "النافذة الرئيسية في الأعلى",
+  "Tiếng Việt": "Cửa sổ chính ở trên"
+ },
+ "Cascade": {
+  "日本語": "重ねて表示",
+  "Español": "En cascada",
+  "Deutsch": "Überlappend",
+  "Français": "En cascade",
+  "한국어": "계단식",
+  "中文": "层叠",
+  "العربية": "تتالي",
+  "Tiếng Việt": "Xếp tầng"
+ },
+ "The window in front becomes the main one. Drag a window onto another to swap their places.": {
+  "日本語": "最前面のウィンドウがメインになります。ウィンドウを別のウィンドウの上にドラッグすると、位置が入れ替わります。",
+  "Español": "La ventana que está delante pasa a ser la principal. Arrastra una ventana sobre otra para intercambiar sus sitios.",
+  "Deutsch": "Das vorderste Fenster wird zum Hauptfenster. Ziehe ein Fenster auf ein anderes, um ihre Plätze zu tauschen.",
+  "Français": "La fenêtre au premier plan devient la principale. Fais glisser une fenêtre sur une autre pour échanger leurs places.",
+  "한국어": "맨 앞의 창이 주 창이 됩니다. 창을 다른 창 위로 끌면 서로 자리가 바뀝니다.",
+  "中文": "最前面的窗口会成为主窗口。把一个窗口拖到另一个上，即可交换它们的位置。",
+  "العربية": "تصبح النافذة الأمامية هي الرئيسية. اسحب نافذة فوق أخرى لتبادل مكانيهما.",
+  "Tiếng Việt": "Cửa sổ đang ở trước sẽ thành cửa sổ chính. Kéo một cửa sổ lên cửa sổ khác để đổi chỗ cho nhau."
+ },
+ "Tile windows – right-click to choose an arrangement": {
+  "日本語": "ウィンドウを並べる – 右クリックで配置を選択",
+  "Español": "Organizar ventanas en mosaico: clic derecho para elegir una disposición",
+  "Deutsch": "Fenster nebeneinander anordnen – Rechtsklick für eine Anordnung",
+  "Français": "Disposer les fenêtres en mosaïque – clic droit pour choisir une disposition",
+  "한국어": "창 바둑판식 배열 – 오른쪽 클릭으로 배치 선택",
+  "中文": "平铺窗口——右键选择排列方式",
+  "العربية": "تجانب النوافذ – انقر بالزر الأيمن لاختيار ترتيب",
+  "Tiếng Việt": "Xếp cửa sổ cạnh nhau – bấm chuột phải để chọn cách sắp xếp"
  }
 }

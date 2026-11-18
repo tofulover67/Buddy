@@ -11,7 +11,10 @@ included.
 Saved in the shared settings under "desktop" as
     {"windows": {tool_id: {"geom": [x, y, w, h], "open": bool,
                            "min": bool, "max": bool, "color": int}},
-     "order": [tool_id, ...]}          back to front
+     "order": [tool_id, ...],          back to front
+     "preset": "grid",                 the arrangement the Tile button applies
+     "slots": [tool_id, ...] | None}   while the windows are arranged: which
+                                       window is in which place of the preset
 """
 
 import math
@@ -30,6 +33,9 @@ DEFAULT_SHARE = 0.72
 WINDOW_COLORS = 4
 # A desk smaller than this hasn't been laid out yet: don't place by it.
 MIN_DESK = (400, 300)
+# A window dragged past the desk's edge keeps this much of its title bar on
+# the desk (across, down): enough to see what it is and take hold of it again.
+KEEP = (120, 40)
 
 
 def clamp(geom, area, minimum=(MIN_WIDTH, MIN_HEIGHT)):
@@ -41,6 +47,21 @@ def clamp(geom, area, minimum=(MIN_WIDTH, MIN_HEIGHT)):
     h = max(min(h, area_h), min(minimum[1], area_h))
     x = min(max(x, 0), area_w - w)
     y = min(max(y, 0), area_h - h)
+    return (x, y, w, h)
+
+
+def reach(geom, area, minimum=(MIN_WIDTH, MIN_HEIGHT)):
+    """Where a window may be DRAGGED to: sized as clamp() sizes it, but free
+    to go past the desk's left, right and bottom edges as long as KEEP of
+    its title bar stays on the desk (never past the top: the title bar is
+    the handle). A window as big as the desk - tiled, or just large - can
+    still be moved aside; kept wholly on the desk, it couldn't move at all."""
+    x, y, w, h = clamp((0, 0, geom[2], geom[3]), area, minimum)
+    x, y = int(round(geom[0])), int(round(geom[1]))
+    area_w, area_h = max(1, int(area[0])), max(1, int(area[1]))
+    keep_x, keep_y = min(KEEP[0], w, area_w), min(KEEP[1], area_h)
+    x = min(max(x, keep_x - w), area_w - keep_x)
+    y = min(max(y, 0), area_h - keep_y)
     return (x, y, w, h)
 
 
@@ -78,7 +99,7 @@ def resize(geom, edges, dx, dy, area, minimum=(MIN_WIDTH, MIN_HEIGHT)):
         bottom = y + h
         y = max(0, min(y + dy, bottom - minimum[1]))
         h = bottom - y
-    return clamp((x, y, w, h), area, minimum)
+    return reach((x, y, w, h), area, minimum)      # a window partly off the desk stays where it is
 
 
 def opening_size(area, preferred=None, minimum=(MIN_WIDTH, MIN_HEIGHT)):
@@ -104,13 +125,27 @@ def cascade_position(index, size, area):
     return (MARGIN + step * CASCADE_STEP, MARGIN + step * CASCADE_STEP)
 
 
+def grid_columns(count, area):
+    """How many columns a grid of `count` windows gets: an even grid when
+    there is one (four windows are two by two, six three by two - never three
+    and a wide one left over), and of those the one whose windows are nearest
+    a comfortable shape, a little wider than tall."""
+    def cost(cols):
+        rows = math.ceil(count / cols)
+        shape = (area[0] / cols) / max(1.0, area[1] / rows)
+        return (0.0 if count % cols == 0 else 1.0) + abs(math.log(max(shape, 1e-6) / 1.25))
+    side = math.isqrt(count)
+    if side * side == count and 0.4 < area[0] / max(1, area[1]) < 4:
+        return side         # four are two by two, nine three by three, on any desk but a sliver
+    return min(range(1, count + 1), key=cost)
+
+
 def tile(count, area):
-    """`count` geometries filling the desk in a grid - as square as it gets,
-    the last row's windows stretched to use the whole width."""
+    """`count` geometries filling the desk in a grid (grid_columns), the
+    last row's windows stretched to use the whole width."""
     if count <= 0:
         return []
-    cols = math.ceil(math.sqrt(count * area[0] / max(1, area[1]) / 1.6)) or 1
-    cols = max(1, min(cols, count))
+    cols = grid_columns(count, area)
     rows = math.ceil(count / cols)
     cell_h = (area[1] - MARGIN * (rows + 1)) / rows
     out = []
@@ -123,12 +158,67 @@ def tile(count, area):
     return out
 
 
+# The arrangements the Tile button offers (its right-click), in the menu's
+# order: (id, what it's called). Place 0 is the main window's, where there
+# is one.
+PRESETS = (("grid", "Grid"), ("columns", "Side by side"), ("rows", "Stacked"),
+           ("main_left", "Main window on the left"), ("main_right", "Main window on the right"),
+           ("main_top", "Main window on top"))
+PRESET_IDS = tuple(p for p, _label in PRESETS)
+MAIN_SHARE = 0.6        # how much of the desk a preset's main window takes
+
+
+def _strip(count, x, y, w, h, across):
+    """`count` equal cells filling (x, y, w, h), MARGIN apart - side by side (across) or stacked."""
+    if count <= 0:
+        return []
+    out = []
+    if across:
+        cell = (w - MARGIN * (count - 1)) / count
+        for i in range(count):
+            out.append((int(x + i * (cell + MARGIN)), int(y), int(cell), int(h)))
+    else:
+        cell = (h - MARGIN * (count - 1)) / count
+        for i in range(count):
+            out.append((int(x), int(y + i * (cell + MARGIN)), int(w), int(cell)))
+    return out
+
+
+def cells(preset, count, area):
+    """Where `count` windows go in an arrangement: geometries, place 0
+    first (the main window's, in the presets that have one)."""
+    if count <= 0:
+        return []
+    if preset not in PRESET_IDS or preset == "grid":
+        return tile(count, area)
+    x, y = MARGIN, MARGIN
+    w, h = max(1, area[0] - 2 * MARGIN), max(1, area[1] - 2 * MARGIN)
+    if preset == "columns":
+        return _strip(count, x, y, w, h, True)
+    if preset == "rows":
+        return _strip(count, x, y, w, h, False)
+    if count == 1:
+        return [(x, y, int(w), int(h))]
+    if preset == "main_top":
+        main_h = int((h - MARGIN) * MAIN_SHARE)
+        return [(x, y, int(w), main_h)] + _strip(count - 1, x, y + main_h + MARGIN, w, h - main_h - MARGIN, True)
+    main_w = int((w - MARGIN) * MAIN_SHARE)
+    side_w = w - main_w - MARGIN
+    if preset == "main_right":
+        return [(x + side_w + MARGIN, y, main_w, int(h))] + _strip(count - 1, x, y, side_w, h, False)
+    return [(x, y, main_w, int(h))] + _strip(count - 1, x + main_w + MARGIN, y, side_w, h, False)
+
+
 class DesktopState:
     """Every tool window's state, and the stacking order."""
 
-    def __init__(self, windows=None, order=None):
+    def __init__(self, windows=None, order=None, preset="grid", slots=None):
         self.windows = windows or {}
         self.order = order or []
+        self.preset = preset if preset in PRESET_IDS else "grid"
+        # While the windows are arranged: who is in which place. None once
+        # one is moved or resized by hand, opened, closed or minimised.
+        self.slots = list(slots) if slots else None
         # When each window last opened (a counter), for the taskbar's order.
         self.opened = {t: i for i, t in enumerate(self.order)}
         self._clock = len(self.order)
@@ -160,7 +250,11 @@ class DesktopState:
             if tool_id in windows and tool_id not in order:
                 order.append(tool_id)
         order += [t for t in windows if t not in order]
-        return cls(windows, order)
+        slots = data.get("slots")
+        shown = sorted(t for t, w in windows.items() if w["open"] and not w["min"])
+        if not (isinstance(slots, list) and sorted(str(t) for t in slots) == shown):
+            slots = None                # not the windows on show any more: not arranged
+        return cls(windows, order, data.get("preset"), slots)
 
     def to_dict(self):
         return {
@@ -168,6 +262,8 @@ class DesktopState:
                             "min": w["min"], "max": w["max"], "color": w["color"]}
                         for t, w in self.windows.items()},
             "order": list(self.order),
+            "preset": self.preset,
+            "slots": list(self.slots) if self.slots else None,
         }
 
     # ------------------------------------------------------------- queries --
@@ -216,6 +312,8 @@ class DesktopState:
             self.opened[tool_id] = self._clock
         w["open"], w["min"] = True, False
         self.raise_(tool_id)
+        if newly:
+            self.slots = None
         return newly
 
     def _free_color(self, tool_id):
@@ -230,9 +328,11 @@ class DesktopState:
     def close(self, tool_id):
         w = self.entry(tool_id)
         w["open"], w["min"], w["max"] = False, False, False
+        self.slots = None
 
     def minimize(self, tool_id):
         self.entry(tool_id)["min"] = True
+        self.slots = None
 
     def toggle_max(self, tool_id):
         w = self.entry(tool_id)
@@ -240,9 +340,12 @@ class DesktopState:
         return w["max"]
 
     def set_geom(self, tool_id, geom):
+        """Moved or resized by hand: where it is now - and the windows are
+        no longer arranged."""
         w = self.entry(tool_id)
         w["geom"] = tuple(int(v) for v in geom)
         w["max"] = False
+        self.slots = None
 
     def place_new(self, tool_id, area, preferred=None, minimum=(MIN_WIDTH, MIN_HEIGHT)):
         """Give a window that has never been placed a spot: its opening size,
@@ -262,14 +365,51 @@ class DesktopState:
             w["min"] = w["max"] = False
             x, y = cascade_position(i, size, area)
             w["geom"] = clamp((x, y, *size), area)
+        self.slots = None
 
     def tile(self, area):
-        """Every open window restored and laid out in a grid."""
-        ids = self.open_ids()
-        for tool_id, geom in zip(ids, tile(len(ids), area)):
+        """Every open window restored and laid out in the arrangement last chosen."""
+        self.arrange(self.preset, area)
+
+    def arrange(self, preset, area):
+        """Every open window restored and laid out as `preset` (PRESETS),
+        which the Tile button applies from now on. The window in front takes
+        place 0 - the main window's - and the rest follow in the order they
+        were opened (the taskbar's)."""
+        self.preset = preset if preset in PRESET_IDS else "grid"
+        front = self.front()
+        ids = sorted(self.open_ids(), key=lambda t: (t != front, self.opened.get(t, 0)))
+        self.slots = ids
+        self._lay(area)
+
+    def _lay(self, area):
+        for tool_id, geom in zip(self.slots, cells(self.preset, len(self.slots), area)):
             w = self.windows[tool_id]
             w["min"] = w["max"] = False
             w["geom"] = geom
+
+    def reflow(self, area):
+        """The desk changed size: arranged windows keep their arrangement."""
+        if self.slots:
+            self._lay(area)
+
+    def slot_at(self, x, y, area):
+        """The arranged window whose place holds the point (desk pixels), or None."""
+        if not self.slots:
+            return None
+        for tool_id, (gx, gy, gw, gh) in zip(self.slots, cells(self.preset, len(self.slots), area)):
+            if gx <= x < gx + gw and gy <= y < gy + gh:
+                return tool_id
+        return None
+
+    def swap(self, a, b, area):
+        """Two arranged windows trade places. True if they did."""
+        if not self.slots or a == b or a not in self.slots or b not in self.slots:
+            return False
+        i, j = self.slots.index(a), self.slots.index(b)
+        self.slots[i], self.slots[j] = b, a
+        self._lay(area)
+        return True
 
     def keep_only(self, visible_ids):
         """Close the windows of tools no longer in the rail."""

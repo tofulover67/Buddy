@@ -16,6 +16,8 @@ $("bug").onclick = () => send("bug");
 $("programs").onclick = () => send("programs", {left: left($("programs"))});
 $("cascade").onclick = () => send("arrange", {how: "cascade"});
 $("tile").onclick = () => send("arrange", {how: "tile"});
+// Its right-click: the arrangements to choose from (the menu opens above it).
+$("tile").oncontextmenu = e => { e.preventDefault(); send("arrange_menu", {left: left($("tile")) - 150}); };
 $("settings").onclick = () => send("settings");
 $("orb").onclick = () => send("orb");
 $("conn").onclick = () => send("reconnect");

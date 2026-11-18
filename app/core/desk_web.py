@@ -6,8 +6,8 @@ The desktop layout's taskbar and its popup menu, as web views
 
 The taskbar runs along the bottom of the shell window in place of the
 header and the nav rail: a Programs button, the pinned and open tools, and
-a tray - the Resolve connection, the bug report, Cascade / Tile, the news
-orb, Settings.
+a tray - the Resolve connection, the bug report, Cascade / Tile (Tile's
+right-click: the arrangements to choose from), the news orb, Settings.
 
 The menu - Programs, or a taskbar button's right-click - is a popup window
 of its own rather than part of the taskbar's page: the tool windows are
@@ -16,7 +16,8 @@ draw over them.
 
 Protocol (taskbar):
     to the view    taskbar
-    from the view  programs, search, task, task_menu, reconnect, arrange, orb, bug, settings, size
+    from the view  programs, search, task, task_menu, reconnect, arrange, arrange_menu, orb, bug,
+                   settings, size
 Protocol (menu):
     to the view    menu, query (the Search box's typing, while it's open)
     from the view  open, pin, act, settings, size
@@ -86,6 +87,9 @@ class TaskbarView(_ChromeView):
         how = (payload or {}).get("how")
         if how in ("cascade", "tile"):
             self.shell.arrange_windows(how)
+
+    def on_arrange_menu(self, payload):
+        self.shell.open_arrange_menu(self._anchor(payload))
 
     def on_orb(self, _payload=None):
         self.shell.open_announcements()
@@ -168,6 +172,8 @@ class DeskMenu(WebWindow):
     def on_act(self, payload):
         action = (payload or {}).get("action")
         self.hide()
+        if isinstance(action, str) and action.startswith("arrange:"):
+            return self.shell.arrange_windows(action[len("arrange:"):])
         self.shell.task_action(action, (payload or {}).get("id"))
 
     def on_settings(self, _payload=None):
