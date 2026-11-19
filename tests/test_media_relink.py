@@ -850,8 +850,16 @@ class PageTests(Base):
             if time.monotonic() > deadline:
                 self.fail("Media Relink web view did not load")
         rows = self.copies()
-        self.js(f"Buddy.receive('state', {json.dumps(self.last('state'))});"
-                f"Buddy.receive('rows', {json.dumps(rows)});")
+        # What the page itself sent as it opened can reach the view after this
+        # (seen on a slow runner: the button hidden again by the empty first
+        # list), so the rows are sent until they're the ones drawn.
+        deadline = time.monotonic() + 10
+        while True:
+            self.js(f"Buddy.receive('state', {json.dumps(self.last('state'))});"
+                    f"Buddy.receive('rows', {json.dumps(rows)});")
+            self.app.processEvents()
+            if self.js("document.getElementById('pick-groups').hidden") is False or time.monotonic() > deadline:
+                break
         self.assertEqual(self.js("document.getElementById('pick-groups').hidden"), False)
         self.assertEqual(self.js("document.getElementById('pick-groups').textContent"), "Pick for all 3…")
         self.js("document.getElementById('pick-groups').click()")
