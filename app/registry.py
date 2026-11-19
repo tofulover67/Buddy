@@ -69,6 +69,8 @@ REGISTRY = [
     # Not yet checked on a Mac (its Web Audio and the computer keys).
     ("Editing Tools", _tool("daw", "DAW", "Editing Tools", "pages.daw.page", "DawPage")),
     ("Editing Tools", _tool("color_palette", "Color Palette Manager", "Editing Tools", "pages.color_palette.page", "ColorPalettePage", mac=True)),
+    # Counters and Graphs, as its two tabs - neither built yet (docs/DATA_GRAPHICS_PLAN.md).
+    ("Editing Tools", _tool("data_graphics", "Data Graphics", "Editing Tools", "pages.data_graphics.page", "DataGraphicsPage", mac=True)),
 
     ("Generative", _tool("generative", "Generative", "Generative", "pages.generative.page", "GenerativePage", mac=True)),
 

@@ -1,0 +1,103 @@
+{
+ "_comment": "Data Graphics. English -> each language; see core/i18n.py.",
+ "Data Graphics": {
+  "日本語": "データグラフィックス",
+  "Español": "Gráficos de datos",
+  "Deutsch": "Datengrafiken",
+  "Français": "Graphiques de données",
+  "한국어": "데이터 그래픽",
+  "中文": "数据图形",
+  "العربية": "رسومات البيانات",
+  "Tiếng Việt": "Đồ họa dữ liệu"
+ },
+ "Counters": {
+  "日本語": "カウンター",
+  "Español": "Contadores",
+  "Deutsch": "Zähler",
+  "Français": "Compteurs",
+  "한국어": "카운터",
+  "中文": "计数器",
+  "العربية": "العدّادات",
+  "Tiếng Việt": "Bộ đếm"
+ },
+ "Graphs": {
+  "日本語": "グラフ",
+  "Español": "Gráficas",
+  "Deutsch": "Diagramme",
+  "Français": "Graphiques",
+  "한국어": "그래프",
+  "中文": "图表",
+  "العربية": "الرسوم البيانية",
+  "Tiếng Việt": "Biểu đồ"
+ },
+ "Data Graphics tools": {
+  "日本語": "データグラフィックスのツール",
+  "Español": "Herramientas de gráficos de datos",
+  "Deutsch": "Werkzeuge für Datengrafiken",
+  "Français": "Outils de graphiques de données",
+  "한국어": "데이터 그래픽 도구",
+  "中文": "数据图形工具",
+  "العربية": "أدوات رسومات البيانات",
+  "Tiếng Việt": "Công cụ đồ họa dữ liệu"
+ },
+ "Numbers that count": {
+  "日本語": "数えあがる数字",
+  "Español": "Números que cuentan",
+  "Deutsch": "Zahlen, die zählen",
+  "Français": "Des nombres qui comptent",
+  "한국어": "올라가고 내려가는 숫자",
+  "中文": "会跳动的数字",
+  "العربية": "أرقام تَعُدّ",
+  "Tiếng Việt": "Những con số biết đếm"
+ },
+ "A number that runs up or down to where you set it – followers, money, a percentage, a timer – added to your timeline as a title you can still edit.": {
+  "日本語": "設定した値まで増減する数字 – フォロワー数、金額、パーセント、タイマー – を、あとから編集できるタイトルとしてタイムラインに追加します。",
+  "Español": "Un número que sube o baja hasta donde lo fijes – seguidores, dinero, un porcentaje, un temporizador – añadido a tu línea de tiempo como un título que puedes seguir editando.",
+  "Deutsch": "Eine Zahl, die bis zum eingestellten Wert hoch- oder herunterläuft – Follower, Geld, ein Prozentwert, ein Timer – und als weiterhin bearbeitbarer Titel in Ihre Timeline kommt.",
+  "Français": "Un nombre qui monte ou descend jusqu'à la valeur choisie – abonnés, argent, pourcentage, minuteur – ajouté à votre timeline sous forme de titre que vous pouvez encore modifier.",
+  "한국어": "지정한 값까지 올라가거나 내려가는 숫자 – 팔로워, 금액, 퍼센트, 타이머 – 를 계속 편집할 수 있는 타이틀로 타임라인에 추가합니다.",
+  "中文": "一个向上或向下跳动到设定值的数字 – 粉丝数、金额、百分比、计时器 – 作为仍可编辑的标题添加到时间线。",
+  "العربية": "رقم يصعد أو ينزل إلى القيمة التي تحددها – متابعون، مال، نسبة مئوية، مؤقّت – يُضاف إلى الخط الزمني كعنوان يمكنك تعديله لاحقًا.",
+  "Tiếng Việt": "Một con số chạy lên hoặc xuống đến giá trị bạn đặt – lượt theo dõi, tiền, phần trăm, đồng hồ đếm – được thêm vào timeline dưới dạng tiêu đề bạn vẫn chỉnh sửa được."
+ },
+ "Graphs that draw themselves": {
+  "日本語": "自分で描かれていくグラフ",
+  "Español": "Gráficas que se dibujan solas",
+  "Deutsch": "Diagramme, die sich selbst zeichnen",
+  "Français": "Des graphiques qui se dessinent tout seuls",
+  "한국어": "스스로 그려지는 그래프",
+  "中文": "会自己画出来的图表",
+  "العربية": "رسوم بيانية ترسم نفسها",
+  "Tiếng Việt": "Biểu đồ tự vẽ"
+ },
+ "Bar, line and pie charts from the numbers you type or paste, animated onto your timeline.": {
+  "日本語": "入力または貼り付けた数値から棒グラフ、折れ線グラフ、円グラフを作り、アニメーション付きでタイムラインに追加します。",
+  "Español": "Gráficas de barras, de líneas y circulares a partir de los números que escribas o pegues, animadas en tu línea de tiempo.",
+  "Deutsch": "Balken-, Linien- und Kreisdiagramme aus den Zahlen, die Sie eingeben oder einfügen, animiert in Ihrer Timeline.",
+  "Français": "Des graphiques en barres, en courbes et en secteurs à partir des nombres que vous saisissez ou collez, animés sur votre timeline.",
+  "한국어": "입력하거나 붙여넣은 숫자로 막대, 선, 원형 차트를 만들어 애니메이션과 함께 타임라인에 추가합니다.",
+  "中文": "用你输入或粘贴的数字生成柱状图、折线图和饼图，并以动画形式添加到时间线。",
+  "العربية": "مخططات أعمدة وخطوط ودوائر من الأرقام التي تكتبها أو تلصقها، تُضاف متحركة إلى الخط الزمني.",
+  "Tiếng Việt": "Biểu đồ cột, đường và tròn từ các con số bạn nhập hoặc dán, có chuyển động trên timeline."
+ },
+ "This isn't built yet – it's coming in a later version of Buddy.": {
+  "日本語": "まだ作られていません – Buddy の今後のバージョンで追加されます。",
+  "Español": "Aún no está hecho – llegará en una versión posterior de Buddy.",
+  "Deutsch": "Das ist noch nicht gebaut – es kommt in einer späteren Version von Buddy.",
+  "Français": "Ce n'est pas encore construit – cela arrivera dans une prochaine version de Buddy.",
+  "한국어": "아직 만들어지지 않았습니다 – Buddy의 이후 버전에 추가됩니다.",
+  "中文": "尚未完成 – 将在 Buddy 的后续版本中推出。",
+  "العربية": "لم يُبنَ بعد – سيأتي في إصدار لاحق من Buddy.",
+  "Tiếng Việt": "Chưa được xây dựng – sẽ có trong một phiên bản Buddy sau này."
+ },
+ "Animated counters and graphs from your own numbers. Not built yet – it's coming in a later version.": {
+  "日本語": "自分の数値から作るアニメーション付きのカウンターとグラフ。まだ作られていません – 今後のバージョンで追加されます。",
+  "Español": "Contadores y gráficas animados a partir de tus propios números. Aún no está hecho – llegará en una versión posterior.",
+  "Deutsch": "Animierte Zähler und Diagramme aus Ihren eigenen Zahlen. Noch nicht gebaut – es kommt in einer späteren Version.",
+  "Français": "Des compteurs et graphiques animés à partir de vos propres nombres. Pas encore construit – cela arrivera dans une prochaine version.",
+  "한국어": "직접 입력한 숫자로 만드는 애니메이션 카운터와 그래프. 아직 만들어지지 않았습니다 – 이후 버전에 추가됩니다.",
+  "中文": "用你自己的数字制作动画计数器和图表。尚未完成 – 将在后续版本中推出。",
+  "العربية": "عدّادات ورسوم بيانية متحركة من أرقامك. لم يُبنَ بعد – سيأتي في إصدار لاحق.",
+  "Tiếng Việt": "Bộ đếm và biểu đồ có chuyển động từ các con số của bạn. Chưa được xây dựng – sẽ có trong một phiên bản sau."
+ }
+}

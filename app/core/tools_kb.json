@@ -277,6 +277,15 @@
       ],
       "notes": "Each task downloads its model once, the first time it's picked (removal 93 MB, subject 115 MB Standard or 490 MB Best, plus a ~70 MB engine). Runs on the CPU. Footage runs on the CPU: removal is a few seconds a frame, Cut out and Split about 12 s a frame (the subject model). High quality (the add-on): pictures about 7 s with FLUX.2 klein, footage about a minute per 2 seconds with ROSE, on an NVIDIA RTX[[mac: - Windows only]]."
     },
+    "data_graphics": {
+      "name": "Data Graphics",
+      "summary": "A main tab for graphics made from numbers, with two sub-tabs: Counters (a number that runs up or down to where it's set) and Graphs (bar, line and pie charts that draw themselves). Neither is built yet - both sub-tabs only say what they will do, and nothing can be made in them in this version.",
+      "needs_resolve": false,
+      "capabilities": [
+        "Nothing yet: the Counters and Graphs tabs are empty in this version, each with a line on what it will do. For an animated number or chart today, use Fusion in Resolve itself, or the Animation tab's titles for animated text"
+      ],
+      "notes": "Do not tell anyone they can make a counter or a graph with it yet."
+    },
     "podcast": {
       "name": "Podcast",
       "summary": "A main tab of its own for podcasts, with four sub-tabs: Sync (lines up every camera and recorder and builds a new stacked timeline), Auto Switch (cuts between the cameras by who is speaking), Text Edit (edit the open timeline by editing its transcript) and Shorts (the clips selected on the timeline made into a new timeline of their own, for YouTube Shorts or Instagram).",

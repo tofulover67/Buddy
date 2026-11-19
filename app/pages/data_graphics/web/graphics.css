@@ -1,0 +1,20 @@
+/* What Data Graphics' tabs share (counters/, graphs/), on top of
+   web/buddy.css: the tabs beside the title, and one centred column.
+   Theme colours only. */
+
+.dg-head { gap: 14px; }
+.dg-head .page-title { flex: none; }
+.dg-tabs { border-bottom: 0; gap: 6px; flex-wrap: wrap; }
+.dg-tabs button { margin: 0; border: 0; border-radius: var(--r-full); padding: 6px 14px; }
+.dg-tabs button[aria-selected="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+
+.dg-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.dg-col { width: 100%; max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.dg-title { margin: 0; font-size: var(--fs-xl); font-weight: 700; color: var(--text-strong); }
+.dg-sub { margin: 4px 0 0; color: var(--text-dim); line-height: 1.5; }
+
+/* Until a tab is built: what it will do, and that it's coming. */
+.dg-soon {
+    margin: 0; padding: 28px 20px; text-align: center; color: var(--text-dim);
+    border: var(--bw) dashed var(--card-border); border-radius: var(--r-md);
+}

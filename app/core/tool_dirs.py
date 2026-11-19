@@ -47,7 +47,8 @@ FILES = {"svg_importer": ".figma_fusion_importer_settings.json"}
 # names the older tools kept for their data.
 BUCKETS = (
     "asset_manager", "audio_assistant", "audit", "automation", "batch_clip_renamer", "buddy_network",
-    "color_palette", "command_center", "dailies", "daw", "essentials", "footage_search", "games", "generative",
+    "color_palette", "command_center", "dailies", "data_counters", "data_graphics", "data_graphs", "daw",
+    "essentials", "footage_search", "games", "generative",
     "image_importer", "manual_chat", "marker_manager", "media_manager", "media_relink", "podcast",
     "podcast_shorts", "podcast_switch", "podcast_sync", "podcast_text", "project_setup",
     "stills_exporter", "svg_importer", "text_animator", "time_tracker", "transcribe", "web", "youtube_chapters",
