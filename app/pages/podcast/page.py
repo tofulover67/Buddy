@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Podcast - a main tab of its own, under its own heading, holding three
+Podcast - a main tab of its own, under its own heading, holding four
 tools as sub-tabs, each a page of its own in its own folder:
 
     sync/       Podcast Sync - lines up every camera and recorder by
@@ -10,6 +10,8 @@ tools as sub-tabs, each a page of its own in its own folder:
                 timeline by who is speaking, a camera pinned to each voice
                 (even several voices on one mixed track).
     text_edit/  Text Edit - edit the timeline by editing its transcript.
+    shorts/     Shorts - the clips selected on the timeline as a new
+                timeline of their own, shaped for YouTube Shorts or Instagram.
 
 This page only holds them: it shows one at a time (the sub-tab row is in
 each page's own view, web/tabs.js) and passes the shell's hooks on.
@@ -18,11 +20,12 @@ each page's own view, web/tabs.js) and passes the shell's hooks on.
 from PySide6.QtWidgets import QStackedWidget, QVBoxLayout
 
 from pages.base import ToolPage
+from pages.podcast.shorts.page import ShortsPage
 from pages.podcast.switch.page import AutoSwitchPage
 from pages.podcast.sync.page import PodcastSyncPage
 from pages.podcast.text_edit.page import TextEditPage
 
-TABS = ("sync", "switch", "text")
+TABS = ("sync", "switch", "text", "shorts")
 DEFAULTS = {"tab": "sync"}
 
 
@@ -35,7 +38,7 @@ class PodcastPage(ToolPage):
         self.settings = self.host.tool_settings(self.tool_id, dict(DEFAULTS))
         self.stack = QStackedWidget(self)
         self.pages = {"sync": PodcastSyncPage(self.host), "switch": AutoSwitchPage(self.host),
-                      "text": TextEditPage(self.host)}
+                      "text": TextEditPage(self.host), "shorts": ShortsPage(self.host)}
         for page in self.pages.values():
             page._podcast = self
             self.stack.addWidget(page)

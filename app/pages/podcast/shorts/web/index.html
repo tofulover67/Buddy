@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Shorts</title>
+    <link rel="stylesheet" href="../../../../web/buddy.css">
+    <link rel="stylesheet" href="../../web/podcast.css">
+    <link rel="stylesheet" href="shorts.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page sh">
+    <header class="page-head pod-head">
+        <h1 class="page-title">Podcast</h1>
+        <nav class="tabs pod-steps" role="tablist" id="podcast-tabs" aria-label="Podcast tools">
+            <button type="button" role="tab" data-tab="sync" aria-selected="false"><span class="pod-n">1</span>Sync</button>
+            <button type="button" role="tab" data-tab="switch" aria-selected="false"><span class="pod-n">2</span>Auto Switch</button>
+            <button type="button" role="tab" data-tab="text" aria-selected="false"><span class="pod-n">3</span>Text Edit</button>
+            <button type="button" role="tab" data-tab="shorts" aria-selected="true"><span class="pod-n">4</span>Shorts</button>
+        </nav>
+        <span class="spacer"></span>
+        <span class="pod-where">
+            <span class="pod-dot" id="dot" aria-hidden="true"></span>
+            <span class="pod-where-text" id="timeline" translate="no"></span>
+        </span>
+        <button type="button" class="btn ghost icon" id="refresh" title="Read the open timeline again"
+                aria-label="Read the timeline again"></button>
+    </header>
+
+    <div class="sh-scroll">
+        <div class="pod-col">
+            <div>
+                <h2 class="pod-title">Turn a moment into a short</h2>
+                <p class="pod-sub">Select the clips you want on Resolve's timeline – on every track that should come
+                    along. Buddy copies them into a new timeline, closed up and shaped for YouTube Shorts or Instagram.</p>
+            </div>
+            <p class="warn" id="problem"></p>
+
+            <!-- What's selected in Resolve, as it changes. -->
+            <section class="sh-part" aria-labelledby="picked-title">
+                <div class="row sh-part-head">
+                    <h3 class="sh-part-title" id="picked-title">Selected in Resolve</h3>
+                    <span class="spacer"></span>
+                    <span class="sh-total" id="total"></span>
+                </div>
+                <div class="sh-sections" id="sections"></div>
+                <p class="sh-empty" id="empty">Nothing is selected on the timeline yet.</p>
+                <p class="sh-note" id="over" hidden>YouTube Shorts and Instagram Reels can be up to 3 minutes long – this runs longer.</p>
+            </section>
+
+            <!-- The short: its name and shape. -->
+            <section class="sh-part" aria-labelledby="short-title">
+                <h3 class="sh-part-title" id="short-title">The short</h3>
+                <div class="sh-options">
+                    <label class="lbl sh-name">Name
+                        <input type="text" class="field" id="name" maxlength="80" spellcheck="false" autocomplete="off">
+                    </label>
+                    <label class="lbl">Shape
+                        <select class="field" id="format" aria-label="Shape"></select>
+                    </label>
+                </div>
+                <label class="check" id="separate-box" hidden><input type="checkbox" id="separate"> A short for each section</label>
+                <label class="check"><input type="checkbox" id="open-new"> Open the short when it's made</label>
+            </section>
+
+            <!-- The shorts made since Buddy opened. -->
+            <section class="sh-part" id="made-part" aria-labelledby="made-title" hidden>
+                <div class="row sh-part-head">
+                    <h3 class="sh-part-title" id="made-title">Made</h3>
+                    <span class="spacer"></span>
+                    <button type="button" class="btn" id="back" hidden></button>
+                </div>
+                <div class="sh-sections" id="made"></div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="pod-foot">
+        <span class="pod-note sh-foot-note">You get a new timeline. Nothing you already have is changed.</span>
+        <button type="button" class="btn accent pod-main-btn" id="build" disabled>Make short</button>
+    </footer>
+</main>
+<script src="shorts.js"></script>
+<script src="../../web/tabs.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+/* Shorts - on top of web/buddy.css and ../../web/podcast.css. */
+
+.sh { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+.sh-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 16px; }
+
+.sh-part { display: flex; flex-direction: column; gap: 8px; }
+.sh-part-head { align-items: baseline; gap: 10px; min-height: 28px; }
+.sh-part-title { margin: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; }
+.sh-total { font-size: var(--fs-sm); color: var(--text-strong); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* A row per section selected (and per short made). */
+.sh-sections { display: flex; flex-direction: column; gap: 6px; }
+.sh-sections:empty { display: none; }
+.sh-section {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 8px 12px; border-radius: var(--r-md);
+    background: color-mix(in srgb, var(--card-border) 35%, transparent); min-width: 0;
+}
+.sh-n { color: var(--text-dim); font-variant-numeric: tabular-nums; min-width: 1.4em; }
+.sh-when { color: var(--text-strong); font-weight: 600; font-variant-numeric: tabular-nums; }
+.sh-name-made { color: var(--text-strong); font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.sh-detail { color: var(--text-dim); font-size: var(--fs-sm); }
+.sh-len { margin-left: auto; font-variant-numeric: tabular-nums; }
+.sh-empty {
+    margin: 0; padding: 18px 12px; text-align: center; color: var(--text-dim); border-radius: var(--r-md);
+    border: var(--bw) dashed var(--card-border);
+}
+.sh-note { margin: 0; color: var(--text-dim); font-size: var(--fs-sm); }
+
+.sh-options { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.sh-name { flex: 1 1 260px; min-width: 0; }
+.sh-options select { min-width: 200px; }
+
+.sh-foot-note { text-align: right; }
+
+@media (max-width: 640px) {
+    .sh-foot-note { text-align: left; }
+    .sh-len { margin-left: 0; }
+}

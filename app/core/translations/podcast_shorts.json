@@ -1,0 +1,353 @@
+{
+ "_comment": "Podcast's Shorts. English -> each language; see core/i18n.py.",
+ "Turn a moment into a short": {
+  "日本語": "名場面をショート動画に",
+  "Español": "Convierte un momento en un short",
+  "Deutsch": "Aus einem Moment ein Short machen",
+  "Français": "Transformer un moment en short",
+  "한국어": "한 장면을 쇼츠로 만들기",
+  "中文": "把精彩片段做成短视频",
+  "العربية": "حوّل لحظة إلى فيديو قصير",
+  "Tiếng Việt": "Biến một khoảnh khắc thành video ngắn"
+ },
+ "Select the clips you want on Resolve's timeline – on every track that should come along. Buddy copies them into a new timeline, closed up and shaped for YouTube Shorts or Instagram.": {
+  "日本語": "使いたいクリップを Resolve のタイムラインで選択してください。一緒に持っていくトラックすべてで選びます。Buddy がそれらを新しいタイムラインにコピーし、すき間を詰めて YouTube ショートや Instagram 向けの形にします。",
+  "Español": "Selecciona los clips que quieras en la línea de tiempo de Resolve, en todas las pistas que deban acompañarlos. Buddy los copia a una línea de tiempo nueva, sin huecos y con la forma de YouTube Shorts o Instagram.",
+  "Deutsch": "Wähle in Resolves Timeline die gewünschten Clips aus – auf jeder Spur, die mitkommen soll. Buddy kopiert sie in eine neue Timeline, ohne Lücken und im Format für YouTube Shorts oder Instagram.",
+  "Français": "Sélectionnez les clips voulus sur la timeline de Resolve, sur chaque piste à emporter. Buddy les copie dans une nouvelle timeline, sans trous et au format de YouTube Shorts ou d'Instagram.",
+  "한국어": "Resolve 타임라인에서 원하는 클립을 선택하세요. 함께 가져갈 모든 트랙에서 선택합니다. Buddy가 새 타임라인에 복사해 빈틈을 없애고 YouTube 쇼츠나 Instagram에 맞는 모양으로 만듭니다.",
+  "中文": "在 Resolve 的时间线上选中想要的片段，需要一起带走的每条轨道都要选上。Buddy 会把它们复制到新的时间线，合拢空隙，并调整成适合 YouTube Shorts 或 Instagram 的画幅。",
+  "العربية": "حدّد المقاطع التي تريدها على الخط الزمني في Resolve، في كل مسار يجب أن يرافقها. ينسخها Buddy إلى خط زمني جديد، بلا فجوات وبشكل يناسب YouTube Shorts أو Instagram.",
+  "Tiếng Việt": "Chọn các clip bạn muốn trên timeline của Resolve – ở mọi track cần đi cùng. Buddy sao chép chúng sang một timeline mới, dồn sát lại và có khung hình hợp với YouTube Shorts hoặc Instagram."
+ },
+ "Selected in Resolve": {
+  "日本語": "Resolve で選択中",
+  "Español": "Seleccionado en Resolve",
+  "Deutsch": "In Resolve ausgewählt",
+  "Français": "Sélectionné dans Resolve",
+  "한국어": "Resolve에서 선택됨",
+  "中文": "在 Resolve 中选中的内容",
+  "العربية": "المحدد في Resolve",
+  "Tiếng Việt": "Đang chọn trong Resolve"
+ },
+ "Nothing is selected on the timeline yet.": {
+  "日本語": "タイムラインではまだ何も選択されていません。",
+  "Español": "Aún no hay nada seleccionado en la línea de tiempo.",
+  "Deutsch": "In der Timeline ist noch nichts ausgewählt.",
+  "Français": "Rien n'est encore sélectionné sur la timeline.",
+  "한국어": "타임라인에서 아직 아무것도 선택되지 않았습니다.",
+  "中文": "时间线上还没有选中任何内容。",
+  "العربية": "لم يُحدَّد شيء على الخط الزمني بعد.",
+  "Tiếng Việt": "Chưa chọn gì trên timeline."
+ },
+ "YouTube Shorts and Instagram Reels can be up to 3 minutes long – this runs longer.": {
+  "日本語": "YouTube ショートと Instagram リールは最長 3 分です。これはそれより長くなります。",
+  "Español": "Los YouTube Shorts y los Reels de Instagram pueden durar hasta 3 minutos; esto dura más.",
+  "Deutsch": "YouTube Shorts und Instagram Reels dürfen bis zu 3 Minuten lang sein – das hier ist länger.",
+  "Français": "Les YouTube Shorts et les Reels Instagram peuvent durer jusqu'à 3 minutes – ceci est plus long.",
+  "한국어": "YouTube 쇼츠와 Instagram 릴스는 최대 3분입니다. 이것은 그보다 깁니다.",
+  "中文": "YouTube Shorts 和 Instagram Reels 最长 3 分钟，这段内容超出了。",
+  "العربية": "يمكن أن تصل مدة YouTube Shorts و Instagram Reels إلى 3 دقائق – وهذا أطول.",
+  "Tiếng Việt": "YouTube Shorts và Instagram Reels dài tối đa 3 phút – phần này dài hơn."
+ },
+ "The short": {
+  "日本語": "ショート動画",
+  "Español": "El short",
+  "Deutsch": "Das Short",
+  "Français": "Le short",
+  "한국어": "쇼츠",
+  "中文": "短视频",
+  "العربية": "الفيديو القصير",
+  "Tiếng Việt": "Video ngắn"
+ },
+ "A short for each section": {
+  "日本語": "セクションごとにショート動画を作る",
+  "Español": "Un short por cada sección",
+  "Deutsch": "Ein Short für jeden Abschnitt",
+  "Français": "Un short par section",
+  "한국어": "구간마다 쇼츠 하나씩",
+  "中文": "每个段落各做一个短视频",
+  "العربية": "فيديو قصير لكل قسم",
+  "Tiếng Việt": "Mỗi đoạn một video ngắn"
+ },
+ "Open the short when it's made": {
+  "日本語": "作成したらショート動画を開く",
+  "Español": "Abrir el short cuando esté hecho",
+  "Deutsch": "Das Short öffnen, wenn es fertig ist",
+  "Français": "Ouvrir le short une fois créé",
+  "한국어": "만들어지면 쇼츠 열기",
+  "中文": "做好后打开短视频",
+  "العربية": "فتح الفيديو القصير عند إنشائه",
+  "Tiếng Việt": "Mở video ngắn khi tạo xong"
+ },
+ "Made": {
+  "日本語": "作成済み",
+  "Español": "Hechos",
+  "Deutsch": "Erstellt",
+  "Français": "Créés",
+  "한국어": "만든 항목",
+  "中文": "已制作",
+  "العربية": "ما تم إنشاؤه",
+  "Tiếng Việt": "Đã tạo"
+ },
+ "Make short": {
+  "日本語": "ショート動画を作成",
+  "Español": "Crear short",
+  "Deutsch": "Short erstellen",
+  "Français": "Créer le short",
+  "한국어": "쇼츠 만들기",
+  "中文": "制作短视频",
+  "العربية": "إنشاء فيديو قصير",
+  "Tiếng Việt": "Tạo video ngắn"
+ },
+ "Make {n} shorts": {
+  "日本語": "ショート動画を {n} 本作成",
+  "Español": "Crear {n} shorts",
+  "Deutsch": "{n} Shorts erstellen",
+  "Français": "Créer {n} shorts",
+  "한국어": "쇼츠 {n}개 만들기",
+  "中文": "制作 {n} 个短视频",
+  "العربية": "إنشاء {n} فيديوهات قصيرة",
+  "Tiếng Việt": "Tạo {n} video ngắn"
+ },
+ "{time} together": {
+  "日本語": "合計 {time}",
+  "Español": "{time} en total",
+  "Deutsch": "{time} zusammen",
+  "Français": "{time} au total",
+  "한국어": "합계 {time}",
+  "中文": "共 {time}",
+  "العربية": "{time} مجتمعة",
+  "Tiếng Việt": "Tổng cộng {time}"
+ },
+ "Back to": {
+  "日本語": "戻る：",
+  "Español": "Volver a",
+  "Deutsch": "Zurück zu",
+  "Français": "Revenir à",
+  "한국어": "돌아가기:",
+  "中文": "返回",
+  "العربية": "العودة إلى",
+  "Tiếng Việt": "Quay lại"
+ },
+ "Vertical 9:16 ({size})": {
+  "日本語": "縦長 9:16（{size}）",
+  "Español": "Vertical 9:16 ({size})",
+  "Deutsch": "Hochformat 9:16 ({size})",
+  "Français": "Vertical 9:16 ({size})",
+  "한국어": "세로 9:16 ({size})",
+  "中文": "竖屏 9:16（{size}）",
+  "العربية": "عمودي 9:16 ({size})",
+  "Tiếng Việt": "Dọc 9:16 ({size})"
+ },
+ "Portrait 4:5 ({size})": {
+  "日本語": "ポートレート 4:5（{size}）",
+  "Español": "Retrato 4:5 ({size})",
+  "Deutsch": "Porträt 4:5 ({size})",
+  "Français": "Portrait 4:5 ({size})",
+  "한국어": "세로형 4:5 ({size})",
+  "中文": "竖版 4:5（{size}）",
+  "العربية": "طولي 4:5 ({size})",
+  "Tiếng Việt": "Chân dung 4:5 ({size})"
+ },
+ "Square 1:1 ({size})": {
+  "日本語": "正方形 1:1（{size}）",
+  "Español": "Cuadrado 1:1 ({size})",
+  "Deutsch": "Quadrat 1:1 ({size})",
+  "Français": "Carré 1:1 ({size})",
+  "한국어": "정사각형 1:1 ({size})",
+  "中文": "方形 1:1（{size}）",
+  "العربية": "مربع 1:1 ({size})",
+  "Tiếng Việt": "Vuông 1:1 ({size})"
+ },
+ "Same as the timeline": {
+  "日本語": "タイムラインと同じ",
+  "Español": "Igual que la línea de tiempo",
+  "Deutsch": "Wie die Timeline",
+  "Français": "Comme la timeline",
+  "한국어": "타임라인과 동일",
+  "中文": "与时间线相同",
+  "العربية": "مثل الخط الزمني",
+  "Tiếng Việt": "Giống timeline"
+ },
+ "Reading what's selected on the timeline needs DaVinci Resolve 21.0.4 or later.": {
+  "日本語": "タイムラインで選択中のクリップを読み取るには DaVinci Resolve 21.0.4 以降が必要です。",
+  "Español": "Leer lo seleccionado en la línea de tiempo requiere DaVinci Resolve 21.0.4 o posterior.",
+  "Deutsch": "Um die Auswahl in der Timeline zu lesen, wird DaVinci Resolve 21.0.4 oder neuer benötigt.",
+  "Français": "Lire la sélection de la timeline nécessite DaVinci Resolve 21.0.4 ou une version ultérieure.",
+  "한국어": "타임라인에서 선택한 항목을 읽으려면 DaVinci Resolve 21.0.4 이상이 필요합니다.",
+  "中文": "读取时间线上选中的内容需要 DaVinci Resolve 21.0.4 或更高版本。",
+  "العربية": "قراءة ما هو محدد على الخط الزمني تتطلب DaVinci Resolve 21.0.4 أو أحدث.",
+  "Tiếng Việt": "Cần DaVinci Resolve 21.0.4 trở lên để đọc phần đang chọn trên timeline."
+ },
+ "Select the clips for the short on Resolve's timeline first.": {
+  "日本語": "先に Resolve のタイムラインでショート動画にするクリップを選択してください。",
+  "Español": "Primero selecciona los clips del short en la línea de tiempo de Resolve.",
+  "Deutsch": "Wähle zuerst die Clips für das Short in Resolves Timeline aus.",
+  "Français": "Sélectionnez d'abord les clips du short sur la timeline de Resolve.",
+  "한국어": "먼저 Resolve 타임라인에서 쇼츠에 쓸 클립을 선택하세요.",
+  "中文": "请先在 Resolve 的时间线上选中要做成短视频的片段。",
+  "العربية": "حدّد أولاً مقاطع الفيديو القصير على الخط الزمني في Resolve.",
+  "Tiếng Việt": "Hãy chọn các clip cho video ngắn trên timeline của Resolve trước."
+ },
+ "Making the short…": {
+  "日本語": "ショート動画を作成中…",
+  "Español": "Creando el short…",
+  "Deutsch": "Short wird erstellt…",
+  "Français": "Création du short…",
+  "한국어": "쇼츠를 만드는 중…",
+  "中文": "正在制作短视频…",
+  "العربية": "جارٍ إنشاء الفيديو القصير…",
+  "Tiếng Việt": "Đang tạo video ngắn…"
+ },
+ "Making the shorts…": {
+  "日本語": "ショート動画を作成中…",
+  "Español": "Creando los shorts…",
+  "Deutsch": "Shorts werden erstellt…",
+  "Français": "Création des shorts…",
+  "한국어": "쇼츠를 만드는 중…",
+  "中文": "正在制作短视频…",
+  "العربية": "جارٍ إنشاء الفيديوهات القصيرة…",
+  "Tiếng Việt": "Đang tạo các video ngắn…"
+ },
+ "Making a short": {
+  "日本語": "ショート動画を作成中",
+  "Español": "Creando un short",
+  "Deutsch": "Short wird erstellt",
+  "Français": "Création d'un short",
+  "한국어": "쇼츠를 만드는 중",
+  "中文": "正在制作短视频",
+  "العربية": "إنشاء فيديو قصير",
+  "Tiếng Việt": "Đang tạo video ngắn"
+ },
+ "Couldn't make the short": {
+  "日本語": "ショート動画を作成できませんでした",
+  "Español": "No se pudo crear el short",
+  "Deutsch": "Das Short konnte nicht erstellt werden",
+  "Français": "Impossible de créer le short",
+  "한국어": "쇼츠를 만들지 못했습니다",
+  "中文": "无法制作短视频",
+  "العربية": "تعذّر إنشاء الفيديو القصير",
+  "Tiếng Việt": "Không tạo được video ngắn"
+ },
+ "“{name}” is open. Your timeline is as it was.": {
+  "日本語": "「{name}」を開きました。元のタイムラインはそのままです。",
+  "Español": "«{name}» está abierta. Tu línea de tiempo sigue como estaba.",
+  "Deutsch": "„{name}“ ist geöffnet. Deine Timeline ist unverändert.",
+  "Français": "« {name} » est ouverte. Votre timeline est restée telle quelle.",
+  "한국어": "“{name}”이(가) 열렸습니다. 원래 타임라인은 그대로입니다.",
+  "中文": "“{name}”已打开。你的时间线保持原样。",
+  "العربية": "«{name}» مفتوح. خطك الزمني كما كان.",
+  "Tiếng Việt": "Đã mở “{name}”. Timeline của bạn vẫn như cũ."
+ },
+ "“{name}” is in the Media Pool. Your timeline is as it was.": {
+  "日本語": "「{name}」はメディアプールにあります。元のタイムラインはそのままです。",
+  "Español": "«{name}» está en el Media Pool. Tu línea de tiempo sigue como estaba.",
+  "Deutsch": "„{name}“ liegt im Media Pool. Deine Timeline ist unverändert.",
+  "Français": "« {name} » est dans le Media Pool. Votre timeline est restée telle quelle.",
+  "한국어": "“{name}”이(가) 미디어 풀에 있습니다. 원래 타임라인은 그대로입니다.",
+  "中文": "“{name}”已在媒体池中。你的时间线保持原样。",
+  "العربية": "«{name}» موجود في Media Pool. خطك الزمني كما كان.",
+  "Tiếng Việt": "“{name}” nằm trong Media Pool. Timeline của bạn vẫn như cũ."
+ },
+ "{n} shorts made. Your timeline is as it was.": {
+  "日本語": "ショート動画を {n} 本作成しました。元のタイムラインはそのままです。",
+  "Español": "Se crearon {n} shorts. Tu línea de tiempo sigue como estaba.",
+  "Deutsch": "{n} Shorts erstellt. Deine Timeline ist unverändert.",
+  "Français": "{n} shorts créés. Votre timeline est restée telle quelle.",
+  "한국어": "쇼츠 {n}개를 만들었습니다. 원래 타임라인은 그대로입니다.",
+  "中文": "已制作 {n} 个短视频。你的时间线保持原样。",
+  "العربية": "تم إنشاء {n} فيديوهات قصيرة. خطك الزمني كما كان.",
+  "Tiếng Việt": "Đã tạo {n} video ngắn. Timeline của bạn vẫn như cũ."
+ },
+ "Short made": {
+  "日本語": "ショート動画を作成しました",
+  "Español": "Short creado",
+  "Deutsch": "Short erstellt",
+  "Français": "Short créé",
+  "한국어": "쇼츠를 만들었습니다",
+  "中文": "短视频已制作",
+  "العربية": "تم إنشاء الفيديو القصير",
+  "Tiếng Việt": "Đã tạo video ngắn"
+ },
+ "Shorts made": {
+  "日本語": "ショート動画を作成しました",
+  "Español": "Shorts creados",
+  "Deutsch": "Shorts erstellt",
+  "Français": "Shorts créés",
+  "한국어": "쇼츠를 만들었습니다",
+  "中文": "短视频已制作",
+  "العربية": "تم إنشاء الفيديوهات القصيرة",
+  "Tiếng Việt": "Đã tạo các video ngắn"
+ },
+ "Resolve didn't copy the timeline.": {
+  "日本語": "Resolve がタイムラインをコピーしませんでした。",
+  "Español": "Resolve no copió la línea de tiempo.",
+  "Deutsch": "Resolve hat die Timeline nicht kopiert.",
+  "Français": "Resolve n'a pas copié la timeline.",
+  "한국어": "Resolve가 타임라인을 복사하지 않았습니다.",
+  "中文": "Resolve 没有复制时间线。",
+  "العربية": "لم ينسخ Resolve الخط الزمني.",
+  "Tiếng Việt": "Resolve không sao chép timeline."
+ },
+ "The timeline has changed since Buddy read what's selected – select the clips again.": {
+  "日本語": "Buddy が選択を読み取った後にタイムラインが変わりました。クリップを選択し直してください。",
+  "Español": "La línea de tiempo cambió desde que Buddy leyó la selección; vuelve a seleccionar los clips.",
+  "Deutsch": "Die Timeline hat sich geändert, seit Buddy die Auswahl gelesen hat – wähle die Clips erneut aus.",
+  "Français": "La timeline a changé depuis que Buddy a lu la sélection – sélectionnez à nouveau les clips.",
+  "한국어": "Buddy가 선택 항목을 읽은 뒤 타임라인이 바뀌었습니다. 클립을 다시 선택하세요.",
+  "中文": "自 Buddy 读取选中内容后时间线已发生变化，请重新选择片段。",
+  "العربية": "تغيّر الخط الزمني منذ أن قرأ Buddy ما هو محدد – حدّد المقاطع من جديد.",
+  "Tiếng Việt": "Timeline đã thay đổi từ khi Buddy đọc phần đang chọn – hãy chọn lại các clip."
+ },
+ "Resolve couldn't take the other clips out of the copy – unlock every track and try again.": {
+  "日本語": "Resolve がコピーからほかのクリップを取り除けませんでした。すべてのトラックのロックを解除して、もう一度お試しください。",
+  "Español": "Resolve no pudo quitar los demás clips de la copia; desbloquea todas las pistas e inténtalo de nuevo.",
+  "Deutsch": "Resolve konnte die übrigen Clips nicht aus der Kopie entfernen – entsperre alle Spuren und versuche es erneut.",
+  "Français": "Resolve n'a pas pu retirer les autres clips de la copie – déverrouillez toutes les pistes et réessayez.",
+  "한국어": "Resolve가 복사본에서 나머지 클립을 빼지 못했습니다. 모든 트랙의 잠금을 풀고 다시 시도하세요.",
+  "中文": "Resolve 无法从副本中移除其他片段，请解锁所有轨道后重试。",
+  "العربية": "تعذّر على Resolve إزالة المقاطع الأخرى من النسخة – ألغِ قفل كل المسارات وحاول من جديد.",
+  "Tiếng Việt": "Resolve không gỡ được các clip khác khỏi bản sao – hãy mở khóa mọi track rồi thử lại."
+ },
+ "A different timeline is open now – select the clips again.": {
+  "日本語": "別のタイムラインが開いています。クリップを選択し直してください。",
+  "Español": "Ahora hay otra línea de tiempo abierta; vuelve a seleccionar los clips.",
+  "Deutsch": "Jetzt ist eine andere Timeline geöffnet – wähle die Clips erneut aus.",
+  "Français": "Une autre timeline est ouverte maintenant – sélectionnez à nouveau les clips.",
+  "한국어": "지금은 다른 타임라인이 열려 있습니다. 클립을 다시 선택하세요.",
+  "中文": "现在打开的是另一条时间线，请重新选择片段。",
+  "العربية": "خط زمني آخر مفتوح الآن – حدّد المقاطع من جديد.",
+  "Tiếng Việt": "Đang mở một timeline khác – hãy chọn lại các clip."
+ },
+ "Nothing is selected on the timeline.": {
+  "日本語": "タイムラインで何も選択されていません。",
+  "Español": "No hay nada seleccionado en la línea de tiempo.",
+  "Deutsch": "In der Timeline ist nichts ausgewählt.",
+  "Français": "Rien n'est sélectionné sur la timeline.",
+  "한국어": "타임라인에서 선택된 항목이 없습니다.",
+  "中文": "时间线上没有选中任何内容。",
+  "العربية": "لا شيء محدد على الخط الزمني.",
+  "Tiếng Việt": "Không có gì được chọn trên timeline."
+ },
+ "Resolve didn't open the timeline.": {
+  "日本語": "Resolve がタイムラインを開きませんでした。",
+  "Español": "Resolve no abrió la línea de tiempo.",
+  "Deutsch": "Resolve hat die Timeline nicht geöffnet.",
+  "Français": "Resolve n'a pas ouvert la timeline.",
+  "한국어": "Resolve가 타임라인을 열지 않았습니다.",
+  "中文": "Resolve 没有打开时间线。",
+  "العربية": "لم يفتح Resolve الخط الزمني.",
+  "Tiếng Việt": "Resolve không mở timeline."
+ },
+ "That timeline isn't in this project any more.": {
+  "日本語": "そのタイムラインはもうこのプロジェクトにありません。",
+  "Español": "Esa línea de tiempo ya no está en este proyecto.",
+  "Deutsch": "Diese Timeline ist nicht mehr in diesem Projekt.",
+  "Français": "Cette timeline n'est plus dans ce projet.",
+  "한국어": "그 타임라인은 이제 이 프로젝트에 없습니다.",
+  "中文": "该时间线已不在此项目中。",
+  "العربية": "ذلك الخط الزمني لم يعد في هذا المشروع.",
+  "Tiếng Việt": "Timeline đó không còn trong dự án này."
+ }
+}

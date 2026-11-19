@@ -135,6 +135,11 @@ JOBS = {
     "podcast_text.live": ("pages.podcast.text_edit.resolve_ext", "live_here"),
     "podcast_text.seek": ("pages.podcast.text_edit.resolve_ext", "seek_here"),
     "podcast_text.marks": ("pages.podcast.text_edit.resolve_ext", "marks_here"),
+    # Podcast's Shorts: the clips selected on the open timeline, read; Make builds NEW
+    # timelines only (a duplicate, cut down to the selection); Back opens the one they came from.
+    "podshorts.read": ("pages.podcast.shorts.resolve_ext", "read_here"),
+    "podshorts.build": ("pages.podcast.shorts.resolve_ext", "build_here"),
+    "podshorts.open": ("pages.podcast.shorts.resolve_ext", "open_here"),
 }
 # Reads failing this many times in a row, with Resolve itself not answering
 # (_alive): the connection's gone (Resolve closed or restarted) - this
