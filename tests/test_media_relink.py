@@ -849,24 +849,14 @@ class PageTests(Base):
             self.app.processEvents()
             if time.monotonic() > deadline:
                 self.fail("Media Relink web view did not load")
-        rows = self.copies()
-        # With the view up and drawing, a slow runner's search can outlast search()'s
-        # wait: the rows wanted are the ones sent once it's done.
-        deadline = time.monotonic() + 30
-        while rows["counts"].get("ambiguous") != 3 and time.monotonic() < deadline:
-            self.app.processEvents()
-            rows = self.last("rows")
-        self.assertEqual((rows["counts"].get("ambiguous"), bool(self.page._search)), (3, False))
-        # What the page itself sent as it opened can reach the view after this
-        # (seen on a slow runner: the button hidden again by the empty first
-        # list), so the rows are sent until they're the ones drawn.
-        deadline = time.monotonic() + 10
-        while True:
-            self.js(f"Buddy.receive('state', {json.dumps(self.last('state'))});"
-                    f"Buddy.receive('rows', {json.dumps(rows)});")
-            self.app.processEvents()
-            if self.js("document.getElementById('pick-groups').hidden") is False or time.monotonic() > deadline:
-                break
+        self.copies()
+        # The view, once it's loaded, is sent the list of each mode (web_ready) -
+        # on a slow runner after the search here, so the last rows sent can be
+        # the other mode's: the ones wanted are this mode's.
+        rows = [p for n, p in self.events if n == "rows" and p["mode"] == self.page.mode][-1]
+        self.assertEqual(rows["counts"]["ambiguous"], 3)
+        self.js(f"Buddy.receive('state', {json.dumps(self.last('state'))});"
+                f"Buddy.receive('rows', {json.dumps(rows)});")
         self.assertEqual(self.js("document.getElementById('pick-groups').hidden"), False)
         self.assertEqual(self.js("document.getElementById('pick-groups').textContent"), "Pick for all 3…")
         self.js("document.getElementById('pick-groups').click()")
