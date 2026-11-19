@@ -850,6 +850,13 @@ class PageTests(Base):
             if time.monotonic() > deadline:
                 self.fail("Media Relink web view did not load")
         rows = self.copies()
+        # With the view up and drawing, a slow runner's search can outlast search()'s
+        # wait: the rows wanted are the ones sent once it's done.
+        deadline = time.monotonic() + 30
+        while rows["counts"].get("ambiguous") != 3 and time.monotonic() < deadline:
+            self.app.processEvents()
+            rows = self.last("rows")
+        self.assertEqual((rows["counts"].get("ambiguous"), bool(self.page._search)), (3, False))
         # What the page itself sent as it opened can reach the view after this
         # (seen on a slow runner: the button hidden again by the empty first
         # list), so the rows are sent until they're the ones drawn.
