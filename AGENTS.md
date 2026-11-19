@@ -3,6 +3,59 @@
 For anyone changing this repo - AI assistants included. The README says what
 Buddy is and how it's built; this is what to keep true while changing it.
 
+## Where things are
+
+Read this before searching; every module's docstring says what it is for.
+
+```
+app/main.py              entry point
+app/registry.py          the tools, in sidebar order; mac=True once checked on a Mac
+app/pages/<tool>/        one package per tool: page.py (a WebToolPage), the
+                         logic beside it, and web/ (index.html, its .js and .css)
+app/pages/base.py        the ToolPage contract
+app/core/web_page.py     WebToolPage: Python holds the state and emits events,
+                         the page draws them and sends actions back (on_<action>)
+app/web/buddy.js, .css   what every page shares; app/web/shell/ is the window's own pages
+app/core/                the shell and what tools share - shell_window.py,
+                         settings_*.py, theme.py, i18n.py
+app/core/resolve_*.py    talking to Resolve: resolve_bridge.py (the connection),
+                         resolve_reader*.py (reads and jobs in a child process),
+                         busy_job.py (a long job behind the busy overlay)
+app/core/translations/   every string in eight languages, one file per tool
+app/core/tools_kb.json   what Ask Buddy is told each tool can do
+tests/test_<tool>.py     each tool's tests; run_suite.py runs them all
+tools/i18n/              scripts that add and check translations
+server/                  the Buddy Network server
+docs/RESOLVE_API_GUIDE.md  Resolve scripting traps - read before calling Resolve
+```
+
+Three tools are a row of sub tabs, each sub tab a page package of its own
+under the host: `podcast/` (sync, switch, text_edit, shorts), `media_manager/`
+(batch_clip_renamer, media_relink), `marker_manager/` (stills_exporter,
+youtube_chapters).
+
+A search skips what `.ignore` lists - the translations, mostly - so a search
+for a piece of the app's text finds the code that draws it. To search the
+translations, point the search at `app/core/translations/`.
+
+## Adding a tool, or a sub tab
+
+Copy the nearest tool that does something similar, then wire it in:
+
+1. `app/pages/<tool>/` with `page.py` and `web/`. A tool goes in
+   `app/registry.py`; a sub tab goes in its host's `page.py` and in the tab
+   row of every sibling's `web/index.html`.
+2. Its settings folder: `BUCKETS` in `app/core/tool_dirs.py`.
+3. Resolve work that mustn't freeze the window: a module with no Qt in it,
+   named in `JOBS` in `app/core/resolve_reader_child.py`, called through the
+   page's `ResolveCalls` or `core/busy_job.run`.
+4. Its strings: write the page in English, then
+   `python tools/i18n/add_translations.py <name> <lines.txt> --comment "<Tool>"`
+   makes `app/core/translations/<name>.json` (it writes CRLF on Windows;
+   the repo is LF). `tests/test_i18n.py` fails on a missing language.
+5. `app/core/tools_kb.json`: what it does, in the tool's entry.
+6. `tests/test_<tool>.py`, with a fake Resolve - no test needs the real one.
+
 ## Nothing personal, nothing secret
 
 This repo is public. Nothing in it - code, comments, tests, docs, commit

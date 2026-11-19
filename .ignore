@@ -1,0 +1,14 @@
+# What a search of the project skips (ripgrep, and the editors and AI
+# assistants that search with it). Not git: all of this is tracked.
+#
+# These are large, and match a search for any piece of the app's text
+# without being the code that puts it there. To search one on purpose, name
+# it: rg --no-ignore "Make short" app/core/translations
+
+# Every string in eight languages (tools/i18n/ works on these).
+/app/core/translations/
+
+# Generated or bulk data.
+/buddy.zip
+/app/pages/text_animator/motion_presets.json
+/docs/daw-mockups.html
