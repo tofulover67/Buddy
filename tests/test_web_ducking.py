@@ -4,6 +4,7 @@ another app's sound, the fade down and back up, and the thread turning a
 Windows mixer. Plus the sidebar's sound mark (ToolPage.rail_badge)."""
 
 import os
+import sys
 import time
 import unittest
 from unittest import mock
@@ -83,6 +84,10 @@ class _Mixer:
         pass
 
 
+# The thread only ever runs on Windows (core/audio_sessions.available): on a Mac the
+# Web tab has no ducking, and there this thread's start stopped the whole run with a
+# trap on GitHub's runners (Python 3.10).
+@unittest.skipUnless(sys.platform == "win32", "ducking is Windows only")
 class DuckerTests(unittest.TestCase):
     def setUp(self):
         from PySide6.QtWidgets import QApplication
