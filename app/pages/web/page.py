@@ -762,6 +762,17 @@ class WebBrowserPage(ToolPage):
         self.changed(save=True)
         return tab
 
+    def prefill(self, text):
+        """From Ask Buddy's offer (ToolPage.prefill): an address, or words
+        to search for - in a new tab, so nothing open is replaced. Only the
+        web: a model's text never opens a file: or any other kind of address."""
+        url = browser.address_to_url(str(text or ""), self.settings.get("search", browser.DEFAULT_ENGINE),
+                                     self.region())
+        if not url or not url.lower().startswith(("http://", "https://")):
+            return False
+        self.open_tab(url)
+        return True
+
     def open_tab_for_page(self, opener, background=False):
         """A page opened a new window (a link to a new tab, a sign-in
         pop-up): it becomes a tab at the end of the row, with a page the

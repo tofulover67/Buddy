@@ -24,7 +24,7 @@
         <div class="spacer"></div>
         <button class="btn ghost" id="checkup" title="Check current timeline formats">Check project</button>
         <button class="btn ghost" id="explain" title="Explain selected clip or clip at playhead">Explain clip</button>
-        <button class="btn ghost" id="export" title="Save this conversation to a text file"></button>
+        <button class="btn ghost" id="export" title="Save this conversation as Markdown or plain text"></button>
         <button class="btn" id="new" disabled></button>
     </header>
 
@@ -46,6 +46,10 @@
     <section class="card transcript" id="transcript">
         <div class="messages" id="messages" aria-live="polite"></div>
         <div class="suggestions" id="suggestions"></div>
+        <div class="msg buddy draft" id="draft" hidden>
+            <div class="who">Buddy</div>
+            <div class="bubble"><div class="body" id="draft-body" translate="no" aria-live="off"></div></div>
+        </div>
         <div class="msg buddy thinking" id="thinking" hidden>
             <div class="who">Buddy</div>
             <div class="thinking-row">
@@ -61,6 +65,10 @@
     <div class="card pictures" id="pictures" hidden>
         <div class="picture-strip" id="picture-strip"></div>
         <div class="muted small" id="picture-note"></div>
+    </div>
+    <div class="card editing" id="editing" hidden>
+        <span class="muted small">Editing your last question – sending it replaces that question and its answer.</span>
+        <button class="btn ghost" id="cancel-edit">Cancel</button>
     </div>
     <footer class="composer card">
         <button class="btn icon ghost" id="attach" title="Add a picture – or paste or drag one in" hidden></button>

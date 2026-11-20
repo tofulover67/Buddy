@@ -367,6 +367,46 @@ the Fusion page, not that the connection failed.
   - **`project.ExportCurrentFrameAsStill(path)`** writes the timeline frame
     under the playhead as a PNG: the way to compare Resolve's picture with
     Buddy's preview.
+- **Data Graphics' comps (counters and bar graphs).** Measured on Studio
+  21.1.2, 2026-11-20, from `TimelineItem.ExportFrame` of comps imported with
+  `ImportFusionComp` onto a Text+ from Buddy's template bin, on a scratch
+  1920x1080 23.976 timeline. `core/fusion_comp.py` writes these;
+  `pages/data_graphics/` uses them.
+  - **Text can be keyed.** A `BezierSpline` whose keys carry text -
+    `[f] = { n, Flags = { Linear = true, LockedY = true }, Value = Text { Value = "$1,234" } }`
+    - wired to `StyledText` (`SourceOp`, `Source = "Value"`) draws each key's
+    text from its frame until the next key. 300 keys (31 KB of comp text)
+    imported in 13 ms; a 30 s timer changing on every frame (about 720
+    keys) was placed, clip and comp, in 0.4 s. Fusion renames the spline
+    after the input (`CounterText` came back as `CounterStyledText`).
+  - **An expression on `StyledText` works too:**
+    `StyledText = Input { Expression = "Text(string.format(\"%.0f\", Holder.NumberIn1))", }`
+    rendered a number keyed on another tool's input (a Custom tool's
+    `NumberIn1`, a Blur's `XBlurSize`), and `Text(time)` the frame. Reading a
+    `UserControls` number declared on the Text+ itself drew nothing, though
+    the control was there and read back keyed.
+  - **A Text+'s side:** `HorizontalLeftCenterRight` -1 starts the text at its
+    Center, 0 centres it, 1 ends it there (the older `HorizontalJustification`
+    0/1/2 does the same). `HorizontalJustificationNew` 0..3 moved nothing.
+  - **Mask units:** a `RectangleMask`'s `Width` and `Height` are shares of the
+    frame's width and height, its `Center` 0..1 with y up. Both can be keyed
+    (a `BezierSpline` on `Height`, an `XYPath` on `Center`), so a bar grows
+    from a fixed floor; a Height of 0 draws nothing. `CornerRadius` 0.5
+    rounded a 192 px wide bar's corners by about 48 px (a quarter of its
+    width), all four corners.
+  - **Shape tools work as well:** `sRectangle` into `sRender` into the Saver.
+    Its `Width` and `Height` are both shares of the frame's WIDTH, its
+    `Translate.X`/`.Y` (written `["Translate.X"] = Input {...}`) offsets from
+    the middle in the same unit, y up; it carries its own `Red`/`Green`/`Blue`.
+    Shapes and masks both have `WritePosition` and `WriteLength` (not tried).
+  - **`AppendToTimeline` leaves the playhead at the new clip's end.**
+    `timeline.SetCurrentTimecode()` with the timecode read beforehand puts it
+    back (`core/fusion_place.py` does, so the graphic is seen from its start
+    and adding again lands on the same spot).
+  - **Where the text sat:** with `canvas_math`'s fallbacks (0.716 em per
+    Size x width, the baseline 0.375 em below the Center), Arial Bold's
+    baseline came out about 0.02 em lower than asked - 10 px on a 432 px
+    letter.
 - **Pasting drops cross-group connections.** Fusion's clipboard text (Lua
   table syntax) silently loses any `Inputs` entry that references a node
   across a group boundary. That's a Fusion bug; verify wiring after a paste
@@ -428,6 +468,7 @@ the Fusion page, not that the connection failed.
 |---|---|---|---|
 | Shell | probe subprocess, then in-process | One shared controller for every page | `core/resolve_bridge.py`, `core/resolve_probe_worker.py` |
 | Asset Manager | in-process | Imports files, optionally into a new bin | `pages/asset_manager/resolve_ext.py` |
+| Data Graphics | reader's process (`busy_job`), else in-process | A counter or bar graph as a generated comp on a new clip at the playhead | `pages/data_graphics/place.py`, `core/fusion_place.py` |
 | Project Setup | in-process | Bins, folder import, timeline population, sync, proxy rendering | `pages/project_setup/resolve_ext.py`, `pages/project_setup/proxy.py` |
 | Batch Clip Renamer | in-process | Timeline pseudo-clips in bin listings; `GetSelectedClips()` differs by version | `pages/batch_clip_renamer/resolve_ext.py` |
 | Image Importer | in-process | `ImportMedia` failures give no reason (bad path vs. bin not current) | `pages/image_importer/resolve_ext.py` |

@@ -245,6 +245,10 @@ DEFAULTS = {
     # How many tool-call turns the agent may make per answer before it
     # gives up (Ask Buddy Settings -> "Tool call budget").
     "max_steps": DEFAULT_MAX_STEPS,
+    # The answer shown as the model writes it (llm.py streams), and up to
+    # three questions offered under each answer.
+    "stream_answers": True,
+    "suggest_followups": True,
     # Agentic project changes. Off unless the user has typed the consent
     # sentence; see core/write_consent.py for why it is not just a flag.
     "allow_project_writes": False,

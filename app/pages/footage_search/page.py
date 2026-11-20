@@ -456,6 +456,11 @@ class FootageSearchPage(FootageSettingsMixin, WebToolPage):
 
     # ------------------------------------------------------------ finding --
 
+    def prefill(self, text):
+        """From Ask Buddy's offer (ToolPage.prefill): the shot to look for."""
+        self.on_find({"query": text})
+        return True
+
     def on_find(self, payload):
         self.query = " ".join(str((payload or {}).get("query", "")).split())[:300]
         if not self.query or not self.search.state()["ready"] or not self.catalog or self._trouble():

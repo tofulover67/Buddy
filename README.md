@@ -22,7 +22,7 @@ Buddy's integrated tools include the following:
 - Buddy Network (an anonymous chat between Buddy users; see Buddy Network below)
 - Color Palette Manager (palettes, generators, colours from images and contrast checks. Never touches your project)
 - Command Center (new; system-wide hot keys - or a Run button - for markers, jumping between them, copying the timecode or the frame, clip colours, Animation presets, saving a timeline version and removing gaps (experimental). Hot keys are Windows-only for now (`core/hotkeys.py`): a Mac has the Run buttons, and hot keys there need a version of their own (macOS asks for permission); see `pages/command_center/actions.py`)
-- Data Graphics (new; a tab for animated counters and graphs made from your own numbers. Not built yet - its Counters and Graphs tabs only say what's coming; the plan is in `docs/DATA_GRAPHICS_PLAN.md`)
+- Data Graphics (new; animated graphics made from your own numbers, each added to the timeline as a new, still-editable Fusion clip at the playhead. Counters: a number that runs up or down - with decimals, separators, a currency sign or %, or as a clock. Graphs: a bar graph from rows typed or pasted from a spreadsheet, its bars growing on. Both have a timing curve you can drag into shape and a preview that plays what Resolve will. Line and pie charts are still to come: `docs/DATA_GRAPHICS_PLAN.md`. See `pages/data_graphics/`)
 - DAW (new, grown out of Audio Assistant's Keys tab; a small music studio over the music on the timeline, in its key and tempo: instrument and drum tracks - 8 synthesized instruments and 3 drum kits, all Buddy's own sound - with knobs, a mixer, a piano roll, chord pads in the key, chords from a single key (over 60 chords and intervals, in the key or fixed, with voicings and inversions), macro knobs and an XY pad, a drum step sequencer, loop recording with a count-in, and Undo for everything. One project in three layouts, switched without stopping playback: Arrange (the whole timeline, its bar lines on the song's beats or on the timeline, with the edit's cuts, markers and audio tracks to write around; tracks over the song lane, a sound browser, the mixer), Console (one instrument like hardware, a live scope, the piano roll and the keyboard) and Perform (pads, macros, steps). The song's tempo and bar 1 can be put right by hand when Buddy hears them wrong (a BPM typed in, double, half or 4:3 fixed, nudged by ear). The mix, a track or the loop is rendered and placed on the timeline as a new clip, lined up with the song's bars - or stems, each track on a Resolve track of its own named for it. Works without Resolve except for the song and placing. Windows only for now - on a Mac it's a placeholder until it's been checked there. See `pages/daw/`)
 - Essentials (new; a calculator that also does timecode, data rate, aspect ratio, a countdown timer, notes kept per project and a world clock; see `pages/essentials/`)
 - Dailies (named source tapes, continuous Media Pool review, notes and metadata. Windows only for now - on a Mac it's a placeholder until it's been checked there)
@@ -521,8 +521,35 @@ Manual and cites chapter and page, so you can check it. Type `help` in the
 chat for the current capability list — it is generated from the code, so it
 cannot drift.
 
+An answer appears as it is written (`llm.py` streams; a server that can't is
+asked the ordinary way, and Settings > AI has the switch). **Stop**, or Esc,
+ends one part-way and keeps what was written; **Regenerate** asks the last
+question again, and **Edit** puts it back in the box to change. Under an
+answer, **manual pages read** lists what the search handed the model - click
+one to open the manual there - and a note names any page the answer cites
+that was never read, in that answer or earlier in the conversation
+(`conversation.unverified_pages`). Up to three follow-up questions are offered
+as buttons.
+
+The search (`retrieval.py`) fuses keyword and semantic rankings, looks at the
+best twenty again for how much of the question each covers, and hands the
+chosen chunks over with their context: neighbouring hits as one passage, the
+best ones with the chunk that follows. The model can also read whole pages
+(`read_manual_page`) when an excerpt stops short, and search Buddy's own
+documentation - this README and what each tool can do - for questions about
+Buddy rather than Resolve (`buddy_docs.py`; the installer puts a copy of the
+README in the package for it).
+
+The most recent turns go to the model in full (Conversation memory in
+Settings); older ones are folded, a few at a time, into a short summary the
+model writes and is given with each question, so a long conversation keeps
+its beginning. Requests to Claude mark the system prompt and the newest
+message as cache points, so the several requests one answer takes re-read
+what they repeat at a fraction of the price.
+
 Conversations are saved locally in `~/.buddy/ask_buddy/conversations.json`.
-Use **Chats** to search past messages or rename a conversation. Click a manual
+Use **Chats** to search past messages, pin a conversation to the top or
+rename one; **Export** saves the open one as Markdown or plain text. Click a manual
 citation to open the manual PDF at that page - the PDF the bundle was built
 from (Buddy asks where it is once, for a bundle built before that was
 recorded). On a Mac, Preview can't be sent to a page, so it opens in Chrome,
@@ -557,7 +584,11 @@ or failed build leaves the current one untouched.
 **Reading your project.** With Resolve running, it can read your project and
 timeline settings, which edition you have, what is on the timeline, any clips
 whose frame rate or resolution does not match it, and your markers. Mismatches
-are computed in Python rather than left to the model. What it reads goes to
+are computed in Python rather than left to the model. When a question needs
+it, it also reads the audio tracks, the Media Pool's bins and the clips whose
+files are missing, the render queue with each job's status and error, and the
+selected clip's grade (nodes, LUTs, version, flags) and Inspector settings.
+What it reads goes to
 your AI provider with the question, so with a cloud provider it asks first
 (once, for that provider's address; Settings > AI has the switch) and answers
 from the manual alone if you say no - a server on your own computer or network
@@ -566,8 +597,11 @@ The detected Free or Studio edition is included with every question while
 Buddy is connected to Resolve; without a connection, the edition is marked
 unknown. **Check project** scans the current timeline for frame-rate and
 upscaling mismatches and missing local source paths, then suggests next
-steps. **Explain clip** focuses on the selected timeline clip or the video
-clip under the playhead before answering.
+steps, with buttons for what to ask about what it found. **Explain clip**
+focuses on the selected timeline clip or the video clip under the playhead
+before answering. A tool Buddy suggests opens from its button - Footage Search
+and Web already started on the search it proposed, which the button shows
+(`ToolPage.prefill`).
 
 ### Changing your project
 
@@ -582,6 +616,12 @@ Off by default, and behind two independent gates:
    name are flagged, and say what they will do before you press anything.
 
 Even with consent on, nothing reaches your project without that second click.
+
+The changes that only add - markers (at frames, times or timecodes), flags,
+empty metadata fields, bins, timelines, renames, clip colours, clips appended
+to the end - can go several to a card, applied in order by one Apply. One that
+moves or deletes anything is always proposed on its own. Filling in metadata
+never replaces a field that already says something.
 
 ## Buddy Network
 

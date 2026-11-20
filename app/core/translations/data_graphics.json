@@ -40,64 +40,1284 @@
   "العربية": "أدوات رسومات البيانات",
   "Tiếng Việt": "Công cụ đồ họa dữ liệu"
  },
- "Numbers that count": {
-  "日本語": "数えあがる数字",
-  "Español": "Números que cuentan",
-  "Deutsch": "Zahlen, die zählen",
-  "Français": "Des nombres qui comptent",
-  "한국어": "올라가고 내려가는 숫자",
-  "中文": "会跳动的数字",
-  "العربية": "أرقام تَعُدّ",
-  "Tiếng Việt": "Những con số biết đếm"
+ "Read the open timeline again": {
+  "日本語": "開いているタイムラインを読み直す",
+  "Español": "Volver a leer la línea de tiempo abierta",
+  "Deutsch": "Geöffnete Timeline erneut lesen",
+  "Français": "Relire la timeline ouverte",
+  "한국어": "열려 있는 타임라인 다시 읽기",
+  "中文": "重新读取打开的时间线",
+  "العربية": "إعادة قراءة الخط الزمني المفتوح",
+  "Tiếng Việt": "Đọc lại timeline đang mở"
  },
- "A number that runs up or down to where you set it – followers, money, a percentage, a timer – added to your timeline as a title you can still edit.": {
-  "日本語": "設定した値まで増減する数字 – フォロワー数、金額、パーセント、タイマー – を、あとから編集できるタイトルとしてタイムラインに追加します。",
-  "Español": "Un número que sube o baja hasta donde lo fijes – seguidores, dinero, un porcentaje, un temporizador – añadido a tu línea de tiempo como un título que puedes seguir editando.",
-  "Deutsch": "Eine Zahl, die bis zum eingestellten Wert hoch- oder herunterläuft – Follower, Geld, ein Prozentwert, ein Timer – und als weiterhin bearbeitbarer Titel in Ihre Timeline kommt.",
-  "Français": "Un nombre qui monte ou descend jusqu'à la valeur choisie – abonnés, argent, pourcentage, minuteur – ajouté à votre timeline sous forme de titre que vous pouvez encore modifier.",
-  "한국어": "지정한 값까지 올라가거나 내려가는 숫자 – 팔로워, 금액, 퍼센트, 타이머 – 를 계속 편집할 수 있는 타이틀로 타임라인에 추가합니다.",
-  "中文": "一个向上或向下跳动到设定值的数字 – 粉丝数、金额、百分比、计时器 – 作为仍可编辑的标题添加到时间线。",
-  "العربية": "رقم يصعد أو ينزل إلى القيمة التي تحددها – متابعون، مال، نسبة مئوية، مؤقّت – يُضاف إلى الخط الزمني كعنوان يمكنك تعديله لاحقًا.",
-  "Tiếng Việt": "Một con số chạy lên hoặc xuống đến giá trị bạn đặt – lượt theo dõi, tiền, phần trăm, đồng hồ đếm – được thêm vào timeline dưới dạng tiêu đề bạn vẫn chỉnh sửa được."
+ "Read the timeline again": {
+  "日本語": "タイムラインを読み直す",
+  "Español": "Volver a leer la línea de tiempo",
+  "Deutsch": "Timeline erneut lesen",
+  "Français": "Relire la timeline",
+  "한국어": "타임라인 다시 읽기",
+  "中文": "重新读取时间线",
+  "العربية": "إعادة قراءة الخط الزمني",
+  "Tiếng Việt": "Đọc lại timeline"
  },
- "Graphs that draw themselves": {
-  "日本語": "自分で描かれていくグラフ",
-  "Español": "Gráficas que se dibujan solas",
-  "Deutsch": "Diagramme, die sich selbst zeichnen",
-  "Français": "Des graphiques qui se dessinent tout seuls",
-  "한국어": "스스로 그려지는 그래프",
-  "中文": "会自己画出来的图表",
-  "العربية": "رسوم بيانية ترسم نفسها",
-  "Tiếng Việt": "Biểu đồ tự vẽ"
+ "Preview": {
+  "日本語": "プレビュー",
+  "Español": "Vista previa",
+  "Deutsch": "Vorschau",
+  "Français": "Aperçu",
+  "한국어": "미리보기",
+  "中文": "预览",
+  "العربية": "معاينة",
+  "Tiếng Việt": "Xem trước"
  },
- "Bar, line and pie charts from the numbers you type or paste, animated onto your timeline.": {
-  "日本語": "入力または貼り付けた数値から棒グラフ、折れ線グラフ、円グラフを作り、アニメーション付きでタイムラインに追加します。",
-  "Español": "Gráficas de barras, de líneas y circulares a partir de los números que escribas o pegues, animadas en tu línea de tiempo.",
-  "Deutsch": "Balken-, Linien- und Kreisdiagramme aus den Zahlen, die Sie eingeben oder einfügen, animiert in Ihrer Timeline.",
-  "Français": "Des graphiques en barres, en courbes et en secteurs à partir des nombres que vous saisissez ou collez, animés sur votre timeline.",
-  "한국어": "입력하거나 붙여넣은 숫자로 막대, 선, 원형 차트를 만들어 애니메이션과 함께 타임라인에 추가합니다.",
-  "中文": "用你输入或粘贴的数字生成柱状图、折线图和饼图，并以动画形式添加到时间线。",
-  "العربية": "مخططات أعمدة وخطوط ودوائر من الأرقام التي تكتبها أو تلصقها، تُضاف متحركة إلى الخط الزمني.",
-  "Tiếng Việt": "Biểu đồ cột, đường và tròn từ các con số bạn nhập hoặc dán, có chuyển động trên timeline."
+ "Position": {
+  "日本語": "位置",
+  "Español": "Posición",
+  "Deutsch": "Position",
+  "Français": "Position",
+  "한국어": "위치",
+  "中文": "位置",
+  "العربية": "الموضع",
+  "Tiếng Việt": "Vị trí"
  },
- "This isn't built yet – it's coming in a later version of Buddy.": {
-  "日本語": "まだ作られていません – Buddy の今後のバージョンで追加されます。",
-  "Español": "Aún no está hecho – llegará en una versión posterior de Buddy.",
-  "Deutsch": "Das ist noch nicht gebaut – es kommt in einer späteren Version von Buddy.",
-  "Français": "Ce n'est pas encore construit – cela arrivera dans une prochaine version de Buddy.",
-  "한국어": "아직 만들어지지 않았습니다 – Buddy의 이후 버전에 추가됩니다.",
-  "中文": "尚未完成 – 将在 Buddy 的后续版本中推出。",
-  "العربية": "لم يُبنَ بعد – سيأتي في إصدار لاحق من Buddy.",
-  "Tiếng Việt": "Chưa được xây dựng – sẽ có trong một phiên bản Buddy sau này."
+ "Play": {
+  "日本語": "再生",
+  "Español": "Reproducir",
+  "Deutsch": "Wiedergabe",
+  "Français": "Lire",
+  "한국어": "재생",
+  "中文": "播放",
+  "العربية": "تشغيل",
+  "Tiếng Việt": "Phát"
  },
- "Animated counters and graphs from your own numbers. Not built yet – it's coming in a later version.": {
-  "日本語": "自分の数値から作るアニメーション付きのカウンターとグラフ。まだ作られていません – 今後のバージョンで追加されます。",
-  "Español": "Contadores y gráficas animados a partir de tus propios números. Aún no está hecho – llegará en una versión posterior.",
-  "Deutsch": "Animierte Zähler und Diagramme aus Ihren eigenen Zahlen. Noch nicht gebaut – es kommt in einer späteren Version.",
-  "Français": "Des compteurs et graphiques animés à partir de vos propres nombres. Pas encore construit – cela arrivera dans une prochaine version.",
-  "한국어": "직접 입력한 숫자로 만드는 애니메이션 카운터와 그래프. 아직 만들어지지 않았습니다 – 이후 버전에 추가됩니다.",
-  "中文": "用你自己的数字制作动画计数器和图表。尚未完成 – 将在后续版本中推出。",
-  "العربية": "عدّادات ورسوم بيانية متحركة من أرقامك. لم يُبنَ بعد – سيأتي في إصدار لاحق.",
-  "Tiếng Việt": "Bộ đếm và biểu đồ có chuyển động từ các con số của bạn. Chưa được xây dựng – sẽ có trong một phiên bản sau."
+ "Pause": {
+  "日本語": "一時停止",
+  "Español": "Pausa",
+  "Deutsch": "Pause",
+  "Français": "Pause",
+  "한국어": "일시정지",
+  "中文": "暂停",
+  "العربية": "إيقاف مؤقت",
+  "Tiếng Việt": "Tạm dừng"
+ },
+ "Shown on black here. On your timeline only the number is drawn, over whatever is under it.": {
+  "日本語": "ここでは黒の上に表示しています。タイムラインでは数字だけが、下にあるものの上に描かれます。",
+  "Español": "Aquí se muestra sobre negro. En tu línea de tiempo solo se dibuja el número, encima de lo que haya debajo.",
+  "Deutsch": "Hier auf Schwarz gezeigt. In Ihrer Timeline wird nur die Zahl gezeichnet, über allem, was darunter liegt.",
+  "Français": "Affiché ici sur fond noir. Sur votre timeline, seul le nombre est dessiné, par-dessus ce qui se trouve en dessous.",
+  "한국어": "여기서는 검은 배경 위에 표시됩니다. 타임라인에서는 숫자만 아래에 있는 것 위에 그려집니다.",
+  "中文": "这里显示在黑色背景上。在时间线上只绘制数字，叠在下方的内容之上。",
+  "العربية": "يُعرض هنا على خلفية سوداء. على خطك الزمني يُرسم الرقم فقط فوق ما تحته.",
+  "Tiếng Việt": "Ở đây hiển thị trên nền đen. Trên timeline chỉ có con số được vẽ, đè lên những gì bên dưới."
+ },
+ "Shown on black here. On your timeline only the graph is drawn, over whatever is under it.": {
+  "日本語": "ここでは黒の上に表示しています。タイムラインではグラフだけが、下にあるものの上に描かれます。",
+  "Español": "Aquí se muestra sobre negro. En tu línea de tiempo solo se dibuja la gráfica, encima de lo que haya debajo.",
+  "Deutsch": "Hier auf Schwarz gezeigt. In Ihrer Timeline wird nur das Diagramm gezeichnet, über allem, was darunter liegt.",
+  "Français": "Affiché ici sur fond noir. Sur votre timeline, seul le graphique est dessiné, par-dessus ce qui se trouve en dessous.",
+  "한국어": "여기서는 검은 배경 위에 표시됩니다. 타임라인에서는 그래프만 아래에 있는 것 위에 그려집니다.",
+  "中文": "这里显示在黑色背景上。在时间线上只绘制图表，叠在下方的内容之上。",
+  "العربية": "يُعرض هنا على خلفية سوداء. على خطك الزمني يُرسم الرسم البياني فقط فوق ما تحته.",
+  "Tiếng Việt": "Ở đây hiển thị trên nền đen. Trên timeline chỉ có biểu đồ được vẽ, đè lên những gì bên dưới."
+ },
+ "Start from": {
+  "日本語": "ここから始める",
+  "Español": "Empezar desde",
+  "Deutsch": "Ausgehen von",
+  "Français": "Partir de",
+  "한국어": "다음에서 시작",
+  "中文": "从以下开始",
+  "العربية": "البدء من",
+  "Tiếng Việt": "Bắt đầu từ"
+ },
+ "The count": {
+  "日本語": "カウント",
+  "Español": "El conteo",
+  "Deutsch": "Die Zählung",
+  "Français": "Le décompte",
+  "한국어": "카운트",
+  "中文": "计数",
+  "العربية": "العدّ",
+  "Tiếng Việt": "Phần đếm"
+ },
+ "From": {
+  "日本語": "開始値",
+  "Español": "Desde",
+  "Deutsch": "Von",
+  "Français": "De",
+  "한국어": "시작",
+  "中文": "从",
+  "العربية": "من",
+  "Tiếng Việt": "Từ"
+ },
+ "To": {
+  "日本語": "終了値",
+  "Español": "Hasta",
+  "Deutsch": "Bis",
+  "Français": "À",
+  "한국어": "끝",
+  "中文": "到",
+  "العربية": "إلى",
+  "Tiếng Việt": "Đến"
+ },
+ "Seconds counting": {
+  "日本語": "カウントする秒数",
+  "Español": "Segundos contando",
+  "Deutsch": "Sekunden Zählen",
+  "Français": "Secondes de décompte",
+  "한국어": "카운트 시간(초)",
+  "中文": "计数秒数",
+  "العربية": "ثواني العدّ",
+  "Tiếng Việt": "Số giây đếm"
+ },
+ "Seconds held after": {
+  "日本語": "その後保持する秒数",
+  "Español": "Segundos en pausa después",
+  "Deutsch": "Sekunden danach gehalten",
+  "Français": "Secondes de maintien ensuite",
+  "한국어": "이후 유지 시간(초)",
+  "中文": "之后停留秒数",
+  "العربية": "ثواني الثبات بعدها",
+  "Tiếng Việt": "Số giây giữ lại sau đó"
+ },
+ "Timing": {
+  "日本語": "タイミング",
+  "Español": "Ritmo",
+  "Deutsch": "Timing",
+  "Français": "Rythme",
+  "한국어": "타이밍",
+  "中文": "节奏",
+  "العربية": "التوقيت",
+  "Tiếng Việt": "Nhịp độ"
+ },
+ "Fast, then slows to a stop": {
+  "日本語": "速く始まり、ゆっくり止まる",
+  "Español": "Rápido y luego frena hasta parar",
+  "Deutsch": "Schnell, dann bis zum Stillstand langsamer",
+  "Français": "Rapide, puis ralentit jusqu'à l'arrêt",
+  "한국어": "빠르게 시작해 천천히 멈춤",
+  "中文": "先快，然后慢慢停下",
+  "العربية": "سريع ثم يتباطأ حتى يتوقف",
+  "Tiếng Việt": "Nhanh, rồi chậm dần đến khi dừng"
+ },
+ "Starts and ends gently": {
+  "日本語": "ゆっくり始まり、ゆっくり終わる",
+  "Español": "Empieza y termina con suavidad",
+  "Deutsch": "Beginnt und endet sanft",
+  "Français": "Commence et finit en douceur",
+  "한국어": "부드럽게 시작하고 끝남",
+  "中文": "平缓开始，平缓结束",
+  "العربية": "يبدأ وينتهي بلطف",
+  "Tiếng Việt": "Bắt đầu và kết thúc nhẹ nhàng"
+ },
+ "Slow, then speeds up": {
+  "日本語": "ゆっくり始まり、速くなる",
+  "Español": "Lento y luego acelera",
+  "Deutsch": "Langsam, dann schneller",
+  "Français": "Lent, puis accélère",
+  "한국어": "천천히 시작해 빨라짐",
+  "中文": "先慢，然后加快",
+  "العربية": "بطيء ثم يتسارع",
+  "Tiếng Việt": "Chậm, rồi nhanh dần"
+ },
+ "Steady": {
+  "日本語": "一定",
+  "Español": "Constante",
+  "Deutsch": "Gleichmäßig",
+  "Français": "Régulier",
+  "한국어": "일정하게",
+  "中文": "匀速",
+  "العربية": "ثابت",
+  "Tiếng Việt": "Đều"
+ },
+ "Goes past, then settles": {
+  "日本語": "行き過ぎてから落ち着く",
+  "Español": "Se pasa y luego se asienta",
+  "Deutsch": "Schießt darüber hinaus, pendelt sich dann ein",
+  "Français": "Dépasse, puis se stabilise",
+  "한국어": "지나쳤다가 제자리로",
+  "中文": "先超过，再回落",
+  "العربية": "يتجاوز ثم يستقر",
+  "Tiếng Việt": "Vượt quá, rồi ổn định lại"
+ },
+ "Your own curve": {
+  "日本語": "自分のカーブ",
+  "Español": "Tu propia curva",
+  "Deutsch": "Eigene Kurve",
+  "Français": "Votre propre courbe",
+  "한국어": "직접 만든 곡선",
+  "中文": "自定义曲线",
+  "العربية": "منحناك الخاص",
+  "Tiếng Việt": "Đường cong của riêng bạn"
+ },
+ "Timing curve": {
+  "日本語": "タイミングカーブ",
+  "Español": "Curva de ritmo",
+  "Deutsch": "Timing-Kurve",
+  "Français": "Courbe de rythme",
+  "한국어": "타이밍 곡선",
+  "中文": "节奏曲线",
+  "العربية": "منحنى التوقيت",
+  "Tiếng Việt": "Đường cong nhịp độ"
+ },
+ "Drag the two handles to shape the timing. Time runs left to right; the number climbs from the bottom line to the top one.": {
+  "日本語": "2つのハンドルをドラッグしてタイミングを調整します。時間は左から右へ進み、数字は下の線から上の線へ上がります。",
+  "Español": "Arrastra los dos tiradores para dar forma al ritmo. El tiempo va de izquierda a derecha; el número sube de la línea inferior a la superior.",
+  "Deutsch": "Ziehen Sie die beiden Griffe, um das Timing zu formen. Die Zeit läuft von links nach rechts; die Zahl steigt von der unteren zur oberen Linie.",
+  "Français": "Faites glisser les deux poignées pour façonner le rythme. Le temps va de gauche à droite ; le nombre monte de la ligne du bas à celle du haut.",
+  "한국어": "두 핸들을 드래그해 타이밍을 조절하세요. 시간은 왼쪽에서 오른쪽으로 흐르고, 숫자는 아래 선에서 위 선으로 올라갑니다.",
+  "中文": "拖动两个控制柄来调整节奏。时间从左到右；数字从下方的线升到上方的线。",
+  "العربية": "اسحب المقبضين لتشكيل التوقيت. الزمن يسير من اليسار إلى اليمين؛ والرقم يصعد من الخط السفلي إلى العلوي.",
+  "Tiếng Việt": "Kéo hai tay nắm để định hình nhịp độ. Thời gian chạy từ trái sang phải; con số tăng từ đường dưới lên đường trên."
+ },
+ "Drag the two handles to shape the timing. Time runs left to right; each bar grows from the bottom line to the top one.": {
+  "日本語": "2つのハンドルをドラッグしてタイミングを調整します。時間は左から右へ進み、各バーは下の線から上の線へ伸びます。",
+  "Español": "Arrastra los dos tiradores para dar forma al ritmo. El tiempo va de izquierda a derecha; cada barra crece de la línea inferior a la superior.",
+  "Deutsch": "Ziehen Sie die beiden Griffe, um das Timing zu formen. Die Zeit läuft von links nach rechts; jeder Balken wächst von der unteren zur oberen Linie.",
+  "Français": "Faites glisser les deux poignées pour façonner le rythme. Le temps va de gauche à droite ; chaque barre grandit de la ligne du bas à celle du haut.",
+  "한국어": "두 핸들을 드래그해 타이밍을 조절하세요. 시간은 왼쪽에서 오른쪽으로 흐르고, 각 막대는 아래 선에서 위 선으로 자랍니다.",
+  "中文": "拖动两个控制柄来调整节奏。时间从左到右；每根柱子从下方的线长到上方的线。",
+  "العربية": "اسحب المقبضين لتشكيل التوقيت. الزمن يسير من اليسار إلى اليمين؛ وكل عمود ينمو من الخط السفلي إلى العلوي.",
+  "Tiếng Việt": "Kéo hai tay nắm để định hình nhịp độ. Thời gian chạy từ trái sang phải; mỗi cột lớn dần từ đường dưới lên đường trên."
+ },
+ "How it's written": {
+  "日本語": "表記",
+  "Español": "Cómo se escribe",
+  "Deutsch": "Schreibweise",
+  "Français": "Écriture",
+  "한국어": "표기 방식",
+  "中文": "书写方式",
+  "العربية": "طريقة الكتابة",
+  "Tiếng Việt": "Cách viết"
+ },
+ "Shown as": {
+  "日本語": "表示形式",
+  "Español": "Se muestra como",
+  "Deutsch": "Anzeige als",
+  "Français": "Affiché comme",
+  "한국어": "표시 형식",
+  "中文": "显示为",
+  "العربية": "يُعرض كـ",
+  "Tiếng Việt": "Hiển thị dạng"
+ },
+ "A number": {
+  "日本語": "数字",
+  "Español": "Un número",
+  "Deutsch": "Eine Zahl",
+  "Français": "Un nombre",
+  "한국어": "숫자",
+  "中文": "数字",
+  "العربية": "رقم",
+  "Tiếng Việt": "Một con số"
+ },
+ "A clock (m:ss)": {
+  "日本語": "時計 (m:ss)",
+  "Español": "Un reloj (m:ss)",
+  "Deutsch": "Eine Uhr (m:ss)",
+  "Français": "Une horloge (m:ss)",
+  "한국어": "시계 (m:ss)",
+  "中文": "时钟 (m:ss)",
+  "العربية": "ساعة (m:ss)",
+  "Tiếng Việt": "Đồng hồ (m:ss)"
+ },
+ "Thousands": {
+  "日本語": "桁区切り",
+  "Español": "Miles",
+  "Deutsch": "Tausender",
+  "Français": "Milliers",
+  "한국어": "천 단위",
+  "中文": "千位分隔",
+  "العربية": "الآلاف",
+  "Tiếng Việt": "Hàng nghìn"
+ },
+ "Decimals": {
+  "日本語": "小数",
+  "Español": "Decimales",
+  "Deutsch": "Dezimalstellen",
+  "Français": "Décimales",
+  "한국어": "소수",
+  "中文": "小数位",
+  "العربية": "الكسور العشرية",
+  "Tiếng Việt": "Số thập phân"
+ },
+ "Before": {
+  "日本語": "前",
+  "Español": "Antes",
+  "Deutsch": "Davor",
+  "Français": "Avant",
+  "한국어": "앞",
+  "中文": "前缀",
+  "العربية": "قبل",
+  "Tiếng Việt": "Trước"
+ },
+ "After": {
+  "日本語": "後",
+  "Español": "Después",
+  "Deutsch": "Danach",
+  "Français": "Après",
+  "한국어": "뒤",
+  "中文": "后缀",
+  "العربية": "بعد",
+  "Tiếng Việt": "Sau"
+ },
+ "Look": {
+  "日本語": "見た目",
+  "Español": "Aspecto",
+  "Deutsch": "Aussehen",
+  "Français": "Apparence",
+  "한국어": "모양",
+  "中文": "外观",
+  "العربية": "المظهر",
+  "Tiếng Việt": "Kiểu dáng"
+ },
+ "Font": {
+  "日本語": "フォント",
+  "Español": "Fuente",
+  "Deutsch": "Schrift",
+  "Français": "Police",
+  "한국어": "글꼴",
+  "中文": "字体",
+  "العربية": "الخط",
+  "Tiếng Việt": "Phông chữ"
+ },
+ "Style": {
+  "日本語": "スタイル",
+  "Español": "Estilo",
+  "Deutsch": "Schnitt",
+  "Français": "Style",
+  "한국어": "스타일",
+  "中文": "样式",
+  "العربية": "النمط",
+  "Tiếng Việt": "Kiểu"
+ },
+ "Size": {
+  "日本語": "サイズ",
+  "Español": "Tamaño",
+  "Deutsch": "Größe",
+  "Français": "Taille",
+  "한국어": "크기",
+  "中文": "大小",
+  "العربية": "الحجم",
+  "Tiếng Việt": "Cỡ"
+ },
+ "Colour": {
+  "日本語": "色",
+  "Español": "Color",
+  "Deutsch": "Farbe",
+  "Français": "Couleur",
+  "한국어": "색상",
+  "中文": "颜色",
+  "العربية": "اللون",
+  "Tiếng Việt": "Màu"
+ },
+ "Outline": {
+  "日本語": "アウトライン",
+  "Español": "Contorno",
+  "Deutsch": "Kontur",
+  "Français": "Contour",
+  "한국어": "윤곽선",
+  "中文": "描边",
+  "العربية": "حد خارجي",
+  "Tiếng Việt": "Viền"
+ },
+ "Outline colour": {
+  "日本語": "アウトラインの色",
+  "Español": "Color del contorno",
+  "Deutsch": "Konturfarbe",
+  "Français": "Couleur du contour",
+  "한국어": "윤곽선 색상",
+  "中文": "描边颜色",
+  "العربية": "لون الحد الخارجي",
+  "Tiếng Việt": "Màu viền"
+ },
+ "Shadow": {
+  "日本語": "シャドウ",
+  "Español": "Sombra",
+  "Deutsch": "Schatten",
+  "Français": "Ombre",
+  "한국어": "그림자",
+  "中文": "阴影",
+  "العربية": "ظل",
+  "Tiếng Việt": "Bóng đổ"
+ },
+ "Where it sits": {
+  "日本語": "配置",
+  "Español": "Dónde va",
+  "Deutsch": "Wo es sitzt",
+  "Français": "Emplacement",
+  "한국어": "놓이는 위치",
+  "中文": "所在位置",
+  "العربية": "موضعه",
+  "Tiếng Việt": "Vị trí đặt"
+ },
+ "Across": {
+  "日本語": "横方向",
+  "Español": "Horizontal",
+  "Deutsch": "Quer",
+  "Français": "En largeur",
+  "한국어": "가로",
+  "中文": "横向",
+  "العربية": "أفقيًا",
+  "Tiếng Việt": "Ngang"
+ },
+ "Down": {
+  "日本語": "縦方向",
+  "Español": "Vertical",
+  "Deutsch": "Nach unten",
+  "Français": "En hauteur",
+  "한국어": "세로",
+  "中文": "纵向",
+  "العربية": "عموديًا",
+  "Tiếng Việt": "Dọc"
+ },
+ "Grows from": {
+  "日本語": "伸びる起点",
+  "Español": "Crece desde",
+  "Deutsch": "Wächst von",
+  "Français": "Grandit depuis",
+  "한국어": "늘어나는 기준",
+  "中文": "生长起点",
+  "العربية": "ينمو من",
+  "Tiếng Việt": "Lớn dần từ"
+ },
+ "Its left": {
+  "日本語": "左端",
+  "Español": "Su izquierda",
+  "Deutsch": "Links",
+  "Français": "Sa gauche",
+  "한국어": "왼쪽",
+  "中文": "左侧",
+  "العربية": "يساره",
+  "Tiếng Việt": "Bên trái"
+ },
+ "Its middle": {
+  "日本語": "中央",
+  "Español": "Su centro",
+  "Deutsch": "Mitte",
+  "Français": "Son milieu",
+  "한국어": "가운데",
+  "中文": "中间",
+  "العربية": "وسطه",
+  "Tiếng Việt": "Ở giữa"
+ },
+ "Its right": {
+  "日本語": "右端",
+  "Español": "Su derecha",
+  "Deutsch": "Rechts",
+  "Français": "Sa droite",
+  "한국어": "오른쪽",
+  "中文": "右侧",
+  "العربية": "يمينه",
+  "Tiếng Việt": "Bên phải"
+ },
+ "You get a new clip at the playhead. Nothing you already have is changed.": {
+  "日本語": "再生ヘッドの位置に新しいクリップができます。既存のものは何も変更されません。",
+  "Español": "Obtienes un clip nuevo en el cabezal de reproducción. Nada de lo que ya tienes se modifica.",
+  "Deutsch": "Sie erhalten einen neuen Clip am Abspielkopf. Nichts Vorhandenes wird verändert.",
+  "Français": "Vous obtenez un nouveau clip à la tête de lecture. Rien de ce que vous avez déjà n'est modifié.",
+  "한국어": "재생 헤드 위치에 새 클립이 생깁니다. 기존의 것은 아무것도 바뀌지 않습니다.",
+  "中文": "会在播放头处得到一个新片段。已有的内容不会被更改。",
+  "العربية": "تحصل على مقطع جديد عند رأس التشغيل. لا يتغير أي شيء مما لديك.",
+  "Tiếng Việt": "Bạn có một clip mới tại đầu phát. Không có gì bạn đang có bị thay đổi."
+ },
+ "Replace the counter Buddy put there before": {
+  "日本語": "Buddy が以前そこに置いたカウンターを置き換える",
+  "Español": "Reemplazar el contador que Buddy puso ahí antes",
+  "Deutsch": "Den zuvor von Buddy dort platzierten Zähler ersetzen",
+  "Français": "Remplacer le compteur que Buddy y a placé auparavant",
+  "한국어": "Buddy가 이전에 그 자리에 둔 카운터 교체",
+  "中文": "替换 Buddy 之前放在那里的计数器",
+  "العربية": "استبدال العدّاد الذي وضعه Buddy هناك من قبل",
+  "Tiếng Việt": "Thay bộ đếm Buddy đã đặt ở đó trước đây"
+ },
+ "Replace the graph Buddy put there before": {
+  "日本語": "Buddy が以前そこに置いたグラフを置き換える",
+  "Español": "Reemplazar la gráfica que Buddy puso ahí antes",
+  "Deutsch": "Das zuvor von Buddy dort platzierte Diagramm ersetzen",
+  "Français": "Remplacer le graphique que Buddy y a placé auparavant",
+  "한국어": "Buddy가 이전에 그 자리에 둔 그래프 교체",
+  "中文": "替换 Buddy 之前放在那里的图表",
+  "العربية": "استبدال الرسم البياني الذي وضعه Buddy هناك من قبل",
+  "Tiếng Việt": "Thay biểu đồ Buddy đã đặt ở đó trước đây"
+ },
+ "Add to timeline": {
+  "日本語": "タイムラインに追加",
+  "Español": "Añadir a la línea de tiempo",
+  "Deutsch": "Zur Timeline hinzufügen",
+  "Français": "Ajouter à la timeline",
+  "한국어": "타임라인에 추가",
+  "中文": "添加到时间线",
+  "العربية": "إضافة إلى الخط الزمني",
+  "Tiếng Việt": "Thêm vào timeline"
+ },
+ "Number": {
+  "日本語": "数字",
+  "Español": "Número",
+  "Deutsch": "Zahl",
+  "Français": "Nombre",
+  "한국어": "숫자",
+  "中文": "数字",
+  "العربية": "رقم",
+  "Tiếng Việt": "Số"
+ },
+ "Money": {
+  "日本語": "金額",
+  "Español": "Dinero",
+  "Deutsch": "Geld",
+  "Français": "Argent",
+  "한국어": "금액",
+  "中文": "金额",
+  "العربية": "مال",
+  "Tiếng Việt": "Tiền"
+ },
+ "Percent": {
+  "日本語": "パーセント",
+  "Español": "Porcentaje",
+  "Deutsch": "Prozent",
+  "Français": "Pourcentage",
+  "한국어": "퍼센트",
+  "中文": "百分比",
+  "العربية": "نسبة مئوية",
+  "Tiếng Việt": "Phần trăm"
+ },
+ "Timer": {
+  "日本語": "タイマー",
+  "Español": "Temporizador",
+  "Deutsch": "Timer",
+  "Français": "Minuteur",
+  "한국어": "타이머",
+  "中文": "计时器",
+  "العربية": "مؤقّت",
+  "Tiếng Việt": "Hẹn giờ"
+ },
+ "Countdown": {
+  "日本語": "カウントダウン",
+  "Español": "Cuenta atrás",
+  "Deutsch": "Countdown",
+  "Français": "Compte à rebours",
+  "한국어": "카운트다운",
+  "中文": "倒计时",
+  "العربية": "عدّ تنازلي",
+  "Tiếng Việt": "Đếm ngược"
+ },
+ "The numbers": {
+  "日本語": "数値",
+  "Español": "Los números",
+  "Deutsch": "Die Zahlen",
+  "Français": "Les nombres",
+  "한국어": "숫자",
+  "中文": "数据",
+  "العربية": "الأرقام",
+  "Tiếng Việt": "Các con số"
+ },
+ "Add a row": {
+  "日本語": "行を追加",
+  "Español": "Añadir una fila",
+  "Deutsch": "Zeile hinzufügen",
+  "Français": "Ajouter une ligne",
+  "한국어": "행 추가",
+  "中文": "添加一行",
+  "العربية": "إضافة صف",
+  "Tiếng Việt": "Thêm một hàng"
+ },
+ "Paste from a spreadsheet": {
+  "日本語": "スプレッドシートから貼り付け",
+  "Español": "Pegar desde una hoja de cálculo",
+  "Deutsch": "Aus einer Tabelle einfügen",
+  "Français": "Coller depuis un tableur",
+  "한국어": "스프레드시트에서 붙여넣기",
+  "中文": "从电子表格粘贴",
+  "العربية": "لصق من جدول بيانات",
+  "Tiếng Việt": "Dán từ bảng tính"
+ },
+ "Title": {
+  "日本語": "タイトル",
+  "Español": "Título",
+  "Deutsch": "Titel",
+  "Français": "Titre",
+  "한국어": "제목",
+  "中文": "标题",
+  "العربية": "العنوان",
+  "Tiếng Việt": "Tiêu đề"
+ },
+ "How it draws on": {
+  "日本語": "描かれ方",
+  "Español": "Cómo se dibuja",
+  "Deutsch": "Wie es sich aufbaut",
+  "Français": "Comment il se dessine",
+  "한국어": "그려지는 방식",
+  "中文": "绘制方式",
+  "العربية": "كيف يُرسم",
+  "Tiếng Việt": "Cách vẽ ra"
+ },
+ "Seconds growing": {
+  "日本語": "伸びる秒数",
+  "Español": "Segundos creciendo",
+  "Deutsch": "Sekunden Wachsen",
+  "Français": "Secondes de croissance",
+  "한국어": "자라는 시간(초)",
+  "中文": "生长秒数",
+  "العربية": "ثواني النمو",
+  "Tiếng Việt": "Số giây lớn dần"
+ },
+ "One bar after another": {
+  "日本語": "バーを1本ずつ順番に",
+  "Español": "Una barra tras otra",
+  "Deutsch": "Ein Balken nach dem anderen",
+  "Français": "Une barre après l'autre",
+  "한국어": "막대를 하나씩 차례로",
+  "中文": "柱子一根接一根",
+  "العربية": "عمود بعد آخر",
+  "Tiếng Việt": "Từng cột nối tiếp nhau"
+ },
+ "What's written": {
+  "日本語": "表示する文字",
+  "Español": "Qué se escribe",
+  "Deutsch": "Was geschrieben wird",
+  "Français": "Ce qui est écrit",
+  "한국어": "표시할 글자",
+  "中文": "显示的文字",
+  "العربية": "ما يُكتب",
+  "Tiếng Việt": "Nội dung chữ"
+ },
+ "A number over each bar": {
+  "日本語": "各バーの上に数値",
+  "Español": "Un número sobre cada barra",
+  "Deutsch": "Eine Zahl über jedem Balken",
+  "Français": "Un nombre au-dessus de chaque barre",
+  "한국어": "각 막대 위에 숫자",
+  "中文": "每根柱子上方显示数字",
+  "العربية": "رقم فوق كل عمود",
+  "Tiếng Việt": "Con số trên mỗi cột"
+ },
+ "A name under each bar": {
+  "日本語": "各バーの下に名前",
+  "Español": "Un nombre bajo cada barra",
+  "Deutsch": "Ein Name unter jedem Balken",
+  "Français": "Un nom sous chaque barre",
+  "한국어": "각 막대 아래에 이름",
+  "中文": "每根柱子下方显示名称",
+  "العربية": "اسم تحت كل عمود",
+  "Tiếng Việt": "Tên dưới mỗi cột"
+ },
+ "Bars": {
+  "日本語": "バー",
+  "Español": "Barras",
+  "Deutsch": "Balken",
+  "Français": "Barres",
+  "한국어": "막대",
+  "中文": "柱子",
+  "العربية": "الأعمدة",
+  "Tiếng Việt": "Cột"
+ },
+ "A colour each": {
+  "日本語": "1本ずつ別の色",
+  "Español": "Un color cada una",
+  "Deutsch": "Jeder eine Farbe",
+  "Français": "Une couleur chacune",
+  "한국어": "막대마다 다른 색",
+  "中文": "每根一种颜色",
+  "العربية": "لون لكل عمود",
+  "Tiếng Việt": "Mỗi cột một màu"
+ },
+ "One colour": {
+  "日本語": "1色",
+  "Español": "Un solo color",
+  "Deutsch": "Eine Farbe",
+  "Français": "Une seule couleur",
+  "한국어": "한 가지 색",
+  "中文": "一种颜色",
+  "العربية": "لون واحد",
+  "Tiếng Việt": "Một màu"
+ },
+ "Bar colour": {
+  "日本語": "バーの色",
+  "Español": "Color de las barras",
+  "Deutsch": "Balkenfarbe",
+  "Français": "Couleur des barres",
+  "한국어": "막대 색상",
+  "中文": "柱子颜色",
+  "العربية": "لون الأعمدة",
+  "Tiếng Việt": "Màu cột"
+ },
+ "Rounded corners": {
+  "日本語": "角を丸くする",
+  "Español": "Esquinas redondeadas",
+  "Deutsch": "Abgerundete Ecken",
+  "Français": "Coins arrondis",
+  "한국어": "둥근 모서리",
+  "中文": "圆角",
+  "العربية": "زوايا مستديرة",
+  "Tiếng Việt": "Bo tròn góc"
+ },
+ "Text colour": {
+  "日本語": "文字の色",
+  "Español": "Color del texto",
+  "Deutsch": "Textfarbe",
+  "Français": "Couleur du texte",
+  "한국어": "글자 색상",
+  "中文": "文字颜色",
+  "العربية": "لون النص",
+  "Tiếng Việt": "Màu chữ"
+ },
+ "Name": {
+  "日本語": "名前",
+  "Español": "Nombre",
+  "Deutsch": "Name",
+  "Français": "Nom",
+  "한국어": "이름",
+  "中文": "名称",
+  "العربية": "الاسم",
+  "Tiếng Việt": "Tên"
+ },
+ "Remove this row": {
+  "日本語": "この行を削除",
+  "Español": "Quitar esta fila",
+  "Deutsch": "Diese Zeile entfernen",
+  "Français": "Supprimer cette ligne",
+  "한국어": "이 행 삭제",
+  "中文": "删除这一行",
+  "العربية": "إزالة هذا الصف",
+  "Tiếng Việt": "Xóa hàng này"
+ },
+ "No rows yet. Add one, or paste them from a spreadsheet.": {
+  "日本語": "まだ行がありません。追加するか、スプレッドシートから貼り付けてください。",
+  "Español": "Aún no hay filas. Añade una o pégalas desde una hoja de cálculo.",
+  "Deutsch": "Noch keine Zeilen. Fügen Sie eine hinzu oder fügen Sie sie aus einer Tabelle ein.",
+  "Français": "Pas encore de lignes. Ajoutez-en une ou collez-les depuis un tableur.",
+  "한국어": "아직 행이 없습니다. 하나 추가하거나 스프레드시트에서 붙여넣으세요.",
+  "中文": "还没有行。添加一行，或从电子表格粘贴。",
+  "العربية": "لا توجد صفوف بعد. أضف صفًا أو الصقها من جدول بيانات.",
+  "Tiếng Việt": "Chưa có hàng nào. Thêm một hàng, hoặc dán từ bảng tính."
+ },
+ "Rows": {
+  "日本語": "行",
+  "Español": "Filas",
+  "Deutsch": "Zeilen",
+  "Français": "Lignes",
+  "한국어": "행",
+  "中文": "行",
+  "العربية": "الصفوف",
+  "Tiếng Việt": "Các hàng"
+ },
+ "Paste two columns – a name and a number – or type a row on each line. They take the place of the rows you have.": {
+  "日本語": "2列（名前と数値）を貼り付けるか、1行に1つずつ入力してください。現在の行と置き換わります。",
+  "Español": "Pega dos columnas – un nombre y un número – o escribe una fila en cada línea. Sustituyen a las filas que tienes.",
+  "Deutsch": "Fügen Sie zwei Spalten ein – einen Namen und eine Zahl – oder tippen Sie eine Zeile pro Zeile. Sie ersetzen die vorhandenen Zeilen.",
+  "Français": "Collez deux colonnes – un nom et un nombre – ou saisissez une ligne par ligne. Elles remplacent les lignes existantes.",
+  "한국어": "두 열(이름과 숫자)을 붙여넣거나 한 줄에 한 행씩 입력하세요. 기존 행을 대신합니다.",
+  "中文": "粘贴两列（名称和数字），或每行输入一行数据。它们会替换现有的行。",
+  "العربية": "الصق عمودين – اسمًا ورقمًا – أو اكتب صفًا في كل سطر. ستحل محل الصفوف الموجودة.",
+  "Tiếng Việt": "Dán hai cột – tên và con số – hoặc gõ mỗi dòng một hàng. Chúng sẽ thay cho các hàng bạn đang có."
+ },
+ "Use these rows": {
+  "日本語": "これらの行を使う",
+  "Español": "Usar estas filas",
+  "Deutsch": "Diese Zeilen verwenden",
+  "Français": "Utiliser ces lignes",
+  "한국어": "이 행 사용",
+  "中文": "使用这些行",
+  "العربية": "استخدام هذه الصفوف",
+  "Tiếng Việt": "Dùng các hàng này"
+ },
+ "Counter added on V{track}.": {
+  "日本語": "カウンターを V{track} に追加しました。",
+  "Español": "Contador añadido en V{track}.",
+  "Deutsch": "Zähler auf V{track} hinzugefügt.",
+  "Français": "Compteur ajouté sur V{track}.",
+  "한국어": "카운터를 V{track}에 추가했습니다.",
+  "中文": "计数器已添加到 V{track}。",
+  "العربية": "أُضيف العدّاد على V{track}.",
+  "Tiếng Việt": "Đã thêm bộ đếm trên V{track}."
+ },
+ "Counter replaced on V{track}.": {
+  "日本語": "V{track} のカウンターを置き換えました。",
+  "Español": "Contador reemplazado en V{track}.",
+  "Deutsch": "Zähler auf V{track} ersetzt.",
+  "Français": "Compteur remplacé sur V{track}.",
+  "한국어": "V{track}의 카운터를 교체했습니다.",
+  "中文": "已替换 V{track} 上的计数器。",
+  "العربية": "استُبدل العدّاد على V{track}.",
+  "Tiếng Việt": "Đã thay bộ đếm trên V{track}."
+ },
+ "Graph added on V{track}.": {
+  "日本語": "グラフを V{track} に追加しました。",
+  "Español": "Gráfica añadida en V{track}.",
+  "Deutsch": "Diagramm auf V{track} hinzugefügt.",
+  "Français": "Graphique ajouté sur V{track}.",
+  "한국어": "그래프를 V{track}에 추가했습니다.",
+  "中文": "图表已添加到 V{track}。",
+  "العربية": "أُضيف الرسم البياني على V{track}.",
+  "Tiếng Việt": "Đã thêm biểu đồ trên V{track}."
+ },
+ "Graph replaced on V{track}.": {
+  "日本語": "V{track} のグラフを置き換えました。",
+  "Español": "Gráfica reemplazada en V{track}.",
+  "Deutsch": "Diagramm auf V{track} ersetzt.",
+  "Français": "Graphique remplacé sur V{track}.",
+  "한국어": "V{track}의 그래프를 교체했습니다.",
+  "中文": "已替换 V{track} 上的图表。",
+  "العربية": "استُبدل الرسم البياني على V{track}.",
+  "Tiếng Việt": "Đã thay biểu đồ trên V{track}."
+ },
+ "Couldn't add the counter": {
+  "日本語": "カウンターを追加できませんでした",
+  "Español": "No se pudo añadir el contador",
+  "Deutsch": "Zähler konnte nicht hinzugefügt werden",
+  "Français": "Impossible d'ajouter le compteur",
+  "한국어": "카운터를 추가하지 못했습니다",
+  "中文": "无法添加计数器",
+  "العربية": "تعذّرت إضافة العدّاد",
+  "Tiếng Việt": "Không thể thêm bộ đếm"
+ },
+ "Couldn't add the graph": {
+  "日本語": "グラフを追加できませんでした",
+  "Español": "No se pudo añadir la gráfica",
+  "Deutsch": "Diagramm konnte nicht hinzugefügt werden",
+  "Français": "Impossible d'ajouter le graphique",
+  "한국어": "그래프를 추가하지 못했습니다",
+  "中文": "无法添加图表",
+  "العربية": "تعذّرت إضافة الرسم البياني",
+  "Tiếng Việt": "Không thể thêm biểu đồ"
+ },
+ "Open a timeline in Resolve to add this to.": {
+  "日本語": "これを追加するタイムラインを Resolve で開いてください。",
+  "Español": "Abre una línea de tiempo en Resolve para añadirlo.",
+  "Deutsch": "Öffnen Sie in Resolve eine Timeline, um dies hinzuzufügen.",
+  "Français": "Ouvrez une timeline dans Resolve pour l'y ajouter.",
+  "한국어": "추가할 타임라인을 Resolve에서 여세요.",
+  "中文": "请在 Resolve 中打开一条时间线以添加。",
+  "العربية": "افتح خطًا زمنيًا في Resolve لإضافة هذا إليه.",
+  "Tiếng Việt": "Mở một timeline trong Resolve để thêm vào."
+ },
+ "No numbers were found in what was pasted.": {
+  "日本語": "貼り付けた内容に数値が見つかりませんでした。",
+  "Español": "No se encontraron números en lo pegado.",
+  "Deutsch": "Im Eingefügten wurden keine Zahlen gefunden.",
+  "Français": "Aucun nombre trouvé dans ce qui a été collé.",
+  "한국어": "붙여넣은 내용에서 숫자를 찾지 못했습니다.",
+  "中文": "粘贴的内容中没有找到数字。",
+  "العربية": "لم يُعثر على أرقام فيما تم لصقه.",
+  "Tiếng Việt": "Không tìm thấy con số nào trong nội dung đã dán."
+ },
+ "Only the first {n} rows were taken.": {
+  "日本語": "最初の {n} 行だけを取り込みました。",
+  "Español": "Solo se tomaron las primeras {n} filas.",
+  "Deutsch": "Nur die ersten {n} Zeilen wurden übernommen.",
+  "Français": "Seules les {n} premières lignes ont été prises.",
+  "한국어": "처음 {n}개 행만 가져왔습니다.",
+  "中文": "只采用了前 {n} 行。",
+  "العربية": "أُخذت أول {n} صفوف فقط.",
+  "Tiếng Việt": "Chỉ lấy {n} hàng đầu tiên."
+ },
+ "{n} lines without a number were left out.": {
+  "日本語": "数値のない {n} 行を除外しました。",
+  "Español": "Se omitieron {n} líneas sin número.",
+  "Deutsch": "{n} Zeilen ohne Zahl wurden ausgelassen.",
+  "Français": "{n} lignes sans nombre ont été ignorées.",
+  "한국어": "숫자가 없는 {n}개 줄을 제외했습니다.",
+  "中文": "已略过 {n} 行没有数字的内容。",
+  "العربية": "استُبعد {n} سطرًا بلا رقم.",
+  "Tiếng Việt": "Đã bỏ qua {n} dòng không có con số."
+ },
+ "1 line without a number was left out.": {
+  "日本語": "数値のない 1 行を除外しました。",
+  "Español": "Se omitió 1 línea sin número.",
+  "Deutsch": "1 Zeile ohne Zahl wurde ausgelassen.",
+  "Français": "1 ligne sans nombre a été ignorée.",
+  "한국어": "숫자가 없는 1개 줄을 제외했습니다.",
+  "中文": "已略过 1 行没有数字的内容。",
+  "العربية": "استُبعد سطر واحد بلا رقم.",
+  "Tiếng Việt": "Đã bỏ qua 1 dòng không có con số."
+ },
+ "Add a row with a number first.": {
+  "日本語": "先に数値のある行を追加してください。",
+  "Español": "Añade primero una fila con un número.",
+  "Deutsch": "Fügen Sie zuerst eine Zeile mit einer Zahl hinzu.",
+  "Français": "Ajoutez d'abord une ligne avec un nombre.",
+  "한국어": "먼저 숫자가 있는 행을 추가하세요.",
+  "中文": "请先添加一行带数字的数据。",
+  "العربية": "أضف صفًا يحتوي رقمًا أولًا.",
+  "Tiếng Việt": "Hãy thêm một hàng có con số trước."
+ },
+ "Adding the counter": {
+  "日本語": "カウンターを追加中",
+  "Español": "Añadiendo el contador",
+  "Deutsch": "Zähler wird hinzugefügt",
+  "Français": "Ajout du compteur",
+  "한국어": "카운터 추가 중",
+  "中文": "正在添加计数器",
+  "العربية": "جارٍ إضافة العدّاد",
+  "Tiếng Việt": "Đang thêm bộ đếm"
+ },
+ "Adding the graph": {
+  "日本語": "グラフを追加中",
+  "Español": "Añadiendo la gráfica",
+  "Deutsch": "Diagramm wird hinzugefügt",
+  "Français": "Ajout du graphique",
+  "한국어": "그래프 추가 중",
+  "中文": "正在添加图表",
+  "العربية": "جارٍ إضافة الرسم البياني",
+  "Tiếng Việt": "Đang thêm biểu đồ"
+ },
+ "Adding a counter": {
+  "日本語": "カウンターを追加中",
+  "Español": "Añadiendo un contador",
+  "Deutsch": "Ein Zähler wird hinzugefügt",
+  "Français": "Ajout d'un compteur",
+  "한국어": "카운터 추가 중",
+  "中文": "正在添加计数器",
+  "العربية": "جارٍ إضافة عدّاد",
+  "Tiếng Việt": "Đang thêm một bộ đếm"
+ },
+ "Adding a graph": {
+  "日本語": "グラフを追加中",
+  "Español": "Añadiendo una gráfica",
+  "Deutsch": "Ein Diagramm wird hinzugefügt",
+  "Français": "Ajout d'un graphique",
+  "한국어": "그래프 추가 중",
+  "中文": "正在添加图表",
+  "العربية": "جارٍ إضافة رسم بياني",
+  "Tiếng Việt": "Đang thêm một biểu đồ"
+ },
+ "Animated counters and bar graphs from your own numbers, added to your timeline.": {
+  "日本語": "自分の数値から作るアニメーションのカウンターと棒グラフを、タイムラインに追加します。",
+  "Español": "Contadores y gráficas de barras animados a partir de tus propios números, añadidos a tu línea de tiempo.",
+  "Deutsch": "Animierte Zähler und Balkendiagramme aus Ihren eigenen Zahlen, zu Ihrer Timeline hinzugefügt.",
+  "Français": "Compteurs et graphiques à barres animés à partir de vos propres chiffres, ajoutés à votre timeline.",
+  "한국어": "내 숫자로 만든 애니메이션 카운터와 막대 그래프를 타임라인에 추가합니다.",
+  "中文": "用你自己的数字生成动画计数器和柱状图，并添加到时间线。",
+  "العربية": "عدّادات ورسوم أعمدة متحركة من أرقامك، تُضاف إلى خطك الزمني.",
+  "Tiếng Việt": "Bộ đếm và biểu đồ cột động từ số liệu của bạn, thêm vào timeline."
+ },
+ "A timing of its own for each bar": {
+  "日本語": "バーごとに個別のタイミング",
+  "Español": "Un ritmo propio para cada barra",
+  "Deutsch": "Ein eigenes Timing für jeden Balken",
+  "Français": "Un rythme propre à chaque barre",
+  "한국어": "막대마다 개별 타이밍",
+  "中文": "每根柱子有自己的节奏",
+  "العربية": "توقيت خاص لكل عمود",
+  "Tiếng Việt": "Nhịp độ riêng cho từng cột"
+ },
+ "Which bar": {
+  "日本語": "どのバー",
+  "Español": "Qué barra",
+  "Deutsch": "Welcher Balken",
+  "Français": "Quelle barre",
+  "한국어": "어느 막대",
+  "中文": "哪根柱子",
+  "العربية": "أي عمود",
+  "Tiếng Việt": "Cột nào"
+ },
+ "All bars": {
+  "日本語": "すべてのバー",
+  "Español": "Todas las barras",
+  "Deutsch": "Alle Balken",
+  "Français": "Toutes les barres",
+  "한국어": "모든 막대",
+  "中文": "所有柱子",
+  "العربية": "كل الأعمدة",
+  "Tiếng Việt": "Tất cả các cột"
+ },
+ "Starts at": {
+  "日本語": "開始位置",
+  "Español": "Empieza en",
+  "Deutsch": "Beginnt bei",
+  "Français": "Commence à",
+  "한국어": "시작 시점",
+  "中文": "开始于",
+  "العربية": "يبدأ عند",
+  "Tiếng Việt": "Bắt đầu tại"
+ },
+ "Takes": {
+  "日本語": "所要時間",
+  "Español": "Dura",
+  "Deutsch": "Dauert",
+  "Français": "Dure",
+  "한국어": "걸리는 시간",
+  "中文": "用时",
+  "العربية": "يستغرق",
+  "Tiếng Việt": "Kéo dài"
+ },
+ "Follow the others again": {
+  "日本語": "ほかのバーに合わせる",
+  "Español": "Volver a seguir a las demás",
+  "Deutsch": "Wieder den anderen folgen",
+  "Français": "Suivre de nouveau les autres",
+  "한국어": "다시 다른 막대를 따르기",
+  "中文": "重新跟随其他柱子",
+  "العربية": "اتباع البقية من جديد",
+  "Tiếng Việt": "Theo các cột khác trở lại"
+ },
+ "Edit the curve": {
+  "日本語": "カーブを編集",
+  "Español": "Editar la curva",
+  "Deutsch": "Kurve bearbeiten",
+  "Français": "Modifier la courbe",
+  "한국어": "곡선 편집",
+  "中文": "编辑曲线",
+  "العربية": "تعديل المنحنى",
+  "Tiếng Việt": "Chỉnh đường cong"
+ },
+ "Close": {
+  "日本語": "閉じる",
+  "Español": "Cerrar",
+  "Deutsch": "Schließen",
+  "Français": "Fermer",
+  "한국어": "닫기",
+  "中文": "关闭",
+  "العربية": "إغلاق",
+  "Tiếng Việt": "Đóng"
+ },
+ "Arrives": {
+  "日本語": "登場のしかた",
+  "Español": "Llegada",
+  "Deutsch": "Erscheint",
+  "Français": "Arrivée",
+  "한국어": "등장 방식",
+  "中文": "出现方式",
+  "العربية": "الظهور",
+  "Tiếng Việt": "Cách xuất hiện"
+ },
+ "Title arrives": {
+  "日本語": "タイトルの登場",
+  "Español": "Llegada del título",
+  "Deutsch": "Titel erscheint",
+  "Français": "Arrivée du titre",
+  "한국어": "제목 등장 방식",
+  "中文": "标题出现方式",
+  "العربية": "ظهور العنوان",
+  "Tiếng Việt": "Tiêu đề xuất hiện"
+ },
+ "Already there": {
+  "日本語": "最初から表示",
+  "Español": "Ya está ahí",
+  "Deutsch": "Schon da",
+  "Français": "Déjà là",
+  "한국어": "처음부터 표시",
+  "中文": "一开始就在",
+  "العربية": "موجود من البداية",
+  "Tiếng Việt": "Có sẵn từ đầu"
+ },
+ "Fades in": {
+  "日本語": "フェードイン",
+  "Español": "Aparece gradualmente",
+  "Deutsch": "Blendet ein",
+  "Français": "Apparaît en fondu",
+  "한국어": "페이드 인",
+  "中文": "淡入",
+  "العربية": "يظهر تدريجيًا",
+  "Tiếng Việt": "Mờ dần vào"
+ },
+ "Rises in": {
+  "日本語": "下からせり上がる",
+  "Español": "Sube hasta su sitio",
+  "Deutsch": "Steigt herein",
+  "Français": "Monte en place",
+  "한국어": "아래에서 올라옴",
+  "中文": "从下方升入",
+  "العربية": "يصعد إلى مكانه",
+  "Tiếng Việt": "Trồi lên vào chỗ"
+ },
+ "Pops in": {
+  "日本語": "ポップして現れる",
+  "Español": "Aparece con un salto",
+  "Deutsch": "Poppt herein",
+  "Français": "Surgit",
+  "한국어": "톡 튀어나옴",
+  "中文": "弹出",
+  "العربية": "يظهر بقفزة",
+  "Tiếng Việt": "Bật ra"
+ },
+ "Which timing": {
+  "日本語": "どのタイミング",
+  "Español": "Qué ritmo",
+  "Deutsch": "Welches Timing",
+  "Français": "Quel rythme",
+  "한국어": "어느 타이밍",
+  "中文": "哪个节奏",
+  "العربية": "أي توقيت",
+  "Tiếng Việt": "Nhịp độ nào"
+ },
+ "Arriving": {
+  "日本語": "登場",
+  "Español": "La llegada",
+  "Deutsch": "Das Erscheinen",
+  "Français": "L'arrivée",
+  "한국어": "등장",
+  "中文": "出现",
+  "العربية": "الظهور",
+  "Tiếng Việt": "Lúc xuất hiện"
+ },
+ "The bars": {
+  "日本語": "バー",
+  "Español": "Las barras",
+  "Deutsch": "Die Balken",
+  "Français": "Les barres",
+  "한국어": "막대",
+  "中文": "柱子",
+  "العربية": "الأعمدة",
+  "Tiếng Việt": "Các cột"
+ },
+ "The title arriving": {
+  "日本語": "タイトルの登場",
+  "Español": "La llegada del título",
+  "Deutsch": "Das Erscheinen des Titels",
+  "Français": "L'arrivée du titre",
+  "한국어": "제목의 등장",
+  "中文": "标题的出现",
+  "العربية": "ظهور العنوان",
+  "Tiếng Việt": "Tiêu đề xuất hiện"
+ },
+ "Seconds arriving": {
+  "日本語": "登場にかける秒数",
+  "Español": "Segundos de llegada",
+  "Deutsch": "Sekunden Erscheinen",
+  "Français": "Secondes d'arrivée",
+  "한국어": "등장 시간(초)",
+  "中文": "出现秒数",
+  "العربية": "ثواني الظهور",
+  "Tiếng Việt": "Số giây xuất hiện"
+ },
+ "Double-click to choose this bar's colour. Right-click to go back to its automatic colour.": {
+  "日本語": "ダブルクリックでこのバーの色を選びます。右クリックで自動の色に戻します。",
+  "Español": "Doble clic para elegir el color de esta barra. Clic derecho para volver a su color automático.",
+  "Deutsch": "Doppelklicken, um die Farbe dieses Balkens zu wählen. Rechtsklick stellt die automatische Farbe wieder her.",
+  "Français": "Double-cliquez pour choisir la couleur de cette barre. Clic droit pour revenir à sa couleur automatique.",
+  "한국어": "더블 클릭하여 이 막대의 색을 고릅니다. 오른쪽 클릭하면 자동 색으로 돌아갑니다.",
+  "中文": "双击为这根柱子选择颜色。右键单击恢复自动颜色。",
+  "العربية": "انقر نقرًا مزدوجًا لاختيار لون هذا العمود. انقر بالزر الأيمن للعودة إلى لونه التلقائي.",
+  "Tiếng Việt": "Nhấp đúp để chọn màu cho cột này. Nhấp chuột phải để trở về màu tự động."
+ },
+ "Axes and titles": {
+  "日本語": "軸とタイトル",
+  "Español": "Ejes y títulos",
+  "Deutsch": "Achsen und Titel",
+  "Français": "Axes et titres",
+  "한국어": "축과 제목",
+  "中文": "坐标轴和标题",
+  "العربية": "المحاور والعناوين",
+  "Tiếng Việt": "Trục và tiêu đề"
+ },
+ "Subtitle": {
+  "日本語": "サブタイトル",
+  "Español": "Subtítulo",
+  "Deutsch": "Untertitel",
+  "Français": "Sous-titre",
+  "한국어": "부제목",
+  "中文": "副标题",
+  "العربية": "العنوان الفرعي",
+  "Tiếng Việt": "Tiêu đề phụ"
+ },
+ "Along the bottom": {
+  "日本語": "下の軸のタイトル",
+  "Español": "A lo largo de la base",
+  "Deutsch": "Entlang der Unterkante",
+  "Français": "Le long du bas",
+  "한국어": "아래쪽 축 제목",
+  "中文": "底部轴标题",
+  "العربية": "على طول الأسفل",
+  "Tiếng Việt": "Dọc theo đáy"
+ },
+ "Up the side": {
+  "日本語": "横の軸のタイトル",
+  "Español": "En el lateral",
+  "Deutsch": "An der Seite",
+  "Français": "Sur le côté",
+  "한국어": "옆쪽 축 제목",
+  "中文": "侧边轴标题",
+  "العربية": "على الجانب",
+  "Tiếng Việt": "Dọc bên cạnh"
+ },
+ "Numbers up the side": {
+  "日本語": "横に目盛りの数値",
+  "Español": "Números en el lateral",
+  "Deutsch": "Zahlen an der Seite",
+  "Français": "Nombres sur le côté",
+  "한국어": "옆에 눈금 숫자",
+  "中文": "侧边显示刻度数字",
+  "العربية": "أرقام على الجانب",
+  "Tiếng Việt": "Số ở bên cạnh"
+ },
+ "Lines across": {
+  "日本語": "横の目盛り線",
+  "Español": "Líneas horizontales",
+  "Deutsch": "Querlinien",
+  "Français": "Lignes horizontales",
+  "한국어": "가로 눈금선",
+  "中文": "横向网格线",
+  "العربية": "خطوط أفقية",
+  "Tiếng Việt": "Đường kẻ ngang"
+ },
+ "Steps": {
+  "日本語": "目盛りの数",
+  "Español": "Pasos",
+  "Deutsch": "Schritte",
+  "Français": "Paliers",
+  "한국어": "눈금 수",
+  "中文": "刻度数",
+  "العربية": "الدرجات",
+  "Tiếng Việt": "Số bậc"
+ },
+ "Top of the scale": {
+  "日本語": "目盛りの最大値",
+  "Español": "Tope de la escala",
+  "Deutsch": "Oberes Ende der Skala",
+  "Français": "Haut de l'échelle",
+  "한국어": "눈금 최댓값",
+  "中文": "刻度最大值",
+  "العربية": "أعلى المقياس",
+  "Tiếng Việt": "Đỉnh thang đo"
+ },
+ "Auto": {
+  "日本語": "自動",
+  "Español": "Automático",
+  "Deutsch": "Automatisch",
+  "Français": "Auto",
+  "한국어": "자동",
+  "中文": "自动",
+  "العربية": "تلقائي",
+  "Tiếng Việt": "Tự động"
+ },
+ "Timing of each part": {
+  "日本語": "各パーツのタイミング",
+  "Español": "Ritmo de cada parte",
+  "Deutsch": "Timing jedes Teils",
+  "Français": "Rythme de chaque élément",
+  "한국어": "각 요소의 타이밍",
+  "中文": "各部分的节奏",
+  "العربية": "توقيت كل جزء",
+  "Tiếng Việt": "Nhịp độ từng phần"
+ },
+ "Drag a bar to move it, its right end to stretch it.": {
+  "日本語": "バーをドラッグして移動、右端をドラッグして長さを変えます。",
+  "Español": "Arrastra una barra para moverla y su extremo derecho para alargarla.",
+  "Deutsch": "Balken ziehen zum Verschieben, das rechte Ende zum Verlängern.",
+  "Français": "Faites glisser une barre pour la déplacer, son extrémité droite pour l'allonger.",
+  "한국어": "막대를 드래그해 옮기고, 오른쪽 끝을 드래그해 늘립니다.",
+  "中文": "拖动条块可移动，拖动右端可拉长。",
+  "العربية": "اسحب الشريط لتحريكه، وطرفه الأيمن لتمديده.",
+  "Tiếng Việt": "Kéo thanh để di chuyển, kéo đầu phải để kéo dài."
+ },
+ "Show or hide the timing": {
+  "日本語": "タイミングの表示/非表示",
+  "Español": "Mostrar u ocultar el ritmo",
+  "Deutsch": "Timing ein- oder ausblenden",
+  "Français": "Afficher ou masquer le rythme",
+  "한국어": "타이밍 표시/숨기기",
+  "中文": "显示或隐藏节奏",
+  "العربية": "إظهار أو إخفاء التوقيت",
+  "Tiếng Việt": "Hiện hoặc ẩn nhịp độ"
+ },
+ "Back to automatic": {
+  "日本語": "自動に戻す",
+  "Español": "Volver a automático",
+  "Deutsch": "Zurück zu automatisch",
+  "Français": "Revenir à l'automatique",
+  "한국어": "자동으로 되돌리기",
+  "中文": "恢复自动",
+  "العربية": "العودة إلى التلقائي",
+  "Tiếng Việt": "Trở về tự động"
  }
 }

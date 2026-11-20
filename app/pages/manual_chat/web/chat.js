@@ -14,12 +14,20 @@ const transcript = $("transcript");
 const input = $("input");
 const sendBtn = $("send");
 let sending = false;
+let canStop = false;        // a question is with the model: the Send button stops it
+let replacing = false;      // the composer holds the last question, being edited
+let redo = null;            // {q, a}: the blocks Edit and Regenerate go on
 let currentChatTitle = "New chat";
 
 $("prev").append(icon("left"));
 $("next").append(icon("right"));
 $("export").append(icon("download"), "Export");
-sendBtn.append(icon("send"), "Send");
+function drawSendButton() {
+    sendBtn.replaceChildren(...(canStop ? [icon("stop"), "Stop"] : [icon("send"), "Send"]));
+    sendBtn.title = canStop ? "Stop this answer" : "Send (Enter)";
+    sendBtn.classList.toggle("accent", !canStop);
+    sendBtn.disabled = canStop ? false : (sending || !canSend());
+}
 $("attach").append(icon("image"));
 $("attach").onclick = () => send("attach_image");
 
@@ -61,7 +69,51 @@ function copyButton(block) {
         btn.replaceChildren(icon("check"), "Copied");
         setTimeout(() => btn.replaceChildren(icon("copy"), "Copy"), 1500);
     }}, [icon("copy"), "Copy"]);
-    return el("div.actions", {}, [btn]);
+    return btn;
+}
+
+// The manual pages Buddy read for an answer: each opens the manual there.
+function sourcesNode(sources) {
+    if (!sources || !sources.length) return null;
+    return el("details.trace.sources", {}, [
+        el("summary", {text: sources.length === 1 ? "1 manual page read" : `${sources.length} manual pages read`}),
+        el("div.source-list", {}, sources.map(s => {
+            const open = () => send("open_manual", {page: s.page});
+            return el("div.source-row", {tabIndex: 0, role: "link", title: `Open the manual at page ${s.page}`,
+                                         onclick: open,
+                                         onkeydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}, [
+                el("div.source-cite", {text: s.cite, translate: "no"}),
+                s.snippet ? el("div.muted.small", {text: s.snippet, translate: "no"}) : null,
+            ]);
+        })),
+    ]);
+}
+
+// Pages an answer cites that Buddy never handed the model.
+function unverifiedNode(pages) {
+    if (!pages || !pages.length) return null;
+    const text = pages.length === 1
+        ? `Page ${pages[0]} is cited here, but it isn't among the manual pages Buddy read for this conversation – check it before relying on it.`
+        : `Pages ${pages.join(", ")} are cited here, but they aren't among the manual pages Buddy read for this conversation – check them before relying on them.`;
+    return el("div.unverified", {}, [icon("warning"), el("span", {text})]);
+}
+
+// Edit on the last question, Regenerate on its answer (Try again when
+// there was none). Drawn from "controls", which says which blocks they are.
+function drawRedo() {
+    messages.querySelectorAll(".redo").forEach(n => n.remove());
+    if (!redo || sending) return;
+    const row = i => messages.querySelector(`.msg[data-i="${i}"] .actions`);
+    const again = (label, title) => el("button.btn.ghost.redo", {title, onclick: () => send("regenerate")},
+                                       [icon("refresh"), label]);
+    const question = row(redo.q);
+    if (question) {
+        question.append(el("button.btn.ghost.redo", {title: "Change this question and ask again",
+                                                     onclick: () => send("edit_last")}, [icon("undo"), "Edit"]));
+        if (redo.a === null) question.append(again("Try again", "Ask this question again"));
+    }
+    const answer = redo.a === null ? null : row(redo.a);
+    if (answer) answer.append(again("Regenerate", "Ask the question again for a new answer"));
 }
 
 function picturesNode(block) {
@@ -107,18 +159,35 @@ function messageNode(block) {
             // What people asked and what the model answered stay as written;
             // Buddy's own messages (the welcome, help) are translated.
             openableCitations(el("div.body", {html: block.html, translate: block.raw ? "no" : undefined})),
+            block.stopped ? el("div.stopped.muted.small", {text: "Stopped"}) : null,
+            unverifiedNode(block.unverified),
+            sourcesNode(block.sources),
             traceNode(block.trace),
         ]),
-        copyButton(block),
+        el("div.actions", {}, [copyButton(block)]),
     ]);
 }
 
+// The questions under the conversation: a new chat's starters, or the ones
+// offered with the last answer (the model's own words: left untranslated).
+function drawSuggestions(items, raw) {
+    $("suggestions").replaceChildren(...(items || []).map(text =>
+        el("button.btn", {text, translate: raw ? "no" : undefined, onclick: () => ask(text)})));
+}
+
 Buddy.on("transcript", data => {
+    // Another conversation, or this one redrawn: an edit under way was of
+    // what stood here before, and must not replace a turn of what is here now.
+    setReplacing(false);
     messages.replaceChildren(...data.blocks.map(messageNode));
-    const box = $("suggestions");
-    box.replaceChildren(...data.suggestions.map(text =>
-        el("button.btn", {text, onclick: () => ask(text)})));
+    drawSuggestions(data.suggestions, data.suggestions_raw);
+    drawRedo();
     requestAnimationFrame(() => scrollToBottom(false));
+});
+
+Buddy.on("suggestions", data => {
+    drawSuggestions(data.items, data.raw);
+    if (following) requestAnimationFrame(() => scrollToBottom(true));
 });
 
 Buddy.on("append", block => {
@@ -128,10 +197,47 @@ Buddy.on("append", block => {
     if (stick) requestAnimationFrame(() => scrollToBottom(true));
 });
 
+// The dots show until the answer starts arriving; then the answer itself
+// does, as it's written ("stream").
+let drafting = false;
+let thinkingOn = false;
+
 Buddy.on("thinking", data => {
-    $("thinking").hidden = !data.on;
+    thinkingOn = data.on;
+    $("thinking").hidden = !data.on || drafting;
     $("thinking-text").textContent = data.message || "Thinking…";
     if (data.on && following) requestAnimationFrame(() => scrollToBottom(true));
+});
+
+// An answer that has stopped growing but isn't finished - the model is
+// writing its follow-up questions, or thinking again - gets the dots back
+// under it after a moment, so it never just sits there looking hung.
+const QUIET_MS = 1500;
+let quietTimer = 0;
+let draftHtml = "";
+
+Buddy.on("stream", data => {
+    const html = data.html || "";
+    drafting = !!html;
+    $("draft").hidden = !drafting;
+    // The same draft again is not news: text the reader doesn't see (the
+    // follow-ups line) is arriving, and the wait for the dots goes on.
+    if (html === draftHtml) return;
+    clearTimeout(quietTimer);
+    draftHtml = html;
+    $("draft-body").innerHTML = html;           // Python-rendered and escaped, like every answer
+    $("thinking").classList.remove("under-draft");
+    $("thinking").hidden = !thinkingOn || drafting;
+    if (drafting) {
+        quietTimer = setTimeout(() => {
+            if (!drafting || !thinkingOn) return;
+            $("thinking-text").textContent = "Thinking…";
+            $("thinking").classList.add("under-draft");     // part of the answer above it, not a new message
+            $("thinking").hidden = false;
+            if (following) requestAnimationFrame(() => scrollToBottom(true));
+        }, QUIET_MS);
+        if (following) requestAnimationFrame(() => scrollToBottom(false));
+    }
 });
 
 // -------------------------------------------------------------- controls
@@ -139,6 +245,9 @@ Buddy.on("thinking", data => {
 Buddy.on("controls", c => {
     const wasSending = sending;
     sending = c.sending;
+    canStop = !!c.can_stop;
+    redo = c.redo || null;
+    drawRedo();
     $("prev").disabled = !c.can_prev;
     $("next").disabled = !c.can_next;
     $("checkup").disabled = sending || !c.connected;
@@ -163,9 +272,24 @@ Buddy.on("controls", c => {
         ? `Start a fresh conversation. This one has ${c.turns} of ${c.limit} remembered turns.`
         : "Start a fresh conversation";
 
-    sendBtn.disabled = sending || !canSend();
+    drawSendButton();
     if (wasSending && !sending) input.focus();
 });
+
+// Edit: the last question comes back to the composer; sending it replaces
+// that question and its answer. Cancel leaves the conversation alone.
+function setReplacing(on) {
+    replacing = on;
+    $("editing").hidden = !on;
+}
+Buddy.on("compose", data => {
+    input.value = data.text || "";
+    setReplacing(!!data.replace);
+    autosize();
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+});
+$("cancel-edit").onclick = () => { setReplacing(false); input.value = ""; autosize(); input.focus(); };
 
 Buddy.on("status", s => { $("status").textContent = s.text || ""; });
 Buddy.on("toast", t => Buddy.toast(t.text));
@@ -211,6 +335,10 @@ async function deleteChat(item) {
 Buddy.on("chat_list", data => {
     $("chat-results").replaceChildren(...data.items.map(item =>
         el("div.chat-row", {}, [
+            el(`button.btn.icon.ghost.chat-pin${item.pinned ? ".on" : ""}`,
+               {type: "button", title: item.pinned ? "Unpin this conversation" : "Pin this conversation to the top",
+                "aria-pressed": item.pinned ? "true" : "false",
+                onclick: () => send("pin_chat", {index: item.index, on: !item.pinned})}, [icon("pin")]),
             el("button.chat-result", {type: "button", onclick: () => {
                 send("select_chat", {index: item.index});
                 $("chat-browser").hidden = true;
@@ -238,7 +366,11 @@ Buddy.on("offer", offer => {
     box.replaceChildren(
         icon("tool"),
         el("div.reason", {}, [el("div.strong", {text: "Buddy suggests a tool"}),
-                              el("div.muted.small", {text: offer.reason || "", translate: "no"})]),
+                              el("div.muted.small", {text: offer.reason || "", translate: "no"}),
+                              // What the tool will be started with - the model's words, shown before the click.
+                              offer.prefill ? el("div.small.prefill", {}, [
+                                  el("span.muted", {text: "Starts with:"}), " ",
+                                  el("span", {text: offer.prefill, translate: "no"})]) : null]),
         el("button.btn.accent", {text: offer.label, onclick: () => send("open_tool", {tool_id: offer.tool_id})}),
     );
 });
@@ -283,7 +415,7 @@ Buddy.on("pictures", p => {
                              onclick: () => send("remove_picture", {index})}),
     ])));
     $("picture-note").textContent = p.note || "";
-    sendBtn.disabled = sending || !canSend();
+    drawSendButton();
 });
 
 // A pasted picture goes through Python, which reads the clipboard itself.
@@ -301,13 +433,14 @@ function autosize() {
     input.style.height = "auto";
     input.style.height = `${Math.min(input.scrollHeight, 200)}px`;
     input.style.overflowY = input.scrollHeight > 200 ? "auto" : "hidden";
-    sendBtn.disabled = sending || !canSend();
+    drawSendButton();
 }
 
 function ask(text) {
     text = (text || "").trim();
     if ((!text && !pictureCount) || sending) return;
-    send("send", {text});
+    send("send", replacing ? {text, replace: true} : {text});
+    setReplacing(false);
     input.value = "";
     autosize();
     input.focus();
@@ -322,7 +455,13 @@ input.addEventListener("keydown", e => {
         ask(input.value);
     }
 });
-sendBtn.onclick = () => ask(input.value);
+sendBtn.onclick = () => (canStop ? send("stop") : ask(input.value));
+// Esc stops an answer on its way - or, with nothing to stop, an edit.
+document.addEventListener("keydown", e => {
+    if (e.key !== "Escape" || document.querySelector(".modal-backdrop")) return;
+    if (canStop) send("stop");
+    else if (replacing) $("cancel-edit").click();
+});
 
 autosize();
 input.focus();

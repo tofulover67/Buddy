@@ -338,13 +338,19 @@ class ChatSettingsMixin:
             sf.hint(test[1], tone=test[2]) if test else None,
             sf.slider("history_turns", "Conversation memory", history, 0, MAX_HISTORY_TURNS, DEFAULT_HISTORY_TURNS,
                       {n: "Off" if not n else "1 turn" if n == 1 else f"{n} turns" for n in range(MAX_HISTORY_TURNS + 1)},
-                      hint_text="Past question/answer pairs replayed to the model each request. 0 means every "
-                                "question is standalone."),
+                      hint_text="Past question/answer pairs replayed to the model each request; older ones "
+                                "are kept as a short summary. 0 means every question is standalone."),
             sf.slider("max_steps", "Tool call budget", steps, DEFAULT_MAX_STEPS, MAX_MAX_STEPS, DEFAULT_MAX_STEPS,
                       {n: "1 call" if n == 1 else f"{n} calls" for n in range(DEFAULT_MAX_STEPS, MAX_MAX_STEPS + 1)},
                       hint_text="How many tool calls Buddy may make per answer before it gives up – manual "
                                 "searches, reading your project, offering tools. More calls let it dig deeper on "
                                 "hard questions, but each one is an extra model round-trip that uses more tokens."),
+            sf.check("stream_answers", "Show answers as they're written", bool(self.settings.get("stream_answers", True)),
+                     hint_text="The answer appears word by word instead of all at once. A server that can't "
+                               "do this is asked the ordinary way."),
+            sf.check("suggest_followups", "Suggest follow-up questions",
+                     bool(self.settings.get("suggest_followups", True)),
+                     hint_text="Up to three questions under each answer that you can ask with a click."),
             sf.heading("Project changes"),
             sf.check("allow_project_reads", "Let Ask Buddy send my project's details to my AI provider",
                      self.project_reads_allowed(),
@@ -707,6 +713,8 @@ class ChatSettingsMixin:
             self._on_history_limit_changed()
         elif key == "max_steps" and isinstance(value, int) and DEFAULT_MAX_STEPS <= value <= MAX_MAX_STEPS:
             self._save("max_steps", value)
+        elif key in ("stream_answers", "suggest_followups"):
+            self._save(key, bool(value))
         elif key == "allow_project_reads":
             self._save("project_read_consent", llm_client_from_settings(self.settings).destination if value else "")
             self._read_declined = None

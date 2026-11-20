@@ -416,11 +416,13 @@ def timeline_markers(controller, max_markers: int = MAX_MARKERS) -> dict:
     return out
 
 
-def focused_clip(controller) -> dict:
+def focused_clip(controller, with_items=False) -> dict:
     """Read the timeline selection, or the video clip under the playhead.
 
     Older Resolve versions may not expose GetSelectedClips. In that case the
     playhead lookup still works. Neither path changes selection or timecode.
+    with_items adds the clips' own objects under "_items" (focused_clip_grade
+    reads more from them, and takes them out again).
     """
     project = _safe(controller.current_project)
     timeline = _safe(project.GetCurrentTimeline) if project else None
@@ -474,8 +476,161 @@ def focused_clip(controller) -> dict:
             entry["source"] = source
         entry["mismatch"] = _find_mismatches(entry, fmt)
         clips.append(entry)
-    return {"found": True, "mode": mode, "timeline": _safe(timeline.GetName, ""),
-            "timecode": timecode, "timeline_format": fmt, "clips": clips}
+    out = {"found": True, "mode": mode, "timeline": _safe(timeline.GetName, ""),
+           "timecode": timecode, "timeline_format": fmt, "clips": clips}
+    if with_items:
+        out["_items"] = list(chosen)
+    return out
+
+
+MAX_RENDER_JOBS = 20
+MAX_BINS = 60
+MAX_PATHS_CHECKED = 200
+MAX_NODES = 24
+RENDER_JOB_FIELDS = ("RenderJobName", "TimelineName", "TargetDir", "OutputFilename", "FormatWidth",
+                     "FormatHeight", "FrameRate", "VideoFormat", "VideoCodec", "AudioCodec",
+                     "IsExportVideo", "IsExportAudio")
+ITEM_PROPERTIES = ("ZoomX", "ZoomY", "Pan", "Tilt", "RotationAngle", "Opacity", "CompositeMode",
+                   "CropLeft", "CropRight", "CropTop", "CropBottom", "RetimeProcess", "Scaling",
+                   "ResizeFilter", "FlipX", "FlipY")
+
+
+def render_state(controller) -> dict:
+    """The Deliver page as it stands: the format and codec chosen, and the
+    jobs in the render queue with each one's status."""
+    project = _safe(controller.current_project)
+    if not project:
+        return {"open": False, "reason": "No project is currently open in Resolve."}
+    out = {"open": True,
+           "current_format_and_codec": _safe(lambda: project.GetCurrentRenderFormatAndCodec(), {}) or {},
+           "rendering_now": bool(_safe(lambda: project.IsRenderingInProgress(), False)),
+           "jobs": []}
+    mode = _safe(lambda: project.GetCurrentRenderMode())
+    if mode in (0, 1):
+        out["render_mode"] = "individual clips" if mode == 0 else "single clip"
+    jobs = _safe(lambda: project.GetRenderJobList(), []) or []
+    for job in jobs[:MAX_RENDER_JOBS]:
+        if not isinstance(job, dict):
+            continue
+        entry = {key: job[key] for key in RENDER_JOB_FIELDS if job.get(key) not in ("", None)}
+        status = _safe(lambda j=job: project.GetRenderJobStatus(j.get("JobId")), {}) or {}
+        if isinstance(status, dict):
+            for key in ("JobStatus", "CompletionPercentage", "Error"):
+                if status.get(key) not in ("", None):
+                    entry[key] = status[key]
+        out["jobs"].append(entry)
+    if len(jobs) > MAX_RENDER_JOBS:
+        out["truncated"] = f"Showing the first {MAX_RENDER_JOBS} of {len(jobs)} render jobs."
+    return out
+
+
+def media_pool_overview(controller) -> dict:
+    """The Media Pool's bins - each with how many clips and timelines it
+    holds - and how many of the first MAX_PATHS_CHECKED clips point at a
+    file that isn't on this computer."""
+    project = _safe(controller.current_project)
+    pool = _safe(project.GetMediaPool) if project else None
+    root = _safe(pool.GetRootFolder) if pool else None
+    if not root:
+        return {"open": False, "reason": "No project is currently open in Resolve."}
+    bins, missing = [], []
+    clips = timelines = checked = 0
+    stack = [(root, _safe(root.GetName, "Master") or "Master")]
+    while stack:
+        folder, path = stack.pop()
+        here = there = 0
+        for clip in _safe(folder.GetClipList, []) or []:
+            if not _is_real_media_clip(clip):
+                there += 1
+                continue
+            here += 1
+            if checked < MAX_PATHS_CHECKED:
+                checked += 1
+                file_path = _safe(lambda c=clip: c.GetClipProperty("File Path"), "") or ""
+                if isinstance(file_path, str) and os.path.isabs(file_path) and not os.path.exists(file_path):
+                    missing.append(_safe(lambda c=clip: c.GetClipProperty("Clip Name"), "") or "")
+        clips += here
+        timelines += there
+        if len(bins) < MAX_BINS:
+            bins.append({"bin": path, "clips": here, "timelines": there})
+        for sub in reversed(_safe(folder.GetSubFolderList, []) or []):
+            stack.append((sub, f"{path} / {_safe(sub.GetName, '') or ''}"))
+    out = {"open": True, "clips": clips, "timelines": timelines, "bins": bins,
+           "current_bin": _safe(lambda: pool.GetCurrentFolder().GetName(), ""),
+           "source_files_checked": checked, "source_files_not_found": missing[:MAX_CLIPS * 3],
+           "source_files_not_found_count": len(missing)}
+    if clips > checked:
+        out["note"] = f"Only the first {checked} of {clips} clips had their source file looked for."
+    return out
+
+
+def audio_tracks(controller) -> dict:
+    """The current timeline's audio tracks: name, channel layout, whether
+    it's enabled, and how many clips it holds."""
+    project = _safe(controller.current_project)
+    timeline = _safe(project.GetCurrentTimeline) if project else None
+    if not timeline:
+        return {"open": bool(project), "reason": "No timeline is open."}
+    tracks = []
+    for track in range(1, int(_safe(lambda: timeline.GetTrackCount("audio"), 0) or 0) + 1):
+        items = _safe(lambda t=track: timeline.GetItemListInTrack("audio", t), []) or []
+        entry = {"track": f"A{track}", "name": _safe(lambda t=track: timeline.GetTrackName("audio", t), ""),
+                 "layout": _safe(lambda t=track: timeline.GetTrackSubType("audio", t), ""),
+                 "clips": len(items)}
+        enabled = _safe(lambda t=track: timeline.GetIsTrackEnabled("audio", t))
+        if enabled is not None:
+            entry["enabled"] = bool(enabled)
+        tracks.append(entry)
+    return {"open": True, "timeline": _safe(timeline.GetName, ""), "tracks": tracks}
+
+
+def _grade(item) -> dict:
+    """How one timeline clip is graded and set up, as far as the scripting
+    API tells: its nodes (label, tools, LUT), version, colour group, flags,
+    and its main Inspector values. Every call is its own try - an older
+    Resolve without one of them just leaves that part out."""
+    out = {}
+    graph = _safe(lambda: item.GetNodeGraph())
+    count = int(_safe(lambda: graph.GetNumNodes(), 0) or 0) if graph else 0
+    if graph:
+        out["node_count"] = count
+        nodes = []
+        for n in range(1, min(count, MAX_NODES) + 1):
+            node = {"node": n}
+            for key, method in (("label", "GetNodeLabel"), ("lut", "GetLUT"), ("tools", "GetToolsInNode")):
+                value = _safe(lambda m=method, i=n: getattr(graph, m)(i))
+                if value not in ("", None, []):
+                    node[key] = value
+            nodes.append(node)
+        out["nodes"] = nodes
+    version = _safe(lambda: item.GetCurrentVersion(), {}) or {}
+    if isinstance(version, dict) and version.get("versionName"):
+        out["version"] = {"name": version.get("versionName"),
+                          "type": "remote" if version.get("versionType") == 1 else "local"}
+    group = _safe(lambda: item.GetColorGroup())
+    if group:
+        out["color_group"] = _safe(lambda: group.GetName(), "")
+    for key, method in (("clip_color", "GetClipColor"), ("flags", "GetFlagList")):
+        value = _safe(lambda m=method: getattr(item, m)())
+        if value not in ("", None, []):
+            out[key] = value
+    enabled = _safe(lambda: item.GetClipEnabled())
+    if enabled is not None:
+        out["enabled"] = bool(enabled)
+    properties = _safe(lambda: item.GetProperties()) or _safe(lambda: item.GetProperty()) or {}
+    inspector = {key: properties[key] for key in ITEM_PROPERTIES if key in properties} \
+        if isinstance(properties, dict) else {}
+    if inspector:
+        out["inspector"] = inspector
+    return out
+
+
+def focused_clip_grade(controller) -> dict:
+    """focused_clip, with each clip's grade and Inspector settings."""
+    found = focused_clip(controller, with_items=True)
+    for clip, item in zip(found.get("clips", []), found.pop("_items", [])):
+        clip["grade"] = _grade(item)
+    return found
 
 
 def project_checkup(controller, max_items=500) -> dict:

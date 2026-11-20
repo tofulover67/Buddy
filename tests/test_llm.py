@@ -237,7 +237,7 @@ class PictureTests(unittest.TestCase):
         sent = self.sent(llm.PROVIDER_ANTHROPIC, {"content": [{"type": "text", "text": "ok"}]})
         self.assertEqual(sent["messages"][0]["content"], [
             {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": "QUJD"}},
-            {"type": "text", "text": "What's this panel?"}])
+            {"type": "text", "text": "What's this panel?", "cache_control": {"type": "ephemeral"}}])   # the newest message: a cache point
 
     def test_openai_shaped_ones_get_a_data_url(self):
         for provider in (llm.PROVIDER_OPENAI_API, llm.PROVIDER_OLLAMA, llm.PROVIDER_OPENROUTER):

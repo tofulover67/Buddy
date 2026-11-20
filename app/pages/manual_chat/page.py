@@ -5,13 +5,21 @@ actual open project. A web page (core/web_page.py): the
 view is web/index.html + chat.js; everything it shows is decided here.
 
 Protocol (see core/web_page.py for the mechanism):
-    to the view    transcript, append, controls, status, thinking,
-                   proposal, offer, toast, pictures, chat_list
-    from the view  send, copy, new_chat, prev_chat, next_chat, export,
-                   apply_proposal, discard_proposal, open_tool, open_manual,
-                   attach_image, paste_image, remove_picture,
-                   search_chats, select_chat, rename_chat, delete_chat,
-                   delete_all_chats, run_checkup, explain_clip
+    to the view    transcript, append, controls, status, thinking, stream,
+                   suggestions, compose, proposal, offer, toast, pictures,
+                   chat_list
+    from the view  send, stop, regenerate, edit_last, copy, new_chat,
+                   prev_chat, next_chat, export, apply_proposal,
+                   discard_proposal, open_tool, open_manual, attach_image,
+                   paste_image, remove_picture, search_chats, select_chat,
+                   rename_chat, pin_chat, delete_chat, delete_all_chats,
+                   run_checkup, explain_clip
+
+An answer streams: the worker hands over each piece as the model writes it
+(delta), the page keeps the draft and sends it to the view, rendered, a few
+times a second (stream). Stop lets go of the worker at once - the request
+it's in ends at the next piece, or when the server answers - and whatever
+it says after that is ignored (_on_done looks at who sent it).
 
 Pictures (pictures.py) can go with a question - picked, pasted or dropped -
 for a model that can see them; only that question carries them.
@@ -65,31 +73,57 @@ from .config import (
 from .conversation import (
     BUDDY,
     ERROR,
+    MAX_SOURCES,
     YOU,
     ChatSessions,
     block_view,
+    followups_view,
     help_text,
+    hide_followups,
     is_help,
+    md_to_html,
     shuffled_pool,
+    sources_from,
     suggestions,
+    unverified_pages,
 )
-from .retrieval import TIER_NONE, ManualRetriever
+from .retrieval import TIER_HYBRID, TIER_NONE, ManualRetriever
 from .resolve_ext import project_checkup, resolve_info
 from .settings_panel import ChatSettingsMixin
 
 PICTURE_FILTER = "Pictures (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.tif *.tiff);;All files (*)"
 PICTURE_ENDINGS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff")
 MANUAL_POLL_MS = 15     # how often a question waiting for the manual looks whether it's loaded
+STREAM_MS = 70          # how often an answer being written is redrawn
+EXPORT_FILTER = "Markdown (*.md);;Text files (*.txt)"
+
+# Offered under a project check-up, by what it found. Buddy's own words, so
+# they're translated (the model's follow-ups never are).
+CHECKUP_FOLLOWUPS = {
+    "frame_rate": "How should I handle clips whose frame rate doesn't match the timeline?",
+    "upscaled": "How can I make upscaled clips look sharper?",
+    "missing_path": "How do I relink missing media?",
+    "flag": "Flag the clips that don't match the timeline",
+    "clean": "What should I check before I render?",
+}
 
 
 class _AgentWorker(QThread):
     done = Signal(object)
     progress = Signal(str)
+    delta = Signal(object)      # a piece of the answer as it's written; None: clear what came so far
 
-    def __init__(self, agent, question, history, images=None):
+    def __init__(self, agent, question, history, images=None, stream=False, summary="", fold=0):
         super().__init__()
         self._agent, self._question, self._history = agent, question, history
-        self._images = images
+        self._images, self._stream = images, stream
+        self._summary, self.fold = summary, fold
+        self._stop = False
+
+    def stop(self):
+        """Stop when it next can (agent.ask's `cancelled`). Only a flag: the
+        thread is never killed, it's let go of."""
+        self._stop = True
 
     def run(self):
         """Always emits exactly once. ask() is written not to raise, but if
@@ -98,7 +132,9 @@ class _AgentWorker(QThread):
         answer instead."""
         try:
             result = self._agent.ask(
-                self._question, self._history, progress=self.progress.emit, images=self._images
+                self._question, self._history, progress=self.progress.emit, images=self._images,
+                on_text=self.delta.emit if self._stream else None, cancelled=lambda: self._stop,
+                summary=self._summary, fold=self.fold,
             )
         except Exception as e:  # noqa: BLE001 - surfaced in the transcript
             result = AgentResult(error=f"Unexpected failure: {e!r}")
@@ -136,6 +172,11 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._manual_gen = 0                # a reload's load replaces an older one still running
         self._manual_loaded.connect(self._on_manual_loaded)
         self._worker = None
+        self._stopped = []                  # workers let go of by Stop, until their thread ends
+        self._draft = ""                    # the answer so far, while it streams
+        self._stream_timer = QTimer(self)
+        self._stream_timer.setSingleShot(True)
+        self._stream_timer.timeout.connect(self._push_stream)
         self._sending = False
         self._thinking = ""
         self._pending_question = ""
@@ -174,6 +215,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._push_proposal()
         self._push_offer()
         self.emit("thinking", {"on": self._sending, "message": self._thinking})
+        self._push_stream()
 
     # ------------------------------------------------------------- wiring
 
@@ -256,7 +298,11 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         thread.join()                 # over by now: only tidies up
 
     def _status_text(self) -> str:
-        if self._retriever is None:
+        """The line under the composer - only when there's something to
+        know: the manual search isn't at its best (and why), or there is no
+        manual. With semantic search working it says nothing; that it works
+        is not news, and Settings > AI shows how it's set up."""
+        if self._retriever is None or self._retriever.tier == TIER_HYBRID:
             return ""
         note = self._retriever.describe_tier()
         if self._retriever.tier == TIER_NONE:
@@ -271,13 +317,15 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         # QThread destroyed while it runs takes the app down with it.
         # Likewise Set up's download, Test connection, a question on its way
         # and the check-up: each a QThread of this page's.
-        for name in ("_pinned_job", "_list_job", "_embed_job", "_llm_job", "_ending_job",
-                     "_worker", "_checkup_worker"):
-            job = getattr(self, name, None)
+        jobs = [getattr(self, name, None) for name in (
+            "_pinned_job", "_list_job", "_embed_job", "_llm_job", "_ending_job", "_worker", "_checkup_worker")]
+        for job in jobs + list(self._stopped):
             if job is None or not hasattr(job, "wait"):
                 continue
             if isinstance(getattr(job, "cancel", None), bool):
                 job.cancel = True           # _EmbedJob: stops between files
+            if isinstance(job, _AgentWorker):
+                job.stop()                  # a question on its way: no need to hear the answer out
             job.wait(10000)
 
     def _reload_manual(self, _result=None):
@@ -313,6 +361,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             edition=edition,
             prefetch_focus=prefetch_focus,
             allow_reads=allow_reads,
+            followups=bool(self.settings.get("suggest_followups", True)),
         )
 
     def _ask_to_read_project(self):
@@ -356,18 +405,35 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
 
     # ------------------------------------------------------------ the view
 
+    def _suggestions(self) -> dict:
+        """The buttons under the conversation: a new chat's starters, or
+        the questions offered with its last message. `raw` ones are the
+        model's own words, which the view leaves untranslated."""
+        if self.chats.is_empty():
+            return {"items": suggestions(self._suggestion_pool, bool(getattr(self.host, "connected", False))),
+                    "raw": False}
+        if self._sending or not self.settings.get("suggest_followups", True):
+            return {"items": [], "raw": False}
+        return followups_view(self.chats.blocks[-1] if self.chats.blocks else None)
+
+    def _push_suggestions(self):
+        self.emit("suggestions", self._suggestions())
+
     def _push_transcript(self):
+        offered = self._suggestions()
         self.emit("transcript", {
             "blocks": [block_view(i, b) for i, b in enumerate(self.chats.blocks)],
-            "suggestions": (suggestions(self._suggestion_pool, bool(getattr(self.host, "connected", False)))
-                            if self.chats.is_empty() else []),
+            "suggestions": offered["items"],
+            "suggestions_raw": offered["raw"],
         })
 
-    def _append(self, who, body, trace=None, error=False, copyable=False, images=None, raw=False, views=None):
+    def _append(self, who, body, trace=None, error=False, copyable=False, images=None, raw=False, views=None,
+                **more):
         block = self.chats.add(who, body, trace=trace, error=error, copyable=copyable, images=images, raw=raw,
-                               views=views)
+                               views=views, **more)
         self.emit("append", block_view(len(self.chats.blocks) - 1, block))
         self._persist_chats()
+        return block
 
     def _saving_disabled(self):
         return bool(self._chat_store_error and "Saving is disabled" in self._chat_store_error)
@@ -386,8 +452,13 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
 
     def _push_controls(self):
         chats = self.chats
+        turn = None if self._sending else chats.last_turn()
         self.emit("controls", {
             "sending": self._sending,
+            # Only a question to the model can be stopped; a check-up is over in a moment.
+            "can_stop": self._sending and self._worker is not None,
+            # The last question and its answer, by block: where Edit and Regenerate go.
+            "redo": {"q": turn[0], "a": turn[1]} if turn else None,
             "turns": chats.turns,
             "limit": history_limit(self.settings),
             "index": chats.index,
@@ -404,12 +475,8 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
 
     def _push_status(self):
         note = self._status_text()
-        controller = self.host.controller if getattr(self.host, "connected", False) else None
-        product = resolve_info(controller).get("product") if controller else ""
-        if product:
-            note = f"{product} · {note}"
         if self._chat_store_error:
-            note += "  " + self._chat_store_error
+            note = f"{note}  {self._chat_store_error}".strip()
         self.emit("status", {"text": note})
 
     def _toast(self, text):
@@ -553,11 +620,15 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
     # ------------------------------------------------------------ sending
 
     def on_send(self, payload):
+        """A question from the composer. With {"replace": true} it takes
+        the place of the last one (Edit): that turn comes off the
+        conversation first, and its pictures go with the new wording."""
         question = str((payload or {}).get("text") or "").strip()
         if (not question and not self.pictures) or self._sending:
             return
         if not question:
             question = "Take a look at this picture." if len(self.pictures) == 1 else "Take a look at these pictures."
+        replaced = self._drop_last_turn() if (payload or {}).get("replace") else None
 
         # Answered here, before the retriever is even loaded: "help" should
         # be instant and free, and it must describe what Buddy can actually
@@ -569,35 +640,150 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             self._push_controls()
             return
 
+        self.achieve("questions", 1)
+        sent, self.pictures = self.pictures, []
+        if sent or replaced is None:
+            previews, views = [p.preview for p in sent], [self._keep_view(p.view) for p in sent]
+            images = [p.for_model() for p in sent]
+        else:
+            previews, views, images = self._pictures_again(replaced)
+        self._ask(question, images, previews, views, focus=bool((payload or {}).get("focus")))
+
+    def on_regenerate(self, _payload=None):
+        """The last question, asked again: its answer comes off the
+        conversation (and out of what the model is re-sent) first."""
+        if self._sending:
+            return
+        question = self._drop_last_turn()
+        if question is None:
+            return
+        previews, views, images = self._pictures_again(question)
+        self._ask(question["body"], images, previews, views)
+
+    def on_edit_last(self, _payload=None):
+        """Edit was pressed on the last question: its words go to the
+        composer. Nothing is removed until the new wording is sent
+        (on_send's replace) - cancelling leaves the conversation as it was."""
+        turn = None if self._sending else self.chats.last_turn()
+        if turn is not None:
+            self.emit("compose", {"text": self.chats.blocks[turn[0]]["body"], "replace": True})
+
+    def _drop_last_turn(self):
+        """The last turn off the conversation, and what hung on it: the
+        change it proposed, the tool it offered. Its question's block, or
+        None when the conversation doesn't end on a question to the model."""
+        question = self.chats.drop_last_turn()
+        if question is None:
+            return None
+        self._hide_proposal()
+        self.chats.current.offer = None
+        self._push_offer()
+        self._push_transcript()
+        return question
+
+    def _pictures_again(self, block):
+        """(previews, views, pictures for the model) of a question being
+        asked again, from the larger copies kept when it was first sent. A
+        picture whose copy is gone (saving was off, an older chat) isn't
+        sent again, and isn't shown as if it had been."""
+        previews, views, images = [], [], []
+        for n, name in enumerate(block.get("views") or []):
+            data = self._views.get(name)
+            if data is None:
+                path = chat_store.picture_path(self.ask_folder, name)
+                try:
+                    data = path.read_bytes() if path is not None else None
+                except OSError:
+                    data = None
+            if data is None or n >= len(block.get("images") or []):
+                continue
+            previews.append(block["images"][n])
+            views.append(name)
+            images.append({"mime": pictures.MIME, "data": base64.b64encode(data).decode("ascii")})
+        return previews, views, images
+
+    def _ask(self, question, images, previews, views, focus=False):
+        """Put the question in the conversation and start the worker on it."""
         if self._retriever is None:
             self._load_manual_now()
         self._ask_to_read_project()
 
         self._pending_question = question
-        self.achieve("questions", 1)
-        sent, self.pictures = self.pictures, []
-        self._pending_pictures = len(sent)
-        self._append(YOU, question, images=[p.preview for p in sent], raw=True,
-                     views=[self._keep_view(p.view) for p in sent])
+        self._pending_pictures = len(previews)
+        self._append(YOU, question, images=previews, raw=True, views=views, asked=True)
         self._push_pictures()
+        self._draft = ""
         self._set_sending(True)
 
-        self._worker = _AgentWorker(self._build_agent(prefetch_focus=bool((payload or {}).get("focus"))), question, list(self.chats.history),
-                                    images=[p.for_model() for p in sent] or None)
+        chat = self.chats.current
+        self._worker = _AgentWorker(self._build_agent(prefetch_focus=focus), question,
+                                    self.chats.history_for_model(), images=images or None,
+                                    stream=bool(self.settings.get("stream_answers", True)),
+                                    summary=chat.summary, fold=self.chats.to_fold())
         self._worker.done.connect(self._on_done)
         self._worker.progress.connect(self._on_progress)
+        self._worker.delta.connect(self._on_delta)
         self._worker.finished.connect(self._clear_worker)
         self._worker.start()
+        self._push_controls()               # Stop, now there is something to stop
+
+    def _from_a_stopped_worker(self) -> bool:
+        """True for a signal from a worker Stop has let go of."""
+        sender = self.sender()
+        return isinstance(sender, _AgentWorker) and sender is not self._worker
 
     def _on_progress(self, message: str):
         """Queued from the worker thread - runs on the GUI thread."""
-        if self._sending:
+        if self._sending and not self._from_a_stopped_worker():
             self._thinking = message
             self.emit("thinking", {"on": True, "message": message})
 
+    def _on_delta(self, piece):
+        """A piece of the answer as the model writes it (None: what came so
+        far led to a tool call - clear it). Drawn at most every STREAM_MS."""
+        if not self._sending or self._from_a_stopped_worker():
+            return
+        self._draft = "" if piece is None else self._draft + str(piece)
+        if not self._stream_timer.isActive():
+            self._stream_timer.start(STREAM_MS)
+
+    def _push_stream(self):
+        draft = hide_followups(self._draft) if self._sending else ""
+        self.emit("stream", {"html": md_to_html(draft) if draft.strip() else ""})
+
+    def _end_stream(self) -> str:
+        """The draft, taken off the screen."""
+        draft, self._draft = self._draft, ""
+        self._stream_timer.stop()
+        self.emit("stream", {"html": ""})
+        return draft
+
+    def on_stop(self, _payload=None):
+        """Stop the answer on its way. What had been written stays, marked
+        as stopped - and out of what the model is re-sent, where half an
+        answer would read as a whole one."""
+        worker = self._worker
+        if worker is None or not self._sending:
+            return
+        worker.stop()
+        self._worker = None
+        self._stopped.append(worker)        # kept until its thread ends (_clear_worker)
+        draft = hide_followups(self._end_stream()).strip()
+        self._set_sending(False)
+        if draft:
+            self._append(BUDDY, draft, copyable=True, raw=True, answer=True, stopped=True)
+        else:
+            self._append(BUDDY, "Stopped before there was an answer.", answer=True, stopped=True)
+        self._push_controls()
+        self._push_suggestions()
+
     def _clear_worker(self):
         """done fires before finished, so _on_done has already run by now."""
-        worker, self._worker = self._worker, None
+        worker = self.sender() if isinstance(self.sender(), _AgentWorker) else self._worker
+        if worker is self._worker:
+            self._worker = None
+        if worker in self._stopped:
+            self._stopped.remove(worker)
         if worker is not None:
             worker.deleteLater()
 
@@ -609,8 +795,25 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         if not sending:
             self._push_status()
 
+    def _pages_read(self, passages) -> set:
+        """Every manual page the model has been handed in this conversation:
+        this answer's, and the earlier answers' (a follow-up may rightly
+        cite a page it was given two questions ago)."""
+        pages = {p.page for p in passages if isinstance(getattr(p, "page", None), int)}
+        for block in self.chats.blocks:
+            pages.update(s["page"] for s in block.get("sources") or [])
+        return pages
+
     def _on_done(self, result):
+        if self._from_a_stopped_worker():
+            return                          # Stop was pressed: nobody is waiting for this
+        worker = self._worker
+        self._end_stream()
         self._set_sending(False)
+        if result.summary is not None:
+            self.chats.folded(result.summary, getattr(worker, "fold", 0))
+        if result.cancelled:
+            return
         if result.error:
             error = result.error
             if self._pending_pictures:
@@ -618,15 +821,21 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
                           "can in Settings > AI > Chat assistant (a \"vision\" model – most recent GPT, Claude and "
                           "Gemini models can; for Ollama, e.g. gemma3 or llava) – or ask without it.")
             self._append(ERROR, error, error=True, copyable=True)
+            self._push_controls()
             return
 
         trace = [f"{e.name}: {e.summary}" for e in result.events]
-        block = self.chats.add(BUDDY, result.answer, trace=trace, copyable=True, raw=True)
+        block = self.chats.add(
+            BUDDY, result.answer, trace=trace, copyable=True, raw=True, answer=True,
+            sources=sources_from(result.passages)[:MAX_SOURCES],
+            unverified=unverified_pages(result.answer, self._pages_read(result.passages)),
+            followups=result.followups)
         self.emit("append", block_view(len(self.chats.blocks) - 1, block))
         self.chats.record_turn(self._pending_question, result.answer, history_limit(self.settings),
                                pictures=self._pending_pictures)
         self._persist_chats()
         self._push_controls()
+        self._push_suggestions()
 
         if result.proposed_action is not None:
             # Consent may have been revoked while this answer was in flight.
@@ -642,8 +851,10 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         if result.offered_tool:
             tool_id, reason = result.offered_tool
             tool = get_tool(tool_id, getattr(self.host, "registry", None))
-            self._set_offer({"tool_id": tool_id, "label": f"Open {tool.name if tool else tool_id}",
-                             "reason": reason})
+            offer = {"tool_id": tool_id, "label": f"Open {tool.name if tool else tool_id}", "reason": reason}
+            if result.offered_prefill:
+                offer["prefill"] = result.offered_prefill
+            self._set_offer(offer)
 
     def _set_offer(self, offer):
         self.chats.current.offer = offer
@@ -654,9 +865,21 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self.emit("offer", self.chats.current.offer)
 
     def on_open_tool(self, payload):
+        """The offered tool, in front - started with what the model handed
+        over for it, when it's a tool that takes that (ToolPage.prefill).
+        The text comes from the offer kept here, never from the view."""
         tool_id = (payload or {}).get("tool_id")
-        if tool_id:
-            self.host.switch_tool(tool_id)
+        if not tool_id:
+            return
+        self.host.switch_tool(tool_id)
+        offer = self.chats.current.offer or {}
+        text = offer.get("prefill") if offer.get("tool_id") == tool_id else ""
+        page = (getattr(self.host, "pages", None) or {}).get(tool_id)
+        if text and page is not None and not getattr(page, "is_placeholder", False):
+            try:
+                page.prefill(text)
+            except Exception as exc:  # noqa: BLE001 - the tool is open either way
+                self._toast(f"Couldn't hand that over to the tool: {exc}")
 
     def on_open_manual(self, payload):
         """A citation was clicked: the manual PDF, at its page."""
@@ -747,6 +970,16 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         if self.chats.rename(self.chats.index, (payload or {}).get("title") or ""):
             self._persist_chats()
             self._push_controls()
+
+    def on_pin_chat(self, payload):
+        """Pinned conversations stay at the top of Chats."""
+        try:
+            index = int((payload or {}).get("index"))
+        except (TypeError, ValueError):
+            return
+        if self.chats.pin(index, bool((payload or {}).get("on"))):
+            self._persist_chats()
+            self._push_chat_list()
 
     def on_delete_chat(self, payload):
         """One conversation, from Chats (the view has already confirmed).
@@ -841,15 +1074,32 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             lines += ["", report["truncated"]]
         lines += ["", "This check covers current timeline video formats and local source paths. It does not verify audio, render settings, proxy availability, or color accuracy."]
         answer = "\n".join(lines)
-        self._append(BUDDY, answer, copyable=True)
+        self._append(BUDDY, answer, copyable=True, followups=self._checkup_followups(issues), own_followups=True)
         self.chats.record_turn("Check my project", answer, history_limit(self.settings))
         self._persist_chats()
         self._push_controls()
+        self._push_suggestions()
         if any(issue.get("kind") == "missing_path" for issue in issues):
             tool = get_tool("media_relink", getattr(self.host, "registry", None))
             if tool and tool.is_available:
                 self._set_offer({"tool_id": "media_relink", "label": "Open Media Relink",
                                  "reason": "Some source file paths could not be found on this computer."})
+
+    def _checkup_followups(self, issues) -> list:
+        """What to ask next about what the check-up found - one click each."""
+        details = " ".join(d for issue in issues for d in issue.get("details") or [])
+        asks = []
+        if "frame rate" in details:
+            asks.append(CHECKUP_FOLLOWUPS["frame_rate"])
+        if "upscaled" in details:
+            asks.append(CHECKUP_FOLLOWUPS["upscaled"])
+        if any(issue.get("kind") == "missing_path" for issue in issues):
+            asks.append(CHECKUP_FOLLOWUPS["missing_path"])
+        # A change to the project is only offered where those are switched on.
+        if (any(issue.get("kind") == "format" for issue in issues)
+                and self.settings.get("allow_project_writes", False)):
+            asks.append(CHECKUP_FOLLOWUPS["flag"])
+        return asks[:3] or [CHECKUP_FOLLOWUPS["clean"]]
 
     def _on_history_limit_changed(self):
         self.chats.trim(history_limit(self.settings))
@@ -867,18 +1117,22 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             self._toast("Copied to clipboard")
 
     def on_export(self, _payload):
-        """Save the whole current conversation as plain text. The file
-        dialog starts in the user's Downloads folder, with a timestamped
-        default name, and lets them pick a different place."""
+        """Save the whole current conversation, as Markdown (the answers
+        as written, with their sources) or as plain text - whichever the
+        file's ending says. The file dialog starts in the user's Downloads
+        folder, with a timestamped default name, and lets them pick a
+        different place."""
         downloads = QStandardPaths.writableLocation(QStandardPaths.DownloadLocation) or str(Path.home())
-        default_name = f"Buddy Chat {datetime.now().strftime('%Y-%m-%d %H%M%S')}.txt"
+        default_name = f"Buddy Chat {datetime.now().strftime('%Y-%m-%d %H%M%S')}.md"
         path, _filter = QFileDialog.getSaveFileName(
-            self, tr("Export conversation"), str(Path(downloads) / default_name), tr_filter("Text files (*.txt)")
+            self, tr("Export conversation"), str(Path(downloads) / default_name), tr_filter(EXPORT_FILTER)
         )
         if not path:
             return
+        plain = path.lower().endswith(".txt")
         try:
-            Path(path).write_text(self.chats.export_text(), encoding="utf-8")
+            Path(path).write_text(self.chats.export_text() if plain else self.chats.export_markdown(),
+                                  encoding="utf-8")
         except OSError as e:
             self._toast(f"Could not save the file: {e}")
             return

@@ -2,7 +2,8 @@
 MediaOut1 - written as the text of a .comp file. A clip takes it with
 ImportFusionComp, and the Edit page renders an imported comp straight away (nodes
 built through the API don't render until they've been through an export and import
-anyway, motion_resolve.py). Pure: no Resolve, so it's tested on its own.
+anyway, motion_resolve.py). Pure: no Resolve, so it's tested on its own. The writers
+of a comp's text (inputs, tools, splines, merges) are core/fusion_comp.py's.
 
 Where each word goes, from the composer's box (frame px, top-down):
   Size     the letter size over Text+'s px per Size (canvas_math: ascent + descent
@@ -35,6 +36,10 @@ are the same as a still word's. A word's copies are keyed the same way, offset f
 import json
 import math
 
+from core.fusion_comp import (Lua as _Lua, block as _block, clear as _clear, feed as _feed, input_ as _input,
+                              merge as _merge, num as _num, path as _path, rgba as _rgba, spline as _spline,
+                              straight as _straight, wired as _wired)
+
 from .. import canvas_math as cm
 from . import kinetic
 from . import looks as L
@@ -45,38 +50,6 @@ SOFTNESS_PER_BLUR = 55.0            # shadow Softness per blur (share of the let
 BLUR_SIZE_PER_PX = 0.5              # Blur's XBlurSize per px of the preview's blur radius - by eye, 21.1
 GRADIENT_PER_WORD = 3               # ShadingMappingLevel: 0 frame, 1 text, 2 line, 3 word, 4 character
 _OUTLINE_ELEMENTS = (2, 5, 6, 7, 8)
-
-
-def _rgba(value, fallback="#ffffff"):
-    """(r, g, b, a) in 0..1 from "#rrggbb", "#rrggbbaa" or "rgba(r, g, b, a)"."""
-    text = str(value or fallback).strip()
-    if text.startswith("rgb"):
-        parts = [float(p) for p in text[text.index("(") + 1:text.index(")")].split(",")]
-        return parts[0] / 255, parts[1] / 255, parts[2] / 255, parts[3] if len(parts) > 3 else 1.0
-    text = text.lstrip("#")
-    if len(text) not in (6, 8):
-        return _rgba(fallback, "#ffffff")
-    rgb = [int(text[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-    return (*rgb, int(text[6:8], 16) / 255 if len(text) == 8 else 1.0)
-
-
-def _num(v):
-    return f"{v:.6g}"
-
-
-class _Lua(str):
-    """A value already written as Lua (a Gradient table): never quoted."""
-
-
-def _input(name, value):
-    if isinstance(value, _Lua):
-        return f"{name} = Input {{ Value = {value}, }},"
-    if isinstance(value, str):
-        # The text as it is: Lua reads a JSON string's \" \\ \n, but not \uXXXX.
-        return f"{name} = Input {{ Value = {json.dumps(value, ensure_ascii=False)}, }},"
-    if isinstance(value, (tuple, list)):
-        return f"{name} = Input {{ Value = {{ {', '.join(_num(v) for v in value)} }}, }},"
-    return f"{name} = Input {{ Value = {_num(value)}, }},"
 
 
 def text_plus_size(box, frame_w):
@@ -178,57 +151,6 @@ def _tool(name, box, style, frame, pos, comp_frames, wired=None):
     body = "\n".join(f"\t\t\t\t{_wired(k, wired[k]) if k in wired else _input(k, v)}" for k, v in inputs)
     return (f"\t\t{name} = TextPlus {{\n\t\t\tInputs = {{\n{body}\n\t\t\t}},\n"
             f"\t\t\tViewInfo = OperatorInfo {{ Pos = {{ {pos[0]}, {pos[1]} }} }},\n\t\t}},")
-
-
-def _spline(name, points):
-    """A BezierSpline keyed at (frame, value) points, straight between them (handles a
-    third of the way along, Linear) - so Fusion plays exactly the sampled values."""
-    rows = []
-    for n, (f, v) in enumerate(points):
-        parts = [_num(v)]
-        if n > 0:
-            pf, pv = points[n - 1]
-            parts.append(f"LH = {{ {_num(f - (f - pf) / 3)}, {_num(v - (v - pv) / 3)} }}")
-        if n < len(points) - 1:
-            nf, nv = points[n + 1]
-            parts.append(f"RH = {{ {_num(f + (nf - f) / 3)}, {_num(v + (nv - v) / 3)} }}")
-        parts.append("Flags = { Linear = true }")
-        rows.append(f"\t\t\t\t[{int(f)}] = {{ {', '.join(parts)} }},")
-    return (f"\t\t{name} = BezierSpline {{\n\t\t\tSplineColor = {{ Red = 255, Green = 128, Blue = 0 }},\n"
-            f"\t\t\tNameSet = true,\n\t\t\tKeyFrames = {{\n" + "\n".join(rows) + "\n\t\t\t}\n\t\t},")
-
-
-def _wired(name, source):
-    return f"{name} = Input {{ SourceOp = \"{source}\", Source = \"Value\", }},"
-
-
-def _block(name, kind, inputs, pos, extra=""):
-    body = "\n".join(f"\t\t\t\t{x}" for x in inputs)
-    return (f"\t\t{name} = {kind} {{\n{extra}\t\t\tInputs = {{\n{body}\n\t\t\t}},\n"
-            f"\t\t\tViewInfo = OperatorInfo {{ Pos = {{ {pos[0]}, {pos[1]} }} }},\n\t\t}},")
-
-
-def _feed(name, source):
-    return f"{name} = Input {{ SourceOp = \"{source}\", Source = \"Output\", }},"
-
-
-def _clear(name, frame, comp_frames, pos):
-    """A transparent Background the size of the frame: a canvas to merge onto."""
-    fw, fh = frame
-    return _block(name, "Background", [_input("GlobalOut", comp_frames - 1), _input("Width", fw), _input("Height", fh),
-                                       _input("UseFrameFormatSettings", 1), _input("TopLeftAlpha", 0)], pos)
-
-
-def _merge(name, background, foreground, pos, extra=()):
-    return _block(name, "Merge", [_feed("Background", background), _feed("Foreground", foreground), *extra,
-                                  _input("PerformDepthMerge", 0)], pos)
-
-
-def _path(name, xs, ys, pos):
-    """An XYPath keyed from (frame, value) points for x and y - a Point input's motion."""
-    return [_spline(f"{name}X", xs), _spline(f"{name}Y", ys),
-            _block(name, "XYPath", [_wired("X", f"{name}X"), _wired("Y", f"{name}Y")], pos,
-                   "\t\t\tShowKeyPoints = false,\n\t\t\tDrawMode = \"ModifyOnly\",\n")]
 
 
 def _at(points, f):
@@ -359,18 +281,6 @@ def _pose(box, state, frame):
     r = math.radians(rot)
     px, py = cx - math.sin(r) * (ty - cy), cy + math.cos(r) * (ty - cy)
     return size / (cm._px_per_size(family, style) * fw), px / fw, 1 - py / fh, -rot
-
-
-def _straight(points):
-    """(frame, value) keys less those in the middle of a straight run."""
-    if len(points) < 3:
-        return points
-    kept = [points[0]]
-    for prev, cur, nxt in zip(points, points[1:], points[2:]):
-        if abs((cur[1] - prev[1]) - (nxt[1] - cur[1])) > 1e-7 or cur[0] - prev[0] != nxt[0] - cur[0]:
-            kept.append(cur)
-    kept.append(points[-1])
-    return kept
 
 
 def _kinetic_frames(word, camera, fps, comp_frames):

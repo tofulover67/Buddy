@@ -31,7 +31,7 @@ docs/RESOLVE_API_GUIDE.md  Resolve scripting traps - read before calling Resolve
 
 Four tools are a row of sub tabs, each sub tab a page package of its own:
 `podcast/` (sync, switch, text_edit, shorts) and `data_graphics/` (counters,
-graphs - not built yet, see `docs/DATA_GRAPHICS_PLAN.md`) hold theirs inside
+graphs - what's still to build is in `docs/DATA_GRAPHICS_PLAN.md`) hold theirs inside
 the host's folder; `media_manager/` (batch_clip_renamer, media_relink) and
 `marker_manager/` (stills_exporter, youtube_chapters) hold theirs beside it.
 

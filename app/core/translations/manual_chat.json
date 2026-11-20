@@ -3319,5 +3319,385 @@
   "中文": "，然后选择其中一个模型。将密钥留空则使用环境中的 $OPENROUTER_API_KEY。",
   "العربية": "، ثم اختر أحد نماذجه. اترك المفتاح فارغًا لاستخدام $OPENROUTER_API_KEY من بيئتك بدلًا من ذلك.",
   "Tiếng Việt": ", rồi chọn một mô hình của nó. Để trống khóa để dùng $OPENROUTER_API_KEY từ môi trường của bạn."
+ },
+ "Stop this answer": {
+  "日本語": "この回答を停止",
+  "Español": "Detener esta respuesta",
+  "Deutsch": "Diese Antwort stoppen",
+  "Français": "Arrêter cette réponse",
+  "한국어": "이 답변 중지",
+  "中文": "停止此回答",
+  "العربية": "إيقاف هذه الإجابة",
+  "Tiếng Việt": "Dừng câu trả lời này"
+ },
+ "Stopped before there was an answer.": {
+  "日本語": "回答が始まる前に停止しました。",
+  "Español": "Se detuvo antes de que hubiera una respuesta.",
+  "Deutsch": "Gestoppt, bevor es eine Antwort gab.",
+  "Français": "Arrêté avant qu'il y ait une réponse.",
+  "한국어": "답변이 나오기 전에 중지했습니다.",
+  "中文": "在有回答之前已停止。",
+  "العربية": "تم الإيقاف قبل ظهور أي إجابة.",
+  "Tiếng Việt": "Đã dừng trước khi có câu trả lời."
+ },
+ "1 manual page read": {
+  "日本語": "マニュアルを1ページ参照",
+  "Español": "1 página del manual leída",
+  "Deutsch": "1 Handbuchseite gelesen",
+  "Français": "1 page du manuel lue",
+  "한국어": "매뉴얼 1쪽 읽음",
+  "中文": "已阅读手册 1 页",
+  "العربية": "تمت قراءة صفحة واحدة من الدليل",
+  "Tiếng Việt": "Đã đọc 1 trang hướng dẫn"
+ },
+ "{count} manual pages read": {
+  "日本語": "マニュアルを{count}ページ参照",
+  "Español": "{count} páginas del manual leídas",
+  "Deutsch": "{count} Handbuchseiten gelesen",
+  "Français": "{count} pages du manuel lues",
+  "한국어": "매뉴얼 {count}쪽 읽음",
+  "中文": "已阅读手册 {count} 页",
+  "العربية": "تمت قراءة {count} صفحات من الدليل",
+  "Tiếng Việt": "Đã đọc {count} trang hướng dẫn"
+ },
+ "Page {page} is cited here, but it isn't among the manual pages Buddy read for this conversation – check it before relying on it.": {
+  "日本語": "ここで{page}ページが引用されていますが、この会話でBuddyが読んだマニュアルのページには含まれていません。頼る前に確認してください。",
+  "Español": "Aquí se cita la página {page}, pero no está entre las páginas del manual que Buddy leyó para esta conversación; compruébala antes de fiarte de ella.",
+  "Deutsch": "Hier wird Seite {page} zitiert, sie gehört aber nicht zu den Handbuchseiten, die Buddy für dieses Gespräch gelesen hat – bitte prüfen, bevor du dich darauf verlässt.",
+  "Français": "La page {page} est citée ici, mais elle ne fait pas partie des pages du manuel que Buddy a lues pour cette conversation – vérifiez-la avant de vous y fier.",
+  "한국어": "여기에 {page}쪽이 인용되었지만, 이 대화에서 Buddy가 읽은 매뉴얼 쪽에는 없습니다. 믿기 전에 확인하세요.",
+  "中文": "此处引用了第 {page} 页，但它不在 Buddy 为本次对话阅读的手册页面之中，请先核对再采信。",
+  "العربية": "تم الاستشهاد هنا بالصفحة {page}، لكنها ليست ضمن صفحات الدليل التي قرأها Buddy في هذه المحادثة – تحقق منها قبل الاعتماد عليها.",
+  "Tiếng Việt": "Trang {page} được trích dẫn ở đây, nhưng không nằm trong các trang hướng dẫn mà Buddy đã đọc cho cuộc trò chuyện này – hãy kiểm tra trước khi tin dùng."
+ },
+ "Pages {pages} are cited here, but they aren't among the manual pages Buddy read for this conversation – check them before relying on them.": {
+  "日本語": "ここで{pages}ページが引用されていますが、この会話でBuddyが読んだマニュアルのページには含まれていません。頼る前に確認してください。",
+  "Español": "Aquí se citan las páginas {pages}, pero no están entre las páginas del manual que Buddy leyó para esta conversación; compruébalas antes de fiarte de ellas.",
+  "Deutsch": "Hier werden die Seiten {pages} zitiert, sie gehören aber nicht zu den Handbuchseiten, die Buddy für dieses Gespräch gelesen hat – bitte prüfen, bevor du dich darauf verlässt.",
+  "Français": "Les pages {pages} sont citées ici, mais elles ne font pas partie des pages du manuel que Buddy a lues pour cette conversation – vérifiez-les avant de vous y fier.",
+  "한국어": "여기에 {pages}쪽이 인용되었지만, 이 대화에서 Buddy가 읽은 매뉴얼 쪽에는 없습니다. 믿기 전에 확인하세요.",
+  "中文": "此处引用了第 {pages} 页，但它们不在 Buddy 为本次对话阅读的手册页面之中，请先核对再采信。",
+  "العربية": "تم الاستشهاد هنا بالصفحات {pages}، لكنها ليست ضمن صفحات الدليل التي قرأها Buddy في هذه المحادثة – تحقق منها قبل الاعتماد عليها.",
+  "Tiếng Việt": "Các trang {pages} được trích dẫn ở đây, nhưng không nằm trong các trang hướng dẫn mà Buddy đã đọc cho cuộc trò chuyện này – hãy kiểm tra trước khi tin dùng."
+ },
+ "Change this question and ask again": {
+  "日本語": "この質問を変更して再度質問",
+  "Español": "Cambiar esta pregunta y volver a preguntar",
+  "Deutsch": "Diese Frage ändern und erneut stellen",
+  "Français": "Modifier cette question et la reposer",
+  "한국어": "이 질문을 고쳐서 다시 묻기",
+  "中文": "修改此问题并重新提问",
+  "العربية": "تعديل هذا السؤال وطرحه من جديد",
+  "Tiếng Việt": "Sửa câu hỏi này và hỏi lại"
+ },
+ "Ask this question again": {
+  "日本語": "この質問をもう一度する",
+  "Español": "Volver a hacer esta pregunta",
+  "Deutsch": "Diese Frage erneut stellen",
+  "Français": "Reposer cette question",
+  "한국어": "이 질문 다시 묻기",
+  "中文": "重新提出此问题",
+  "العربية": "طرح هذا السؤال مرة أخرى",
+  "Tiếng Việt": "Hỏi lại câu hỏi này"
+ },
+ "Ask the question again for a new answer": {
+  "日本語": "質問をもう一度して新しい回答を得る",
+  "Español": "Volver a preguntar para obtener una respuesta nueva",
+  "Deutsch": "Die Frage erneut stellen, um eine neue Antwort zu erhalten",
+  "Français": "Reposer la question pour obtenir une nouvelle réponse",
+  "한국어": "질문을 다시 해서 새 답변 받기",
+  "中文": "重新提问以获得新的回答",
+  "العربية": "طرح السؤال مرة أخرى للحصول على إجابة جديدة",
+  "Tiếng Việt": "Hỏi lại để nhận câu trả lời mới"
+ },
+ "Unpin this conversation": {
+  "日本語": "この会話のピン留めを解除",
+  "Español": "Desfijar esta conversación",
+  "Deutsch": "Dieses Gespräch lösen",
+  "Français": "Désépingler cette conversation",
+  "한국어": "이 대화 고정 해제",
+  "中文": "取消固定此对话",
+  "العربية": "إلغاء تثبيت هذه المحادثة",
+  "Tiếng Việt": "Bỏ ghim cuộc trò chuyện này"
+ },
+ "Pin this conversation to the top": {
+  "日本語": "この会話を一番上にピン留め",
+  "Español": "Fijar esta conversación arriba",
+  "Deutsch": "Dieses Gespräch oben anheften",
+  "Français": "Épingler cette conversation en haut",
+  "한국어": "이 대화를 맨 위에 고정",
+  "中文": "将此对话固定在顶部",
+  "العربية": "تثبيت هذه المحادثة في الأعلى",
+  "Tiếng Việt": "Ghim cuộc trò chuyện này lên đầu"
+ },
+ "Starts with:": {
+  "日本語": "開始時の入力：",
+  "Español": "Empieza con:",
+  "Deutsch": "Beginnt mit:",
+  "Français": "Commence avec :",
+  "한국어": "시작 내용:",
+  "中文": "起始内容：",
+  "العربية": "يبدأ بـ:",
+  "Tiếng Việt": "Bắt đầu với:"
+ },
+ "Editing your last question – sending it replaces that question and its answer.": {
+  "日本語": "最後の質問を編集中 – 送信すると、その質問と回答が置き換えられます。",
+  "Español": "Editando tu última pregunta: al enviarla se sustituyen esa pregunta y su respuesta.",
+  "Deutsch": "Du bearbeitest deine letzte Frage – beim Senden werden diese Frage und ihre Antwort ersetzt.",
+  "Français": "Modification de votre dernière question – l'envoyer remplace cette question et sa réponse.",
+  "한국어": "마지막 질문을 편집하는 중 – 보내면 그 질문과 답변이 바뀝니다.",
+  "中文": "正在编辑上一个问题 – 发送后将替换该问题及其回答。",
+  "العربية": "تعديل سؤالك الأخير – إرساله يستبدل ذلك السؤال وإجابته.",
+  "Tiếng Việt": "Đang sửa câu hỏi gần nhất – gửi đi sẽ thay thế câu hỏi đó và câu trả lời của nó."
+ },
+ "Save this conversation as Markdown or plain text": {
+  "日本語": "この会話をMarkdownまたはプレーンテキストで保存",
+  "Español": "Guardar esta conversación como Markdown o texto sin formato",
+  "Deutsch": "Dieses Gespräch als Markdown oder reinen Text speichern",
+  "Français": "Enregistrer cette conversation en Markdown ou en texte brut",
+  "한국어": "이 대화를 Markdown 또는 일반 텍스트로 저장",
+  "中文": "将此对话保存为 Markdown 或纯文本",
+  "العربية": "حفظ هذه المحادثة بصيغة Markdown أو كنص عادي",
+  "Tiếng Việt": "Lưu cuộc trò chuyện này dưới dạng Markdown hoặc văn bản thuần"
+ },
+ "Show answers as they're written": {
+  "日本語": "回答を書かれるそばから表示",
+  "Español": "Mostrar las respuestas mientras se escriben",
+  "Deutsch": "Antworten anzeigen, während sie geschrieben werden",
+  "Français": "Afficher les réponses au fil de leur rédaction",
+  "한국어": "답변을 작성되는 대로 표시",
+  "中文": "边生成边显示回答",
+  "العربية": "عرض الإجابات أثناء كتابتها",
+  "Tiếng Việt": "Hiển thị câu trả lời ngay khi đang được viết"
+ },
+ "The answer appears word by word instead of all at once. A server that can't do this is asked the ordinary way.": {
+  "日本語": "回答が一度にではなく、少しずつ表示されます。これに対応していないサーバーには通常の方法で問い合わせます。",
+  "Español": "La respuesta aparece palabra por palabra en lugar de toda de una vez. A un servidor que no pueda hacerlo se le pregunta de la forma habitual.",
+  "Deutsch": "Die Antwort erscheint Wort für Wort statt auf einmal. Ein Server, der das nicht kann, wird auf die übliche Weise gefragt.",
+  "Français": "La réponse apparaît mot à mot au lieu d'un seul coup. Un serveur qui ne le permet pas est interrogé de la façon habituelle.",
+  "한국어": "답변이 한꺼번에가 아니라 한 단어씩 나타납니다. 이를 지원하지 않는 서버에는 일반 방식으로 요청합니다.",
+  "中文": "回答会逐字出现，而不是一次全部显示。不支持此功能的服务器将按普通方式请求。",
+  "العربية": "تظهر الإجابة كلمة كلمة بدلاً من ظهورها دفعة واحدة. الخادم الذي لا يدعم ذلك يُسأل بالطريقة العادية.",
+  "Tiếng Việt": "Câu trả lời hiện ra từng từ thay vì cùng một lúc. Máy chủ không hỗ trợ sẽ được hỏi theo cách thông thường."
+ },
+ "Suggest follow-up questions": {
+  "日本語": "続きの質問を提案",
+  "Español": "Sugerir preguntas de seguimiento",
+  "Deutsch": "Anschlussfragen vorschlagen",
+  "Français": "Suggérer des questions de suivi",
+  "한국어": "후속 질문 제안",
+  "中文": "建议后续问题",
+  "العربية": "اقتراح أسئلة متابعة",
+  "Tiếng Việt": "Gợi ý câu hỏi tiếp theo"
+ },
+ "Up to three questions under each answer that you can ask with a click.": {
+  "日本語": "各回答の下に、クリックで質問できる候補を最大3つ表示します。",
+  "Español": "Hasta tres preguntas bajo cada respuesta que puedes hacer con un clic.",
+  "Deutsch": "Bis zu drei Fragen unter jeder Antwort, die du per Klick stellen kannst.",
+  "Français": "Jusqu'à trois questions sous chaque réponse, à poser d'un clic.",
+  "한국어": "각 답변 아래에 클릭 한 번으로 물을 수 있는 질문을 최대 세 개 보여 줍니다.",
+  "中文": "每个回答下方最多显示三个可一键提问的问题。",
+  "العربية": "حتى ثلاثة أسئلة تحت كل إجابة يمكنك طرحها بنقرة.",
+  "Tiếng Việt": "Tối đa ba câu hỏi dưới mỗi câu trả lời, hỏi chỉ bằng một cú nhấp."
+ },
+ "Past question/answer pairs replayed to the model each request; older ones are kept as a short summary. 0 means every question is standalone.": {
+  "日本語": "リクエストごとにモデルへ再送する過去の質問と回答の組数です。それより古いものは短い要約として保持されます。0にすると、どの質問も単独になります。",
+  "Español": "Pares de pregunta y respuesta anteriores que se reenvían al modelo en cada petición; los más antiguos se conservan como un resumen breve. 0 significa que cada pregunta es independiente.",
+  "Deutsch": "Frühere Frage-Antwort-Paare, die dem Modell bei jeder Anfrage erneut gesendet werden; ältere bleiben als kurze Zusammenfassung erhalten. 0 bedeutet, dass jede Frage für sich steht.",
+  "Français": "Paires question/réponse précédentes renvoyées au modèle à chaque requête ; les plus anciennes sont conservées sous forme de court résumé. 0 signifie que chaque question est indépendante.",
+  "한국어": "요청마다 모델에 다시 보내는 이전 질문/답변 쌍의 수입니다. 그보다 오래된 것은 짧은 요약으로 유지됩니다. 0이면 모든 질문이 독립적입니다.",
+  "中文": "每次请求重新发送给模型的历史问答对数量；更早的内容会保留为简短摘要。0 表示每个问题都独立。",
+  "العربية": "أزواج الأسئلة والأجوبة السابقة التي يُعاد إرسالها إلى النموذج مع كل طلب؛ الأقدم منها يُحفظ كملخص قصير. 0 يعني أن كل سؤال مستقل.",
+  "Tiếng Việt": "Số cặp hỏi/đáp trước đó được gửi lại cho mô hình mỗi lần yêu cầu; những cặp cũ hơn được giữ dưới dạng tóm tắt ngắn. 0 nghĩa là mỗi câu hỏi độc lập."
+ },
+ "How should I handle clips whose frame rate doesn't match the timeline?": {
+  "日本語": "フレームレートがタイムラインと合わないクリップはどう扱えばいいですか？",
+  "Español": "¿Cómo debo tratar los clips cuya frecuencia de fotogramas no coincide con la línea de tiempo?",
+  "Deutsch": "Wie gehe ich mit Clips um, deren Bildrate nicht zur Timeline passt?",
+  "Français": "Comment traiter les clips dont la fréquence d'images ne correspond pas à la timeline ?",
+  "한국어": "프레임 속도가 타임라인과 맞지 않는 클립은 어떻게 처리해야 하나요?",
+  "中文": "帧率与时间线不一致的片段该如何处理？",
+  "العربية": "كيف أتعامل مع المقاطع التي لا يطابق معدل إطاراتها الخط الزمني؟",
+  "Tiếng Việt": "Tôi nên xử lý thế nào với các clip có tốc độ khung hình không khớp với timeline?"
+ },
+ "How can I make upscaled clips look sharper?": {
+  "日本語": "拡大されたクリップをよりシャープに見せるには？",
+  "Español": "¿Cómo puedo hacer que los clips escalados se vean más nítidos?",
+  "Deutsch": "Wie bekomme ich hochskalierte Clips schärfer?",
+  "Français": "Comment rendre plus nets les clips agrandis ?",
+  "한국어": "확대된 클립을 더 선명하게 보이게 하려면?",
+  "中文": "如何让放大的片段看起来更清晰？",
+  "العربية": "كيف أجعل المقاطع المكبّرة تبدو أكثر حدة؟",
+  "Tiếng Việt": "Làm sao để các clip bị phóng to trông sắc nét hơn?"
+ },
+ "How do I relink missing media?": {
+  "日本語": "見つからないメディアを再リンクするには？",
+  "Español": "¿Cómo vuelvo a vincular los medios que faltan?",
+  "Deutsch": "Wie verknüpfe ich fehlende Medien neu?",
+  "Français": "Comment relier les médias manquants ?",
+  "한국어": "누락된 미디어를 다시 연결하려면?",
+  "中文": "如何重新链接丢失的媒体？",
+  "العربية": "كيف أعيد ربط الوسائط المفقودة؟",
+  "Tiếng Việt": "Làm sao để liên kết lại media bị thiếu?"
+ },
+ "Flag the clips that don't match the timeline": {
+  "日本語": "タイムラインと合わないクリップにフラグを付けて",
+  "Español": "Marca con una bandera los clips que no coinciden con la línea de tiempo",
+  "Deutsch": "Markiere die Clips, die nicht zur Timeline passen, mit einer Flagge",
+  "Français": "Signale par un drapeau les clips qui ne correspondent pas à la timeline",
+  "한국어": "타임라인과 맞지 않는 클립에 플래그를 달아 줘",
+  "中文": "给与时间线不一致的片段加上旗标",
+  "العربية": "ضع علامة على المقاطع التي لا تطابق الخط الزمني",
+  "Tiếng Việt": "Gắn cờ cho các clip không khớp với timeline"
+ },
+ "What should I check before I render?": {
+  "日本語": "レンダリングの前に何を確認すべきですか？",
+  "Español": "¿Qué debo comprobar antes de renderizar?",
+  "Deutsch": "Was sollte ich vor dem Rendern prüfen?",
+  "Français": "Que dois-je vérifier avant le rendu ?",
+  "한국어": "렌더링 전에 무엇을 확인해야 하나요?",
+  "中文": "渲染前我应该检查什么？",
+  "العربية": "ما الذي يجب أن أتحقق منه قبل التصيير؟",
+  "Tiếng Việt": "Tôi nên kiểm tra gì trước khi kết xuất?"
+ },
+ "Reading the manual, page {page}…": {
+  "日本語": "マニュアルの{page}ページを読んでいます…",
+  "Español": "Leyendo el manual, página {page}…",
+  "Deutsch": "Handbuch wird gelesen, Seite {page}…",
+  "Français": "Lecture du manuel, page {page}…",
+  "한국어": "매뉴얼 {page}쪽을 읽는 중…",
+  "中文": "正在阅读手册第 {page} 页…",
+  "العربية": "جارٍ قراءة الدليل، الصفحة {page}…",
+  "Tiếng Việt": "Đang đọc hướng dẫn, trang {page}…"
+ },
+ "Reading the manual, pages {first}–{last}…": {
+  "日本語": "マニュアルの{first}～{last}ページを読んでいます…",
+  "Español": "Leyendo el manual, páginas {first}–{last}…",
+  "Deutsch": "Handbuch wird gelesen, Seiten {first}–{last}…",
+  "Français": "Lecture du manuel, pages {first}–{last}…",
+  "한국어": "매뉴얼 {first}–{last}쪽을 읽는 중…",
+  "中文": "正在阅读手册第 {first}–{last} 页…",
+  "العربية": "جارٍ قراءة الدليل، الصفحات {first}–{last}…",
+  "Tiếng Việt": "Đang đọc hướng dẫn, trang {first}–{last}…"
+ },
+ "Catching up on the conversation…": {
+  "日本語": "これまでの会話を整理しています…",
+  "Español": "Poniéndose al día con la conversación…",
+  "Deutsch": "Das bisherige Gespräch wird zusammengefasst…",
+  "Français": "Récapitulation de la conversation…",
+  "한국어": "지금까지의 대화를 정리하는 중…",
+  "中文": "正在整理之前的对话…",
+  "العربية": "جارٍ تلخيص ما سبق من المحادثة…",
+  "Tiếng Việt": "Đang tóm lược cuộc trò chuyện…"
+ },
+ "Searching Buddy’s documentation: \"{query}\"": {
+  "日本語": "Buddyのドキュメントを検索中：「{query}」",
+  "Español": "Buscando en la documentación de Buddy: \"{query}\"",
+  "Deutsch": "Buddys Dokumentation wird durchsucht: \"{query}\"",
+  "Français": "Recherche dans la documentation de Buddy : \"{query}\"",
+  "한국어": "Buddy 문서 검색 중: \"{query}\"",
+  "中文": "正在搜索 Buddy 的文档：\"{query}\"",
+  "العربية": "جارٍ البحث في وثائق Buddy: \"{query}\"",
+  "Tiếng Việt": "Đang tìm trong tài liệu của Buddy: \"{query}\""
+ },
+ "Couldn't hand that over to the tool: {error}": {
+  "日本語": "ツールに引き渡せませんでした：{error}",
+  "Español": "No se pudo pasar eso a la herramienta: {error}",
+  "Deutsch": "Das konnte nicht an das Werkzeug übergeben werden: {error}",
+  "Français": "Impossible de transmettre cela à l'outil : {error}",
+  "한국어": "도구에 넘기지 못했습니다: {error}",
+  "中文": "无法将其交给该工具：{error}",
+  "العربية": "تعذّر تسليم ذلك إلى الأداة: {error}",
+  "Tiếng Việt": "Không thể chuyển nội dung đó cho công cụ: {error}"
+ },
+ "Under an answer:": {
+  "日本語": "回答の下：",
+  "Español": "Debajo de una respuesta:",
+  "Deutsch": "Unter einer Antwort:",
+  "Français": "Sous une réponse :",
+  "한국어": "답변 아래:",
+  "中文": "回答下方：",
+  "العربية": "تحت الإجابة:",
+  "Tiếng Việt": "Bên dưới câu trả lời:"
+ },
+ "I can also tell you about Buddy itself": {
+  "日本語": "Buddy自体についてもお答えできます",
+  "Español": "También puedo hablarte del propio Buddy",
+  "Deutsch": "Ich kann dir auch etwas über Buddy selbst sagen",
+  "Français": "Je peux aussi vous parler de Buddy lui-même",
+  "한국어": "Buddy 자체에 대해서도 알려 드릴 수 있습니다",
+  "中文": "我还可以介绍 Buddy 本身",
+  "العربية": "يمكنني أيضاً أن أخبرك عن Buddy نفسه",
+  "Tiếng Việt": "Tôi cũng có thể cho bạn biết về chính Buddy"
+ },
+ "– how each of its tools works and where it keeps things – from Buddy's own documentation.": {
+  "日本語": "– 各ツールの仕組みや保存場所を、Buddy自身のドキュメントからお答えします。",
+  "Español": "– cómo funciona cada una de sus herramientas y dónde guarda las cosas –, a partir de la documentación del propio Buddy.",
+  "Deutsch": "– wie jedes seiner Werkzeuge funktioniert und wo es Dinge ablegt – aus Buddys eigener Dokumentation.",
+  "Français": "– comment fonctionne chacun de ses outils et où il range les choses – d'après la documentation de Buddy.",
+  "한국어": "– 각 도구가 어떻게 작동하고 무엇을 어디에 보관하는지 – Buddy 자체 문서를 바탕으로 알려 드립니다.",
+  "中文": "– 它的每个工具如何工作、内容保存在哪里 – 依据 Buddy 自己的文档。",
+  "العربية": "– كيف تعمل كل أداة من أدواته وأين يحفظ الأشياء – من وثائق Buddy نفسه.",
+  "Tiếng Việt": "– từng công cụ hoạt động thế nào và lưu mọi thứ ở đâu – dựa trên tài liệu của chính Buddy."
+ },
+ "Sources lists the manual pages I read for it – click one to open the manual there – and I say so when I cite a page I didn't read. Regenerate asks again; Edit, on your last question, lets you change it and ask again. Stop ends an answer part-way.": {
+  "日本語": "「参照ページ」には、その回答のために読んだマニュアルのページが並びます（クリックするとそのページが開きます）。読んでいないページを引用した場合は、その旨を表示します。「再生成」はもう一度質問し、最後の質問の「編集」では内容を変えて再度質問できます。「停止」は回答を途中で止めます。",
+  "Español": "Las fuentes muestran las páginas del manual que leí para la respuesta (haz clic en una para abrir el manual ahí), y aviso cuando cito una página que no leí. Regenerar vuelve a preguntar; Editar, en tu última pregunta, te permite cambiarla y preguntar de nuevo. Detener corta una respuesta a medias.",
+  "Deutsch": "Die Quellen führen die Handbuchseiten auf, die ich dafür gelesen habe – ein Klick öffnet das Handbuch dort –, und ich sage es, wenn ich eine Seite zitiere, die ich nicht gelesen habe. Neu generieren fragt erneut; Bearbeiten bei deiner letzten Frage lässt dich sie ändern und erneut stellen. Stopp beendet eine Antwort mittendrin.",
+  "Français": "Les sources listent les pages du manuel que j'ai lues pour la réponse – cliquez sur l'une d'elles pour y ouvrir le manuel – et je le signale quand je cite une page que je n'ai pas lue. Régénérer repose la question ; Modifier, sur votre dernière question, permet de la changer et de la reposer. Arrêter interrompt une réponse en cours.",
+  "한국어": "출처에는 그 답변을 위해 읽은 매뉴얼 쪽이 나열됩니다(클릭하면 매뉴얼의 그 쪽이 열립니다). 읽지 않은 쪽을 인용하면 그렇다고 알려 드립니다. 다시 생성은 다시 묻고, 마지막 질문의 편집은 질문을 고쳐 다시 물을 수 있게 합니다. 중지는 답변을 도중에 멈춥니다.",
+  "中文": "“来源”列出我为该回答阅读的手册页面（点击即可在手册中打开该页），如果我引用了没有读过的页面，也会说明。“重新生成”会再次提问；上一个问题上的“编辑”可让你修改后重新提问。“停止”会中途结束回答。",
+  "العربية": "تسرد المصادر صفحات الدليل التي قرأتها من أجل الإجابة – انقر إحداها لفتح الدليل عندها – وأنبّهك عندما أستشهد بصفحة لم أقرأها. «إعادة التوليد» تطرح السؤال من جديد؛ و«تعديل» على سؤالك الأخير يتيح لك تغييره وطرحه مجدداً. «إيقاف» ينهي الإجابة في منتصفها.",
+  "Tiếng Việt": "Nguồn liệt kê các trang hướng dẫn tôi đã đọc cho câu trả lời – nhấp vào một trang để mở hướng dẫn tại đó – và tôi sẽ nói rõ khi trích dẫn một trang chưa đọc. Tạo lại sẽ hỏi lại; Sửa, ở câu hỏi gần nhất, cho phép bạn thay đổi rồi hỏi lại. Dừng kết thúc câu trả lời giữa chừng."
+ },
+ "New chat starts a fresh conversation; Chats searches saved conversations and lets you pin, rename or delete them. Check project reviews the current timeline's video formats. Explain clip reads the selected timeline clip or clip at the playhead. Export saves the conversation as Markdown or plain text.": {
+  "日本語": "「新しいチャット」は新しい会話を始めます。「チャット」では保存した会話を検索し、ピン留め、名前の変更、削除ができます。「プロジェクトを確認」は現在のタイムラインのビデオ形式を点検します。「クリップを説明」は選択中のタイムラインクリップ、または再生ヘッド位置のクリップを読み取ります。「書き出し」は会話をMarkdownまたはプレーンテキストで保存します。",
+  "Español": "Nuevo chat inicia una conversación nueva; Chats busca en las conversaciones guardadas y permite fijarlas, renombrarlas o eliminarlas. Comprobar proyecto revisa los formatos de vídeo de la línea de tiempo actual. Explicar clip lee el clip seleccionado en la línea de tiempo o el que está bajo el cabezal. Exportar guarda la conversación como Markdown o texto sin formato.",
+  "Deutsch": "Neuer Chat beginnt ein neues Gespräch; Chats durchsucht gespeicherte Gespräche und lässt dich sie anheften, umbenennen oder löschen. Projekt prüfen sieht sich die Videoformate der aktuellen Timeline an. Clip erklären liest den ausgewählten Timeline-Clip oder den Clip am Abspielkopf. Exportieren speichert das Gespräch als Markdown oder reinen Text.",
+  "Français": "Nouveau chat démarre une nouvelle conversation ; Chats recherche dans les conversations enregistrées et permet de les épingler, les renommer ou les supprimer. Vérifier le projet passe en revue les formats vidéo de la timeline actuelle. Expliquer le clip lit le clip sélectionné dans la timeline ou celui sous la tête de lecture. Exporter enregistre la conversation en Markdown ou en texte brut.",
+  "한국어": "새 채팅은 새 대화를 시작합니다. 채팅은 저장된 대화를 검색하고 고정, 이름 변경, 삭제를 할 수 있게 합니다. 프로젝트 확인은 현재 타임라인의 비디오 형식을 점검합니다. 클립 설명은 선택한 타임라인 클립이나 재생 헤드 위치의 클립을 읽습니다. 내보내기는 대화를 Markdown 또는 일반 텍스트로 저장합니다.",
+  "中文": "“新建聊天”开始一段新对话；“聊天”可搜索已保存的对话，并可固定、重命名或删除它们。“检查项目”会检查当前时间线的视频格式。“解释片段”会读取所选的时间线片段或播放头处的片段。“导出”将对话保存为 Markdown 或纯文本。",
+  "العربية": "«محادثة جديدة» تبدأ محادثة جديدة؛ «المحادثات» تبحث في المحادثات المحفوظة وتتيح لك تثبيتها أو إعادة تسميتها أو حذفها. «فحص المشروع» يراجع صيغ الفيديو في الخط الزمني الحالي. «شرح المقطع» يقرأ مقطع الخط الزمني المحدد أو المقطع عند رأس التشغيل. «تصدير» يحفظ المحادثة بصيغة Markdown أو كنص عادي.",
+  "Tiếng Việt": "Trò chuyện mới bắt đầu một cuộc trò chuyện mới; Trò chuyện tìm trong các cuộc trò chuyện đã lưu và cho phép ghim, đổi tên hoặc xóa chúng. Kiểm tra dự án xem xét các định dạng video của timeline hiện tại. Giải thích clip đọc clip đang chọn trên timeline hoặc clip tại đầu phát. Xuất lưu cuộc trò chuyện dưới dạng Markdown hoặc văn bản thuần."
+ },
+ "several of these at once, on one card, applied in order": {
+  "日本語": "これらのうち複数を1枚のカードにまとめ、順番に適用",
+  "Español": "varias de estas a la vez, en una sola tarjeta, aplicadas en orden",
+  "Deutsch": "mehrere davon auf einmal, auf einer Karte, der Reihe nach angewendet",
+  "Français": "plusieurs à la fois, sur une seule carte, appliquées dans l'ordre",
+  "한국어": "이 중 여러 개를 한 카드에 담아 순서대로 적용",
+  "中文": "将其中几项放在同一张卡片上，按顺序应用",
+  "العربية": "عدة منها دفعة واحدة، في بطاقة واحدة، تُطبَّق بالترتيب",
+  "Tiếng Việt": "nhiều thay đổi trong số này cùng lúc, trên một thẻ, áp dụng theo thứ tự"
+ },
+ "add markers to the timeline, at frames, times or timecodes": {
+  "日本語": "フレーム、時間、またはタイムコードを指定してタイムラインにマーカーを追加",
+  "Español": "añadir marcadores a la línea de tiempo, por fotogramas, tiempos o códigos de tiempo",
+  "Deutsch": "Marker zur Timeline hinzufügen, an Frames, Zeiten oder Timecodes",
+  "Français": "ajouter des marqueurs à la timeline, par images, temps ou timecodes",
+  "한국어": "프레임, 시간 또는 타임코드 위치에 타임라인 마커 추가",
+  "中文": "按帧、时间或时间码向时间线添加标记",
+  "العربية": "إضافة علامات إلى الخط الزمني عند إطارات أو أوقات أو رموز زمنية",
+  "Tiếng Việt": "thêm điểm đánh dấu vào timeline theo khung hình, thời gian hoặc timecode"
+ },
+ "add a flag to clips on the timeline": {
+  "日本語": "タイムライン上のクリップにフラグを追加",
+  "Español": "añadir una bandera a clips de la línea de tiempo",
+  "Deutsch": "Clips auf der Timeline mit einer Flagge versehen",
+  "Français": "ajouter un drapeau à des clips de la timeline",
+  "한국어": "타임라인의 클립에 플래그 추가",
+  "中文": "给时间线上的片段添加旗标",
+  "العربية": "إضافة علامة إلى مقاطع على الخط الزمني",
+  "Tiếng Việt": "thêm cờ cho các clip trên timeline"
+ },
+ "fill in empty metadata fields on Media Pool clips": {
+  "日本語": "メディアプールのクリップの空のメタデータ欄を入力",
+  "Español": "rellenar campos de metadatos vacíos en clips del Media Pool",
+  "Deutsch": "leere Metadatenfelder von Media-Pool-Clips ausfüllen",
+  "Français": "remplir les champs de métadonnées vides de clips du Media Pool",
+  "한국어": "미디어 풀 클립의 빈 메타데이터 필드 채우기",
+  "中文": "填写媒体池片段中空白的元数据字段",
+  "العربية": "ملء حقول البيانات الوصفية الفارغة لمقاطع في مجمع الوسائط",
+  "Tiếng Việt": "điền các trường siêu dữ liệu còn trống của clip trong Media Pool"
  }
 }

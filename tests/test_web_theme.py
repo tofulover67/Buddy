@@ -21,7 +21,12 @@ PAGE_WEB_DIRS = sorted(p.parent for pattern in ("*/web/index.html", "*/*/web/ind
 # Python a page hosts from elsewhere, whose view shares the page's: Transcribe's Text+
 # tabs are text_animator/text_plus.py (their script sends and hears through the local
 # send()/on() that add the "tp_" prefix).
-HOSTED = {"transcribe": [_paths.APP / "pages" / "text_animator" / "text_plus.py"]}
+_DG = _paths.APP / "pages" / "data_graphics"
+HOSTED = {"transcribe": [_paths.APP / "pages" / "text_animator" / "text_plus.py"],
+          # Data Graphics' two pages are one base class (graphic_page.py) ...
+          "counters": [_DG / "graphic_page.py"], "graphs": [_DG / "graphic_page.py"]}
+# ... and their views one shared script beside their own.
+SHARED_JS = {"counters": [_DG / "web" / "graphics.js"], "graphs": [_DG / "web" / "graphics.js"]}
 # Web windows of their own (core/web_page.py WebWindow): view folder -> its Python.
 _CP = _paths.APP / "pages" / "color_palette"
 _CORE, _SHELL = _paths.APP / "core", WEB / "shell"
@@ -327,7 +332,8 @@ class WebPageContractTests(unittest.TestCase):
         """(name, js, py, html, folder) per view - views sharing one Python
         file (the shell's header and rail) are checked against it together."""
         for web in PAGE_WEB_DIRS:
-            js = "\n".join(f.read_text(encoding="utf-8") for f in web.glob("*.js"))
+            js = "\n".join(f.read_text(encoding="utf-8")
+                           for f in [*web.glob("*.js"), *SHARED_JS.get(web.parent.name, [])])
             # page.py, plus any mixin of the page's own (a class ...Mixin in its folder).
             py = [(web.parent / "page.py").read_text(encoding="utf-8")]
             for f in sorted(web.parent.glob("*.py")):

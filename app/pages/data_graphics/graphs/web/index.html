@@ -7,6 +7,7 @@
     <title>Graphs</title>
     <link rel="stylesheet" href="../../../../web/buddy.css">
     <link rel="stylesheet" href="../../web/graphics.css">
+    <link rel="stylesheet" href="graphs.css">
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <script src="../../../../web/buddy.js"></script>
 </head>
@@ -18,18 +19,221 @@
             <button type="button" role="tab" data-tab="counters" aria-selected="false">Counters</button>
             <button type="button" role="tab" data-tab="graphs" aria-selected="true">Graphs</button>
         </nav>
+        <span class="spacer"></span>
+        <span class="dg-where">
+            <span class="dg-dot" id="dot" aria-hidden="true"></span>
+            <span class="dg-where-text" id="timeline" translate="no"></span>
+        </span>
+        <button type="button" class="btn ghost icon" id="refresh" title="Read the open timeline again"
+                aria-label="Read the timeline again"></button>
     </header>
 
     <div class="dg-scroll">
-        <div class="dg-col">
-            <div>
-                <h2 class="dg-title">Graphs that draw themselves</h2>
-                <p class="dg-sub">Bar, line and pie charts from the numbers you type or paste, animated onto your timeline.</p>
+        <div class="dg-work">
+            <section class="dg-view" aria-label="Preview">
+                <div class="dg-stage"><canvas id="preview" width="640" height="360"></canvas></div>
+                <div class="dg-player">
+                    <button type="button" class="btn icon" id="play"></button>
+                    <input type="range" id="scrub" min="0" max="1" value="0" step="1" aria-label="Position">
+                    <span class="dg-time" id="time" translate="no"></span>
+                </div>
+                <p class="dg-hint">Shown on black here. On your timeline only the graph is drawn, over whatever is under it.</p>
+                <p class="warn" id="problem"></p>
+                <!-- The timing dock: a lane per part - its bar dragged to retime it - and the
+                     picked lane's start, length and curve. -->
+                <section class="dg-dock" id="dock" aria-labelledby="dock-title">
+                    <div class="row dg-dock-head">
+                        <button type="button" class="btn ghost icon" id="dock-fold" title="Show or hide the timing"
+                                aria-label="Show or hide the timing"></button>
+                        <h2 class="dg-group-title" id="dock-title">Timing of each part</h2>
+                        <span class="spacer"></span>
+                        <span class="dg-hint">Drag a bar to move it, its right end to stretch it.</span>
+                    </div>
+                    <div id="dock-body">
+                        <div class="dg-lanes" id="lanes"></div>
+                        <div class="dg-inspect" id="inspect">
+                            <div class="dg-fields">
+                                <label class="lbl" id="part-kind-box">Arrives
+                                    <select class="field" id="part-kind">
+                                        <option value="none">Already there</option>
+                                        <option value="fade">Fades in</option>
+                                        <option value="rise">Rises in</option>
+                                        <option value="pop">Pops in</option>
+                                    </select>
+                                </label>
+                                <label class="lbl narrow">Starts at
+                                    <input type="text" class="field" id="part-start" inputmode="decimal" autocomplete="off" spellcheck="false">
+                                </label>
+                                <label class="lbl narrow">Takes
+                                    <input type="text" class="field" id="part-length" inputmode="decimal" autocomplete="off" spellcheck="false">
+                                </label>
+                                <label class="lbl wide">Timing
+                                    <select class="field" id="part-easing">
+                                        <option value="ease_out">Fast, then slows to a stop</option>
+                                        <option value="ease_in_out">Starts and ends gently</option>
+                                        <option value="ease_in">Slow, then speeds up</option>
+                                        <option value="linear">Steady</option>
+                                        <option value="overshoot">Goes past, then settles</option>
+                                        <option value="custom">Your own curve</option>
+                                    </select>
+                                </label>
+                                <button type="button" class="btn" id="part-reset">Back to automatic</button>
+                            </div>
+                            <canvas class="dg-curve" id="curve" width="320" height="150" role="img" aria-label="Timing curve"></canvas>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <div class="dg-controls">
+                <section class="dg-group" aria-labelledby="g-rows">
+                    <h2 class="dg-group-title" id="g-rows">The numbers</h2>
+                    <div class="gr-rows" id="rows"></div>
+                    <div class="row">
+                        <button type="button" class="btn" id="add-row">Add a row</button>
+                        <button type="button" class="btn" id="paste">Paste from a spreadsheet…</button>
+                        <span class="spacer"></span>
+                        <span class="muted small" id="row-count" translate="no"></span>
+                    </div>
+                    <div class="dg-fields">
+                        <label class="lbl wide">Title
+                            <input type="text" class="field" data-key="title" maxlength="80" autocomplete="off">
+                        </label>
+                        <button type="button" class="btn" id="edit-axes">Axes and titles…</button>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-grow">
+                    <h2 class="dg-group-title" id="g-grow">How it draws on</h2>
+                    <div class="dg-fields">
+                        <label class="lbl">Seconds growing
+                            <input type="text" class="field" data-key="seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+                        </label>
+                        <label class="lbl">Seconds held after
+                            <input type="text" class="field" data-key="hold" inputmode="decimal" autocomplete="off" spellcheck="false">
+                        </label>
+                        <label class="lbl wide">Timing
+                            <select class="field" id="easing">
+                                <option value="ease_out">Fast, then slows to a stop</option>
+                                <option value="ease_in_out">Starts and ends gently</option>
+                                <option value="ease_in">Slow, then speeds up</option>
+                                <option value="linear">Steady</option>
+                                <option value="overshoot">Goes past, then settles</option>
+                                <option value="custom">Your own curve</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label class="check"><input type="checkbox" data-key="stagger"> One bar after another</label>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-values">
+                    <h2 class="dg-group-title" id="g-values">What's written</h2>
+                    <div class="dg-checks">
+                        <label class="check"><input type="checkbox" data-key="values"> A number over each bar</label>
+                        <label class="check"><input type="checkbox" data-key="labels"> A name under each bar</label>
+                    </div>
+                    <div class="dg-fields">
+                        <label class="lbl">Thousands
+                            <select class="field" data-key="separator">
+                                <option value="comma" translate="no">1,234.5</option>
+                                <option value="dot" translate="no">1.234,5</option>
+                                <option value="space" translate="no">1 234,5</option>
+                                <option value="none" translate="no">1234.5</option>
+                            </select>
+                        </label>
+                        <label class="lbl narrow">Decimals
+                            <select class="field" data-key="decimals">
+                                <option value="0" translate="no">0</option>
+                                <option value="1" translate="no">1</option>
+                                <option value="2" translate="no">2</option>
+                                <option value="3" translate="no">3</option>
+                            </select>
+                        </label>
+                        <label class="lbl narrow">Before
+                            <input type="text" class="field" data-key="prefix" maxlength="12" placeholder="$" autocomplete="off" spellcheck="false">
+                        </label>
+                        <label class="lbl narrow">After
+                            <input type="text" class="field" data-key="suffix" maxlength="12" placeholder="%" autocomplete="off" spellcheck="false">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-look">
+                    <h2 class="dg-group-title" id="g-look">Look</h2>
+                    <div class="dg-checks">
+                        <span class="muted small">Bars</span>
+                        <div class="segmented" data-key="colours" role="group" aria-label="Bars">
+                            <button type="button" data-value="many">A colour each</button>
+                            <button type="button" data-value="one">One colour</button>
+                        </div>
+                        <input type="color" class="dg-colour" data-key="bar_colour" id="bar-colour" aria-label="Bar colour">
+                        <label class="check"><input type="checkbox" data-key="rounded"> Rounded corners</label>
+                    </div>
+                    <div class="dg-fields">
+                        <label class="lbl wide">Font
+                            <select class="field" id="font" data-key="font" translate="no"></select>
+                        </label>
+                        <label class="lbl">Style
+                            <select class="field" id="style" data-key="style" translate="no"></select>
+                        </label>
+                    </div>
+                    <div class="dg-checks">
+                        <label class="dg-pick">Text colour <input type="color" class="dg-colour" data-key="colour"></label>
+                        <label class="check"><input type="checkbox" data-key="outline"> Outline</label>
+                        <input type="color" class="dg-colour" data-key="outline_colour" data-needs="outline" aria-label="Outline colour">
+                        <label class="check"><input type="checkbox" data-key="shadow"> Shadow</label>
+                    </div>
+                </section>
             </div>
-            <p class="dg-soon">This isn't built yet – it's coming in a later version of Buddy.</p>
         </div>
     </div>
+
+    <footer class="dg-foot">
+        <span class="dg-note">You get a new clip at the playhead. Nothing you already have is changed.</span>
+        <label class="check"><input type="checkbox" id="replace"> Replace the graph Buddy put there before</label>
+        <button type="button" class="btn accent dg-main-btn" id="add">Add to timeline</button>
+    </footer>
+
+    <!-- The value axis and the other titles: a panel of their own, opened by "Axes and titles…". -->
+    <section class="dg-pop" id="axes-pop" role="dialog" aria-labelledby="axes-title" hidden>
+        <header class="dg-pop-head">
+            <h2 class="dg-pop-title" id="axes-title">Axes and titles</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" title="Close" aria-label="Close"></button>
+        </header>
+        <label class="lbl">Subtitle
+            <input type="text" class="field" data-key="subtitle" maxlength="80" autocomplete="off">
+        </label>
+        <label class="lbl">Along the bottom
+            <input type="text" class="field" data-key="x_title" maxlength="80" autocomplete="off">
+        </label>
+        <label class="lbl">Up the side
+            <input type="text" class="field" data-key="y_title" maxlength="80" autocomplete="off">
+        </label>
+        <div class="dg-checks">
+            <label class="check"><input type="checkbox" data-key="scale"> Numbers up the side</label>
+            <label class="check"><input type="checkbox" data-key="grid"> Lines across</label>
+        </div>
+        <div class="dg-fields">
+            <label class="lbl">Steps
+                <select class="field" data-key="steps">
+                    <option value="2" translate="no">2</option>
+                    <option value="3" translate="no">3</option>
+                    <option value="4" translate="no">4</option>
+                    <option value="5" translate="no">5</option>
+                    <option value="6" translate="no">6</option>
+                    <option value="8" translate="no">8</option>
+                    <option value="10" translate="no">10</option>
+                </select>
+            </label>
+            <label class="lbl">Top of the scale
+                <input type="text" class="field" data-key="top" inputmode="decimal" placeholder="Auto" autocomplete="off" spellcheck="false">
+            </label>
+        </div>
+    </section>
 </main>
+<script src="../../web/graphics.js"></script>
+<script src="graphs.js"></script>
 <script src="../../web/tabs.js"></script>
 </body>
 </html>

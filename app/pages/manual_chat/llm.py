@@ -30,15 +30,26 @@ which OpenRouter, Groq, Ollama, llama.cpp, LM Studio and Azure all accept
 for a model that can see. A model that can't gives an HTTP error, which
 the page explains (pictures.py).
 
-Not streaming. A tool-calling loop already makes several round trips per
-answer, and streaming deltas that may turn out to be a tool call rather
-than prose is a large complication for a first version - the page shows a
-"thinking" state instead. The Reply shape below is what a streaming
-implementation would yield incrementally, so adding it later is additive.
+Streaming is optional: chat(..., on_text=callback) asks the provider for
+server-sent events and hands the callback each piece of prose as it
+arrives; the Reply at the end is the same as without it. Text that turns
+out to precede a tool call has been handed over by then - the caller
+decides what to do with it (agent.py clears the draft). A server that
+refuses a streamed request (some OpenAI-compatible ones do, with tools) is
+asked again without, once, and remembered for the rest of the run.
+`cancelled`, a callable, is looked at between events: True stops reading,
+closes the connection and raises LLMCancelled.
+
+Anthropic requests mark the system prompt and the newest message as cache
+points. One answer is several requests that repeat everything before them
+(the tool loop), so from the second on the repeated part is read from
+Anthropic's cache at a fraction of the price. OpenAI and Gemini cache
+repeated prefixes on their own, with nothing to ask for.
 """
 
 from __future__ import annotations
 
+import http.client
 import json
 import urllib.error
 import urllib.parse
@@ -50,6 +61,16 @@ from core import safe_http
 GEMINI_ENDPOINT = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 )
+GEMINI_STREAM_ENDPOINT = (
+    "https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?alt=sse"
+)
+# What a server that can't stream this request answers with; anything else
+# (a wrong key, no credit, a model that doesn't exist) is the real error.
+NO_STREAM_CODES = (400, 404, 405, 415, 422, 501)
+CACHE_POINT = {"type": "ephemeral"}
+# How much a model may reason after it has written its answer before the
+# answer is taken as finished (LLMClient._stream_openai). About 400 words.
+AFTERTHOUGHT_CHARS = 2000
 DEFAULT_TIMEOUT = 90
 
 PROVIDER_GEMINI = "gemini"
@@ -232,6 +253,12 @@ class LLMError(RuntimeError):
     """Anything that stopped us getting an answer. The message is shown to
     the user verbatim, so it names the provider and stays readable."""
 
+    code = 0        # the HTTP status, when that's what it was
+
+
+class LLMCancelled(LLMError):
+    """The caller's `cancelled` said stop while an answer was streaming."""
+
 
 @dataclass
 class ToolCall:
@@ -263,6 +290,20 @@ def _safe_to_send_key(base_url: str) -> bool:
     return parts.scheme == "http" and (parts.hostname or "") in LOCAL_HOSTS
 
 
+def _http_error(e, label: str) -> LLMError:
+    detail = ""
+    try:
+        data = json.load(e)
+        if isinstance(data, list) and data:         # Gemini's streamed errors come in a list
+            data = data[0]
+        detail = data.get("error", {}).get("message") or ""
+    except Exception:
+        detail = e.reason or ""
+    error = LLMError(f"{label}: HTTP {e.code}{' – ' + detail if detail else ''}")
+    error.code = e.code
+    return error
+
+
 def _post(url: str, payload: dict, headers: dict, label: str, timeout: int) -> dict:
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=body, headers=headers, method="POST")
@@ -270,17 +311,45 @@ def _post(url: str, payload: dict, headers: dict, label: str, timeout: int) -> d
         with safe_http.urlopen(req, timeout=timeout) as resp:
             return json.load(resp)
     except urllib.error.HTTPError as e:
-        detail = ""
-        try:
-            data = json.load(e)
-            detail = data.get("error", {}).get("message") or ""
-        except Exception:
-            detail = e.reason or ""
-        raise LLMError(f"{label}: HTTP {e.code}{' – ' + detail if detail else ''}")
+        raise _http_error(e, label)
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         raise LLMError(f"{label}: could not reach the API ({e})")
     except ValueError:
         raise LLMError(f"{label}: the API returned a response that wasn't JSON")
+
+
+def _stream(url: str, payload: dict, headers: dict, label: str, timeout: int, cancelled=None):
+    """POST, and yield each server-sent event's JSON as it arrives. Stops
+    (LLMCancelled, the connection closed) as soon as cancelled() is true -
+    looked at once per line, so within a word or two of the answer."""
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=body, headers={**headers, "Accept": "text/event-stream"},
+                                 method="POST")
+    try:
+        with safe_http.urlopen(req, timeout=timeout) as resp:
+            for raw in resp:
+                if cancelled is not None and cancelled():
+                    raise LLMCancelled("Stopped.")
+                line = raw.decode("utf-8", "replace").strip()
+                if not line.startswith("data:"):
+                    continue                    # "event:" names, comments, the blank line between events
+                data = line[5:].strip()
+                if data == "[DONE]":
+                    return
+                try:
+                    event = json.loads(data)
+                except ValueError:
+                    continue                    # a keep-alive, or half a line from a broken proxy
+                if isinstance(event, dict):
+                    yield event
+    except urllib.error.HTTPError as e:
+        raise _http_error(e, label)
+    except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException) as e:
+        raise LLMError(f"{label}: could not reach the API ({e})")
+
+
+# The servers that have refused a streamed request this run (see chat()).
+_NO_STREAM: set = set()
 
 
 class LLMClient:
@@ -427,19 +496,43 @@ class LLMClient:
             return _ollama_tags(self.base_url, timeout)
         return list_openai_models(self.base_url, self.api_key, timeout)
 
-    def chat(self, system: str, messages: list[dict], tools: list[dict] | None = None) -> Reply:
+    def chat(self, system: str, messages: list[dict], tools: list[dict] | None = None,
+             on_text=None, cancelled=None) -> Reply:
+        """One request. on_text(piece) is given the answer's prose as it
+        arrives (streaming); without it the reply comes whole. cancelled()
+        true while streaming stops it with LLMCancelled."""
         problem = self.validate()
         if problem:
             raise LLMError(problem)
         if self.provider == PROVIDER_GEMINI:
-            return self._chat_gemini(system, messages, tools)
-        if self.provider == PROVIDER_ANTHROPIC:
-            return self._chat_anthropic(system, messages, tools)
-        return self._chat_openai(system, messages, tools)  # every OpenAI-shaped provider
+            send = self._chat_gemini
+        elif self.provider == PROVIDER_ANTHROPIC:
+            send = self._chat_anthropic
+        else:
+            send = self._chat_openai        # every OpenAI-shaped provider
+        where = (self.provider, self.base_url, self.model)
+        if on_text is None or where in _NO_STREAM:
+            return send(system, messages, tools)
+        said = []
+
+        def heard(piece):
+            if piece:
+                said.append(piece)
+                on_text(piece)
+        try:
+            return send(system, messages, tools, on_text=heard, cancelled=cancelled)
+        except LLMCancelled:
+            raise
+        except LLMError as e:
+            # Refused before a word of it: a server that can't stream this.
+            if said or e.code not in NO_STREAM_CODES:
+                raise
+        _NO_STREAM.add(where)
+        return send(system, messages, tools)
 
     # ------------------------------------------------------------- gemini
 
-    def _chat_gemini(self, system, messages, tools) -> Reply:
+    def _chat_gemini(self, system, messages, tools, on_text=None, cancelled=None) -> Reply:
         contents = []
         for m in messages:
             role = m.get("role")
@@ -485,42 +578,52 @@ class LLMClient:
         if tools:
             payload["tools"] = [{"function_declarations": tools}]
 
-        url = GEMINI_ENDPOINT.format(model=self.model)
-        data = _post(
-            url,
-            payload,
-            # A header, not ?key= in the address: addresses end up in proxy logs.
-            {"Content-Type": "application/json", "x-goog-api-key": self.api_key},
-            "Gemini",
-            self.timeout,
-        )
+        # A header, not ?key= in the address: addresses end up in proxy logs.
+        headers = {"Content-Type": "application/json", "x-goog-api-key": self.api_key}
+        reply = Reply()
+        seen = blocked = None
 
-        candidates = data.get("candidates") or []
-        if not candidates:
-            blocked = (data.get("promptFeedback") or {}).get("blockReason")
+        def take(data):
+            """One response - the whole answer, or one streamed piece of it."""
+            nonlocal seen, blocked
+            blocked = (data.get("promptFeedback") or {}).get("blockReason") or blocked
+            for candidate in (data.get("candidates") or [])[:1]:
+                seen = True
+                for part in (candidate.get("content") or {}).get("parts") or []:
+                    if part.get("thought"):
+                        continue                # the model's working, not its answer
+                    if part.get("text"):
+                        reply.content += part["text"]
+                        if on_text is not None:
+                            on_text(part["text"])
+                    fc = part.get("functionCall")
+                    if fc:
+                        reply.tool_calls.append(
+                            ToolCall(
+                                id=f"{fc.get('name','tool')}-{len(reply.tool_calls)}",
+                                name=fc.get("name", ""),
+                                arguments=fc.get("args") or {},
+                                signature=part.get("thoughtSignature") or "",
+                            )
+                        )
+
+        if on_text is not None:
+            for event in _stream(GEMINI_STREAM_ENDPOINT.format(model=self.model), payload, headers, "Gemini",
+                                 self.timeout, cancelled):
+                if event.get("error"):
+                    raise LLMError(f"Gemini: {(event['error'] or {}).get('message') or 'the answer stopped.'}")
+                take(event)
+        else:
+            take(_post(GEMINI_ENDPOINT.format(model=self.model), payload, headers, "Gemini", self.timeout))
+        if not seen:
             raise LLMError(
                 f"Gemini returned no answer{f' ({blocked})' if blocked else ''}."
             )
-        parts = (candidates[0].get("content") or {}).get("parts") or []
-        reply = Reply()
-        for i, part in enumerate(parts):
-            if "text" in part:
-                reply.content += part["text"]
-            fc = part.get("functionCall")
-            if fc:
-                reply.tool_calls.append(
-                    ToolCall(
-                        id=f"{fc.get('name','tool')}-{i}",
-                        name=fc.get("name", ""),
-                        arguments=fc.get("args") or {},
-                        signature=part.get("thoughtSignature") or "",
-                    )
-                )
         return reply
 
     # ---------------------------------------------------------- anthropic
 
-    def _chat_anthropic(self, system, messages, tools) -> Reply:
+    def _chat_anthropic(self, system, messages, tools, on_text=None, cancelled=None) -> Reply:
         """Anthropic Messages API.
 
         Three shape differences from the OpenAI transport, each of which is
@@ -588,10 +691,16 @@ class LLMClient:
                     }
                 )
 
+        # Cache points (see the module docstring): everything up to and
+        # including the system prompt - the tools come before it - and
+        # everything up to the newest message. Too short a prefix is simply
+        # not cached; nothing here can make a request fail.
+        if out and isinstance(out[-1]["content"], list) and out[-1]["content"]:
+            out[-1]["content"][-1] = {**out[-1]["content"][-1], "cache_control": CACHE_POINT}
         payload = {
             "model": self.model,
             "max_tokens": self.max_tokens,
-            "system": system,
+            "system": [{"type": "text", "text": system, "cache_control": CACHE_POINT}] if system else system,
             "messages": out,
         }
         if tools:
@@ -606,17 +715,14 @@ class LLMClient:
                 for t in tools
             ]
 
-        data = _post(
-            ANTHROPIC_ENDPOINT,
-            payload,
-            {
-                "Content-Type": "application/json",
-                "x-api-key": self.api_key,
-                "anthropic-version": ANTHROPIC_VERSION,
-            },
-            "Claude",
-            self.timeout,
-        )
+        headers = {
+            "Content-Type": "application/json",
+            "x-api-key": self.api_key,
+            "anthropic-version": ANTHROPIC_VERSION,
+        }
+        if on_text is not None:
+            return self._stream_anthropic({**payload, "stream": True}, headers, on_text, cancelled)
+        data = _post(ANTHROPIC_ENDPOINT, payload, headers, "Claude", self.timeout)
 
         blocks = data.get("content") or []
         if not blocks:
@@ -640,9 +746,51 @@ class LLMClient:
                 )
         return reply
 
+    def _stream_anthropic(self, payload, headers, on_text, cancelled) -> Reply:
+        """The same answer as events: each content block opens
+        (content_block_start), fills (content_block_delta - text, or a tool
+        call's arguments as pieces of JSON) and closes."""
+        reply = Reply()
+        calls = {}              # block index -> [ToolCall, its arguments' JSON so far]
+        stop = ""
+        for event in _stream(ANTHROPIC_ENDPOINT, payload, headers, "Claude", self.timeout, cancelled):
+            kind = event.get("type")
+            if kind == "error":
+                raise LLMError(f"Claude: {(event.get('error') or {}).get('message') or 'the answer stopped.'}")
+            if kind == "content_block_start":
+                block = event.get("content_block") or {}
+                if block.get("type") == "tool_use":
+                    calls[event.get("index")] = [
+                        ToolCall(id=block.get("id", ""), name=block.get("name", ""),
+                                 arguments=block.get("input") or {}), ""]
+                elif block.get("type") == "text" and block.get("text"):
+                    reply.content += block["text"]
+                    on_text(block["text"])
+            elif kind == "content_block_delta":
+                delta = event.get("delta") or {}
+                if delta.get("type") == "text_delta" and delta.get("text"):
+                    reply.content += delta["text"]
+                    on_text(delta["text"])
+                elif delta.get("type") == "input_json_delta" and event.get("index") in calls:
+                    calls[event.get("index")][1] += delta.get("partial_json") or ""
+            elif kind == "message_delta":
+                stop = (event.get("delta") or {}).get("stop_reason") or stop
+        for index in sorted(calls, key=lambda i: i if isinstance(i, int) else 0):
+            call, raw = calls[index]
+            if raw:
+                try:
+                    parsed = json.loads(raw)
+                    call.arguments = parsed if isinstance(parsed, dict) else {}
+                except ValueError:
+                    call.arguments = {}
+            reply.tool_calls.append(call)
+        if not reply.content and not reply.tool_calls:
+            raise LLMError(f"Claude returned no answer{f' ({stop})' if stop else ''}.")
+        return reply
+
     # ------------------------------------------------------------- openai
 
-    def _chat_openai(self, system, messages, tools) -> Reply:
+    def _chat_openai(self, system, messages, tools, on_text=None, cancelled=None) -> Reply:
         out = [{"role": "system", "content": system}]
         for m in messages:
             role = m.get("role")
@@ -688,13 +836,16 @@ class LLMClient:
             url = f"{self.base_url}/chat/completions"
             if self.api_key:
                 headers["Authorization"] = f"Bearer {self.api_key}"
-        data = _post(url, payload, headers, self.label, self.timeout)
-
-        choices = data.get("choices") or []
-        if not choices:
-            raise LLMError("The API returned no answer.")
-        message = choices[0].get("message") or {}
-        reply = Reply(content=message.get("content") or "")
+        if on_text is not None:
+            message = self._stream_openai(url, {**payload, "stream": True}, headers, on_text, cancelled)
+        else:
+            data = _post(url, payload, headers, self.label, self.timeout)
+            choices = data.get("choices") or []
+            if not choices:
+                raise LLMError("The API returned no answer.")
+            message = choices[0].get("message") or {}
+        content = message.get("content") or ""
+        reply = Reply(content=content if isinstance(content, str) else "")
         for call in message.get("tool_calls") or []:
             fn = call.get("function") or {}
             raw = fn.get("arguments") or "{}"
@@ -705,6 +856,50 @@ class LLMClient:
                 # JSON; treat it as no arguments rather than failing the turn.
                 args = {}
             reply.tool_calls.append(
-                ToolCall(id=call.get("id", ""), name=fn.get("name", ""), arguments=args)
+                ToolCall(id=call.get("id", ""), name=fn.get("name", ""),
+                         arguments=args if isinstance(args, dict) else {})
             )
         return reply
+
+    def _stream_openai(self, url, payload, headers, on_text, cancelled) -> dict:
+        """The streamed answer put back together as the message a plain
+        request returns. A tool call arrives in pieces keyed by `index`: its
+        id and name once, its arguments as fragments of one JSON string."""
+        content, calls, seen = "", {}, False
+        afterthought = 0        # how much it has "reasoned" since the answer's last word
+        events = _stream(url, payload, headers, self.label, self.timeout, cancelled)
+        for event in events:
+            if event.get("error"):
+                error = event["error"]
+                raise LLMError(f"{self.label}: {error.get('message') if isinstance(error, dict) else error}")
+            for choice in (event.get("choices") or [])[:1]:
+                seen = True
+                delta = choice.get("delta") or {}
+                piece = delta.get("content")
+                if isinstance(piece, str) and piece:
+                    content += piece
+                    on_text(piece)
+                    if piece.strip():
+                        afterthought = 0
+                # A thinking model reasons first and then answers. A local one
+                # (measured: gemma4:12b in Ollama, one answer in three) can
+                # start reasoning AGAIN once the answer is written, and go on
+                # for minutes with nothing to show for it - the answer looks
+                # hung. A little of that is allowed (it may be on its way to
+                # a tool call); past AFTERTHOUGHT_CHARS the answer is taken
+                # as finished and the connection closed, which stops the model.
+                thought = delta.get("reasoning") or delta.get("reasoning_content")
+                if isinstance(thought, str) and content.strip():
+                    afterthought += len(thought)
+                for part in delta.get("tool_calls") or []:
+                    call = calls.setdefault(part.get("index", 0), {"id": "", "function": {"name": "", "arguments": ""}})
+                    fn = part.get("function") or {}
+                    call["id"] = part.get("id") or call["id"]
+                    call["function"]["name"] = fn.get("name") or call["function"]["name"]
+                    call["function"]["arguments"] += fn.get("arguments") or ""
+            if afterthought > AFTERTHOUGHT_CHARS and not calls:
+                events.close()
+                break
+        if not seen:
+            raise LLMError("The API returned no answer.")
+        return {"content": content, "tool_calls": [calls[i] for i in sorted(calls)]}

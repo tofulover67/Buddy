@@ -219,6 +219,65 @@ def _pool_clips(controller):
 # ---------------------------------------------------------- add_markers
 
 
+def _timeline_fps(controller, timeline) -> float:
+    """The timeline's frame rate (its own setting, else the project's), or 0."""
+    for source in (timeline, _safe(controller.current_project)):
+        value = _safe(lambda s=source: s.GetSetting("timelineFrameRate"), "")
+        try:
+            fps = float(str(value).strip())
+        except (TypeError, ValueError):
+            continue
+        if fps > 0:
+            return fps
+    return 0.0
+
+
+def _marker_frame(marker, start, fps) -> int:
+    """Where one marker goes, as an offset from the timeline's start.
+
+    Three ways to say it, so a chapter list or a transcript can be turned
+    into markers without the model doing frame arithmetic it would get
+    wrong: 'frame' (the offset itself), 'time' (how far in - "2:15",
+    "1:02:15" or seconds) or 'timecode' (the timeline's own, "01:02:15:00").
+    """
+    if marker.get("frame") is not None:
+        try:
+            return int(marker.get("frame"))
+        except (TypeError, ValueError):
+            raise ActionError(
+                f"Marker {marker!r} has no usable 'frame'. Frames are "
+                "offsets from the timeline start, as project_state reports "
+                "them under 'frame_offset'."
+            )
+    if marker.get("time") is None and marker.get("timecode") is None:
+        raise ActionError(
+            f"Marker {marker!r} has no usable 'frame'. Frames are "
+            "offsets from the timeline start, as project_state reports "
+            "them under 'frame_offset'. A 'time' into the timeline (\"2:15\") or its "
+            "'timecode' (\"01:02:15:00\") works too."
+        )
+    if not fps:
+        raise ActionError("The timeline's frame rate couldn't be read, so a time can't be turned into a "
+                          "frame. Give the marker's 'frame' instead.")
+    if marker.get("timecode") is not None:
+        from pages.stills_exporter.resolve_ext import timecode_to_frames
+        try:
+            return timecode_to_frames(str(marker["timecode"]).strip(), fps) - int(start)
+        except (TypeError, ValueError):
+            raise ActionError(f"'{marker['timecode']}' isn't a timecode like 01:02:15:00.")
+    text = str(marker["time"]).strip()
+    try:
+        parts = [float(p) for p in text.split(":")]
+        if not 1 <= len(parts) <= 3 or any(p < 0 for p in parts):
+            raise ValueError(text)
+    except ValueError:
+        raise ActionError(f"'{text}' isn't a time like 2:15 or 1:02:15.")
+    seconds = 0.0
+    for part in parts:
+        seconds = seconds * 60 + part
+    return int(round(seconds * fps))
+
+
 def preview_add_markers(controller, args) -> ProposedAction:
     timeline = _require_timeline(controller)
     markers = args.get("markers") or []
@@ -228,18 +287,19 @@ def preview_add_markers(controller, args) -> ProposedAction:
     start = _safe(timeline.GetStartFrame, 0) or 0
     name = _safe(timeline.GetName, "the timeline")
 
-    plan, details = [], []
+    fps = _timeline_fps(controller, timeline)
+    plan, details, taken = [], [], set()
     for marker in markers:
-        try:
-            frame = int(marker.get("frame"))
-        except (TypeError, ValueError):
-            raise ActionError(
-                f"Marker {marker!r} has no usable 'frame'. Frames are "
-                "offsets from the timeline start, as project_state reports "
-                "them under 'frame_offset'."
-            )
+        if not isinstance(marker, dict):
+            raise ActionError(f"Marker {marker!r} should be {{frame, name, color, note}}.")
+        frame = _marker_frame(marker, start, fps)
         if frame < 0:
             raise ActionError(f"Frame {frame} is before the timeline starts.")
+        if frame in taken:
+            raise ActionError(
+                f"Two of these markers land on frame {frame}. Resolve allows only one marker per frame."
+            )
+        taken.add(frame)
         if frame in existing:
             raise ActionError(
                 f"There is already a marker at frame {frame} "
@@ -420,6 +480,127 @@ def execute_set_clip_colors(controller, proposal, log=lambda m: None) -> str:
             log(f"Coloured '{name}' {color}.")
     tail = f" {unstuck} didn't keep the colour (titles and generators can't have one)." if unstuck else ""
     return f"Coloured {done} of {len(proposal.plan)} clip(s).{tail}"
+
+
+# -------------------------------------------------------- add_clip_flags
+
+
+def preview_add_clip_flags(controller, args) -> ProposedAction:
+    """A flag on each clip. Flags stack - a clip can carry several - so one
+    more takes nothing away; a clip that already has this colour is left
+    out, and the card says so."""
+    color = _check_color(args.get("color") or "", MARKER_COLORS, "flag")
+    targets = args.get("clips") or []
+    _check_count(targets, "clips")
+    items = _timeline_items(controller)
+
+    plan, details = [], []
+    for track, index, item in _find_timeline_clips(items, targets):
+        name = _safe(item.GetName, "")
+        if color in (_safe(lambda i=item: i.GetFlagList(), []) or []):
+            details.append(f"{track} clip {index}: '{name}' already has a {color} flag – left as it is")
+            continue
+        plan.append(item)
+        details.append(f"{track} clip {index}: '{name}'  +  {color} flag")
+    if not plan:
+        raise ActionError(f"Every one of those clips already has a {color} flag, so there is nothing to do.")
+
+    return ProposedAction(
+        action_id="add_clip_flags",
+        summary=f"Add a {color} flag to {len(plan)} timeline clip(s).",
+        details=details,
+        args=args,
+        plan=[(item, color) for item in plan],
+    )
+
+
+def execute_add_clip_flags(controller, proposal, log=lambda m: None) -> str:
+    done = 0
+    for item, color in proposal.plan:
+        name = _safe(item.GetName, "")
+        if item.AddFlag(color):
+            done += 1
+            log(f"Flagged '{name}' {color}.")
+        else:
+            log(f"Resolve refused to flag '{name}'.")
+    return f"Flagged {done} of {len(proposal.plan)} clip(s)."
+
+
+# --------------------------------------------------- fill_clip_metadata
+
+
+def preview_fill_clip_metadata(controller, args) -> ProposedAction:
+    """Metadata for Media Pool clips - EMPTY fields only. A field that
+    already says something is somebody's work, and overwriting it is not
+    additive; the proposal is refused rather than quietly skipping it, so
+    the model has to say what's already there."""
+    entries = args.get("clips") or []
+    _check_count(entries, "clips")
+
+    by_name = {}
+    for clip in _pool_clips(controller):
+        current = _safe(lambda c=clip: c.GetClipProperty("Clip Name"), "") or ""
+        by_name.setdefault(current, []).append(clip)
+
+    plan, details, seen = [], [], set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ActionError(f"Clip {entry!r} should be {{name, metadata: {{field: value}}}}.")
+        name = str(entry.get("name") or "").strip()
+        fields = entry.get("metadata")
+        if not name or not isinstance(fields, dict) or not fields:
+            raise ActionError(f"Each clip needs a 'name' and a 'metadata' object of field: value; got {entry!r}.")
+        matches = by_name.get(name) or []
+        if not matches:
+            raise ActionError(
+                f"No Media Pool clip is named '{name}'. Nothing was changed. "
+                "Read the project first rather than guessing clip names."
+            )
+        if len(matches) > 1:
+            raise ActionError(f"{len(matches)} clips are named '{name}', so the reference is ambiguous.")
+        if name in seen:
+            raise ActionError(f"'{name}' is listed twice in the same proposal.")
+        seen.add(name)
+        clip = matches[0]
+        existing = _safe(lambda c=clip: c.GetMetadata(), {}) or {}
+        for field_name, value in fields.items():
+            field_name, value = str(field_name).strip(), str(value).strip()
+            if not field_name or not value:
+                raise ActionError(f"'{name}': a metadata field and its value can't be empty.")
+            already = existing.get(field_name) if isinstance(existing, dict) else None
+            if already not in ("", None):
+                raise ActionError(
+                    f"'{name}' already has {field_name} set to '{already}', and this action only fills "
+                    "empty fields. Nothing was changed; leave that field out, or tell the user it is "
+                    "already filled in."
+                )
+            plan.append((clip, name, field_name, value))
+            details.append(f"'{name}': {field_name} = '{value}'")
+    if len(plan) > MAX_ITEMS_PER_ACTION:
+        raise ActionError(f"{len(plan)} fields is more than one action may change ({MAX_ITEMS_PER_ACTION} max).")
+
+    return ProposedAction(
+        action_id="fill_clip_metadata",
+        summary=f"Fill in {len(plan)} empty metadata field(s) on {len(seen)} Media Pool clip(s).",
+        details=details,
+        args=args,
+        plan=plan,
+    )
+
+
+def execute_fill_clip_metadata(controller, proposal, log=lambda m: None) -> str:
+    done = 0
+    for clip, name, field_name, value in proposal.plan:
+        # Looked at again: the field may have been filled in since the card appeared.
+        now = _safe(lambda c=clip: c.GetMetadata(), {}) or {}
+        if isinstance(now, dict) and now.get(field_name) not in ("", None):
+            log(f"'{name}': {field_name} has been filled in since – left as it is.")
+        elif clip.SetMetadata({field_name: value}):
+            done += 1
+            log(f"'{name}': {field_name} = '{value}'.")
+        else:
+            log(f"Resolve refused to set {field_name} on '{name}' – it may not be a field it knows.")
+    return f"Filled in {done} of {len(proposal.plan)} metadata field(s)."
 
 
 # ==========================================================================
@@ -1075,7 +1256,9 @@ def execute_set_timeline_settings(controller, proposal, log=lambda m: None) -> s
 # asserts all three have identical keys.
 
 ACTION_SUMMARIES = {
-    "add_markers": "add markers to the timeline",
+    "add_markers": "add markers to the timeline, at frames, times or timecodes",
+    "add_clip_flags": "add a flag to clips on the timeline",
+    "fill_clip_metadata": "fill in empty metadata fields on Media Pool clips",
     "create_bin": "create a Media Pool bin",
     "create_timeline": "create a new empty timeline",
     "rename_clips": "rename Media Pool clips",
@@ -1107,6 +1290,7 @@ DESTRUCTIVE_ACTIONS = frozenset({
 # only the project has to be the same.
 TIMELINE_ACTIONS = frozenset({
     "add_markers",
+    "add_clip_flags",
     "set_clip_colors",
     "append_to_timeline",
     "insert_into_timeline",
@@ -1119,6 +1303,8 @@ TIMELINE_ACTIONS = frozenset({
 ACTIONS = {
     # Additive: nothing here moves or removes anything already in place.
     "add_markers": (preview_add_markers, execute_add_markers),
+    "add_clip_flags": (preview_add_clip_flags, execute_add_clip_flags),
+    "fill_clip_metadata": (preview_fill_clip_metadata, execute_fill_clip_metadata),
     "create_bin": (preview_create_bin, execute_create_bin),
     "create_timeline": (preview_create_timeline, execute_create_timeline),
     "rename_clips": (preview_rename_clips, execute_rename_clips),
@@ -1160,7 +1346,90 @@ def preview(controller, action_id, args) -> ProposedAction:
     return proposal
 
 
+# ------------------------------------------------------------------ plans
+#
+# Several ADDITIVE actions on one card, applied in order by one Apply:
+# "make a bin, flag the mismatched clips, mark where each starts". Never a
+# destructive one - those move or remove things, so a later step's item
+# list (read before anything ran) could be pointing somewhere else by the
+# time it runs. Each step is previewed against the project as it is now,
+# which also means a step can't depend on an earlier one's result.
+
+MAX_PLAN_STEPS = 5
+
+
+@dataclass
+class ProposedPlan:
+    """What the card shows for a plan - the same face as ProposedAction."""
+
+    steps: list = field(default_factory=list)
+    reason: str = ""
+    action_id: str = "plan"
+    destructive: bool = False       # by construction: only additive steps get in
+    warnings: list = field(default_factory=list)
+
+    @property
+    def summary(self) -> str:
+        return f"{len(self.steps)} changes, applied in this order."
+
+    @property
+    def details(self) -> list[str]:
+        lines = []
+        for n, step in enumerate(self.steps, start=1):
+            lines.append(f"{n}. {step.summary}")
+            lines.extend(f"      {detail}" for detail in step.details)
+        return lines
+
+    def as_text(self) -> str:
+        return "\n".join([self.summary] + [f"  {line}" for line in self.details])
+
+
+def preview_plan(controller, steps) -> ProposedPlan:
+    if not isinstance(steps, list) or len(steps) < 2:
+        raise ActionError("A plan needs two or more steps; propose a single change on its own.")
+    if len(steps) > MAX_PLAN_STEPS:
+        raise ActionError(f"{len(steps)} steps is more than one plan may hold ({MAX_PLAN_STEPS} max).")
+    built, used = [], set()
+    for n, step in enumerate(steps, start=1):
+        if not isinstance(step, dict):
+            raise ActionError(f"Step {n} should be {{action_id, arguments}}.")
+        action_id = str(step.get("action_id") or "").strip()
+        if action_id in DESTRUCTIVE_ACTIONS:
+            raise ActionError(
+                f"Step {n} ({action_id}) moves or removes things, and a plan may only hold changes that "
+                "add. Propose it on its own, so the user can weigh it by itself."
+            )
+        if action_id in used:
+            raise ActionError(f"{action_id} is in the plan twice; put everything for it in one step.")
+        used.add(action_id)
+        try:
+            proposal = preview(controller, action_id, step.get("arguments"))
+        except ActionError as e:
+            raise ActionError(f"Step {n} ({action_id or 'no action_id'}): {e}")
+        if proposal.destructive:
+            raise ActionError(f"Step {n} ({action_id}) turned out to be destructive, so it can't be in a plan.")
+        built.append(proposal)
+    return ProposedPlan(steps=built)
+
+
+def _execute_plan(controller, plan, log) -> str:
+    # Every step's target first: a timeline switched since the card appeared
+    # stops the whole plan before any of it has been applied.
+    for step in plan.steps:
+        _check_target(controller, step.action_id, step.target)
+    outcomes = []
+    for n, step in enumerate(plan.steps, start=1):
+        try:
+            outcomes.append(ACTIONS[step.action_id][1](controller, step, log))
+        except Exception as e:  # noqa: BLE001 - reported with what did get done
+            done = " ".join(outcomes) or "nothing"
+            raise ActionError(f"step {n} ({step.summary}) failed: {e}. Applied before it: {done}")
+    return " ".join(outcomes)
+
+
 def execute(controller, proposal, log=lambda m: None) -> str:
+    if isinstance(proposal, ProposedPlan):
+        return _execute_plan(controller, proposal, log)
     if proposal.action_id not in ACTIONS:
         raise ActionError(f"Unknown action '{proposal.action_id}'.")
     # One place for every action: the card was built from one project and

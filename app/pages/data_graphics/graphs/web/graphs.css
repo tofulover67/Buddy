@@ -1,0 +1,13 @@
+/* Graphs - on top of web/buddy.css and ../../web/graphics.css: the table of rows. */
+
+.gr-rows { display: flex; flex-direction: column; gap: 6px; }
+.gr-row { display: flex; align-items: center; gap: 8px; }
+.gr-swatch { width: 16px; height: 26px; padding: 0; border: 0; border-radius: var(--r-xs); flex: none; cursor: pointer; }
+.gr-swatch:hover, .gr-swatch:focus-visible { outline: var(--bw-thick) solid var(--text-strong); outline-offset: 1px; }
+.gr-row .gr-label { flex: 2 1 120px; min-width: 0; }
+.gr-row .gr-value { flex: 1 1 80px; min-width: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.gr-empty {
+    margin: 0; padding: 14px 12px; text-align: center; color: var(--text-dim); border-radius: var(--r-md);
+    border: var(--bw) dashed var(--card-border);
+}
+.gr-paste { width: 100%; min-height: 180px; resize: vertical; font-family: var(--font-mono); }

@@ -22,6 +22,12 @@ from the UI:
                                   out of the running footer at query time.
   none         nothing built    - the page tells the user how to fix it.
 
+On every tier the best twenty candidates are looked at again (_rerank: how
+much of the question each covers), and on the bundle tiers the chosen chunks
+are handed over with their context (_with_context: neighbouring hits as one
+passage, the best ones with the chunk that follows). page_passages reads
+whole pages, for the agent's read_manual_page.
+
 Vector decode mirrors bundle_builder.py's writer exactly: b"RMS1" | int32 N |
 int32 dim | N float32 scales | N*dim int8 components.
 """
@@ -81,6 +87,18 @@ FOOTER_RE = re.compile(
 )
 TOKEN_RE = re.compile(r"[a-z0-9]+")
 
+# Re-ranking (ManualRetriever._rerank): how many fused candidates are looked
+# at again, and how much covering the question's words, its word pairs and
+# having them in the heading each lift one.
+RERANK_POOL = 20
+RERANK_COVERAGE = 0.35
+RERANK_PHRASE = 0.25
+RERANK_HEADING = 0.15
+CONTINUED = 2           # this many of the best hits bring the chunk that follows them
+STOPWORDS = frozenset(
+    "a an and are as at be by can do does for from how i in is it my of on or the to what when "
+    "where which why with you your".split())
+
 
 def tokenize(text: str) -> list[str]:
     return TOKEN_RE.findall(text.lower())
@@ -96,6 +114,7 @@ class Passage:
     chapter_title: str = ""
     section: str = ""
     score: float = 0.0
+    index: int = -1         # its chunk's place in the bundle; -1 when it isn't one chunk
 
     def citation(self) -> str:
         bits = []
@@ -295,6 +314,85 @@ class ManualRetriever:
                 fused[idx] = fused.get(idx, 0.0) + 1.0 / (RRF_K + rank + 1)
         return sorted(fused.items(), key=lambda x: -x[1])[:limit]
 
+    def _passage(self, idx: int, score: float = 0.0) -> Passage:
+        c = self.chunks[idx]
+        return Passage(
+            text=c.get("text", ""),
+            page=c.get("page"),
+            chapter_no=c.get("chapter_no"),
+            chapter_title=c.get("chapter_title", ""),
+            section=c.get("section", ""),
+            score=score,
+            index=idx,
+        )
+
+    def _rerank(self, query: str, fused: list[tuple[int, float]]) -> list[tuple[int, float]]:
+        """The fused candidates, re-ordered by how much of the question each
+        one actually covers. Fusion ranks a chunk that says one of the
+        question's words many times beside one that says all of them once;
+        this lifts the second. A boost on the fused score, never a
+        replacement for it - a paraphrase the embedder found, sharing no
+        words with the question, keeps the place fusion gave it among the
+        others like it."""
+        words = [t for t in tokenize(query) if t not in STOPWORDS]
+        terms = set(words)
+        if not terms or not self._bm25:
+            return fused
+        pairs = {f"{a} {b}" for a, b in zip(words, words[1:])}
+        out = []
+        for idx, score in fused:
+            chunk = self.chunks[idx]
+            have = self._bm25.freqs[idx]
+            coverage = sum(1 for t in terms if t in have) / len(terms)
+            phrase = 0.0
+            if pairs and coverage:
+                flat = " ".join(tokenize(chunk.get("text", "")))
+                phrase = sum(1 for p in pairs if p in flat) / len(pairs)
+            heading = set(tokenize(f"{chunk.get('section', '')} {chunk.get('chapter_title', '')}"))
+            titled = sum(1 for t in terms if t in heading) / len(terms)
+            out.append((idx, score * (1 + RERANK_COVERAGE * coverage + RERANK_PHRASE * phrase
+                                      + RERANK_HEADING * titled)))
+        out.sort(key=lambda x: -x[1])
+        return out
+
+    def _with_context(self, picked: list[tuple[int, float]], spare=()) -> list[Passage]:
+        """Passages for the chosen chunks, each a readable stretch: chunks
+        that follow one another in the manual become one passage, and the
+        best CONTINUED hits bring the chunk after them - a chunk is under a
+        thousand characters, and a procedure that starts in one usually
+        finishes in the next."""
+        chosen = {idx for idx, _ in picked}
+        used: set[int] = set()
+        results = []
+        for rank, (idx, score) in enumerate(picked):
+            if idx in used:
+                continue
+            run = [idx]
+            while run[0] - 1 in chosen and run[0] - 1 not in used and self._same_chapter(run[0] - 1, idx):
+                run.insert(0, run[0] - 1)
+            while run[-1] + 1 in chosen and run[-1] + 1 not in used and self._same_chapter(run[-1] + 1, idx):
+                run.append(run[-1] + 1)
+            nxt = run[-1] + 1
+            if (rank < CONTINUED and nxt < len(self.chunks) and nxt not in used
+                    and self._same_chapter(nxt, idx)):
+                run.append(nxt)
+            used.update(run)
+            passage = self._passage(run[0], score)
+            if len(run) > 1:
+                passage.text = "\n\n".join(self.chunks[i].get("text", "") for i in run)
+            results.append(passage)
+        # Chunks that merged left places free: the next best fill them.
+        for idx, score in spare:
+            if len(results) >= len(picked):
+                break
+            if idx not in used:
+                used.add(idx)
+                results.append(self._passage(idx, score))
+        return results
+
+    def _same_chapter(self, a: int, b: int) -> bool:
+        return self.chunks[a].get("chapter_no") == self.chunks[b].get("chapter_no")
+
     def search(self, query: str, limit: int = 5) -> list[Passage]:
         if not self._bm25 or not self.chunks:
             return []
@@ -308,23 +406,26 @@ class ManualRetriever:
             if qvec:
                 rankings.append([i for i, _ in self._vector_scores(qvec)])
 
-        fused = self._rrf(rankings, limit) if len(rankings) > 1 else [
-            (i, s) for i, s in keyword[:limit]
+        pool = max(limit, RERANK_POOL)
+        fused = self._rrf(rankings, pool) if len(rankings) > 1 else [
+            (i, s) for i, s in keyword[:pool]
         ]
-        results = []
-        for idx, score in fused:
-            c = self.chunks[idx]
-            results.append(
-                Passage(
-                    text=c.get("text", ""),
-                    page=c.get("page"),
-                    chapter_no=c.get("chapter_no"),
-                    chapter_title=c.get("chapter_title", ""),
-                    section=c.get("section", ""),
-                    score=score,
-                )
-            )
-        return results
+        ranked = self._rerank(query, fused)
+        picked = ranked[:limit]
+        if self.tier == TIER_TEXT_BM25:
+            return [self._passage(idx, score) for idx, score in picked]    # whole pages already
+        return self._with_context(picked, ranked[limit:])
+
+    def page_passages(self, first: int, last: int | None = None) -> list[Passage]:
+        """Everything the manual says from page `first` to `last`, in
+        order - for reading on from an excerpt that stopped short."""
+        last = first if last is None else max(first, last)
+        return [self._passage(i) for i, c in enumerate(self.chunks)
+                if isinstance(c.get("page"), int) and first <= c["page"] <= last]
+
+    @property
+    def last_page(self) -> int:
+        return max((c["page"] for c in self.chunks if isinstance(c.get("page"), int)), default=0)
 
     def describe_tier(self) -> str:
         if self.tier == TIER_HYBRID and self.embedder is not None:

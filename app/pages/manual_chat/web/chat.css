@@ -34,6 +34,9 @@
 .chat-row .chat-result { flex: 1; min-width: 0; }
 .chat-row .chat-delete { flex: none; opacity: .55; }
 .chat-row:hover .chat-delete, .chat-row .chat-delete:focus { opacity: 1; }
+.chat-row .chat-pin { flex: none; opacity: .3; }
+.chat-row:hover .chat-pin, .chat-row .chat-pin:focus { opacity: .8; }
+.chat-row .chat-pin.on { opacity: 1; color: var(--accent-text); }
 .chat-row .chat-delete:hover:not(:disabled) { background: var(--danger-bg); color: var(--danger-fg); }
 .chat-result { width: 100%; display: flex; flex-wrap: wrap; gap: 6px 12px;
     align-items: baseline; text-align: left; padding: 6px 8px; border: 0;
@@ -135,6 +138,45 @@
 .body .cite.openable { cursor: pointer; text-decoration: underline; text-decoration-style: dotted; }
 .body .cite.openable:hover, .body .cite.openable:focus { color: var(--accent-text); }
 .body .source { color: var(--text-dim); font-style: italic; font-size: .92em; }
+.body ul ul, .body ul ol, .body ol ul, .body ol ol { margin: 2px 0 2px; }
+.body .table-wrap { overflow-x: auto; margin: 0 0 8px; }
+.body .table-wrap:last-child { margin-bottom: 0; }
+.body table { border-collapse: collapse; font-size: .95em; }
+.body th, .body td {
+    padding: 5px 10px;
+    text-align: left;
+    vertical-align: top;
+    border: var(--bw) solid var(--field-border);
+    overflow-wrap: normal;
+}
+.body th { background: var(--field-bg); color: var(--text-strong); font-weight: 600; }
+
+/* An answer still being written, and one that was stopped part-way. */
+.draft { margin-top: 18px; }
+/* The dots, back under an answer that has gone quiet: no second "Buddy". */
+.thinking.under-draft { margin-top: 6px; }
+.thinking.under-draft .who { display: none; }
+.stopped { margin-top: 6px; font-style: italic; }
+
+/* Cited, but never read: said plainly under the answer. */
+.unverified {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: var(--r-md);
+    border: var(--bw) solid var(--danger);
+    background: color-mix(in srgb, var(--danger) 8%, transparent);
+    font-size: var(--fs-sm);
+}
+.unverified svg { flex: none; width: 16px; height: 16px; color: var(--danger-text); margin-top: 1px; }
+
+/* The manual pages read for an answer (under the same kind of fold as the tools used). */
+.source-list { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
+.source-row { padding: 5px 8px; border-radius: var(--r-sm); cursor: pointer; }
+.source-row:hover, .source-row:focus { background: var(--raised-bg); }
+.source-cite { font-size: var(--fs-sm); color: var(--text-strong); }
 
 .trace { margin-top: 6px; }
 .trace summary {
@@ -154,6 +196,7 @@
 .trace .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
 
 .actions { display: flex; gap: 4px; margin-top: 2px; opacity: .75; transition: opacity .15s; }
+.actions:empty { display: none; }
 .msg:hover .actions, .actions:focus-within { opacity: 1; }
 .actions .btn { font-size: var(--fs-xs); padding: 2px 8px; }
 .actions .btn svg { width: 13px; height: 13px; }
@@ -173,7 +216,12 @@
     gap: 12px;
     padding: 10px 14px;
 }
-.offer .reason { flex: 1; }
+.offer .reason { flex: 1; min-width: 0; }
+.offer .prefill { overflow-wrap: anywhere; }
+
+.editing { display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; }
+.editing[hidden] { display: none; }
+.editing .muted { flex: 1; }
 
 .proposal {
     padding: 12px 14px;
@@ -222,6 +270,7 @@
 .composer .btn.accent { min-height: 36px; padding-left: 16px; padding-right: 16px; }
 
 .status { min-height: 16px; padding: 0 4px; }
+.status:empty { display: none; }     /* nothing to say: no empty line under the composer */
 
 /* ------------------------------------------------------------ pictures -- */
 /* Waiting to go with the next question, and sent in a question's bubble. */

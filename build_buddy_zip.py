@@ -86,6 +86,10 @@ def build():
         archive.write(os.path.join(REPO_ROOT, "installer", "requirements.txt"),
                       f"{PACKAGE_DIR_NAME}/requirements.txt")
         written.append(f"{PACKAGE_DIR_NAME}/requirements.txt")
+        # Buddy's own documentation, which Ask Buddy searches when the
+        # question is about Buddy (pages/manual_chat/buddy_docs.py).
+        archive.write(os.path.join(REPO_ROOT, "README.md"), f"{PACKAGE_DIR_NAME}/README.md")
+        written.append(f"{PACKAGE_DIR_NAME}/README.md")
 
     size_mb = os.path.getsize(OUTPUT_ZIP) / 1e6
     print(f"Wrote {OUTPUT_ZIP} ({len(written)} files, {size_mb:.2f} MB)")

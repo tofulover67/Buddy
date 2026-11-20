@@ -153,6 +153,16 @@ class ToolPage(QWidget):
             except Exception:  # noqa: BLE001
                 pass
 
+    def prefill(self, text):
+        """Optional hook: Ask Buddy offered this tool with something to
+        start from - words to search for, say - and the user pressed the
+        button; the tool is already in front. `text` is the model's, shown
+        to the user on the button they pressed. Start with it and return
+        True, or leave this as it is for a tool with nothing to prefill.
+        A tool that takes it is named in pages/manual_chat/agent.py's
+        PREFILL_TOOLS, which is how the model knows it can."""
+        return False
+
     def on_app_quitting(self):
         """Optional hook: called once, before the shell actually tears
         itself down - both on a normal close and when the tray's Quit

@@ -15,7 +15,8 @@ The way it goes in (measured on Studio 21.1, 2026-10-05):
 
 Safety: a title is Buddy's when its comp carries the BuddyTitle tag. Placing never
 covers anything else - a clip of someone else's in the span stops it, naming the clip
-and where - and Buddy's own earlier title in that spot is replaced.
+and where - and Buddy's own earlier title in that spot is replaced. Finding the spot (in_the_way,
+pick_track) is core/fusion_place.py's, which Data Graphics places its comps with too.
 """
 
 import hashlib
@@ -23,6 +24,8 @@ import json
 import os
 import re
 import tempfile
+
+from core import fusion_place
 
 from .. import canvas_math as cm
 from .. import subtitle_engine as se
@@ -58,34 +61,16 @@ def is_buddy_title(item):
 
 def in_the_way(items, start, end, is_ours=is_buddy_title):
     """The items overlapping [start, end): (Buddy's own titles, everyone else's)."""
-    ours, theirs = [], []
-    for item in items or []:
-        try:
-            s, e = int(item.GetStart()), int(item.GetEnd())
-        except Exception:
-            continue
-        if s < end and start < e:
-            (ours if is_ours(item) else theirs).append(item)
-    return ours, theirs
+    return fusion_place.in_the_way(items, start, end, is_ours)
 
 
-def clock(frame, fps, start_frame=0):
-    """A timeline frame as h:mm:ss.f from the timeline's start - for messages."""
-    seconds = max(0.0, (frame - start_frame) / float(fps or 24))
-    m, s = divmod(seconds, 60)
-    h, m = divmod(int(m), 60)
-    return f"{h}:{m:02d}:{s:04.1f}" if h else f"{m}:{s:04.1f}"
+clock = fusion_place.clock          # a timeline frame as h:mm:ss.f, for messages
 
 
 def pick_track(timeline, start, end, is_ours=is_buddy_title):
     """The track a new title goes on: the topmost video track with nothing of anyone
     else's in the span, else a new track above them all."""
-    count = int(timeline.GetTrackCount("video") or 0)
-    for track in range(count, 0, -1):
-        _ours, theirs = in_the_way(timeline.GetItemListInTrack("video", track), start, end, is_ours)
-        if not theirs:
-            return track
-    return count + 1
+    return fusion_place.pick_track(timeline, start, end, is_ours)
 
 
 def _template(pool):

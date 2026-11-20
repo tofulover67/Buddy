@@ -281,7 +281,7 @@ class RetrieverTests(unittest.TestCase):
         fake = _Fake(self.matching())
         r = retrieval.ManualRetriever(self.dir, None, fake)
         self.assertEqual(r.tier, retrieval.TIER_HYBRID)
-        self.assertEqual(r.search("save the cut for another app as xml", 3)[0].page, 30)
+        self.assertEqual(r.search("save the cut for another app as xml", 1)[0].page, 30)
         r.search("again", 3)
         self.assertEqual(fake.calls, 2)                                  # checked once, not per question
         self.assertIn("Fake", r.describe_tier())
