@@ -961,7 +961,12 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         worker, slot.worker = slot.worker, None
         if worker is not None:
             worker.release()
-            worker.deleteLater()
+            # Its last signal comes from inside run(), which may not have
+            # returned yet: a QThread deleted while it runs aborts the app.
+            if worker.isRunning() and not worker.wait(5000):
+                worker.finished.connect(worker.deleteLater)
+            else:
+                worker.deleteLater()
         self._push_jobs()
         self._push_state()
         if self._auto is not None:
