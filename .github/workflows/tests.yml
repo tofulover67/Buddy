@@ -135,8 +135,13 @@ jobs:
                   block.append(later)
               print(f"::error title={prop(m.group(1) + ' ' + m.group(2))}::{esc(chr(10).join(block[-12:]))}")
           if not found:
-              # No test failed by name: the run itself died. Show how it ended.
-              print(f"::error title=Tests stopped (exit {sys.argv[1]})::{esc(chr(10).join(lines[-15:]))}")
+              # No test failed by name: the run itself died. Show how it ended -
+              # plain text and short lines, which is all an annotation is sure to keep.
+              plain = lambda s: "".join(ch if ch.isascii() and ch.isprintable() else "?" for ch in s)[:300]
+              tail = [plain(line) for line in lines[-40:]] or ["(the run printed nothing)"]
+              last = next((plain(l) for l in reversed(lines) if l.startswith("test")), "no test had started")
+              print(f"::error title={prop('Tests stopped (exit ' + sys.argv[1] + ') in or after: ' + last[:150])}::"
+                    f"{esc(chr(10).join(tail))}")
           EOF
             exit "$code"
           fi

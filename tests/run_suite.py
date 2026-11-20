@@ -12,9 +12,15 @@ workflow uses this runner for that reason.
 It also sets BUDDY_HOME (core/tool_dirs.py) to a new empty folder, unless
 it's set already, so nothing a test writes by accident lands in the real
 ~/.buddy - the folder is removed at the end.
+
+A run that dies natively (Qt, Chromium) says which test it was in: Python's
+faulthandler prints every thread's stack on the way down - for a trap too,
+which is how Chromium stops itself on a Mac.
 """
 
+import faulthandler
 import os
+import signal
 import shutil
 import sys
 import tempfile
@@ -24,6 +30,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
     os.chdir(ROOT)
+    faulthandler.enable()
+    if hasattr(signal, "SIGTRAP") and hasattr(faulthandler, "register"):    # not on Windows
+        faulthandler.register(signal.SIGTRAP, chain=True)
     sandbox = None
     if not os.environ.get("BUDDY_HOME", "").strip():
         sandbox = tempfile.mkdtemp(prefix="buddy-home-")
