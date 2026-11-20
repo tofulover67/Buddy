@@ -65,6 +65,9 @@ REFIT_MS = 120
 # this many times, before its card shows in the middle instead.
 FIND_RETRY_MS = 100
 FIND_TRIES = 30
+# Settings still loading isn't a try: it's waited for this many times first
+# (20 s - its first load took over 3 s on GitHub's Mac runners).
+SETTINGS_LOAD_TRIES = 200
 
 TRAY_TEXT = {
     "win": "Closing the window keeps Buddy running in the system tray, so Time Tracker keeps tracking. "
@@ -280,18 +283,19 @@ class TourView(WebWindow):
             self._lens = _SettingsLens(self, dialog)
         self._find_in_settings(dialog, page_id, selectors, step, asked, FIND_TRIES, turned=False)
 
-    def _find_in_settings(self, dialog, page_id, selectors, step, asked, tries, turned):
-        """Once Settings has loaded: turns it to the page, then looks for the
-        card until it's drawn there (the page turns as a message, after
-        which the lookup may run first)."""
+    def _find_in_settings(self, dialog, page_id, selectors, step, asked, tries, turned, loading=SETTINGS_LOAD_TRIES):
+        """Once Settings has loaded (waited for apart from the tries): turns
+        it to the page, then looks for the card until it's drawn there (the
+        page turns as a message, after which the lookup may run first)."""
         if asked != self._asked or not _alive(dialog) or self._lens is None:
             return
         again = lambda turned: QTimer.singleShot(  # noqa: E731
             FIND_RETRY_MS, self, lambda: self._find_in_settings(dialog, page_id, selectors, step, asked, tries - 1,
                                                                 turned))
         if not (dialog._ready and dialog.isVisible()):
-            if tries > 0:
-                again(turned)
+            if loading > 0:
+                QTimer.singleShot(FIND_RETRY_MS, self, lambda: self._find_in_settings(
+                    dialog, page_id, selectors, step, asked, tries, turned, loading - 1))
             else:
                 self._lens.send(self._payload(step, []))
             return
