@@ -30,8 +30,8 @@
     <div class="sw-scroll">
         <div class="pod-col sw-col">
             <div>
-                <h2 class="pod-title">Who is on each camera?</h2>
-                <p class="pod-sub">Buddy listens to the mics and cuts to whoever is talking. Check the names and cameras, then build.</p>
+                <h2 class="pod-title">Set up your angles</h2>
+                <p class="pod-sub">Give each angle its video and, for a person, their audio. Buddy cuts to whoever is talking, and to the other angles by their rules.</p>
             </div>
 
             <div class="sw-status" id="status" hidden>
@@ -42,9 +42,9 @@
             </div>
             <p class="warn" id="problem"></p>
 
-            <!-- The people: each voice heard, its name, and the camera it's on. -->
-            <section class="sw-part" aria-labelledby="people-title">
-                <h3 class="sw-part-title" id="people-title">People</h3>
+            <!-- The angles: a card each - its name, its video, a person's audio, and when it cuts in. -->
+            <section class="sw-part" aria-labelledby="cams-title">
+                <h3 class="sw-part-title" id="cams-title">Angles</h3>
                 <div class="sw-notice" id="engine-notice" hidden>
                     <p>Telling apart people on one mic needs Buddy's speech engine and a 27 MB voice model.</p>
                     <div class="row">
@@ -53,12 +53,6 @@
                         <span class="muted small" id="download-text" translate="no"></span>
                     </div>
                 </div>
-                <div class="sw-voices" id="voices"></div>
-            </section>
-
-            <!-- The cameras: the sound each is heard through, and what the ones with no person on them are for. -->
-            <section class="sw-part" aria-labelledby="cams-title">
-                <h3 class="sw-part-title" id="cams-title">Cameras</h3>
                 <div class="sw-cams" id="cams"></div>
             </section>
 
@@ -74,10 +68,10 @@
     </div>
 
     <footer class="pod-foot">
-        <button type="button" class="btn" id="cut-settings" title="How long shots last, reaction shots, when the wide shot is used">Pacing…</button>
-        <label class="row sw-setup-pick" title="Your cameras and their settings, kept to use again next episode">
+        <button type="button" class="btn" id="cut-settings" title="How long shots last and how early the cuts come">Pacing…</button>
+        <label class="row sw-setup-pick" title="Your angles and their rules, kept to use again next episode">
             <span class="muted small">Setup</span>
-            <select class="field" id="setup" aria-label="Camera setup"></select>
+            <select class="field" id="setup" aria-label="Setup"></select>
         </label>
         <button type="button" class="btn ghost icon" id="setup-more" title="New, copy, rename or delete a setup"
                 aria-label="Setup options"></button>

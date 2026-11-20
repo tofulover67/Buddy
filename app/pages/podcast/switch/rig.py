@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
 """
-Auto Switch's camera setups ("rigs"): the cameras a studio has, what each
-is called, which mics give it its sound, and when it's used. Saved by
+Auto Switch's setups ("rigs"): the angles a studio has - a person's
+camera, a wide, a detail - what each is called, the video track it's on,
+the audio that says when its person talks, and when it's used. Saved by
 name and reused episode after episode, so nothing here knows about one
-timeline: a camera remembers the name of the video track it was on and of
-the mics it's linked to, and place() finds them again on whichever
-timeline is open. Pure Python: no Qt, no Resolve, no numpy.
+timeline: an angle (a "camera" in the code) remembers the name of the
+video track it was on and of the mics it's linked to, and place() finds
+them again on whichever timeline is open. Pure Python: no Qt, no Resolve,
+no numpy.
 
     clean_setups(raw)                 -> {id: setup}, every field made safe
     from_timeline(video, mics, name, legacy) -> a first setup for a timeline
-    new_camera(setup, name)           -> a camera added to it
-    place(setup, video, mics, mem)    -> each camera's track and linked mics here
+    new_camera(setup, name, role)     -> an angle added to it
+    remove_camera(setup, cam_id)      -> one taken out
+    place(setup, video, mics, mem)    -> each angle's track and linked mics here
 
-A camera's role says when the cut plan (cutplan.py) shows it:
+An angle's role says when the cut plan (cutplan.py) shows it:
 
-    speaker   a person's camera: shows the voices pinned to it while they
-              talk. With `reaction` on, it's also a listener's reaction
-              shot: when someone else talks longer than `react_after` s,
-              it's cut to for `react_len` s, and back.
+    speaker   a person's angle - one with audio: shows the voice heard
+              through it while they talk. With `reaction` on, it's also a
+              listener's reaction shot: when someone else talks longer than
+              `react_after` s, it's cut to for `react_len` s, and back.
     angle     a second angle of a speaker camera (`of`): in that camera's
               shots, the two take turns every `every` s.
     wide      the wide / group shot: for crosstalk (`crosstalk`), long
@@ -30,9 +33,10 @@ A camera's role says when the cut plan (cutplan.py) shows it:
     off       not used: razored nowhere, never on screen (its clips are
               turned off in the new timeline).
 
-Those settings are the setup's `rules`, one set for every camera of a
-role (Cut settings); `person` is who a speaker's camera shows, so a voice
-on it starts with that name next episode.
+Those settings are each angle's own (its rules, set from its card). A
+setup also keeps a set as `rules`: what a new angle starts with - and, in a
+setup saved before angles had their own (no `version`), what every angle
+of a role used.
 
 Audio links: a camera with mics linked (`audio`) is heard through them -
 its own sound is cut at the same points as its picture and turned off in
@@ -41,6 +45,7 @@ it by default.
 """
 
 ROLES = ("speaker", "angle", "wide", "cutaway", "off")
+VERSION = 2                 # each angle holds its own rules
 MAX_SETUPS = 30
 MAX_CAMERAS = 16
 MAX_NAME = 60
@@ -93,13 +98,13 @@ def clean_camera(raw, index=1):
     raw = raw if isinstance(raw, dict) else {}
     cam = {
         "id": _text(raw.get("id"), 20) or f"cam{index}",
-        "name": _text(raw.get("name")) or f"Camera {index}",
+        # An older setup's speaker camera was shown by its person's name.
+        "name": _text(raw.get("person")) or _text(raw.get("name")) or f"Angle {index}",
         "role": raw.get("role") if raw.get("role") in ROLES else "speaker",
         "track_name": _text(raw.get("track_name"), 120),
         "audio_names": [_text(n, 120) for n in raw.get("audio_names", []) if _text(n, 120)][:8]
         if isinstance(raw.get("audio_names"), list) else [],
         "of": _text(raw.get("of"), 20) or None,
-        "person": _text(raw.get("person")),
     }
     cam.update(clean_rules(raw))
     return cam
@@ -142,7 +147,11 @@ def clean_setup(raw, index=1):
         for role, keys in RULE_ROLES.items():
             first = next((c for c in raw.get("cameras", []) if isinstance(c, dict) and c.get("role") == role), {})
             rules.update({k: first[k] for k in keys if k in first})
-    return {"name": _text(raw.get("name")) or f"Setup {index}", "cameras": cams, "rules": clean_rules(rules)}
+    elif raw.get("version") != VERSION:   # one set for every angle of a role: now each angle's own
+        for cam in cams:
+            cam.update(clean_rules(rules))
+    return {"name": _text(raw.get("name")) or f"Setup {index}", "cameras": cams, "rules": clean_rules(rules),
+            "version": VERSION}
 
 
 def clean_setups(raw):
@@ -165,13 +174,28 @@ def new_setup_id(setups):
     return _free_id(set(setups), "setup")
 
 
-def new_camera(setup, name=""):
-    """A speaker camera added to `setup` (changed in place) - its id."""
+def new_camera(setup, name="", role="speaker"):
+    """An angle added to `setup` (changed in place), with the setup's rules
+    to start from - its id, or None when the setup is full."""
+    if len(setup["cameras"]) >= MAX_CAMERAS:
+        return None
     taken = {c["id"] for c in setup["cameras"]}
-    cam = clean_camera({"id": _free_id(taken), "name": name or f"Camera {len(setup['cameras']) + 1}"},
-                       len(setup["cameras"]) + 1)
+    names = {c["name"] for c in setup["cameras"]}
+    n = len(setup["cameras"]) + 1
+    while not name and f"Angle {n}" in names:
+        n += 1
+    cam = clean_camera(dict(setup.get("rules") or {}, id=_free_id(taken), name=name or f"Angle {n}", role=role), n)
     setup["cameras"].append(cam)
     return cam["id"]
+
+
+def remove_camera(setup, cam_id):
+    """An angle taken out of `setup` (changed in place); a second angle of
+    it is of nothing then."""
+    setup["cameras"] = [c for c in setup["cameras"] if c["id"] != cam_id]
+    for cam in setup["cameras"]:
+        if cam["of"] == cam_id:
+            cam["of"] = None
 
 
 def _default_name(name, kind, index):
@@ -183,7 +207,7 @@ def from_timeline(video, mics, name="My setup", legacy_wide=None):
     named after its track, the one named like a wide (or `legacy_wide`, the
     track an older Auto Switch had as the wide) a wide, the rest speakers;
     a speaker linked to the mic named like it ("Tess cam" - "Tess lav")."""
-    setup = {"name": name, "cameras": []}
+    setup = {"name": name, "cameras": [], "version": VERSION}
     for track in video:
         if not track.get("clips"):
             continue

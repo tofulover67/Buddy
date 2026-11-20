@@ -357,6 +357,31 @@ class RigTests(unittest.TestCase):
         self.assertNotEqual(b["id"], "a")
         self.assertEqual((b["gap_min"], b["gap_max"]), (50.0, 50.0))
 
+    def test_an_older_setups_shared_rules_become_each_angles_own(self):
+        old = {"name": "Studio", "rules": {"every": 30, "quiet": True},
+               "cameras": [{"id": "a", "name": "Camera 1", "person": "Tess"}, {"id": "b", "role": "wide", "every": 5}]}
+        setup = rig.clean_setup(old)
+        self.assertEqual([(c["every"], c["quiet"]) for c in setup["cameras"]], [(30.0, True), (30.0, True)])
+        self.assertEqual(setup["cameras"][0]["name"], "Tess")            # shown by its person's name
+        setup["cameras"][1]["every"] = 8.0
+        again = rig.clean_setup(setup)                                   # saved since: each keeps its own
+        self.assertEqual([c["every"] for c in again["cameras"]], [30.0, 8.0])
+
+    def test_angles_are_added_and_removed(self):
+        setup = rig.from_timeline(VIDEO, MICS)
+        setup["rules"]["cutaway"] = 45.0
+        new = rig.new_camera(setup, role="wide")
+        cam = setup["cameras"][-1]
+        self.assertEqual((cam["id"], cam["name"], cam["role"], cam["cutaway"]), (new, "Angle 4", "wide", 45.0))
+        first = setup["cameras"][0]["id"]
+        cam["role"], cam["of"] = "angle", first
+        rig.remove_camera(setup, first)
+        self.assertEqual(len(setup["cameras"]), 3)
+        self.assertIsNone(setup["cameras"][-1]["of"])
+        while rig.new_camera(setup) is not None:
+            pass
+        self.assertEqual(len(setup["cameras"]), rig.MAX_CAMERAS)
+
 
 # ------------------------------------------------------------------ OTIO --
 
@@ -403,10 +428,14 @@ class OtioSplitTests(unittest.TestCase):
         self.assertEqual(v2["children"][1]["source_range"]["start_time"]["value"], 0)
         self.assertEqual(v2["children"][2]["source_range"]["start_time"]["value"], 250)
         self.assertEqual(v3, otio_doc()["tracks"]["children"][2])          # B-roll as it was
-        self.assertEqual(a1, otio_doc()["tracks"]["children"][3])          # and the sound
         self.assertEqual(pieces, [(1, 0, 300, True), (1, 300, 500, False), (1, 500, 1000, True),
                                   (2, 50, 300, False), (2, 300, 500, True), (2, 500, 1000, False)])
-        self.assertNotIn("Link Group ID", v1["children"][0]["metadata"]["Resolve_OTIO"])
+        # The camera's sound is cut at the same points, each piece linked to its picture piece.
+        self.assertEqual([(c["source_range"]["start_time"]["value"], c["source_range"]["duration"]["value"])
+                          for c in a1["children"]], [(100, 300), (400, 200), (600, 500)])
+        links = [c["metadata"]["Resolve_OTIO"]["Link Group ID"] for c in v1["children"]]
+        self.assertEqual(links, [c["metadata"]["Resolve_OTIO"]["Link Group ID"] for c in a1["children"]])
+        self.assertEqual(len(set(links)), 3)
 
     def test_a_clip_wholly_inside_one_shot_is_left_whole(self):
         doc, pieces, _s, _w = otio_split.split(otio_doc(), cut((0, 2000, 1)), [1])
@@ -432,11 +461,60 @@ class OtioSplitTests(unittest.TestCase):
         self.assertEqual(len(set(links)), 3)
         self.assertNotIn(1, links)                                   # new groups, not the whole clip's
 
-    def test_an_unmuted_cameras_sound_is_left_whole(self):
+    def test_an_unmuted_cameras_sound_is_cut_too_but_stays_on(self):
         shots = cut((86400, 86700, 1), (86700, 87400, 2))
         doc, _p, sound, _w = otio_split.split(otio_doc(), shots, [1, 2], 86400, muted=[2])
+        self.assertEqual(sound, [])                                  # V2's file has no sound on the timeline
+        self.assertEqual([oe._item_duration(c) for c in doc["tracks"]["children"][3]["children"]], [300, 700])
+
+    def test_sound_that_goes_with_b_roll_is_left_whole(self):
+        document = otio_doc()
+        document["tracks"]["children"][2]["children"][1]["metadata"] = {"Resolve_OTIO": {"Link Group ID": 9}}
+        document["tracks"]["children"].append(
+            oe._make_track("Audio", "A2", [oe._make_gap(200, R), otio_clip("Broll", 10, 100, link=9)]))
+        shots = cut((86400, 86650, 1), (86650, 87400, 2))            # a switch in the middle of the B-roll
+        doc, _p, _s, _w = otio_split.split(document, shots, [1, 2], 86400)
+        self.assertEqual(doc["tracks"]["children"][4], document["tracks"]["children"][4])
+
+    def paired_doc(self):
+        """otio_doc() with a recorder's track, A2: one long file that starts 20 frames in."""
+        doc = otio_doc()
+        mic = otio_clip("Tess_lav", 0, 1100)
+        mic["metadata"] = {}                                         # as a loose clip comes: no link of its own
+        doc["tracks"]["children"].append(oe._make_track("Audio", "A2", [oe._make_gap(20, R), mic]))
+        return doc
+
+    def test_paired_audio_is_cut_with_its_camera_and_linked_piece_by_piece(self):
+        shots = cut((86400, 86700, 1), (86700, 86900, 2), (86900, 87400, 1))
+        doc, _pieces, sound, _w = otio_split.split(self.paired_doc(), shots, [1, 2], 86400, muted=[1],
+                                                   paired={1: [2]})
+        v1, _v2, _v3, a1, a2 = doc["tracks"]["children"]
+        mic = a2["children"][1:]
+        self.assertEqual([(c["source_range"]["start_time"]["value"], c["source_range"]["duration"]["value"])
+                          for c in mic], [(0, 280), (280, 200), (480, 500), (980, 120)])   # in step, nothing moved
+        link = lambda c: c["metadata"].get("Resolve_OTIO", {}).get("Link Group ID")  # noqa: E731
+        self.assertEqual([link(c) for c in mic[:3]], [link(c) for c in v1["children"]])
+        self.assertEqual([link(c) for c in mic[:3]], [link(c) for c in a1["children"]])   # picture, its sound, its mic
+        self.assertEqual(len({link(c) for c in mic[:3]}), 3)
+        self.assertIsNone(link(mic[3]))                                # past the camera's end: no picture to go with
+        self.assertEqual(sound, [(1, 0, 300), (1, 300, 500), (1, 500, 1000)])   # only the camera's own is turned off
+
+    def test_a_mic_two_cameras_share_goes_with_the_one_on_screen(self):
+        shots = cut((86400, 86700, 1), (86700, 86900, 2), (86900, 87400, 1))
+        doc, _p, _s, _w = otio_split.split(self.paired_doc(), shots, [1, 2], 86400, paired={1: [2], 2: [2]})
+        v1, v2, _v3, _a1, a2 = doc["tracks"]["children"]
+        link = lambda c: c["metadata"].get("Resolve_OTIO", {}).get("Link Group ID")  # noqa: E731
+        mic = a2["children"][1:]
+        self.assertEqual([link(c) for c in mic[:3]],
+                         [link(v1["children"][0]), link(v2["children"][2]), link(v1["children"][2])])
+
+    def test_audio_paired_with_no_camera_is_cut_too_and_left_on_its_own(self):
+        shots = cut((86400, 86700, 1), (86700, 87400, 2))
+        doc, _p, sound, _w = otio_split.split(self.paired_doc(), shots, [1, 2], 86400)
+        mic = doc["tracks"]["children"][4]["children"][1:]
+        self.assertEqual([oe._item_duration(c) for c in mic], [280, 700, 120])
+        self.assertTrue(all("Link Group ID" not in c["metadata"].get("Resolve_OTIO", {}) for c in mic))
         self.assertEqual(sound, [])
-        self.assertEqual(doc["tracks"]["children"][3], otio_doc()["tracks"]["children"][3])
 
     def test_compound_clips_are_refused(self):
         doc = otio_doc()
@@ -631,38 +709,92 @@ class PageTests(unittest.TestCase):
         found = [p for n, p in self.events if n == name]
         return found[-1] if found else None
 
-    def test_analyse_pins_each_voice_to_its_camera_and_plans_the_cuts(self):
+    def test_analyse_gives_each_angle_its_voice_and_plans_the_cuts(self):
         page = self.make()
         page.on_analyse()
         setup = self.last("setup")
         self.assertEqual([a["label"] for a in setup["audio"]], ["tess.wav · A1", "sam.wav · A2"])  # no camera sound
-        self.assertEqual([(c["file"], c["role"], c["track"], c["audio"]) for c in setup["cameras"]],
-                         [("A001", "speaker", 1, [1]), ("B001", "speaker", 2, [2]), ("C001", "wide", 3, [])])
+        self.assertEqual([v["label"] for v in setup["video"]], ["A001 · V1", "B001 · V2", "C001 · V3"])
+        self.assertEqual([(c["file"], c["role"], c["track"], c["audio"], c["voice"]) for c in setup["cameras"]],
+                         [("A001", "speaker", 1, [1], "1"), ("B001", "speaker", 2, [2], "2"),
+                          ("C001", "wide", 3, [], None)])
         self.assertEqual(setup["setups"], [{"id": "setup1", "name": "My setup"}])
-        ids = [c["id"] for c in setup["cameras"]]
-        voices = self.last("voices")["voices"]
-        self.assertEqual([(v["track"], v["camera"]) for v in voices], [(1, ids[0]), (2, ids[1])])
         plan = self.last("plan")
         self.assertEqual([s["camera"] for s in plan["shots"]], [1, 2, 1, 2])
         self.assertEqual(plan["shots"][0]["start"], 0)
         self.assertEqual(plan["shots"][-1]["end"], 1000)
 
-    def test_changing_a_camera_or_an_option_replans_and_is_kept(self):
+    def test_unnamed_tracks_are_paired_in_order_and_the_spare_is_the_wide(self):
+        page = self.make()
+        data = timeline_data()
+        for kind, word in (("tracks", "Audio"), ("video", "Video")):
+            for track in data[kind]:
+                track["name"] = f"{word} {track['index']}"
+        page._calls.call = lambda name, args, job, done: done(data, None) or True
+        page.on_analyse()
+        self.assertEqual([(c["name"], c["role"], c["track"], c["audio"]) for c in self.last("setup")["cameras"]],
+                         [("Angle 1", "speaker", 1, [1]), ("Angle 2", "speaker", 2, [2]), ("Angle 3", "wide", 3, [])])
+        self.assertEqual([s["camera"] for s in self.last("plan")["shots"]], [1, 2, 1, 2])
+
+    def test_changing_an_angle_or_an_option_replans_and_is_kept(self):
         page = self.make()
         page.on_analyse()
-        tess = self.last("setup")["cameras"][0]["id"]
-        page.on_map({"voice": "2", "camera": tess})
-        self.assertEqual([s["camera"] for s in self.last("plan")["shots"]], [1])
+        tess, sam, wide = [c["id"] for c in self.last("setup")["cameras"]]
+        page.on_cam({"id": sam, "key": "audio", "value": []})
+        self.assertEqual([s["camera"] for s in self.last("plan")["shots"]], [1])   # Sam has no angle now
         page.on_cut({"key": "min_shot", "value": 15})
         self.assertEqual(self.last("cut")["min_shot"], 15.0)
         self.assertEqual(self.host.tools["podcast_switch"]["options"]["min_shot"], 15.0)
         first = self.host
         again = self.make()
         again.settings = first.tool_settings("podcast_switch")
+        again.setups = rig.clean_setups(again.settings["setups"])
         again.on_analyse()
-        self.assertEqual(again._memory()["cameras"]["2"], tess)
+        self.assertEqual(self.last("setup")["cameras"][1]["audio"], [])
+        self.assertNotIn("2", again._memory()["cameras"])
 
-    def test_linking_a_mic_pins_its_voice_and_mutes_the_camera_at_build(self):
+    def test_an_angles_video_and_audio_can_both_be_changed(self):
+        page = self.make()
+        page.on_analyse()
+        tess, sam, wide = [c["id"] for c in self.last("setup")["cameras"]]
+        page.on_cam({"id": tess, "key": "track", "value": 3})            # Tess is on the third camera
+        cams = self.last("setup")["cameras"]
+        self.assertEqual([(c["track"], c["audio"], c["voice"]) for c in cams], [(3, [1], "1"), (2, [2], "2"), (1, [], None)])
+        self.assertEqual([s["camera"] for s in self.last("plan")["shots"]], [3, 2, 3, 2])
+        page.on_cam({"id": tess, "key": "audio", "value": [2]})          # and heard through Sam's mic
+        cams = self.last("setup")["cameras"]
+        self.assertEqual((cams[0]["audio"], cams[0]["voice"], cams[1]["voice"]), ([2], "2", None))
+        page.on_cam({"id": tess, "key": "track", "value": None})
+        self.assertIsNone(self.last("setup")["cameras"][0]["track"])     # still listed, with no video
+
+    def test_angles_are_added_named_and_removed(self):
+        page = self.make()
+        data = timeline_data()
+        data["video"].append({"index": 4, "name": "Video 4", "clips": [{"start": 0, "end": 1000, "name": "D001"}]})
+        page._calls.call = lambda name, args, job, done: done(data, None) or True
+        page.on_analyse()
+        # A fourth track with no one on it and a wide there already: not used, until its card says.
+        self.assertEqual([c["role"] for c in self.last("setup")["cameras"]], ["speaker", "speaker", "wide", "off"])
+        page.on_angle_add()
+        new = self.last("setup")["cameras"][-1]
+        self.assertEqual((new["name"], new["role"], new["track"], new["audio"]), ("Angle 5", "off", None, []))
+        page.on_cam({"id": new["id"], "key": "name", "value": "  Center  "})
+        page.on_cam({"id": new["id"], "key": "name", "value": "   "})     # an empty name: the one it had
+        page.on_cam({"id": new["id"], "key": "track", "value": 4})
+        page.on_cam({"id": new["id"], "key": "role", "value": "cutaway"})
+        page.on_cam({"id": new["id"], "key": "gap_min", "value": 5})
+        page.on_cam({"id": new["id"], "key": "gap_max", "value": 6})
+        cams = self.last("setup")["cameras"]
+        self.assertEqual((cams[-1]["name"], cams[-1]["track"], cams[-1]["role"], cams[-1]["rules"]["gap_max"]),
+                         ("Center", 4, "cutaway", 6.0))
+        self.assertIsNone(cams[3]["track"])                               # the angle that was on V4
+        self.assertIn(4, {s["camera"] for s in self.last("plan")["shots"]})
+        self.assertEqual(cams[2]["rules"]["gap_min"], 30.0)               # its rules are its own
+        page.on_angle_remove({"id": new["id"]})
+        self.assertEqual(len(self.last("setup")["cameras"]), 4)
+        self.assertNotIn(4, {s["camera"] for s in self.last("plan")["shots"]})
+
+    def test_linking_a_mic_gives_its_voice_and_mutes_the_camera_at_build(self):
         page = self.make()
         page.on_analyse()
         tess, sam, wide = [c["id"] for c in self.last("setup")["cameras"]]
@@ -675,42 +807,59 @@ class PageTests(unittest.TestCase):
                                                                "warnings": []}) as build:
             page._calls.wait_idle = lambda timeout: True
             page.on_build()
-        self.assertEqual(build.call_args[0][4], [2])                     # Tess's camera: its own sound
+        self.assertEqual(build.call_args[0][4], [2])                     # Sam's camera: its own sound
         self.assertIn("own sound", self.last("toast")["text"])
 
     def test_opening_the_tab_reads_the_timeline(self):
         page = self.make()
         page.on_shown()
         self.assertEqual(self.last("setup")["cameras"][0]["label"], "A001 · V1")
-        self.assertEqual(len(self.last("voices")["voices"]), 2)
+        self.assertEqual([len(m["voices"]) for m in self.last("setup")["mics"]], [1, 1])
 
-    def test_a_camera_with_no_one_on_it_is_an_extra_shot_with_a_use(self):
+    def test_an_angle_with_no_audio_is_an_extra_shot_with_a_use_and_its_own_rules(self):
         page = self.make()
         page.on_analyse()
         tess, sam, wide = [c["id"] for c in self.last("setup")["cameras"]]
         page.on_cam({"id": sam, "key": "audio", "value": []})
-        page.on_map({"voice": "2", "camera": tess})
-        self.assertEqual(self.last("setup")["cameras"][1]["role"], "off")          # nobody on it: not used
+        self.assertEqual(self.last("setup")["cameras"][1]["role"], "off")          # no audio: not used
         page.on_cam({"id": sam, "key": "role", "value": "angle"})
         page.on_cam({"id": sam, "key": "of", "value": tess})
         cam = self.last("setup")["cameras"][1]
         self.assertEqual((cam["role"], cam["of"]), ("angle", tess))
-        page.on_cut({"key": "every", "value": 8})
-        self.assertEqual(page._setup()["rules"]["every"], 8.0)
-        self.assertEqual(self.last("cut")["every"], 8.0)
+        page.on_cam({"id": sam, "key": "every", "value": 8})
+        cams = self.last("setup")["cameras"]
+        self.assertEqual((cams[1]["rules"]["every"], cams[0]["rules"]["every"]), (8.0, 12.0))
         self.assertIn(2, {s["camera"] for s in self.last("plan")["shots"]})        # the angle takes turns
-        page.on_map({"voice": "2", "camera": sam})                                  # a voice on it: a person's
-        self.assertEqual(self.last("setup")["cameras"][1]["role"], "speaker")
+        page.on_cam({"id": wide, "key": "crosstalk", "value": False})
+        self.assertFalse(self.last("setup")["cameras"][2]["rules"]["crosstalk"])
+        page.on_cam({"id": sam, "key": "audio", "value": [2]})                      # audio on it: a person's
+        cam = self.last("setup")["cameras"][1]
+        self.assertEqual((cam["role"], cam["voice"]), ("speaker", "2"))
 
-    def test_a_voice_is_named_and_its_camera_remembers_who_it_shows(self):
+    def test_an_angles_name_is_what_its_voice_is_called(self):
         page = self.make()
         page.on_analyse()
-        page.on_name({"voice": "1", "name": "  Tess  "})
-        voices = self.last("voices")
-        self.assertEqual(voices["voices"][0]["name"], "Tess")
-        self.assertEqual(voices["mics"][0]["label"], "tess.wav · A1")
-        self.assertEqual(page._setup()["cameras"][0]["person"], "Tess")
+        tess = self.last("setup")["cameras"][0]["id"]
+        page.on_cam({"id": tess, "key": "name", "value": "  Tess  "})
+        self.assertEqual(self.last("setup")["cameras"][0]["name"], "Tess")
         self.assertEqual(self.last("plan")["rows"][0]["label"], "Tess")
+
+    def test_angles_on_a_shared_mic_swap_voices(self):
+        page = self.make()
+        page.on_analyse()
+        tess, sam, wide = [c["id"] for c in self.last("setup")["cameras"]]
+        page.on_cam({"id": sam, "key": "audio", "value": [1]})         # both heard through A1
+        row = page.voices[0]["row"]
+        page.voices = [dict(page.voices[0], id="1:0", label="A1 Tess · Voice 1"),
+                       dict(page.voices[0], id="1:1", label="A1 Tess · Voice 2", row=~row)]
+        page._changed()
+        cams = self.last("setup")["cameras"]
+        self.assertEqual([c["voice"] for c in cams], ["1:0", "1:1", None])
+        self.assertEqual([v["which"] for v in self.last("setup")["mics"][0]["voices"]], ["Voice 1", "Voice 2"])
+        page.on_voice({"id": tess, "voice": "1:1"})
+        self.assertEqual([c["voice"] for c in self.last("setup")["cameras"]], ["1:1", "1:0", None])
+        page.on_voice({"id": wide, "voice": "1:0"})                    # not heard through that mic: no
+        self.assertEqual([c["voice"] for c in self.last("setup")["cameras"]], ["1:1", "1:0", None])
 
     def test_setups_are_kept_copied_and_deleted(self):
         page = self.make()
@@ -731,8 +880,9 @@ class PageTests(unittest.TestCase):
         page.on_analyse()
         cams = self.last("setup")["cameras"]
         self.assertEqual([c["role"] for c in cams], ["wide", "speaker", "wide"])
-        self.assertEqual((page._setup()["rules"]["cutaway"], page._setup()["rules"]["quiet"]), (30.0, True))
-        self.assertEqual(page._memory()["cameras"]["1"], cams[1]["id"])          # the track became its camera
+        self.assertEqual((cams[0]["rules"]["cutaway"], cams[0]["rules"]["quiet"]), (30.0, True))
+        self.assertEqual(page._memory()["cameras"]["1"], cams[1]["id"])          # the track became its angle,
+        self.assertEqual(cams[1]["audio"], [1, 2])                                # heard through that mic too
 
     def test_a_shared_mic_without_the_engine_says_what_it_needs(self):
         page = self.make()
@@ -740,7 +890,9 @@ class PageTests(unittest.TestCase):
         with mock.patch("pages.podcast.switch.jobs.engine_installed", return_value=False):
             page.on_people({"track": 1, "value": "auto"})
             self.assertTrue(self.last("state")["needs_voices"])
-        self.assertEqual(len(self.last("voices")["voices"]), 2)          # still one voice per mic meanwhile
+        mics = self.last("setup")["mics"]
+        self.assertEqual(mics[0]["people"], "auto")
+        self.assertEqual([len(m["voices"]) for m in mics], [1, 1])       # still one voice per mic meanwhile
 
     def test_build_hands_the_plan_to_resolve(self):
         page = self.make()
@@ -749,11 +901,12 @@ class PageTests(unittest.TestCase):
                                                                "failed": 0, "wanted": 6, "warnings": []}) as build:
             page._calls.wait_idle = lambda timeout: True
             page.on_build()
-        shots, cameras, tid, muted = build.call_args[0][1:]
+        shots, cameras, tid, muted, paired = build.call_args[0][1:]
         self.assertEqual(len(shots), 4)
         self.assertEqual(cameras, [1, 2, 3])
         self.assertEqual(tid, "tl-1")
-        self.assertEqual(muted, [1, 2])                         # each speaker heard through its own lav
+        self.assertEqual(muted, [1, 2])                         # each speaker heard through its own lav,
+        self.assertEqual(paired, [[1, [1]], [2, [2]]])          # which is cut and linked with its picture
         self.assertEqual(self.host.busy, [True, False])
         self.assertIn("Auto Switch", self.last("toast")["text"])
 

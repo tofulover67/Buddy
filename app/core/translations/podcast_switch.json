@@ -1149,5 +1149,235 @@
   "中文": "这条时间线上还没有摄影机。",
   "العربية": "لا توجد كاميرات على هذا الخط الزمني بعد.",
   "Tiếng Việt": "Timeline này chưa có máy quay nào."
+ },
+ "Set up your angles": {
+  "日本語": "アングルを設定",
+  "Español": "Configura tus ángulos",
+  "Deutsch": "Winkel einrichten",
+  "Français": "Configurez vos angles",
+  "한국어": "앵글 설정",
+  "中文": "设置机位",
+  "العربية": "إعداد الزوايا",
+  "Tiếng Việt": "Thiết lập các góc máy"
+ },
+ "Give each angle its video and, for a person, their audio. Buddy cuts to whoever is talking, and to the other angles by their rules.": {
+  "日本語": "各アングルに映像を、人物のアングルにはその人の音声を割り当てます。Buddy は話している人に切り替え、他のアングルにはそれぞれのルールに従って切り替えます。",
+  "Español": "Dale a cada ángulo su vídeo y, si es de una persona, su audio. Buddy corta a quien esté hablando y a los demás ángulos según sus reglas.",
+  "Deutsch": "Gib jedem Winkel sein Video und, bei einer Person, ihren Ton. Buddy schneidet auf die Person, die gerade spricht, und auf die anderen Winkel nach ihren Regeln.",
+  "Français": "Donnez à chaque angle sa vidéo et, pour une personne, son audio. Buddy coupe sur la personne qui parle, et sur les autres angles selon leurs règles.",
+  "한국어": "각 앵글에 비디오를, 사람의 앵글에는 그 사람의 오디오를 지정하세요. Buddy는 말하는 사람으로 전환하고, 다른 앵글은 각자의 규칙에 따라 전환합니다.",
+  "中文": "为每个机位指定视频；如果是人物机位，再指定其音频。Buddy 会切到正在说话的人，并按各自的规则切到其他机位。",
+  "العربية": "امنح كل زاوية الفيديو الخاص بها، وللشخص الصوت الخاص به. يقطع Buddy إلى من يتحدث، وإلى الزوايا الأخرى حسب قواعدها.",
+  "Tiếng Việt": "Gán video cho từng góc máy và, với góc của một người, âm thanh của họ. Buddy cắt sang người đang nói và sang các góc khác theo quy tắc của chúng."
+ },
+ "Angles": {
+  "日本語": "アングル",
+  "Español": "Ángulos",
+  "Deutsch": "Winkel",
+  "Français": "Angles",
+  "한국어": "앵글",
+  "中文": "机位",
+  "العربية": "الزوايا",
+  "Tiếng Việt": "Góc máy"
+ },
+ "How long shots last and how early the cuts come": {
+  "日本語": "ショットの長さとカットの早さ",
+  "Español": "Cuánto duran los planos y con cuánta antelación llegan los cortes",
+  "Deutsch": "Wie lange Einstellungen dauern und wie früh die Schnitte kommen",
+  "Français": "La durée des plans et l'avance des coupes",
+  "한국어": "샷의 길이와 컷이 얼마나 일찍 들어가는지",
+  "中文": "镜头持续多久、剪切点提前多少",
+  "العربية": "مدة اللقطات ومدى تبكير القطع",
+  "Tiếng Việt": "Cảnh kéo dài bao lâu và cắt sớm đến mức nào"
+ },
+ "Your angles and their rules, kept to use again next episode": {
+  "日本語": "アングルとそのルール。次のエピソードでも使えるように保存されます",
+  "Español": "Tus ángulos y sus reglas, guardados para usarlos en el próximo episodio",
+  "Deutsch": "Deine Winkel und ihre Regeln, gespeichert für die nächste Folge",
+  "Français": "Vos angles et leurs règles, conservés pour le prochain épisode",
+  "한국어": "앵글과 규칙. 다음 에피소드에서 다시 쓸 수 있게 저장됩니다",
+  "中文": "你的机位及其规则，保存下来供下一期再用",
+  "العربية": "زواياك وقواعدها، محفوظة لاستخدامها في الحلقة القادمة",
+  "Tiếng Việt": "Các góc máy và quy tắc của chúng, được lưu để dùng lại cho tập sau"
+ },
+ "No video": {
+  "日本語": "映像なし",
+  "Español": "Sin vídeo",
+  "Deutsch": "Kein Video",
+  "Français": "Pas de vidéo",
+  "한국어": "비디오 없음",
+  "中文": "无视频",
+  "العربية": "بلا فيديو",
+  "Tiếng Việt": "Không có video"
+ },
+ "Voice": {
+  "日本語": "声",
+  "Español": "Voz",
+  "Deutsch": "Stimme",
+  "Français": "Voix",
+  "한국어": "목소리",
+  "中文": "人声",
+  "العربية": "الصوت",
+  "Tiếng Việt": "Giọng nói"
+ },
+ "No voice": {
+  "日本語": "声なし",
+  "Español": "Sin voz",
+  "Deutsch": "Keine Stimme",
+  "Français": "Pas de voix",
+  "한국어": "목소리 없음",
+  "中文": "无人声",
+  "العربية": "بلا صوت",
+  "Tiếng Việt": "Không có giọng nói"
+ },
+ "On screen when they talk": {
+  "日本語": "話しているときに画面に表示",
+  "Español": "En pantalla cuando habla",
+  "Deutsch": "Im Bild, wenn die Person spricht",
+  "Français": "À l'écran quand la personne parle",
+  "한국어": "말할 때 화면에 나옴",
+  "中文": "说话时出现在画面中",
+  "العربية": "على الشاشة عندما يتحدث",
+  "Tiếng Việt": "Lên hình khi họ nói"
+ },
+ "When this angle cuts in": {
+  "日本語": "このアングルに切り替えるタイミング",
+  "Español": "Cuándo entra este ángulo",
+  "Deutsch": "Wann dieser Winkel ins Bild kommt",
+  "Français": "Quand cet angle intervient",
+  "한국어": "이 앵글로 전환되는 때",
+  "中文": "何时切到这个机位",
+  "العربية": "متى تدخل هذه الزاوية",
+  "Tiếng Việt": "Khi nào cắt sang góc máy này"
+ },
+ "Remove this angle": {
+  "日本語": "このアングルを削除",
+  "Español": "Quitar este ángulo",
+  "Deutsch": "Diesen Winkel entfernen",
+  "Français": "Retirer cet angle",
+  "한국어": "이 앵글 제거",
+  "中文": "移除这个机位",
+  "العربية": "إزالة هذه الزاوية",
+  "Tiếng Việt": "Xóa góc máy này"
+ },
+ "Add angle": {
+  "日本語": "アングルを追加",
+  "Español": "Añadir ángulo",
+  "Deutsch": "Winkel hinzufügen",
+  "Français": "Ajouter un angle",
+  "한국어": "앵글 추가",
+  "中文": "添加机位",
+  "العربية": "إضافة زاوية",
+  "Tiếng Việt": "Thêm góc máy"
+ },
+ "Remove this angle?": {
+  "日本語": "このアングルを削除しますか？",
+  "Español": "¿Quitar este ángulo?",
+  "Deutsch": "Diesen Winkel entfernen?",
+  "Français": "Retirer cet angle ?",
+  "한국어": "이 앵글을 제거할까요?",
+  "中文": "移除这个机位？",
+  "العربية": "إزالة هذه الزاوية؟",
+  "Tiếng Việt": "Xóa góc máy này?"
+ },
+ "It's taken out of this setup. Nothing on your timeline changes.": {
+  "日本語": "このセットアップから取り除かれます。タイムラインは何も変わりません。",
+  "Español": "Se quita de esta configuración. No cambia nada en tu línea de tiempo.",
+  "Deutsch": "Er wird aus diesem Setup entfernt. An deiner Timeline ändert sich nichts.",
+  "Français": "Il est retiré de cette configuration. Rien ne change sur votre timeline.",
+  "한국어": "이 설정에서 빠집니다. 타임라인은 아무것도 바뀌지 않습니다.",
+  "中文": "它会从此设置中移除。时间线上不会有任何改动。",
+  "العربية": "تُزال من هذا الإعداد. لا يتغير شيء في الخط الزمني.",
+  "Tiếng Việt": "Góc máy này bị loại khỏi thiết lập. Dòng thời gian của bạn không thay đổi gì."
+ },
+ "This angle is on screen whenever its person talks.": {
+  "日本語": "このアングルは、その人が話しているあいだ画面に表示されます。",
+  "Español": "Este ángulo está en pantalla siempre que habla su persona.",
+  "Deutsch": "Dieser Winkel ist im Bild, wann immer seine Person spricht.",
+  "Français": "Cet angle est à l'écran dès que sa personne parle.",
+  "한국어": "이 앵글은 해당 인물이 말할 때마다 화면에 나옵니다.",
+  "中文": "只要其人物在说话，这个机位就会出现在画面中。",
+  "العربية": "تظهر هذه الزاوية على الشاشة كلما تحدث صاحبها.",
+  "Tiếng Việt": "Góc máy này lên hình mỗi khi người của nó nói."
+ },
+ "Its audio": {
+  "日本語": "その音声",
+  "Español": "Su audio",
+  "Deutsch": "Sein Ton",
+  "Français": "Son audio",
+  "한국어": "해당 오디오",
+  "中文": "它的音频",
+  "العربية": "صوتها",
+  "Tiếng Việt": "Âm thanh của nó"
+ },
+ "Cut to them listening in long answers": {
+  "日本語": "長い回答のあいだ、聞いている姿に切り替える",
+  "Español": "Cortar a esta persona escuchando en las respuestas largas",
+  "Deutsch": "Bei langen Antworten auf die zuhörende Person schneiden",
+  "Français": "Couper sur la personne qui écoute pendant les longues réponses",
+  "한국어": "긴 답변 중에 듣고 있는 모습으로 전환",
+  "中文": "在长回答中切到其倾听的画面",
+  "العربية": "القطع إليه وهو يستمع أثناء الإجابات الطويلة",
+  "Tiếng Việt": "Cắt sang họ đang lắng nghe trong các câu trả lời dài"
+ },
+ "Cut to it": {
+  "日本語": "このアングルに切り替える",
+  "Español": "Cortar a este ángulo",
+  "Deutsch": "Darauf schneiden",
+  "Français": "Couper sur cet angle",
+  "한국어": "이 앵글로 전환",
+  "中文": "切到它",
+  "العربية": "القطع إليها",
+  "Tiếng Việt": "Cắt sang góc này"
+ },
+ "At the start and the end": {
+  "日本語": "最初と最後",
+  "Español": "Al principio y al final",
+  "Deutsch": "Am Anfang und am Ende",
+  "Français": "Au début et à la fin",
+  "한국어": "시작과 끝",
+  "中文": "开头和结尾",
+  "العربية": "في البداية والنهاية",
+  "Tiếng Việt": "Ở đầu và cuối"
+ },
+ "In long shots": {
+  "日本語": "長いショットの途中",
+  "Español": "En planos largos",
+  "Deutsch": "In langen Einstellungen",
+  "Français": "Dans les plans longs",
+  "한국어": "긴 샷 중간에",
+  "中文": "在长镜头中",
+  "العربية": "في اللقطات الطويلة",
+  "Tiếng Việt": "Trong các cảnh dài"
+ },
+ "This angle isn't used. Pick what it's used as on its card, or give it audio.": {
+  "日本語": "このアングルは使われていません。カードで用途を選ぶか、音声を割り当ててください。",
+  "Español": "Este ángulo no se usa. Elige para qué se usa en su tarjeta, o dale audio.",
+  "Deutsch": "Dieser Winkel wird nicht verwendet. Wähle auf seiner Karte, wofür er dient, oder gib ihm Ton.",
+  "Français": "Cet angle n'est pas utilisé. Choisissez son usage sur sa carte, ou donnez-lui un audio.",
+  "한국어": "이 앵글은 사용되지 않습니다. 카드에서 용도를 고르거나 오디오를 지정하세요.",
+  "中文": "这个机位未被使用。请在其卡片上选择用途，或为它指定音频。",
+  "العربية": "هذه الزاوية غير مستخدمة. اختر استخدامها من بطاقتها، أو امنحها صوتًا.",
+  "Tiếng Việt": "Góc máy này không được dùng. Hãy chọn mục đích trên thẻ của nó, hoặc gán âm thanh cho nó."
+ },
+ "When each angle cuts in is set on its own card.": {
+  "日本語": "各アングルに切り替えるタイミングは、それぞれのカードで設定します。",
+  "Español": "Cuándo entra cada ángulo se ajusta en su propia tarjeta.",
+  "Deutsch": "Wann jeder Winkel ins Bild kommt, wird auf seiner eigenen Karte eingestellt.",
+  "Français": "Le moment où chaque angle intervient se règle sur sa propre carte.",
+  "한국어": "각 앵글로 전환되는 때는 해당 카드에서 설정합니다.",
+  "中文": "每个机位何时切入，在各自的卡片上设置。",
+  "العربية": "يُضبط توقيت دخول كل زاوية من بطاقتها.",
+  "Tiếng Việt": "Thời điểm cắt sang từng góc máy được đặt trên thẻ của góc đó."
+ },
+ "A setup holds {n} angles at most.": {
+  "日本語": "1 つのセットアップに入れられるアングルは最大 {n} 個です。",
+  "Español": "Una configuración admite {n} ángulos como máximo.",
+  "Deutsch": "Ein Setup fasst höchstens {n} Winkel.",
+  "Français": "Une configuration contient {n} angles au maximum.",
+  "한국어": "설정 하나에 앵글은 최대 {n}개까지 넣을 수 있습니다.",
+  "中文": "一个设置最多容纳 {n} 个机位。",
+  "العربية": "يتسع الإعداد لـ {n} زاوية على الأكثر.",
+  "Tiếng Việt": "Một thiết lập chứa tối đa {n} góc máy."
  }
 }

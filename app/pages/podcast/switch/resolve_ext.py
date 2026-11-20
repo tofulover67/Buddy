@@ -7,16 +7,19 @@ Auto Switch's calls to Resolve. No Qt.
                                    and its video tracks (each clip's file, a
                                    still of each track's first) - a reader job
                                    ("podswitch.read", core/resolve_reader_child.py)
-    build_here(controller, shots, cameras, timeline_id, muted)
+    build_here(controller, shots, cameras, timeline_id, muted, paired)
                                    a reader job ("podswitch.build") - and
     build(...)                     on the UI thread only where there's no
                                    reader (core/busy_job.py): a NEW timeline, "<name>
                                    (Auto Switch)", the open one's export with
                                    each camera razored at every switch
                                    (otio_split) and the pieces not on screen
-                                   turned off - and the muted cameras' own
-                                   sound, cut the same, turned off. The open
-                                   timeline isn't touched.
+                                   turned off - and every audio track cut
+                                   at the same points: a camera's own sound
+                                   linked to its picture (turned off for a
+                                   muted camera), the audio paired with a
+                                   camera left on and linked to its picture.
+                                   The open timeline isn't touched.
 
 The round trip is Project Setup's (otio_engine.read_current_timeline,
 import_rebuilt): an OTIO export, worked on as JSON, imported as a new
@@ -129,16 +132,19 @@ def _turn_off(timeline, kind, wanted, origin):
     return turned, failed
 
 
-def build_here(controller, shots, cameras, timeline_id="", muted=()):
-    """build() from plain data - shots as {"start", "end", "camera"} - as the
-    page sends it to the Resolve reader's process ("podswitch.build")."""
+def build_here(controller, shots, cameras, timeline_id="", muted=(), paired=()):
+    """build() from plain data - shots as {"start", "end", "camera"}, paired
+    as [[camera track, [audio tracks]]] - as the page sends it to the Resolve
+    reader's process ("podswitch.build")."""
     shots = [SimpleNamespace(start=int(s["start"]), end=int(s["end"]), camera=int(s["camera"])) for s in shots]
-    return build(controller, shots, [int(c) for c in cameras], str(timeline_id or ""), [int(m) for m in muted])
+    return build(controller, shots, [int(c) for c in cameras], str(timeline_id or ""), [int(m) for m in muted],
+                 [[int(camera), [int(a) for a in audio]] for camera, audio in paired])
 
 
-def build(controller, shots, cameras, timeline_id="", muted=()):
+def build(controller, shots, cameras, timeline_id="", muted=(), paired=()):
     """{"name", "off", "failed", "wanted", "sound_off", "sound_failed",
-    "warnings"} - see the module docstring."""
+    "warnings"} - see the module docstring. paired: [[camera track, [audio
+    tracks]]], the audio each camera is heard through."""
     wrapped = ProjectSetupController(controller)
     timeline = wrapped.get_current_timeline()
     if timeline is None:
@@ -149,7 +155,8 @@ def build(controller, shots, cameras, timeline_id="", muted=()):
     start = int(timeline.GetStartFrame())
     try:
         document, _clips, workdir = oe.read_current_timeline(wrapped)
-        result, pieces, sound, warnings = otio_split.split(document, shots, cameras, start, muted)
+        result, pieces, sound, warnings = otio_split.split(document, shots, cameras, start, muted,
+                                                           {camera: audio for camera, audio in paired})
         new = oe.import_rebuilt(wrapped, result, workdir, name, SUFFIX, "auto_switch.otio")
     except oe.OtioError as exc:
         raise BuildError(str(exc)) from exc

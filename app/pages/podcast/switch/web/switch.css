@@ -16,16 +16,15 @@
     .sw-bar > div.indeterminate { animation: none; width: 100%; opacity: .5; }
 }
 
-/* One screen, scrolling: people, cameras, how it will cut. */
+/* One screen, scrolling: the angles, how it will cut. */
 .sw { display: flex; flex-direction: column; min-height: 0; height: 100%; }
 .sw-scroll { flex: 1; min-height: 0; overflow-y: auto; padding-bottom: 16px; }
 .sw-col { max-width: 980px; }
 .sw-part { display: flex; flex-direction: column; gap: 8px; }
 .sw-part-title { margin: 0; font-size: var(--fs-xs); font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .04em; }
-.sw-voices { display: flex; flex-direction: column; gap: 6px; }
 
-/* A card per camera. */
-.sw-cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+/* A card per angle, and one to add another. */
+.sw-cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
 .sw-cam {
     display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r-md);
     background: color-mix(in srgb, var(--card-border) 35%, transparent); min-width: 0;
@@ -35,25 +34,24 @@
     background: color-mix(in srgb, var(--card-border) 60%, transparent); border-bottom: 3px solid transparent;
 }
 .sw-thumb-empty { display: flex; align-items: center; justify-content: center; color: var(--text-dim); }
-.sw-cam-name { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.sw-cam .field { width: 100%; }
-.sw-shows { font-size: var(--font-size); font-weight: 600; color: var(--text-strong); min-height: 1.4em; overflow-wrap: anywhere; }
+.sw-cam-head { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.sw-cam .field { width: 100%; min-width: 0; }
+.sw-cam .sw-name { flex: 1; font-weight: 600; }
+.sw-pair { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.sw-pair .field { flex: 1; }
+.sw-when { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: var(--fs-sm); color: var(--text-dim); }
+.sw-add {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 120px;
+    border: var(--bw, 1px) dashed var(--card-border); border-radius: var(--r-md); background: none;
+    color: var(--text-dim); font: inherit; cursor: pointer;
+}
+.sw-add:hover:not(:disabled), .sw-add:focus-visible { color: var(--text-strong); border-color: var(--text-dim); }
+.sw-add:disabled { opacity: .5; cursor: default; }
 .sw-file {
     font-family: var(--font-mono, monospace); font-size: var(--fs-sm); min-width: 0;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sw-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--card-border); }
-
-/* Each mic, and the voices on it. */
-.sw-mic {
-    display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border-radius: 8px;
-    background: color-mix(in srgb, var(--card-border) 35%, transparent);
-}
-.sw-mic-head { align-items: center; gap: 10px; }
-.sw-mic-head select { min-width: 120px; }
-.sw-voice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 2px 0 2px 4px; }
-.sw-name { width: 170px; }
-.sw-voice select { min-width: 180px; }
 
 .sw-notice {
     border-left: 3px solid var(--primary, var(--accent-bg)); padding: 6px 10px;
@@ -80,6 +78,5 @@
 .sw-options input[type="number"] { width: 90px; }
 
 @media (max-width: 640px) {
-    .sw-name, .sw-voice select { width: auto; min-width: 0; flex: 1 1 140px; }
     .sw-note { text-align: left; }
 }

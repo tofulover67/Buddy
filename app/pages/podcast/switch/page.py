@@ -10,28 +10,33 @@ who talks when worked out (talk.py). Where more than one person spoke into
 a mic, their voices are told apart on this computer (voice_worker.py in the
 speech engine, cluster.py).
 
-The view is one screen. People: the voices found are named and each given
-a camera. Cameras: a card each (its file and a still of it) with the synced
-audio it's heard through and, for the ones with nobody on them, their use -
-a wide, a second angle, a random cutaway, or not used. Then how it will cut,
-and Build. The numbers (shortest shot, reaction shots, cutaway timings...)
-are behind Pacing.
+The view is one screen. Angles: a card each - its name, the video track
+it shows (a still of it) and, for a person's angle, the audio track that
+says when they talk. Any number can be added or removed. An angle with no
+audio has a use - a wide, a second angle of a person's, a random cutaway,
+or not used - and every angle has its own rules for when it cuts in,
+behind its card's button. Then how it will cut, and Build. The numbers for
+every cut (shortest shot, cut ahead...) are behind Pacing.
 
-The cameras come from a saved setup (rig.py), kept by name and found again
-on each timeline (by track names, then in order; a timeline's own choices
-are kept with it). A camera with audio paired or a voice given is a
-speaker's camera; the rest have the use their card gives them. The cut plan
-(cutplan.py) shows as a strip, and Build makes a NEW timeline, "<name>
-(Auto Switch)": every camera still on its own track, razored at each
-switch, the clips not on screen turned off - so any shot can be swapped by
-turning another on - and a camera heard through paired audio has its own
-sound cut the same and turned off. The open timeline is never changed.
+The angles come from a saved setup (rig.py; an angle is a "camera" in the
+code), kept by name and found again on each timeline (by track names,
+then in order; a timeline's own choices are kept with it). An angle with
+audio is a speaker's: the voice on that audio is its voice (on a mic
+several people share, one voice each - which one can be chosen). The cut
+plan (cutplan.py) shows as a strip, and Build makes a NEW timeline,
+"<name> (Auto Switch)": every camera still on its own track, razored at
+each switch, the clips not on screen turned off - so any shot can be
+swapped by turning another on - and a camera heard through paired audio
+has its own sound cut the same and turned off, and that audio cut the
+same, left on and linked to the picture piece by piece (so Text Edit's
+cuts and Shorts' selections take both). The open timeline is never changed.
 
 Protocol:
-    to the view    state, setup, voices, plan, cut, toast, alert
-    from the view  analyse, people, map, name, cut, seek, build, cancel,
+    to the view    state, setup, plan, cut, toast, alert
+    from the view  analyse, people, voice, cut, seek, build, cancel,
                    download, engine, setup_pick, setup_new, setup_copy,
-                   setup_rename, setup_delete, cam, switch_tab
+                   setup_rename, setup_delete, cam, angle_add,
+                   angle_remove, switch_tab
 """
 
 import os
@@ -130,7 +135,6 @@ class AutoSwitchPage(WebToolPage):
         self._push_state()
         if self.data is not None:
             self._push_setup()
-            self._push_voices()
             self._push_plan()
 
     def on_shown(self):
@@ -177,10 +181,9 @@ class AutoSwitchPage(WebToolPage):
 
     def _memory(self):
         """This timeline's choices: {"mics": {track: bool}, "people": {track:
-        str}, "cameras": {voice id: camera id or None}, "names": {voice id:
-        name}, "setup": setup id, "tracks": {camera id: video track or None},
-        "audio": {camera id: [mic tracks]}} - an older one's "cameras" held
-        tracks, and "wide"."""
+        str}, "cameras": {voice id: angle id}, "setup": setup id, "tracks":
+        {angle id: video track or None}, "audio": {angle id: [mic tracks]}} -
+        an older one's "cameras" held tracks, and "wide" and "names"."""
         tid = (self.data or {}).get("id") or "none"
         timelines = self.settings.get("timelines")
         if not isinstance(timelines, dict):
@@ -188,14 +191,13 @@ class AutoSwitchPage(WebToolPage):
             self.settings["timelines"] = timelines
         mem = timelines.get(tid)
         if not isinstance(mem, dict):
-            mem = {"mics": {}, "people": {}, "cameras": {}, "names": {}, "tracks": {}, "audio": {},
-                   "used": time.time()}
+            mem = {"mics": {}, "people": {}, "cameras": {}, "tracks": {}, "audio": {}, "used": time.time()}
             timelines[tid] = mem
             if len(timelines) > MOST_TIMELINES:
                 oldest = sorted(timelines, key=lambda k: timelines[k].get("used", 0))
                 for old in oldest[:len(timelines) - MOST_TIMELINES]:
                     timelines.pop(old, None)
-        for key in ("mics", "people", "cameras", "names", "tracks", "audio"):
+        for key in ("mics", "people", "cameras", "tracks", "audio"):
             if not isinstance(mem.get(key), dict):
                 mem[key] = {}
         mem["used"] = time.time()
@@ -232,40 +234,46 @@ class AutoSwitchPage(WebToolPage):
         setup = rig.from_timeline(self.data.get("video", []) if self.data else [], self._rig_mics(), name, wide)
         if legacy and self._legacy:
             setup["rules"] = rig.clean_rules(dict(setup["rules"], **self._legacy))
+            for cam in setup["cameras"]:
+                cam.update(setup["rules"])
         return setup
 
     def _setup(self):
         return self.setups[self._setup_id()]
 
     def _placed(self):
-        """The setup's cameras on this timeline: each camera's own fields
-        plus "track" (or None: not on this timeline), "audio" (mic tracks)
-        and "of_track" (an angle's speaker, as a track)."""
+        """The setup's angles on this timeline: each one's own fields (its
+        rules among them) plus "track" (or None: not on this timeline),
+        "audio" (mic tracks) and "of_track" (a second angle's speaker, as a
+        track)."""
         if self.data is None:
             return []
         setup = self._setup()
         where = rig.place(setup, self.data.get("video", []), self._rig_mics(), self._memory())
-        # Cut settings are the setup's, for every camera of a role.
-        out = [dict(cam, **setup["rules"], **where[cam["id"]]) for cam in setup["cameras"]]
+        out = [dict(cam, **where[cam["id"]]) for cam in setup["cameras"]]
         track_of = {c["id"]: c["track"] for c in out}
         for cam in out:
             cam["of_track"] = track_of.get(cam["of"])
         return out
 
+    def _spare_role(self, name=""):
+        """What an angle with no audio is for until its card says: the wide
+        if it's named like one or the setup has none yet, else not used."""
+        wide = rig.looks_wide(name) or not any(c["role"] == "wide" for c in self._setup()["cameras"])
+        return "wide" if wide else "off"
+
     def _settle_roles(self):
-        """A camera with audio paired or a voice given is a speaker's; one
-        that's neither any more is a wide if it's named like one, else not
-        used - until step 3 says otherwise."""
+        """An angle with audio is a speaker's; one that has none any more
+        gets a spare angle's use (_spare_role) until its card says otherwise."""
         if self.data is None or self.talk is None:
             return
-        pinned = {v for v in self._memory()["cameras"].values() if v is not None}
         names = {t["index"]: f"{t['name']} {t['file']}" for t in self._video_tracks()}
         for cam in self._placed():
             own = self._camera(cam["id"])
-            if cam["audio"] or cam["id"] in pinned:
+            if cam["audio"]:
                 own["role"] = "speaker"
             elif own["role"] == "speaker":
-                own["role"] = "wide" if rig.looks_wide(names.get(cam["track"], "") + " " + cam["name"]) else "off"
+                own["role"] = self._spare_role(names.get(cam["track"], "") + " " + cam["name"])
 
     def _camera(self, cam_id):
         return next((c for c in self._setup()["cameras"] if c["id"] == cam_id), None)
@@ -491,7 +499,7 @@ class AutoSwitchPage(WebToolPage):
         self.voices = []
         talk, fps = self.talk, self.data["fps"]
         if talk is None or not talk.length:
-            self._push_voices()
+            self._push_setup()
             return self._replan()
         mem = self._memory()
         names = {t["index"]: t for t in self._mic_tracks()}
@@ -509,10 +517,10 @@ class AutoSwitchPage(WebToolPage):
             else:
                 self.voices.append(self._voice(str(index), index, track["name"], talk.talk[row], total))
         self.voices = [v for v in self.voices if v["share"] > 0 or v["id"].count(":") == 0]
-        self._default_cameras(mem)
+        self._assign_voices(mem)
         self._settle_roles()
+        self._save()
         self._push_setup()
-        self._push_voices()
         self._replan()
 
     def _voice(self, vid, track, label, row, total):
@@ -535,36 +543,57 @@ class AutoSwitchPage(WebToolPage):
                         "file": file, "label": f"{file} · V{t['index']}", "still": t.get("still") or ""})
         return out
 
-    def _default_cameras(self, mem):
-        """Voices with no camera yet: the speaker camera their mic is linked
-        to (a shared mic's voices, its cameras in turn), else the one named
-        like their mic, else the next free speaker camera. An older Auto
-        Switch's camera (a track) becomes the camera on that track."""
-        placed = [c for c in self._placed() if c["track"] is not None]
-        speakers = [c for c in placed if c["role"] in ("speaker", "off")]
-        on_track = {c["track"]: c["id"] for c in placed}
+    @staticmethod
+    def _mic_of(voice_id):
+        """The mic track a voice id ("3", "3:1") is on, or None."""
+        head = str(voice_id).split(":")[0]
+        return int(head) if head.isdigit() else None
+
+    def _assign_voices(self, mem):
+        """Each voice's angle (mem["cameras"]): one heard through the voice's
+        mic, a voice of a mic to an angle. A choice made stays; a voice with
+        none takes the next angle on its mic - or, the first time a timeline
+        is read, the next person's angle with no audio yet, which is linked
+        to the mic. An older Auto Switch's choice (a track, or a camera not
+        linked to the mic) is linked the same way."""
+        placed = self._placed()
+        audio = {c["id"]: list(c["audio"]) for c in placed}
+        on_track = {c["track"]: c["id"] for c in placed if c["track"] is not None}
+        known = {v["id"]: v["track"] for v in self.voices}
+        raw = {t["index"]: t["raw_name"] for t in self._mic_tracks()}
+
+        def link(cam_id, mic):
+            audio[cam_id] = sorted(set(audio[cam_id]) | {mic})
+            mem["audio"][cam_id] = audio[cam_id]
+            self._camera(cam_id)["audio_names"] = [raw[a] for a in audio[cam_id] if raw.get(a)]
+
         for vid, value in list(mem["cameras"].items()):
             if isinstance(value, int) and not isinstance(value, bool):
-                mem["cameras"][vid] = on_track.get(value)
-        taken = {v for v in mem["cameras"].values() if v is not None}
-        linked = {}
-        for voice in self.voices:
-            if voice["id"] in mem["cameras"]:
+                value = mem["cameras"][vid] = on_track.get(value)
+            if value not in audio:
+                mem["cameras"].pop(vid, None)
+            elif vid in known and known[vid] not in audio[value]:
+                link(value, known[vid])
+        pins, taken = {}, set()
+        for vid, mic in known.items():
+            cam_id = mem["cameras"].get(vid)
+            if cam_id is not None and (mic, cam_id) not in taken:
+                pins[vid] = cam_id
+                taken.add((mic, cam_id))
+        for vid, mic in known.items():
+            if vid in pins:
                 continue
-            mine = [c["id"] for c in speakers if voice["track"] in c["audio"]]
-            k = linked.get(voice["track"], 0)
-            match = mine[k % len(mine)] if mine else None
-            linked[voice["track"]] = k + 1
-            if match is None:
-                mic_words = rig.words(voice["label"].split("·")[0]) - {f"a{voice['track']}"}
-                match = next((c["id"] for c in speakers if c["id"] not in taken
-                              and mic_words & (rig.words(c["name"]) - {f"v{c['track']}"})), None)
-            if match is None:
-                match = next((c["id"] for c in speakers if c["id"] not in taken), None)
-            mem["cameras"][voice["id"]] = match
-            if match is not None:
-                taken.add(match)
-        self._save()
+            free = next((c["id"] for c in placed if mic in audio[c["id"]] and (mic, c["id"]) not in taken), None)
+            if free is None:
+                free = next((c["id"] for c in placed if c["role"] == "speaker" and not audio[c["id"]]
+                             and c["track"] is not None), None)
+                if free is not None:
+                    link(free, mic)
+            if free is not None:
+                pins[vid] = free
+                taken.add((mic, free))
+        # A voice not heard just now (its mic's voices still being told apart) keeps its angle.
+        mem["cameras"] = {**{k: v for k, v in mem["cameras"].items() if k not in known}, **pins}
 
     # -------------------------------------------------------------- plan --
 
@@ -600,47 +629,43 @@ class AutoSwitchPage(WebToolPage):
     # -------------------------------------------------------------- view --
 
     def _push_setup(self):
+        if self.data is None:
+            return
+        mem = self._memory()
         tracks = {t["index"]: t for t in self._video_tracks()}
+        mics = {t["index"]: t for t in self._mic_tracks()}
+        heard = {}
+        for v in self.voices:
+            heard.setdefault(v["track"], []).append({
+                "id": v["id"], "which": v["label"].split(" · ")[1] if " · " in v["label"] else "",
+                "share": v["share"], "sample": v["sample"], "camera": mem["cameras"].get(v["id"])})
         cams = []
         for cam in self._placed():
             track = tracks.get(cam["track"])
-            cams.append({k: cam[k] for k in ("id", "name", "role", "track", "audio", "of", "person")} | {
-                "file": track["file"] if track else "", "label": track["label"] if track else cam["name"],
+            voice = next((v["id"] for v in self.voices if mem["cameras"].get(v["id"]) == cam["id"]), None)
+            cams.append({k: cam[k] for k in ("id", "name", "role", "track", "audio", "of")} | {
+                "rules": {k: cam[k] for k in (*rig.NUMBERS, *rig.FLAGS)}, "voice": voice,
+                "file": track["file"] if track else "", "label": track["label"] if track else "",
                 "still": track["still"] if track else ""})
         self.emit("setup", {
+            "video": [{"index": t["index"], "label": t["label"]} for t in tracks.values()],
             "audio": [{"index": t["index"], "label": f"{t['file']} · A{t['index']}"}
-                      for t in self._mic_tracks() if t["has_audio"] and not t["camera_sound"]],
+                      for t in mics.values() if t["has_audio"] and not t["camera_sound"]],
+            "mics": [{"index": index, "people": mem["people"].get(str(index), "1"), "voices": found}
+                     for index, found in heard.items()],
             "cameras": cams,
+            "most": rig.MAX_CAMERAS,
             "setups": [{"id": k, "name": v["name"]} for k, v in self.setups.items()],
-            "setup": self._setup_id() if self.data else "",
+            "setup": self._setup_id(),
         })
 
     def _voice_name(self, voice, mem):
-        """What a voice is called: the name given, or its camera's person's."""
-        given = mem["names"].get(voice["id"])
-        if given:
-            return given
+        """What a voice is called: its angle's name."""
         cam = self._camera(mem["cameras"].get(voice["id"])) if self.data else None
-        alone = cam is not None and list(mem["cameras"].values()).count(cam["id"]) == 1
-        return cam["person"] if alone else ""
-
-    def _push_voices(self):
-        mem = self._memory()
-        mics = {t["index"]: t for t in self._mic_tracks()}
-        groups = []
-        for v in self.voices:
-            if not groups or groups[-1]["index"] != v["track"]:
-                mic = mics.get(v["track"], {})
-                groups.append({"index": v["track"], "label": f"{mic.get('file', '')} · A{v['track']}",
-                               "people": mem["people"].get(str(v["track"]), "1")})
-        self.emit("voices", {"mics": groups, "voices": [
-            {"id": v["id"], "track": v["track"], "which": v["label"].split(" · ")[1] if " · " in v["label"] else "",
-             "name": self._voice_name(v, mem), "share": v["share"], "sample": v["sample"],
-             "camera": mem["cameras"].get(v["id"])} for v in self.voices]})
+        return cam["name"] if cam is not None else ""
 
     def _push_cut(self):
-        rules = self._setup()["rules"] if self.data else rig.clean_setup({})["rules"]
-        self.emit("cut", dict(self.opts, **rules))
+        self.emit("cut", dict(self.opts))
 
     def _push_plan(self):
         span = self._span() if self.data else None
@@ -659,13 +684,14 @@ class AutoSwitchPage(WebToolPage):
     # ----------------------------------------------------------- actions --
 
     def on_people(self, payload):
+        """How many people talk into a mic (1-6, or find out)."""
         payload = payload or {}
         value = str(payload.get("value"))
-        if value not in PEOPLE:
+        if value not in PEOPLE or self.data is None:
             return
         mem = self._memory()
         mem["people"][str(payload.get("track"))] = value
-        # Its voices are new: their cameras are chosen again.
+        # Its voices are new: their angles are chosen again.
         prefix = f"{payload.get('track')}"
         mem["cameras"] = {k: v for k, v in mem["cameras"].items() if k != prefix and not k.startswith(prefix + ":")}
         self._save()
@@ -673,73 +699,58 @@ class AutoSwitchPage(WebToolPage):
         if self.talk is not None and not self.stage:
             self._listen_or_group()
 
-    def on_map(self, payload):
-        """A voice's camera (step 2) - any camera; it's a speaker's camera then."""
+    def on_voice(self, payload):
+        """Which of a shared mic's voices an angle shows; the angle that had
+        that voice gets this one's in return."""
         payload = payload or {}
-        camera = payload.get("camera")
-        if self.data is None:
+        cam = self._camera(payload.get("id")) if self.data else None
+        voice = next((v for v in self.voices if v["id"] == str(payload.get("voice"))), None)
+        if cam is None or voice is None:
+            return
+        mic = voice["track"]
+        if mic not in next((c["audio"] for c in self._placed() if c["id"] == cam["id"]), []):
             return
         mem = self._memory()
-        mem["cameras"][str(payload.get("voice"))] = camera if self._camera(camera) is not None else None
-        self._settle_roles()
-        self._changed()
-
-    def on_name(self, payload):
-        """A voice's name (step 2): kept for this timeline, and as its
-        camera's person, so the next episode on the setup starts with it."""
-        payload = payload or {}
-        vid = str(payload.get("voice"))
-        if self.data is None or not any(v["id"] == vid for v in self.voices):
-            return
-        name = " ".join(str(payload.get("name") or "").split())[:rig.MAX_NAME]
-        mem = self._memory()
-        mem["names"][vid] = name
-        cam = self._camera(mem["cameras"].get(vid))
-        if cam is not None and list(mem["cameras"].values()).count(cam["id"]) == 1:
-            cam["person"] = name
+        mine = next((k for k, v in mem["cameras"].items() if v == cam["id"] and self._mic_of(k) == mic), None)
+        other = mem["cameras"].get(voice["id"])
+        mem["cameras"][voice["id"]] = cam["id"]
+        if mine is not None and mine != voice["id"]:
+            if other is not None and other != cam["id"]:
+                mem["cameras"][mine] = other
+            else:
+                mem["cameras"].pop(mine, None)
         self._changed()
 
     def on_cut(self, payload):
-        """One of Cut settings: a global option, or a rule for a role's cameras."""
+        """One of Pacing's numbers, for every cut."""
         payload = payload or {}
         key, value = payload.get("key"), payload.get("value")
-        if key in cutplan.DEFAULTS:
-            self.opts = cutplan.options(dict(self.opts, **{key: value}))
-            self.settings["options"] = dict(self.opts)
-        elif key in rig.NUMBERS or key in rig.FLAGS:
-            if self.data is None:
-                return
-            setup = self._setup()
-            setup["rules"] = rig.clean_rules(dict(setup["rules"], **{key: value}))
-        else:
+        if key not in cutplan.DEFAULTS:
             return
+        self.opts = cutplan.options(dict(self.opts, **{key: value}))
+        self.settings["options"] = dict(self.opts)
         self._save()
         self._push_cut()
         self._replan()
 
-    def _changed(self, pins=False):
-        """The setup changed: saved, shown, planned again. pins: voices
-        pinned to a camera that's no longer a speaker's lose it, and voices
-        with none are pinned again."""
+    def _changed(self):
+        """The setup changed: every voice has its angle again, then it's
+        saved, shown and planned again."""
         if self.data is None:
             return self._save()
-        mem = self._memory()
-        if pins:
-            people = {c["id"] for c in self._setup()["cameras"] if c["role"] in ("speaker", "off")}
-            mem["cameras"] = {k: v for k, v in mem["cameras"].items() if v in people}
-            self._default_cameras(mem)
+        if self.talk is not None:
+            self._assign_voices(self._memory())
             self._settle_roles()
         self._save()
         self._push_setup()
-        self._push_voices()
         self._replan()
 
     def _switch_setup(self, sid):
         mem = self._memory()
         mem["setup"] = self.settings["setup"] = sid
-        for key in ("cameras", "names", "tracks", "audio"):   # another setup's camera ids
+        for key in ("cameras", "tracks", "audio"):            # another setup's angle ids
             mem[key] = {}
-        self._changed(pins=True)
+        self._changed()
 
     def _name(self, payload, fallback):
         return " ".join(str((payload or {}).get("name") or "").split())[:rig.MAX_NAME] or fallback
@@ -758,7 +769,7 @@ class AutoSwitchPage(WebToolPage):
         self._switch_setup(sid)
 
     def on_setup_copy(self, payload):
-        """The open setup again under a new name - same cameras, same choices here."""
+        """The open setup again under a new name - same angles, same choices here."""
         if self.data is None or len(self.setups) >= rig.MAX_SETUPS:
             return
         current = self._setup()
@@ -787,58 +798,85 @@ class AutoSwitchPage(WebToolPage):
         track = next((t for t in (self.data or {}).get("video", []) if t["index"] == index), None)
         return str(track.get("name") or "") if track else ""
 
+    def on_angle_add(self, _payload=None):
+        """A new angle: on the next video track with no angle yet (or none),
+        with no audio - a spare angle until its card says more."""
+        if self.data is None:
+            return
+        if rig.new_camera(self._setup(), role=self._spare_role()) is None:
+            return self.emit("toast", {"text": f"A setup holds {rig.MAX_CAMERAS} angles at most."})
+        self._changed()
+
+    def on_angle_remove(self, payload):
+        """An angle taken out of the setup; its video and audio tracks stay where they are."""
+        cam = self._camera((payload or {}).get("id")) if self.data else None
+        if cam is None:
+            return
+        rig.remove_camera(self._setup(), cam["id"])
+        mem = self._memory()
+        for key in ("tracks", "audio"):
+            mem[key].pop(cam["id"], None)
+        mem["cameras"] = {k: v for k, v in mem["cameras"].items() if v != cam["id"]}
+        self._changed()
+
     def on_cam(self, payload):
-        """One of a camera's fields: audio (step 1: the mic tracks it's heard
-        through), role and of (step 3: what it's for, an angle's speaker
-        camera), name or track."""
+        """One of an angle's fields: name, track (its video), audio (the mic
+        tracks that say when its person talks), role and of (what an angle
+        with no audio is for, and whose second angle), or one of its rules
+        (rig.NUMBERS, rig.FLAGS)."""
         payload = payload or {}
         cam, key, value = self._camera(payload.get("id")) if self.data else None, payload.get("key"), payload.get("value")
         if cam is None:
             return
         mem = self._memory()
-        pins = False
         if key == "track":
             valid = {t["index"] for t in self._video_tracks()}
             track = value if value in valid else None
-            for other in self._placed():                    # one camera to a track
-                if other["id"] != cam["id"] and track is not None and other["track"] == track:
-                    mem["tracks"][other["id"]] = None
+            placed = {c["id"]: c["track"] for c in self._placed()}
+            for other, its in placed.items():                # one angle to a track: they change places
+                if other != cam["id"] and track is not None and its == track:
+                    mem["tracks"][other] = placed[cam["id"]]
+                    self._camera(other)["track_name"] = self._track_name(placed[cam["id"]])
             mem["tracks"][cam["id"]] = track
             cam["track_name"] = self._track_name(track)
-            pins = True
         elif key == "audio":
             mics = {t["index"]: t for t in self._mic_tracks()}
             tracks = sorted({a for a in value if a in mics}) if isinstance(value, list) else []
-            before = set(next((c["audio"] for c in self._placed() if c["id"] == cam["id"]), []))
             mem["audio"][cam["id"]] = tracks
             cam["audio_names"] = [mics[a]["raw_name"] for a in tracks if mics[a]["raw_name"]]
-            if tracks:
-                cam["role"] = "speaker"
-            # The voices of a mic just linked are this camera's now (a speaker's);
-            # its other voices are pinned again - and a linked mic is listened to.
-            added = {str(a) for a in set(tracks) - before}
-            mem["cameras"] = {k: v for k, v in mem["cameras"].items()
-                              if v != cam["id"] and not (cam["role"] == "speaker" and k.split(":")[0] in added)}
+            if not tracks and cam["role"] == "speaker":      # no longer a person's: a spare angle
+                cam["role"] = self._spare_role(f"{cam['track_name']} {cam['name']}")
+            # Its voice is found again: a mic's only voice is this angle's now,
+            # one of several is the first with no angle yet.
+            mem["cameras"] = {k: v for k, v in mem["cameras"].items() if v != cam["id"]}
+            for mic in tracks:
+                on_mic = [v["id"] for v in self.voices if v["track"] == mic]
+                pick = on_mic[0] if len(on_mic) == 1 else next((v for v in on_mic if v not in mem["cameras"]), None)
+                if pick is not None:
+                    mem["cameras"][pick] = cam["id"]
             listen = [a for a in tracks if mics[a]["has_audio"] and not mem["mics"].get(str(a))]
             for a in listen:
                 mem["mics"][str(a)] = True
-            if listen:                                       # measured, then its voices are pinned
+            if listen:                                       # measured, then its voice is this angle's
                 self._save()
                 self._push_setup()
                 return None if self.stage else self._measure_files()
-            pins = True
         elif key in ("name", "role", "of"):
             fresh = rig.clean_camera(dict(cam, **{key: value}))
+            if key == "name" and not " ".join(str(value or "").split()):
+                fresh["name"] = cam["name"]
             if key == "of" and (value == cam["id"] or self._camera(value) is None):
                 fresh["of"] = None
-            if key == "role" and fresh["role"] != "speaker":       # not a person's camera: no voices
+            if key == "role" and fresh["role"] != "speaker":       # not a person's angle: no audio, no voice
                 mem["cameras"] = {k: v for k, v in mem["cameras"].items() if v != cam["id"]}
                 mem["audio"][cam["id"]] = []
                 cam["audio_names"] = []
             cam.update(fresh)
+        elif key in rig.NUMBERS or key in rig.FLAGS:
+            cam.update(rig.clean_rules(dict(cam, **{key: value})))
         else:
             return
-        self._changed(pins)
+        self._changed()
 
     def on_seek(self, payload):
         try:
@@ -869,9 +907,13 @@ class AutoSwitchPage(WebToolPage):
         if not self._calls.wait_idle(WRITE_WAIT_S):
             return self.emit("toast", {"text": "Resolve is still busy – try again in a moment."})
         self._set_stage("building", "Building the timeline")
+        heard = [c for c in self._placed() if c["track"] is not None and c["audio"]]
+        # An angle with audio: its camera's own sound is cut with the picture and turned
+        # off, and that audio is cut the same and linked to the picture, piece by piece.
         args = {"shots": [s.as_dict() for s in self.shots], "cameras": self._camera_tracks(),
                 "timeline_id": self.data.get("id", ""),
-                "muted": [c["track"] for c in self._placed() if c["track"] is not None and c["audio"]]}
+                "muted": [c["track"] for c in heard],
+                "paired": [[c["track"], list(c["audio"])] for c in heard]}
         # In the Resolve reader's process: hundreds of calls, and Buddy keeps
         # drawing meanwhile (core/busy_job.py).
         busy_job.run(self.host, self._calls, "podswitch.build", args,
