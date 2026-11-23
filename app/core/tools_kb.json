@@ -128,15 +128,15 @@
       "summary": "Converts an SVG or Lottie/Bodymovin JSON into Fusion node-graph paste-text, copied to the clipboard for pasting into the Fusion page.",
       "needs_resolve": true,
       "capabilities": [
-        "Parses path, rect, ellipse and polyline geometry, fills, strokes and gradients in pure Python",
-        "Handles blur, drop-shadow and inner-shadow filters, and basic <mask> and group clip-path clipping",
+        "Parses path, rect, ellipse and polyline geometry, fills, strokes (with round, bevel or square ends and corners), opacity and gradients in pure Python",
+        "Handles blur, drop-shadow and inner-shadow filters, and basic <mask> and clip-path clipping, on a group or on a single shape",
         "Builds real Fusion PolylineMask / Background / Merge / Group node graphs, with a pivot on every shape and one for the whole graphic",
         "Batch-converts several files (dragged in, picked, or a whole folder) into one paste",
         "Consolidate Colors: one Master Controller swatch per distinct solid color, wired to every shape using it",
-        "Reads Lottie/Bodymovin JSON: shape layers and precomps, with real keyframes for position, anchor, scale, rotation and opacity, and each layer's in/out points",
+        "Reads Lottie/Bodymovin JSON: shape layers and precomps, with real keyframes for position, anchor, scale, rotation and opacity (the file's own easing and curved motion paths), paths that morph, round, bevel and square stroke ends and corners, track mattes as a clip, and each layer's in/out points",
         "Diagnostics: dumps the selected Fusion nodes' settings to a JSON file on the Desktop"
       ],
-      "notes": "Works on the Fusion page: a Fusion comp must be open, and the result is pasted with Ctrl+V into the Flow view. Not supported: SVG <text>, Lottie path morphing and trim-path reveal. Known limitations include fill-rule and stroke dash patterns."
+      "notes": "Works on the Fusion page: a Fusion comp must be open, and the result is pasted with Ctrl+V into the Flow view. Not supported: SVG <text>, and in Lottie files trim-path reveal, repeaters, and animated fill or stroke colour, opacity and width (they stay as they first are). Known limitations: fill-rule (a shape that overlaps itself can show small gaps), stroke dash patterns, and files built from many stacked filters (glossy emoji) come out only roughly right."
     },
     "media_relink": {
       "name": "Media Relink",

@@ -437,6 +437,48 @@ the Fusion page, not that the connection failed.
     Size x width, the baseline 0.375 em below the Center), Arial Bold's
     baseline came out about 0.02 em lower than asked - 10 px on a 432 px
     letter.
+- **Shapes that animate, as masks** (SVG Importer's Lottie side). Measured on
+  Studio 21.1.2, 2026-11-23, by importing the generated comp onto a scratch
+  clip, exporting frames with `TimelineItem.ExportFrame`, and laying them
+  over the same frames from lottie-web:
+  - **A mask's outline is keyed with a spline of its own.** `Polyline = Input
+    { SourceOp = "<name>", Source = "Value" }` on the `PolylineMask`, and a
+    `BezierSpline` whose keys are numbered 0, 1, 2 ... with `Flags = { LockedY
+    = true }` and `Value = Polyline { ... }` holding that key's outline (every
+    key the same number of points). Fusion moves each point and handle in a
+    straight line by how far the curve has got from one number to the next,
+    so `LH`/`RH` on those numbers ease the morph.
+  - **Every step is a picture the size of the comp.** What a mask draws
+    outside the frame is gone before a later `Transform` can bring it back.
+    Geometry far from where it is drawn (a layer's own coordinates, with the
+    layer's origin at the frame's middle) lost whole lines this way; draw it
+    round its own middle and let the Transform's Center and Pivot make up the
+    difference.
+  - **A border's corners and ends**, as the mask's controls number them from
+    0: `JoinStyle` Bevel, Round, Miter, Miter Clip; `CapStyle` Flat, Rounded,
+    Square. `MiterLimit` defaults to 10.
+  - **Opacity goes on the mask's `Level`, not the Background's alpha.** A
+    `Background` with `TopLeftAlpha` below 1 still puts its colour out at full
+    strength, and the `Merge` after it reads a picture as already multiplied
+    by its alpha - white at 50% over blue came out solid white. `Level` on the
+    mask that feeds the Background scales colour and alpha together. (The
+    importer's drop and inner shadows still use the alpha: their strength was
+    tuned by eye against that, and moving them made the tuned files worse.)
+  - **A Point input reads an `XYPath`** written with no `ViewInfo`, with a
+    plain `BezierSpline` on X and on Y - on `Transform.Center`, pasted or
+    imported.
+  - **A sibling reading a `GroupOperator`'s `Output1` gets nothing** in an
+    imported comp too, not only in a paste: a `Merge` fed from the group came
+    out empty. Test comps keep their tools flat.
+- **Another program polling Resolve can stop the script server starting.**
+  Seen 2026-11-23: after Resolve crashed, every restart logged `Started script
+  server` then `Failed to connect to script server`, and nothing - not
+  `fuscript` either - could reach it. The server's own log (in
+  `ResolveDebug.txt`) showed two incoming connections the instant it opened
+  and the server quitting 0.2 s later. A separate app that asks Resolve for
+  its timecode every couple of minutes was running; with it closed, the next
+  start worked. When `scriptapp("Resolve")` is `None` with Resolve open, read
+  that log before anything else.
 - **Pasting drops cross-group connections.** Fusion's clipboard text (Lua
   table syntax) silently loses any `Inputs` entry that references a node
   across a group boundary. That's a Fusion bug; verify wiring after a paste

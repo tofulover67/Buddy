@@ -481,11 +481,17 @@ def parse_transform(s):
 
 
 class Subpath:
-    __slots__ = ("anchors", "closed")
+    __slots__ = ("anchors", "closed", "keyframes")
 
     def __init__(self):
         self.anchors = []
         self.closed = False
+        # A Lottie path that morphs: [(frame, Subpath, out_ease, in_ease), ...],
+        # one whole outline per keyframe, each with the same number of points
+        # as this one (which holds the first keyframe's outline). None for a
+        # path that never changes shape - every SVG path, most Lottie ones.
+        # See lottie_shapes_to_nodes and build_mask_tool_lua.
+        self.keyframes = None
 
     def add(self, x, y, in_cp=None, out_cp=None):
         self.anchors.append({"x": x, "y": y, "in_cp": in_cp, "out_cp": out_cp})
@@ -1357,6 +1363,11 @@ class ShapeNode:
         self.blur_stddev_px = blur_stddev_px
         self.drop_shadow = drop_shadow
         self.inner_shadow = inner_shadow
+        # How the stroke's corners and open ends are drawn: "miter", "round"
+        # or "bevel"; "butt", "round" or "square"; and the miter limit. None
+        # leaves the mask at what native SVG import writes (miter, butt, 4).
+        # Set for a Lottie stroke - see lottie_shapes_to_nodes.
+        self.stroke_join = self.stroke_cap = self.stroke_miter_limit = None
 
 
 class GroupNode:
@@ -1397,6 +1408,16 @@ class GroupNode:
         # means the default "own layer" space; a promoted shape group
         # sets _LOTTIE_SPACE_SHAPE_GROUP instead.
         self.transform_space = None
+        # Set by _frame_lottie_layer on a node whose transform stays live:
+        # the point of its own space ([x, y], Lottie pixels) its content is
+        # drawn round, and the point of the space it lands in that the result
+        # is drawn round. When set they decide Center and Pivot in place of
+        # transform_space.
+        self.frame_in = self.frame_out = None
+        # True on a consolidated layer (see _lottie_build_merged_layer): every
+        # level of it is framed round the same point, so a padded level still
+        # does nothing.
+        self.frame_as_one = False
         # Populated for a Lottie layer clipped by a "td" track matte (see
         # _lottie_matte_clip_subpaths): the matte's resolved-static
         # geometry, in composition-coordinates-minus-half-the-comp space.
@@ -1443,6 +1464,12 @@ def get_style_fill(el, inherited_fill, inherited_opacity, css_classes=None,
     returned for the caller to pass down and only applied to shapes."""
     style_map = _style_map(el, css_classes)
     fill = style_map.get('fill', el.get('fill', inherited_fill))
+    if not str(fill if fill is not None else '').strip():
+        # fill="" is not a paint: a browser ignores it and the inherited fill
+        # stands. Icon sets write it on every path under a root fill="#000000";
+        # read as a colour that couldn't be parsed, a black line drawing came
+        # out in the grey placeholder (seen in Fusion against the browser).
+        fill = inherited_fill
     fill_opacity = _parse_opacity(style_map.get('fill-opacity', el.get('fill-opacity', inherited_fill_opacity)),
                                   inherited_fill_opacity)
     opacity = _parse_opacity(style_map.get('opacity', el.get('opacity', 1.0))) * inherited_opacity
@@ -1628,6 +1655,47 @@ def walk(el, matrix, inherited_fill, inherited_opacity, counter, id_map=None, us
          filter_defs=None, inherited_blur=None, drop_shadow_defs=None, inherited_drop_shadow=None,
          inner_shadow_defs=None, inherited_inner_shadow=None, report=None, viewport=None, css_classes=None,
          inherited_fill_opacity=1.0, inherited_visible=True, as_clip=False):
+    """One element of the SVG tree as a ShapeNode or GroupNode (or None).
+
+    A clip-path or mask on a SHAPE (a <g> or <svg> handles its own, in
+    _walk_element) is that shape alone in a group that carries the clip -
+    the same hard-edged clip a group gets, in the shape's own coordinates
+    (its transform included). Inkscape writes its clips this way; ignored,
+    a circle meant to show only below a horizon covered the whole picture
+    (seen in Fusion against the browser)."""
+    node = _walk_element(el, matrix, inherited_fill, inherited_opacity, counter, id_map, use_stack,
+                         inherited_stroke, inherited_stroke_width, inherited_stroke_opacity, gradient_defs,
+                         filter_defs, inherited_blur, drop_shadow_defs, inherited_drop_shadow,
+                         inner_shadow_defs, inherited_inner_shadow, report=report, viewport=viewport,
+                         css_classes=css_classes, inherited_fill_opacity=inherited_fill_opacity,
+                         inherited_visible=inherited_visible, as_clip=as_clip)
+    if node is None or as_clip or strip_ns(el.tag) in ('g', 'svg', 'use', 'defs'):
+        return node
+    for attr, wanted in (('mask', 'mask'), ('clip-path', 'clipPath')):
+        ref = re.match(r'url\(#([^)]+)\)', (el.get(attr) or '').strip())
+        if not el.get(attr):
+            continue
+        clip_el = id_map.get(ref.group(1)) if ref and id_map is not None else None
+        if clip_el is None or strip_ns(clip_el.tag) != wanted:
+            if report is not None:
+                (report.note_unresolved_mask if attr == 'mask' else report.note_unresolved_clip_path_attr)()
+            continue
+        m = mat_mul(matrix, parse_transform(el.get('transform', '')))
+        clip = _resolve_ref_clip_subpaths(clip_el, m, counter, id_map, gradient_defs, filter_defs, report=report,
+                                           viewport=viewport, css_classes=css_classes)
+        if clip:
+            wrapper = GroupNode(f"{node.name}_Clipped")
+            wrapper.clip_subpaths = clip
+            wrapper.children = [node]
+            return wrapper
+    return node
+
+
+def _walk_element(el, matrix, inherited_fill, inherited_opacity, counter, id_map=None, use_stack=frozenset(),
+                  inherited_stroke=None, inherited_stroke_width=1.0, inherited_stroke_opacity=1.0, gradient_defs=None,
+                  filter_defs=None, inherited_blur=None, drop_shadow_defs=None, inherited_drop_shadow=None,
+                  inner_shadow_defs=None, inherited_inner_shadow=None, report=None, viewport=None, css_classes=None,
+                  inherited_fill_opacity=1.0, inherited_visible=True, as_clip=False):
     tag = strip_ns(el.tag)
     m = mat_mul(matrix, parse_transform(el.get('transform', '')))
     fill, fill_opacity, opacity, displayed, visible = get_style_fill(
@@ -1653,16 +1721,9 @@ def walk(el, matrix, inherited_fill, inherited_opacity, counter, id_map=None, us
         filter_attr = el.get('filter')
         if filter_attr and own_blur is None and own_drop_shadow is None and own_inner_shadow is None:
             report.note_unsupported_filter()
-        # clip-path is a DIFFERENT attribute from mask, and per spec is valid
-        # on any element -- but only resolved on <g>/<svg> here (same scope
-        # as mask=..., see the 'g'/'svg' branch below), since that's the
-        # overwhelmingly common real-world pattern (Figma/Illustrator wrap
-        # the clipped content in a group) and clip_subpaths only exists on
-        # GroupNode. On any other element it's flagged unsupported straight
-        # away; on a <g>/<svg> it's flagged below instead, only if it
-        # DIDN'T end up resolving.
-        if el.get('clip-path') and tag not in ('g', 'svg'):
-            report.note_unresolved_clip_path_attr()
+        # clip-path and mask on a <g>/<svg> are resolved in the 'g'/'svg'
+        # branch below; on a shape, by walk() once the shape is built. Each
+        # is flagged there, only if it DIDN'T end up resolving.
 
     if tag == 'defs':
         # Definitions are never rendered directly -- content only appears
@@ -1883,10 +1944,26 @@ def walk(el, matrix, inherited_fill, inherited_opacity, counter, id_map=None, us
                 "color": layer["color"], "opacity": layer["opacity"],
             })
 
-    return ShapeNode(get_name(el, f"Shape_{next(counter)}"), subpaths,
+    shape = ShapeNode(get_name(el, f"Shape_{next(counter)}"), subpaths,
                       has_fill, color, fill_opacity * opacity,
                       has_stroke, stroke_color, stroke_width_px, stroke_opacity * opacity,
                       fill_gradient, stroke_gradient, blur_stddev_px, drop_shadow_px, inner_shadow_px)
+    if has_stroke:
+        # How the stroke's corners and ends are drawn, when the element says
+        # so itself (its attributes, style or class). These properties
+        # inherit in SVG; one set only on a parent group isn't picked up, and
+        # the stroke then gets SVG's defaults (miter, butt), as before.
+        style_map = _style_map(el, css_classes)
+        join = style_map.get('stroke-linejoin', el.get('stroke-linejoin', '')).strip()
+        cap = style_map.get('stroke-linecap', el.get('stroke-linecap', '')).strip()
+        shape.stroke_join = join if join in _FUSION_JOIN_STYLES else None
+        shape.stroke_cap = cap if cap in _FUSION_CAP_STYLES else None
+        limit = style_map.get('stroke-miterlimit', el.get('stroke-miterlimit'))
+        try:
+            shape.stroke_miter_limit = float(limit) if limit not in (None, '') else None
+        except ValueError:
+            pass
+    return shape
 
 
 def _resolve_ref_clip_subpaths(ref_el, m, counter, id_map, gradient_defs, filter_defs, report=None,
@@ -2250,7 +2327,7 @@ class PastePositions:
 
 def build_mask_tool_lua(mask_name, sp, to_point, to_vector, comp_w, comp_h, pos,
                          invert=False, effect_mask_source=None, border_width=None, force_closed=None,
-                         level=None, soft_edge=None, paint_mode=None):
+                         level=None, soft_edge=None, paint_mode=None, stroke_style=None, level_source_op=None):
     """comp_w/comp_h aren't used for MaskWidth/MaskHeight below -- confirmed
     against a real native-import dump that Fusion's own importer always
     leaves those at a fixed 320x240 (a legacy default baked into
@@ -2331,20 +2408,73 @@ def build_mask_tool_lua(mask_name, sp, to_point, to_vector, comp_w, comp_h, pos,
     is only ever set on a chain's FIRST subpath, which invert_chain never
     marks invert=True regardless)."""
     poly_lua = subpath_to_polyline_lua(sp, to_point, to_vector, force_closed=force_closed)
-    return _build_mask_tool_lua_from_poly(mask_name, poly_lua, pos, invert=invert,
-                                           effect_mask_source=effect_mask_source, border_width=border_width,
-                                           level=level, soft_edge=soft_edge, paint_mode=paint_mode)
+    mask_lua = _build_mask_tool_lua_from_poly(
+        mask_name, poly_lua, pos, invert=invert, effect_mask_source=effect_mask_source,
+        border_width=border_width, level=level, soft_edge=soft_edge, paint_mode=paint_mode,
+        stroke_style=stroke_style, polyline_source_op=f"{mask_name}Polyline" if sp.keyframes else None,
+        level_source_op=level_source_op)
+    if not sp.keyframes:
+        return mask_lua
+    # A path that morphs: the mask's Polyline is keyed by a spline of its own,
+    # written ahead of the mask that reads it.
+    return _build_polyline_spline_lua(f"{mask_name}Polyline", sp.keyframes, to_point, to_vector,
+                                       force_closed) + ",\n        " + mask_lua
+
+
+def _build_polyline_spline_lua(name, keyframes, to_point, to_vector, force_closed=None):
+    """The spline that keys a mask's Polyline through a morphing path's
+    outlines (Subpath.keyframes, frames already the Fusion comp's).
+
+    This is how Fusion itself saves an animated polygon: each key's number
+    is its place in the list (0, 1, 2 ...) and the outline it stands for is
+    the key's Value; between two keys Fusion moves every point and handle
+    in a straight line by however far the curve has got from one number to
+    the next. Lottie morphs a path the same way - each vertex and tangent
+    interpolated linearly, by the keyframe's eased progress - so the
+    Lottie easing goes straight onto the curve's handles (see
+    _lottie_ease_segment) and the outlines in between come out the same."""
+    synthetic = [(t, [float(n)], o, i, None, None, False) for n, (t, _sp, o, i) in enumerate(keyframes)]
+    specs = _lottie_keyframe_specs(synthetic, value_fn=lambda v: v, unwrap_scalar=True)
+    lines = []
+    for (frame, value, rh, lh, linear), (_t, sp, _o, _i) in zip(specs, keyframes):
+        entry = [f"{value!r}"]
+        if lh is not None:
+            entry.append(f"LH = {{ {lh[0]!r}, {lh[1]!r} }}")
+        if rh is not None:
+            entry.append(f"RH = {{ {rh[0]!r}, {rh[1]!r} }}")
+        entry.append("Flags = { Linear = true, LockedY = true }" if linear else "Flags = { LockedY = true }")
+        entry.append("Value = " + subpath_to_polyline_lua(sp, to_point, to_vector, force_closed=force_closed))
+        lines.append(f'            [{float(frame)!r}] = {{ {", ".join(entry)} }},')
+    keys = "\n".join(lines)
+    return f"""{name} = BezierSpline {{
+        NameSet = true,
+        KeyFrames = {{
+{keys}
+        }},
+    }}"""
+
+
+# A mask border's corners and ends, as Fusion numbers them - read off a
+# PolylineMask's own controls on Studio 21.1.2 (JoinStyle: Bevel, Round,
+# Miter, Miter Clip; CapStyle: Flat, Rounded, Square; each counted from 0).
+# Miter 2 and flat 0 are what native SVG import writes for SVG's own
+# defaults (see build_mask_tool_lua).
+_FUSION_JOIN_STYLES = {"bevel": 0, "round": 1, "miter": 2}
+_FUSION_CAP_STYLES = {"butt": 0, "round": 1, "square": 2}
 
 
 def _build_mask_tool_lua_from_poly(mask_name, poly_lua, pos, invert=False, effect_mask_source=None,
-                                    border_width=None, level=None, soft_edge=None, paint_mode=None):
+                                    border_width=None, level=None, soft_edge=None, paint_mode=None,
+                                    stroke_style=None, polyline_source_op=None, level_source_op=None):
     """The template half of build_mask_tool_lua, factored out so a caller
     that already HAS a finished 'Polyline { ... }' literal can reuse the
     exact same native-import-matched mask template (JoinStyle/MiterLimit/
     MaskWidth/etc, see build_mask_tool_lua's own docstring) without needing
     a Subpath object or a to_point/to_vector pair to build one from."""
     extra_lines = ""
-    if level is not None:
+    if level_source_op:
+        extra_lines += f'            Level = Input {{ SourceOp = "{level_source_op}", Source = "Value" }},\n'
+    elif level is not None:
         extra_lines += f'            Level = Input {{ Value = {level!r} }},\n'
     if soft_edge is not None:
         extra_lines += f'            SoftEdge = Input {{ Value = {soft_edge!r} }},\n'
@@ -2357,16 +2487,24 @@ def _build_mask_tool_lua_from_poly(mask_name, poly_lua, pos, invert=False, effec
         extra_lines += '            Solid = Input { Value = 0 },\n'
     if effect_mask_source:
         extra_lines += f'            EffectMask = Input {{ SourceOp = "{effect_mask_source}", Source = "Mask" }},\n'
+    join, cap, miter_limit = stroke_style or (None, None, None)
+    join_value = _FUSION_JOIN_STYLES.get(join, 2)
+    cap_value = _FUSION_CAP_STYLES.get(cap, 0)
+    miter_value = 4 if miter_limit is None else miter_limit
+    if polyline_source_op:
+        polyline_line = f'Input {{ SourceOp = "{polyline_source_op}", Source = "Value" }}'
+    else:
+        polyline_line = f'Input {{ Value = {poly_lua} }}'
     return f"""{mask_name} = PolylineMask {{
         DrawMode = "ModifyOnly",
         Inputs = {{
-            JoinStyle = Input {{ Value = 2 }},
-            MiterLimit = Input {{ Value = 4 }},
-            CapStyle = Input {{ Value = 0 }},
+            JoinStyle = Input {{ Value = {join_value!r} }},
+            MiterLimit = Input {{ Value = {miter_value!r} }},
+            CapStyle = Input {{ Value = {cap_value!r} }},
             MaskWidth = Input {{ Value = 320.0 }},
             MaskHeight = Input {{ Value = 240.0 }},
             PixelAspect = Input {{ Value = {{ 1, 1 }} }},
-            Polyline = Input {{ Value = {poly_lua} }},
+            Polyline = {polyline_line},
 {extra_lines}        }},
         ViewInfo = OperatorInfo {{ Pos = {{ {pos[0]!r}, {pos[1]!r} }} }},
     }}"""
@@ -2491,7 +2629,7 @@ def _build_mask_chain(subpaths, to_point, to_vector, comp_w, comp_h,
                        end_flow_level, stack_slot, names, positions,
                        invert_chain, border_width, name_for, force_closed=None, level=None,
                        soft_edge=None, initial_effect_mask=None, initial_paint_mode="Multiply",
-                       initial_invert=False):
+                       initial_invert=False, stroke_style=None, level_source_op=None):
     """Builds one mask per subpath, chained via EffectMask, ending at
     end_flow_level with the masks stacked at negative flow offsets above it
     (see build_shape_lua). Shared by the fill chain (invert_chain=True, the
@@ -2541,9 +2679,11 @@ def _build_mask_chain(subpaths, to_point, to_vector, comp_w, comp_h,
                                           effect_mask_source=prev_mask, border_width=border_width,
                                           force_closed=force_closed,
                                           level=level if i == n - 1 else None,
+                                          level_source_op=level_source_op if i == n - 1 else None,
                                           soft_edge=soft_edge,
                                           paint_mode=(initial_paint_mode if i == 0 and initial_effect_mask is not None
-                                                      else None)))
+                                                      else None),
+                                          stroke_style=stroke_style))
         prev_mask = mask_name
     return tools, prev_mask
 
@@ -2822,16 +2962,15 @@ def _build_recentering_transform_lua(name, pivot, input_source, pos):
 # real "Dump Selected Node Settings" capture of a hand-built animated
 # Transform:
 #
-#   - An animated `Center` (Point-type Input) is NOT two per-axis splines
-#     -- it's `Center = Input { SourceOp = "<PolyPath>", Source =
-#     "Position" }`. That PolyPath holds a `PolyLine` (one point per
-#     position keyframe, in this file's own frame-normalized (0.5,0.5)-
-#     center convention, each point's own LX/LY/RX/RY shaping the ON-
-#     SCREEN path curve) and a `Displacement` Input wired to ANOTHER
-#     separate BezierSpline (0..1 progress-over-time). Displacement
-#     isn't naive index/(count-1) -- it tracks actual spacing
-#     between the path's own points (see _lottie_position_displacement_
-#     specs).
+#   - An animated `Center` (a Point input) reads an XYPath: one
+#     BezierSpline for X and one for Y (see _static_or_animated_point_field
+#     and _lottie_point_axis_specs). The hand-built dump animated Center
+#     with a PolyPath and a Displacement spline instead, and Buddy wrote
+#     that until 2026-11: it is how Fusion draws a motion path you can drag,
+#     but a point on it is found by distance along the path, which made the
+#     timing between keyframes depend on how Fusion measures that distance -
+#     and Buddy's own measure of it was only ever a guess. Two splines say
+#     where the point is on every frame and leave nothing to measure.
 #   - `Pivot` stays a plain STATIC Value in the real dump even with
 #     Center animated -- this keeps Pivot static (the layer's
 #     own anchor, resolved to its first/static value), matching this
@@ -2847,10 +2986,11 @@ def _build_recentering_transform_lua(name, pivot, input_source, pos):
 #     linear (handles then sit exactly on the straight line -- verified
 #     algebraically against the real dump's own numbers).
 #
-# What's an ASSUMPTION rather than taken from a dump (flagged inline
-# below): how Lottie's own "o"/"i" temporal ease fractions map onto
-# Fusion's absolute LH/RH handles, and how a position keyframe's own
-# spatial "to"/"ti" tangents map onto the PolyPath's own LX/LY/RX/RY.
+# How Lottie's easing ("o"/"i") and a position's spatial tangents
+# ("to"/"ti") are read was checked on Studio 21.1.2 on 2026-11-23: four
+# example files rendered frame by frame in Fusion against the same frames
+# from lottie-web, and the positions Buddy's splines give against the ones
+# lottie-web computes (within a hundredth of a pixel on a 48 pixel canvas).
 # ==========================================================================
 def _lottie_resolved_static(value_or_keyframes, scalar=False):
     """Resolves a LottieLayerAnimation field (already either a plain
@@ -2915,8 +3055,8 @@ def _lottie_ease_segment(t0, v0, t1, v1, out_ease, in_ease, component=0):
     property carries both "o" and "i", and the last, starting no further
     segment, carries neither).
 
-    ASSUMPTION (the Fusion-side LH/RH shape comes from a real dump; this
-    is about what Lottie's own "o"/"i" VALUES mean once you have them): they're already a literal 2-control-point
+    What Lottie's own "o"/"i" VALUES mean (checked against lottie-web, see
+    this section's module comment): they're already a literal 2-control-point
     cubic Bezier in (time-fraction, value-fraction) space, measured from
     the segment's own start -- not a normalized y=f(x) timing function
     needing inversion -- so converting to Fusion's absolute-frame/
@@ -2952,16 +3092,16 @@ def _lottie_keyframe_specs(keyframes, value_fn, ease_component=0, force_linear=F
     """Converts one property's raw lottie_keyframes() list (7-tuples --
     see there) into [(frame, value, rh_or_None, lh_or_None, linear), ...]
     ready for _lua_keyframes_table_lua -- shared by every animated scalar
-    Input (Angle/Size/Aspect/TopLeftAlpha) and by the position PolyPath's
-    own Displacement spline (via synthetic keyframe tuples, see
-    _lottie_position_displacement_specs).
+    Input (Angle/Size/Aspect/TopLeftAlpha) and by the spline that keys a
+    morphing mask's outline (via synthetic keyframe tuples, see
+    _build_polyline_spline_lua).
 
     value_fn maps a keyframe's own raw (unwrapped) "s" value to this
     property's actual Fusion-space number -- e.g. rotation passes it
     through as-is, Size divides by 100, Aspect derives sy/sx from a
     shared 2D scale keyframe.
 
-    force_linear=True (Aspect, Displacement) skips ease conversion
+    force_linear=True (Aspect) skips ease conversion
     entirely and always synthesizes the Linear 1/3-2/3 handles -- see
     _lottie_ease_segment's own docstring and this section's module
     comment for why a derived/synthetic value (not a direct copy of one
@@ -3037,8 +3177,8 @@ def _lua_keyframes_table_lua(specs):
 
 def _build_bezier_spline_lua(name, specs):
     """Generic scalar keyframe-curve tool, shared by every animated
-    scalar Input (Angle/Size/Aspect/TopLeftAlpha) and by a position
-    PolyPath's own Displacement. NameSet=true follows this file's own
+    scalar Input (Angle/Size/Aspect/TopLeftAlpha) and by each axis of an
+    animated point's XYPath. NameSet=true follows this file's own
     universal every-referenced-tool convention -- not checked against a
     real dump for BezierSpline specifically.
 
@@ -3154,100 +3294,145 @@ def _lottie_center_point(position_xy, anchor_xy, center_offset, to_point):
     which make_lottie_converter's docstring correctly notes Lottie has no
     equivalent of at the LOCAL level, but position still needs it at the
     COMP level."""
-    x, y = _lottie_comp_relative_point(position_xy, anchor_xy, center_offset, to_point)
+    x, y = to_point(position_xy[0] - anchor_xy[0] - center_offset[0],
+                    position_xy[1] - anchor_xy[1] - center_offset[1])
     return x + 0.5, y + 0.5
 
 
-def _lottie_comp_relative_point(position_xy, anchor_xy, center_offset, to_point):
-    """The centering half of _lottie_center_point WITHOUT its final +0.5
-    shift -- i.e. the plain to_point()-style "-0.5..0.5, centered at 0"
-    convention every OTHER polyline in this file uses (see
-    subpath_to_polyline_lua), just with Position's own comp-centering
-    applied first.
-
-    Needed as its own function because PolyPath's own `PolyLine` input
-    uses THIS convention, not the +0.5-shifted Center/Pivot one: PolyLine
-    points already shifted by _lottie_center_point's own +0.5 make
-    PolyPath's Source="Position" output come out shifted by +0.5 TWICE
-    (once from our own point data, once from whatever internal
-    +0.5-equivalent conversion PolyPath itself applies when producing a
-    Center-compatible output) -- parked exactly on a Displacement
-    keyframe's last value (1.0, so PolyPath's output should equal its last
-    PolyLine point), the live Center reads 0.5 higher than that point on
-    BOTH axes. A hand-built PolyPath in a real dump likewise has negative
-    points (e.g. X=-0.253), so a real PolyLine carries no +0.5 shift."""
-    return to_point(position_xy[0] - anchor_xy[0] - center_offset[0],
-                     position_xy[1] - anchor_xy[1] - center_offset[1])
+_LOTTIE_PATH_STEPS = 200
 
 
-def _lottie_position_polyline_lua(keyframes, anchor_xy, center_offset, to_point, to_vector):
-    """The position PolyPath's own `PolyLine` literal -- one point per
-    position keyframe, in the same frame-normalized (0.5,0.5)-center
-    convention _shape_pivot_point already uses, each point's own
-    LX/LY/RX/RY shaping the ON-SCREEN motion path (not time). anchor_xy/
-    center_offset are this transform's own resolved-static Anchor and its
-    space's own offset -- see _lottie_center_point / this section's own
-    module comment for why Position needs both and plain Anchor/geometry
-    conversions don't.
-
-    ASSUMPTION, not taken from a dump: reads a keyframe's own "to" (spatial
-    tangent leaving THIS keyframe) as RX/RY and "ti" (spatial tangent
-    arriving at THIS keyframe) as LX/LY -- a structural analogy to
-    lottie_shape_to_subpath's own i[n]/o[n]-on-the-same-vertex convention
-    (the way to check it is pasting a file with a real curved motion path
-    and eyeballing the curve direction)."""
-    lines = []
-    for (t, v, o, i, sp_out, sp_in, h) in keyframes:
-        x, y = _lottie_comp_relative_point(v, anchor_xy, center_offset, to_point)
-        # Spec says "to"/"ti" are [x, y], but some exporters (AE's Position is internally
-        # always 3D) emit a 3rd z component even on purely 2D artwork (every tangent
-        # [x, y, 0]). Fusion has no use for it here, so take only the first two components.
-        rx, ry = to_vector(*sp_out[:2]) if sp_out else (0.0, 0.0)
-        lx, ly = to_vector(*sp_in[:2]) if sp_in else (0.0, 0.0)
-        fields = [f"X = {x!r}", f"Y = {y!r}", f"LX = {lx!r}", f"LY = {ly!r}",
-                  f"RX = {rx!r}", f"RY = {ry!r}"]
-        if sp_out is None and sp_in is None:
-            fields.append("Linear = true")
-        lines.append("{ " + ", ".join(fields) + " }")
-    return "Polyline { Closed = false, Points = { " + ", ".join(lines) + " } }"
+def _lottie_ease_progress(u, out_ease, in_ease):
+    """How far along a segment its value is, 0..1, when a share u of the
+    segment's time has passed: Lottie's easing curve, a cubic bezier from
+    (0, 0) to (1, 1) whose two control points are the keyframe's "o" and "i",
+    read as y for a given x. No easing authored is a straight line."""
+    out_f, in_f = _lottie_ease_fraction(out_ease), _lottie_ease_fraction(in_ease)
+    if out_f is None and in_f is None:
+        return u
+    x1, y1 = out_f if out_f is not None else (1.0 / 3.0, 1.0 / 3.0)
+    x2, y2 = in_f if in_f is not None else (2.0 / 3.0, 2.0 / 3.0)
+    lo, hi = 0.0, 1.0
+    for _ in range(40):
+        mid = (lo + hi) / 2.0
+        x = 3 * (1 - mid) ** 2 * mid * x1 + 3 * (1 - mid) * mid ** 2 * x2 + mid ** 3
+        if x < u:
+            lo = mid
+        else:
+            hi = mid
+    k = (lo + hi) / 2.0
+    return 3 * (1 - k) ** 2 * k * y1 + 3 * (1 - k) * k ** 2 * y2 + k ** 3
 
 
-def _lottie_position_displacement_specs(keyframes, to_point, time_scale=1.0):
-    """Cumulative chord-length-normalized progress value (0..1) per
-    position keyframe, at that SAME keyframe's own frame time -- in the
-    real dump Displacement isn't naive index/(count-1) (a 3-point path's
-    middle keyframe sits at 0.5688, not 0.5, tracking actual point spacing).
+def _lottie_motion_segment(kf, nxt):
+    """The path a position takes from keyframe kf to nxt: its four bezier
+    points, and whether it is a straight run.
 
-    Chord length (straight-line distance between the already-converted
-    screen-space points), not true bezier arc length through the path's
-    own spatial handles, is the pragmatic choice here: the load-bearing
-    correctness -- each keyframe's OWN point landing exactly right --
-    only depends on Displacement(t_i) equalling this i's own progress
-    value, which holds regardless of how the in-between arc length is
-    approximated; only the in-between interpolation FEEL is affected.
-    Always force_linear (see _lottie_keyframe_specs) -- Displacement is a
-    synthetic derived scalar Lottie never authored an ease for."""
-    points = []
-    for kf in keyframes:
-        x, y = to_point(kf[1][0], kf[1][1])
-        points.append((x + 0.5, y + 0.5))
-    n = len(points)
-    cum = [0.0] * n
-    for i in range(1, n):
-        cum[i] = cum[i - 1] + math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1])
-    total = cum[-1]
-    synthetic = []
-    for i, kf in enumerate(keyframes):
-        d = (cum[i] / total) if total > 0 else (i / (n - 1) if n > 1 else 0.0)
-        synthetic.append((kf[0], [d], None, None, None, None, False))
-    return _lottie_keyframe_specs(synthetic, value_fn=lambda d: d, force_linear=True, unwrap_scalar=True,
-                                    time_scale=time_scale)
+    The spatial tangents of a segment both sit on the keyframe that STARTS
+    it: "to" leaves this keyframe's point, "ti" arrives at the next one's
+    (in the example files a keyframe's "ti" is the mirror of the next
+    keyframe's "to", which only makes sense read that way). A segment is
+    straight when both control points lie on the line between its ends, in
+    order - then the point just moves along that line by the eased progress,
+    and one eased key per axis plays it exactly."""
+    p0 = (float(kf[1][0]), float(kf[1][1]))
+    p3 = (float(nxt[1][0]), float(nxt[1][1]))
+    to, ti = kf[4] or (0.0, 0.0), kf[5] or (0.0, 0.0)
+    p1 = (p0[0] + to[0], p0[1] + to[1])
+    p2 = (p3[0] + ti[0], p3[1] + ti[1])
+    dx, dy = p3[0] - p0[0], p3[1] - p0[1]
+    length2 = dx * dx + dy * dy
+    if length2 < 1e-12:
+        straight = abs(to[0]) + abs(to[1]) + abs(ti[0]) + abs(ti[1]) < 1e-9
+    else:
+        straight = True
+        along = []
+        for q in (p1, p2):
+            qx, qy = q[0] - p0[0], q[1] - p0[1]
+            if abs(qx * dy - qy * dx) > 1e-6 * max(1.0, length2):
+                straight = False
+            along.append((qx * dx + qy * dy) / length2)
+        if straight and not (-1e-9 <= along[0] <= along[1] + 1e-9 and along[1] <= 1.0 + 1e-9):
+            straight = False
+    return (p0, p1, p2, p3), straight
+
+
+def _lottie_point_on_curve(points, progress):
+    """The point a share `progress` of the way ALONG a bezier's length -
+    Lottie moves a position by distance travelled, not by the bezier's own
+    parameter."""
+    p0, p1, p2, p3 = points
+
+    def at(k):
+        a, b, c, d = (1 - k) ** 3, 3 * (1 - k) ** 2 * k, 3 * (1 - k) * k ** 2, k ** 3
+        return (a * p0[0] + b * p1[0] + c * p2[0] + d * p3[0], a * p0[1] + b * p1[1] + c * p2[1] + d * p3[1])
+
+    pts = [at(n / _LOTTIE_PATH_STEPS) for n in range(_LOTTIE_PATH_STEPS + 1)]
+    cum = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        cum.append(cum[-1] + math.hypot(b[0] - a[0], b[1] - a[1]))
+    want = min(max(progress, 0.0), 1.0) * cum[-1]
+    for n in range(1, len(cum)):
+        if cum[n] >= want:
+            span = cum[n] - cum[n - 1]
+            f = (want - cum[n - 1]) / span if span > 0 else 0.0
+            return (pts[n - 1][0] + f * (pts[n][0] - pts[n - 1][0]), pts[n - 1][1] + f * (pts[n][1] - pts[n - 1][1]))
+    return pts[-1]
+
+
+def _lottie_point_axis_specs(keyframes, point_fn, time_scale=1.0):
+    """A point's keyframes (a layer's Position or Anchor: lottie_keyframes()
+    7-tuples) as two spline spec lists, one for X and one for Y, each ready
+    for _build_bezier_spline_lua. point_fn turns a Lottie [x, y] into the
+    Fusion point the input takes.
+
+    A straight run between two keyframes is ONE eased segment on each axis:
+    both axes get the keyframe's own easing, so the point travels the line
+    at the speed the file asks for. A curved run can't be written that way
+    (the point moves by distance along the curve), so it is sampled instead:
+    a key on every Fusion frame inside it, straight between them."""
+    nodes = [(keyframes[0][0] * time_scale, point_fn(keyframes[0][1]))]
+    gaps = []
+    for kf, nxt in zip(keyframes, keyframes[1:]):
+        f0, f1 = kf[0] * time_scale, nxt[0] * time_scale
+        points, straight = _lottie_motion_segment(kf, nxt)
+        if straight or f1 - f0 <= 1.0:
+            gaps.append((kf[2], kf[3]))
+        else:
+            frame = math.floor(f0) + 1
+            while frame < f1 - 1e-6:
+                progress = _lottie_ease_progress((frame - f0) / (f1 - f0), kf[2], kf[3])
+                nodes.append((float(frame), point_fn(_lottie_point_on_curve(points, progress))))
+                gaps.append(None)
+                frame += 1
+            gaps.append(None)
+        nodes.append((f1, point_fn(nxt[1])))
+
+    specs = []
+    for axis in (0, 1):
+        n = len(nodes)
+        rh, lh, linear = [None] * n, [None] * n, [True] * n
+        for i, gap in enumerate(gaps):
+            (t0, a), (t1, b) = nodes[i], nodes[i + 1]
+            v0, v1 = a[axis], b[axis]
+            if gap is None:
+                is_linear = True
+                r = (t0 + (t1 - t0) / 3.0, v0 + (v1 - v0) / 3.0)
+                l = (t0 + (t1 - t0) * 2.0 / 3.0, v0 + (v1 - v0) * 2.0 / 3.0)
+            else:
+                is_linear, r, l = _lottie_ease_segment(t0, v0, t1, v1, gap[0], gap[1])
+            rh[i], lh[i + 1] = r, l
+            linear[i] = is_linear
+        specs.append([(nodes[i][0], nodes[i][1][axis], rh[i], lh[i],
+                       (linear[i - 1] if i > 0 else True) and (linear[i] if i < n - 1 else True))
+                      for i in range(n)])
+    return specs[0], specs[1]
 
 
 # --------------------------------------------------------------------------
 # Modifiers vs tools in the Flow view.
 #
-# BezierSpline and PolyPath are Fusion MODIFIERS, not flow tools: they drive
+# BezierSpline and XYPath are Fusion MODIFIERS, not flow tools: they drive
 # another tool's Input via SourceOp rather than passing an image along, and
 # Fusion normally surfaces them in the Spline/Modifiers views, NOT as boxes
 # in the Flow. Fusion understands ours that way -- in a real "Dump Selected
@@ -3277,16 +3462,17 @@ def _lottie_position_displacement_specs(keyframes, to_point, time_scale=1.0):
 _MODIFIER_TOOLS_NOTE = True
 
 
-def _build_polypath_lua(name, polyline_lua, displacement_source_op):
-    """The PolyPath tool an animated Center/Pivot wires to
-    (Source="Position") -- structure from a real dump, see
-    this section's own module comment. Writes no ViewInfo: it's a
-    modifier, see the module comment above."""
-    return f"""{name} = PolyPath {{
+def _build_xy_path_lua(name, x_source_op, y_source_op):
+    """The XYPath an animated Center or Pivot reads (Source = "Value"): one
+    spline for X and one for Y. Writes no ViewInfo: it's a modifier, see the
+    module comment above."""
+    return f"""{name} = XYPath {{
+        ShowKeyPoints = false,
+        DrawMode = "ModifyOnly",
         NameSet = true,
         Inputs = {{
-            PolyLine = Input {{ Value = {polyline_lua} }},
-            Displacement = Input {{ SourceOp = "{displacement_source_op}", Source = "Value" }},
+            X = Input {{ SourceOp = "{x_source_op}", Source = "Value" }},
+            Y = Input {{ SourceOp = "{y_source_op}", Source = "Value" }},
         }},
     }}"""
 
@@ -3340,9 +3526,9 @@ def _static_or_animated_point_field(fusion_field, field, anchor_xy, offset, to_p
                                       positions, flow_level, stack_slot, name_hint, report=None,
                                       time_scale=1.0):
     """A POINT-type Transform Input (Center or Pivot) -- structurally
-    different from every scalar field: when animated it routes through a
-    PolyPath+Displacement pair, not a plain BezierSpline (see this
-    section's own module comment / the real dump).
+    different from every scalar field: when animated it reads an XYPath
+    with a spline for each axis, not one BezierSpline (see this section's
+    own module comment).
 
     The written value is always `to_point(field - anchor_xy - offset) +
     0.5`, which covers both callers: Center passes the layer's own
@@ -3351,39 +3537,29 @@ def _static_or_animated_point_field(fusion_field, field, anchor_xy, offset, to_p
     -- see this section's own module comment for why those are the right
     two corrections.
 
-    An animated PIVOT is not checked against a real dump -- the dump this
-    design comes from has a static Pivot alongside an animated Center, so
-    the PolyPath-driven Point mechanism itself is known, but not
-    specifically on the Pivot input. It is only ever generated for a
-    CONSOLIDATED object whose merged segments genuinely disagree about
-    their anchor (see _consolidate_lottie_layers); every single-segment
-    layer writes a plain static Pivot.
+    An animated PIVOT is only ever generated for a CONSOLIDATED object
+    whose merged segments genuinely disagree about their anchor (see
+    _consolidate_lottie_layers), and has not been seen in Fusion; every
+    single-segment layer writes a plain static Pivot.
 
-    Returns (field_lua_line, [new_tool_lua, ...]). The PolyPath sits at
-    flow_level (a parallel dependent of the wrapping Transform, same as
-    the scalar splines -- see _wrap_layer_transform); its own
-    Displacement spline sits one step further back, feeding it."""
+    Returns (field_lua_line, [new_tool_lua, ...])."""
     if not _lottie_field_is_really_animated(field):
         x, y = _lottie_center_point(_lottie_resolved_static(field), anchor_xy, offset, to_point)
         return f'{fusion_field} = Input {{ Value = {{ {x!r}, {y!r} }} }},', []
 
-    if report is not None:
-        report.note_approximated_derived_scalar_ease()
-    polyline_lua = _lottie_position_polyline_lua(field, anchor_xy, offset, to_point, to_vector)
-    disp_specs = _lottie_position_displacement_specs(field, to_point, time_scale=time_scale)
-    disp_name = names.safe_name(f"{name_hint}Displacement", "BezierSpline")
-    disp_tool = _build_bezier_spline_lua(disp_name, disp_specs)
-
-    path_name = names.safe_name(f"{name_hint}Path", "PolyPath")
-    path_tool = _build_polypath_lua(path_name, polyline_lua, disp_name)
-
-    return (f'{fusion_field} = Input {{ SourceOp = "{path_name}", Source = "Position" }},',
-            [disp_tool, path_tool])
+    xs, ys = _lottie_point_axis_specs(
+        field, lambda v: _lottie_center_point(v, anchor_xy, offset, to_point), time_scale=time_scale)
+    x_name = names.safe_name(f"{name_hint}X", "BezierSpline")
+    y_name = names.safe_name(f"{name_hint}Y", "BezierSpline")
+    path_name = names.safe_name(f"{name_hint}Path", "XYPath")
+    return (f'{fusion_field} = Input {{ SourceOp = "{path_name}", Source = "Value" }},',
+            [_build_bezier_spline_lua(x_name, xs), _build_bezier_spline_lua(y_name, ys),
+             _build_xy_path_lua(path_name, x_name, y_name)])
 
 
 def _wrap_layer_transform(anim, name_base, content_output_name, output_slot, last_flow_level, lottie_comp_w,
                             lottie_comp_h, to_point, to_vector, names, positions, report, time_scale=1.0,
-                            space=_LOTTIE_SPACE_OWN_LAYER):
+                            space=_LOTTIE_SPACE_OWN_LAYER, offsets=None):
     """Wraps a Lottie layer's (or one of its AE ancestors', see
     build_group_lua's own wrap hookup) already-built STATIC content
     (exactly the same BuiltGraph output_name/output_slot/output_flow
@@ -3406,7 +3582,7 @@ def _wrap_layer_transform(anim, name_base, content_output_name, output_slot, las
     section's own module comment. Returns (new_tools, output_name,
     output_slot, output_flow)."""
     tools = []
-    pivot_offset, center_offset = _lottie_transform_offsets(space, lottie_comp_w, lottie_comp_h)
+    pivot_offset, center_offset = offsets or _lottie_transform_offsets(space, lottie_comp_w, lottie_comp_h)
 
     # Center subtracts this transform's own Anchor, so it needs ONE anchor
     # value even when the anchor itself animates (only a consolidated
@@ -3522,10 +3698,16 @@ def _collect_all_shapes(node, shapes, matrix=IDENTITY, lottie_comp_size=None):
             # comp-absolute, so it gets no comp-centering -- same
             # space distinction _lottie_transform_offsets encodes for the
             # real generated Transforms (see there).
-            if (getattr(node, "transform_space", None) or _LOTTIE_SPACE_OWN_LAYER) == _LOTTIE_SPACE_OWN_LAYER:
+            ax, ay = _lottie_resolved_static(anim.anchor)[:2]
+            if getattr(node, "frame_in", None) is not None:
+                # A framed node's content and result are each drawn round a
+                # point of their own - see _frame_lottie_layer.
+                px, py = px - node.frame_out[0], py - node.frame_out[1]
+                ax, ay = ax - node.frame_in[0], ay - node.frame_in[1]
+            elif (getattr(node, "transform_space", None) or _LOTTIE_SPACE_OWN_LAYER) == _LOTTIE_SPACE_OWN_LAYER:
                 px, py = px - comp_w / 2.0, py - comp_h / 2.0
             tr = {"p": {"a": 0, "k": [px, py]},
-                  "a": {"a": 0, "k": _lottie_resolved_static(anim.anchor)},
+                  "a": {"a": 0, "k": [ax, ay]},
                   "s": {"a": 0, "k": _lottie_resolved_static(anim.scale)},
                   "r": {"a": 0, "k": _lottie_resolved_static(anim.rotation, scalar=True)}}
             child_matrix = mat_mul(matrix, lottie_matrix_from_static_transform(tr))
@@ -3635,6 +3817,31 @@ def _weighted_pivot_point(top, to_point, lottie_comp_size=None):
     else:
         px, py = to_point(wx / total_area, wy / total_area)
     return px + 0.5, py + 0.5
+
+
+def _shape_paint_level(alpha, opacity_anim, spline_hint, names, time_scale):
+    """Where a paint's opacity goes: (level, level_source_op, tools) for the
+    LAST mask of the chain that feeds its Background.
+
+    A Background's own alpha is no place for it. With TopLeftAlpha below 1
+    the Background still puts out its colour at full strength, and the
+    Merge after it reads a picture as already multiplied by its alpha - so
+    it adds the whole colour on top of what shows through, and a white bar
+    at 50% over blue came out solid white (measured on Studio 21.1.2
+    against the browser's own drawing of the SVG). A mask's Level scales
+    colour and alpha together, which is what the Merge expects, and leaves
+    the Background's colour the one the file names. Native import does
+    the same for a gradient's opacity (see build_mask_tool_lua).
+
+    alpha is the paint's own (a colour's alpha times the shape's opacity);
+    opacity_anim, a Lottie layer's animated opacity keyframes or None,
+    keys the Level with a spline of that times alpha."""
+    if opacity_anim is not None:
+        name = names.safe_name(spline_hint, "BezierSpline")
+        specs = _lottie_keyframe_specs(opacity_anim, value_fn=lambda o, mult=alpha: (o / 100.0) * mult,
+                                         unwrap_scalar=True, time_scale=time_scale)
+        return None, name, [_build_bezier_spline_lua(name, specs)]
+    return (alpha if alpha < 1.0 else None), None, []
 
 
 def build_shape_lua(shape, to_point, to_vector, comp_w, comp_h, flow_level, stack_slot, names, positions,
@@ -3749,18 +3956,23 @@ def build_shape_lua(shape, to_point, to_vector, comp_w, comp_h, flow_level, stac
 
     fill_bg_name = fill_bg_slot = None
     if shape.has_fill:
-        # A gradient fill's own overall opacity (SVG fill-opacity) goes on
-        # the mask's Level, NOT into the Gradient's own color stops -- see
-        # build_mask_tool_lua and _build_gradient_background_lua. A solid
-        # fill instead folds it straight into TopLeftAlpha below -- the
-        # Level convention comes from a real native dump of the gradient
-        # case only, so it isn't assumed for solid fills.
-        fill_level = shape.opacity if shape.fill_gradient is not None and shape.opacity < 1.0 else None
+        # How see-through a fill is goes on its mask's Level, never on the
+        # Background's own alpha -- see _shape_paint_level. For a gradient
+        # that is the shape's opacity (its stops carry their own alpha, see
+        # _build_gradient_background_lua); for a solid colour, the colour's
+        # alpha times the shape's opacity.
+        fill_rgba = shape.color or (0.5, 0.5, 0.5, 1.0)  # unparsed fill placeholder
+        fill_alpha = shape.opacity if shape.fill_gradient is not None else fill_rgba[3] * shape.opacity
+        fill_level, fill_level_op, level_tools = _shape_paint_level(
+            fill_alpha, None if shape.fill_gradient is not None else layer_opacity_anim,
+            f"{shape.name}_Alpha", names, time_scale)
+        tools.extend(level_tools)
         mask_tools, prev_mask = _build_mask_chain(
             shape.subpaths, to_point, to_vector, comp_w, comp_h, fill_end, stack_slot, names, positions,
             invert_chain=True, border_width=None, force_closed=True,
             name_for=lambda i: f"{shape.name}_Mask" if i == 0 else f"{shape.name}_Sub{i + 1}_Mask",
-            level=fill_level, soft_edge=soft_edge, initial_effect_mask=external_clip)
+            level=fill_level, soft_edge=soft_edge, initial_effect_mask=external_clip,
+            level_source_op=fill_level_op)
         tools.extend(mask_tools)
         fill_bg_name = names.safe_name(shape.name, "Shape")
         fill_bg_pos, fill_bg_slot = positions.claim(fill_end, stack_slot)
@@ -3768,19 +3980,10 @@ def build_shape_lua(shape, to_point, to_vector, comp_w, comp_h, flow_level, stac
             tools.append(_build_gradient_background_lua(fill_bg_name, comp_w, comp_h, shape.fill_gradient,
                                                           to_point, prev_mask, fill_bg_pos))
         else:
-            color = shape.color or (0.5, 0.5, 0.5, 1.0)  # unparsed fill placeholder
-            r, g, b, a = color
-            a = a * shape.opacity
+            r, g, b, _a = fill_rgba
             color_exprs = color_registry.lookup(shape, "fill") if color_registry else None
-            alpha_source_op = None
-            if layer_opacity_anim is not None:
-                alpha_name = names.safe_name(f"{shape.name}_Alpha", "BezierSpline")
-                specs = _lottie_keyframe_specs(layer_opacity_anim, value_fn=lambda o, mult=a: (o / 100.0) * mult,
-                                                 unwrap_scalar=True, time_scale=time_scale)
-                tools.append(_build_bezier_spline_lua(alpha_name, specs))
-                alpha_source_op = alpha_name
-            tools.append(_build_background_lua(fill_bg_name, comp_w, comp_h, r, g, b, a, prev_mask, fill_bg_pos,
-                                                 color_exprs=color_exprs, alpha_source_op=alpha_source_op))
+            tools.append(_build_background_lua(fill_bg_name, comp_w, comp_h, r, g, b, 1.0, prev_mask, fill_bg_pos,
+                                                 color_exprs=color_exprs))
 
     stroke_bg_name = stroke_bg_slot = None
     if shape.has_stroke:
@@ -3796,13 +3999,21 @@ def build_shape_lua(shape, to_point, to_vector, comp_w, comp_h, flow_level, stac
         # X when the comp's aspect isn't square, the same single-scalar
         # limitation native itself would have if ever run on such a comp.
         border_width = to_vector(shape.stroke_width, 0.0)[0]
-        # Same Level-on-mask-vs-TopLeftAlpha split as the fill chain above.
-        stroke_level = shape.stroke_opacity if shape.stroke_gradient is not None and shape.stroke_opacity < 1.0 else None
+        # Opacity on the mask's Level, as for the fill above.
+        stroke_rgba = shape.stroke_color or (0.5, 0.5, 0.5, 1.0)  # unparsed stroke placeholder
+        stroke_alpha = (shape.stroke_opacity if shape.stroke_gradient is not None
+                        else stroke_rgba[3] * shape.stroke_opacity)
+        stroke_level, stroke_level_op, level_tools = _shape_paint_level(
+            stroke_alpha, None if shape.stroke_gradient is not None else layer_opacity_anim,
+            f"{shape.name}_StrokeAlpha", names, time_scale)
+        tools.extend(level_tools)
         mask_tools, prev_mask = _build_mask_chain(
             shape.subpaths, to_point, to_vector, comp_w, comp_h, stroke_end, stack_slot, names, positions,
             invert_chain=False, border_width=border_width,
             name_for=lambda i: f"{shape.name}_StrokeMask" if i == 0 else f"{shape.name}_StrokeSub{i + 1}Mask",
-            level=stroke_level, soft_edge=soft_edge, initial_effect_mask=external_clip)
+            level=stroke_level, soft_edge=soft_edge, initial_effect_mask=external_clip,
+            stroke_style=(shape.stroke_join, shape.stroke_cap, shape.stroke_miter_limit),
+            level_source_op=stroke_level_op)
         tools.extend(mask_tools)
         stroke_bg_name = names.safe_name(f"{shape.name}_Stroke", "Shape")
         stroke_bg_pos, stroke_bg_slot = positions.claim(stroke_end, stack_slot)
@@ -3810,19 +4021,10 @@ def build_shape_lua(shape, to_point, to_vector, comp_w, comp_h, flow_level, stac
             tools.append(_build_gradient_background_lua(stroke_bg_name, comp_w, comp_h, shape.stroke_gradient,
                                                           to_point, prev_mask, stroke_bg_pos))
         else:
-            color = shape.stroke_color or (0.5, 0.5, 0.5, 1.0)  # unparsed stroke placeholder
-            r, g, b, a = color
-            a = a * shape.stroke_opacity
+            r, g, b, _a = stroke_rgba
             color_exprs = color_registry.lookup(shape, "stroke") if color_registry else None
-            alpha_source_op = None
-            if layer_opacity_anim is not None:
-                alpha_name = names.safe_name(f"{shape.name}_StrokeAlpha", "BezierSpline")
-                specs = _lottie_keyframe_specs(layer_opacity_anim, value_fn=lambda o, mult=a: (o / 100.0) * mult,
-                                                 unwrap_scalar=True, time_scale=time_scale)
-                tools.append(_build_bezier_spline_lua(alpha_name, specs))
-                alpha_source_op = alpha_name
-            tools.append(_build_background_lua(stroke_bg_name, comp_w, comp_h, r, g, b, a, prev_mask, stroke_bg_pos,
-                                                 color_exprs=color_exprs, alpha_source_op=alpha_source_op))
+            tools.append(_build_background_lua(stroke_bg_name, comp_w, comp_h, r, g, b, 1.0, prev_mask, stroke_bg_pos,
+                                                 color_exprs=color_exprs))
 
     if both:
         merge_name = names.safe_name(shape.name, "Shape")
@@ -3928,6 +4130,13 @@ def _build_drop_shadow_lua(shape, to_point, to_vector, comp_w, comp_h, end_flow_
     # input too, per spec (opacity composites BEFORE filters run) -- so the
     # shadow's alpha is the filter's own recolor multiplier TIMES the
     # shape's opacity, not the multiplier alone.
+    #
+    # Left on the Background's own alpha, unlike a fill's or stroke's (see
+    # _shape_paint_level): a coloured shadow is therefore added on brighter
+    # than the file means, but these shadows' strength was tuned by eye
+    # against exactly that, and moving them to the mask's Level made the
+    # files they were tuned on (emoji with a dozen stacked filters) visibly
+    # worse in Fusion (2026-11-23). A black shadow is right either way.
     a = ds["opacity"] * shape.opacity
     mask_tools.append(_build_background_lua(bg_name, comp_w, comp_h, r, g, b, a, prev_mask, bg_pos))
     return mask_tools, bg_name
@@ -4004,7 +4213,8 @@ def _build_inner_shadow_layer_lua(shape, layer, to_point, to_vector, comp_w, com
     bg_name = names.safe_name(f"{shape.name}_InnerShadow{suffix}", "Shape")
     bg_pos, _ = positions.claim(end_flow_level, stack_slot)
     r, g, b = layer["color"]
-    # see _build_drop_shadow_lua's identical opacity note re: shape.opacity;
+    # see _build_drop_shadow_lua's identical opacity note re: shape.opacity
+    # (and why this stays on the Background's alpha);
     # INNER_SHADOW_INTENSITY is a separate manual dial, see its own comment.
     a = layer["opacity"] * shape.opacity * INNER_SHADOW_INTENSITY
     tools = base_tools + clip_tools + band_tools
@@ -4258,8 +4468,10 @@ def build_group_lua(node, to_point, to_vector, comp_w, comp_h, depth, slot_count
         output_name, output_slot, output_source = merge_name, merge_slot, "Output"
     output_flow = merge_flow if len(children_built) > 1 else children_built[0].output_flow
 
+    # A matted layer comes through here even when nothing about it moves:
+    # its clip is applied below, and a still layer needs it just the same.
     if anim is not None and (_layer_has_transform_animation(anim) or node.ancestor_animations
-                              or node.needs_live_transform):
+                              or node.needs_live_transform or node.matte_clip_subpaths):
         lottie_comp_w, lottie_comp_h = lottie_comp_size
         # Own transform first (closest to the content), THEN each AE
         # ancestor in turn (nearest parent first, root last) -- matching
@@ -4273,7 +4485,7 @@ def build_group_lua(node, to_point, to_vector, comp_w, comp_h, depth, slot_count
             wrap_tools, output_name, output_slot, output_flow = _wrap_layer_transform(
                 anim, node.name, output_name, output_slot, output_flow, lottie_comp_w, lottie_comp_h,
                 to_point, to_vector, names, positions, report, time_scale=time_scale,
-                space=node.transform_space or _LOTTIE_SPACE_OWN_LAYER)
+                space=node.transform_space or _LOTTIE_SPACE_OWN_LAYER, offsets=_lottie_frame_offsets(node))
             inner_tools.extend(wrap_tools)
         for depth_idx, ancestor_anim in enumerate(node.ancestor_animations):
             # A track matte shares this layer's own composition, so the clip
@@ -4764,13 +4976,12 @@ def run_import_all(app, svg_paths):
 #                      comment right before _lottie_resolved_static for the
 #                      confirmed structure and what's still an assumption.
 #
-# Scope: TRANSFORM-only animation. Shape
-# geometry (fill/stroke/path) always renders static -- reusing the exact
-# SVG shape pipeline -- only a layer's own Position/Anchor/Scale/Rotation/
-# Opacity become real keyframes. A layer's own Pivot (from its Lottie
-# anchor) always stays static regardless, matching the real dump's own
-# behavior. Path-shape morphing and stroke trim-path reveal are explicitly
-# out of scope.
+# What animates: a layer's (and a shape group's) Position, Scale and
+# Rotation, a layer's Opacity, and a path's own outline (see
+# _lottie_path_keyframes / _build_polyline_spline_lua). A fill's or stroke's
+# colour, opacity and width stay as they first are, a layer's Pivot (from
+# its anchor) stays static, and trim paths and repeaters are skipped - each
+# is counted in the report.
 # ==========================================================================
 class LottieImportReport:
     """Collects notable approximations/omissions made during one Lottie
@@ -4900,8 +5111,8 @@ class LottieImportReport:
                           "-- only a LAYER's own transform animates in this version.")
         if self.approximated_animated_shape_paths:
             lines.append(f"[NOTE] {self.approximated_animated_shape_paths} animated shape path "
-                          "(path morphing) approximated as static (its first keyframe) -- not "
-                          "supported yet.")
+                          "(path morphing) kept as its first keyframe -- its keyframes don't all "
+                          "have the same number of points, so it can't be played as a morph.")
         if self.approximated_animated_fill_stroke_opacity:
             lines.append(f"[NOTE] {self.approximated_animated_fill_stroke_opacity} fill/stroke's "
                           "own animated opacity approximated as static (its first keyframe) -- "
@@ -4926,7 +5137,7 @@ class LottieImportReport:
                           "never animates in this version.")
         if self.approximated_derived_scalar_eases:
             lines.append(f"[NOTE] {self.approximated_derived_scalar_eases} derived animated value "
-                          "(Aspect, or a layer's motion-path timing) used linear timing instead of "
+                          "(the Aspect of a scale that isn't the same on both axes) used linear timing instead of "
                           "its source property's own eased keyframes -- no direct ease to carry over "
                           "for a value that isn't a straight copy of one Lottie property.")
         if self.approximated_stepped_keyframes:
@@ -5216,10 +5427,9 @@ def lottie_matrix_from_static_transform(tr):
     parse_transform's own rotate-around-a-point construction (see there
     for the same mat_mul(outer, inner) pattern used step by step here).
 
-    Rotation SIGN (clockwise-positive, matching AE's own on-screen
-    convention) is an ASSUMPTION, not yet confirmed against a live
-    render -- flag this if a real animated-rotation test ever looks
-    mirrored."""
+    Rotation is clockwise-positive, as on screen in AE (seen right in
+    Fusion against lottie-web, 2026-11-23: a layer turning -360 and
+    another rocking 27 to -10 degrees)."""
     px, py = _lottie_position_static_value(tr.get("p"))
     ax, ay = lottie_static_value(tr.get("a"), [0.0, 0.0])[:2]
     sx, sy = lottie_static_value(tr.get("s"), [100.0, 100.0])[:2]
@@ -5323,7 +5533,7 @@ def _lottie_group_needs_promotion(item, fps):
                for sub in item.get("it", []))
 
 
-def lottie_shapes_to_nodes(shapes_list, matrix, opacity, counter, report, fps=30.0):
+def lottie_shapes_to_nodes(shapes_list, matrix, opacity, counter, report, fps=30.0, inherited=(None, None)):
     """The per-group recursive walk over one Lottie shapes[] array (a
     layer's own top-level shapes, or one gr's own it[]) -- mirrors
     walk()'s structure for SVG's <g>/leaf elements.
@@ -5348,10 +5558,28 @@ def lottie_shapes_to_nodes(shapes_list, matrix, opacity, counter, report, fps=30
     (tallied as note_approximated_group_transform) -- e.g. a file that
     spins a rect 0->180 and an arc 0->360 purely at the shape-group
     level, motion that can't survive the bake.
-    Promotion propagates UP: see _lottie_group_needs_promotion."""
+    Promotion propagates UP: see _lottie_group_needs_promotion.
+
+    inherited: (fill item, stroke item) from the lists above this one. A
+    fill or stroke paints every path listed before it, and that includes
+    the paths INSIDE the groups listed before it - a file can keep its
+    outline in a group and put the fill after the group, at the layer's
+    own level. Such a path gets a second shape here for the paint it
+    inherits, under everything else in its own list (so it moves with the
+    group, and sits below the group's own strokes, which is where a later
+    item in the list above paints). Measured in Fusion against lottie-web:
+    without it a laptop drawn that way had no white inside, and the hands
+    behind it showed through."""
+    fill_at = max((i for i, it in enumerate(shapes_list) if it.get("ty") == "fl"), default=None)
+    stroke_at = max((i for i, it in enumerate(shapes_list) if it.get("ty") == "st"), default=None)
     geometry, fill_item, stroke_item = [], None, None
-    nodes = []
-    for item in shapes_list:
+    # (place in the list, node): Lottie paints a list from its LAST item up,
+    # so the first item ends on top - the reverse of the order build_group_lua
+    # stacks siblings in. Sorted at the end. (Measured in Fusion against
+    # lottie-web: a page's folded corner, listed before the page it sits on,
+    # was hidden behind it when the list was painted first to last.)
+    placed = []
+    for index, item in enumerate(shapes_list):
         ty = item.get("ty")
         if ty == "gr":
             child_tr = _lottie_group_tr(item)
@@ -5381,11 +5609,13 @@ def lottie_shapes_to_nodes(shapes_list, matrix, opacity, counter, report, fps=30
             child_o = opacity * (lottie_static_value(
                 (child_tr or {}).get("o"), 100.0, scalar=True) / 100.0)
             group_node.children = lottie_shapes_to_nodes(
-                item.get("it", []), child_m, child_o, counter, report, fps)
+                item.get("it", []), child_m, child_o, counter, report, fps,
+                inherited=(shapes_list[fill_at] if fill_at is not None and fill_at > index else inherited[0],
+                           shapes_list[stroke_at] if stroke_at is not None and stroke_at > index else inherited[1]))
             if group_node.children:
-                nodes.append(group_node)
+                placed.append((index, group_node))
         elif ty in ("sh", "rc", "el"):
-            geometry.append((ty, item))
+            geometry.append((index, ty, item))
         elif ty == "fl":
             fill_item = item
         elif ty == "st":
@@ -5399,37 +5629,25 @@ def lottie_shapes_to_nodes(shapes_list, matrix, opacity, counter, report, fps=30
         # "tr" (this group's own transform) is read by the CALLER, above --
         # skipped here rather than double-handled.
 
-    if not geometry or fill_item is None and stroke_item is None:
-        return nodes
+    def in_paint_order():
+        return [node for _index, node in sorted(placed, key=lambda entry: -entry[0])]
 
-    has_fill = fill_item is not None
-    fill_color = fill_stroke_opacity = None
-    if has_fill:
-        if fill_item.get("c", {}).get("a") or fill_item.get("o", {}).get("a"):
-            report.note_approximated_fill_stroke_opacity()
-        fc = lottie_static_value(fill_item.get("c"), [0.0, 0.0, 0.0])
-        fill_color = (fc[0], fc[1], fc[2], 1.0)
-        fill_opacity = opacity * (lottie_static_value(fill_item.get("o"), 100.0, scalar=True) / 100.0)
+    # What this list's own paths inherit: only what they don't already have.
+    under_fill = inherited[0] if fill_item is None else None
+    under_stroke = inherited[1] if stroke_item is None else None
+    own_paint = fill_item is not None or stroke_item is not None
+    if not geometry or not (own_paint or under_fill is not None or under_stroke is not None):
+        return in_paint_order()
 
-    has_stroke = stroke_item is not None
-    stroke_color = stroke_width_px = stroke_opacity = None
-    if has_stroke:
-        if stroke_item.get("c", {}).get("a") or stroke_item.get("o", {}).get("a") \
-                or stroke_item.get("w", {}).get("a"):
-            report.note_approximated_fill_stroke_opacity()
-        sc = lottie_static_value(stroke_item.get("c"), [0.0, 0.0, 0.0])
-        stroke_color = (sc[0], sc[1], sc[2], 1.0)
-        stroke_opacity = opacity * (lottie_static_value(stroke_item.get("o"), 100.0, scalar=True) / 100.0)
-        ma, mb, mc, md, _, _ = matrix
-        stroke_width_px = lottie_static_value(stroke_item.get("w"), 0.0, scalar=True) * math.sqrt(abs(ma * md - mb * mc))
-
-    for ty, item in geometry:
+    def subpath_of(ty, item, noting=True):
         if ty == "sh":
             ks = item.get("ks", {})
-            if ks.get("a") == 1:
-                report.note_approximated_shape_path()
             sh_ks = lottie_static_value(ks, {"v": [], "i": [], "o": [], "c": False})
             sp = lottie_shape_to_subpath(sh_ks)
+            if ks.get("a") == 1:
+                sp.keyframes = _lottie_path_keyframes(ks, sp)
+                if noting and sp.keyframes is None and len(ks.get("k") or []) > 1:
+                    report.note_approximated_shape_path()
         elif ty == "rc":
             cx, cy = lottie_static_value(item.get("p"), [0.0, 0.0])[:2]
             w, h = lottie_static_value(item.get("s"), [0.0, 0.0])[:2]
@@ -5439,17 +5657,90 @@ def lottie_shapes_to_nodes(shapes_list, matrix, opacity, counter, report, fps=30
             cx, cy = lottie_static_value(item.get("p"), [0.0, 0.0])[:2]
             dw, dh = lottie_static_value(item.get("s"), [0.0, 0.0])[:2]
             sp = ellipse_to_subpath(cx, cy, dw / 2.0, dh / 2.0)
-        for a in sp.anchors:
-            a['x'], a['y'] = mat_point(matrix, a['x'], a['y'])
-            if a['in_cp'] is not None:
-                a['in_cp'] = mat_point(matrix, *a['in_cp'])
-            if a['out_cp'] is not None:
-                a['out_cp'] = mat_point(matrix, *a['out_cp'])
+        _map_subpath_points(sp, lambda x, y: mat_point(matrix, x, y))
+        return sp
+
+    def painted(name, sp, fill, line):
+        has_fill = fill is not None
+        fill_color, fill_opacity = None, 1.0
+        if has_fill:
+            if fill.get("c", {}).get("a") or fill.get("o", {}).get("a"):
+                report.note_approximated_fill_stroke_opacity()
+            fc = lottie_static_value(fill.get("c"), [0.0, 0.0, 0.0])
+            fill_color = (fc[0], fc[1], fc[2], 1.0)
+            fill_opacity = opacity * (lottie_static_value(fill.get("o"), 100.0, scalar=True) / 100.0)
+        has_stroke = line is not None
+        stroke_color = stroke_width_px = stroke_opacity = None
+        if has_stroke:
+            if line.get("c", {}).get("a") or line.get("o", {}).get("a") or line.get("w", {}).get("a"):
+                report.note_approximated_fill_stroke_opacity()
+            sc = lottie_static_value(line.get("c"), [0.0, 0.0, 0.0])
+            stroke_color = (sc[0], sc[1], sc[2], 1.0)
+            stroke_opacity = opacity * (lottie_static_value(line.get("o"), 100.0, scalar=True) / 100.0)
+            ma, mb, mc, md, _, _ = matrix
+            stroke_width_px = lottie_static_value(line.get("w"), 0.0, scalar=True) * math.sqrt(abs(ma * md - mb * mc))
+        node = ShapeNode(name, [sp], has_fill, fill_color, fill_opacity,
+                         has_stroke, stroke_color, stroke_width_px, stroke_opacity)
+        if has_stroke:
+            node.stroke_join = _LOTTIE_LINE_JOINS.get(line.get("lj"))
+            node.stroke_cap = _LOTTIE_LINE_CAPS.get(line.get("lc"))
+            node.stroke_miter_limit = line.get("ml")
+        return node
+
+    for index, ty, item in geometry:
         name = item.get("nm") or f"Shape_{next(counter)}"
-        nodes.append(ShapeNode(name, [sp], has_fill, fill_color,
-                                fill_opacity if has_fill else 1.0,
-                                has_stroke, stroke_color, stroke_width_px, stroke_opacity))
-    return nodes
+        if own_paint:
+            placed.append((index, painted(name, subpath_of(ty, item), fill_item, stroke_item)))
+        if under_fill is not None or under_stroke is not None:
+            placed.append((len(shapes_list) + index, painted(
+                f"{name}_Under", subpath_of(ty, item, noting=not own_paint), under_fill, under_stroke)))
+    return in_paint_order()
+
+
+# Lottie's "lj" and "lc" numbers on a stroke.
+_LOTTIE_LINE_JOINS = {1: "miter", 2: "round", 3: "bevel"}
+_LOTTIE_LINE_CAPS = {1: "butt", 2: "round", 3: "square"}
+
+
+def _map_subpath_points(sp, fn):
+    """Moves every point of a subpath - anchors and handles, and those of each
+    outline it morphs through - by fn(x, y) -> (x, y). The one place geometry
+    is transformed in place, so a morphing path's keyframes never get left
+    behind in the old space."""
+    for one in [sp] + [kf[1] for kf in (sp.keyframes or [])]:
+        for a in one.anchors:
+            a['x'], a['y'] = fn(a['x'], a['y'])
+            if a['in_cp'] is not None:
+                a['in_cp'] = fn(*a['in_cp'])
+            if a['out_cp'] is not None:
+                a['out_cp'] = fn(*a['out_cp'])
+
+
+def _lottie_path_keyframes(ks, first):
+    """The outlines an animated Lottie path ("sh" with a:1) morphs through:
+    [(frame, Subpath, out_ease, in_ease), ...], or None when it can't be
+    played as a morph - fewer than two keyframes, or outlines that don't all
+    have `first`'s number of points (Fusion moves a mask's points from one key
+    to the next, so every key needs the same ones).
+
+    A keyframe's "s" is its outline wrapped in a one-element list. Files from
+    older exporters give the last keyframe no "s" and put where a segment ends
+    in the keyframe before it, as "e"; that is read too. "o" and "i" are the
+    easing of the segment that starts at the keyframe carrying them."""
+    out, previous_end = [], None
+    for kf in ks.get("k") or []:
+        shape = kf.get("s") or previous_end
+        previous_end = kf.get("e")
+        if isinstance(shape, list):
+            shape = shape[0] if shape else None
+        if not isinstance(shape, dict):
+            return None
+        sp = lottie_shape_to_subpath(shape)
+        if len(sp.anchors) != len(first.anchors):
+            return None
+        sp.closed = first.closed
+        out.append((float(kf.get("t", 0)), sp, kf.get("o"), kf.get("i")))
+    return out if len(out) >= 2 else None
 
 
 LottieLayerAnimation = collections.namedtuple(
@@ -5588,14 +5879,25 @@ def _lottie_matte_clip_subpaths(matte_json, layer_by_ind, fps, comp_w, comp_h, c
     nodes = lottie_shapes_to_nodes(matte_json.get("shapes", []), IDENTITY, 1.0, counter, report, fps)
     subpaths = []
 
-    def collect(ns):
+    def collect(ns, group_matrix):
+        # A shape group whose own transform does anything is kept apart from
+        # its points (see _lottie_group_needs_promotion), so it is applied
+        # here, as it first stands. Without it a matte rectangle drawn round
+        # its group's origin and moved into place by the group clipped the
+        # wrong part of the frame (measured in Fusion: two matted layers
+        # vanished altogether).
         for n in ns:
             if isinstance(n, ShapeNode):
-                subpaths.extend(n.subpaths)
+                for sp in n.subpaths:
+                    _map_subpath_points(sp, lambda x, y: mat_point(group_matrix, x, y))
+                    subpaths.append(sp)
             else:
-                collect(n.children)
+                m = group_matrix
+                if n.layer_animation is not None:
+                    m = mat_mul(m, lottie_matrix_from_static_transform(_lottie_anim_static_tr(n.layer_animation)))
+                collect(n.children, m)
 
-    collect(nodes)
+    collect(nodes, IDENTITY)
     if not subpaths:
         return None
 
@@ -5681,6 +5983,7 @@ def lottie_layer_to_group_node(layer_json, fps, counter, report, layer_by_ind,
     # group's Transform, reversing AE's own composition order).
     if _any_node_needs_live_transform(group.children):
         group.needs_live_transform = True
+    _retime_lottie_path_keyframes(group, offset=time_offset)
     group.layer_animation = _shift_lottie_layer_animation_time(
         _parse_ks_animation(ks, fps, report=report), time_offset)
     own_ancestors = [_shift_lottie_layer_animation_time(a, time_offset)
@@ -5947,6 +6250,120 @@ def _walk_lottie_shape_nodes(node, fn):
             _walk_lottie_shape_nodes(c, fn)
 
 
+# --------------------------------------------------------------------------
+# Framing: keeping a live transform's content on the picture.
+#
+# Every step of the chain Buddy writes is a picture the size of the comp. A
+# mask is drawn into one, and anything that falls outside it is gone before
+# the Transform after it can move it back into view. Geometry left in a
+# layer's own coordinates sits wherever the file put it relative to that
+# layer's origin, and the origin is drawn at the middle of the frame - so on
+# a Lottie fitted to the timeline, a line 30 pixels down a 48 pixel layer was
+# drawn below the bottom edge and never seen again (measured in Fusion on
+# Studio 21.1.2: of three such lines in one layer, only the one above the
+# middle came out).
+#
+# So the content under each live transform is drawn round the middle of its
+# own bounding box instead, and the transform is told. With the content
+# moved by -d (frame_in) and the result wanted round -out (frame_out),
+#
+#     world - out = (p - out) + M * (local' - (a - d)),    local' = local - d
+#
+# which is the same transform with anchor a - d and position p - out: in
+# _lottie_transform_offsets' terms, pivot_offset = d and center_offset =
+# out - d. The three fixed spaces there are this with d and out each either
+# nothing or half the comp.
+# --------------------------------------------------------------------------
+def _lottie_node_is_live(node):
+    """True for a layer or shape group whose transform is written as a
+    Transform tool rather than folded into its points."""
+    anim = getattr(node, "layer_animation", None)
+    return anim is not None and (_layer_has_transform_animation(anim) or node.needs_live_transform)
+
+
+def _lottie_rest_points(node, matrix=None):
+    """Every anchor under node at its first frame, in node's own space -
+    through any live shape group below it, placed by that group's transform
+    as it first stands. A morphing path counts every outline it goes through."""
+    matrix = matrix or IDENTITY
+    points = []
+    for child in node.children:
+        if isinstance(child, ShapeNode):
+            for sp in child.subpaths:
+                for one in [sp] + [kf[1] for kf in (sp.keyframes or [])]:
+                    points.extend(mat_point(matrix, a['x'], a['y']) for a in one.anchors)
+        elif _lottie_node_is_live(child):
+            points.extend(_lottie_rest_points(
+                child, mat_mul(matrix, lottie_matrix_from_static_transform(_lottie_anim_static_tr(child.layer_animation)))))
+        else:
+            points.extend(_lottie_rest_points(child, matrix))
+    return points
+
+
+def _points_middle(points):
+    xs, ys = [pt[0] for pt in points], [pt[1] for pt in points]
+    return [(min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0]
+
+
+def _frame_lottie_layer(layer, comp_w, comp_h):
+    """Draws the content under each live transform of a layer round the
+    middle of that content, and records it on the node (frame_in,
+    frame_out) for the Transform to allow for - see the comment above. A
+    layer whose transform was folded into its points is left alone: those
+    are already where they show."""
+    if not _lottie_node_is_live(layer):
+        return
+    one = None
+    if layer.frame_as_one:
+        points = []
+        _walk_lottie_shape_nodes(layer, lambda shape: points.extend(
+            (a['x'], a['y']) for sp in shape.subpaths for a in sp.anchors))
+        one = _points_middle(points) if points else None
+
+    def frame(node, out):
+        points = _lottie_rest_points(node)
+        d = one or (_points_middle(points) if points else [0.0, 0.0])
+        node.frame_in, node.frame_out = d, out
+        shift(node, d)
+
+    def shift(node, d):
+        for child in node.children:
+            if isinstance(child, ShapeNode):
+                for sp in child.subpaths:
+                    _map_subpath_points(sp, lambda x, y: (x - d[0], y - d[1]))
+            elif _lottie_node_is_live(child):
+                frame(child, d)
+            else:
+                shift(child, d)
+
+    frame(layer, [comp_w / 2.0, comp_h / 2.0])
+
+
+def _lottie_frame_offsets(node):
+    """(pivot_offset, center_offset) for a framed node, or None for one
+    that isn't - see the comment before _lottie_node_is_live."""
+    if node.frame_in is None:
+        return None
+    return (tuple(node.frame_in), (node.frame_out[0] - node.frame_in[0], node.frame_out[1] - node.frame_in[1]))
+
+
+def _retime_lottie_path_keyframes(node, offset=0.0, scale=1.0):
+    """Moves every morphing path's keyframes under node to (frame + offset) *
+    scale. offset puts a precomp's own frame numbers on the root
+    composition's clock (see _collect_lottie_shape_layers); scale turns Lottie
+    frames into the Fusion comp's (see build_lottie_tools' time_scale), and is
+    applied once, just before the tools are written."""
+    if offset == 0.0 and scale == 1.0:
+        return
+
+    def retime(shape):
+        for sp in shape.subpaths:
+            if sp.keyframes:
+                sp.keyframes = [((t + offset) * scale,) + tuple(rest) for (t, *rest) in sp.keyframes]
+
+    _walk_lottie_shape_nodes(node, retime)
+
+
 def _bake_lottie_layer_transform(layer_group, comp_w, comp_h):
     """The position/anchor/scale/rotation half of the static bake: a
     mat_point/mat_vector bake over every descendant ShapeNode's subpaths,
@@ -5977,12 +6394,7 @@ def _bake_lottie_layer_transform(layer_group, comp_w, comp_h):
 
     def bake(shape):
         for sp in shape.subpaths:
-            for a in sp.anchors:
-                a['x'], a['y'] = mat_point(m, a['x'], a['y'])
-                if a['in_cp'] is not None:
-                    a['in_cp'] = mat_point(m, *a['in_cp'])
-                if a['out_cp'] is not None:
-                    a['out_cp'] = mat_point(m, *a['out_cp'])
+            _map_subpath_points(sp, lambda x, y: mat_point(m, x, y))
 
     _walk_lottie_shape_nodes(layer_group, bake)
 
@@ -6040,18 +6452,13 @@ def _reflect_lottie_geometry(node, anchor, signs):
     ax, ay = anchor[0], anchor[1]
     sx, sy = signs
 
-    def refl(pt):
-        return (ax + sx * (pt[0] - ax), ay + sy * (pt[1] - ay))
+    def refl(x, y):
+        return (ax + sx * (x - ax), ay + sy * (y - ay))
 
     def apply(n):
         if isinstance(n, ShapeNode):
             for sp in n.subpaths:
-                for a in sp.anchors:
-                    a['x'], a['y'] = refl((a['x'], a['y']))
-                    if a['in_cp'] is not None:
-                        a['in_cp'] = refl(a['in_cp'])
-                    if a['out_cp'] is not None:
-                        a['out_cp'] = refl(a['out_cp'])
+                _map_subpath_points(sp, refl)
         else:
             for c in n.children:
                 apply(c)
@@ -6201,7 +6608,9 @@ def _lottie_shape_identity(shape):
             pts.append((r(a['x']), r(a['y']),
                         tuple(r(c) for c in a['in_cp']) if a['in_cp'] is not None else None,
                         tuple(r(c) for c in a['out_cp']) if a['out_cp'] is not None else None))
-        geom.append((tuple(pts), bool(sp.closed)))
+        # A path that morphs is never one of several copies of the same
+        # still artwork: its own id keeps it out of every match.
+        geom.append((tuple(pts), bool(sp.closed), id(sp) if sp.keyframes else None))
     def col(c):
         return tuple(r(v) for v in c) if c else None
     return (tuple(geom), shape.has_fill, col(shape.color), r(shape.opacity),
@@ -6430,6 +6839,7 @@ def _lottie_build_merged_layer(members, counter, report):
     merged.layer_animation = merged_own
     merged.transform_space = _LOTTIE_SPACE_OWN_LAYER
     merged.needs_live_transform = True
+    merged.frame_as_one = True
     merged.ancestor_animations = merged_ancestors
     merged.visibility_window = _lottie_merge_intervals(windows)
     # Every member shares one clip (it's part of the identity key that
@@ -6496,8 +6906,9 @@ def build_lottie_tools(lottie_path, comp_w, comp_h, log=None, orientation="horiz
     keyframes when the source file actually animates them (see
     _wrap_layer_transform/build_group_lua's own layer_opacity_anim
     handling); a layer with nothing animated pastes at its own static
-    pose (see _bake_lottie_layer_pose). Shape geometry itself
-    (fill/stroke/path) always renders static.
+    pose (see _bake_lottie_layer_pose). A path that morphs keys its
+    masks' outlines (see _build_polyline_spline_lua); fills and strokes
+    stay as they first are.
 
     comp_fps: the DESTINATION Fusion comp's own project frame rate (see
     connect_to_resolve), or None if it couldn't be read. The source
@@ -6546,6 +6957,8 @@ def build_lottie_tools(lottie_path, comp_w, comp_h, log=None, orientation="horiz
 
     for layer in layers:
         _bake_lottie_layer_pose(layer, comp.width, comp.height)
+        _frame_lottie_layer(layer, comp.width, comp.height)
+        _retime_lottie_path_keyframes(layer, scale=time_scale)
 
     fit_scale = compute_svg_scale(scale_mode, comp.width, comp.height, comp_w, comp_h)
     to_point, to_vector = make_lottie_converter(comp_w, comp_h, scale=fit_scale)

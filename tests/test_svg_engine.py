@@ -397,5 +397,51 @@ class OddInputTests(unittest.TestCase):
         self.assertEqual(masks("fill:none;"), masks(""))
 
 
+class PaintInFusionTests(unittest.TestCase):
+    """What Fusion needs written for a paint to come out as a browser draws it -
+    each of these was a mismatch seen in Fusion against the browser."""
+
+    def test_a_see_through_fill_goes_on_the_masks_level_not_the_backgrounds_alpha(self):
+        lua = to_lua('<rect width="10" height="10" fill="#fff" opacity=".5"/>')
+        self.assertIn("Level = Input { Value = 0.5 }", lua)
+        self.assertNotIn("TopLeftAlpha = Input { Value = 0.5 }", lua)
+        # ...and the colour itself is the one the file names.
+        self.assertIn("TopLeftRed = Input { Value = 1.0 }", lua)
+
+    def test_a_see_through_stroke_and_a_colours_own_alpha_go_there_too(self):
+        lua = to_lua('<rect width="10" height="10" fill="rgb(255 0 0 / 25%)" stroke="#000" stroke-opacity=".4"/>')
+        self.assertIn("Level = Input { Value = 0.25 }", lua)
+        self.assertIn("Level = Input { Value = 0.4 }", lua)
+
+    def test_an_opaque_fill_writes_no_level(self):
+        self.assertNotIn("Level = ", to_lua('<rect width="10" height="10" fill="#fff"/>'))
+
+    def test_an_empty_fill_attribute_keeps_the_inherited_fill(self):
+        shapes, report = walk_doc(f'<svg {SVG_NS}><g fill="#102030"><path d="M0 0h10v10z" fill=""/></g></svg>')
+        self.assertEqual([tuple(round(c, 4) for c in s.color[:3]) for s in shapes],
+                         [(round(0x10 / 255, 4), round(0x20 / 255, 4), round(0x30 / 255, 4))])
+        self.assertEqual(report.unparsed_colors, 0)
+
+    def test_a_clip_path_on_a_shape_clips_that_shape(self):
+        lua = to_lua('<defs><clipPath id="k"><rect width="5" height="5"/></clipPath></defs>'
+                     '<circle clip-path="url(#k)" cx="5" cy="5" r="5" fill="red"/>'
+                     '<rect x="20" width="10" height="10" fill="blue"/>')
+        self.assertEqual(lua.count("_ClipMask"), 2)        # the clip mask, and the one mask that reads it
+        self.assertIn('PaintMode = Input { Value = FuID { "Multiply" } }', lua)
+
+    def test_a_clip_path_that_isnt_there_is_reported_and_the_shape_still_drawn(self):
+        shapes, report = walk_doc(f'<svg {SVG_NS}><circle clip-path="url(#gone)" cx="5" cy="5" r="5"/></svg>')
+        self.assertEqual(len(shapes), 1)
+        self.assertEqual(report.unsupported_clip_path_attr, 1)
+
+    def test_round_stroke_ends_and_corners(self):
+        lua = to_lua('<path d="M0 0L10 10" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round"/>')
+        self.assertIn("JoinStyle = Input { Value = 1 }", lua)
+        self.assertIn("CapStyle = Input { Value = 1 }", lua)
+        plain = to_lua('<path d="M0 0L10 10" fill="none" stroke="#000"/>')
+        self.assertIn("JoinStyle = Input { Value = 2 }", plain)
+        self.assertIn("CapStyle = Input { Value = 0 }", plain)
+
+
 if __name__ == '__main__':
     unittest.main()

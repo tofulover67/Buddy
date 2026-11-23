@@ -160,16 +160,6 @@
   "العربية": "- أعد تلوين كل شيء من مجموعة عينات واحدة",
   "Tiếng Việt": "- đổi màu toàn bộ từ một bộ mẫu màu"
  },
- "Shape layers and precomps come in; position, anchor, scale, rotation and opacity become Fusion keyframes, and each layer shows between its in and out points. Shapes don't morph, and trim paths aren't supported – anything skipped is listed in the details.": {
-  "日本語": "シェイプレイヤーとプリコンポーズが読み込まれ、位置、アンカー、スケール、回転、不透明度は Fusion のキーフレームになり、各レイヤーはインポイントとアウトポイントの間に表示されます。シェイプのモーフィングやパスのトリミングには対応していません – スキップされたものは詳細に一覧表示されます。",
-  "Español": "Se importan las capas de forma y las precomposiciones; la posición, el ancla, la escala, la rotación y la opacidad se convierten en fotogramas clave de Fusion, y cada capa aparece entre sus puntos de entrada y salida. Las formas no se transforman y no se admite recortar trazados; todo lo omitido aparece en los detalles.",
-  "Deutsch": "Formebenen und Precomps werden übernommen; Position, Ankerpunkt, Skalierung, Drehung und Deckkraft werden zu Fusion-Keyframes, und jede Ebene erscheint zwischen ihrem In- und Out-Punkt. Formen morphen nicht, und Pfade trimmen wird nicht unterstützt – alles Übersprungene steht in den Details.",
-  "Français": "Les calques de forme et les précompositions sont importés ; la position, le point d'ancrage, l'échelle, la rotation et l'opacité deviennent des images clés Fusion, et chaque calque s'affiche entre ses points d'entrée et de sortie. Les formes ne se transforment pas et le découpage de tracés n'est pas pris en charge – tout ce qui est ignoré est listé dans les détails.",
-  "한국어": "셰이프 레이어와 프리컴프를 가져옵니다. 위치, 앵커, 크기, 회전, 불투명도는 Fusion 키프레임이 되고, 각 레이어는 시작 지점과 끝 지점 사이에 표시됩니다. 셰이프 모핑과 패스 트리밍은 지원되지 않습니다 – 건너뛴 항목은 세부 정보에 나열됩니다.",
-  "中文": "会导入形状图层和预合成；位置、锚点、缩放、旋转和不透明度会转为 Fusion 关键帧，每个图层在其入点和出点之间显示。形状不会变形，也不支持修剪路径——跳过的内容会列在详细信息中。",
-  "العربية": "يتم استيراد طبقات الأشكال والتركيبات المسبقة؛ ويصبح الموضع والمرتكز والحجم والدوران والعتامة إطارات مفتاحية في Fusion، وتظهر كل طبقة بين نقطتي دخولها وخروجها. لا تتحول الأشكال، ولا يُدعم قص المسارات – يُدرج كل ما تم تخطيه في التفاصيل.",
-  "Tiếng Việt": "Các lớp hình và precomp sẽ được nhập; vị trí, điểm neo, tỷ lệ, xoay và độ mờ trở thành keyframe của Fusion, và mỗi lớp hiện giữa điểm vào và điểm ra của nó. Hình không biến dạng, và không hỗ trợ cắt đường dẫn – mọi thứ bị bỏ qua được liệt kê trong phần chi tiết."
- },
  "Convert & copy for Fusion": {
   "日本語": "変換して Fusion 用にコピー",
   "Español": "Convertir y copiar para Fusion",
@@ -719,5 +709,15 @@
   "中文": "已连接到 Fusion，但没有打开的合成。\n\n请在加载了合成的情况下打开 Fusion 页面（或双击 Fusion 片段），然后重试。",
   "العربية": "تم الاتصال بـ Fusion، لكن لا توجد تركيبة مفتوحة.\n\nافتح صفحة Fusion (أو انقر نقرًا مزدوجًا على مقطع Fusion) مع تحميل تركيبة، ثم حاول مرة أخرى.",
   "Tiếng Việt": "Đã kết nối với Fusion nhưng chưa mở comp nào.\n\nHãy mở trang Fusion (hoặc bấm đúp vào một clip Fusion) với comp đã tải, rồi thử lại."
+ },
+ "Shape layers and precomps come in; position, anchor, scale, rotation and opacity become Fusion keyframes, shapes that change outline morph, and each layer shows between its in and out points. Trim paths aren't supported – anything skipped is listed in the details.": {
+  "日本語": "シェイプレイヤーとプリコンポーズが読み込まれ、位置、アンカー、スケール、回転、不透明度は Fusion のキーフレームになり、輪郭が変化するシェイプはモーフィングし、各レイヤーはインポイントとアウトポイントの間に表示されます。パスのトリミングには対応していません – スキップされたものは詳細に一覧表示されます。",
+  "Español": "Se importan las capas de forma y las precomposiciones; la posición, el ancla, la escala, la rotación y la opacidad se convierten en fotogramas clave de Fusion, las formas cuyo contorno cambia se transforman, y cada capa aparece entre sus puntos de entrada y salida. No se admite recortar trazados; todo lo omitido aparece en los detalles.",
+  "Deutsch": "Formebenen und Precomps werden übernommen; Position, Ankerpunkt, Skalierung, Drehung und Deckkraft werden zu Fusion-Keyframes, Formen mit veränderlichem Umriss morphen, und jede Ebene erscheint zwischen ihrem In- und Out-Punkt. Pfade trimmen wird nicht unterstützt – alles Übersprungene steht in den Details.",
+  "Français": "Les calques de forme et les précompositions sont importés ; la position, le point d'ancrage, l'échelle, la rotation et l'opacité deviennent des images clés Fusion, les formes dont le contour change se transforment, et chaque calque s'affiche entre ses points d'entrée et de sortie. Le découpage de tracés n'est pas pris en charge – tout ce qui est ignoré est listé dans les détails.",
+  "한국어": "셰이프 레이어와 프리컴프를 가져옵니다. 위치, 앵커, 크기, 회전, 불투명도는 Fusion 키프레임이 되고, 윤곽이 바뀌는 셰이프는 모핑되며, 각 레이어는 시작 지점과 끝 지점 사이에 표시됩니다. 패스 트리밍은 지원되지 않습니다 – 건너뛴 항목은 세부 정보에 나열됩니다.",
+  "中文": "会导入形状图层和预合成；位置、锚点、缩放、旋转和不透明度会转为 Fusion 关键帧，轮廓变化的形状会变形，每个图层在其入点和出点之间显示。不支持修剪路径——跳过的内容会列在详细信息中。",
+  "العربية": "يتم استيراد طبقات الأشكال والتركيبات المسبقة؛ ويصبح الموضع والمرتكز والحجم والدوران والعتامة إطارات مفتاحية في Fusion، وتتحول الأشكال التي يتغير محيطها، وتظهر كل طبقة بين نقطتي دخولها وخروجها. لا يُدعم قص المسارات – يُدرج كل ما تم تخطيه في التفاصيل.",
+  "Tiếng Việt": "Các lớp hình và precomp sẽ được nhập; vị trí, điểm neo, tỷ lệ, xoay và độ mờ trở thành keyframe của Fusion, các hình có đường viền thay đổi sẽ biến dạng, và mỗi lớp hiện giữa điểm vào và điểm ra của nó. Không hỗ trợ cắt đường dẫn – mọi thứ bị bỏ qua được liệt kê trong phần chi tiết."
  }
 }
