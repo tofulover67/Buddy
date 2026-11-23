@@ -141,8 +141,8 @@ class WiringTests(unittest.TestCase):
         tool = get_tool("data_graphics")
         self.assertTrue(tool.needs_resolve)
         told = " ".join([tool.summary, *tool.capabilities, tool.notes])
-        for word in ("Counters", "bar graph", "timing dock", "a lane for every part", "new clip",
-                     "Line and pie charts are not built yet"):
+        for word in ("Counters", "bar graph", "line graph", "Draw them as", "timing dock", "a lane for every part",
+                     "new clip", "A pie", "a donut"):
             self.assertIn(word, told)
         self.assertNotIn("Neither is built yet", told)
 
@@ -202,6 +202,10 @@ class PageTests(unittest.TestCase):
     def last(self, name):
         return next(data for _tool, n, data in reversed(self.sent) if n == name)
 
+    def last_state(self, page):
+        """The state the page would send now (what the view's buttons go by)."""
+        return page._state()
+
     # ---------------------------------------------------------- the tab --
 
     def test_it_opens_on_counters_and_isnt_a_placeholder(self):
@@ -249,6 +253,65 @@ class PageTests(unittest.TestCase):
         again = type(self.counters)(self.host)
         self.addCleanup(again.deleteLater)
         self.assertEqual(again.spec, spec)
+
+    def test_undo_and_redo_walk_back_and_forth_through_the_changes(self):
+        from pages.data_graphics import graphic_page
+        clock = [100.0]
+        with mock.patch.object(graphic_page.time, "monotonic", side_effect=lambda: clock[0]):
+            start = self.counters.spec
+            self.assertFalse(self.last_state(self.counters)["can_undo"])
+            for typed in ("1", "12", "120"):                                 # typing: one step
+                self.counters.on_set({"key": "to", "value": typed})
+                clock[0] += 0.3
+            clock[0] += 5
+            self.counters.on_set({"key": "colour", "value": "#ff0000"})      # another step
+            self.counters.on_part({"id": "count", "key": "start", "value": 1.0})   # and another
+            self.assertEqual(len(self.counters.undo_steps), 3)
+            self.counters.on_set({"key": "to", "value": "120"})              # nothing changed: no step
+            self.assertEqual(len(self.counters.undo_steps), 3)
+            self.counters.on_undo()
+            self.counters.on_undo()
+            self.assertEqual((self.counters.spec["to"], self.counters.spec["colour"]), (120.0, start["colour"]))
+            state = self.last_state(self.counters)
+            self.assertEqual((state["can_undo"], state["can_redo"]), (True, True))
+            self.counters.on_redo()
+            self.assertEqual(self.counters.spec["colour"], "#ff0000")
+            self.counters.on_undo()
+            self.counters.on_undo()
+            self.assertEqual(self.counters.spec, start)
+            self.assertFalse(self.last_state(self.counters)["can_undo"])
+            self.counters.on_undo()                                          # nothing left: nothing happens
+            self.assertEqual(self.counters.spec, start)
+            self.assertEqual(self.host.buckets["data_counters"].saved["spec"], start)   # what's saved follows
+            self.counters.on_redo()
+            self.counters.on_set({"key": "suffix", "value": "%"})            # a new change ends what Redo could do
+            self.assertFalse(self.last_state(self.counters)["can_redo"])
+
+    def test_reset_is_the_template_again_and_undo_brings_it_back(self):
+        self.graphs.on_set({"key": "shape", "value": "pie"})
+        self.graphs.on_rows({"rows": [{"label": "Tess", "value": "3", "was": 0}]})
+        self.assertFalse(self.last_state(self.graphs)["is_template"])
+        mine = self.graphs.spec
+        self.graphs.on_reset()
+        self.assertEqual(self.graphs.spec, graphs.clean({}))
+        self.assertTrue(self.last_state(self.graphs)["is_template"])
+        self.graphs.on_undo()
+        self.assertEqual(self.graphs.spec, mine)
+        steps = len(self.graphs.undo_steps)
+        self.graphs.on_rows({"rows": [{"label": "Tess", "value": "3", "was": 0}, {"label": "", "value": "0", "was": -1}]})
+        self.assertEqual(len(self.graphs.undo_steps), steps + 1)             # a row added is a step of its own
+        self.graphs.on_bar_colour({"index": 0, "value": "#112233"})
+        self.graphs.on_undo()
+        self.assertNotIn("colour", self.graphs.spec["rows"][0])
+
+    def test_both_pages_have_undo_redo_and_reset(self):
+        for page in ("counters", "graphs"):
+            html = (ROOT / page / "web" / "index.html").read_text(encoding="utf-8")
+            for said in ('id="undo" title="Undo (Ctrl+Z)"', 'id="redo" title="Redo (Ctrl+Y)"', 'id="reset"'):
+                self.assertIn(said, html)
+        script = (ROOT / "web" / "graphics.js").read_text(encoding="utf-8")
+        for said in ('Buddy.send("undo")', 'Buddy.send("redo")', 'Buddy.send("reset")', "e.ctrlKey || e.metaKey"):
+            self.assertIn(said, script)
 
     def test_a_dragged_curve_is_its_own_and_a_named_one_takes_over_again(self):
         self.counters.on_part({"id": "count", "key": "curve", "value": [0.2, 1.4, 0.6, 0.9]})

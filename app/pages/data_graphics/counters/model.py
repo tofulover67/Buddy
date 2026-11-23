@@ -99,12 +99,12 @@ FIELDS = {"count": {"start": "count_start", "length": "seconds", "easing": "easi
                      "curve": "in_curve"}}
 
 
-def lanes(spec):
+def lanes(spec, frame=None):        # frame: as Graphs' lanes take it; a counter's timing doesn't depend on it
     count = {"start": spec["count_start"], "length": spec["seconds"], "easing": spec["easing"], "curve": spec["curve"]}
     return [parts.lane("count", "The count", count), parts.lane("arrive", "Arriving", arrival(spec), parts.KINDS)]
 
 
-def with_part(spec, part, key, value):
+def with_part(spec, part, key, value, frame=None):
     """The counter with one thing about a part's timing changed in the dock, or None
     for a part or a key there isn't."""
     field = FIELDS.get(part, {}).get(key)

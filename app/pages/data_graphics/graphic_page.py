@@ -12,12 +12,18 @@ A page says what it makes:
     preview()   what the view draws
     WHAT        "counter" / "graph", for what's said
 
+Every change to the graphic goes through change_to(), one undoable step (a run of the
+same change - typing in a field, dragging a bar or a curve - within MERGE_S is one
+step): undo and redo walk the steps, reset is a step back to how a new one starts
+(MODEL.clean({})). The steps last as long as the page; only the graphic is saved.
+
 Protocol (both pages):
     to the view    state, fonts, toast, alert
-    from the view  set, part, option, add, refresh, switch_tab
+    from the view  set, part, option, add, refresh, switch_tab, undo, redo, reset
 """
 
 import os
+import time
 
 from core import busy_job
 from core.resolve_bridge import ResolveConnectionError
@@ -28,6 +34,8 @@ from core.web_page import WebToolPage
 from . import easing, parts, place, text_look
 
 WRITE_WAIT_S = 3.0
+HISTORY = 200               # undo steps kept
+MERGE_S = 1.5               # the same change again within this long is the same step
 PREVIEW_FRAME, PREVIEW_FPS = (1920, 1080), 24.0     # until a timeline has been read
 MAX_PREVIEW_FPS = 60.0
 FALLBACK_FONTS = {"Arial": ["Regular", "Bold", "Italic", "Bold Italic", "Black"]}
@@ -74,6 +82,8 @@ class GraphicPage(WebToolPage):
         self.fonts = {}                 # {family: [styles]} - Resolve's, once read
         self.problem = ""
         self.adding = False
+        self.undo_steps, self.redo_steps = [], []       # the graphic as it was before each step / after each undone one
+        self._last_change, self._last_at = None, 0.0
         self._worker = ResolveWorker(self)
         self._calls = ResolveCalls(self, self._worker)
 
@@ -123,9 +133,10 @@ class GraphicPage(WebToolPage):
         return {"connected": bool(self.timeline), "timeline": self.timeline, "problem": self.problem,
                 "frame": list(self.frame), "fps": self.fps, "spec": self.spec, "look": self._look(),
                 "preview": self.preview(), "curve_range": [easing.Y_MIN, easing.Y_MAX],
-                "lanes": self.MODEL.lanes(self.spec), "cap": text_look.CAP, "min_length": parts.MIN_LENGTH,
+                "lanes": self.MODEL.lanes(self.spec, self.frame), "cap": text_look.CAP, "min_length": parts.MIN_LENGTH,
                 "dock": bool(self.settings.get("dock", True)), "replace": bool(self.settings.get("replace", True)),
-                "adding": self.adding}
+                "adding": self.adding, "can_undo": bool(self.undo_steps), "can_redo": bool(self.redo_steps),
+                "is_template": self.spec == self.MODEL.clean({})}
 
     def _push_state(self):
         self.emit("state", self._state())
@@ -194,13 +205,28 @@ class GraphicPage(WebToolPage):
                 raw["style"] = next((s for s in ("Bold", "Regular") if s in styles), styles[0])
         return raw
 
+    def change_to(self, spec, merge=None):
+        """The graphic becomes `spec` (already clean), as one step Undo can take back.
+        merge: what kind of change this is ("set:title", a part dragged...) - the same
+        kind again within MERGE_S joins the step before (a word typed, a bar dragged is
+        one step, not one a letter or a pixel). The view is sent the state either way,
+        so a field being typed in is tidied."""
+        now = time.monotonic()
+        if spec != self.spec:
+            if not (merge and merge == self._last_change and now - self._last_at < MERGE_S and self.undo_steps):
+                self.undo_steps.append(self.spec)
+                del self.undo_steps[:-HISTORY]
+            self.redo_steps.clear()
+            self._last_change, self._last_at = merge, now
+            self.spec = spec
+            self._save()
+        self._push_state()
+
     def on_set(self, payload):
         key = (payload or {}).get("key")
         if key not in self.spec or self.adding:
             return
-        self.spec = self.MODEL.clean(self.change(key, (payload or {}).get("value")))
-        self._save()
-        self._push_state()
+        self.change_to(self.MODEL.clean(self.change(key, (payload or {}).get("value"))), f"set:{key}")
 
     def on_part(self, payload):
         """One thing about a part's timing changed in the dock: its "start" or "length"
@@ -209,12 +235,33 @@ class GraphicPage(WebToolPage):
         payload = payload or {}
         if self.adding:
             return
-        spec = self.MODEL.with_part(self.spec, payload.get("id"), payload.get("key"), payload.get("value"))
+        spec = self.MODEL.with_part(self.spec, payload.get("id"), payload.get("key"), payload.get("value"), self.frame)
         if spec is None:
             return
-        self.spec = spec
+        self.change_to(spec, f"part:{payload.get('id')}:{payload.get('key')}")
+
+    def _step(self, back, forth):
+        if self.adding or not back:
+            return
+        forth.append(self.spec)
+        self.spec = back.pop()
+        self._last_change = None                # what comes next is a step of its own
         self._save()
         self._push_state()
+
+    def on_undo(self, _payload=None):
+        """The graphic as it was before the last step (Ctrl+Z)."""
+        self._step(self.undo_steps, self.redo_steps)
+
+    def on_redo(self, _payload=None):
+        """The step Undo took back, again (Ctrl+Y, Ctrl+Shift+Z)."""
+        self._step(self.redo_steps, self.undo_steps)
+
+    def on_reset(self, _payload=None):
+        """Back to the template: everything as a new one starts - one step, so Undo
+        brings back what there was."""
+        if not self.adding:
+            self.change_to(self.MODEL.clean({}))
 
     def on_option(self, payload):
         """"replace": Buddy's earlier graphic on the spot is replaced; "dock": the timing dock is open."""

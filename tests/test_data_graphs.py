@@ -2,6 +2,7 @@
 layout and the bars' growth (graphs/model.py), the comp (graphs/comp.py) and the job
 that puts it on a timeline (place.bars, on a fake Resolve)."""
 
+import math
 import re
 import unittest
 
@@ -360,6 +361,214 @@ class CompTests(unittest.TestCase):
         text, _gid = comp.comp_text(spec, FRAME, 24, 48)
         self.assertNotIn("Label1 = TextPlus", text)
         self.assertIn("Label2 = TextPlus", text)
+
+
+class LineTests(unittest.TestCase):
+    ROWS = [{"label": "A", "value": 10}, {"label": "B", "value": 20}, {"label": "C", "value": 10}]
+
+    def spec(self, **more):
+        return M.clean({"shape": "line", "rows": self.ROWS, "seconds": 2, "hold": 1, "easing": "linear", **more})
+
+    def test_a_line_is_a_choice_that_cleans(self):
+        self.assertEqual(M.clean({})["shape"], "bars")
+        self.assertEqual(M.clean({"shape": "radar"})["shape"], "bars")
+        spec = self.spec()
+        self.assertEqual((spec["shape"], spec["dots"], spec["fill"], spec["draw_timing"]), ("line", True, False, None))
+        self.assertEqual(M.clean(spec), spec)
+        self.assertIsNone(M.layout(M.clean({}), FRAME)["line"])
+
+    def test_its_points_are_where_the_bars_tops_would_be(self):
+        spec = self.spec()
+        plan = M.layout(spec, FRAME)
+        pts = M.points(plan)
+        self.assertEqual([x for x, _y in pts], [b["cx"] for b in plan["bars"]])
+        self.assertAlmostEqual(plan["axis"]["y"] - pts[1][1], 2 * (plan["axis"]["y"] - pts[0][1]))
+        self.assertAlmostEqual(plan["line"]["w"], 1080 * M.LINE_W)
+        self.assertEqual(M.along(pts), [0.0, 0.5, 1.0])                     # two equal slopes
+        self.assertEqual(M.head(pts, 0.5), pts[1])
+        self.assertEqual(M.head(pts, 1.0), pts[2])
+        self.assertEqual(M.along([(0, 0), (0, 0)]), [0.0, 0.0])            # no length: nothing to divide by
+        self.assertEqual(M.colours(M.clean({**spec, "colours": "many"})), [spec["bar_colour"]] * 3)
+
+    def test_it_draws_on_over_the_build_and_its_numbers_fade_in_as_it_reaches_them(self):
+        spec = self.spec()
+        share = M.drawn(spec, 24)
+        build = M.build_frames(spec, 24)
+        self.assertEqual((share[0], share[build - 1], share[-1]), (0.0, 1.0, 1.0))
+        self.assertAlmostEqual(share[(build - 1) // 2], ((build - 1) // 2) / (build - 1), places=5)
+        self.assertEqual(M.reached(spec, FRAME), [0.0, 1.0, 2.0])           # steady: halfway along is halfway through
+        arriving = M.arrivals(spec, FRAME)
+        self.assertEqual([arriving[f"value:{i}"]["start"] for i in range(3)], [0.0, 1.0, 2.0])
+        dots = M.dot_states(spec, 24)
+        self.assertEqual(dots[0][0], (0.0, 0.0))
+        self.assertEqual(dots[0][-1], (1.0, 1.0))
+        self.assertEqual(dots[2][build - 2], (0.0, 0.0))                    # the last one starts as the line ends
+        # It pops in: never a speck smaller than half its size, fading in as it grows.
+        popping = [s for s in dots[1] if 0 < s[1] < 1]
+        self.assertTrue(popping)
+        self.assertTrue(all(M.DOT_FROM <= size < 1 for size, _alpha in popping))
+        self.assertEqual(M.growth(spec, 24)[0], [1.0] * M.frames(spec, 24))   # the numbers don't count up
+
+    def test_a_number_goes_where_the_line_leaves_room_for_it(self):
+        rows = [{"label": "Mon", "value": 12}, {"label": "Tue", "value": 19}, {"label": "Wed", "value": 8},
+                {"label": "Thu", "value": 24}, {"label": "Fri", "value": 16}, {"label": "Sat", "value": 100}]
+        plan = M.layout(M.clean({"shape": "line", "rows": rows}), FRAME)
+        pts = M.points(plan)
+        where = []
+        for (x, y), (sx, base) in zip(pts, plan["line"]["spots"]):
+            where.append("above" if sx == round(x, 3) and base < y else "below" if sx == round(x, 3) else "beside")
+        # Fri's number would sit on the steep line up to Sat: it goes under its point instead.
+        self.assertEqual(where, ["above", "above", "above", "above", "below", "above"])
+        self.assertLess(plan["line"]["spots"][4][1], plan["axis"]["y"])          # still above the floor line
+        wide = {"shape": "line", "prefix": "$", "decimals": 2}
+        # A wide number in a V: the lines are over it, so under it.
+        v = M.layout(M.clean({**wide, "rows": [{"label": "A", "value": 100}, {"label": "B", "value": 40},
+                                               {"label": "C", "value": 100}]}), FRAME)
+        (x, y), (sx, base) = M.points(v)[1], v["line"]["spots"][1]
+        self.assertEqual(sx, round(x, 3))
+        self.assertGreater(base, y)
+        # Half way up a steep climb the line is over it and under it: beside.
+        up = M.layout(M.clean({**wide, "rows": [{"label": "A", "value": 0}, {"label": "B", "value": 50},
+                                                {"label": "C", "value": 100}]}), FRAME)
+        (x, y), (sx, base) = M.points(up)[1], up["line"]["spots"][1]
+        self.assertGreater(sx, x)                                                # right of it, away from the climb
+        self.assertAlmostEqual(base - y, 0.35 * up["value"]["size"], places=3)   # its digits level with the point
+        # On the floor there's no room under or beside it: over it, the least crossed.
+        floor = M.layout(M.clean({**wide, "rows": [{"label": "A", "value": 100}, {"label": "B", "value": 0},
+                                                   {"label": "C", "value": 100}]}), FRAME)
+        (x, y), (sx, base) = M.points(floor)[1], floor["line"]["spots"][1]
+        self.assertEqual(sx, round(x, 3))
+        self.assertLess(base, y)
+        self.assertIsNone(M.layout(M.clean({"rows": rows}), FRAME)["line"])      # bars: as they were
+        self.assertNotIn("spots", M.layout(M.clean({"shape": "line", "values": False}), FRAME)["line"])
+        self.assertEqual(M._crossing((0, 0), (10, 0), (2, -1, 5, 1)), 3.0)
+        self.assertEqual(M._crossing((0, 5), (10, 5), (2, -1, 5, 1)), 0.0)
+
+    def test_the_line_has_a_lane_of_its_own_in_place_of_the_bars(self):
+        spec = self.spec()
+        ids = [lane["id"] for lane in M.lanes(spec, FRAME)]
+        self.assertEqual(ids, ["draw", "name:0", "value:0", "name:1", "value:1", "name:2", "value:2"])
+        self.assertEqual(M.lanes(spec, FRAME)[0]["label"], "Line")
+        self.assertIsNone(M.with_part(spec, "bar:0", "start", 1))
+        self.assertIsNone(M.with_part(M.clean({}), "draw", "start", 1))     # bars have no line
+        later = M.with_part(spec, "draw", "start", 0.5)
+        self.assertEqual((later["draw_timing"]["start"], later["draw_timing"]["length"]), (0.5, 2.0))
+        timing = M.draw_timing(later)
+        self.assertEqual((timing["start"], timing["length"], timing["own"]), (0.5, 1.5, True))     # kept within the build
+        self.assertEqual(M.drawn(later, 24)[11], 0.0)
+        self.assertEqual(M.reached(later, FRAME)[0], 0.5)
+        self.assertIsNone(M.with_part(later, "draw", "reset", None)["draw_timing"])
+        self.assertIsNone(M.with_part(spec, "draw", "kind", "fade"))
+
+    def test_the_comp_draws_the_line_on_with_write_length(self):
+        spec = self.spec(fill=True)
+        frames = M.frames(spec, 24)
+        text, _gid = comp.comp_text(spec, FRAME, 24, frames)
+        self.assertNotIn("Bar1Mask", text)
+        trace = text[text.index("\t\tTraceMask = PolylineMask"):text.index("\t\tTrace = Background")]
+        self.assertIn('WriteLength = Input { SourceOp = "TraceWrite", Source = "Value", },', trace)
+        self.assertIn("CapStyle = Input { Value = 1, },", trace)
+        pts = M.points(M.layout(spec, FRAME))
+        self.assertIn(f"X = {pts[1][0] / 1920 - 0.5:.6g}, Y = {0.5 - pts[1][1] / 1080:.6g}", trace)
+        self.assertNotIn("Closed = true", trace)
+        write = text[text.index("\t\tTraceWrite = BezierSpline"):text.index("\t\tTraceMask")]
+        keys = [(int(f), float(v)) for f, v in re.findall(r"\[(\d+)\] = \{ ([\d.e-]+),", write)]
+        self.assertEqual((keys[0], keys[-1]), ((0, 0.0), (frames - 1, 1.0)))
+        area = text[text.index("\t\tAreaMask = PolylineMask"):text.index("\t\tArea = Background")]
+        self.assertIn('PaintMode = Input { Value = FuID { "Multiply" }, },', area)
+        self.assertIn('EffectMask = Input { SourceOp = "Wipe", Source = "Mask", },', area)
+        self.assertIn("Closed = true", area)
+        self.assertEqual(len(re.findall(r"\tDot\d = Background \{", text)), 3)
+        self.assertIn('Width = Input { SourceOp = "Dot2Width", Source = "Value", },', text)
+        self.assertIn('Blend = Input { SourceOp = "Dot2Blend", Source = "Value", },', text)          # it fades in
+        # A point's number sits where the layout found room: its path holds that spot.
+        sx, base = M.layout(spec, FRAME)["line"]["spots"][1]
+        path = text[text.index("\t\tValue2PathY = BezierSpline"):text.index("\t\tValue2Path = XYPath")]
+        y = float(re.findall(r"\[\d+\] = \{ ([\d.e-]+),", path)[0])
+        self.assertAlmostEqual(y, 1 - (base - 0.375 * M.layout(spec, FRAME)["value"]["size"]) / 1080, places=5)
+        plain, _gid = comp.comp_text(self.spec(dots=False), FRAME, 24, frames)
+        self.assertNotIn("Dot1", plain)
+        self.assertNotIn("AreaMask", plain)
+        alone, _gid = comp.comp_text(M.clean({"shape": "line", "rows": [{"label": "A", "value": 3}]}), FRAME, 24, 48)
+        self.assertNotIn("TraceMask", alone)                                # one point: a dot, no line
+        self.assertIn("Dot1Mask", alone)
+
+    def test_a_line_is_placed_like_bars(self):
+        controller, timeline = studio()
+        done = place.bars(controller, self.spec())
+        self.assertEqual(timeline.tracks[1][0].comp.GetData(comp.TAG), done["id"])
+
+
+class PieTests(unittest.TestCase):
+    ROWS = [{"label": "Rent", "value": 50}, {"label": "Food", "value": 25}, {"label": "None", "value": 0},
+            {"label": "Fun", "value": 25}]
+
+    def spec(self, **more):
+        return M.clean({"shape": "pie", "rows": self.ROWS, "seconds": 2, "hold": 1, "easing": "linear", **more})
+
+    def test_slices_share_the_whole_round_from_12_oclock(self):
+        spec = self.spec()
+        self.assertEqual((spec["hole"], spec["percent"]), (False, True))
+        pie = M.layout(spec, FRAME)["pie"]
+        self.assertEqual([(s["row"], s["a"], s["b"]) for s in pie["slices"]], [(0, 0.0, 0.5), (1, 0.5, 0.75), (3, 0.75, 1.0)])
+        self.assertEqual([s["shown"] for s in pie["slices"]], ["50%", "25%", "25%"])
+        self.assertEqual((pie["cx"], pie["inner"]), (960.0, 0.0))
+        rent, food, fun = pie["slices"]
+        self.assertEqual((rent["align"], food["align"], fun["align"]), ("left", "right", "right"))   # beside each slice
+        top = M.layout(M.clean({"shape": "pie", "rows": [{"label": "A", "value": 1}]}), FRAME)["pie"]["slices"][0]
+        self.assertEqual(top["align"], "center")                               # a whole disc: its middle is at 6 o'clock
+        self.assertGreater(rent["label_at"][0], pie["cx"] + pie["r"])
+        self.assertLess(fun["label_at"][0], pie["cx"])
+        for s in pie["slices"]:                                                # names outside, numbers inside
+            x, y = s["label_at"]
+            self.assertGreater(math.hypot(x - pie["cx"], y - pie["cy"]), pie["r"])
+            x, y = s["value_at"]
+            self.assertLess(math.hypot(x - pie["cx"], y - pie["cy"]), pie["r"])
+        self.assertGreater(M.layout(self.spec(hole=True), FRAME)["pie"]["inner"], 0)
+        plain = M.layout(self.spec(percent=False, prefix="$"), FRAME)["pie"]
+        self.assertEqual(plain["slices"][0]["shown"], "$50")
+        self.assertEqual(M.layout(M.clean({"shape": "pie", "rows": [{"label": "A", "value": 0}]}), FRAME)["pie"]["slices"], [])
+
+    def test_a_pie_has_no_axes_and_its_parts_arrive_as_the_sweep_reaches_them(self):
+        spec = self.spec(scale=True, grid=True, x_title="X", y_title="Y", title="Spend")
+        plan = M.layout(spec, FRAME)
+        self.assertEqual((plan["marks"], plan["tick"], plan["x_title"], plan["y_title"]), ([], None, None, None))
+        ids = [lane["id"] for lane in M.lanes(spec, FRAME)]
+        self.assertEqual(ids[:2], ["title", "draw"])
+        self.assertEqual(M.lanes(spec, FRAME)[1]["label"], "Pie")
+        self.assertEqual(M.reached(spec, FRAME), [0.5, 1.25, 1.5, 1.75])      # each slice's middle; a 0 at its start
+        arriving = M.arrivals(spec, FRAME)
+        self.assertEqual(arriving["value:1"]["start"], 1.25)
+        self.assertEqual((arriving["name:1"]["kind"], arriving["name:1"]["start"]), ("fade", 1.25))   # with its slice
+        self.assertEqual(M.arrivals(LineTests.spec(LineTests()), FRAME)["name:1"]["kind"], "none")    # a line's are there
+
+    def test_the_comp_sweeps_each_slice_on_clockwise(self):
+        spec = self.spec()
+        frames = M.frames(spec, 24)
+        text, _gid = comp.comp_text(spec, FRAME, 24, frames)
+        self.assertNotIn("FloorMask", text)
+        self.assertNotIn("Slice3Mask", text)                                   # the row of 0
+        mask = text[text.index("\t\tSlice2Mask = EllipseMask"):text.index("\t\tSlice2 = Background")]
+        for said in ("Angle = Input { Value = 90, },", "CapStyle = Input { Value = 0, },", "Solid = Input { Value = 0, },",
+                     'WritePosition = Input { SourceOp = "Slice2Start", Source = "Value", },',
+                     'WriteLength = Input { SourceOp = "Slice2Length", Source = "Value", },'):
+            self.assertIn(said, mask)
+
+        def keys(name):
+            block = text[text.index(f"\t\t{name} = BezierSpline"):]
+            block = block[:block.index("\t\t}")]
+            return [(int(f), float(v)) for f, v in re.findall(r"\[(\d+)\] = \{ ([\d.e-]+),", block)]
+        self.assertEqual(keys("Slice2Length")[0], (0, 0.0))
+        self.assertEqual(keys("Slice2Length")[-1], (frames - 1, 0.25))
+        self.assertEqual(keys("Slice2Start")[-1], (frames - 1, 0.25))          # 1 - 0.75: counter-clockwise from 12
+        self.assertIn('StyledText = Input { Value = "50%", },', text)
+        self.assertIn('StyledText = Input { Value = "Rent", },', text)
+        self.assertIn("HorizontalLeftCenterRight = Input { Value = -1, },", text)
+
+    def test_a_pie_is_placed_like_bars(self):
+        controller, timeline = studio()
+        done = place.bars(controller, self.spec())
+        self.assertEqual(timeline.tracks[1][0].comp.GetData(comp.TAG), done["id"])
 
 
 class JobTests(unittest.TestCase):

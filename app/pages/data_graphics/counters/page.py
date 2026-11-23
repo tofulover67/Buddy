@@ -13,7 +13,7 @@ place.counter: a new clip, nothing already there changed (../graphic_page.py).
 
 Protocol:
     to the view    state, fonts, toast, alert
-    from the view  set, part, preset, option, add, refresh, switch_tab
+    from the view  set, part, preset, option, add, refresh, switch_tab, undo, redo, reset
 """
 
 from .. import figures, parts, place
@@ -43,9 +43,7 @@ class CountersPage(GraphicPage):
         spec = M.with_preset(self.spec, (payload or {}).get("name"))
         if spec is None or self.adding:
             return
-        self.spec = spec
-        self._save()
-        self._push_state()
+        self.change_to(spec, None)
 
     def here(self, controller, **args):
         return place.counter(controller, **args)

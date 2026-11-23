@@ -4,8 +4,8 @@
 // each event carries): the controls - any element with data-key is one field of the
 // graphic, sent to Python as it changes and filled in from the state - the fonts, the
 // preview's player, the timing dock under it (a lane per part: its bar dragged to
-// retime it, its curve reshaped), pop-up panels for a page's detailed options, and
-// the header and foot. Python owns the graphic; a page's own script only draws a
+// retime it, its curve reshaped), pop-up panels for a page's detailed options, undo,
+// redo and Reset (Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z), and the header and foot. Python owns the graphic; a page's own script only draws a
 // frame of it: Graphics.start(draw), draw(ctx, frame, state).
 
 const Graphics = (() => {
@@ -398,6 +398,33 @@ const Graphics = (() => {
         panels.forEach(p => p.show(false));
     });
 
+    // -------------------------------------------------------- history --
+    // Python keeps the steps (../graphic_page.py change_to): Undo, Redo and Reset only ask.
+    // In a text field Ctrl+Z is the field's own; anywhere else it's the graphic's.
+
+    function typing(target) {
+        const field = target && target.closest && target.closest("input, textarea, select, [contenteditable]");
+        return !!field && !(field.tagName === "INPUT" && /^(checkbox|radio|range|color|button)$/.test(field.type));
+    }
+
+    function bindHistory() {
+        $("undo").append(Buddy.icon("undo"));
+        $("redo").append(Buddy.icon("undo"));          // turned round in graphics.css
+        $("undo").addEventListener("click", () => Buddy.send("undo"));
+        $("redo").addEventListener("click", () => Buddy.send("redo"));
+        $("reset").addEventListener("click", () => {
+            Buddy.send("reset");
+            Buddy.toast("Back to the template.", 5000, {label: "Undo", onClick: () => Buddy.send("undo")});
+        });
+        document.addEventListener("keydown", e => {
+            const key = e.key.toLowerCase();
+            if (!(e.ctrlKey || e.metaKey) || e.altKey || (key !== "z" && key !== "y")) return;
+            if (typing(e.target) || document.querySelector(".modal-backdrop") || document.getElementById("picker")) return;
+            e.preventDefault();
+            Buddy.send(key === "y" || e.shiftKey ? "redo" : "undo");
+        });
+    }
+
     // --------------------------------------------------------- player --
 
     function paint() {
@@ -524,6 +551,9 @@ const Graphics = (() => {
         $("problem").textContent = s.problem || "";
         $("replace").checked = !!s.replace;
         $("add").disabled = !!s.adding;
+        $("undo").disabled = !s.can_undo || !!s.adding;
+        $("redo").disabled = !s.can_redo || !!s.adding;
+        $("reset").disabled = !!s.is_template || !!s.adding;
         fill(s.spec);
         document.dispatchEvent(new CustomEvent("graphics-state", {detail: s}));
         range = s.curve_range || range;
@@ -544,6 +574,7 @@ const Graphics = (() => {
         bind();
         bindDock();
         bindCurve();
+        bindHistory();
         $("easing").addEventListener("change", e => setField("easing", e.target.value));
         $("dock-fold").append(Buddy.icon("sliders"));
         $("refresh").append(Buddy.icon("refresh"));

@@ -398,7 +398,37 @@ the Fusion page, not that the connection failed.
     Its `Width` and `Height` are both shares of the frame's WIDTH, its
     `Translate.X`/`.Y` (written `["Translate.X"] = Input {...}`) offsets from
     the middle in the same unit, y up; it carries its own `Red`/`Green`/`Blue`.
-    Shapes and masks both have `WritePosition` and `WriteLength` (not tried).
+    Shapes and masks both have `WritePosition` and `WriteLength`.
+  - **Lines and arcs (2026-11-23, same setup).** A `PolylineMask`'s points
+    (`Polyline = Input { Value = Polyline { Points = { { Linear = true, X = -0.4, Y = -0.2 }, ... } } }`,
+    `Closed = true,` before `Points` to close it) are offsets from the middle
+    as shares of the frame's width (X) and height (Y), y up. Left open, with a
+    `BorderWidth` (a share of the frame's width, the whole thickness), it is
+    a stroke. `WriteLength` 0..1 draws it on by its length **in pixels**
+    (half of a 648 px upright plus a 768 px flat ended 60 px into the flat),
+    and keyed it plays; at 0 nothing is drawn, not even a cap. `sPolygon`
+    takes the same points but reads Y as a share of the WIDTH.
+  - **`CapStyle`** 0 butt, 1 round, 2 square; **`JoinStyle`** 0 bevel, 1
+    round, 2 miter. Masks' strokes start with round caps.
+  - **An `EllipseMask`'s** `Width`, `Height` and `BorderWidth` are all shares
+    of the frame's WIDTH (unlike a RectangleMask's Height), Width/Height the
+    diameter of the stroke's middle. With `Solid = 0` it is a ring; its
+    stroke starts at 3 o'clock and runs counterclockwise; `WritePosition` is
+    where it starts and `WriteLength` how much of the way round (not where
+    it ends). A pie slice of radius R: Width = Height = R, BorderWidth = R,
+    CapStyle 0 - slices (0, .3), (.3, .2), (.5, .5) tiled a whole disc
+    with no seam. A donut is the same with a thinner border. Past the start
+    it wraps: position 0.9 for 0.3 drew across 3 o'clock. `Angle = 90` puts
+    the start at 12 o'clock (still counterclockwise), so a slice running
+    clockwise from 12 o'clock over [a, b] is WritePosition 1 - b, WriteLength
+    b - a. A negative Width draws nothing, and so does WriteLength 0.
+  - **Masks chain:** a mask's `EffectMask` fed another mask's `Mask` output,
+    with `PaintMode = Input { Value = FuID { "Multiply" }, }`, keeps it to
+    their overlap - an area under a line wiped on by a RectangleMask.
+  - **`sMerge` in a written comp** made `ImportFusionComp` refuse the whole
+    comp; not looked into, since the masks do everything needed.
+  - **`TimelineItem.ExportFrame(offset, {"outputType": "file", "filePath": path})`**
+    writes a still of the clip's frame; `path` or `fileName` instead fails.
   - **`AppendToTimeline` leaves the playhead at the new clip's end.**
     `timeline.SetCurrentTimecode()` with the timecode read beforehand puts it
     back (`core/fusion_place.py` does, so the graphic is seen from its start

@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """
 Graphs - one of the Data Graphics tab's sub-tabs (see pages/data_graphics/page.py):
-a bar graph from numbers typed in or pasted from a spreadsheet, its bars growing one
-after another, added to the timeline as a new clip at the playhead.
+a graph from numbers typed in or pasted from a spreadsheet - bars growing one after
+another, a line drawing itself on left to right, or a pie sweeping round - added to the timeline as a new
+clip at the playhead.
 
 The view (web/) has the rows, the titles and axis, how the bars grow and the look, and
 plays the graph as it will play in Resolve: where everything sits is model.layout(),
 how far each bar has grown model.growth() and how each other part arrives
 model.arrivals(), the same ones the comp's keys are made from (comp.py). The dock
 under the preview has a lane for every part (model.lanes). Add to timeline is
-place.bars: a new clip, nothing already there changed (../graphic_page.py). Bars only
-so far - lines and pies are in docs/DATA_GRAPHICS_PLAN.md.
+place.bars (bars or a line): a new clip, nothing already there changed
+(../graphic_page.py). A pie (model.pie_of) sweeps round clockwise from 12 o'clock.
 
 Protocol:
     to the view    state, fonts, toast, alert
-    from the view  set, part, rows, paste, bar_colour, option, add, refresh, switch_tab
+    from the view  set, part, rows, paste, bar_colour, option, add, refresh, switch_tab, undo, redo, reset
 """
 
 from .. import easing, figures, place
@@ -37,15 +38,21 @@ class GraphsPage(GraphicPage):
         fps = self.preview_fps()
         build, total = M.build_frames(self.spec, fps), M.frames(self.spec, fps)
         grown = M.growth(self.spec, fps, build)             # after the build every bar is whole
-        return {"frame": list(self.frame), "fps": fps, "total": total, "build": build,
-                "layout": M.layout(self.spec, self.frame), "grown": grown,
-                "values": [[list(k) for k in figures.runs(texts)] for texts in M.value_texts(self.spec, grown)],
-                "arrivals": self.arrivals(M.arrivals(self.spec), fps, total), "max_rows": M.MAX_ROWS}
+        plan = M.layout(self.spec, self.frame)
+        out = {"frame": list(self.frame), "fps": fps, "total": total, "build": build,
+               "layout": plan, "grown": grown,
+               "values": [[list(k) for k in figures.runs(texts)] for texts in M.value_texts(self.spec, grown)],
+               "arrivals": self.arrivals(M.arrivals(self.spec, self.frame), fps, total), "max_rows": M.MAX_ROWS}
+        if plan["pie"]:
+            out["drawn"] = M.drawn(self.spec, fps, total)        # how far round it has swept, frame by frame
+        if plan["line"]:
+            # How much of the line is drawn and how big each dot is, frame by frame.
+            out.update(points=[list(p) for p in M.points(plan)], drawn=M.drawn(self.spec, fps, total),
+                       dots=[[list(s) for s in dot] for dot in M.dot_states(self.spec, fps, total, self.frame)])
+        return out
 
-    def _set_rows(self, rows):
-        self.spec = M.clean({**self.spec, "rows": rows})
-        self._save()
-        self._push_state()
+    def _set_rows(self, rows, merge=None):
+        self.change_to(M.clean({**self.spec, "rows": rows}), merge)
 
     def on_rows(self, payload):
         """The table as the view has it now: [{"label", "value"}] - a value still being
@@ -61,7 +68,8 @@ class GraphsPage(GraphicPage):
                 was = row.get("was")
                 if isinstance(was, int) and not isinstance(was, bool) and 0 <= was < len(had):
                     rows[-1].update({k: had[was][k] for k in ROW_KEEPS if had[was].get(k)})
-        self._set_rows(rows)
+        # Typing in the table is one step a run; a row added or taken out is a step of its own.
+        self._set_rows(rows, "rows" if len(rows) == len(had) else None)
 
     def on_bar_colour(self, payload):
         """A colour picked for one bar ("#rrggbb"), or None: it takes the graph's again."""
@@ -76,7 +84,7 @@ class GraphsPage(GraphicPage):
         rows[index].pop("colour", None)
         if value:
             rows[index]["colour"] = value
-        self._set_rows(rows)
+        self._set_rows(rows, f"colour:{index}")
 
     def on_paste(self, payload):
         """Rows pasted from a spreadsheet: they take the table's place."""

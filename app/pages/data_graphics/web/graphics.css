@@ -10,6 +10,10 @@
 .dg-tabs button { margin: 0; border: 0; border-radius: var(--r-full); padding: 6px 14px; }
 .dg-tabs button[aria-selected="true"] { background: var(--selection-bg); color: var(--selection-fg); }
 
+/* Undo, redo and Reset, beside the tabs. */
+.dg-history { display: inline-flex; align-items: center; gap: 2px; }
+.dg-history #redo svg { transform: scaleX(-1); }
+
 .dg-where { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: var(--text-dim); font-size: var(--fs-sm); }
 .dg-where-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; }
 .dg-dot { width: 8px; height: 8px; border-radius: var(--r-full); background: var(--text-dim); flex: none; }

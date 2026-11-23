@@ -85,7 +85,8 @@
         rows = state.spec.rows;
         maxRows = state.preview.max_rows;
         drawRows(state);
-        $("bar-colour").disabled = state.spec.colours !== "one";
+        document.querySelector("main.dg").dataset.shape = state.spec.shape;
+        $("bar-colour").disabled = state.spec.colours !== "one" && state.spec.shape !== "line";
     });
 
     Graphics.panel("axes-pop", "edit-axes");
@@ -126,6 +127,97 @@
         ctx.fill();
     }
 
+    // A line as far as it's drawn on this frame (its share of its length in pixels, as
+    // Fusion's WriteLength draws it), the room under it filled up to its end, and each
+    // point's dot as big as it has grown.
+    function drawLine(ctx, p, plan, frame) {
+        const pts = p.points, look = plan.line, f = Math.min(frame, p.drawn.length - 1);
+        const want = p.drawn[f];
+        if (pts.length > 1 && want > 0) {
+            const runs = [0];
+            for (let i = 1; i < pts.length; i++) {
+                runs.push(runs[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+            }
+            const goal = want * runs[runs.length - 1];
+            const path = [pts[0]];
+            for (let i = 1; i < pts.length; i++) {
+                if (runs[i] <= goal + 1e-9) { path.push(pts[i]); continue; }
+                const t = runs[i] > runs[i - 1] ? (goal - runs[i - 1]) / (runs[i] - runs[i - 1]) : 0;
+                path.push([pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t]);
+                break;
+            }
+            if (look.fill) {
+                const last = pts[pts.length - 1], end = path[path.length - 1][0];
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(pts[0][0], 0, end - pts[0][0], plan.frame[1]);
+                ctx.clip();
+                ctx.beginPath();
+                pts.forEach((pt, i) => (i ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1])));
+                ctx.lineTo(last[0], plan.axis.y);
+                ctx.lineTo(pts[0][0], plan.axis.y);
+                ctx.closePath();
+                ctx.fillStyle = look.fill;
+                ctx.fill();
+                ctx.restore();
+            }
+            ctx.save();
+            ctx.beginPath();
+            path.forEach((pt, i) => (i ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1])));
+            ctx.strokeStyle = look.colour;
+            ctx.lineWidth = look.w;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.stroke();
+            ctx.restore();
+        }
+        if (look.dot) {
+            // Each dot pops in as the line reaches it: [its share of its size, its opacity].
+            pts.forEach((pt, i) => {
+                const [size, alpha] = p.dots[i][f];
+                if (size <= 0 || alpha <= 0) return;
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = plan.bars[i].colour;
+                ctx.beginPath();
+                ctx.arc(pt[0], pt[1], look.dot * size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+    }
+
+    // A pie as far round as it has swept (clockwise from 12 o'clock, as the comp's
+    // keyed WritePosition/WriteLength draw it), each slice's name beside it and its
+    // number on it, arriving as their parts say.
+    function drawPie(ctx, p, plan, frame, state) {
+        const pie = plan.pie, f = Math.min(frame, p.drawn.length - 1), swept = p.drawn[f];
+        const turn = share => -Math.PI / 2 + share * Math.PI * 2;
+        pie.slices.forEach(s => {
+            const end = Math.min(s.b, Math.max(s.a, swept));
+            if (end <= s.a) return;
+            ctx.beginPath();
+            ctx.arc(pie.cx, pie.cy, pie.r, turn(s.a), turn(end));
+            if (pie.inner > 0) ctx.arc(pie.cx, pie.cy, pie.inner, turn(end), turn(s.a), true);
+            else ctx.lineTo(pie.cx, pie.cy);
+            ctx.closePath();
+            ctx.fillStyle = s.colour;
+            ctx.fill();
+        });
+        const look = state.look, cap = state.cap, size = pie.size;
+        pie.slices.forEach(s => {
+            const at = (id, x, y) => Graphics.arriving(state, id, frame, size, [x, y - cap * size / 2]);
+            if (state.spec.labels && s.label) {
+                Graphics.text(ctx, look, s.label, s.label_at[0], s.label_at[1], size, s.align,
+                              at(`name:${s.row}`, ...s.label_at));
+            }
+            if (state.spec.values) {
+                Graphics.text(ctx, look, s.shown, s.value_at[0], s.value_at[1], size, "center",
+                              at(`value:${s.row}`, ...s.value_at));
+            }
+        });
+    }
+
     Graphics.start((ctx, frame, state) => {
         const p = state.preview, plan = p.layout, look = state.look, cap = state.cap;
         const at = Math.min(frame, p.build - 1);          // after the build every bar is whole
@@ -138,7 +230,7 @@
             ctx.fillRect(plan.axis.x0, y - plan.axis.h / 2, plan.axis.x1 - plan.axis.x0, plan.axis.h);
             ctx.restore();
         };
-        line(plan.axis.y, 0.4);
+        if (!plan.pie) line(plan.axis.y, 0.4);
         if (plan.grid) {
             const fade = Graphics.arriving(state, "grid", frame, 0, [0, 0]);
             plan.marks.slice(1).forEach(m => line(m.y, 0.2 * (fade ? fade.alpha : 1)));
@@ -151,12 +243,18 @@
             plan.marks.forEach(m => Graphics.text(ctx, look, m.text, plan.tick.x, m.y + plan.tick.drop,
                                                   plan.tick.size, "right", moved));
         }
-        plan.bars.forEach((b, i) => {
-            const h = b.h * p.grown[i][at];
-            ctx.fillStyle = b.colour;
-            bar(ctx, b.cx - b.w / 2, b.base - h, b.w, h, plan.radius);
-        });
-        if (plan.label) {
+        if (plan.pie) {
+            drawPie(ctx, p, plan, frame, state);
+        } else if (plan.line) {
+            drawLine(ctx, p, plan, frame);
+        } else {
+            plan.bars.forEach((b, i) => {
+                const h = b.h * p.grown[i][at];
+                ctx.fillStyle = b.colour;
+                bar(ctx, b.cx - b.w / 2, b.base - h, b.w, h, plan.radius);
+            });
+        }
+        if (plan.label && !plan.pie) {
             plan.bars.forEach((b, i) => {
                 if (b.label) {
                     Graphics.text(ctx, look, b.label, b.cx, plan.label.baseline, plan.label.size, "center",
@@ -164,11 +262,13 @@
                 }
             });
         }
-        if (plan.value) {
+        if (plan.value && !plan.pie) {
+            // A point's number sits where the line leaves room for it (model.value_spots).
+            const spots = plan.line ? plan.line.spots : null;
             plan.bars.forEach((b, i) => {
-                const baseline = b.base - b.h * p.grown[i][at] - plan.value.gap;
-                Graphics.text(ctx, look, Graphics.textAt(p.values[i], at), b.cx, baseline, plan.value.size, "center",
-                              arriving(`value:${i}`, plan.value.size, b.cx, baseline));
+                const [x, baseline] = spots ? spots[i] : [b.cx, b.base - b.h * p.grown[i][at] - plan.value.gap];
+                Graphics.text(ctx, look, Graphics.textAt(p.values[i], at), x, baseline, plan.value.size, "center",
+                              arriving(`value:${i}`, plan.value.size, x, baseline));
             });
         }
         for (const [id, t] of [["title", plan.title], ["subtitle", plan.subtitle], ["x_title", plan.x_title]]) {

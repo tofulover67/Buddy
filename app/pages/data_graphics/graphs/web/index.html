@@ -19,6 +19,11 @@
             <button type="button" role="tab" data-tab="counters" aria-selected="false">Counters</button>
             <button type="button" role="tab" data-tab="graphs" aria-selected="true">Graphs</button>
         </nav>
+        <span class="dg-history">
+            <button type="button" class="btn ghost icon" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
+            <button type="button" class="btn ghost icon" id="redo" title="Redo (Ctrl+Y)" aria-label="Redo"></button>
+            <button type="button" class="btn ghost" id="reset" title="Start again from the template">Reset</button>
+        </span>
         <span class="spacer"></span>
         <span class="dg-where">
             <span class="dg-dot" id="dot" aria-hidden="true"></span>
@@ -88,6 +93,14 @@
             <div class="dg-controls">
                 <section class="dg-group" aria-labelledby="g-rows">
                     <h2 class="dg-group-title" id="g-rows">The numbers</h2>
+                    <div class="dg-checks">
+                        <span class="muted small">Draw them as</span>
+                        <div class="segmented" data-key="shape" role="group" aria-label="Draw them as">
+                            <button type="button" data-value="bars">Bars</button>
+                            <button type="button" data-value="line">A line</button>
+                            <button type="button" data-value="pie">A pie</button>
+                        </div>
+                    </div>
                     <div class="gr-rows" id="rows"></div>
                     <div class="row">
                         <button type="button" class="btn" id="add-row">Add a row</button>
@@ -106,7 +119,7 @@
                 <section class="dg-group" aria-labelledby="g-grow">
                     <h2 class="dg-group-title" id="g-grow">How it draws on</h2>
                     <div class="dg-fields">
-                        <label class="lbl">Seconds growing
+                        <label class="lbl"><span class="for-bars">Seconds growing</span><span class="for-line for-pie">Seconds drawing</span>
                             <input type="text" class="field" data-key="seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
                         </label>
                         <label class="lbl">Seconds held after
@@ -123,14 +136,15 @@
                             </select>
                         </label>
                     </div>
-                    <label class="check"><input type="checkbox" data-key="stagger"> One bar after another</label>
+                    <label class="check for-bars"><input type="checkbox" data-key="stagger"> One bar after another</label>
                 </section>
 
                 <section class="dg-group" aria-labelledby="g-values">
                     <h2 class="dg-group-title" id="g-values">What's written</h2>
                     <div class="dg-checks">
-                        <label class="check"><input type="checkbox" data-key="values"> A number over each bar</label>
-                        <label class="check"><input type="checkbox" data-key="labels"> A name under each bar</label>
+                        <label class="check"><input type="checkbox" data-key="values"> <span class="for-bars">A number over each bar</span><span class="for-line">A number over each point</span><span class="for-pie">A number on each slice</span></label>
+                        <label class="check"><input type="checkbox" data-key="labels"> <span class="for-bars">A name under each bar</span><span class="for-line">A name under each point</span><span class="for-pie">A name beside each slice</span></label>
+                        <label class="check for-pie"><input type="checkbox" data-key="percent"> As a share of the whole (%)</label>
                     </div>
                     <div class="dg-fields">
                         <label class="lbl">Thousands
@@ -161,13 +175,18 @@
                 <section class="dg-group" aria-labelledby="g-look">
                     <h2 class="dg-group-title" id="g-look">Look</h2>
                     <div class="dg-checks">
-                        <span class="muted small">Bars</span>
-                        <div class="segmented" data-key="colours" role="group" aria-label="Bars">
+                        <span class="muted small for-bars">Bars</span>
+                        <span class="muted small for-pie">Slices</span>
+                        <span class="muted small for-line">Line</span>
+                        <div class="segmented for-bars for-pie" data-key="colours" role="group" aria-label="Bars">
                             <button type="button" data-value="many">A colour each</button>
                             <button type="button" data-value="one">One colour</button>
                         </div>
                         <input type="color" class="dg-colour" data-key="bar_colour" id="bar-colour" aria-label="Bar colour">
-                        <label class="check"><input type="checkbox" data-key="rounded"> Rounded corners</label>
+                        <label class="check for-bars"><input type="checkbox" data-key="rounded"> Rounded corners</label>
+                        <label class="check for-line"><input type="checkbox" data-key="dots"> A dot at each point</label>
+                        <label class="check for-line"><input type="checkbox" data-key="fill"> Fill under the line</label>
+                        <label class="check for-pie"><input type="checkbox" data-key="hole"> A hole in the middle</label>
                     </div>
                     <div class="dg-fields">
                         <label class="lbl wide">Font
@@ -204,17 +223,17 @@
         <label class="lbl">Subtitle
             <input type="text" class="field" data-key="subtitle" maxlength="80" autocomplete="off">
         </label>
-        <label class="lbl">Along the bottom
+        <label class="lbl for-bars for-line">Along the bottom
             <input type="text" class="field" data-key="x_title" maxlength="80" autocomplete="off">
         </label>
-        <label class="lbl">Up the side
+        <label class="lbl for-bars for-line">Up the side
             <input type="text" class="field" data-key="y_title" maxlength="80" autocomplete="off">
         </label>
-        <div class="dg-checks">
+        <div class="dg-checks for-bars for-line">
             <label class="check"><input type="checkbox" data-key="scale"> Numbers up the side</label>
             <label class="check"><input type="checkbox" data-key="grid"> Lines across</label>
         </div>
-        <div class="dg-fields">
+        <div class="dg-fields for-bars for-line">
             <label class="lbl">Steps
                 <select class="field" data-key="steps">
                     <option value="2" translate="no">2</option>

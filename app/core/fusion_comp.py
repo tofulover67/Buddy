@@ -55,6 +55,19 @@ def input_(name, value):
     return f"{name} = Input {{ Value = {num(value)}, }},"
 
 
+def polyline(points, closed=False):
+    """A Polyline value of straight-sided points, (x, y) each an offset from the frame's
+    middle as a share of its width and height, y up - what a PolylineMask's Polyline
+    takes (measured on Studio 21.1.2). Open, with a BorderWidth, it is a stroke."""
+    rows = ", ".join(f"{{ Linear = true, X = {num(x)}, Y = {num(y)} }}" for x, y in points)
+    return Lua(f"Polyline {{ {'Closed = true, ' if closed else ''}Points = {{ {rows} }} }}")
+
+
+def fuid(name):
+    """A choice written by name, as Fusion saves one: PaintMode "Multiply"."""
+    return Lua(f"FuID {{ {json.dumps(name)} }}")
+
+
 def spline(name, points):
     """A BezierSpline keyed at (frame, value) points, straight between them (handles a
     third of the way along, Linear) - so Fusion plays exactly the sampled values."""

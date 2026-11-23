@@ -1,4 +1,10 @@
-/* Graphs - on top of web/buddy.css and ../../web/graphics.css: the table of rows. */
+/* Graphs - on top of web/buddy.css and ../../web/graphics.css: the table of rows, and
+   what's shown only for some shapes of graph (main's data-shape; an element may be
+   for several: class="for-line for-pie"). */
+
+.dg[data-shape="bars"] :is(.for-line, .for-pie):not(.for-bars),
+.dg[data-shape="line"] :is(.for-bars, .for-pie):not(.for-line),
+.dg[data-shape="pie"] :is(.for-bars, .for-line):not(.for-pie) { display: none; }
 
 .gr-rows { display: flex; flex-direction: column; gap: 6px; }
 .gr-row { display: flex; align-items: center; gap: 8px; }

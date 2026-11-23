@@ -1319,5 +1319,175 @@
   "中文": "恢复自动",
   "العربية": "العودة إلى التلقائي",
   "Tiếng Việt": "Trở về tự động"
+ },
+ "Draw them as": {
+  "日本語": "表示の形",
+  "Español": "Dibujarlos como",
+  "Deutsch": "Darstellen als",
+  "Français": "Les dessiner en",
+  "한국어": "표시 형태",
+  "中文": "绘制为",
+  "العربية": "ارسمها على شكل",
+  "Tiếng Việt": "Vẽ dưới dạng"
+ },
+ "A line": {
+  "日本語": "折れ線",
+  "Español": "Una línea",
+  "Deutsch": "Eine Linie",
+  "Français": "Une ligne",
+  "한국어": "꺾은선",
+  "中文": "折线",
+  "العربية": "خط",
+  "Tiếng Việt": "Một đường"
+ },
+ "Seconds drawing": {
+  "日本語": "描く秒数",
+  "Español": "Segundos dibujando",
+  "Deutsch": "Sekunden Zeichnen",
+  "Français": "Secondes de tracé",
+  "한국어": "그리는 시간(초)",
+  "中文": "绘制秒数",
+  "العربية": "ثواني الرسم",
+  "Tiếng Việt": "Số giây vẽ"
+ },
+ "A number over each point": {
+  "日本語": "各点の上に数値",
+  "Español": "Un número sobre cada punto",
+  "Deutsch": "Eine Zahl über jedem Punkt",
+  "Français": "Un nombre au-dessus de chaque point",
+  "한국어": "각 점 위에 숫자",
+  "中文": "每个点上方显示数字",
+  "العربية": "رقم فوق كل نقطة",
+  "Tiếng Việt": "Một số phía trên mỗi điểm"
+ },
+ "A name under each point": {
+  "日本語": "各点の下に名前",
+  "Español": "Un nombre bajo cada punto",
+  "Deutsch": "Ein Name unter jedem Punkt",
+  "Français": "Un nom sous chaque point",
+  "한국어": "각 점 아래에 이름",
+  "中文": "每个点下方显示名称",
+  "العربية": "اسم تحت كل نقطة",
+  "Tiếng Việt": "Một tên bên dưới mỗi điểm"
+ },
+ "Line": {
+  "日本語": "線",
+  "Español": "Línea",
+  "Deutsch": "Linie",
+  "Français": "Ligne",
+  "한국어": "선",
+  "中文": "线",
+  "العربية": "الخط",
+  "Tiếng Việt": "Đường"
+ },
+ "A dot at each point": {
+  "日本語": "各点に丸",
+  "Español": "Un círculo en cada punto",
+  "Deutsch": "Ein Punkt an jeder Stelle",
+  "Français": "Un rond à chaque point",
+  "한국어": "각 점에 동그라미",
+  "中文": "每个点画圆点",
+  "العربية": "دائرة عند كل نقطة",
+  "Tiếng Việt": "Một chấm tại mỗi điểm"
+ },
+ "Fill under the line": {
+  "日本語": "線の下を塗る",
+  "Español": "Rellenar bajo la línea",
+  "Deutsch": "Fläche unter der Linie füllen",
+  "Français": "Remplir sous la ligne",
+  "한국어": "선 아래 채우기",
+  "中文": "填充线下区域",
+  "العربية": "ملء ما تحت الخط",
+  "Tiếng Việt": "Tô phần dưới đường"
+ },
+ "A pie": {
+  "日本語": "円グラフ",
+  "Español": "Un gráfico circular",
+  "Deutsch": "Ein Kreis",
+  "Français": "Un camembert",
+  "한국어": "원형",
+  "中文": "饼图",
+  "العربية": "دائرة",
+  "Tiếng Việt": "Hình tròn"
+ },
+ "Pie": {
+  "日本語": "円",
+  "Español": "Círculo",
+  "Deutsch": "Kreis",
+  "Français": "Camembert",
+  "한국어": "원형",
+  "中文": "饼图",
+  "العربية": "الدائرة",
+  "Tiếng Việt": "Hình tròn"
+ },
+ "A number on each slice": {
+  "日本語": "各扇形に数値",
+  "Español": "Un número en cada porción",
+  "Deutsch": "Eine Zahl auf jedem Stück",
+  "Français": "Un nombre sur chaque part",
+  "한국어": "각 조각에 숫자",
+  "中文": "每块上显示数字",
+  "العربية": "رقم على كل شريحة",
+  "Tiếng Việt": "Một số trên mỗi phần"
+ },
+ "A name beside each slice": {
+  "日本語": "各扇形の横に名前",
+  "Español": "Un nombre junto a cada porción",
+  "Deutsch": "Ein Name neben jedem Stück",
+  "Français": "Un nom à côté de chaque part",
+  "한국어": "각 조각 옆에 이름",
+  "中文": "每块旁显示名称",
+  "العربية": "اسم بجانب كل شريحة",
+  "Tiếng Việt": "Một tên bên cạnh mỗi phần"
+ },
+ "As a share of the whole (%)": {
+  "日本語": "全体に対する割合 (%)",
+  "Español": "Como parte del total (%)",
+  "Deutsch": "Als Anteil am Ganzen (%)",
+  "Français": "En part du total (%)",
+  "한국어": "전체 대비 비율(%)",
+  "中文": "占整体的比例 (%)",
+  "العربية": "كنسبة من الكل (%)",
+  "Tiếng Việt": "Theo tỷ lệ trên tổng (%)"
+ },
+ "Slices": {
+  "日本語": "扇形",
+  "Español": "Porciones",
+  "Deutsch": "Stücke",
+  "Français": "Parts",
+  "한국어": "조각",
+  "中文": "扇区",
+  "العربية": "الشرائح",
+  "Tiếng Việt": "Các phần"
+ },
+ "A hole in the middle": {
+  "日本語": "中央に穴",
+  "Español": "Un hueco en el centro",
+  "Deutsch": "Ein Loch in der Mitte",
+  "Français": "Un trou au centre",
+  "한국어": "가운데 구멍",
+  "中文": "中间留空",
+  "العربية": "فتحة في المنتصف",
+  "Tiếng Việt": "Lỗ ở giữa"
+ },
+ "Start again from the template": {
+  "日本語": "テンプレートからやり直す",
+  "Español": "Empezar de nuevo desde la plantilla",
+  "Deutsch": "Neu mit der Vorlage beginnen",
+  "Français": "Recommencer à partir du modèle",
+  "한국어": "템플릿에서 다시 시작",
+  "中文": "从模板重新开始",
+  "العربية": "البدء من جديد من القالب",
+  "Tiếng Việt": "Bắt đầu lại từ mẫu"
+ },
+ "Back to the template.": {
+  "日本語": "テンプレートに戻しました。",
+  "Español": "De vuelta a la plantilla.",
+  "Deutsch": "Zurück zur Vorlage.",
+  "Français": "Retour au modèle.",
+  "한국어": "템플릿으로 되돌렸습니다.",
+  "中文": "已恢复为模板。",
+  "العربية": "تمت العودة إلى القالب.",
+  "Tiếng Việt": "Đã trở về mẫu."
  }
 }
