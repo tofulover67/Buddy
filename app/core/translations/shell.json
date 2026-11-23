@@ -4939,5 +4939,65 @@
   "中文": "平铺窗口——右键选择排列方式",
   "العربية": "تجانب النوافذ – انقر بالزر الأيمن لاختيار ترتيب",
   "Tiếng Việt": "Xếp cửa sổ cạnh nhau – bấm chuột phải để chọn cách sắp xếp"
+ },
+ "No timeline open": {
+  "日本語": "タイムラインが開かれていません",
+  "Español": "Ninguna línea de tiempo abierta",
+  "Deutsch": "Keine Timeline geöffnet",
+  "Français": "Aucune timeline ouverte",
+  "한국어": "열린 타임라인 없음",
+  "中文": "未打开时间线",
+  "العربية": "لا يوجد خط زمني مفتوح",
+  "Tiếng Việt": "Chưa mở timeline nào"
+ },
+ "Open Time Tracker": {
+  "日本語": "タイムトラッカーを開く",
+  "Español": "Abrir Control de tiempo",
+  "Deutsch": "Zeiterfassung öffnen",
+  "Français": "Ouvrir Suivi du temps",
+  "한국어": "시간 추적기 열기",
+  "中文": "打开时间追踪",
+  "العربية": "فتح متتبع الوقت",
+  "Tiếng Việt": "Mở Theo dõi thời gian"
+ },
+ "Pause the timer": {
+  "日本語": "タイマーを一時停止",
+  "Español": "Pausar el temporizador",
+  "Deutsch": "Timer anhalten",
+  "Français": "Mettre le minuteur en pause",
+  "한국어": "타이머 일시 정지",
+  "中文": "暂停计时",
+  "العربية": "إيقاف المؤقت مؤقتًا",
+  "Tiếng Việt": "Tạm dừng bộ đếm giờ"
+ },
+ "Resume the timer": {
+  "日本語": "タイマーを再開",
+  "Español": "Reanudar el temporizador",
+  "Deutsch": "Timer fortsetzen",
+  "Français": "Reprendre le minuteur",
+  "한국어": "타이머 다시 시작",
+  "中文": "继续计时",
+  "العربية": "استئناف المؤقت",
+  "Tiếng Việt": "Tiếp tục bộ đếm giờ"
+ },
+ "Paused while you were away – resume the timer": {
+  "日本語": "離席中のため一時停止しました – タイマーを再開",
+  "Español": "En pausa mientras no estabas: reanudar el temporizador",
+  "Deutsch": "Angehalten, während du weg warst – Timer fortsetzen",
+  "Français": "En pause pendant votre absence – reprendre le minuteur",
+  "한국어": "자리를 비운 동안 일시 정지됨 – 타이머 다시 시작",
+  "中文": "你离开时已暂停 – 继续计时",
+  "العربية": "توقف مؤقتًا أثناء غيابك – استئناف المؤقت",
+  "Tiếng Việt": "Đã tạm dừng khi bạn vắng mặt – tiếp tục bộ đếm giờ"
+ },
+ "Connected to Resolve – this is the project and timeline Buddy's tools work on": {
+  "日本語": "Resolve に接続済み – Buddy のツールが作業するプロジェクトとタイムラインです。",
+  "Español": "Conectado a Resolve: este es el proyecto y la línea de tiempo con los que trabajan las herramientas de Buddy",
+  "Deutsch": "Mit Resolve verbunden – mit diesem Projekt und dieser Timeline arbeiten Buddys Werkzeuge",
+  "Français": "Connecté à Resolve – voici le projet et la timeline sur lesquels travaillent les outils de Buddy",
+  "한국어": "Resolve에 연결됨 – Buddy의 도구가 작업하는 프로젝트와 타임라인입니다",
+  "中文": "已连接到 Resolve – 这是 Buddy 的工具所处理的项目和时间线",
+  "العربية": "متصل بـ Resolve – هذا هو المشروع والخط الزمني اللذان تعمل عليهما أدوات Buddy",
+  "Tiếng Việt": "Đã kết nối với Resolve – đây là dự án và timeline mà các công cụ của Buddy làm việc"
  }
 }

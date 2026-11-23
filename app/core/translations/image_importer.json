@@ -749,5 +749,105 @@
   "中文": "已取消。",
   "العربية": "تم الإلغاء.",
   "Tiếng Việt": "Đã hủy."
+ },
+ "Also save to Asset Manager": {
+  "日本語": "アセットマネージャーにも保存",
+  "Español": "Guardar también en Gestor de recursos",
+  "Deutsch": "Auch im Asset-Manager speichern",
+  "Français": "Enregistrer aussi dans Gestionnaire de ressources",
+  "한국어": "에셋 매니저에도 저장",
+  "中文": "同时保存到素材管理器",
+  "العربية": "الحفظ أيضًا في مدير الأصول",
+  "Tiếng Việt": "Lưu cả vào Trình quản lý tài nguyên"
+ },
+ "Adds the selected images – or all of them, with none selected – to Asset Manager's library, to find and use again": {
+  "日本語": "選択した画像 (未選択ならすべて) をアセットマネージャーのライブラリに追加し、後で探して再利用できるようにします",
+  "Español": "Añade las imágenes seleccionadas, o todas si no hay ninguna seleccionada, a la biblioteca del Gestor de recursos, para encontrarlas y usarlas de nuevo",
+  "Deutsch": "Fügt die ausgewählten Bilder – oder alle, wenn keines ausgewählt ist – zur Bibliothek des Asset-Managers hinzu, um sie wiederzufinden und erneut zu verwenden",
+  "Français": "Ajoute les images sélectionnées – ou toutes, si aucune n'est sélectionnée – à la bibliothèque du Gestionnaire de ressources, pour les retrouver et les réutiliser",
+  "한국어": "선택한 이미지(선택이 없으면 전부)를 에셋 매니저 라이브러리에 추가해 나중에 찾아 다시 쓸 수 있게 합니다",
+  "中文": "将所选图片（未选择时为全部）添加到素材管理器的素材库，便于以后查找和再次使用",
+  "العربية": "يضيف الصور المحددة – أو كلها إن لم يُحدَّد شيء – إلى مكتبة مدير الأصول، للعثور عليها واستخدامها من جديد",
+  "Tiếng Việt": "Thêm các ảnh đã chọn – hoặc tất cả nếu chưa chọn ảnh nào – vào thư viện của Trình quản lý tài nguyên để tìm và dùng lại"
+ },
+ "Asset Manager isn't available here.": {
+  "日本語": "ここではアセットマネージャーを使えません。",
+  "Español": "Gestor de recursos no está disponible aquí.",
+  "Deutsch": "Der Asset-Manager ist hier nicht verfügbar.",
+  "Français": "Gestionnaire de ressources n'est pas disponible ici.",
+  "한국어": "여기서는 에셋 매니저를 사용할 수 없습니다.",
+  "中文": "此处无法使用素材管理器。",
+  "العربية": "مدير الأصول غير متاح هنا.",
+  "Tiếng Việt": "Trình quản lý tài nguyên không khả dụng ở đây."
+ },
+ "Saved 1 image to Asset Manager.": {
+  "日本語": "1 枚の画像をアセットマネージャーに保存しました。",
+  "Español": "Se guardó 1 imagen en Gestor de recursos.",
+  "Deutsch": "1 Bild im Asset-Manager gespeichert.",
+  "Français": "1 image enregistrée dans Gestionnaire de ressources.",
+  "한국어": "이미지 1개를 에셋 매니저에 저장했습니다.",
+  "中文": "已将 1 张图片保存到素材管理器。",
+  "العربية": "تم حفظ صورة واحدة في مدير الأصول.",
+  "Tiếng Việt": "Đã lưu 1 ảnh vào Trình quản lý tài nguyên."
+ },
+ "Saved {count} images to Asset Manager.": {
+  "日本語": "{count} 枚の画像をアセットマネージャーに保存しました。",
+  "Español": "Se guardaron {count} imágenes en Gestor de recursos.",
+  "Deutsch": "{count} Bilder im Asset-Manager gespeichert.",
+  "Français": "{count} images enregistrées dans Gestionnaire de ressources.",
+  "한국어": "이미지 {count}개를 에셋 매니저에 저장했습니다.",
+  "中文": "已将 {count} 张图片保存到素材管理器。",
+  "العربية": "تم حفظ {count} صور في مدير الأصول.",
+  "Tiếng Việt": "Đã lưu {count} ảnh vào Trình quản lý tài nguyên."
+ },
+ "1 was there already.": {
+  "日本語": "1 件はすでにありました。",
+  "Español": "1 ya estaba allí.",
+  "Deutsch": "1 war bereits vorhanden.",
+  "Français": "1 y était déjà.",
+  "한국어": "1개는 이미 있었습니다.",
+  "中文": "1 个已在其中。",
+  "العربية": "1 كان موجودًا من قبل.",
+  "Tiếng Việt": "1 mục đã có sẵn."
+ },
+ "{count} were there already.": {
+  "日本語": "{count} 件はすでにありました。",
+  "Español": "{count} ya estaban allí.",
+  "Deutsch": "{count} waren bereits vorhanden.",
+  "Français": "{count} y étaient déjà.",
+  "한국어": "{count}개는 이미 있었습니다.",
+  "中文": "{count} 个已在其中。",
+  "العربية": "{count} كانت موجودة من قبل.",
+  "Tiếng Việt": "{count} mục đã có sẵn."
+ },
+ "1 isn't a kind of file Asset Manager takes.": {
+  "日本語": "1 件はアセットマネージャーが扱えない種類のファイルです。",
+  "Español": "1 no es un tipo de archivo que admita Gestor de recursos.",
+  "Deutsch": "1 ist kein Dateityp, den der Asset-Manager annimmt.",
+  "Français": "1 n'est pas un type de fichier accepté par Gestionnaire de ressources.",
+  "한국어": "1개는 에셋 매니저가 받지 않는 파일 형식입니다.",
+  "中文": "1 个不是素材管理器支持的文件类型。",
+  "العربية": "1 ليس من أنواع الملفات التي يقبلها مدير الأصول.",
+  "Tiếng Việt": "1 tệp không thuộc loại Trình quản lý tài nguyên nhận."
+ },
+ "{count} aren't a kind of file Asset Manager takes.": {
+  "日本語": "{count} 件はアセットマネージャーが扱えない種類のファイルです。",
+  "Español": "{count} no son un tipo de archivo que admita Gestor de recursos.",
+  "Deutsch": "{count} sind kein Dateityp, den der Asset-Manager annimmt.",
+  "Français": "{count} ne sont pas d'un type de fichier accepté par Gestionnaire de ressources.",
+  "한국어": "{count}개는 에셋 매니저가 받지 않는 파일 형식입니다.",
+  "中文": "{count} 个不是素材管理器支持的文件类型。",
+  "العربية": "{count} ليست من أنواع الملفات التي يقبلها مدير الأصول.",
+  "Tiếng Việt": "{count} tệp không thuộc loại Trình quản lý tài nguyên nhận."
+ },
+ "Couldn't save to Asset Manager: {error}": {
+  "日本語": "アセットマネージャーに保存できませんでした: {error}",
+  "Español": "No se pudo guardar en Gestor de recursos: {error}",
+  "Deutsch": "Speichern im Asset-Manager fehlgeschlagen: {error}",
+  "Français": "Impossible d'enregistrer dans Gestionnaire de ressources : {error}",
+  "한국어": "에셋 매니저에 저장하지 못했습니다: {error}",
+  "中文": "无法保存到素材管理器：{error}",
+  "العربية": "تعذّر الحفظ في مدير الأصول: {error}",
+  "Tiếng Việt": "Không thể lưu vào Trình quản lý tài nguyên: {error}"
  }
 }

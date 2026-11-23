@@ -21,7 +21,7 @@ remembered between launches.
 Protocol:
     to the view    settings, items, downloads, log, alert, toast
     from the view  paste, add_files, choose_folder, bin_name, remove, clear,
-                   import_images
+                   to_assets, import_images
 """
 
 from __future__ import annotations
@@ -255,6 +255,34 @@ class ImageImporterPage(WebToolPage):
         removed = self.staging.remove((payload or {}).get("ids"))
         if removed:
             self._push_items()
+
+    def on_to_assets(self, payload):
+        """Also save to Asset Manager: the selected images (all of them
+        with none selected) join its library, to be found and used again -
+        where they are, in the save folder. They stay on this list too."""
+        ids = set((payload or {}).get("ids") or [])
+        chosen = [item for item in self.staging.items if not ids or item["id"] in ids]
+        paths = [item["path"] for item in chosen if os.path.exists(item["path"])]
+        if not paths:
+            return
+        assets = (getattr(self.host, "pages", None) or {}).get("asset_manager")
+        if assets is None or getattr(assets, "is_placeholder", False) or not hasattr(assets, "add_from_tool"):
+            self.emit("toast", {"text": "Asset Manager isn't available here."})
+            return
+        try:
+            added, existing, skipped = assets.add_from_tool(paths)
+        except Exception as exc:  # noqa: BLE001 - the other tool's trouble, said here
+            self._add_log(f"Couldn't save to Asset Manager: {exc}", "error")
+            return
+        parts = ["Saved 1 image to Asset Manager." if added == 1 else f"Saved {added} images to Asset Manager."]
+        if existing:
+            parts.append("1 was there already." if existing == 1 else f"{existing} were there already.")
+        if skipped:
+            parts.append("1 isn't a kind of file Asset Manager takes." if skipped == 1
+                         else f"{skipped} aren't a kind of file Asset Manager takes.")
+        for part in parts:
+            self._add_log(part, "success" if added else "info")
+        self.emit("toast", {"text": parts[0] if added else parts[-1]})
 
     def on_clear(self, _payload):
         if self.staging.clear():

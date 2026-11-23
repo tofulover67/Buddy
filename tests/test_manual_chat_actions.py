@@ -310,5 +310,141 @@ class DeleteBinTests(unittest.TestCase):
             )
 
 
+class Renamable(FakeClip):
+    def SetClipProperty(self, key, value):
+        if key != "Clip Name" or getattr(self, "locked", False):
+            return False
+        self.name = value
+        return True
+
+
+class WithSettings:
+    """GetSetting / SetSetting on a project or timeline."""
+    def __init__(self, target, values):
+        self.values = dict(values)
+        target.GetSetting = lambda key: self.values.get(key, "")
+        target.SetSetting = self.set
+
+    def set(self, key, value):
+        self.values[key] = value
+        return True
+
+
+class RevertTests(unittest.TestCase):
+    """Revert last change: what Apply set is put back - only where it is
+    still as Buddy left it, and only on the project and timeline it was
+    applied to."""
+
+    def setUp(self):
+        self.a, self.b = FakeItem("A", 86400), FakeItem("B", 86410)
+        self.a.color = "Orange"
+        for item in (self.a, self.b):
+            item.ClearClipColor = lambda item=item: setattr(item, "color", None) or True
+        self.clips = [Renamable("A001"), Renamable("A002")]
+        self.controller, self.project, self.timeline = _setup(
+            tracks=[[self.a, self.b]], root=FakeFolder("Master", self.clips))
+        self.timeline.DeleteMarkerAtFrame = lambda frame: self.timeline.markers.pop(frame, None) is not None
+
+    def apply(self, action_id, args):
+        proposal = actions.preview(self.controller, action_id, args)
+        actions.execute(self.controller, proposal)
+        return proposal
+
+    def test_renames_go_back(self):
+        proposal = self.apply("rename_clips", {"renames": [{"from": "A001", "to": "Interview"},
+                                                           {"from": "A002", "to": "Cutaway"}]})
+        self.assertTrue(actions.can_revert(proposal))
+        self.assertIn("2 of 2", actions.revert(self.controller, proposal))
+        self.assertEqual([c.name for c in self.clips], ["A001", "A002"])
+
+    def test_a_clip_renamed_again_since_is_left(self):
+        proposal = self.apply("rename_clips", {"renames": [{"from": "A001", "to": "Interview"}]})
+        self.clips[0].name = "Interview wide"
+        log = []
+        self.assertIn("0 of 1", actions.revert(self.controller, proposal, log=log.append))
+        self.assertEqual(self.clips[0].name, "Interview wide")
+        self.assertTrue(any("renamed again" in line for line in log))
+
+    def test_a_rename_resolve_refused_is_not_one_to_revert(self):
+        self.clips[0].locked = True
+        proposal = self.apply("rename_clips", {"renames": [{"from": "A001", "to": "Interview"}]})
+        self.assertFalse(actions.can_revert(proposal))
+        with self.assertRaises(actions.ActionError):
+            actions.revert(self.controller, proposal)
+
+    def test_only_the_markers_buddy_added_come_off(self):
+        self.timeline.markers[10] = {"color": "Red", "name": "Mine", "note": ""}
+        proposal = self.apply("add_markers", {"markers": [{"frame": 20, "name": "Intro", "color": "Blue"},
+                                                          {"frame": 30, "name": "Outro", "color": "Blue"}]})
+        self.timeline.markers[30]["name"] = "Outro (checked)"          # changed by hand since
+        log = []
+        self.assertIn("1 of 2", actions.revert(self.controller, proposal, log=log.append))
+        self.assertEqual(sorted(self.timeline.markers), [10, 30])
+        self.assertTrue(any("changed since" in line for line in log))
+
+    def test_colours_go_back_to_what_they_were_or_to_none(self):
+        proposal = self.apply("set_clip_colors", {"color": "Teal", "clips": [{"track": "V1", "index": 1},
+                                                                             {"track": "V1", "index": 2}]})
+        self.assertEqual((self.a.color, self.b.color), ("Teal", "Teal"))
+        actions.revert(self.controller, proposal)
+        self.assertEqual((self.a.color, self.b.color), ("Orange", None))
+
+    def test_a_colour_changed_since_is_left(self):
+        proposal = self.apply("set_clip_colors", {"color": "Teal", "clips": [{"track": "V1", "index": 1}]})
+        self.a.color = "Pink"
+        self.assertIn("0 of 1", actions.revert(self.controller, proposal))
+        self.assertEqual(self.a.color, "Pink")
+
+    def test_settings_go_back_and_an_unknown_key_is_not_noted(self):
+        settings = WithSettings(self.project, {"timelineFrameRate": "24", "colorScienceMode": "davinciYRGB"})
+        proposal = self.apply("set_project_settings", {"settings": {
+            "timelineFrameRate": "25", "colorScienceMode": "davinciYRGBColorManagedv2", "madeUp": "1"}})
+        self.assertEqual([key for key, _before, _value in proposal.undo], ["timelineFrameRate", "colorScienceMode"])
+        settings.values["timelineFrameRate"] = "25.0"          # as Resolve reads it back
+        self.assertIn("2 of 2", actions.revert(self.controller, proposal))
+        self.assertEqual(settings.values["timelineFrameRate"], "24")
+        self.assertEqual(settings.values["colorScienceMode"], "davinciYRGB")
+        self.assertEqual(settings.values["madeUp"], "1")
+
+    def test_timeline_settings_too(self):
+        settings = WithSettings(self.timeline, {"timelineResolutionWidth": "1920"})
+        proposal = self.apply("set_timeline_settings", {"settings": {"timelineResolutionWidth": "3840"}})
+        actions.revert(self.controller, proposal)
+        self.assertEqual(settings.values["timelineResolutionWidth"], "1920")
+
+    def test_another_timeline_open_reverts_nothing(self):
+        proposal = self.apply("add_markers", {"markers": [{"frame": 20, "name": "Intro"}]})
+        other = FakeTimeline("Edit v2", "tl-2")
+        self.project.timeline = other
+        with self.assertRaises(actions.ActionError):
+            actions.revert(self.controller, proposal)
+        self.assertIn(20, self.timeline.markers)
+        self.assertTrue(actions.can_revert(proposal))           # still there for the right timeline
+
+    def test_a_second_revert_does_nothing(self):
+        proposal = self.apply("rename_clips", {"renames": [{"from": "A001", "to": "Interview"}]})
+        actions.revert(self.controller, proposal)
+        self.assertFalse(actions.can_revert(proposal))
+
+    def test_a_plan_reverts_what_it_can_and_says_what_stays(self):
+        self.project.pool.AddSubFolder = lambda parent, name: FakeFolder(name)
+        plan = actions.preview_plan(self.controller, [
+            {"action_id": "rename_clips", "arguments": {"renames": [{"from": "A001", "to": "Interview"}]}},
+            {"action_id": "add_markers", "arguments": {"markers": [{"frame": 20, "name": "Intro"}]}},
+        ])
+        actions.execute(self.controller, plan)
+        self.assertTrue(actions.will_be_revertible(plan))
+        outcome = actions.revert(self.controller, plan)
+        self.assertEqual(self.clips[0].name, "A001")
+        self.assertNotIn(20, self.timeline.markers)
+        self.assertNotIn("Not reverted", outcome)
+
+    def test_what_cannot_be_reverted_says_so_beforehand(self):
+        delete = actions.ProposedAction(action_id="delete_markers", summary="Delete 1 marker(s).")
+        self.assertFalse(actions.will_be_revertible(delete))
+        self.assertEqual(actions.REVERTIBLE_ACTIONS, frozenset(actions.REVERTS))
+        self.assertTrue(actions.REVERTIBLE_ACTIONS <= set(actions.ACTIONS))
+
+
 if __name__ == "__main__":
     unittest.main()

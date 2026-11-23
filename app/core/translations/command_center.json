@@ -1369,5 +1369,125 @@
   "中文": "Web 标签页未打开。",
   "العربية": "تبويب الويب غير مفتوح.",
   "Tiếng Việt": "Thẻ Web chưa mở."
+ },
+ "Open a Buddy tool": {
+  "日本語": "Buddy のツールを開く",
+  "Español": "Abrir una herramienta de Buddy",
+  "Deutsch": "Ein Buddy-Werkzeug öffnen",
+  "Français": "Ouvrir un outil de Buddy",
+  "한국어": "Buddy 도구 열기",
+  "中文": "打开 Buddy 工具",
+  "العربية": "فتح أداة من Buddy",
+  "Tiếng Việt": "Mở một công cụ của Buddy"
+ },
+ "Brings Buddy to the front on the tool you choose – one hot key per tool, if you like.": {
+  "日本語": "選んだツールで Buddy を前面に表示します – ツールごとにホットキーを設定できます。",
+  "Español": "Trae Buddy al frente en la herramienta que elijas: una tecla rápida por herramienta, si quieres.",
+  "Deutsch": "Holt Buddy mit dem gewählten Werkzeug nach vorn – auf Wunsch ein Hotkey pro Werkzeug.",
+  "Français": "Amène Buddy au premier plan sur l'outil choisi – un raccourci par outil, si vous voulez.",
+  "한국어": "선택한 도구로 Buddy를 앞으로 가져옵니다 – 원하면 도구마다 단축키를 하나씩.",
+  "中文": "将 Buddy 调到最前并打开你选择的工具 – 可以为每个工具设置一个热键。",
+  "العربية": "يجلب Buddy إلى المقدمة على الأداة التي تختارها – مفتاح سريع لكل أداة إن أردت.",
+  "Tiếng Việt": "Đưa Buddy lên trước ở công cụ bạn chọn – mỗi công cụ một phím tắt, nếu muốn."
+ },
+ "Tool": {
+  "日本語": "ツール",
+  "Español": "Herramienta",
+  "Deutsch": "Werkzeug",
+  "Français": "Outil",
+  "한국어": "도구",
+  "中文": "工具",
+  "العربية": "الأداة",
+  "Tiếng Việt": "Công cụ"
+ },
+ "Pause or resume the time tracker": {
+  "日本語": "タイムトラッカーを一時停止または再開",
+  "Español": "Pausar o reanudar el control de tiempo",
+  "Deutsch": "Zeiterfassung anhalten oder fortsetzen",
+  "Français": "Mettre en pause ou reprendre le suivi du temps",
+  "한국어": "시간 추적기 일시 정지 또는 다시 시작",
+  "中文": "暂停或继续时间追踪",
+  "العربية": "إيقاف متتبع الوقت مؤقتًا أو استئنافه",
+  "Tiếng Việt": "Tạm dừng hoặc tiếp tục theo dõi thời gian"
+ },
+ "Pauses Time Tracker's running timer, or carries on with a paused one – without leaving Resolve.": {
+  "日本語": "タイムトラッカーの動作中のタイマーを一時停止、または一時停止中のタイマーを再開します – Resolve を離れずに。",
+  "Español": "Pausa el temporizador en marcha de Control de tiempo, o continúa uno en pausa, sin salir de Resolve.",
+  "Deutsch": "Hält den laufenden Timer der Zeiterfassung an oder setzt einen angehaltenen fort – ohne Resolve zu verlassen.",
+  "Français": "Met en pause le minuteur en cours de Suivi du temps, ou reprend un minuteur en pause – sans quitter Resolve.",
+  "한국어": "시간 추적기의 실행 중인 타이머를 일시 정지하거나 일시 정지된 타이머를 다시 시작합니다 – Resolve를 떠나지 않고.",
+  "中文": "暂停时间追踪正在运行的计时，或继续已暂停的计时 – 无需离开 Resolve。",
+  "العربية": "يوقف مؤقت متتبع الوقت الجاري مؤقتًا، أو يكمل مؤقتًا متوقفًا – دون مغادرة Resolve.",
+  "Tiếng Việt": "Tạm dừng bộ đếm giờ đang chạy của Theo dõi thời gian, hoặc tiếp tục bộ đang tạm dừng – không cần rời Resolve."
+ },
+ "Open {name}": {
+  "日本語": "{name} を開く",
+  "Español": "Abrir {name}",
+  "Deutsch": "{name} öffnen",
+  "Français": "Ouvrir {name}",
+  "한국어": "{name} 열기",
+  "中文": "打开 {name}",
+  "العربية": "فتح {name}",
+  "Tiếng Việt": "Mở {name}"
+ },
+ "Opened {name}": {
+  "日本語": "{name} を開きました",
+  "Español": "Se abrió {name}",
+  "Deutsch": "{name} geöffnet",
+  "Français": "{name} ouvert",
+  "한국어": "{name} 열림",
+  "中文": "已打开 {name}",
+  "العربية": "تم فتح {name}",
+  "Tiếng Việt": "Đã mở {name}"
+ },
+ "Choose a tool for this hot key first.": {
+  "日本語": "まずこのホットキーのツールを選んでください。",
+  "Español": "Elige primero una herramienta para esta tecla rápida.",
+  "Deutsch": "Wähle zuerst ein Werkzeug für diesen Hotkey.",
+  "Français": "Choisissez d'abord un outil pour ce raccourci.",
+  "한국어": "먼저 이 단축키의 도구를 선택하세요.",
+  "中文": "请先为此热键选择一个工具。",
+  "العربية": "اختر أولًا أداة لهذا المفتاح السريع.",
+  "Tiếng Việt": "Hãy chọn công cụ cho phím tắt này trước."
+ },
+ "No timer is running in Time Tracker.": {
+  "日本語": "タイムトラッカーで動作中のタイマーはありません。",
+  "Español": "No hay ningún temporizador en marcha en Control de tiempo.",
+  "Deutsch": "In der Zeiterfassung läuft kein Timer.",
+  "Français": "Aucun minuteur n'est en cours dans Suivi du temps.",
+  "한국어": "시간 추적기에서 실행 중인 타이머가 없습니다.",
+  "中文": "时间追踪中没有正在运行的计时。",
+  "العربية": "لا يوجد مؤقت يعمل في متتبع الوقت.",
+  "Tiếng Việt": "Không có bộ đếm giờ nào đang chạy trong Theo dõi thời gian."
+ },
+ "Time Tracker didn't change.": {
+  "日本語": "タイムトラッカーは変わりませんでした。",
+  "Español": "Control de tiempo no cambió.",
+  "Deutsch": "Die Zeiterfassung hat sich nicht geändert.",
+  "Français": "Suivi du temps n'a pas changé.",
+  "한국어": "시간 추적기가 바뀌지 않았습니다.",
+  "中文": "时间追踪没有变化。",
+  "العربية": "لم يتغير متتبع الوقت.",
+  "Tiếng Việt": "Theo dõi thời gian không thay đổi."
+ },
+ "Timer paused": {
+  "日本語": "タイマーを一時停止しました",
+  "Español": "Temporizador en pausa",
+  "Deutsch": "Timer angehalten",
+  "Français": "Minuteur en pause",
+  "한국어": "타이머 일시 정지됨",
+  "中文": "计时已暂停",
+  "العربية": "تم إيقاف المؤقت مؤقتًا",
+  "Tiếng Việt": "Đã tạm dừng bộ đếm giờ"
+ },
+ "Timer resumed": {
+  "日本語": "タイマーを再開しました",
+  "Español": "Temporizador reanudado",
+  "Deutsch": "Timer fortgesetzt",
+  "Français": "Minuteur repris",
+  "한국어": "타이머 다시 시작됨",
+  "中文": "计时已继续",
+  "العربية": "تم استئناف المؤقت",
+  "Tiếng Việt": "Đã tiếp tục bộ đếm giờ"
  }
 }

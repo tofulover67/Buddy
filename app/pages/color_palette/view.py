@@ -42,6 +42,17 @@ def normalize_hex(text):
     return "#" + digits
 
 
+def fusion_rgba(hex_code, alpha=1.0):
+    """'#1A2B3C' -> '0.102, 0.169, 0.235, 1' - red, green, blue and alpha as the
+    0-1 numbers Fusion's colour controls take (and Text+'s, and a
+    Background's). None if it isn't a colour."""
+    hex_code = normalize_hex(hex_code)
+    if not hex_code:
+        return None
+    parts = [int(hex_code[i:i + 2], 16) / 255 for i in (1, 3, 5)] + [max(0.0, min(1.0, float(alpha)))]
+    return ", ".join(f"{value:.3f}".rstrip("0").rstrip(".") for value in parts)
+
+
 def swatch(hex_code, vision="None"):
     shown = simulate_colorblindness(hex_code, vision)
     return {"hex": hex_code.upper(), "shown": shown.upper(), "ink": contrasting_text_color(shown)}

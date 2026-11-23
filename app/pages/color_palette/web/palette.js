@@ -112,16 +112,28 @@ function swatchEl(sw, opts = {}) {
     return node;
 }
 
+/* A colour as Fusion's colour controls take it: red, green, blue, alpha from 0 to 1
+   (view.py fusion_rgba writes the same for the clipboard). */
+function fusionRgba(hex) {
+    const n = v => String(+(parseInt(v, 16) / 255).toFixed(3));
+    return `${n(hex.slice(1, 3))}, ${n(hex.slice(3, 5))}, ${n(hex.slice(5, 7))}, 1`;
+}
+function fusionItem(sw) {
+    return {label: T("Copy for Fusion ({rgba})").replace("{rgba}", fusionRgba(sw.hex)),
+            onClick: () => copyHex(sw, null, "fusion")};
+}
+
 /* A copied colour flashes up by the pointer, in the colour itself. */
 let tipTimer = 0;
-function copyHex(sw, e) {
-    send("copy", {hex: sw.hex});
+function copyHex(sw, e, format) {
+    send("copy", format ? {hex: sw.hex, format} : {hex: sw.hex});
     let tip = $("copy-tip");
     if (!tip) {
         tip = el("div.copy-tip#copy-tip");
         document.body.append(tip);
     }
-    tip.textContent = T("Copied {hex}").replace("{hex}", sw.hex);
+    tip.textContent = format === "fusion" ? T("Copied for Fusion: {rgba}").replace("{rgba}", fusionRgba(sw.hex))
+                                           : T("Copied {hex}").replace("{hex}", sw.hex);
     tip.style.cssText = `--sw:${sw.shown};--ink:${sw.ink}`;
     const x = e && e.clientX ? e.clientX : innerWidth / 2, y = e && e.clientY ? e.clientY : innerHeight / 2;
     tip.style.left = `${Math.min(x + 12, innerWidth - 150)}px`;
@@ -351,6 +363,7 @@ function paletteBody(row) {
             title: `${c.hex} – click to copy, drag to reorder, right-click for more`,
             menu: () => [
                 {label: T("Copy hex ({hex})").replace("{hex}", c.hex), onClick: () => copyHex(c)},
+                fusionItem(c),
                 {label: T("Change colour") + "…", onClick: () => editColor(row, i, grid.children[i])},
                 {sep: true},
                 {label: T("Remove"), danger: true, onClick: () => send("remove_color", {name: row.name, index: i})},
@@ -608,6 +621,7 @@ function previewGrid(cls) {
                     cls: "big", drag: {gen: GEN.id, preview: i},
                     menu: () => [
                         {label: T("Copy hex ({hex})").replace("{hex}", sw.hex), onClick: () => copyHex(sw)},
+                        fusionItem(sw),
                         {label: `${T("Add to")} ${GEN.target}`, onClick: () => gen("add", {indexes: [i]})},
                     ],
                 });
@@ -1108,6 +1122,7 @@ Buddy.on("extract", x => {
         cls: "huge", label: true,
         menu: () => [
             {label: T("Copy hex ({hex})").replace("{hex}", c.hex), onClick: () => copyHex(c)},
+            fusionItem(c),
             {sep: true},
             {heading: T("Add to palette")},
             ...[x.current, ...x.palettes.filter(p => p !== x.current)].map(p => ({
@@ -1266,6 +1281,7 @@ function slotDrop(node, slot) {
 function slotMenu(s) {
     return [
         {label: T("Copy hex ({hex})").replace("{hex}", s.hex), swatch: s.shown, onClick: () => copyHex(s)},
+        fusionItem(s),
         {label: T("Change colour") + "…", onClick: () => Picker.open({
             hex: s.hex, title: T("Change colour"), at: {x: innerWidth / 2 - 130, y: 140},
             onPick: hex => send("set_slot", {slot: s.slot, hex}),

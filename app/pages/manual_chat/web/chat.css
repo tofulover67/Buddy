@@ -217,7 +217,7 @@
     padding: 10px 14px;
 }
 .offer .reason { flex: 1; min-width: 0; }
-.offer .prefill { overflow-wrap: anywhere; }
+.offer .prefill { overflow-wrap: anywhere; white-space: pre-wrap; max-height: 9.5em; overflow-y: auto; }
 
 .editing { display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 12px; }
 .editing[hidden] { display: none; }

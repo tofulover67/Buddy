@@ -6,11 +6,12 @@ view is web/index.html + chat.js; everything it shows is decided here.
 
 Protocol (see core/web_page.py for the mechanism):
     to the view    transcript, append, controls, status, thinking, stream,
-                   suggestions, compose, proposal, offer, toast, pictures,
-                   chat_list
+                   suggestions, compose, proposal, revert, offer, toast,
+                   pictures, chat_list
     from the view  send, stop, regenerate, edit_last, copy, new_chat,
                    prev_chat, next_chat, export, apply_proposal,
-                   discard_proposal, open_tool, open_manual, attach_image,
+                   discard_proposal, revert_change, open_tool, open_manual,
+                   attach_image,
                    paste_image, remove_picture, search_chats, select_chat,
                    rename_chat, pin_chat, delete_chat, delete_all_chats,
                    run_checkup, explain_clip
@@ -186,6 +187,10 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         # offer with one click - but Discard still works).
         self._proposal_state = "ready"
         self._proposal_note = ""
+        # The change applied last, while Revert can still put it back
+        # (actions.revert): this run only - it holds Resolve's own objects.
+        self._applied = None
+        self._revert_busy = False
         self._chat_query = ""
         self._chat_store_error = ""
         try:
@@ -213,6 +218,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._push_chat_list()
         self._push_status()
         self._push_proposal()
+        self._push_revert()
         self._push_offer()
         self.emit("thinking", {"on": self._sending, "message": self._thinking})
         self._push_stream()
@@ -854,6 +860,8 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             offer = {"tool_id": tool_id, "label": f"Open {tool.name if tool else tool_id}", "reason": reason}
             if result.offered_prefill:
                 offer["prefill"] = result.offered_prefill
+            if result.offered_handoff:
+                offer["handoff"] = result.offered_handoff
             self._set_offer(offer)
 
     def _set_offer(self, offer):
@@ -866,13 +874,20 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
 
     def on_open_tool(self, payload):
         """The offered tool, in front - started with what the model handed
-        over for it, when it's a tool that takes that (ToolPage.prefill).
+        over for it, when it's a tool that takes that (ToolPage.prefill, or
+        ToolPage.handoff for a bin list or a tab to open on).
         The text comes from the offer kept here, never from the view."""
         tool_id = (payload or {}).get("tool_id")
         if not tool_id:
             return
-        self.host.switch_tool(tool_id)
         offer = self.chats.current.offer or {}
+        handoff = offer.get("handoff") if offer.get("tool_id") == tool_id else None
+        if handoff:
+            # More than words: the shell hands it to the tool (ToolPage.handoff).
+            if not self.host.switch_tool(tool_id, payload=handoff):
+                self._toast("The tool is open, but it couldn't take what Ask Buddy handed over.")
+            return
+        self.host.switch_tool(tool_id)
         text = offer.get("prefill") if offer.get("tool_id") == tool_id else ""
         page = (getattr(self.host, "pages", None) or {}).get(tool_id)
         if text and page is not None and not getattr(page, "is_placeholder", False):
@@ -924,6 +939,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         project state."""
         self._pending_question = ""
         self._hide_proposal()
+        self._forget_applied()
         self._push_offer()
         self._push_transcript()
         self._push_controls()
@@ -1163,10 +1179,14 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             self.emit("proposal", None)
             return
         destructive = bool(getattr(proposal, "destructive", False))
-        note = self._proposal_note or (
-            "Nothing has been changed yet. Buddy cannot undo this – use Resolve's own Edit > Undo."
-            if destructive else "Nothing has been changed yet."
-        )
+        if self._proposal_note:
+            note = self._proposal_note
+        elif actions.will_be_revertible(proposal):
+            note = "Nothing has been changed yet. Afterwards, Revert last change can put it back."
+        elif destructive:
+            note = "Nothing has been changed yet. Buddy cannot undo this – use Resolve's own Edit > Undo."
+        else:
+            note = "Nothing has been changed yet."
         self.emit("proposal", {
             "title": proposal.summary,
             "destructive": destructive,
@@ -1190,6 +1210,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
     def _on_writes_revoked(self):
         # A card already on screen was proposed under the consent just
         # withdrawn, so it goes too (Apply also re-checks the setting).
+        self._forget_applied()              # a revert is a change to the project too
         if self._proposal is not None:
             self._hide_proposal()
             self._append(
@@ -1246,6 +1267,63 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._append(BUDDY, f"**Applied.** {outcome}" + (f"\n\n{detail}" if detail else ""),
                      copyable=True)
         self._hide_proposal()
+        self._applied = proposal if actions.can_revert(proposal) else None
+        self._push_revert()
+
+    # ------------------------------------------------ revert last change
+
+    def _forget_applied(self):
+        if self._applied is not None:
+            self._applied = None
+            self._push_revert()
+
+    def _push_revert(self):
+        applied = self._applied
+        self.emit("revert", None if applied is None else {"summary": applied.summary, "busy": self._revert_busy})
+
+    def on_revert_change(self, _payload=None):
+        """Put back what the last applied change set (actions.revert) -
+        the other place this page writes, and as guarded as Apply: the
+        consent is read again, it runs on the GUI thread, and the button
+        goes busy first so a double-click can't run it twice."""
+        applied = self._applied
+        if applied is None or self._revert_busy or self._sending:
+            return
+        if not bool(self.settings.get("allow_project_writes", False)):
+            self._forget_applied()
+            self._append(BUDDY, "Project changes are turned off in Settings, so nothing was reverted.")
+            return
+        try:
+            controller = self.host.ensure_connected()
+        except ResolveConnectionError as e:
+            self._toast(f"Could not reach Resolve: {e}")
+            return
+        self._revert_busy = True
+        self._push_revert()
+        lines = []
+        self.host.set_busy(True, "Reverting the change…")
+        try:
+            outcome = actions.revert(controller, applied, log=lines.append)
+        except actions.ActionError as e:
+            # The project or timeline is another one now: the button stays,
+            # for when the right one is open again.
+            self._revert_busy = False
+            self._push_revert()
+            self._append(BUDDY, f"Nothing was reverted: {e}", error=True)
+            return
+        except Exception as e:  # noqa: BLE001 - shown to the user
+            self._revert_busy = False
+            self._applied = None
+            self._push_revert()
+            self._append(BUDDY, f"The revert failed part-way: {e}", error=True)
+            return
+        finally:
+            self.host.set_busy(False)
+        self._revert_busy = False
+        self._applied = None
+        self._push_revert()
+        detail = "\n".join(f"- {line}" for line in lines)
+        self._append(BUDDY, f"**Reverted.** {outcome}" + (f"\n\n{detail}" if detail else ""), copyable=True)
 
     # ------------------------------------------------------------ settings
 

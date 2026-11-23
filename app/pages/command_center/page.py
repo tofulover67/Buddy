@@ -114,8 +114,31 @@ class CommandCenterPage(WebToolPage):
         except Exception:   # noqa: BLE001 - Animation not ready: no presets offered yet
             return []
 
+    def _tools(self):
+        """[(tool id, name)] the Open a Buddy tool hot key can open: every
+        tool that works, a tab on another tool's page too."""
+        out = []
+        for tool_id, page in (getattr(self.host, "pages", None) or {}).items():
+            if getattr(page, "is_placeholder", False) or tool_id == self.tool_id:
+                continue
+            out.append((tool_id, getattr(page, "display_name", None) or tool_id))
+            for sub in getattr(page, "by_tab", {}).values():
+                if getattr(sub, "tool_id", None) and not getattr(sub, "is_placeholder", False):
+                    out.append((sub.tool_id, getattr(sub, "display_name", None) or sub.tool_id))
+        return out
+
+    def _names(self, presets=None):
+        """What actions.summary names a binding by: Animation's presets, and
+        the tools as \"tool:<id>\"."""
+        names = dict(self._presets() if presets is None else presets)
+        names.update({f"tool:{tool_id}": name for tool_id, name in self._tools()})
+        return names
+
     def _options_for(self, binding) -> dict:
         options = dict(binding["options"])
+        if binding["action"] == "open_tool" and options.get("tool") not in dict(self._tools()):
+            tools = self._tools()
+            options["tool"] = tools[0][0] if tools else ""
         if binding["action"] == "animation" and not options.get("preset"):
             presets = self._presets()
             options["preset"] = presets[0][0] if presets else ""
@@ -123,7 +146,8 @@ class CommandCenterPage(WebToolPage):
 
     def _push_state(self):
         presets = self._presets()
-        names = dict(presets)
+        names = self._names(presets)
+        tools = self._tools()
         used = {}
         for b in self.bindings:
             if b["keys"]:
@@ -137,6 +161,8 @@ class CommandCenterPage(WebToolPage):
                     spec = dict(o)
                     if o["kind"] == "preset":
                         spec["choices"] = [{"id": i, "label": label} for i, label in presets]
+                    elif o["kind"] == "tool":
+                        spec["choices"] = [{"id": i, "label": label} for i, label in tools]
                     specs.append(spec)
                 rows.append({
                     "id": a["id"], "label": a["label"], "about": a["about"], "options": specs,
@@ -296,6 +322,10 @@ class CommandCenterPage(WebToolPage):
                 return say("The Web tab isn't open.", False)
             text = web.media_hotkey(options.get("what", "play_pause"))
             return say(text, not text.startswith("Nothing"))
+        if b["action"] == "open_tool":
+            return say(*self._open_tool(options.get("tool")))
+        if b["action"] == "timer":
+            return say(*self._toggle_timer())
         controller = self._controller()
         if controller is None:
             return say("Not connected to Resolve.", False)
@@ -304,6 +334,29 @@ class CommandCenterPage(WebToolPage):
                              lambda at: self._ask_name(b, controller, options, at, from_keys), say)
         runner = actions.RUNNERS[b["action"]]
         self._job(b, lambda: runner(controller, options), lambda result: self._finish(result, say), say)
+
+    def _open_tool(self, tool_id):
+        """(what to say, whether it worked): Buddy's window to the front, on that tool."""
+        name = dict(self._tools()).get(tool_id)
+        if not name:
+            return "Choose a tool for this hot key first.", False
+        front = getattr(self.host, "bring_to_front", None)
+        if front is not None:
+            front()
+        self.host.switch_tool(tool_id)
+        return f"Opened {tr(name)}", True
+
+    def _toggle_timer(self):
+        """(what to say, whether it worked): Time Tracker's timer paused, or carried on."""
+        tracker = (getattr(self.host, "pages", None) or {}).get("time_tracker")
+        status = tracker.header_status() if tracker is not None and hasattr(tracker, "header_status") else None
+        if not status:
+            return "No timer is running in Time Tracker.", False
+        tracker.header_action("toggle")
+        now = tracker.header_status() or {}
+        if bool(now.get("running")) == bool(status.get("running")):
+            return "Time Tracker didn't change.", False
+        return ("Timer resumed" if now.get("running") else "Timer paused"), True
 
     def _job(self, b, job, then, say):
         """job() on the worker, then(result) on the UI thread - or say() what went wrong."""
@@ -361,7 +414,7 @@ class CommandCenterPage(WebToolPage):
         if ok:
             self.achieve("hotkeys", 1)
         self.recent = ([{"when": time.strftime("%H:%M:%S"), "text": text, "ok": bool(ok),
-                         "what": actions.summary(b["action"], self._options_for(b), dict(self._presets()))}]
+                         "what": actions.summary(b["action"], self._options_for(b), self._names())}]
                        + self.recent)[:RECENT]
         self.settings["recent"] = self.recent
         self.settings.save()

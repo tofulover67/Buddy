@@ -201,3 +201,97 @@ class ManualLoadTests(unittest.TestCase):
         self.page._load_manual_now()
         self.assertEqual(len(self.made), 2)
         self.assertIs(self.page._retriever, self.made[1][0])
+
+
+class WritingHost(Host):
+    connected = True
+
+    def __init__(self):
+        self.controller = object()
+        self.busy = []
+
+    def ensure_connected(self):
+        return self.controller
+
+    def set_busy(self, on, message=None):
+        self.busy.append(on)
+
+
+@unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+class RevertTests(unittest.TestCase):
+    """Revert last change: offered after an Apply that can be put back, and
+    gone once used, once another chat is open, or once changes are off."""
+
+    def setUp(self):
+        from pages.manual_chat import actions
+        self.actions = actions
+        QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        self.app = QApplication.instance() or QApplication([])
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        patch = mock.patch.object(ManualChatPage, "ask_folder", folder.name)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.page = ManualChatPage(WritingHost())
+        self.addCleanup(delete, self.page)
+        self.page.settings["allow_project_writes"] = True
+        self.events = []
+        self.page.emit = lambda name, value=None: self.events.append((name, value))
+
+    def last(self, name):
+        return [value for event, value in self.events if event == name][-1]
+
+    def applied(self, undo=(("clip", "A001", "Interview"),)):
+        proposal = self.actions.ProposedAction(action_id="rename_clips", summary="Rename 1 Media Pool clip(s).")
+
+        def execute(controller, proposal, log=None):
+            proposal.undo = list(undo)
+            return "Renamed 1 of 1 clip(s)."
+        self.page._show_proposal(proposal)
+        with mock.patch.object(self.actions, "execute", side_effect=execute):
+            self.page.on_apply_proposal(None)
+        return proposal
+
+    def test_the_card_says_beforehand_that_it_can_be_put_back(self):
+        self.page._show_proposal(self.actions.ProposedAction(action_id="rename_clips", summary="Rename"))
+        self.assertIn("Revert last change", self.last("proposal")["note"])
+        self.page._show_proposal(self.actions.ProposedAction(action_id="delete_markers", summary="Delete",
+                                                             destructive=True))
+        self.assertIn("cannot undo", self.last("proposal")["note"])
+
+    def test_apply_offers_the_revert_and_using_it_takes_it_away(self):
+        proposal = self.applied()
+        self.assertEqual(self.last("revert"), {"summary": "Rename 1 Media Pool clip(s).", "busy": False})
+        with mock.patch.object(self.actions, "revert", return_value="Renamed 1 of 1 clip(s) back.") as revert:
+            self.page.on_revert_change(None)
+            self.page.on_revert_change(None)             # a second click: nothing left
+        revert.assert_called_once()
+        self.assertIs(revert.call_args.args[1], proposal)
+        self.assertIsNone(self.last("revert"))
+        self.assertIn("**Reverted.**", self.page.chats.blocks[-1]["body"])
+        self.assertEqual(self.page.host.busy[-2:], [True, False])
+
+    def test_a_change_with_nothing_to_put_back_offers_none(self):
+        self.applied(undo=())
+        self.assertIsNone(self.last("revert"))
+
+    def test_another_timeline_keeps_the_button_for_later(self):
+        self.applied()
+        refused = self.actions.ActionError("The timeline changed since this was proposed")
+        with mock.patch.object(self.actions, "revert", side_effect=refused):
+            self.page.on_revert_change(None)
+        self.assertEqual(self.last("revert")["busy"], False)
+        self.assertIn("Nothing was reverted", self.page.chats.blocks[-1]["body"])
+
+    def test_changes_switched_off_reverts_nothing(self):
+        self.applied()
+        self.page.settings["allow_project_writes"] = False
+        with mock.patch.object(self.actions, "revert") as revert:
+            self.page.on_revert_change(None)
+        revert.assert_not_called()
+        self.assertIsNone(self.last("revert"))
+
+    def test_another_chat_forgets_it(self):
+        self.applied()
+        self.page.on_new_chat(None)
+        self.assertIsNone(self.last("revert"))

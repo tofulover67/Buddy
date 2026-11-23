@@ -303,6 +303,15 @@ class TimeTrackerPage(TrackerSettingsMixin, WebToolPage):
 
     # --------------------------------------------------- tracker controls
 
+    def header_status(self):
+        return self.engine.header_status()
+
+    def header_action(self, action):
+        if action == "toggle":
+            self.engine.header_toggle()
+            if self.isVisible():
+                self._push_tick()
+
     def on_pause(self, payload):
         paused = bool((payload or {}).get("paused"))
         if self.engine.manual_mode:

@@ -95,6 +95,12 @@ class HeaderView(_ChromeView):
     def on_reconnect(self, _payload=None):
         self.shell.reconnect()
 
+    def on_timer(self, payload):
+        """The running timer in the header: its Pause / Resume, or a click on it."""
+        action = (payload or {}).get("action")
+        if action in ("toggle", "open"):
+            self.shell.header_timer_action(action)
+
     def on_split(self, payload):
         self.shell.set_split_view(bool((payload or {}).get("on")))
 

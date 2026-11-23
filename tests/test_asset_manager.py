@@ -354,6 +354,19 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.host.busy, [True, False])
         self.assertEqual(self.last("toast")["text"], "Imported 3 items into the Media Pool")
 
+    def test_another_tools_files_join_the_library_and_no_project(self):
+        self.page.on_view({"view": "projects"})
+        self.page.on_new_project({"name": "Client A"})
+        notes = os.path.join(self.media, "notes.txt")
+        open(notes, "w").close()
+        self.assertEqual(self.page.add_from_tool([self.files[2], notes, os.path.join(self.media, "gone.png")]),
+                         (1, 0, 2))
+        self.assertEqual(self.page.add_from_tool([self.files[2]]), (0, 1, 0))       # there already
+        self.assertEqual(len(self.page.library.assets), 1)
+        project = self.page.projects.projects[self.page.project_id]
+        self.assertEqual(project["asset_ids"], [])                                  # not linked into the open project
+        self.assertEqual(self.page.add_from_tool([]), (0, 0, 0))
+
     def test_projects_link_into_the_library(self):
         self.page.on_files_dropped([self.files[2]])
         self.page.on_view({"view": "projects"})

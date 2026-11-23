@@ -40,6 +40,8 @@ function removeSelected() {
     selected.clear();
 }
 $("remove-selected").onclick = removeSelected;
+// The selected images, or all of them with none selected (the page decides).
+$("to-assets").onclick = () => send("to_assets", {ids: [...selected]});
 $("clear").onclick = async () => {
     if (await Buddy.confirm({title: "Clear the list?", text: "The images come off the list. Their files stay in the save folder.", ok: "Clear"})) {
         selected.clear();
@@ -103,6 +105,7 @@ function draw() {
     $("selected-note").textContent = selected.size ? `${selected.size} selected – Delete removes` : "";
     $("remove-selected").hidden = !selected.size;
     $("clear").hidden = !items.length;
+    $("to-assets").hidden = !items.some(i => i.exists);
     drawFooter();
 }
 

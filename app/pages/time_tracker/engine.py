@@ -363,6 +363,25 @@ class TrackerEngine:
 
     # ---------- Shared ----------
 
+    def header_status(self):
+        """The running timer for Buddy's header (ToolPage.header_status), so
+        it can be watched - and paused - from any tool: None with nothing
+        being tracked."""
+        if self.current_state not in ("tracking", "paused"):
+            return None
+        return {"project": self.current_project or "", "seconds": int(self.elapsed_seconds()),
+                "running": self.current_state == "tracking", "away": bool(self._idle_paused)}
+
+    def header_toggle(self):
+        """The header's Pause / Resume: what the page's own button does."""
+        if self.current_state not in ("tracking", "paused"):
+            return
+        pause = self.current_state == "tracking"
+        if self.manual_mode:
+            self.manual_pause_toggle(pause)
+        else:
+            self.toggle_pause(pause)
+
     def elapsed_seconds(self):
         open_entry = self.data_mgr.get_open_entry()
         return self.data_mgr.duration_seconds(open_entry) if open_entry else 0.0

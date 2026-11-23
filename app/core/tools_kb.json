@@ -26,7 +26,10 @@
         "Checks the current timeline for format mismatches and missing local media paths - then offers what to ask about what it found - and explains the selected clip or clip under the playhead",
         "Uses the detected Free or Studio edition for every question when connected to Resolve",
         "Points you at whichever other Buddy tool automates what you are asking about, with a button that opens it - for Footage Search and Web, already started on the search it suggests",
-        "Runs on the AI model you choose in Settings > AI > Chat assistant: Google Gemini, Anthropic Claude, OpenAI, OpenRouter, Groq or Azure OpenAI in the cloud; Ollama, llama.cpp's llama-server (started with --jinja) or LM Studio on your own computer or network; or any other OpenAI-compatible endpoint. The Model dropdown lists the models that provider has once its key or server address is in (Ollama's installed models, an Azure resource's deployments); Refresh fetches the list again, Type a name… takes one that isn't listed, and when the list can't be fetched the model is typed instead. Test connection checks the key, the model and that it can call tools"
+        "Runs on the AI model you choose in Settings > AI > Chat assistant: Google Gemini, Anthropic Claude, OpenAI, OpenRouter, Groq or Azure OpenAI in the cloud; Ollama, llama.cpp's llama-server (started with --jinja) or LM Studio on your own computer or network; or any other OpenAI-compatible endpoint. The Model dropdown lists the models that provider has once its key or server address is in (Ollama's installed models, an Azure resource's deployments); Refresh fetches the list again, Type a name… takes one that isn't listed, and when the list can't be fetched the model is typed instead. Test connection checks the key, the model and that it can call tools",
+        "Revert last change: after Apply, a button under the chat puts back what that change set - renamed Media Pool clips, markers it added, timeline clip colours, and project or timeline settings - only with the same project and timeline open, and only where nothing has changed since (a clip renamed again or a marker edited is left alone, and said so). Bins and timelines it created, flags, metadata and anything deleted can't be reverted from Buddy. The button lasts until the next applied change, another chat, or Buddy closing",
+        "Hands a tool more than a search to start with: a bin structure it drafted opens in Project Setup's Bins tab with its preview (nothing is created until Create bins is pressed, and a list of your own is only replaced if you agree), and Media Relink opens on its offline clips (or on media that moved) and scans them - nothing is relinked until you say so",
+        "Settings > AI > Manual search shows the folder the manual's data is read from, with Choose folder… to point at manual data kept somewhere else (the folder that holds chunks.jsonl, or one with a manual.txt), Open folder, Use Buddy's own to go back, and Rebuild from PDF…"
       ]
     },
     "audit": {
@@ -120,7 +123,8 @@
         "A copied image (from a browser or image editor) is saved as a timestamped PNG",
         "Copied or dropped files are copied into the save folder, skipping ones that aren't images",
         "A copied image URL is downloaded and staged, showing in the list while it downloads",
-        "Thumbnails of everything staged; the save folder and bin name are remembered between launches"
+        "Thumbnails of everything staged; the save folder and bin name are remembered between launches",
+        "Also save to Asset Manager adds the selected staged images (all of them when none is selected) to Asset Manager's library, to find and reuse later; the files stay where they are in the save folder and stay on the list. WebP images are skipped - Asset Manager doesn't take them"
       ]
     },
     "svg_importer": {
@@ -262,7 +266,8 @@
         "Visualize: an 8-block treemap and three UI mockup cards (header card, stat tile, tags); click a block or card part to recolour it or drag a colour onto it - this never changes the saved palette, and Reset to Original undoes it",
         "Vision: every tab can show colours as people with protanopia, deuteranopia, tritanopia or achromatopsia see them",
         "Tools: WCAG 2.1 / APCA contrast checker, palette import (json, gpl, ase, aco, swatches, css/scss/txt/js) and export (CSS, SCSS, JSON, Swift, Tailwind, GPL, ASE, Procreate, .cube LUT) with a copyable preview of text formats",
-        "Runs entirely standalone - no Resolve scripting API dependency at all"
+        "Runs entirely standalone - no Resolve scripting API dependency at all",
+        "Right-click any swatch for Copy for Fusion: the colour as red, green, blue and alpha numbers from 0 to 1 (orange #FF8000 is 1, 0.502, 0, 1), to type or paste into Fusion's and Text+'s colour controls; a click still copies the hex"
       ],
       "notes": "Works with Resolve closed. Never claim it reads or changes a Resolve project. Its own options (language, focus overlay, mini palette transparency, backup/restore) are in Settings while this tool is open."
     },
@@ -359,7 +364,8 @@
         "The Tracker tab shows today's and this week's time so far, and progress toward a weekly goal",
         "This Project and History list past sessions: add, edit, hide from exports or delete entries (tick several to act on them together), and export as PDF, CSV, JSON or Excel",
         "Reports: today / this week / this month totals with earnings per currency, weekly and monthly goals, a last-7-days chart, time per project, a custom date range, and an hourly rate per project",
-        "Generates a client-ready PDF invoice for one project over a date range"
+        "Generates a client-ready PDF invoice for one project over a date range",
+        "While a timer is tracking or paused it also shows in Buddy's header whatever tool is open - the elapsed time and the project, with a Pause / Resume button; click it to open Time Tracker"
       ]
     },
     "command_center": {
@@ -367,7 +373,8 @@
       "summary": "A new main tab of its own. Only the page is there so far - it will let you set hot key combos that run Buddy's actions.",
       "needs_resolve": false,
       "capabilities": [
-        "Nothing yet - the page is in place and its hot keys are still being built"
+        "Nothing yet - the page is in place and its hot keys are still being built",
+        "Hot keys for Buddy itself, under Buddy: Open a Buddy tool brings Buddy's window to the front on the tool you choose (add one hot key per tool; tabs such as Media Relink count), and Pause or resume the time tracker pauses or carries on Time Tracker's timer - both work with Resolve closed"
       ]
     },
     "essentials": {

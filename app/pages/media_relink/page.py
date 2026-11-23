@@ -216,6 +216,23 @@ class MediaRelinkPage(WebToolPage):
             self.mode = mode
             self._push_state()
 
+    def handoff(self, payload):
+        """From Ask Buddy (ToolPage.handoff): open on the offline clips
+        ("fix") or on media that moved ("relocate"), over the scope it
+        names, and read them - a scan only; nothing is relinked."""
+        mode = (payload or {}).get("mode")
+        if mode not in MODES or self._search:
+            return False
+        self.mode = mode
+        self._push_state()
+        self._push_rows(mode)
+        scope = (payload or {}).get("scope")
+        if scope in resolve_ext.SCOPES and scope != self._lists[mode]["scope"]:
+            self.on_scope({"scope": scope})         # scans too
+        elif self._connected():
+            self.on_scan(None)
+        return True
+
     def on_connect(self, _payload):
         try:
             self.host.ensure_connected()

@@ -233,6 +233,46 @@ class PageTests(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(self.save, "shot.jpg")))
         self.assertIn("readme.md", self.last("log")[-1]["text"])
 
+    def stage(self, *names):
+        src = os.path.join(self._tmp.name, "src")
+        for name in names:
+            self.page._stage(touch(os.path.join(src, name)), "Added file")
+        return {item["name"]: item for item in self.page.staging.items}
+
+    def test_also_save_to_asset_manager_takes_the_selected_or_all(self):
+        class Assets:
+            is_placeholder = False
+            got = []
+
+            def add_from_tool(self, paths):
+                self.got.append([os.path.basename(p) for p in paths])
+                return len(paths), 0, 0
+        self.host.pages = {"asset_manager": Assets()}
+        staged = self.stage("icon.png", "broll.jpg")
+        self.page.on_to_assets({"ids": [staged["broll.jpg"]["id"]]})
+        self.page.on_to_assets({"ids": []})                               # none selected: all of them
+        self.assertEqual(Assets.got, [["broll.jpg"], ["icon.png", "broll.jpg"]])
+        self.assertEqual(self.last("toast")["text"], "Saved 2 images to Asset Manager.")
+        self.assertEqual(len(self.page.staging.items), 2)                 # still on the list
+
+    def test_what_asset_manager_already_has_or_cannot_take_is_said(self):
+        assets = mock.Mock(is_placeholder=False)
+        assets.add_from_tool.return_value = (0, 1, 1)
+        self.host.pages = {"asset_manager": assets}
+        self.stage("icon.png", "anim.webp")
+        self.page.on_to_assets({})
+        texts = [entry["text"] for entry in self.last("log")]
+        self.assertIn("1 was there already.", texts)
+        self.assertIn("1 isn't a kind of file Asset Manager takes.", texts)
+
+    def test_no_asset_manager_here_says_so(self):
+        self.stage("icon.png")
+        self.page.on_to_assets({})                                        # the host has no such page
+        self.assertEqual(self.last("toast")["text"], "Asset Manager isn't available here.")
+        self.host.pages = {"asset_manager": mock.Mock(is_placeholder=True)}
+        self.page.on_to_assets({})
+        self.host.pages["asset_manager"].add_from_tool.assert_not_called()
+
     def test_import_needs_a_bin_name_and_files(self):
         self.page.on_import_images(None)
         self.assertEqual(self.last("alert")["title"], "Nothing to import")

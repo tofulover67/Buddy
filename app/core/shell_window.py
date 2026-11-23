@@ -41,6 +41,8 @@ from core import desktop_layout
 from core import link_bar
 from core.achievements import Achievements
 from core.render_watch import RenderWatch
+from core import resolve_status
+from core.resolve_reader import ResolveCalls
 from core import nav_layout
 from core import onboarding
 from core import quitting
@@ -132,6 +134,10 @@ RESTART_STEPS_TRAY = (
     "2. Quit DaVinci Resolve, then open it again.\n"
     "3. Open Buddy again from Workspace > Scripts > Buddy."
 )
+# The header's project and timeline are read again no more often than this
+# (coming to a tool, coming back to Buddy) - a click on it always reads.
+STATUS_EVERY_S = 1.0
+
 RESTART_STEPS = (
     "Buddy couldn't reach DaVinci Resolve.\n\n"
     "Make sure Resolve is running with a project open, then try Reconnect again. "
@@ -501,6 +507,10 @@ class ShellWindow(QMainWindow):
 
         self.pages = {}
         self._connect_worker = None
+        # What's open in Resolve, for the header (core/resolve_status.py); None: not read.
+        self._resolve_status = None
+        self._status_calls = None
+        self._status_asked = 0.0
         # What's been done with the tools, and the badges for it
         # (core/achievements.py) - before the pages, which report to it
         # (ToolPage.achieve) and show it (Pets, Achievements).
@@ -1122,6 +1132,9 @@ class ShellWindow(QMainWindow):
             self._update_tray_show_action()
         elif event.type() == QEvent.ActivationChange and getattr(self, "header", None) is not None:
             self.push_header()
+            if self.isActiveWindow():
+                # Back from Resolve, where another timeline may have been opened.
+                self.refresh_resolve_status()
         super().changeEvent(event)
 
     def _quit_app(self, confirmed=False):
@@ -1787,7 +1800,12 @@ class ShellWindow(QMainWindow):
     # -------------------------------------------------------- web chrome --
     def push_header(self):
         self.header.show_state({
-            "connected": self.connected, "orb": self.announcements.unseen() if hasattr(self, "announcements") else False,
+            "connected": self.connected,
+            # The open project and timeline, once read (refresh_resolve_status).
+            "where": getattr(self, "_resolve_status", None) if self.connected else None,
+            # A tool's running timer (Time Tracker's), shown whatever tool is in front.
+            "timer": ShellWindow._header_timer(self),
+            "orb": self.announcements.unseen() if hasattr(self, "announcements") else False,
             "update": self.updates.header_state() if hasattr(self, "updates") else None,
             "split": self._split_on, "side": self._side_tool_id,
             "choices": [{"id": tid, "label": self.pages[tid].display_name} for tid in self.side_choices()],
@@ -1847,7 +1865,47 @@ class ShellWindow(QMainWindow):
             return None
         return tr(what) if what else None
 
+    def _header_timer(self):
+        """The first tool's header_status that has one: {"tool_id",
+        "project", "seconds", "running", "away"}, or None."""
+        for tool_id, page in getattr(self, "pages", {}).items():
+            if getattr(page, "is_placeholder", False) or not hasattr(page, "header_status"):
+                continue
+            try:
+                status = page.header_status()
+            except Exception:  # noqa: BLE001 - a tool's bug never breaks the header
+                status = None
+            if isinstance(status, dict):
+                return {"tool_id": tool_id, "project": str(status.get("project") or ""),
+                        "seconds": int(status.get("seconds") or 0), "running": bool(status.get("running")),
+                        "away": bool(status.get("away"))}
+        return None
+
+    def header_timer_action(self, action):
+        """The header timer's buttons: "toggle" pauses or resumes it, "open"
+        brings its tool to the front."""
+        timer = ShellWindow._header_timer(self)
+        if timer is None:
+            return
+        if action == "open":
+            self.switch_tool(timer["tool_id"])
+        elif action == "toggle":
+            try:
+                self.pages[timer["tool_id"]].header_action("toggle")
+            except Exception:  # noqa: BLE001
+                traceback.print_exc()
+            now = ShellWindow._header_timer(self)
+            self._timer_seen = (now["project"], now["running"], now["away"]) if now else None
+            self.push_header()
+
     def _check_working(self):
+        # The header's timer counts by itself between these looks (header.js):
+        # it's sent again only when it starts, stops, pauses or changes project.
+        timer = ShellWindow._header_timer(self)
+        seen = (timer["project"], timer["running"], timer["away"]) if timer else None
+        if seen != getattr(self, "_timer_seen", None):
+            self._timer_seen = seen
+            self.push_header()
         now = tuple((tool_id, self._working(tool_id)) for tool_id in getattr(self, "pages", {}))
         if now != self._working_seen:
             self._working_seen = now
@@ -1968,24 +2026,31 @@ class ShellWindow(QMainWindow):
         y = max(available.top(), min(frame.top(), available.bottom() - height + 1))
         self.move(x, y)
 
-    def switch_tool(self, tool_id):
+    def switch_tool(self, tool_id, payload=None):
+        """Bring a tool to the front. With `payload` (a dict), the tool is
+        handed it to start from once it's there - ToolPage.handoff, which
+        only ever shows it. True when a payload was taken."""
+        target = self.pages.get(tool_id)
         if tool_id not in self.pages:
             # A tool that's a tab on another page (Media Relink on Media
             # Manager): that page, on its tab.
             holder = next((page for page in self.pages.values()
                            if tool_id in getattr(page, "SUB_TOOLS", ())), None)
             if holder is None:
-                return
+                return False
             holder.show_tool(tool_id)
+            target = next((page for page in getattr(holder, "by_tab", {}).values()
+                           if getattr(page, "tool_id", None) == tool_id), None)
             tool_id = holder.tool_id
         if sys.platform != "darwin":
             crash_log.trail("shown", tool_id)
         ShellWindow._remember_tool(self, tool_id)
+        ShellWindow.refresh_resolve_status(self)
         if self._layout == "desktop":
             # Open its window, bring it back from minimised, or to the front.
             self._current_tool_id = tool_id
             self.desktop.open(tool_id)
-            return
+            return ShellWindow._hand_over(target, payload)
         previous = self._current_tool_id
         page = self.pages[tool_id]
         # Picking the tool that's on the right (dual view) swaps the two
@@ -2001,6 +2066,17 @@ class ShellWindow(QMainWindow):
         page.on_shown()
         if self._split_on:
             self._show_side(previous if swap else self._side_tool_id)
+        return ShellWindow._hand_over(target, payload)
+
+    @staticmethod
+    def _hand_over(page, payload):
+        if not payload or page is None or getattr(page, "is_placeholder", False):
+            return False
+        try:
+            return bool(page.handoff(dict(payload)))
+        except Exception:  # noqa: BLE001 - the tool is open either way
+            traceback.print_exc()
+            return False
 
     def _remember_tool(self, tool_id):
         """For "Open Buddy on: the tool you used last" (settings_form.start_tool)."""
@@ -2019,10 +2095,41 @@ class ShellWindow(QMainWindow):
     def _set_connected(self, connected):
         changed = connected != self.connected
         self.connected = connected
+        if not connected:
+            self._resolve_status = None
         self.push_header()
+        if connected:
+            self.refresh_resolve_status(force=True)     # also Reconnect: another project may be open
         if changed:
             for page in self.pages.values():
                 page.on_connection_changed(connected)
+
+    def refresh_resolve_status(self, force=False):
+        """Read which project and timeline are open, for the header - on
+        connecting (force), and on coming to a tool or back to Buddy. Asked of the Resolve reader's
+        process, so a timeline playing never holds the window up; the
+        header changes when the answer comes."""
+        if not getattr(self, "connected", False) or getattr(self, "controller", None) is None:
+            return
+        if not hasattr(self, "_status_asked"):
+            return                              # not a whole shell (a test's stand-in)
+        now = time.monotonic()
+        if not force and now - self._status_asked < STATUS_EVERY_S:
+            return
+        if self._status_calls is None:
+            self._status_calls = ResolveCalls(self)
+        if self._status_calls.busy():
+            return
+        self._status_asked = now
+        controller = self.controller
+        self._status_calls.call("resolve.status", {}, lambda: resolve_status.status(controller),
+                                self._on_resolve_status)
+
+    def _on_resolve_status(self, result, error):
+        status = result if error is None and isinstance(result, dict) and self.connected else None
+        if status != self._resolve_status:
+            self._resolve_status = status
+            self.push_header()
 
     def reconnect(self):
         """The header's Connect (Reconnect once connected)."""

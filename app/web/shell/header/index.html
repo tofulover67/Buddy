@@ -16,6 +16,13 @@
     <button type="button" class="orb" id="orb" hidden title="News from Buddy" aria-label="News from Buddy"></button>
     <button type="button" class="btn accent update" id="update" hidden></button>
     <div class="spacer"></div>
+    <div class="header-timer" id="timer" hidden>
+        <button type="button" class="timer-open" id="timer-open" title="Open Time Tracker">
+            <span class="timer-clock" id="timer-clock" translate="no"></span>
+            <span class="timer-project" id="timer-project" translate="no"></span>
+        </button>
+        <button type="button" class="btn ghost icon icon-btn" id="timer-toggle"></button>
+    </div>
     <span class="status" id="status" role="status"></span>
     <button type="button" class="btn ghost icon icon-btn" id="bug" title="Report a bug" aria-label="Report a bug"></button>
     <button type="button" class="btn" id="connect" data-action="reconnect">Connect</button>

@@ -441,10 +441,21 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
 
     # ------------------------------------------------------------- adding --
 
-    def _add_paths(self, paths, folder=""):
+    def add_from_tool(self, paths):
+        """Another tool's files into the library - Image Importer's "Also
+        save to Asset Manager". Like every asset they're kept where they
+        are, by their path; never linked into a project (this page may not
+        even be showing one). Returns (added, already there, not a type
+        Asset Manager takes)."""
+        files = [os.path.normpath(path) for path in paths
+                 if os.path.isfile(path) and os.path.splitext(path)[1].lower() in SUPPORTED_EXTS]
+        added, existing = self._add_paths(files, link=False) if files else (0, 0)
+        return added, existing, len(list(paths)) - len(files)
+
+    def _add_paths(self, paths, folder="", link=True):
         """Adds media files to the library (and, in Projects, links them to
-        the open project). Returns (added, already there)."""
-        project = self.projects.projects.get(self.project_id) if self.list_view == "projects" else None
+        the open project - unless `link` is off). Returns (added, already there)."""
+        project = self.projects.projects.get(self.project_id) if link and self.list_view == "projects" else None
         added = existing = linked = 0
         touched = []   # every asset these paths are, new or not: what to show
         for path in paths:
@@ -481,6 +492,7 @@ class AssetManagerPage(AssetSettingsMixin, WebToolPage):
             self._index_library()
             self._counts(fresh=True)
             self._push_describe()
+        return added, existing
 
     def _hidden_by_filter(self, asset_ids):
         """How many of these the All media view's type and search leave out."""

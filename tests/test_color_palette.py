@@ -52,6 +52,12 @@ class ViewTests(unittest.TestCase):
     def test_hex_codes(self):
         self.assertEqual(view.normalize_hex(" 1a2b3c "), "#1A2B3C")
         self.assertEqual(view.normalize_hex("#abc"), "#AABBCC")
+
+    def test_a_colour_as_fusion_takes_it(self):
+        self.assertEqual(view.fusion_rgba("#FF8000"), "1, 0.502, 0, 1")
+        self.assertEqual(view.fusion_rgba("1a2b3c"), "0.102, 0.169, 0.235, 1")
+        self.assertEqual(view.fusion_rgba("#000", alpha=0.5), "0, 0, 0, 0.5")
+        self.assertIsNone(view.fusion_rgba("not a colour"))
         for bad in ("", None, "#12345", "zzzzzz", "#1234567"):
             self.assertIsNone(view.normalize_hex(bad), bad)
 
@@ -552,6 +558,11 @@ class PageTests(unittest.TestCase):
         win.refresh()
         mini = [p for n, p in shown if n == "mini"][-1]
         self.assertEqual([s["hex"] for s in mini["swatches"]], self.dm.palettes["Warm"][:12])
+        with mock.patch.object(self.page, "copy_to_clipboard") as copied:
+            self.page.on_copy({"hex": "#ff8000"})
+            self.page.on_copy({"hex": "#ff8000", "format": "fusion"})
+            self.page.on_copy({"hex": "nonsense", "format": "fusion"})
+            self.assertEqual([c.args[0] for c in copied.call_args_list], ["#FF8000", "1, 0.502, 0, 1"])
         with mock.patch.object(self.page, "copy_to_clipboard") as copied:
             win.on_copy({"index": 1})
             copied.assert_called_once_with(self.dm.palettes["Warm"][1])

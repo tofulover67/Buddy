@@ -375,6 +375,23 @@ Buddy.on("offer", offer => {
     );
 });
 
+// ---------------------------------------------------------------- revert
+
+// The change applied last, while it can still be put back.
+Buddy.on("revert", r => {
+    const box = $("revert");
+    box.hidden = !r;
+    if (!r) return box.replaceChildren();
+    box.replaceChildren(
+        icon("spark"),
+        el("div.reason", {}, [el("div.strong", {text: "Applied"}),
+                              el("div.muted.small", {text: r.summary, translate: "no"})]),
+        el("button.btn", {text: r.busy ? "Reverting…" : "Revert last change", disabled: r.busy,
+                          title: "Put back what this change set – only where nothing has changed since",
+                          onclick: () => send("revert_change")}),
+    );
+});
+
 // -------------------------------------------------------------- proposal
 
 Buddy.on("proposal", p => {

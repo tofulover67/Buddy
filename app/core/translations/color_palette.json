@@ -1059,5 +1059,25 @@
   "中文": "CSS 变量 (.css)",
   "العربية": "متغيرات CSS (.css)",
   "Tiếng Việt": "Biến CSS (.css)"
+ },
+ "Copy for Fusion ({rgba})": {
+  "日本語": "Fusion 用にコピー ({rgba})",
+  "Español": "Copiar para Fusion ({rgba})",
+  "Deutsch": "Für Fusion kopieren ({rgba})",
+  "Français": "Copier pour Fusion ({rgba})",
+  "한국어": "Fusion용으로 복사 ({rgba})",
+  "中文": "复制为 Fusion 格式 ({rgba})",
+  "العربية": "نسخ لـ Fusion ({rgba})",
+  "Tiếng Việt": "Sao chép cho Fusion ({rgba})"
+ },
+ "Copied for Fusion: {rgba}": {
+  "日本語": "Fusion 用にコピーしました: {rgba}",
+  "Español": "Copiado para Fusion: {rgba}",
+  "Deutsch": "Für Fusion kopiert: {rgba}",
+  "Français": "Copié pour Fusion : {rgba}",
+  "한국어": "Fusion용으로 복사됨: {rgba}",
+  "中文": "已复制为 Fusion 格式：{rgba}",
+  "العربية": "تم النسخ لـ Fusion: {rgba}",
+  "Tiếng Việt": "Đã sao chép cho Fusion: {rgba}"
  }
 }

@@ -432,6 +432,76 @@ class PageTests(unittest.TestCase):
     def binding(self, action):
         return next(b for b in self.page.bindings if b["action"] == action)
 
+    # ------------------------------------------- Buddy's own: tools, the timer
+
+    def tools(self):
+        class Tool:
+            is_placeholder = False
+
+            def __init__(self, tool_id, name, **more):
+                self.tool_id, self.display_name = tool_id, name
+                self.__dict__.update(more)
+        relink = Tool("media_relink", "Media Relink")
+        self.host.pages = {"manual_chat": Tool("manual_chat", "Ask Buddy"),
+                           "media_manager": Tool("media_manager", "Media Manager", by_tab={"relink": relink}),
+                           "dailies": Tool("dailies", "Dailies", is_placeholder=True),
+                           "command_center": self.page}
+        self.host.opened, self.host.fronted = [], 0
+        self.host.switch_tool = self.host.opened.append
+        self.host.bring_to_front = lambda: setattr(self.host, "fronted", self.host.fronted + 1)
+
+    def test_a_hot_key_opens_the_tool_it_names_with_buddy_in_front(self):
+        self.tools()
+        b = self.binding("open_tool")
+        self.page._push_state()
+        group = next(g for g in self.last("state")["groups"] if g["name"] == "Buddy")
+        row = next(a for a in group["actions"] if a["id"] == "open_tool")
+        self.assertEqual([c["id"] for c in row["options"][0]["choices"]],
+                         ["manual_chat", "media_manager", "media_relink"])      # no placeholder, not itself
+        self.assertEqual(row["bindings"][0]["summary"], "Open Ask Buddy")       # none chosen yet: the first
+        self.page.on_option({"id": b["id"], "key": "tool", "value": "media_relink"})
+        self.page._pressed(b["id"])
+        self.assertEqual((self.host.opened, self.host.fronted), (["media_relink"], 1))
+        self.assertEqual(self.page.recent[0]["what"], "Open Media Relink")
+        self.assertTrue(self.page.recent[0]["ok"])
+
+    def test_a_tool_that_is_gone_opens_nothing(self):
+        self.tools()
+        self.host.pages = {"command_center": self.page}
+        self.page._pressed(self.binding("open_tool")["id"])
+        self.assertEqual(self.host.opened, [])
+        self.assertFalse(self.page.recent[0]["ok"])
+
+    def test_a_hot_key_pauses_and_resumes_the_time_tracker(self):
+        class Tracker:
+            is_placeholder = False
+            display_name = "Time Tracker"
+            status = {"project": "Harbour Film", "seconds": 60, "running": True, "away": False}
+
+            def header_status(self):
+                return self.status
+
+            def header_action(self, action):
+                self.status = dict(self.status, running=not self.status["running"])
+        b = self.binding("timer")
+        self.page._pressed(b["id"])                              # no Time Tracker here
+        self.assertEqual((self.page.recent[0]["text"], self.page.recent[0]["ok"]),
+                         ("No timer is running in Time Tracker.", False))
+        tracker = self.host.pages["time_tracker"] = Tracker()
+        self.host.switch_tool = lambda tool_id: None
+        self.page._pressed(b["id"])
+        self.assertEqual(self.page.recent[0]["text"], "Timer paused")
+        self.page._pressed(b["id"])
+        self.assertEqual(self.page.recent[0]["text"], "Timer resumed")
+        tracker.status = None
+        self.page._pressed(b["id"])
+        self.assertFalse(self.page.recent[0]["ok"])
+
+    def test_buddys_own_actions_need_no_resolve(self):
+        self.assertTrue({"open_tool", "timer"} <= set(actions.LOCAL))
+        self.assertFalse({"open_tool", "timer"} & set(actions.RUNNERS))
+        self.assertEqual(actions.clean_options("open_tool", {"tool": 7}), {"tool": ""})
+
     def test_every_action_starts_with_one_hot_key_to_set(self):
         self.assertEqual(sorted(b["action"] for b in self.page.bindings), sorted(a["id"] for a in actions.ACTIONS))
         self.assertTrue(all(not b["keys"] for b in self.page.bindings))

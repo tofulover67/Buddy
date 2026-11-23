@@ -53,7 +53,8 @@ def _choices(values, extra=()):
 
 
 # What the page shows, in order. options: key, label, kind ("select",
-# "check", "folder", "preset"), default, choices for a select.
+# "check", "folder", "preset", "tool"), default, choices for a select
+# (a preset's and a tool's are filled in by the page: what there is to pick).
 ACTIONS = [
     {"id": "marker", "group": "Timeline", "label": "Add a marker at the playhead",
      "about": "Drops a marker of your colour where the playhead is – one hot key per colour, if you like.",
@@ -97,11 +98,17 @@ ACTIONS = [
      "options": [{"key": "what", "label": "Do", "kind": "select", "default": "play_pause",
                   "choices": [{"id": "play_pause", "label": "Play / pause"}, {"id": "next", "label": "Next track"},
                               {"id": "previous", "label": "Previous track"}]}]},
+    {"id": "open_tool", "group": "Buddy", "label": "Open a Buddy tool",
+     "about": "Brings Buddy to the front on the tool you choose – one hot key per tool, if you like.",
+     "options": [{"key": "tool", "label": "Tool", "kind": "tool", "default": ""}]},
+    {"id": "timer", "group": "Buddy", "label": "Pause or resume the time tracker",
+     "about": "Pauses Time Tracker's running timer, or carries on with a paused one – without leaving Resolve.",
+     "options": []},
 ]
 BY_ID = {a["id"]: a for a in ACTIONS}
-GROUPS = ("Timeline", "Clips", "Export", "Web")
+GROUPS = ("Timeline", "Clips", "Export", "Web", "Buddy")
 # Actions Buddy does itself, without Resolve (page.py runs them on its own pages).
-LOCAL = ("web_media",)
+LOCAL = ("web_media", "open_tool", "timer")
 
 
 def default_options(action_id: str) -> dict:
@@ -118,7 +125,7 @@ def clean_options(action_id: str, raw) -> dict:
             out[o["key"]] = bool(value)
         elif o["kind"] == "select":
             out[o["key"]] = value if value in {c["id"] for c in o["choices"]} else o["default"]
-        elif o["kind"] in ("folder", "preset"):
+        elif o["kind"] in ("folder", "preset", "tool"):
             out[o["key"]] = value if isinstance(value, str) else ""
     return out
 
@@ -143,6 +150,10 @@ def summary(action_id: str, options: dict, preset_names=None) -> str:
     if action_id == "animation":
         name = (preset_names or {}).get(o.get("preset"), "a preset")
         return f"Animation: {name}"
+    if action_id == "open_tool":
+        # The page's names hold its tools too, as "tool:<id>".
+        name = (preset_names or {}).get(f"tool:{o.get('tool')}")
+        return f"Open {name}" if name else "Open a Buddy tool"
     return BY_ID[action_id]["label"]
 
 

@@ -68,6 +68,8 @@ JOBS = {
     # Footage Search's Place: one clip onto a track above V1, only when the person presses it.
     "footage.place": ("pages.footage_search.resolve_ext", "place"),
     "resolve.where": ("core.resolve_where", "where"),
+    # The header's project and timeline (core/shell_window.py refresh_resolve_status).
+    "resolve.status": ("core.resolve_status", "status"),
     # Project Setup's steps behind its overlay, only when the person presses one:
     # NEW bins, imported media, the selected clips' metadata, a NEW timeline.
     "project_setup.metadata": ("pages.project_setup.resolve_jobs", "apply_metadata"),

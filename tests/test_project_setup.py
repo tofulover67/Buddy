@@ -524,6 +524,26 @@ class PageTests(_PageCase):
         self.assertTrue(os.path.exists(os.path.join(self._tmp.name, "settings.json")))
         self.assertEqual(self.last("bins")["rows"][1]["depth"], 1)
 
+    def test_ask_buddys_bin_list_lands_in_the_box_and_creates_nothing(self):
+        self.page.on_tab({"tab": "sync"})
+        self.assertTrue(self.page.handoff({"bins": ["Footage", ">Interviews", "Audio"]}))
+        self.assertEqual(self.page.tab, "bins")
+        self.assertEqual(self.last("bins_text")["text"], "Footage\n>Interviews\nAudio")
+        self.assertEqual([row["name"] for row in self.last("bins")["rows"]], ["Footage", "Interviews", "Audio"])
+        self.assertEqual(self.pool.tree(), [])
+        self.assertFalse(self.page.handoff({"bins": []}))
+
+    def test_a_list_of_your_own_is_only_replaced_when_you_say_so(self):
+        from pages.project_setup import page as page_mod
+        self.page.on_bins_text({"text": "My own\n>Structure"})
+        with mock.patch.object(page_mod, "confirm", return_value=False) as asked:
+            self.assertTrue(self.page.handoff({"bins": ["Footage"]}))
+        asked.assert_called_once()
+        self.assertEqual(self.page.data_mgr.settings["bin_list"], "My own\n>Structure")
+        with mock.patch.object(page_mod, "confirm", return_value=True):
+            self.page.handoff({"bins": ["Footage"]})
+        self.assertEqual(self.page.data_mgr.settings["bin_list"], "Footage")
+
     def test_create_bins(self):
         self.page.on_bins_text({"text": "01_Footage\n>A-Cam\n>B-Cam\n02_Audio"})
         self.page.on_create_bins(None)

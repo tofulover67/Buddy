@@ -121,6 +121,12 @@ def help_text(writes_on: bool) -> str:
         lines.append("- several of these at once, on one card, applied in order")
         lines.append("")
         lines.append(
+            "After Apply, **Revert last change** puts back renamed clips, "
+            "added markers, clip colours and settings – where nothing has "
+            "changed since."
+        )
+        lines.append("")
+        lines.append(
             "These move or destroy work you did not name, and the card "
             "says so in red:"
         )
@@ -632,6 +638,10 @@ class ChatSessions:
                               "reason": offer.get("reason", "")}
                 if isinstance(offer.get("prefill"), str) and offer["prefill"]:
                     chat.offer["prefill"] = offer["prefill"][:300]    # what the tool starts with (agent.PREFILL_TOOLS)
+                from . import handoffs
+                handoff, shown = handoffs.clean(offer["tool_id"], offer.get("handoff"))
+                if handoff:                 # checked again: the file is only as good as what wrote it
+                    chat.offer["handoff"], chat.offer["prefill"] = handoff, shown
             def messages(value):
                 return [{"role": m["role"], "content": m["content"]} for m in (value if isinstance(value, list) else [])
                         if isinstance(m, dict) and m.get("role") in ("user", "assistant")

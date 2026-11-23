@@ -43,7 +43,7 @@ from dataclasses import dataclass, field
 
 from core.tools_kb import get_tool, index_block, load_tools
 
-from . import actions
+from . import actions, handoffs
 from .conversation import split_followups
 from .llm import LLMCancelled, LLMError
 from .resolve_ext import (
@@ -97,7 +97,7 @@ The session context reports the detected Resolve edition on every question. proj
 
 Call describe_tool when the user asks what a Buddy tool does, what Buddy can do for a task, or when you need a tool's exact capabilities before recommending it. The index below is a summary; describe_tool has the detail.
 
-Call offer_tool when Buddy has a tool that does what the user is asking about by hand, and that tool is integrated. It shows them a button; it does not navigate. Never offer more than one tool per answer. For the tools its description lists, `prefill` hands over what to start with (the search to run), which the button shows. Tools marked [not yet integrated] cannot be offered - you may say one is planned, but never imply it is usable today.
+Call offer_tool when Buddy has a tool that does what the user is asking about by hand, and that tool is integrated. It shows them a button; it does not navigate. Never offer more than one tool per answer. For the tools its description lists, `prefill` hands over what to start with (the search to run), which the button shows; for a few, `handoff` hands over more - a bin structure you drafted for Project Setup, Media Relink opened on the offline clips. A handoff changes nothing in the project: the tool shows it and the user presses its own button. Tools marked [not yet integrated] cannot be offered - you may say one is planned, but never imply it is usable today.
 
 When project changes are enabled you also have propose_action. It does NOT change anything - it shows the user a card listing exactly what would happen, and they decide. Rules for it:
 - Read the project with project_state FIRST. Never propose a change to a clip, frame or name you have not just read. Guessing at names is the most likely way to damage someone's work.
@@ -106,7 +106,7 @@ When project changes are enabled you also have propose_action. It does NOT chang
 - If a proposal comes back rejected, tell the user what was wrong. Do not retry it with guessed values.
 - Destructive actions (anything that inserts with a ripple, deletes, or changes settings) need a higher bar than additive ones. Propose one only when the user clearly asked for that specific change. "Clean up my timeline" or "fix this" is NOT a request to delete anything - ask what they mean.
 - Never propose deleting a timeline unless the user named that timeline and asked for it to be deleted.
-- You cannot undo. Say so rather than implying a change can be reversed from Buddy.
+- After Apply the user gets a Revert last change button for renamed clips, added markers, clip colours and project or timeline settings: it puts back what was there, where nothing has changed since. Nothing else can be reversed from Buddy, and you cannot undo anything yourself - say which applies rather than implying a change can be taken back.
 - Several additive changes the user asked for together go in ONE proposal, as `steps` (two to five, each {action_id, arguments}). Every step is checked against the project as it is now, so a step cannot use what an earlier step creates. A destructive action never goes in steps - propose it on its own.
 - fill_clip_metadata only fills fields that are empty. If a field already has a value, tell the user what it says instead of proposing to replace it.
 - For markers from a chapter list or a transcript, give each marker its 'time' into the timeline ("2:15") or its 'timecode' rather than working out frames yourself.
@@ -324,7 +324,9 @@ def tool_specs(catalog: list[tuple[str, str]], allow_writes: bool = False) -> li
                 "Offer the user a Buddy tool that automates what they're asking "
                 f"about. Shows a button. Valid tool_id values: {names}. "
                 "prefill is taken by: "
-                + "; ".join(f"{tid} ({what})" for tid, what in PREFILL_TOOLS.items()) + "."
+                + "; ".join(f"{tid} ({what})" for tid, what in PREFILL_TOOLS.items()) + ". "
+                "handoff is taken by: "
+                + "; ".join(f"{tid} - {what}" for tid, what in handoffs.HANDOFF_TOOLS.items()) + "."
             ),
             "parameters": {
                 "type": "object",
@@ -337,6 +339,10 @@ def tool_specs(catalog: list[tuple[str, str]], allow_writes: bool = False) -> li
                     "prefill": {
                         "type": "string",
                         "description": "What the tool should start with, for the tools that take it.",
+                    },
+                    "handoff": {
+                        "type": "object",
+                        "description": "Structured data the tool opens with, for the tools that take it.",
                     },
                 },
                 "required": ["tool_id", "reason"],
@@ -429,6 +435,9 @@ class AgentResult:
     offered_tool: tuple[str, str] | None = None
     # What the offered tool should start with (PREFILL_TOOLS), or "".
     offered_prefill: str = ""
+    # Structured data for the offered tool (handoffs.HANDOFF_TOOLS), or {} -
+    # offered_prefill then holds what the card shows of it.
+    offered_handoff: dict = field(default_factory=dict)
     # Questions the model suggested asking next (the answer's closing
     # "Follow-ups:" line, taken off it).
     followups: list[str] = field(default_factory=list)
@@ -671,6 +680,16 @@ class ManualAgent:
         result.offered_tool = (tool_id, reason)
         prefill = " ".join(str(args.get("prefill") or "").split())[:MAX_PREFILL]
         result.offered_prefill = prefill if tool_id in PREFILL_TOOLS else ""
+        result.offered_handoff, shown = handoffs.clean(tool_id, args.get("handoff"))
+        if result.offered_handoff:
+            result.offered_prefill = shown
+            result.events.append(ToolEvent("offer_tool", f"{tool.name}, with a handoff"))
+            return (f"Offered '{tool.name}' to the user as a button. Pressed, it opens with:\n{shown}\n"
+                    "Nothing is changed until they press the tool's own button - say so.")
+        if args.get("handoff") and tool_id in handoffs.HANDOFF_TOOLS:
+            result.events.append(ToolEvent("offer_tool", tool.name))
+            return (f"Offered '{tool.name}' to the user as a button, but the handoff held nothing usable, so it "
+                    f"opens as it is. It takes: {handoffs.HANDOFF_TOOLS[tool_id]}")
         result.events.append(ToolEvent("offer_tool", tool.name))
         if prefill and not result.offered_prefill:
             return (f"Offered '{tool.name}' to the user as a button. It opens as it is - "

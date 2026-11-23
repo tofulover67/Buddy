@@ -560,6 +560,19 @@ class PageTests(Base):
     def last(self, name):
         return [p for n, p in self.events if n == name][-1]
 
+    def test_ask_buddys_handoff_opens_on_the_offline_clips_and_only_scans(self):
+        self.page.mode = self.page_mod.MODE_RELOCATE
+        with mock.patch.object(self.page, "on_scan") as scan:
+            self.assertTrue(self.page.handoff({"mode": "fix"}))
+            self.assertEqual(self.page.mode, self.page_mod.MODE_FIX)
+            self.assertEqual(self.last("state")["mode"], "fix")
+            scan.assert_called_once()
+            self.assertTrue(self.page.handoff({"mode": "fix", "scope": "timeline"}))
+            self.assertEqual(self.page._lists["fix"]["scope"], "timeline")
+            self.assertEqual(scan.call_count, 2)
+        self.assertFalse(self.page.handoff({"mode": "delete everything"}))
+        self.assertFalse(self.page.handoff({}))
+
     def js(self, code):
         loop, result = QEventLoop(), {}
         self.page.view.page().runJavaScript(code, 0, lambda value: (result.update(value=value), loop.quit()))

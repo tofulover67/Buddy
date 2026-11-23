@@ -100,6 +100,9 @@ class ProposedAction:
     # plan above is only meaningful against the objects it was read from,
     # and Apply can be pressed long after the user has switched timelines.
     target: dict = field(default_factory=dict)
+    # Filled in by the executor of a REVERTIBLE_ACTIONS change: per item
+    # Resolve accepted, what was there before - what revert() puts back.
+    undo: list = field(default_factory=list)
 
     def as_text(self) -> str:
         lines = [self.summary]
@@ -333,6 +336,7 @@ def execute_add_markers(controller, proposal, log=lambda m: None) -> str:
         ok = timeline.AddMarker(frame, color, label, note, 1)
         if ok:
             done += 1
+            proposal.undo.append((frame, color, label))
             log(f"Added {color} marker at frame {frame}.")
         else:
             # Keep going: a refused marker is not a reason to abandon the
@@ -432,6 +436,7 @@ def execute_rename_clips(controller, proposal, log=lambda m: None) -> str:
     for clip, old, new in proposal.plan:
         if clip.SetClipProperty("Clip Name", new):
             done += 1
+            proposal.undo.append((clip, old, new))
             log(f"Renamed '{old}' to '{new}'.")
         else:
             log(f"Resolve refused to rename '{old}'.")
@@ -469,6 +474,7 @@ def execute_set_clip_colors(controller, proposal, log=lambda m: None) -> str:
     done = unstuck = 0
     for item, color in proposal.plan:
         name = _safe(item.GetName, '')
+        before = _safe(item.GetClipColor, "") or ""
         if not item.SetClipColor(color):
             log(f"Resolve refused to colour '{name}'.")
         elif _safe(item.GetClipColor, color) != color:
@@ -477,6 +483,7 @@ def execute_set_clip_colors(controller, proposal, log=lambda m: None) -> str:
                 "generators can't take a clip colour. A marker on it would work instead.")
         else:
             done += 1
+            proposal.undo.append((item, before, color))
             log(f"Coloured '{name}' {color}.")
     tail = f" {unstuck} didn't keep the colour (titles and generators can't have one)." if unstuck else ""
     return f"Coloured {done} of {len(proposal.plan)} clip(s).{tail}"
@@ -1204,6 +1211,12 @@ def _preview_settings(controller, args, target, label, action_id):
     )
 
 
+def _note_setting(proposal, key, before, value):
+    """For revert: only a setting that had a value can be put back."""
+    if before not in ("", None):
+        proposal.undo.append((key, str(before), value))
+
+
 def preview_set_project_settings(controller, args) -> ProposedAction:
     return _preview_settings(
         controller, args, _require_project(controller), "project",
@@ -1215,8 +1228,10 @@ def execute_set_project_settings(controller, proposal, log=lambda m: None) -> st
     project = _require_project(controller)
     done = 0
     for key, value in proposal.plan:
+        before = _safe(lambda k=key: project.GetSetting(k), "")
         if project.SetSetting(key, value):
             done += 1
+            _note_setting(proposal, key, before, value)
             log(f"Set {key} = {value}.")
         else:
             log(f"Resolve refused to set {key}.")
@@ -1234,8 +1249,10 @@ def execute_set_timeline_settings(controller, proposal, log=lambda m: None) -> s
     timeline = _require_timeline(controller)
     done = 0
     for key, value in proposal.plan:
+        before = _safe(lambda k=key: timeline.GetSetting(k), "")
         if timeline.SetSetting(key, value):
             done += 1
+            _note_setting(proposal, key, before, value)
             log(f"Set {key} = {value}.")
         else:
             log(f"Resolve refused to set {key}.")
@@ -1436,6 +1453,141 @@ def execute(controller, proposal, log=lambda m: None) -> str:
     # timeline, and Apply must not land on another.
     _check_target(controller, proposal.action_id, proposal.target)
     return ACTIONS[proposal.action_id][1](controller, proposal, log)
+
+
+# ----------------------------------------------------------------- revert
+#
+# Resolve's scripting API has no Undo. For the changes whose old values are
+# known - a clip's name, its colour, a setting, a marker that wasn't there -
+# the executor notes, per item that Resolve accepted, what was there before
+# (ProposedAction.undo), and revert() puts exactly those back. It is as
+# careful as Apply: the same project and timeline, and only an item that is
+# still as Buddy left it - a clip renamed again since, a marker moved or
+# recoloured, is left alone and said so. A marker Buddy added is the one
+# thing a revert deletes, and only that marker.
+
+REVERTIBLE_ACTIONS = frozenset({
+    "rename_clips", "add_markers", "set_clip_colors", "set_project_settings", "set_timeline_settings",
+})
+
+
+def _same_value(a, b) -> bool:
+    """A setting read back against what was written: "24" and "24.0" are one."""
+    a, b = str(a).strip(), str(b).strip()
+    if a == b:
+        return True
+    try:
+        return float(a) == float(b)
+    except ValueError:
+        return False
+
+
+def _revert_rename_clips(controller, proposal, log) -> str:
+    done = 0
+    for clip, old, new in reversed(proposal.undo):
+        if _safe(lambda c=clip: c.GetClipProperty("Clip Name"), "") != new:
+            log(f"Left '{new}': it has been renamed again since.")
+        elif clip.SetClipProperty("Clip Name", old):
+            done += 1
+            log(f"Renamed '{new}' back to '{old}'.")
+        else:
+            log(f"Resolve refused to rename '{new}' back.")
+    return f"Renamed {done} of {len(proposal.undo)} clip(s) back."
+
+
+def _revert_add_markers(controller, proposal, log) -> str:
+    timeline = _require_timeline(controller)
+    now = {float(f): info for f, info in (_safe(timeline.GetMarkers, {}) or {}).items()}
+    done = 0
+    for frame, color, label in reversed(proposal.undo):
+        info = now.get(float(frame))
+        if info is None:
+            log(f"The marker at frame {frame} is already gone.")
+        elif info.get("color", "") != color or info.get("name", "") != label:
+            log(f"Left the marker at frame {frame}: it has been changed since.")
+        elif timeline.DeleteMarkerAtFrame(frame):
+            done += 1
+            log(f"Took off the marker at frame {frame}.")
+        else:
+            log(f"Resolve refused to take off the marker at frame {frame}.")
+    return f"Took off {done} of {len(proposal.undo)} marker(s) Buddy added."
+
+
+def _revert_set_clip_colors(controller, proposal, log) -> str:
+    done = 0
+    for item, before, color in reversed(proposal.undo):
+        name = _safe(item.GetName, "")
+        if _safe(item.GetClipColor, "") != color:
+            log(f"Left '{name}': its colour has been changed since.")
+        elif (item.SetClipColor(before) if before else item.ClearClipColor()):
+            done += 1
+            log(f"Put '{name}' back to {before}." if before else f"Took the colour off '{name}' again.")
+        else:
+            log(f"Resolve refused to put back the colour of '{name}'.")
+    return f"Put back the colour of {done} of {len(proposal.undo)} clip(s)."
+
+
+def _revert_settings(target, proposal, log, label) -> str:
+    done = 0
+    for key, before, value in reversed(proposal.undo):
+        if not _same_value(_safe(lambda k=key: target.GetSetting(k), ""), value):
+            log(f"Left {key}: it has been changed since.")
+        elif target.SetSetting(key, before):
+            done += 1
+            log(f"Set {key} back to {before}.")
+        else:
+            log(f"Resolve refused to set {key} back to {before}.")
+    return f"Put back {done} of {len(proposal.undo)} {label} setting(s)."
+
+
+def _revert_set_project_settings(controller, proposal, log) -> str:
+    return _revert_settings(_require_project(controller), proposal, log, "project")
+
+
+def _revert_set_timeline_settings(controller, proposal, log) -> str:
+    return _revert_settings(_require_timeline(controller), proposal, log, "timeline")
+
+
+REVERTS = {
+    "rename_clips": _revert_rename_clips,
+    "add_markers": _revert_add_markers,
+    "set_clip_colors": _revert_set_clip_colors,
+    "set_project_settings": _revert_set_project_settings,
+    "set_timeline_settings": _revert_set_timeline_settings,
+}
+
+
+def _steps(proposal) -> list:
+    return list(proposal.steps) if isinstance(proposal, ProposedPlan) else [proposal]
+
+
+def will_be_revertible(proposal) -> bool:
+    """Before Apply: this is a kind of change Revert can put back."""
+    return any(step.action_id in REVERTIBLE_ACTIONS for step in _steps(proposal))
+
+
+def can_revert(proposal) -> bool:
+    """After Apply: something was changed whose old value is known."""
+    return any(step.action_id in REVERTS and step.undo for step in _steps(proposal))
+
+
+def revert(controller, proposal, log=lambda m: None) -> str:
+    """Put back what an applied proposal changed, newest step first. A plan's
+    steps that can't be put back (a bin or timeline it made) stay, and the
+    answer says so. The undo notes are used up: a second revert does nothing."""
+    steps = [step for step in _steps(proposal) if step.action_id in REVERTS and step.undo]
+    if not steps:
+        raise ActionError("There is nothing to revert.")
+    for step in steps:
+        _check_target(controller, step.action_id, step.target)
+    outcomes = []
+    for step in reversed(steps):
+        outcomes.append(REVERTS[step.action_id](controller, step, log))
+        step.undo = []
+    kept = [step.summary for step in _steps(proposal) if step.action_id not in REVERTS]
+    if kept:
+        outcomes.append("Not reverted - Buddy can't take these back: " + " ".join(kept))
+    return " ".join(outcomes)
 
 
 def describe_actions() -> str:

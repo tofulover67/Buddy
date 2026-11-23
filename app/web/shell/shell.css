@@ -28,6 +28,21 @@ body.window { background: var(--surface); }
     50% { box-shadow: 0 0 10px 4px color-mix(in srgb, var(--primary) 45%, transparent); }
 }
 .status { font-weight: 700; white-space: nowrap; }
+/* A tool's running timer (Time Tracker's), in the header whatever tool is in front. */
+.header-timer { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.header-timer[hidden] { display: none; }
+.timer-open {
+    display: flex; align-items: baseline; gap: 8px; min-width: 0; max-width: 26vw; padding: 4px 8px;
+    font: inherit; color: inherit; background: none; border: 0; border-radius: var(--btn-radius); cursor: pointer;
+}
+.timer-open:hover { background: var(--nav-hover-bg); }
+.timer-clock { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--success); }
+.header-timer.paused .timer-clock { color: inherit; opacity: .7; }
+.timer-project { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .8; }
+/* The header's status: with a project open, its name, the timeline and its format. */
+.shell-header .status { display: flex; align-items: baseline; gap: 6px; min-width: 0; max-width: 46vw; }
+.status .where-name { overflow: hidden; text-overflow: ellipsis; min-width: 2ch; }
+.status .where-dot, .status .where-format, .status .where-none { flex: none; opacity: .8; font-weight: 500; }
 .status.ok { color: var(--success); }
 .status.bad { color: var(--danger-text); }
 .icon-btn { width: 36px; height: 36px; padding: 0; }

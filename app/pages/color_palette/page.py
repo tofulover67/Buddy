@@ -310,9 +310,12 @@ class ColorPalettePage(ColorPaletteSettingsMixin, WebToolPage):
             self.refresh_all()
 
     def on_copy(self, payload):
+        """A colour to the clipboard: its hex, or with {"format": "fusion"}
+        its red, green, blue and alpha as Fusion's 0-1 numbers."""
         hex_code = view.normalize_hex((payload or {}).get("hex"))
         if hex_code:
-            self.copy_to_clipboard(hex_code)
+            fusion = (payload or {}).get("format") == "fusion"
+            self.copy_to_clipboard(view.fusion_rgba(hex_code) if fusion else hex_code)
 
     def on_copy_text(self, payload):
         """An export's text, from the preview's Copy button."""

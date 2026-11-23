@@ -163,6 +163,28 @@ class ToolPage(QWidget):
         PREFILL_TOOLS, which is how the model knows it can."""
         return False
 
+    def header_status(self):
+        """Optional hook: a timer of this tool's to keep in Buddy's header
+        while other tools are in front (Time Tracker's) - {"project",
+        "seconds" so far, "running", "away"}, or None for nothing. Asked
+        twice a second, so it must be cheap; header_action("toggle") is
+        its Pause / Resume button."""
+        return None
+
+    def header_action(self, action):
+        """The header's button for header_status was pressed."""
+
+    def handoff(self, payload):
+        """Optional hook: the shell opened this tool with something to
+        start from (host.switch_tool(tool_id, payload=...)) - Ask Buddy's
+        offer, pressed. `payload` is a dict in the shape this tool takes
+        (pages/manual_chat/handoffs.py checks it): a bin list, a tab to
+        open on. Show it - never act on it; the person still presses the
+        tool's own button - and return True. As it is, words to start
+        with ({"text": ...}) go to prefill."""
+        text = (payload or {}).get("text")
+        return bool(self.prefill(text)) if isinstance(text, str) and text else False
+
     def on_app_quitting(self):
         """Optional hook: called once, before the shell actually tears
         itself down - both on a normal close and when the tray's Quit
@@ -198,6 +220,11 @@ class ShellHost:
     theme_tokens() -> dict
         Current resolved theme tokens, for pages that paint their own
         icons or chart colors to match.
+
+    switch_tool(tool_id, payload=None) -> bool
+        Brings a tool to the front - a sub tab by its own tool id too.
+        With `payload`, the tool is handed it to start from
+        (ToolPage.handoff); True when it took it.
 
     notify(title, message)
         A tray notification (does nothing without a tray icon). Used by

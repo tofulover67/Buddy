@@ -4239,5 +4239,55 @@
   "中文": "此 NVIDIA 显卡不会再有比 470 系列更新的驱动，而此 ffmpeg 需要更新的驱动。能在 470 驱动上运行的较旧 ffmpeg 版本可以使用这张显卡——请在设置中填写它的路径。",
   "العربية": "لا تحصل بطاقة NVIDIA هذه على برامج تشغيل أحدث من سلسلة 470، وffmpeg هذا يحتاج إلى أحدث منها. إصدار أقدم من ffmpeg يعمل مع برنامج التشغيل 470 سيستخدم البطاقة – حدّد مساره في الإعدادات.",
   "Tiếng Việt": "card NVIDIA này không còn được cấp trình điều khiển mới hơn dòng 470, mà bản ffmpeg này cần bản mới hơn. Một bản ffmpeg cũ hơn chạy được với trình điều khiển 470 sẽ dùng được card – hãy đặt đường dẫn của nó trong Cài đặt."
+ },
+ "Replace your bin list?": {
+  "日本語": "ビンのリストを置き換えますか？",
+  "Español": "¿Reemplazar tu lista de bins?",
+  "Deutsch": "Deine Bin-Liste ersetzen?",
+  "Français": "Remplacer votre liste de chutiers ?",
+  "한국어": "빈 목록을 바꿀까요?",
+  "中文": "替换你的媒体夹列表？",
+  "العربية": "هل تريد استبدال قائمة السلال؟",
+  "Tiếng Việt": "Thay danh sách bin của bạn?"
+ },
+ "The Bins tab already holds a list of your own. Replace it with the one Ask Buddy drafted?": {
+  "日本語": "ビンタブにはすでにあなたのリストがあります。Buddy に質問が作成したものに置き換えますか？",
+  "Español": "La pestaña Bins ya contiene una lista tuya. ¿Reemplazarla por la que redactó Pregunta a Buddy?",
+  "Deutsch": "Der Tab „Bins“ enthält bereits eine eigene Liste. Durch die von „Buddy fragen“ entworfene ersetzen?",
+  "Français": "L'onglet Chutiers contient déjà une liste à vous. La remplacer par celle rédigée par Demander à Buddy ?",
+  "한국어": "빈 탭에 이미 직접 만든 목록이 있습니다. Buddy에게 질문이 작성한 목록으로 바꿀까요?",
+  "中文": "“媒体夹”选项卡里已有你自己的列表。要用询问 Buddy 起草的列表替换吗？",
+  "العربية": "تبويب السلال يحوي قائمة خاصة بك. هل تستبدلها بالتي صاغها اسأل Buddy؟",
+  "Tiếng Việt": "Thẻ Bin đã có danh sách của riêng bạn. Thay bằng danh sách do Hỏi Buddy soạn?"
+ },
+ "Replace": {
+  "日本語": "置き換える",
+  "Español": "Reemplazar",
+  "Deutsch": "Ersetzen",
+  "Français": "Remplacer",
+  "한국어": "바꾸기",
+  "中文": "替换",
+  "العربية": "استبدال",
+  "Tiếng Việt": "Thay"
+ },
+ "Keep mine": {
+  "日本語": "自分のを残す",
+  "Español": "Conservar la mía",
+  "Deutsch": "Meine behalten",
+  "Français": "Garder la mienne",
+  "한국어": "내 목록 유지",
+  "中文": "保留我的",
+  "العربية": "الإبقاء على قائمتي",
+  "Tiếng Việt": "Giữ của tôi"
+ },
+ "Bin list from Ask Buddy – nothing is created until you press Create bins.": {
+  "日本語": "Buddy に質問からのビンリストです – 「ビンを作成」を押すまで何も作成されません。",
+  "Español": "Lista de bins de Pregunta a Buddy: no se crea nada hasta que pulses Crear bins.",
+  "Deutsch": "Bin-Liste von „Buddy fragen“ – es wird nichts erstellt, bis du „Bins erstellen“ drückst.",
+  "Français": "Liste de chutiers de Demander à Buddy – rien n'est créé tant que vous n'appuyez pas sur Créer les chutiers.",
+  "한국어": "Buddy에게 질문의 빈 목록입니다 – '빈 만들기'를 누를 때까지 아무것도 만들지 않습니다.",
+  "中文": "来自询问 Buddy 的媒体夹列表 – 按下“创建媒体夹”之前不会创建任何内容。",
+  "العربية": "قائمة سلال من اسأل Buddy – لن يُنشأ شيء حتى تضغط إنشاء السلال.",
+  "Tiếng Việt": "Danh sách bin từ Hỏi Buddy – chưa tạo gì cho đến khi bạn nhấn Tạo bin."
  }
 }

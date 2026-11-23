@@ -398,3 +398,93 @@ class ThreadTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Ui:
+    """Settings' side of a page's fields (core/settings_dialog.py)."""
+    parent = None
+
+    def __init__(self):
+        self.said, self.refreshed = [], 0
+
+    def status(self, text, tone=""):
+        self.said.append((text, tone))
+
+    def refresh(self):
+        self.refreshed += 1
+
+
+@unittest.skipUnless(HAVE_QT, "PySide6 not installed")
+class ManualFolderTests(unittest.TestCase):
+    """Settings > AI > Manual search: Choose folder… points Ask Buddy at
+    manual data kept elsewhere; Use Buddy's own goes back."""
+
+    def setUp(self):
+        QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+        self.app = QApplication.instance() or QApplication([])
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        self.folder = folder.name
+        for target, name, value in ((ManualChatPage, "ask_folder", os.path.join(self.folder, "ask")),
+                                    (chat_page.chat_store, "load", lambda _folder: (chat_page.ChatSessions(), [])),
+                                    (ManualChatPage, "_reload_manual", lambda page, _result=None: self.reloads.append(1))):
+            patch = mock.patch.object(target, name, value)
+            patch.start()
+            self.addCleanup(patch.stop)
+        from pages.manual_chat import settings_panel
+        self.panel = settings_panel
+        patch = mock.patch.object(settings_panel, "default_data_paths", lambda: ("", ""))
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.reloads = []
+        self.page = ManualChatPage(Host())
+        self.addCleanup(delete, self.page)
+        self.ui = Ui()
+
+    def make(self, *parts):
+        path = os.path.join(self.folder, *parts)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        open(path, "w").close()
+        return os.path.dirname(path)
+
+    def choose(self, folder):
+        with mock.patch.object(self.panel.QFileDialog, "getExistingDirectory", return_value=folder):
+            self.page.on_settings_action("choose_manual", self.ui)
+
+    def buttons(self):
+        return [action for _label, action in self.page._manual_buttons()]
+
+    def test_with_no_manual_there_is_a_folder_to_choose_and_a_pdf_to_build_from(self):
+        self.assertEqual(self.buttons(), ["choose_manual", "rebuild_manual"])
+
+    def test_choosing_the_bundle_folder_or_the_one_above_it(self):
+        bundle = self.make("Shared", "bundle", "chunks.jsonl")
+        self.choose(os.path.dirname(bundle))                    # the folder holding bundle/
+        self.assertEqual(os.path.normpath(self.page.settings["bundle_dir"]), os.path.normpath(bundle))
+        self.assertEqual(self.page.settings["text_path"], "")
+        self.assertEqual((len(self.reloads), self.ui.refreshed, self.ui.said[-1][1]), (1, 1, "success"))
+        self.assertEqual(self.buttons(), ["choose_manual", "open_manual_folder", "reset_manual", "rebuild_manual"])
+        self.assertIn(os.path.normpath(bundle), os.path.normpath(self.page.manual_summary_text()))
+        self.choose(bundle)                                     # the bundle itself
+        self.assertEqual(os.path.normpath(self.page.settings["bundle_dir"]), os.path.normpath(bundle))
+
+    def test_a_folder_with_only_the_manual_as_text(self):
+        folder = self.make("Text only", "manual.txt")
+        self.choose(folder)
+        self.assertEqual(self.page.settings["bundle_dir"], "")
+        self.assertEqual(os.path.basename(self.page.settings["text_path"]), "manual.txt")
+        self.assertIn("plain text", self.page.manual_summary_text())
+
+    def test_a_folder_without_manual_data_changes_nothing(self):
+        self.choose(self.make("Holiday photos", "beach.jpg"))
+        self.assertEqual((self.page.settings["bundle_dir"], self.page.settings["text_path"]), ("", ""))
+        self.assertEqual((self.reloads, self.ui.said[-1][1]), ([], "danger"))
+        self.choose("")                                         # the dialog was cancelled
+        self.assertEqual(len(self.ui.said), 1)
+
+    def test_use_buddys_own_goes_back(self):
+        self.choose(self.make("Shared", "chunks.jsonl"))
+        self.page.on_settings_action("reset_manual", self.ui)
+        self.assertEqual((self.page.settings["bundle_dir"], self.page.settings["text_path"]), ("", ""))
+        self.assertEqual(len(self.reloads), 2)
+        self.assertNotIn("reset_manual", self.buttons())

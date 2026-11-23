@@ -3699,5 +3699,155 @@
   "中文": "填写媒体池片段中空白的元数据字段",
   "العربية": "ملء حقول البيانات الوصفية الفارغة لمقاطع في مجمع الوسائط",
   "Tiếng Việt": "điền các trường siêu dữ liệu còn trống của clip trong Media Pool"
+ },
+ "Applied": {
+  "日本語": "適用済み",
+  "Español": "Aplicado",
+  "Deutsch": "Angewendet",
+  "Français": "Appliqué",
+  "한국어": "적용됨",
+  "中文": "已应用",
+  "العربية": "تم التطبيق",
+  "Tiếng Việt": "Đã áp dụng"
+ },
+ "Revert last change": {
+  "日本語": "最後の変更を元に戻す",
+  "Español": "Revertir el último cambio",
+  "Deutsch": "Letzte Änderung zurücknehmen",
+  "Français": "Annuler la dernière modification",
+  "한국어": "마지막 변경 되돌리기",
+  "中文": "还原上次更改",
+  "العربية": "التراجع عن آخر تغيير",
+  "Tiếng Việt": "Hoàn tác thay đổi gần nhất"
+ },
+ "Reverting…": {
+  "日本語": "元に戻しています…",
+  "Español": "Revirtiendo…",
+  "Deutsch": "Wird zurückgenommen…",
+  "Français": "Annulation…",
+  "한국어": "되돌리는 중…",
+  "中文": "正在还原…",
+  "العربية": "جارٍ التراجع…",
+  "Tiếng Việt": "Đang hoàn tác…"
+ },
+ "Reverting the change…": {
+  "日本語": "変更を元に戻しています…",
+  "Español": "Revirtiendo el cambio…",
+  "Deutsch": "Änderung wird zurückgenommen…",
+  "Français": "Annulation de la modification…",
+  "한국어": "변경을 되돌리는 중…",
+  "中文": "正在还原更改…",
+  "العربية": "جارٍ التراجع عن التغيير…",
+  "Tiếng Việt": "Đang hoàn tác thay đổi…"
+ },
+ "Put back what this change set – only where nothing has changed since": {
+  "日本語": "この変更で設定した内容を元に戻します – その後変更されていないものだけ",
+  "Español": "Devuelve lo que este cambio estableció, solo donde nada ha cambiado desde entonces",
+  "Deutsch": "Stellt wieder her, was diese Änderung gesetzt hat – nur dort, wo sich seitdem nichts geändert hat",
+  "Français": "Rétablit ce que cette modification a défini – uniquement là où rien n'a changé depuis",
+  "한국어": "이 변경으로 설정한 내용을 되돌립니다 – 그 뒤로 바뀌지 않은 것만",
+  "中文": "恢复此更改所设置的内容 – 仅限此后未再改动之处",
+  "العربية": "يعيد ما ضبطه هذا التغيير – فقط حيث لم يتغير شيء منذ ذلك الحين",
+  "Tiếng Việt": "Khôi phục những gì thay đổi này đã đặt – chỉ ở nơi chưa có gì thay đổi kể từ đó"
+ },
+ "Nothing has been changed yet. Afterwards, Revert last change can put it back.": {
+  "日本語": "まだ何も変更されていません。適用後は「最後の変更を元に戻す」で戻せます。",
+  "Español": "Todavía no se ha cambiado nada. Después, Revertir el último cambio puede deshacerlo.",
+  "Deutsch": "Es wurde noch nichts geändert. Danach kann „Letzte Änderung zurücknehmen“ es wiederherstellen.",
+  "Français": "Rien n'a encore été modifié. Ensuite, Annuler la dernière modification peut le rétablir.",
+  "한국어": "아직 아무것도 변경되지 않았습니다. 적용한 뒤에는 '마지막 변경 되돌리기'로 되돌릴 수 있습니다.",
+  "中文": "尚未更改任何内容。之后可用“还原上次更改”恢复。",
+  "العربية": "لم يتغير شيء بعد. بعد ذلك يمكن لـ«التراجع عن آخر تغيير» إعادته.",
+  "Tiếng Việt": "Chưa có gì thay đổi. Sau đó, Hoàn tác thay đổi gần nhất có thể khôi phục lại."
+ },
+ "Project changes are turned off in Settings, so nothing was reverted.": {
+  "日本語": "設定でプロジェクトの変更がオフになっているため、何も元に戻しませんでした。",
+  "Español": "Los cambios en el proyecto están desactivados en Ajustes, así que no se revirtió nada.",
+  "Deutsch": "Projektänderungen sind in den Einstellungen ausgeschaltet, daher wurde nichts zurückgenommen.",
+  "Français": "Les modifications du projet sont désactivées dans les Réglages : rien n'a été annulé.",
+  "한국어": "설정에서 프로젝트 변경이 꺼져 있어 아무것도 되돌리지 않았습니다.",
+  "中文": "设置中已关闭项目更改，因此没有还原任何内容。",
+  "العربية": "تغييرات المشروع متوقفة في الإعدادات، لذلك لم يُتراجع عن شيء.",
+  "Tiếng Việt": "Thay đổi dự án đang tắt trong Cài đặt nên không có gì được hoàn tác."
+ },
+ "After Apply, **Revert last change** puts back renamed clips, added markers, clip colours and settings – where nothing has changed since.": {
+  "日本語": "適用後は **最後の変更を元に戻す** で、名前を変えたクリップ、追加したマーカー、クリップカラー、設定を元に戻せます – その後変更されていないものだけ。",
+  "Español": "Tras Aplicar, **Revertir el último cambio** devuelve los clips renombrados, los marcadores añadidos, los colores de clip y los ajustes, donde nada ha cambiado desde entonces.",
+  "Deutsch": "Nach dem Anwenden stellt **Letzte Änderung zurücknehmen** umbenannte Clips, hinzugefügte Marker, Clipfarben und Einstellungen wieder her – wo sich seitdem nichts geändert hat.",
+  "Français": "Après Appliquer, **Annuler la dernière modification** rétablit les clips renommés, les marqueurs ajoutés, les couleurs de clip et les réglages – là où rien n'a changé depuis.",
+  "한국어": "적용한 뒤 **마지막 변경 되돌리기**로 이름을 바꾼 클립, 추가한 마커, 클립 색상, 설정을 되돌릴 수 있습니다 – 그 뒤로 바뀌지 않은 것만.",
+  "中文": "应用之后，**还原上次更改** 可恢复重命名的片段、添加的标记、片段颜色和设置 – 仅限此后未再改动之处。",
+  "العربية": "بعد التطبيق، يعيد **التراجع عن آخر تغيير** المقاطع المعاد تسميتها والعلامات المضافة وألوان المقاطع والإعدادات – حيث لم يتغير شيء منذ ذلك الحين.",
+  "Tiếng Việt": "Sau khi Áp dụng, **Hoàn tác thay đổi gần nhất** khôi phục clip đã đổi tên, marker đã thêm, màu clip và cài đặt – ở nơi chưa có gì thay đổi kể từ đó."
+ },
+ "The tool is open, but it couldn't take what Ask Buddy handed over.": {
+  "日本語": "ツールは開きましたが、Buddy に質問から渡された内容を受け取れませんでした。",
+  "Español": "La herramienta está abierta, pero no pudo recibir lo que Pregunta a Buddy le pasó.",
+  "Deutsch": "Das Werkzeug ist geöffnet, konnte aber nicht übernehmen, was „Buddy fragen“ übergeben hat.",
+  "Français": "L'outil est ouvert, mais il n'a pas pu prendre ce que Demander à Buddy lui a transmis.",
+  "한국어": "도구는 열렸지만 Buddy에게 질문이 넘긴 내용을 받지 못했습니다.",
+  "中文": "工具已打开，但无法接收询问 Buddy 交给它的内容。",
+  "العربية": "الأداة مفتوحة، لكنها لم تستطع أخذ ما سلّمه اسأل Buddy.",
+  "Tiếng Việt": "Công cụ đã mở nhưng không nhận được những gì Hỏi Buddy chuyển sang."
+ },
+ "Choose folder…": {
+  "日本語": "フォルダを選択…",
+  "Español": "Elegir carpeta…",
+  "Deutsch": "Ordner wählen…",
+  "Français": "Choisir un dossier…",
+  "한국어": "폴더 선택…",
+  "中文": "选择文件夹…",
+  "العربية": "اختيار مجلد…",
+  "Tiếng Việt": "Chọn thư mục…"
+ },
+ "Use Buddy's own": {
+  "日本語": "Buddy のものを使う",
+  "Español": "Usar el de Buddy",
+  "Deutsch": "Buddys eigenes verwenden",
+  "Français": "Utiliser celui de Buddy",
+  "한국어": "Buddy 기본 사용",
+  "中文": "使用 Buddy 自带的",
+  "العربية": "استخدام نسخة Buddy",
+  "Tiếng Việt": "Dùng bản của Buddy"
+ },
+ "Choose the folder with the manual's data (it contains chunks.jsonl)": {
+  "日本語": "マニュアルのデータがあるフォルダを選択 (chunks.jsonl が入っています)",
+  "Español": "Elige la carpeta con los datos del manual (contiene chunks.jsonl)",
+  "Deutsch": "Ordner mit den Daten des Handbuchs wählen (er enthält chunks.jsonl)",
+  "Français": "Choisissez le dossier contenant les données du manuel (il contient chunks.jsonl)",
+  "한국어": "매뉴얼 데이터가 있는 폴더 선택 (chunks.jsonl 포함)",
+  "中文": "选择包含手册数据的文件夹（其中有 chunks.jsonl）",
+  "العربية": "اختر المجلد الذي يحوي بيانات الدليل (يحتوي على chunks.jsonl)",
+  "Tiếng Việt": "Chọn thư mục chứa dữ liệu của sách hướng dẫn (có tệp chunks.jsonl)"
+ },
+ "That folder has no manual data – it should contain chunks.jsonl (or a manual.txt). Rebuild from PDF… makes it from the manual's PDF.": {
+  "日本語": "そのフォルダにはマニュアルのデータがありません – chunks.jsonl (または manual.txt) が必要です。「PDF から再構築…」でマニュアルの PDF から作成できます。",
+  "Español": "Esa carpeta no tiene datos del manual: debería contener chunks.jsonl (o un manual.txt). Reconstruir desde PDF… los crea a partir del PDF del manual.",
+  "Deutsch": "Dieser Ordner enthält keine Handbuchdaten – er sollte chunks.jsonl (oder eine manual.txt) enthalten. „Aus PDF neu erstellen…“ erzeugt sie aus dem PDF des Handbuchs.",
+  "Français": "Ce dossier ne contient pas de données du manuel – il devrait contenir chunks.jsonl (ou un manual.txt). Reconstruire depuis le PDF… les crée à partir du PDF du manuel.",
+  "한국어": "그 폴더에는 매뉴얼 데이터가 없습니다 – chunks.jsonl (또는 manual.txt)이 있어야 합니다. 'PDF에서 다시 만들기…'로 매뉴얼 PDF에서 만들 수 있습니다.",
+  "中文": "该文件夹没有手册数据 – 应包含 chunks.jsonl（或 manual.txt）。“从 PDF 重建…”可从手册的 PDF 生成。",
+  "العربية": "هذا المجلد لا يحوي بيانات الدليل – يجب أن يحتوي على chunks.jsonl (أو manual.txt). «إعادة البناء من PDF…» ينشئها من ملف PDF للدليل.",
+  "Tiếng Việt": "Thư mục đó không có dữ liệu sách hướng dẫn – cần có chunks.jsonl (hoặc manual.txt). Dựng lại từ PDF… sẽ tạo từ tệp PDF của sách hướng dẫn."
+ },
+ "Ask Buddy now reads the manual from that folder.": {
+  "日本語": "Buddy に質問は今後そのフォルダからマニュアルを読みます。",
+  "Español": "Pregunta a Buddy ahora lee el manual de esa carpeta.",
+  "Deutsch": "„Buddy fragen“ liest das Handbuch jetzt aus diesem Ordner.",
+  "Français": "Demander à Buddy lit désormais le manuel depuis ce dossier.",
+  "한국어": "이제 Buddy에게 질문이 그 폴더에서 매뉴얼을 읽습니다.",
+  "中文": "询问 Buddy 现在从该文件夹读取手册。",
+  "العربية": "يقرأ اسأل Buddy الدليل الآن من ذلك المجلد.",
+  "Tiếng Việt": "Hỏi Buddy giờ đọc sách hướng dẫn từ thư mục đó."
+ },
+ "Ask Buddy reads its own copy of the manual again.": {
+  "日本語": "Buddy に質問は再び自身のマニュアルを読みます。",
+  "Español": "Pregunta a Buddy vuelve a leer su propia copia del manual.",
+  "Deutsch": "„Buddy fragen“ liest wieder seine eigene Kopie des Handbuchs.",
+  "Français": "Demander à Buddy lit de nouveau sa propre copie du manuel.",
+  "한국어": "Buddy에게 질문이 다시 자체 매뉴얼을 읽습니다.",
+  "中文": "询问 Buddy 重新读取自带的手册。",
+  "العربية": "يقرأ اسأل Buddy نسخته الخاصة من الدليل من جديد.",
+  "Tiếng Việt": "Hỏi Buddy lại đọc bản sách hướng dẫn của riêng nó."
  }
 }

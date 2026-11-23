@@ -318,6 +318,19 @@ def default_data_paths() -> tuple[str, str]:
     return "", ""
 
 
+def manual_data_in(folder) -> tuple[str, str]:
+    """(bundle_dir, text_path) for a folder the user picked as the manual's
+    data: the bundle itself (it holds chunks.jsonl), a folder holding one
+    (bundle/, app/bundle/), or one with only a manual.txt. ("", "") when
+    it has none of those."""
+    folder = Path(folder)
+    for bundle in (folder, folder / "bundle", folder / "app" / "bundle"):
+        if (bundle / "chunks.jsonl").is_file():
+            return str(bundle), ""
+    text = folder / "manual.txt"
+    return ("", str(text)) if text.is_file() else ("", "")
+
+
 def rebuild_target(settings) -> Path:
     """Where "Rebuild from PDF..." writes: an explicit bundle_dir setting if
     there is one, else the first candidate - so the result is always the

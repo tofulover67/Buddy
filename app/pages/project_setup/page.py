@@ -53,6 +53,7 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QFileDialog
 
 from core.i18n import tr
+from core.message_dialog import confirm
 from core import busy_job, resolve_where
 from core.resolve_bridge import ResolveConnectionError
 from core.resolve_reader import ReadError, ResolveCalls
@@ -520,6 +521,33 @@ class ProjectSetupPage(ProjectSetupAutomationMixin, ProjectSetupSettingsMixin, W
         self.data_mgr.settings["bin_list"] = str((payload or {}).get("text", ""))
         self.data_mgr.save_settings()
         self._push_bins()
+
+    def handoff(self, payload):
+        """From Ask Buddy (ToolPage.handoff): a bin list it drafted, put in
+        the Bins tab's box with its preview. Nothing is created until
+        Create bins is pressed; a list of the person's own is only
+        replaced when they say so."""
+        lines = [str(line) for line in (payload or {}).get("bins") or [] if str(line).strip()]
+        if not lines or self._auto is not None or self._sync_busy:
+            return False
+        text = "\n".join(lines)
+        if self.tab != "bins":
+            self.tab = "bins"
+            self.data_mgr.settings["web_tab"] = "bins"
+            self._push_state()
+        current = self.data_mgr.settings.get("bin_list", "")
+        mine = current.strip() not in ("", text.strip(), data_manager.DEFAULT_BIN_LIST.strip())
+        if mine and not confirm(self.window(), "Replace your bin list?",
+                                "The Bins tab already holds a list of your own. Replace it with the one Ask "
+                                "Buddy drafted?", ok="Replace", cancel="Keep mine"):
+            self.data_mgr.save_settings()
+            return True                     # open on Bins, their list untouched
+        self.data_mgr.settings["bin_list"] = text
+        self.data_mgr.save_settings()
+        self.emit("bins_text", {"text": text})
+        self._push_bins()
+        self.emit("toast", {"text": "Bin list from Ask Buddy – nothing is created until you press Create bins."})
+        return True
 
     def on_bins_reset(self, _payload):
         self.data_mgr.settings["bin_list"] = data_manager.DEFAULT_BIN_LIST

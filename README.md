@@ -21,7 +21,7 @@ Buddy's integrated tools include the following:
 - Asset Manager (a library of the images, audio and video you reuse, with per-project lists. Its search can go by description instead of name - "rain on a window", "a crowd cheering" - and More like this finds what looks or sounds nearest an asset; see Search by description below)
 - Buddy Network (an anonymous chat between Buddy users; see Buddy Network below)
 - Color Palette Manager (palettes, generators, colours from images and contrast checks. Never touches your project)
-- Command Center (new; system-wide hot keys - or a Run button - for markers, jumping between them, copying the timecode or the frame, clip colours, Animation presets, saving a timeline version and removing gaps (experimental). Hot keys are Windows-only for now (`core/hotkeys.py`): a Mac has the Run buttons, and hot keys there need a version of their own (macOS asks for permission); see `pages/command_center/actions.py`)
+- Command Center (new; system-wide hot keys - or a Run button - for markers, jumping between them, copying the timecode or the frame, clip colours, Animation presets, saving a timeline version and removing gaps (experimental), and for Buddy itself - opening a tool of your choosing with Buddy brought to the front, and pausing or resuming Time Tracker. Hot keys are Windows-only for now (`core/hotkeys.py`): a Mac has the Run buttons, and hot keys there need a version of their own (macOS asks for permission); see `pages/command_center/actions.py`)
 - Data Graphics (new; animated graphics made from your own numbers, each added to the timeline as a new, still-editable Fusion clip at the playhead. Counters: a number that runs up or down - with decimals, separators, a currency sign or %, or as a clock. Graphs: a bar graph from rows typed or pasted from a spreadsheet, its bars growing on. Both have a timing curve you can drag into shape and a preview that plays what Resolve will. Line and pie charts are still to come: `docs/DATA_GRAPHICS_PLAN.md`. See `pages/data_graphics/`)
 - DAW (new, grown out of Audio Assistant's Keys tab; a small music studio over the music on the timeline, in its key and tempo: instrument and drum tracks - 8 synthesized instruments and 3 drum kits, all Buddy's own sound - with knobs, a mixer, a piano roll, chord pads in the key, chords from a single key (over 60 chords and intervals, in the key or fixed, with voicings and inversions), macro knobs and an XY pad, a drum step sequencer, loop recording with a count-in, and Undo for everything. One project in three layouts, switched without stopping playback: Arrange (the whole timeline, its bar lines on the song's beats or on the timeline, with the edit's cuts, markers and audio tracks to write around; tracks over the song lane, a sound browser, the mixer), Console (one instrument like hardware, a live scope, the piano roll and the keyboard) and Perform (pads, macros, steps). The song's tempo and bar 1 can be put right by hand when Buddy hears them wrong (a BPM typed in, double, half or 4:3 fixed, nudged by ear). The mix, a track or the loop is rendered and placed on the timeline as a new clip, lined up with the song's bars - or stems, each track on a Resolve track of its own named for it. Works without Resolve except for the song and placing. Windows only for now - on a Mac it's a placeholder until it's been checked there. See `pages/daw/`)
 - Essentials (new; a calculator that also does timecode, data rate, aspect ratio, a countdown timer, notes kept per project and a world clock; see `pages/essentials/`)
@@ -66,6 +66,16 @@ Two more things live in Settings (under General) rather than in the sidebar: a *
 a small companion in a see-through window of its own that floats over Resolve,
 and **achievements**, badges for what's done with the tools and for what
 Resolve does while Buddy is open. See Pets and achievements below.
+
+The header says what Buddy is connected to: once it has reached Resolve, the
+status reads the open project, the timeline and that timeline's format -
+`Harbour Film · Cut v3 (23.976 fps, 1920×1080)` - so a tool isn't run on the
+wrong project or timeline. It is read again on connecting, on opening a tool,
+and on coming back to Buddy's window (through the
+Resolve reader's process, so a playing timeline never holds the window up).
+See `core/resolve_status.py`. While Time Tracker is tracking or paused, its
+timer shows in the header too, with the project and a Pause / Resume button,
+whatever tool is open; clicking it opens Time Tracker (`ToolPage.header_status`).
 
 The bug button in the header (and on the desktop layout's taskbar) sends a
 bug report - what went wrong, up to six screenshots, and Buddy's, the
@@ -568,7 +578,10 @@ ungrounded and carry no citations.
 
 To build or refresh it when a new manual comes out, download the Reference
 Manual PDF, then either open **Settings > Ask Buddy > Rebuild from PDF...**,
-drop the PDF in and press Build, or run:
+drop the PDF in and press Build, or run the command below. The same page
+shows the folder the manual's data is read from; **Choose folder…** points
+Ask Buddy at data kept somewhere else (a folder holding `chunks.jsonl`), and
+**Use Buddy's own** goes back.
 
 ```bash
 python build_manual_bundle.py DavinciManual.pdf
@@ -601,7 +614,12 @@ steps, with buttons for what to ask about what it found. **Explain clip**
 focuses on the selected timeline clip or the video clip under the playhead
 before answering. A tool Buddy suggests opens from its button - Footage Search
 and Web already started on the search it proposed, which the button shows
-(`ToolPage.prefill`).
+(`ToolPage.prefill`). Two tools take more than words (`handoffs.py`, through
+the shell's `switch_tool(tool_id, payload=...)` and `ToolPage.handoff`): a bin
+structure Buddy drafted opens in Project Setup's Bins tab with its preview, and
+Media Relink opens on its offline clips and scans them. A handoff only shows -
+nothing is created or relinked until that tool's own button is pressed, and a
+bin list of your own is replaced only if you agree.
 
 ### Changing your project
 
@@ -622,6 +640,13 @@ empty metadata fields, bins, timelines, renames, clip colours, clips appended
 to the end - can go several to a card, applied in order by one Apply. One that
 moves or deletes anything is always proposed on its own. Filling in metadata
 never replaces a field that already says something.
+
+Resolve's scripting has no undo, so for the changes whose old values are known
+Buddy keeps them: after Apply, **Revert last change** puts back renamed clips,
+clip colours and project or timeline settings, and takes off the markers Buddy
+added - with the same project and timeline open, and only where nothing has
+changed since (a clip renamed again is left alone, and the answer says so).
+It lasts until the next applied change, another chat, or Buddy closing.
 
 ## Buddy Network
 

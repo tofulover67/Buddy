@@ -34,6 +34,7 @@ import time
 
 from PySide6.QtCore import QCoreApplication, QThread, QUrl, Signal
 from PySide6.QtGui import QDesktopServices
+from PySide6.QtWidgets import QFileDialog
 
 from core import secrets_store
 from core import settings_form as sf
@@ -63,6 +64,7 @@ from .config import (
     default_data_paths,
     history_limit,
     llm_client_from_settings,
+    manual_data_in,
     max_steps_limit,
     provider_spec,
     rebuild_target,
@@ -192,8 +194,11 @@ class ChatSettingsMixin:
 
     def manual_summary_text(self) -> str:
         bundle = self.settings.get("bundle_dir") or ""
-        if not bundle:
-            bundle, _text = default_data_paths()
+        text = self.settings.get("text_path") or ""
+        if not bundle and not text:
+            bundle, text = default_data_paths()
+        if not bundle and text:
+            return f"The manual as plain text – keyword search only.\n{text}"
         if not bundle:
             return "No manual bundle yet – answers are not grounded in the manual."
         meta = read_bundle_meta(bundle)
@@ -373,8 +378,35 @@ class ChatSettingsMixin:
         return [
             sf.heading("Manual data"),
             sf.hint(self.manual_summary_text()),
-            sf.buttons(("Rebuild from PDF…", "rebuild_manual")),
+            sf.buttons(*self._manual_buttons()),
         ]
+
+    def _manual_folder(self) -> str:
+        """The folder the manual's data is read from now, or ""."""
+        bundle = self.settings.get("bundle_dir") or ""
+        text = self.settings.get("text_path") or ""
+        if not bundle and not text:
+            bundle, text = default_data_paths()
+        folder = bundle or (os.path.dirname(text) if text else "")
+        return folder if folder and os.path.isdir(folder) else ""
+
+    def _manual_buttons(self):
+        """Choose folder… points Ask Buddy at manual data kept somewhere
+        else (a shared drive, another install's); Use Buddy's own goes
+        back to the one Buddy finds by itself."""
+        buttons = [("Choose folder…", "choose_manual")]
+        if self._manual_folder():
+            buttons.append(("Open folder", "open_manual_folder"))
+        if self.settings.get("bundle_dir") or self.settings.get("text_path"):
+            buttons.append(("Use Buddy's own", "reset_manual"))
+        return [*buttons, ("Rebuild from PDF…", "rebuild_manual")]
+
+    def _set_manual(self, bundle, text, ui, message):
+        self._save("bundle_dir", bundle)
+        self._save("text_path", text)
+        self._reload_manual()               # the next question searches it
+        ui.status(message, "success")
+        ui.refresh()
 
     def settings_pages(self):
         """Settings' AI group has the chat model and the manual search;
@@ -766,6 +798,23 @@ class ChatSettingsMixin:
                 return ui.status("Semantic search is off.", "")
             ui.status(f"Asking {embedder.label}…", "")
             self._start_embed_job("test", lambda _say, _cancelled: check_embedder(bundle, embedder), ui)
+        elif action == "choose_manual":
+            folder = QFileDialog.getExistingDirectory(
+                ui.parent, tr("Choose the folder with the manual's data (it contains chunks.jsonl)"),
+                self._manual_folder())
+            if not folder:
+                return
+            bundle, text = manual_data_in(folder)
+            if not bundle and not text:
+                return ui.status("That folder has no manual data – it should contain chunks.jsonl (or a "
+                                 "manual.txt). Rebuild from PDF… makes it from the manual's PDF.", "danger")
+            self._set_manual(bundle, text, ui, "Ask Buddy now reads the manual from that folder.")
+        elif action == "open_manual_folder":
+            folder = self._manual_folder()
+            if folder:
+                QDesktopServices.openUrl(QUrl.fromLocalFile(folder))
+        elif action == "reset_manual":
+            self._set_manual("", "", ui, "Ask Buddy reads its own copy of the manual again.")
         elif action == "rebuild_manual":
             # Over the Settings window: it's modal, so the build window stacks on it.
             dialog = ManualBuildDialog(ui.parent, rebuild_target(self.settings), emb.from_settings(self.settings))
