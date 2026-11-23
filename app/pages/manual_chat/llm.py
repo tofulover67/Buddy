@@ -37,6 +37,9 @@ out to precede a tool call has been handed over by then - the caller
 decides what to do with it (agent.py clears the draft). A server that
 refuses a streamed request (some OpenAI-compatible ones do, with tools) is
 asked again without, once, and remembered for the rest of the run.
+Working a model wrote into its answer (<think>...</think> and the like) is
+taken out of both (without_thinking); if some was handed over before it
+could be told from the answer, the callback is given None - clear it.
 `cancelled`, a callable, is looked at between events: True stops reading,
 closes the connection and raises LLMCancelled.
 
@@ -51,6 +54,7 @@ from __future__ import annotations
 
 import http.client
 import json
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -304,6 +308,43 @@ def _http_error(e, label: str) -> LLMError:
     return error
 
 
+# A model's working, written into the answer itself. A server is meant to
+# take it out (Ollama, llama.cpp and LM Studio put it in a field of its own,
+# which is never read as the answer) but doesn't always: gemma4:12b in
+# Ollama, after a tool call, sent 3,000 characters of it as the answer, with
+# the mark that opens it lost and only the one that closes it left.
+_THOUGHT = re.compile(r"<think(?:ing)?>.*?</think(?:ing)?>|<\|channel>.*?<channel\|>", re.S)
+_THOUGHT_OPENS = re.compile(r"<think(?:ing)?>|<\|channel>")
+_THOUGHT_CLOSES = ("</think>", "</thinking>", "<channel|>")
+_THOUGHT_MARKS = ("<think>", "<thinking>", "<|channel>") + _THOUGHT_CLOSES
+
+
+def without_thinking(text: str, partial: bool = False) -> str:
+    """The answer in `text`, less the working a model wrote into it: what is
+    between the marks, everything before a closing mark that was never
+    opened, and everything after an opening one never closed. partial: the
+    text is still being written, so an end that may be the start of a mark
+    is kept back too."""
+    if "<" not in text:
+        return text
+    answer = _THOUGHT.sub("", text)
+    cut = max(answer.rfind(mark) + len(mark) if mark in answer else 0 for mark in _THOUGHT_CLOSES)
+    answer = answer[cut:]
+    opened = _THOUGHT_OPENS.search(answer)
+    if opened:
+        answer = answer[:opened.start()]
+    elif partial:
+        start = answer.rfind("<")
+        if start >= 0 and any(mark.startswith(answer[start:]) for mark in _THOUGHT_MARKS):
+            answer = answer[:start]
+    return answer.lstrip() if len(answer) != len(text) else answer
+
+
+def _answer_only(reply: "Reply") -> "Reply":
+    reply.content = without_thinking(reply.content)
+    return reply
+
+
 def _post(url: str, payload: dict, headers: dict, label: str, timeout: int) -> dict:
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=body, headers=headers, method="POST")
@@ -512,15 +553,24 @@ class LLMClient:
             send = self._chat_openai        # every OpenAI-shaped provider
         where = (self.provider, self.base_url, self.model)
         if on_text is None or where in _NO_STREAM:
-            return send(system, messages, tools)
+            return _answer_only(send(system, messages, tools))
         said = []
+        shown = ""              # what on_text has been given of this request's answer
 
         def heard(piece):
-            if piece:
-                said.append(piece)
-                on_text(piece)
+            nonlocal shown
+            if not piece:
+                return
+            said.append(piece)
+            answer = without_thinking("".join(said), partial=True)
+            if not answer.startswith(shown):
+                on_text(None)   # what was shown turned out to be the model's working
+                shown = ""
+            if answer != shown:
+                on_text(answer[len(shown):])
+                shown = answer
         try:
-            return send(system, messages, tools, on_text=heard, cancelled=cancelled)
+            return _answer_only(send(system, messages, tools, on_text=heard, cancelled=cancelled))
         except LLMCancelled:
             raise
         except LLMError as e:
@@ -528,7 +578,7 @@ class LLMClient:
             if said or e.code not in NO_STREAM_CODES:
                 raise
         _NO_STREAM.add(where)
-        return send(system, messages, tools)
+        return _answer_only(send(system, messages, tools))
 
     # ------------------------------------------------------------- gemini
 

@@ -111,6 +111,31 @@ class StreamTests(unittest.TestCase):
         self.assertEqual(reply.content, "Let me look. One moment.")
         self.assertEqual([c.name for c in reply.tool_calls], ["search_manual"])   # a call under way is never dropped
 
+    def test_thinking_written_into_the_answer_is_never_shown(self):
+        pieces = ["<thi", "nk>The user wants", " a marker.</th", "ink>\n\nPress ", "M."]
+        events = [{"choices": [{"delta": {"content": piece}}]} for piece in pieces]
+        heard = []
+        with mock.patch.object(llm, "_stream", streamed(events)):
+            reply = llm.LLMClient(llm.PROVIDER_OLLAMA, "", "m").chat("sys", ASK, PING, on_text=heard.append)
+        self.assertEqual((heard, reply.content), (["Press ", "M."], "Press M."))
+
+    def test_thinking_whose_opening_mark_was_lost_is_cleared_when_it_closes(self):
+        # Measured: gemma4:12b in Ollama, answering after a tool call.
+        pieces = ["The user is asking ", "about markers. Let's do this.<chan", "nel|>Press ", "M."]
+        events = [{"choices": [{"delta": {"content": piece}}]} for piece in pieces]
+        heard = []
+        with mock.patch.object(llm, "_stream", streamed(events)):
+            reply = llm.LLMClient(llm.PROVIDER_OLLAMA, "", "m").chat("sys", ASK, PING, on_text=heard.append)
+        self.assertEqual(reply.content, "Press M.")
+        self.assertEqual(heard[-3:], [None, "Press ", "M."])            # None: what was shown wasn't the answer
+
+    def test_thinking_is_taken_out_of_an_answer_that_comes_whole(self):
+        whole = {"choices": [{"message": {"content": "<|channel>thought\nHm.<channel|>Press M."}}]}
+        with mock.patch.object(llm, "_post", lambda *_a, **_k: whole):
+            self.assertEqual(llm.LLMClient(llm.PROVIDER_OLLAMA, "", "m").chat("sys", ASK).content, "Press M.")
+        self.assertEqual(llm.without_thinking("Press M.\n<think>Did I"), "Press M.\n")
+        self.assertEqual(llm.without_thinking("Use a < b, or <b>bold</b>."), "Use a < b, or <b>bold</b>.")
+
     def test_stopping_part_way(self):
         events = [{"choices": [{"delta": {"content": word}}]} for word in ("one ", "two ", "three")]
         heard = []
