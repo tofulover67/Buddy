@@ -16,8 +16,8 @@ connected controller for one-shot actions, while this one is polled every
 few seconds forever for as long as Buddy is open, and isolating each poll
 in its own disposable process is what makes that safe.
 
-Prints the project name to stdout (nothing if Resolve/no project) and exits
-0 on success, 1 on any handled failure.
+Prints the project name to stdout, as UTF-8 (nothing if Resolve/no project),
+and exits 0 on success, 1 on any handled failure.
 """
 
 import os
@@ -72,7 +72,14 @@ def main():
         # (resolve_bridge.py's current_project_name() applies these same
         # rules in-process - keep the two in step.)
 
-        sys.stdout.write(name)
+        # As UTF-8 bytes, which the parent reads as UTF-8: written as text
+        # it goes out in the console's encoding (cp1252 on most Windows
+        # PCs), and a name with a letter that encoding lacks - Japanese,
+        # Korean, Cyrillic, an emoji - raised here, which read as "no
+        # project detected" for as long as that project was open.
+        sys.stdout.flush()
+        sys.stdout.buffer.write(name.encode("utf-8"))
+        sys.stdout.buffer.flush()
         sys.exit(0)
     except Exception:
         sys.exit(1)

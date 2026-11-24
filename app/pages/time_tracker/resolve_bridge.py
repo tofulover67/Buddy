@@ -157,7 +157,8 @@ class ResolveBridge(QObject):
                 # On a Mac sys.executable is Resolve's script host, which
                 # can't report the worker's result (core/python_exe.py).
                 [standalone_python() if sys.platform == "darwin" else sys.executable, _WORKER_PATH],
-                capture_output=True, text=True, timeout=15,
+                # UTF-8, as the worker writes the name - not the console's encoding.
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
                 **_no_feedback_cursor_kwargs(),
             )
             completed = True

@@ -194,5 +194,54 @@ class ResolveBridgeBannerTests(unittest.TestCase):
         self.assertEqual(_extract_name("My Project"), "My Project")
 
 
+class ProjectNameEncodingTests(unittest.TestCase):
+    """The worker hands the project's name back through its stdout. Written
+    as text it went out in the console's encoding - cp1252 on most Windows
+    PCs - and a name with a letter that lacks (Japanese, Cyrillic, an
+    emoji) raised in the worker: "No project detected", and "Resolve not
+    running", for as long as that project was open."""
+
+    FAKE_RESOLVE = "\n".join([
+        "# -*- coding: utf-8 -*-",
+        "class _Project:",
+        "    def GetName(self):",
+        "        return {name!r}",
+        "class _Manager:",
+        "    def GetCurrentProject(self):",
+        "        return _Project()",
+        "class _Resolve:",
+        "    def GetProjectManager(self):",
+        "        return _Manager()",
+        "def scriptapp(_name):",
+        "    return _Resolve()",
+        "",
+    ])
+
+    def detected(self, name):
+        from unittest import mock
+        from pages.time_tracker import resolve_bridge
+        with tempfile.TemporaryDirectory() as folder:
+            os.makedirs(os.path.join(folder, "Modules"))
+            with open(os.path.join(folder, "Modules", "DaVinciResolveScript.py"), "w", encoding="utf-8") as fh:
+                fh.write(self.FAKE_RESOLVE.format(name=name))
+            # The console's encoding on a Windows PC set up for English.
+            env = {"RESOLVE_SCRIPT_API": folder, "RESOLVE_SCRIPT_LIB": "unused", "PYTHONIOENCODING": "cp1252"}
+            got = []
+            bridge = resolve_bridge.ResolveBridge()
+            bridge.project_detected.connect(lambda found, completed: got.append((found, completed)))
+            with mock.patch.dict(os.environ, env), \
+                    mock.patch.object(resolve_bridge.shell_bridge, "live_host_resolve", return_value=None):
+                bridge._poll_worker()
+        return got
+
+    def test_a_name_the_console_cant_write_is_still_detected(self):
+        for name in ("動画 Sam's edit", "Монтаж", "Olive \U0001f3ac cut",
+                     "Plain name"):
+            self.assertEqual(self.detected(name), [(name, True)], ascii(name))
+
+    def test_untitled_project_is_still_no_project(self):
+        self.assertEqual(self.detected("Untitled Project"), [(None, True)])
+
+
 if __name__ == "__main__":
     unittest.main()
