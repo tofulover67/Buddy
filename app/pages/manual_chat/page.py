@@ -47,6 +47,7 @@ from __future__ import annotations
 import base64
 import os
 import threading
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -88,6 +89,7 @@ from .conversation import (
     suggestions,
     unverified_pages,
 )
+from .llm import session_for
 from .retrieval import TIER_HYBRID, TIER_NONE, ManualRetriever
 from .resolve_ext import project_checkup, resolve_info
 from .settings_panel import ChatSettingsMixin
@@ -95,6 +97,7 @@ from .settings_panel import ChatSettingsMixin
 PICTURE_FILTER = "Pictures (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.tif *.tiff);;All files (*)"
 PICTURE_ENDINGS = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff")
 MANUAL_POLL_MS = 15     # how often a question waiting for the manual looks whether it's loaded
+WAIT_NOTE_S = 10        # a provider silent this long is said to be waited for (_wait_tick)
 STREAM_MS = 70          # how often an answer being written is redrawn
 EXPORT_FILTER = "Markdown (*.md);;Text files (*.txt)"
 
@@ -178,6 +181,13 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._stream_timer = QTimer(self)
         self._stream_timer.setSingleShot(True)
         self._stream_timer.timeout.connect(self._push_stream)
+        # While a question is out: says how long the provider has been
+        # silent, once that is long enough to look like a hang (_wait_tick).
+        self._wait_timer = QTimer(self)
+        self._wait_timer.setInterval(1000)
+        self._wait_timer.timeout.connect(self._wait_tick)
+        self._heard = 0.0
+        self._waiting_on = ""
         self._sending = False
         self._thinking = ""
         self._pending_question = ""
@@ -345,6 +355,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
 
     def _build_agent(self, prefetch_focus=False) -> ManualAgent:
         llm = llm_client_from_settings(self.settings)
+        llm.session = session_for(id(self.chats.current))   # one id for the whole conversation
         # Read here, on every build, rather than cached on the page. The
         # agent is rebuilt per send, so revoking consent in Settings takes
         # effect on the very next message instead of the next launch.
@@ -719,6 +730,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         self._append(YOU, question, images=previews, raw=True, views=views, asked=True)
         self._push_pictures()
         self._draft = ""
+        self._waiting_on = llm_client_from_settings(self.settings).label
         self._set_sending(True)
 
         chat = self.chats.current
@@ -741,6 +753,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
     def _on_progress(self, message: str):
         """Queued from the worker thread - runs on the GUI thread."""
         if self._sending and not self._from_a_stopped_worker():
+            self._heard = time.monotonic()
             self._thinking = message
             self.emit("thinking", {"on": True, "message": message})
 
@@ -749,6 +762,7 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         far led to a tool call - clear it). Drawn at most every STREAM_MS."""
         if not self._sending or self._from_a_stopped_worker():
             return
+        self._heard = time.monotonic()
         self._draft = "" if piece is None else self._draft + str(piece)
         if not self._stream_timer.isActive():
             self._stream_timer.start(STREAM_MS)
@@ -793,8 +807,26 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
         if worker is not None:
             worker.deleteLater()
 
+    def _wait_tick(self):
+        """A provider that has gone quiet - a rate limit it is making the
+        request wait out, a server that stopped answering - looks exactly
+        like Buddy having hung: the dots, and nothing else, for as long as
+        the request's timeout. Past WAIT_NOTE_S the dots say who is being
+        waited for and for how long, so it reads as what it is, with Stop
+        beside it."""
+        if not self._sending:
+            return self._wait_timer.stop()
+        quiet = int(time.monotonic() - self._heard)
+        if quiet >= WAIT_NOTE_S and not self._draft:
+            self.emit("thinking", {"on": True, "message": f"Still waiting for {self._waiting_on} ({quiet} s)…"})
+
     def _set_sending(self, sending: bool):
         self._sending = sending
+        self._heard = time.monotonic()
+        if sending:
+            self._wait_timer.start()
+        else:
+            self._wait_timer.stop()
         self._thinking = "Thinking…" if sending else ""
         self.emit("thinking", {"on": sending, "message": self._thinking})
         self._push_controls()
@@ -822,6 +854,14 @@ class ManualChatPage(ChatSettingsMixin, WebToolPage):
             return
         if result.error:
             error = result.error
+            if "HTTP 429" in error:
+                error += ("\n\nThat is the provider's rate limit: too many requests in a short time, or this "
+                          "model's allowance is used up. Wait a minute and press Try again, or choose another "
+                          "model in Settings > AI > Chat assistant.")
+            if error.startswith(("OpenCode: HTTP 401", "OpenCode Go: HTTP 401")):
+                error += ("\n\nOpenCode has two kinds of key. One from a Go subscription only works with the "
+                          "OpenCode Go provider, and a pay-as-you-go one only with OpenCode: if this key is "
+                          "right, choose the other of the two in Settings > AI > Chat assistant.")
             if self._pending_pictures:
                 error += ("\n\nThis question had a picture. If the model can't read images, choose one that "
                           "can in Settings > AI > Chat assistant (a \"vision\" model – most recent GPT, Claude and "

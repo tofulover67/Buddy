@@ -29,6 +29,8 @@ from .llm import (
     PROVIDER_OLLAMA,
     PROVIDER_OPENAI,
     PROVIDER_OPENAI_API,
+    PROVIDER_OPENCODE,
+    PROVIDER_OPENCODE_GO,
     PROVIDER_OPENROUTER,
     LLMClient,
 )
@@ -105,6 +107,39 @@ PROVIDER_SPEC = {
             "One key for hundreds of models from every major lab, some of them free. Get one at "
             '<a href="https://openrouter.ai/keys">openrouter.ai/keys</a>, then pick one of its models. '
             "Leave the key empty to use $OPENROUTER_API_KEY from your environment instead."
+        ),
+    },
+    PROVIDER_OPENCODE: {
+        "label": "OpenCode",
+        "model_key": "model_opencode",
+        "api_key_key": "api_key_opencode",
+        "base_url_key": "",
+        "env_vars": ("OPENCODE_API_KEY",),
+        "model_placeholder": "glm-5.3",
+        "models": ["deepseek-v4-pro", "deepseek-v4.1-flash", "glm-5.3", "glm-5.3-flash", "kimi-k3",
+                   "minimax-m3", "mistral-large-4", "qwen3.8-max"],
+        "note": (
+            "OpenCode's pay-as-you-go models, with the key from "
+            '<a href="https://opencode.ai/console">opencode.ai/console</a>. The list above shows the ones '
+            "Ask Buddy can use: its open models, which answer over the chat API and cost credits. Its free "
+            "models only work inside OpenCode itself, and its GPT, Claude and Gemini models are reached with "
+            "their own providers here. Leave the key empty to use $OPENCODE_API_KEY from your environment instead."
+        ),
+    },
+    PROVIDER_OPENCODE_GO: {
+        "label": "OpenCode Go",
+        "model_key": "model_opencode_go",
+        "api_key_key": "api_key_opencode_go",
+        "base_url_key": "",
+        "env_vars": ("OPENCODE_GO_API_KEY",),
+        "model_placeholder": "kimi-k3",
+        "models": ["deepseek-v4-pro", "glm-5.3", "kimi-k3", "minimax-m3", "qwen3.8-max"],
+        "note": (
+            "OpenCode's Go subscription, with the key from "
+            '<a href="https://opencode.ai/console">opencode.ai/console</a>. What you ask counts against your '
+            "plan's limits. OpenCode makes Go for coding agents and watches for other kinds of use, so it may "
+            "limit or refuse a client like Buddy. Leave the key empty to use $OPENCODE_GO_API_KEY from your "
+            "environment instead."
         ),
     },
     PROVIDER_GROQ: {
@@ -210,6 +245,8 @@ DEFAULTS = {
     "model_openai_api": "",
     "model_openrouter": "",
     "model_groq": "",
+    "model_opencode": "",
+    "model_opencode_go": "",
     "model_azure": "",
     "model_llamacpp": "",
     "model_lmstudio": "",
@@ -219,6 +256,8 @@ DEFAULTS = {
     "api_key_openai_api": "",
     "api_key_openrouter": "",
     "api_key_groq": "",
+    "api_key_opencode": "",
+    "api_key_opencode_go": "",
     "api_key_azure": "",
     "api_key_llamacpp": "",
     "api_key_lmstudio": "",

@@ -2181,12 +2181,17 @@ class ShellWindow(QMainWindow):
         self._connect_worker = None
 
     # ------------------------------------------------------------ settings --
-    def open_settings(self, tool_id=None):
-        """The Settings window - on General, or on a tool's own page (its
-        right-click Settings). A window of its own rather than a modal one:
-        the pet can still be dragged about, and Buddy used, while it's
-        open (what changes there applies as it's changed). Asked for again
-        while open, the one on screen comes to the front."""
+    def open_settings(self, tool_id=None, here=True):
+        """The Settings window - on a tool's own page (its right-click
+        Settings), else on the page of the tool that's on screen (opened
+        from Ask Buddy, it opens on Ask Buddy's), else on General: a tool
+        with no page of its own, or here=False (the tour, which goes where
+        it means to). A window of its own rather than a modal one: the pet
+        can still be dragged about, and Buddy used, while it's open (what
+        changes there applies as it's changed). Asked for again while open,
+        the one on screen comes to the front - and stays on its page unless
+        a tool's was asked for."""
+        here = here and tool_id is None             # asked for by name, a tool with no page gets General
         tool_id = tool_id if ShellWindow.has_settings(self, tool_id) else None
         open_now = next(iter(SettingsDialog.on_screen()), None)
         if open_now is not None:
@@ -2194,6 +2199,9 @@ class ShellWindow(QMainWindow):
             return
         current_page = (self.pages.get(self._current_tool_id) if self._layout == "desktop"
                         else self.stack.front())
+        if here:
+            on_screen = getattr(current_page, "tool_id", None)
+            tool_id = on_screen if ShellWindow.has_settings(self, on_screen) else None
         dialog = SettingsDialog(self, self.shared_settings, self._on_settings_applied, current_page, open_tool=tool_id)
         # A child of this window: without this, every Settings ever opened
         # stays behind, hidden, with a live web view, until Buddy quits.

@@ -202,6 +202,20 @@ class DialogTests(_Shell):
             self.win.open_settings("broken")
         self.assertEqual([c.kwargs["open_tool"] for c in dialog.call_args_list], ["smart", None])
 
+    def test_opened_from_a_tool_it_opens_on_that_tools_page(self):
+        win = self.win
+        with mock.patch.object(shell_window, "SettingsDialog") as dialog,                 mock.patch.object(win, "_layout", "rail"), mock.patch.object(win, "stack") as stack:
+            stack.front.return_value = win.pages["smart"]
+            win.open_settings()                             # the gear, with Smart on screen
+            win.open_settings(here=False)                   # the tour: General
+            win.open_settings("plain")                      # another tool's right-click wins
+            stack.front.return_value = win.pages["broken"]  # a tool with no page of its own
+            win.open_settings()
+            stack.front.return_value = None
+            win.open_settings()
+        self.assertEqual([c.kwargs["open_tool"] for c in dialog.call_args_list],
+                         ["smart", None, "plain", None, None])
+
     def test_the_sidebar_and_taskbar_menus_offer_it(self):
         made = []
 

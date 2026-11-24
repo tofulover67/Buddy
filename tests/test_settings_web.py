@@ -401,7 +401,8 @@ class ToolSectionTests(unittest.TestCase):
         lists = {"gemini": ["gemini-3.8-flash", "gemini-3.8-pro"], "anthropic": ["claude-opus-5", "claude-sonnet-5"],
                  "openai_api": ["gpt-4.1", "o4-mini"], "openrouter": ["meta-llama/llama-3.3-70b-instruct"],
                  "groq": ["llama-3.3-70b-versatile"], "azure": ["my-deployment"], "ollama": ["qwen3:14b"],
-                 "llamacpp": ["local-model"], "lmstudio": ["qwen3-14b"], "openai": ["custom-1"]}
+                 "llamacpp": ["local-model"], "lmstudio": ["qwen3-14b"], "openai": ["custom-1"],
+                 "opencode": ["glm-5.3"], "opencode_go": ["kimi-k3"]}
         page = self.chat_page(provider="gemini", api_key_gemini=secrets_store.lock("g-key"),
                               api_key_anthropic=secrets_store.lock("a-key"), api_key_openai_api=secrets_store.lock("o-key"),
                               api_key_openrouter=secrets_store.lock("r-key"), api_key_groq=secrets_store.lock("q-key"),

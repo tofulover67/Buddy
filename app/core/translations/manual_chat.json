@@ -3849,5 +3849,55 @@
   "中文": "询问 Buddy 重新读取自带的手册。",
   "العربية": "يقرأ اسأل Buddy نسخته الخاصة من الدليل من جديد.",
   "Tiếng Việt": "Hỏi Buddy lại đọc bản sách hướng dẫn của riêng nó."
+ },
+ "Still waiting for {provider} ({n} s)…": {
+  "日本語": "{provider} の応答を待っています（{n} 秒）…",
+  "Español": "Seguimos esperando a {provider} ({n} s)…",
+  "Deutsch": "Warte weiter auf {provider} ({n} s)…",
+  "Français": "Toujours en attente de {provider} ({n} s)…",
+  "한국어": "{provider}의 응답을 기다리는 중({n}초)…",
+  "中文": "仍在等待 {provider}（{n} 秒）…",
+  "العربية": "ما زلنا ننتظر {provider} ({n} ث)…",
+  "Tiếng Việt": "Vẫn đang chờ {provider} ({n} giây)…"
+ },
+ "That is the provider's rate limit: too many requests in a short time, or this model's allowance is used up. Wait a minute and press Try again, or choose another model in Settings > AI > Chat assistant.": {
+  "日本語": "これはプロバイダーのレート制限です。短時間にリクエストが多すぎるか、このモデルの利用枠を使い切っています。1 分ほど待ってから「再試行」を押すか、設定 > AI > チャットアシスタントで別のモデルを選んでください。",
+  "Español": "Es el límite de uso del proveedor: demasiadas solicitudes en poco tiempo, o la cuota de este modelo se ha agotado. Espera un minuto y pulsa Reintentar, o elige otro modelo en Ajustes > IA > Asistente de chat.",
+  "Deutsch": "Das ist das Ratenlimit des Anbieters: zu viele Anfragen in kurzer Zeit, oder das Kontingent dieses Modells ist aufgebraucht. Warte eine Minute und klicke auf „Erneut versuchen“, oder wähle unter Einstellungen > KI > Chat-Assistent ein anderes Modell.",
+  "Français": "C'est la limite de débit du fournisseur : trop de requêtes en peu de temps, ou le quota de ce modèle est épuisé. Attendez une minute et cliquez sur Réessayer, ou choisissez un autre modèle dans Réglages > IA > Assistant de discussion.",
+  "한국어": "제공업체의 사용량 제한입니다. 짧은 시간에 요청이 너무 많았거나 이 모델의 할당량을 모두 사용했습니다. 1분 정도 기다린 뒤 다시 시도를 누르거나 설정 > AI > 채팅 도우미에서 다른 모델을 선택하세요.",
+  "中文": "这是服务商的速率限制：短时间内请求过多，或此模型的额度已用完。请等一分钟后按“重试”，或在 设置 > AI > 聊天助手 中选择其他模型。",
+  "العربية": "هذا هو حد المعدّل لدى المزوّد: طلبات كثيرة في وقت قصير، أو أن حصة هذا النموذج قد استُنفدت. انتظر دقيقة ثم اضغط «حاول مرة أخرى»، أو اختر نموذجًا آخر في الإعدادات > الذكاء الاصطناعي > مساعد الدردشة.",
+  "Tiếng Việt": "Đây là giới hạn tần suất của nhà cung cấp: quá nhiều yêu cầu trong thời gian ngắn, hoặc hạn mức của mô hình này đã hết. Hãy chờ một phút rồi nhấn Thử lại, hoặc chọn mô hình khác trong Cài đặt > AI > Trợ lý trò chuyện."
+ },
+ "OpenCode's pay-as-you-go models, with the key from <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. The list above shows the ones Ask Buddy can use: its open models, which answer over the chat API and cost credits. Its free models only work inside OpenCode itself, and its GPT, Claude and Gemini models are reached with their own providers here. Leave the key empty to use $OPENCODE_API_KEY from your environment instead.": {
+  "日本語": "OpenCode の従量課金モデルです。キーは <a href=\"https://opencode.ai/console\">opencode.ai/console</a> で取得します。上の一覧には Ask Buddy で使えるもの、つまりチャット API で応答しクレジットを消費するオープンモデルが表示されます。無料モデルは OpenCode 本体でしか使えず、GPT、Claude、Gemini の各モデルはここではそれぞれのプロバイダーから利用します。キーを空欄にすると、環境変数 $OPENCODE_API_KEY が使われます。",
+  "Español": "Los modelos de pago por uso de OpenCode, con la clave de <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. La lista de arriba muestra los que Ask Buddy puede usar: sus modelos abiertos, que responden por la API de chat y consumen créditos. Sus modelos gratuitos solo funcionan dentro de OpenCode, y sus modelos GPT, Claude y Gemini se usan aquí con sus propios proveedores. Deja la clave vacía para usar $OPENCODE_API_KEY de tu entorno.",
+  "Deutsch": "Die nutzungsbasierten Modelle von OpenCode, mit dem Schlüssel von <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. Die Liste oben zeigt die, die Ask Buddy nutzen kann: die offenen Modelle, die über die Chat-API antworten und Guthaben kosten. Die kostenlosen Modelle funktionieren nur in OpenCode selbst, und die GPT-, Claude- und Gemini-Modelle erreichst du hier über ihre eigenen Anbieter. Lass den Schlüssel leer, um stattdessen $OPENCODE_API_KEY aus deiner Umgebung zu verwenden.",
+  "Français": "Les modèles à l'usage d'OpenCode, avec la clé obtenue sur <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. La liste ci-dessus montre ceux qu'Ask Buddy peut utiliser : ses modèles ouverts, qui répondent via l'API de chat et consomment des crédits. Ses modèles gratuits ne fonctionnent que dans OpenCode lui-même, et ses modèles GPT, Claude et Gemini s'utilisent ici avec leurs propres fournisseurs. Laissez la clé vide pour utiliser $OPENCODE_API_KEY de votre environnement.",
+  "한국어": "OpenCode의 종량제 모델이며, 키는 <a href=\"https://opencode.ai/console\">opencode.ai/console</a>에서 받습니다. 위 목록에는 Ask Buddy가 쓸 수 있는 모델, 즉 채팅 API로 응답하고 크레딧을 쓰는 오픈 모델이 표시됩니다. 무료 모델은 OpenCode 안에서만 작동하고, GPT, Claude, Gemini 모델은 여기서 각자의 제공업체로 사용합니다. 키를 비워 두면 환경 변수 $OPENCODE_API_KEY를 사용합니다.",
+  "中文": "OpenCode 的按量付费模型，密钥在 <a href=\"https://opencode.ai/console\">opencode.ai/console</a> 获取。上方列表显示 Ask Buddy 可以使用的模型：通过聊天 API 应答并消耗额度的开放模型。它的免费模型只能在 OpenCode 自身中使用，GPT、Claude 和 Gemini 模型在这里请通过各自的服务商使用。密钥留空则使用环境变量 $OPENCODE_API_KEY。",
+  "العربية": "نماذج OpenCode بالدفع حسب الاستخدام، بالمفتاح من <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. تعرض القائمة أعلاه ما يستطيع Ask Buddy استخدامه: نماذجه المفتوحة التي تجيب عبر واجهة الدردشة وتستهلك رصيدًا. نماذجه المجانية تعمل داخل OpenCode نفسه فقط، ونماذج GPT و Claude و Gemini تُستخدم هنا عبر مزوّديها. اترك المفتاح فارغًا لاستخدام $OPENCODE_API_KEY من بيئتك.",
+  "Tiếng Việt": "Các mô hình trả theo mức dùng của OpenCode, với khóa lấy tại <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. Danh sách ở trên hiển thị những mô hình Ask Buddy dùng được: các mô hình mở, trả lời qua API trò chuyện và tốn tín dụng. Các mô hình miễn phí chỉ hoạt động trong chính OpenCode, còn các mô hình GPT, Claude và Gemini thì dùng ở đây qua nhà cung cấp riêng của chúng. Để trống khóa để dùng $OPENCODE_API_KEY từ môi trường của bạn."
+ },
+ "OpenCode's Go subscription, with the key from <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. What you ask counts against your plan's limits. OpenCode makes Go for coding agents and watches for other kinds of use, so it may limit or refuse a client like Buddy. Leave the key empty to use $OPENCODE_GO_API_KEY from your environment instead.": {
+  "日本語": "OpenCode の Go サブスクリプションです。キーは <a href=\"https://opencode.ai/console\">opencode.ai/console</a> で取得します。質問した分はプランの上限に数えられます。Go はコーディングエージェント向けに作られており、それ以外の使い方は監視されているため、Buddy のようなクライアントは制限または拒否されることがあります。キーを空欄にすると、環境変数 $OPENCODE_GO_API_KEY が使われます。",
+  "Español": "La suscripción Go de OpenCode, con la clave de <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. Lo que preguntes cuenta para los límites de tu plan. OpenCode hace Go para agentes de programación y vigila otros tipos de uso, así que puede limitar o rechazar un cliente como Buddy. Deja la clave vacía para usar $OPENCODE_GO_API_KEY de tu entorno.",
+  "Deutsch": "Das Go-Abo von OpenCode, mit dem Schlüssel von <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. Was du fragst, zählt gegen die Limits deines Tarifs. OpenCode macht Go für Coding-Agenten und beobachtet andere Arten der Nutzung, kann einen Client wie Buddy also einschränken oder ablehnen. Lass den Schlüssel leer, um stattdessen $OPENCODE_GO_API_KEY aus deiner Umgebung zu verwenden.",
+  "Français": "L'abonnement Go d'OpenCode, avec la clé obtenue sur <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. Vos questions sont décomptées des limites de votre formule. OpenCode conçoit Go pour les agents de programmation et surveille les autres usages : il peut donc limiter ou refuser un client comme Buddy. Laissez la clé vide pour utiliser $OPENCODE_GO_API_KEY de votre environnement.",
+  "한국어": "OpenCode의 Go 구독이며, 키는 <a href=\"https://opencode.ai/console\">opencode.ai/console</a>에서 받습니다. 질문한 만큼 요금제 한도에서 차감됩니다. OpenCode는 Go를 코딩 에이전트용으로 만들고 다른 용도의 사용을 지켜보므로, Buddy 같은 클라이언트는 제한되거나 거부될 수 있습니다. 키를 비워 두면 환경 변수 $OPENCODE_GO_API_KEY를 사용합니다.",
+  "中文": "OpenCode 的 Go 订阅，密钥在 <a href=\"https://opencode.ai/console\">opencode.ai/console</a> 获取。你的提问会计入套餐的用量限制。OpenCode 的 Go 面向编程智能体，并会监控其他类型的使用，因此可能限制或拒绝像 Buddy 这样的客户端。密钥留空则使用环境变量 $OPENCODE_GO_API_KEY。",
+  "العربية": "اشتراك Go من OpenCode، بالمفتاح من <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. ما تسأله يُحتسب من حدود خطتك. تصنع OpenCode خدمة Go لوكلاء البرمجة وتراقب أنواع الاستخدام الأخرى، لذا قد تقيّد عميلًا مثل Buddy أو ترفضه. اترك المفتاح فارغًا لاستخدام $OPENCODE_GO_API_KEY من بيئتك.",
+  "Tiếng Việt": "Gói đăng ký Go của OpenCode, với khóa lấy tại <a href=\"https://opencode.ai/console\">opencode.ai/console</a>. Những gì bạn hỏi được tính vào giới hạn của gói. OpenCode làm Go cho các tác tử lập trình và theo dõi những kiểu sử dụng khác, nên có thể giới hạn hoặc từ chối một ứng dụng như Buddy. Để trống khóa để dùng $OPENCODE_GO_API_KEY từ môi trường của bạn."
+ },
+ "OpenCode has two kinds of key. One from a Go subscription only works with the OpenCode Go provider, and a pay-as-you-go one only with OpenCode: if this key is right, choose the other of the two in Settings > AI > Chat assistant.": {
+  "日本語": "OpenCode のキーには 2 種類あります。Go サブスクリプションのキーは OpenCode Go プロバイダーでのみ、従量課金のキーは OpenCode でのみ使えます。このキーが正しい場合は、設定 > AI > チャットアシスタントでもう一方を選んでください。",
+  "Español": "OpenCode tiene dos tipos de clave. La de una suscripción Go solo funciona con el proveedor OpenCode Go, y la de pago por uso solo con OpenCode: si esta clave es correcta, elige el otro de los dos en Ajustes > IA > Asistente de chat.",
+  "Deutsch": "OpenCode hat zwei Arten von Schlüsseln. Einer aus einem Go-Abo funktioniert nur mit dem Anbieter OpenCode Go, ein nutzungsbasierter nur mit OpenCode: Wenn dieser Schlüssel stimmt, wähle unter Einstellungen > KI > Chat-Assistent den anderen der beiden.",
+  "Français": "OpenCode a deux types de clé. Celle d'un abonnement Go ne fonctionne qu'avec le fournisseur OpenCode Go, et celle à l'usage qu'avec OpenCode : si cette clé est correcte, choisissez l'autre des deux dans Réglages > IA > Assistant de discussion.",
+  "한국어": "OpenCode에는 두 종류의 키가 있습니다. Go 구독 키는 OpenCode Go 제공업체에서만, 종량제 키는 OpenCode에서만 작동합니다. 이 키가 맞다면 설정 > AI > 채팅 도우미에서 둘 중 다른 쪽을 선택하세요.",
+  "中文": "OpenCode 有两种密钥。Go 订阅的密钥只能用于 OpenCode Go，按量付费的密钥只能用于 OpenCode：如果这个密钥没错，请在 设置 > AI > 聊天助手 中选择两者中的另一个。",
+  "العربية": "لدى OpenCode نوعان من المفاتيح. مفتاح اشتراك Go يعمل فقط مع المزوّد OpenCode Go، ومفتاح الدفع حسب الاستخدام يعمل فقط مع OpenCode: إن كان هذا المفتاح صحيحًا فاختر الآخر من الاثنين في الإعدادات > الذكاء الاصطناعي > مساعد الدردشة.",
+  "Tiếng Việt": "OpenCode có hai loại khóa. Khóa của gói đăng ký Go chỉ dùng được với nhà cung cấp OpenCode Go, còn khóa trả theo mức dùng chỉ dùng với OpenCode: nếu khóa này đúng, hãy chọn cái còn lại trong Cài đặt > AI > Trợ lý trò chuyện."
  }
 }

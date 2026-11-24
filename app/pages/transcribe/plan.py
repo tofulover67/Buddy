@@ -38,7 +38,8 @@ AI_ID = "ai"
 AI_TIMEOUT = 240
 AI_PROVIDER_NAMES = {"anthropic": "Claude", "gemini": "Gemini", "ollama": "Ollama",
                      "openai": "OpenAI-compatible", "openai_api": "OpenAI", "openrouter": "OpenRouter",
-                     "groq": "Groq", "azure": "Azure OpenAI", "llamacpp": "llama.cpp",
+                     "groq": "Groq", "opencode": "OpenCode", "opencode_go": "OpenCode Go",
+                     "azure": "Azure OpenAI", "llamacpp": "llama.cpp",
                      "lmstudio": "LM Studio"}
 AI_TIP = ("Uses the model Ask Buddy is set up with (Claude, Gemini, Ollama…). Best quality – "
           "it translates whole passages with their context – but a cloud model gets the "

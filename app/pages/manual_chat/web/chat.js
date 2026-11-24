@@ -49,7 +49,28 @@ function scrollToBottom(smooth) {
     following = true;
 }
 
-transcript.addEventListener("scroll", () => { following = nearBottom(); }, {passive: true});
+// Only the reader moves the transcript up, so any move up is them reading
+// back - by however little, and while an answer is still being written
+// under them - and it stops the following there and then. It starts again
+// once they are back down at the newest line. A move up that ends at the
+// very bottom is the transcript getting shorter (a draft taken back), not
+// the reader.
+let lastTop = 0;
+
+function readerScrolled() {
+    const top = transcript.scrollTop;
+    const gap = transcript.scrollHeight - top - transcript.clientHeight;
+    if (top < lastTop - 1 && gap > 2) following = false;
+    else if (top > lastTop && nearBottom()) following = true;
+    lastTop = top;
+}
+
+transcript.addEventListener("scroll", readerScrolled, {passive: true});
+// The wheel says so before the transcript has moved: an answer growing at
+// the same moment must not pull it back down first.
+transcript.addEventListener("wheel", event => {
+    if (event.deltaY < 0 && transcript.scrollHeight > transcript.clientHeight) following = false;
+}, {passive: true});
 new ResizeObserver(() => { if (following) scrollToBottom(false); }).observe(transcript);
 new ResizeObserver(() => { if (following) scrollToBottom(false); }).observe(messages);
 

@@ -317,7 +317,7 @@ class TourView(WebWindow):
         from core.settings_dialog import SettingsDialog     # here: it's a lot to import for the tour's sake
         dialog = next(iter(SettingsDialog.on_screen()), None)
         if dialog is None:
-            self.shell.open_settings()
+            self.shell.open_settings(here=False)
             dialog = next(iter(SettingsDialog.on_screen()), None)
             if dialog is not None:
                 self._opened = dialog

@@ -212,6 +212,118 @@ class ModelListTests(unittest.TestCase):
         self.assertEqual(str(caught.exception), "Couldn't list the models: HTTP 401 – check the API key.")
 
 
+class OpenCodeTests(unittest.TestCase):
+    LISTED = {"object": "list", "data": [
+        {"id": "glm-5.3", "type": "chat", "api": {"chat-completions": {}},
+         "capabilities": {"tools": {"supported": True}},
+         "cost": {"text": {"input": {"price": 0.56}, "output": {"price": 1.76}}}},
+        {"id": "beam-free", "type": "chat", "api": {"chat-completions": {}},       # only answers OpenCode itself
+         "cost": {"text": {"input": {"price": 0}, "output": {"price": 0}}}},
+        {"id": "gpt-6-sol", "type": "chat", "api": {"responses": {}},              # another API, another address
+         "cost": {"text": {"input": {"price": 2}, "output": {"price": 8}}}},
+        {"id": "claude-sonnet-5", "type": "chat", "api": {"messages": {}},
+         "cost": {"text": {"input": {"price": 3}, "output": {"price": 15}}}},
+        {"id": "no-tools", "type": "chat", "api": {"chat-completions": {}},
+         "capabilities": {"tools": {"supported": False}},
+         "cost": {"text": {"input": {"price": 1}, "output": {"price": 1}}}},
+        {"id": "text-embedding-3-small", "type": "embedding", "api": {"embeddings": {}}},
+    ]}
+
+    def test_it_speaks_chat_completions_at_its_own_address_with_the_key(self):
+        sent = {}
+        client = llm.LLMClient(llm.PROVIDER_OPENCODE, "oc-key", "glm-5.3")
+        self.assertEqual(client.validate(), "")
+        self.assertFalse(client.local)
+        self.assertEqual(client.label, "OpenCode")
+        self.assertEqual(client.destination, "opencode.ai")
+        with mock.patch.object(llm, "_post", fake_openai(sent)):
+            client.chat("sys", [{"role": "user", "content": "hi"}])
+        self.assertEqual(sent["url"], "https://opencode.ai/inference/openai/v1/chat/completions")
+        self.assertEqual(sent["headers"]["Authorization"], "Bearer oc-key")
+        self.assertEqual(sent["payload"]["model"], "glm-5.3")
+        self.assertIn("API key", llm.LLMClient(llm.PROVIDER_OPENCODE, "", "glm-5.3").validate())
+
+    def test_the_list_is_the_models_ask_buddy_can_use_and_needs_no_key(self):
+        asked = []
+
+        def fake_get(url, headers, timeout, where):
+            asked.append((url, headers))
+            return self.LISTED
+
+        client = llm.LLMClient(llm.PROVIDER_OPENCODE, "", "")
+        self.assertEqual(client.list_problem(), "")
+        with mock.patch.object(llm, "_get_json", fake_get):
+            self.assertEqual(client.list_models(), ["glm-5.3"])
+        self.assertEqual(asked, [("https://opencode.ai/inference/v1/models", {})])      # the key isn't sent for it
+
+
+class OpenCodeGoTests(unittest.TestCase):
+    def test_the_subscription_has_its_own_address_and_wants_a_session(self):
+        sent = {}
+        client = llm.LLMClient(llm.PROVIDER_OPENCODE_GO, "go-key", "kimi-k3")
+        self.assertEqual(client.label, "OpenCode Go")
+        with mock.patch.object(llm, "_post", fake_openai(sent)):
+            client.chat("sys", [{"role": "user", "content": "hi"}])
+            first = sent["headers"]["x-opencode-session"]
+            client.chat("sys", [{"role": "user", "content": "and?"}])
+        self.assertEqual(sent["url"], "https://opencode.ai/inference/go/openai/v1/chat/completions")
+        self.assertEqual(sent["headers"]["Authorization"], "Bearer go-key")
+        self.assertTrue(first)
+        self.assertEqual(sent["headers"]["x-opencode-session"], first)      # the same through a conversation
+        client.session = llm.session_for("another chat")
+        with mock.patch.object(llm, "_post", fake_openai(sent)):
+            client.chat("sys", [{"role": "user", "content": "hi"}])
+        self.assertNotEqual(sent["headers"]["x-opencode-session"], first)
+        self.assertEqual(llm.session_for("another chat"), client.session)
+
+    def test_its_list_is_every_model_that_chats_with_tools(self):
+        asked = []
+
+        def fake_get(url, headers, timeout, where):
+            asked.append(url)
+            return OpenCodeTests.LISTED
+
+        with mock.patch.object(llm, "_get_json", fake_get):
+            listed = llm.LLMClient(llm.PROVIDER_OPENCODE_GO, "", "").list_models()
+        self.assertEqual(asked, ["https://opencode.ai/inference/go/v1/models"])
+        self.assertEqual(listed, ["beam-free", "claude-sonnet-5", "glm-5.3", "gpt-6-sol"])
+
+    def test_other_providers_are_sent_no_session(self):
+        sent = {}
+        with mock.patch.object(llm, "_post", fake_openai(sent)):
+            llm.LLMClient(llm.PROVIDER_OPENROUTER, "or-key", "meta/llama").chat("sys", [])
+        self.assertNotIn("x-opencode-session", sent["headers"])
+
+
+class UserAgentTests(unittest.TestCase):
+    def test_every_request_says_it_is_buddy(self):
+        # Python's own user agent is refused by the bot filter in front of
+        # some providers (OpenCode: HTTP 403, "error code: 1010").
+        seen = []
+
+        class Answer(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        def fake_open(request, timeout=None):
+            seen.append(request.get_header("User-agent"))
+            if request.get_method() == "GET":
+                return Answer(b'{"data": []}')
+            if "event-stream" in (request.get_header("Accept") or ""):
+                return Answer(b'data: {"choices": [{"delta": {"content": "hi"}}]}\n\ndata: [DONE]\n')
+            return Answer(b'{"choices": [{"message": {"content": "hi"}}]}')
+
+        client = llm.LLMClient(llm.PROVIDER_OPENCODE, "oc-key", "glm-5.3")
+        with mock.patch.object(llm.safe_http, "urlopen", fake_open):
+            client.list_models()
+            client.chat("sys", [{"role": "user", "content": "hi"}])
+            client.chat("sys", [{"role": "user", "content": "hi"}], on_text=lambda piece: None)
+        self.assertEqual(seen, ["Buddy", "Buddy", "Buddy"])
+
+
 class PictureTests(unittest.TestCase):
     """A question with a picture goes the way each provider takes images."""
     IMAGE = {"mime": "image/jpeg", "data": "QUJD"}

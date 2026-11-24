@@ -11,7 +11,7 @@ This module is TRANSPORT ONLY - it knows nothing about the manual, the
 system prompt, or what the tools do. agent.py owns all of that.
 
 Three request shapes: Gemini's, Anthropic's, and OpenAI's /chat/completions -
-which nearly everything else speaks: OpenAI itself, OpenRouter, Groq, the
+which nearly everything else speaks: OpenAI itself, OpenRouter, Groq, OpenCode, the
 local servers (Ollama, llama.cpp, LM Studio), Azure OpenAI (with its own
 URL and key header) and any other compatible endpoint ("custom"). ENDPOINTS
 says, for each of those, where it lives by default, whether it needs a key
@@ -58,6 +58,7 @@ import re
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from dataclasses import dataclass, field
 
 from core import safe_http
@@ -76,6 +77,10 @@ CACHE_POINT = {"type": "ephemeral"}
 # answer is taken as finished (LLMClient._stream_openai). About 400 words.
 AFTERTHOUGHT_CHARS = 2000
 DEFAULT_TIMEOUT = 90
+# Sent with every request. Python's own ("Python-urllib/3.x") is on the
+# block list of the bot filter some providers sit behind: OpenCode answers
+# it HTTP 403, "error code: 1010", whatever the key.
+USER_AGENT = {"User-Agent": "Buddy"}
 
 PROVIDER_GEMINI = "gemini"
 PROVIDER_OPENAI = "openai"          # any OpenAI-compatible endpoint ("Custom")
@@ -87,6 +92,8 @@ PROVIDER_GROQ = "groq"
 PROVIDER_LLAMACPP = "llamacpp"
 PROVIDER_LMSTUDIO = "lmstudio"
 PROVIDER_AZURE = "azure"
+PROVIDER_OPENCODE = "opencode"      # OpenCode's model gateway (the Console's pay-as-you-go key)
+PROVIDER_OPENCODE_GO = "opencode_go"  # OpenCode Go, its subscription: another address, another key
 
 # Azure OpenAI versions its API by date, like Anthropic; this one is GA.
 AZURE_API_VERSION = "2024-10-21"
@@ -96,6 +103,10 @@ AZURE_LIST_API_VERSION = "2022-12-01"
 # Where Settings reads each cloud provider's model list.
 GEMINI_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models"
+# OpenCode lists every model it serves, with the API each one speaks; no key
+# is needed to read it.
+OPENCODE_MODELS_URL = "https://opencode.ai/inference/v1/models"
+OPENCODE_GO_MODELS_URL = "https://opencode.ai/inference/go/v1/models"
 
 ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages"
 # Pinned, not "latest": Anthropic versions its API by date and a silent
@@ -125,6 +136,10 @@ ENDPOINTS = {
     PROVIDER_OPENAI_API: {"base": "https://api.openai.com/v1", "key": True, "local": False, "label": "OpenAI"},
     PROVIDER_OPENROUTER: {"base": "https://openrouter.ai/api/v1", "key": True, "local": False, "label": "OpenRouter"},
     PROVIDER_GROQ: {"base": "https://api.groq.com/openai/v1", "key": True, "local": False, "label": "Groq"},
+    PROVIDER_OPENCODE: {"base": "https://opencode.ai/inference/openai/v1", "key": True, "local": False,
+                        "label": "OpenCode"},
+    PROVIDER_OPENCODE_GO: {"base": "https://opencode.ai/inference/go/openai/v1", "key": True, "local": False,
+                           "label": "OpenCode Go"},
     PROVIDER_OLLAMA: {"base": OLLAMA_BASE_URL, "key": False, "local": True, "label": "Ollama"},
     PROVIDER_LLAMACPP: {"base": "http://127.0.0.1:8080/v1", "key": False, "local": True, "label": "llama.cpp"},
     PROVIDER_LMSTUDIO: {"base": "http://127.0.0.1:1234/v1", "key": False, "local": True, "label": "LM Studio"},
@@ -199,7 +214,7 @@ def list_ollama_models(base_url: str = "", timeout: int = 3) -> list[str]:
 
 def _get_json(url: str, headers: dict, timeout: int, where: str):
     """GET a model list. Raises LLMError saying why it couldn't be read."""
-    req = urllib.request.Request(url, headers=headers)
+    req = urllib.request.Request(url, headers={**USER_AGENT, **headers})
     try:
         with safe_http.urlopen(req, timeout=timeout) as resp:
             return json.load(resp)
@@ -239,6 +254,47 @@ def _list_anthropic_models(api_key: str, timeout: int) -> list[str]:
                      {"x-api-key": api_key, "anthropic-version": ANTHROPIC_VERSION}, timeout, "Anthropic")
     items = data.get("data") if isinstance(data, dict) else None
     return _chat_names(m.get("id", "") for m in (items or []) if isinstance(m, dict))
+
+
+def _opencode_chat_models(items, go: bool = False) -> list[str]:
+    """OpenCode's models Ask Buddy can use, out of its whole list: the ones
+    that chat and can call tools. Pay-as-you-go, only those served over
+    /chat/completions (its GPT, Claude and Gemini models each speak their
+    maker's own API, at another address) that cost something - its free
+    models only answer OpenCode itself. On Go every text model answers
+    /chat/completions (the others are translated), free ones included."""
+    names = []
+    for m in items or []:
+        if not isinstance(m, dict) or m.get("type") != "chat":
+            continue
+        tools = (m.get("capabilities") or {}).get("tools")
+        if isinstance(tools, dict) and tools.get("supported") is False:
+            continue
+        if not go:
+            if "chat-completions" not in (m.get("api") or {}):
+                continue
+            cost = (m.get("cost") or {}).get("text") or {}
+            prices = [(cost.get(side) or {}).get("price") for side in ("input", "output")]
+            if all(price == 0 for price in prices):
+                continue
+        names.append(m.get("id", ""))
+    return _chat_names(names)
+
+
+def _list_opencode_models(timeout: int, go: bool = False) -> list[str]:
+    data = _get_json(OPENCODE_GO_MODELS_URL if go else OPENCODE_MODELS_URL, {}, timeout,
+                     "OpenCode Go" if go else "OpenCode")
+    return _opencode_chat_models(data.get("data") if isinstance(data, dict) else None, go)
+
+
+# OpenCode asks for a session id that stays the same through a conversation
+# (x-opencode-session; Go refuses a request without one): one per `key` -
+# the page gives its conversation - made up here, for this run of Buddy.
+_SESSIONS: dict = {}
+
+
+def session_for(key) -> str:
+    return _SESSIONS.setdefault(key, str(uuid.uuid4()))
 
 
 def _list_azure_deployments(base_url: str, api_key: str, timeout: int) -> list[str]:
@@ -347,7 +403,7 @@ def _answer_only(reply: "Reply") -> "Reply":
 
 def _post(url: str, payload: dict, headers: dict, label: str, timeout: int) -> dict:
     body = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    req = urllib.request.Request(url, data=body, headers={**USER_AGENT, **headers}, method="POST")
     try:
         with safe_http.urlopen(req, timeout=timeout) as resp:
             return json.load(resp)
@@ -364,7 +420,7 @@ def _stream(url: str, payload: dict, headers: dict, label: str, timeout: int, ca
     (LLMCancelled, the connection closed) as soon as cancelled() is true -
     looked at once per line, so within a word or two of the answer."""
     body = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=body, headers={**headers, "Accept": "text/event-stream"},
+    req = urllib.request.Request(url, data=body, headers={**USER_AGENT, **headers, "Accept": "text/event-stream"},
                                  method="POST")
     try:
         with safe_http.urlopen(req, timeout=timeout) as resp:
@@ -423,6 +479,9 @@ class LLMClient:
         # Only Anthropic needs it (see ANTHROPIC_MAX_TOKENS); a translation
         # batch can run past the chat's 4096.
         self.max_tokens = max_tokens
+        # OpenCode's session id (session_for): this client's own unless the
+        # page says which conversation it is answering.
+        self.session = ""
         if self.local and timeout == DEFAULT_TIMEOUT:
             self.timeout = LOCAL_TIMEOUT
 
@@ -512,6 +571,8 @@ class LLMClient:
     def list_problem(self) -> str:
         """Why the model list can't be asked for yet - no key, no address -
         or "". Nothing is sent to find out."""
+        if self.provider in (PROVIDER_OPENCODE, PROVIDER_OPENCODE_GO):
+            return ""                   # its list is public
         if self.key_required and not self.api_key:
             return "Add the API key to list the models."
         if self.provider not in (PROVIDER_GEMINI, PROVIDER_ANTHROPIC) and not self.base_url:
@@ -535,6 +596,8 @@ class LLMClient:
             return _list_azure_deployments(self.base_url, self.api_key, timeout)
         if self.provider == PROVIDER_OLLAMA:
             return _ollama_tags(self.base_url, timeout)
+        if self.provider in (PROVIDER_OPENCODE, PROVIDER_OPENCODE_GO):
+            return _list_opencode_models(timeout, go=self.provider == PROVIDER_OPENCODE_GO)
         return list_openai_models(self.base_url, self.api_key, timeout)
 
     def chat(self, system: str, messages: list[dict], tools: list[dict] | None = None,
@@ -886,6 +949,8 @@ class LLMClient:
             url = f"{self.base_url}/chat/completions"
             if self.api_key:
                 headers["Authorization"] = f"Bearer {self.api_key}"
+            if self.provider in (PROVIDER_OPENCODE, PROVIDER_OPENCODE_GO):
+                headers["x-opencode-session"] = self.session or session_for(id(self))
         if on_text is not None:
             message = self._stream_openai(url, {**payload, "stream": True}, headers, on_text, cancelled)
         else:
