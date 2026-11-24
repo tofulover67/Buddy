@@ -77,11 +77,12 @@ class WaitingTests(unittest.TestCase):
         self.assertTrue(page._wait_timer.isActive())
         self.assertEqual(page.working_on(), "Answering")
 
-        with self.clock_at(page._heard + page_mod.WAIT_NOTE_S - 1):
+        with self.clock_at(page._heard + page_mod.WAIT_NOTE_S - 1.5):
             page._wait_tick()
         self.assertEqual(self.thinking()[-1]["message"], "Thinking…")        # not long enough to say so
 
-        with self.clock_at(page._heard + 42):
+        # Half a second past: 42 less a rounding error in the clock is 41.
+        with self.clock_at(page._heard + 42.5):
             page._wait_tick()
         self.assertEqual(self.thinking()[-1], {"on": True, "message": "Still waiting for Gemini (42 s)…"})
 
