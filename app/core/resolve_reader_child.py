@@ -29,7 +29,8 @@ timelines), Project Setup's steps (bins, imports, metadata, NEW timelines),
 Subtitles' placing and its NEW timeline, Stills Exporter's grab and export,
 Media Relink's relink, the Batch Clip Renamer's rename and its Undo, Image
 Importer's and Asset Manager's imports, the Text+ tabs' edits, and Data
-Graphics' counter and graph (each a NEW clip).
+Graphics' counter and graph, an interaction, a design and a panel (each a NEW
+clip).
 """
 
 import json
@@ -148,6 +149,15 @@ JOBS = {
     "data_graphics.read": ("pages.data_graphics.place", "read"),
     "data_graphics.counter": ("pages.data_graphics.place", "counter"),
     "data_graphics.bars": ("pages.data_graphics.place", "bars"),
+    # Interactions: shapes and a recorded cursor added as a NEW clip at the playhead, only
+    # when the person presses Add (what it reads is data_graphics.read).
+    "interactions.add": ("pages.interactions.place", "add"),
+    # Design: what was drawn on its canvas added as a NEW clip at the playhead, only when
+    # the person presses Add (what it reads is data_graphics.read).
+    "design.add": ("pages.design.place", "add"),
+    # Panels: a mock app window, its pages and a recorded cursor, all baked to keys, added as
+    # a NEW clip at the playhead, only when the person presses Add (what it reads is data_graphics.read).
+    "panels.add": ("pages.panels.place", "add"),
 }
 # Reads failing this many times in a row, with Resolve itself not answering
 # (_alive): the connection's gone (Resolve closed or restarted) - this

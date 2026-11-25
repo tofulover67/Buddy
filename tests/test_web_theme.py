@@ -24,7 +24,10 @@ PAGE_WEB_DIRS = sorted(p.parent for pattern in ("*/web/index.html", "*/*/web/ind
 _DG = _paths.APP / "pages" / "data_graphics"
 HOSTED = {"transcribe": [_paths.APP / "pages" / "text_animator" / "text_plus.py"],
           # Data Graphics' two pages are one base class (graphic_page.py) ...
-          "counters": [_DG / "graphic_page.py"], "graphs": [_DG / "graphic_page.py"]}
+          "counters": [_DG / "graphic_page.py"], "graphs": [_DG / "graphic_page.py"],
+          # ... which Design Studio's three pages are built on too.
+          "interactions": [_DG / "graphic_page.py"], "design": [_DG / "graphic_page.py"],
+          "panels": [_DG / "graphic_page.py"]}
 # ... and their views one shared script beside their own.
 SHARED_JS = {"counters": [_DG / "web" / "graphics.js"], "graphs": [_DG / "web" / "graphics.js"]}
 # Web windows of their own (core/web_page.py WebWindow): view folder -> its Python.

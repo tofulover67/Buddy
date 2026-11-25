@@ -1,0 +1,613 @@
+{
+ "_comment": "Interactions. English -> each language; see core/i18n.py.",
+ "Interactions": {
+  "日本語": "インタラクション",
+  "Español": "Interacciones",
+  "Deutsch": "Interaktionen",
+  "Français": "Interactions",
+  "한국어": "인터랙션",
+  "中文": "交互",
+  "العربية": "التفاعلات",
+  "Tiếng Việt": "Tương tác"
+ },
+ "Buttons and cards that grow, glow and click under a cursor you record, added to your timeline.": {
+  "日本語": "記録したカーソルに反応して大きくなり、光り、クリックされるボタンやカードをタイムラインに追加します。",
+  "Español": "Botones y tarjetas que crecen, brillan y se pulsan bajo un cursor que grabas, añadidos a tu línea de tiempo.",
+  "Deutsch": "Buttons und Karten, die unter einem aufgezeichneten Cursor wachsen, leuchten und geklickt werden – in deiner Timeline.",
+  "Français": "Des boutons et des cartes qui grandissent, brillent et se cliquent sous un curseur que vous enregistrez, ajoutés à votre timeline.",
+  "한국어": "녹화한 커서 아래에서 커지고 빛나고 클릭되는 버튼과 카드를 타임라인에 추가합니다.",
+  "中文": "按钮和卡片在你录制的光标下放大、发光并被点击，添加到你的时间线。",
+  "العربية": "أزرار وبطاقات تكبر وتتوهّج وتُنقَر تحت مؤشّر تسجّله، تُضاف إلى خطّك الزمني.",
+  "Tiếng Việt": "Nút và thẻ lớn lên, phát sáng và được bấm dưới con trỏ bạn ghi lại, thêm vào timeline của bạn."
+ },
+ "Interaction added on V{track}.": {
+  "日本語": "インタラクションを V{track} に追加しました。",
+  "Español": "Interacción añadida en V{track}.",
+  "Deutsch": "Interaktion auf V{track} hinzugefügt.",
+  "Français": "Interaction ajoutée sur V{track}.",
+  "한국어": "인터랙션을 V{track}에 추가했습니다.",
+  "中文": "交互已添加到 V{track}。",
+  "العربية": "أُضيف التفاعل على V{track}.",
+  "Tiếng Việt": "Đã thêm tương tác trên V{track}."
+ },
+ "Interaction replaced on V{track}.": {
+  "日本語": "V{track} のインタラクションを置き換えました。",
+  "Español": "Interacción reemplazada en V{track}.",
+  "Deutsch": "Interaktion auf V{track} ersetzt.",
+  "Français": "Interaction remplacée sur V{track}.",
+  "한국어": "V{track}의 인터랙션을 교체했습니다.",
+  "中文": "已替换 V{track} 上的交互。",
+  "العربية": "استُبدل التفاعل على V{track}.",
+  "Tiếng Việt": "Đã thay tương tác trên V{track}."
+ },
+ "Couldn't add the interaction": {
+  "日本語": "インタラクションを追加できませんでした",
+  "Español": "No se pudo añadir la interacción",
+  "Deutsch": "Die Interaktion konnte nicht hinzugefügt werden",
+  "Français": "Impossible d'ajouter l'interaction",
+  "한국어": "인터랙션을 추가하지 못했습니다",
+  "中文": "无法添加交互",
+  "العربية": "تعذّرت إضافة التفاعل",
+  "Tiếng Việt": "Không thể thêm tương tác"
+ },
+ "Adding the interaction…": {
+  "日本語": "インタラクションを追加中…",
+  "Español": "Añadiendo la interacción…",
+  "Deutsch": "Interaktion wird hinzugefügt…",
+  "Français": "Ajout de l'interaction…",
+  "한국어": "인터랙션 추가 중…",
+  "中文": "正在添加交互…",
+  "العربية": "جارٍ إضافة التفاعل…",
+  "Tiếng Việt": "Đang thêm tương tác…"
+ },
+ "Adding an interaction": {
+  "日本語": "インタラクションを追加中",
+  "Español": "Añadiendo una interacción",
+  "Deutsch": "Eine Interaktion wird hinzugefügt",
+  "Français": "Ajout d'une interaction",
+  "한국어": "인터랙션 추가 중",
+  "中文": "正在添加交互",
+  "العربية": "جارٍ إضافة تفاعل",
+  "Tiếng Việt": "Đang thêm một tương tác"
+ },
+ "An interaction holds up to {n} shapes.": {
+  "日本語": "インタラクションに置ける図形は {n} 個までです。",
+  "Español": "Una interacción admite hasta {n} formas.",
+  "Deutsch": "Eine Interaktion fasst bis zu {n} Formen.",
+  "Français": "Une interaction contient jusqu'à {n} formes.",
+  "한국어": "인터랙션에는 도형을 {n}개까지 넣을 수 있습니다.",
+  "中文": "一个交互最多容纳 {n} 个形状。",
+  "العربية": "يتّسع التفاعل لما يصل إلى {n} شكلًا.",
+  "Tiếng Việt": "Một tương tác chứa tối đa {n} hình."
+ },
+ "Record the cursor": {
+  "日本語": "カーソルを記録",
+  "Español": "Grabar el cursor",
+  "Deutsch": "Cursor aufzeichnen",
+  "Français": "Enregistrer le curseur",
+  "한국어": "커서 녹화",
+  "中文": "录制光标",
+  "العربية": "تسجيل المؤشّر",
+  "Tiếng Việt": "Ghi con trỏ"
+ },
+ "Nothing was recorded.": {
+  "日本語": "何も記録されませんでした。",
+  "Español": "No se grabó nada.",
+  "Deutsch": "Es wurde nichts aufgezeichnet.",
+  "Français": "Rien n'a été enregistré.",
+  "한국어": "녹화된 것이 없습니다.",
+  "中文": "没有录到任何内容。",
+  "العربية": "لم يُسجَّل شيء.",
+  "Tiếng Việt": "Chưa ghi được gì."
+ },
+ "Recording starts when you move onto the stage. Move and click as it should play, then press Stop.": {
+  "日本語": "ステージ上にマウスを動かすと記録が始まります。再生したいとおりに動かしてクリックし、「停止」を押してください。",
+  "Español": "La grabación empieza cuando entras en el escenario. Mueve y haz clic como deba reproducirse y luego pulsa Detener.",
+  "Deutsch": "Die Aufnahme beginnt, sobald du die Maus auf die Bühne bewegst. Bewege und klicke so, wie es abgespielt werden soll, und drücke dann Stopp.",
+  "Français": "L'enregistrement commence quand vous entrez sur la scène. Déplacez-vous et cliquez comme cela doit être lu, puis appuyez sur Arrêter.",
+  "한국어": "스테이지 위로 마우스를 옮기면 녹화가 시작됩니다. 재생될 대로 움직이고 클릭한 뒤 중지를 누르세요.",
+  "中文": "鼠标移到舞台上即开始录制。按想要播放的样子移动和点击，然后按“停止”。",
+  "العربية": "يبدأ التسجيل حين تحرّك الفأرة فوق المسرح. تحرّك وانقر كما ينبغي أن يُعرض، ثم اضغط إيقاف.",
+  "Tiếng Việt": "Ghi bắt đầu khi bạn đưa chuột vào sân khấu. Di chuyển và bấm như cách nó sẽ phát, rồi nhấn Dừng."
+ },
+ "Move the mouse over the shapes and click them. Nothing is kept until you record.": {
+  "日本語": "マウスを図形の上に動かしてクリックしてみてください。記録するまで何も保存されません。",
+  "Español": "Mueve el ratón sobre las formas y haz clic en ellas. No se guarda nada hasta que grabes.",
+  "Deutsch": "Bewege die Maus über die Formen und klicke sie an. Nichts wird behalten, bis du aufzeichnest.",
+  "Français": "Passez la souris sur les formes et cliquez dessus. Rien n'est gardé tant que vous n'enregistrez pas.",
+  "한국어": "마우스를 도형 위로 옮기고 클릭해 보세요. 녹화하기 전에는 아무것도 저장되지 않습니다.",
+  "中文": "把鼠标移到形状上并点击。录制之前不会保留任何内容。",
+  "العربية": "حرّك الفأرة فوق الأشكال وانقرها. لا يُحفظ شيء حتى تسجّل.",
+  "Tiếng Việt": "Đưa chuột lên các hình và bấm vào chúng. Không gì được giữ lại cho đến khi bạn ghi."
+ },
+ "Drag a shape to move it, the corner of the picked one to resize it.": {
+  "日本語": "図形をドラッグして移動し、選んだ図形の角をドラッグして大きさを変えます。",
+  "Español": "Arrastra una forma para moverla, y la esquina de la elegida para cambiar su tamaño.",
+  "Deutsch": "Ziehe eine Form, um sie zu bewegen, und die Ecke der gewählten, um ihre Größe zu ändern.",
+  "Français": "Faites glisser une forme pour la déplacer, et le coin de celle choisie pour la redimensionner.",
+  "한국어": "도형을 끌어 옮기고, 선택한 도형의 모서리를 끌어 크기를 바꿉니다.",
+  "中文": "拖动形状来移动它，拖动所选形状的角来调整大小。",
+  "العربية": "اسحب شكلًا لتحريكه، واسحب زاوية الشكل المختار لتغيير حجمه.",
+  "Tiếng Việt": "Kéo một hình để di chuyển, kéo góc của hình đã chọn để đổi kích thước."
+ },
+ "What the mouse does on the stage": {
+  "日本語": "ステージ上でのマウスの働き",
+  "Español": "Qué hace el ratón en el escenario",
+  "Deutsch": "Was die Maus auf der Bühne tut",
+  "Français": "Ce que fait la souris sur la scène",
+  "한국어": "스테이지에서 마우스가 하는 일",
+  "中文": "鼠标在舞台上的作用",
+  "العربية": "ما تفعله الفأرة على المسرح",
+  "Tiếng Việt": "Chuột làm gì trên sân khấu"
+ },
+ "Move and resize the shapes": {
+  "日本語": "図形を移動・サイズ変更します",
+  "Español": "Mover y cambiar el tamaño de las formas",
+  "Deutsch": "Formen bewegen und in der Größe ändern",
+  "Français": "Déplacer et redimensionner les formes",
+  "한국어": "도형을 옮기고 크기를 바꿉니다",
+  "中文": "移动形状并调整大小",
+  "العربية": "تحريك الأشكال وتغيير حجمها",
+  "Tiếng Việt": "Di chuyển và đổi kích thước các hình"
+ },
+ "Your mouse is the cursor: the shapes answer it": {
+  "日本語": "マウスがカーソルになり、図形が反応します",
+  "Español": "Tu ratón es el cursor: las formas le responden",
+  "Deutsch": "Deine Maus ist der Cursor: Die Formen reagieren darauf",
+  "Français": "Votre souris est le curseur : les formes lui répondent",
+  "한국어": "마우스가 커서가 되어 도형이 반응합니다",
+  "中文": "你的鼠标就是光标：形状会对它作出反应",
+  "العربية": "فأرتك هي المؤشّر: الأشكال تستجيب له",
+  "Tiếng Việt": "Chuột của bạn là con trỏ: các hình phản hồi nó"
+ },
+ "Arrange": {
+  "日本語": "配置",
+  "Español": "Organizar",
+  "Deutsch": "Anordnen",
+  "Français": "Disposer",
+  "한국어": "배치",
+  "中文": "排列",
+  "العربية": "ترتيب",
+  "Tiếng Việt": "Sắp xếp"
+ },
+ "Try it": {
+  "日本語": "試す",
+  "Español": "Probar",
+  "Deutsch": "Ausprobieren",
+  "Français": "Essayer",
+  "한국어": "사용해 보기",
+  "中文": "试一试",
+  "العربية": "جرّبه",
+  "Tiếng Việt": "Thử"
+ },
+ "Keep what your mouse does as the cursor in the clip": {
+  "日本語": "マウスの動きをクリップ内のカーソルとして残します",
+  "Español": "Guarda lo que hace tu ratón como el cursor del clip",
+  "Deutsch": "Behält, was deine Maus tut, als Cursor im Clip",
+  "Français": "Garde ce que fait votre souris comme curseur du clip",
+  "한국어": "마우스의 움직임을 클립의 커서로 남깁니다",
+  "中文": "把鼠标的动作保留为片段中的光标",
+  "العربية": "يحفظ ما تفعله فأرتك كمؤشّر في المقطع",
+  "Tiếng Việt": "Giữ những gì chuột làm thành con trỏ trong clip"
+ },
+ "Shown on black here. On your timeline only the shapes and the cursor are drawn, over whatever is under them.": {
+  "日本語": "ここでは黒の上に表示されます。タイムラインでは図形とカーソルだけが、下にあるものの上に描かれます。",
+  "Español": "Aquí se muestra sobre negro. En tu línea de tiempo solo se dibujan las formas y el cursor, sobre lo que haya debajo.",
+  "Deutsch": "Hier auf Schwarz gezeigt. In deiner Timeline werden nur die Formen und der Cursor gezeichnet, über allem, was darunter liegt.",
+  "Français": "Affiché ici sur du noir. Sur votre timeline, seuls les formes et le curseur sont dessinés, par-dessus ce qui se trouve dessous.",
+  "한국어": "여기서는 검은 배경에 표시됩니다. 타임라인에서는 도형과 커서만 아래에 있는 것 위에 그려집니다.",
+  "中文": "这里显示在黑色背景上。在你的时间线上只绘制形状和光标，覆盖在下方内容之上。",
+  "العربية": "يُعرض هنا على خلفية سوداء. على خطّك الزمني تُرسم الأشكال والمؤشّر فقط، فوق ما تحتها.",
+  "Tiếng Việt": "Ở đây hiển thị trên nền đen. Trên timeline chỉ các hình và con trỏ được vẽ, đè lên những gì bên dưới."
+ },
+ "Add a shape": {
+  "日本語": "図形を追加",
+  "Español": "Añadir una forma",
+  "Deutsch": "Form hinzufügen",
+  "Français": "Ajouter une forme",
+  "한국어": "도형 추가",
+  "中文": "添加形状",
+  "العربية": "إضافة شكل",
+  "Tiếng Việt": "Thêm hình"
+ },
+ "Button": {
+  "日本語": "ボタン",
+  "Español": "Botón",
+  "Deutsch": "Button",
+  "Français": "Bouton",
+  "한국어": "버튼",
+  "中文": "按钮",
+  "العربية": "زرّ",
+  "Tiếng Việt": "Nút"
+ },
+ "Card": {
+  "日本語": "カード",
+  "Español": "Tarjeta",
+  "Deutsch": "Karte",
+  "Français": "Carte",
+  "한국어": "카드",
+  "中文": "卡片",
+  "العربية": "بطاقة",
+  "Tiếng Việt": "Thẻ"
+ },
+ "Circle": {
+  "日本語": "円",
+  "Español": "Círculo",
+  "Deutsch": "Kreis",
+  "Français": "Cercle",
+  "한국어": "원",
+  "中文": "圆形",
+  "العربية": "دائرة",
+  "Tiếng Việt": "Hình tròn"
+ },
+ "The shape you picked": {
+  "日本語": "選んだ図形",
+  "Español": "La forma que elegiste",
+  "Deutsch": "Die gewählte Form",
+  "Français": "La forme choisie",
+  "한국어": "선택한 도형",
+  "中文": "你选中的形状",
+  "العربية": "الشكل الذي اخترته",
+  "Tiếng Việt": "Hình bạn đã chọn"
+ },
+ "Click a shape on the stage to change it.": {
+  "日本語": "ステージ上の図形をクリックすると変更できます。",
+  "Español": "Haz clic en una forma del escenario para cambiarla.",
+  "Deutsch": "Klicke eine Form auf der Bühne an, um sie zu ändern.",
+  "Français": "Cliquez sur une forme de la scène pour la modifier.",
+  "한국어": "스테이지의 도형을 클릭하면 바꿀 수 있습니다.",
+  "中文": "点击舞台上的形状来修改它。",
+  "العربية": "انقر شكلًا على المسرح لتغييره.",
+  "Tiếng Việt": "Bấm một hình trên sân khấu để thay đổi nó."
+ },
+ "Label": {
+  "日本語": "ラベル",
+  "Español": "Etiqueta",
+  "Deutsch": "Beschriftung",
+  "Français": "Libellé",
+  "한국어": "라벨",
+  "中文": "标签",
+  "العربية": "التسمية",
+  "Tiếng Việt": "Nhãn"
+ },
+ "Corners": {
+  "日本語": "角の丸み",
+  "Español": "Esquinas",
+  "Deutsch": "Ecken",
+  "Français": "Coins",
+  "한국어": "모서리",
+  "中文": "圆角",
+  "العربية": "الزوايا",
+  "Tiếng Việt": "Góc"
+ },
+ "Off, it stays still: a panel behind the others": {
+  "日本語": "オフにすると動きません。ほかの図形の背後のパネルになります",
+  "Español": "Desactivada, se queda quieta: un panel detrás de las demás",
+  "Deutsch": "Aus bleibt sie still: eine Fläche hinter den anderen",
+  "Français": "Désactivée, elle reste immobile : un panneau derrière les autres",
+  "한국어": "끄면 움직이지 않습니다. 다른 도형 뒤의 패널이 됩니다",
+  "中文": "关闭后它保持不动：作为其他形状后面的面板",
+  "العربية": "عند الإيقاف يبقى ثابتًا: لوحة خلف الأشكال الأخرى",
+  "Tiếng Việt": "Tắt đi thì nó đứng yên: một tấm nền phía sau các hình khác"
+ },
+ "Answers the cursor": {
+  "日本語": "カーソルに反応する",
+  "Español": "Responde al cursor",
+  "Deutsch": "Reagiert auf den Cursor",
+  "Français": "Répond au curseur",
+  "한국어": "커서에 반응",
+  "中文": "对光标作出反应",
+  "العربية": "يستجيب للمؤشّر",
+  "Tiếng Việt": "Phản hồi con trỏ"
+ },
+ "Bring to front": {
+  "日本語": "最前面へ",
+  "Español": "Traer al frente",
+  "Deutsch": "Nach vorn holen",
+  "Français": "Mettre au premier plan",
+  "한국어": "맨 앞으로",
+  "中文": "置于顶层",
+  "العربية": "إحضار إلى الأمام",
+  "Tiếng Việt": "Đưa lên trước"
+ },
+ "How shapes answer": {
+  "日本語": "図形の反応",
+  "Español": "Cómo responden las formas",
+  "Deutsch": "Wie Formen reagieren",
+  "Français": "Comment les formes répondent",
+  "한국어": "도형의 반응 방식",
+  "中文": "形状如何反应",
+  "العربية": "كيف تستجيب الأشكال",
+  "Tiếng Việt": "Cách các hình phản hồi"
+ },
+ "Timing…": {
+  "日本語": "タイミング…",
+  "Español": "Tiempos…",
+  "Deutsch": "Timing…",
+  "Français": "Rythme…",
+  "한국어": "타이밍…",
+  "中文": "时间设置…",
+  "العربية": "التوقيت…",
+  "Tiếng Việt": "Thời gian…"
+ },
+ "Label text…": {
+  "日本語": "ラベルの文字…",
+  "Español": "Texto de las etiquetas…",
+  "Deutsch": "Beschriftungstext…",
+  "Français": "Texte des libellés…",
+  "한국어": "라벨 글자…",
+  "中文": "标签文字…",
+  "العربية": "نصّ التسميات…",
+  "Tiếng Việt": "Chữ của nhãn…"
+ },
+ "Label text": {
+  "日本語": "ラベルの文字",
+  "Español": "Texto de las etiquetas",
+  "Deutsch": "Beschriftungstext",
+  "Français": "Texte des libellés",
+  "한국어": "라벨 글자",
+  "中文": "标签文字",
+  "العربية": "نصّ التسميات",
+  "Tiếng Việt": "Chữ của nhãn"
+ },
+ "The cursor": {
+  "日本語": "カーソル",
+  "Español": "El cursor",
+  "Deutsch": "Der Cursor",
+  "Français": "Le curseur",
+  "한국어": "커서",
+  "中文": "光标",
+  "العربية": "المؤشّر",
+  "Tiếng Việt": "Con trỏ"
+ },
+ "A dot": {
+  "日本語": "点",
+  "Español": "Un punto",
+  "Deutsch": "Ein Punkt",
+  "Français": "Un point",
+  "한국어": "점",
+  "中文": "圆点",
+  "العربية": "نقطة",
+  "Tiếng Việt": "Chấm tròn"
+ },
+ "The shapes still answer it": {
+  "日本語": "図形は引き続き反応します",
+  "Español": "Las formas siguen respondiéndole",
+  "Deutsch": "Die Formen reagieren weiterhin darauf",
+  "Français": "Les formes lui répondent toujours",
+  "한국어": "도형은 계속 반응합니다",
+  "中文": "形状仍会对它作出反应",
+  "العربية": "الأشكال تواصل الاستجابة له",
+  "Tiếng Việt": "Các hình vẫn phản hồi nó"
+ },
+ "Not drawn": {
+  "日本語": "描かない",
+  "Español": "Sin dibujar",
+  "Deutsch": "Nicht gezeichnet",
+  "Français": "Non dessiné",
+  "한국어": "그리지 않음",
+  "中文": "不绘制",
+  "العربية": "غير مرسوم",
+  "Tiếng Việt": "Không vẽ"
+ },
+ "Seconds a hover takes to come and go": {
+  "日本語": "ホバーの出入りにかかる秒数",
+  "Español": "Segundos que tarda en aparecer y desaparecer el efecto al pasar",
+  "Deutsch": "Sekunden, die ein Hover zum Kommen und Gehen braucht",
+  "Français": "Secondes que met un survol à apparaître et disparaître",
+  "한국어": "호버가 나타났다 사라지는 데 걸리는 초",
+  "中文": "悬停效果出现和消失所需的秒数",
+  "العربية": "الثواني التي يستغرقها التحويم ليظهر ويزول",
+  "Tiếng Việt": "Số giây để hiệu ứng rê chuột hiện ra và mất đi"
+ },
+ "Seconds a click takes to dip and come back": {
+  "日本語": "クリックで縮んで戻るまでの秒数",
+  "Español": "Segundos que tarda un clic en hundirse y volver",
+  "Deutsch": "Sekunden, die ein Klick zum Nachgeben und Zurückkommen braucht",
+  "Français": "Secondes que met un clic à s'enfoncer et revenir",
+  "한국어": "클릭으로 줄었다 돌아오는 데 걸리는 초",
+  "中文": "点击缩小再恢复所需的秒数",
+  "العربية": "الثواني التي يستغرقها النقر لينكمش ويعود",
+  "Tiếng Việt": "Số giây để một lần bấm lún xuống và trở lại"
+ },
+ "Seconds the clip lasts": {
+  "日本語": "クリップの長さ（秒）",
+  "Español": "Segundos que dura el clip",
+  "Deutsch": "Sekunden, die der Clip dauert",
+  "Français": "Durée du clip en secondes",
+  "한국어": "클립 길이(초)",
+  "中文": "片段持续的秒数",
+  "العربية": "مدّة المقطع بالثواني",
+  "Tiếng Việt": "Số giây clip kéo dài"
+ },
+ "Recording the cursor sets how long the clip lasts. Shorter cuts the end off; longer holds the cursor where it stopped.": {
+  "日本語": "カーソルを記録するとクリップの長さが決まります。短くすると終わりが切れ、長くするとカーソルは止まった位置にとどまります。",
+  "Español": "Grabar el cursor fija cuánto dura el clip. Más corto recorta el final; más largo mantiene el cursor donde se detuvo.",
+  "Deutsch": "Das Aufzeichnen des Cursors legt fest, wie lange der Clip dauert. Kürzer schneidet das Ende ab; länger hält den Cursor dort, wo er stehen blieb.",
+  "Français": "L'enregistrement du curseur fixe la durée du clip. Plus court coupe la fin ; plus long garde le curseur là où il s'est arrêté.",
+  "한국어": "커서를 녹화하면 클립 길이가 정해집니다. 줄이면 끝이 잘리고, 늘리면 커서가 멈춘 자리에 머뭅니다.",
+  "中文": "录制光标会决定片段的长度。缩短会截掉结尾；加长则让光标停在原处。",
+  "العربية": "تسجيل المؤشّر يحدّد مدّة المقطع. التقصير يقطع النهاية؛ والإطالة تُبقي المؤشّر حيث توقّف.",
+  "Tiếng Việt": "Ghi con trỏ sẽ đặt độ dài của clip. Ngắn hơn thì cắt mất đoạn cuối; dài hơn thì giữ con trỏ ở chỗ nó dừng."
+ },
+ "Replace the interaction Buddy put there before": {
+  "日本語": "以前 Buddy が置いたインタラクションを置き換える",
+  "Español": "Reemplazar la interacción que Buddy puso ahí antes",
+  "Deutsch": "Die Interaktion ersetzen, die Buddy dort zuvor platziert hat",
+  "Français": "Remplacer l'interaction que Buddy y a mise auparavant",
+  "한국어": "Buddy가 전에 놓은 인터랙션 교체",
+  "中文": "替换 Buddy 之前放在那里的交互",
+  "العربية": "استبدال التفاعل الذي وضعه Buddy هناك من قبل",
+  "Tiếng Việt": "Thay tương tác Buddy đã đặt ở đó trước đây"
+ },
+ "The pointer Windows has: white, edged in black": {
+  "日本語": "Windows のポインター：白地に黒い縁",
+  "Español": "El puntero de Windows: blanco con borde negro",
+  "Deutsch": "Der Zeiger von Windows: weiß mit schwarzem Rand",
+  "Français": "Le pointeur de Windows : blanc bordé de noir",
+  "한국어": "Windows의 포인터: 흰색에 검은 테두리",
+  "中文": "Windows 的指针：白色，黑色描边",
+  "العربية": "مؤشّر Windows: أبيض بحافّة سوداء",
+  "Tiếng Việt": "Con trỏ của Windows: trắng, viền đen"
+ },
+ "The pointer a Mac has: black, edged in white": {
+  "日本語": "Mac のポインター：黒地に白い縁",
+  "Español": "El puntero de un Mac: negro con borde blanco",
+  "Deutsch": "Der Zeiger eines Mac: schwarz mit weißem Rand",
+  "Français": "Le pointeur d'un Mac : noir bordé de blanc",
+  "한국어": "Mac의 포인터: 검은색에 흰 테두리",
+  "中文": "Mac 的指针：黑色，白色描边",
+  "العربية": "مؤشّر Mac: أسود بحافّة بيضاء",
+  "Tiếng Việt": "Con trỏ của Mac: đen, viền trắng"
+ },
+ "Outline…": {
+  "日本語": "輪郭線…",
+  "Español": "Contorno…",
+  "Deutsch": "Umrandung…",
+  "Français": "Contour…",
+  "한국어": "윤곽선…",
+  "中文": "轮廓…",
+  "العربية": "الحدّ…",
+  "Tiếng Việt": "Viền…"
+ },
+ "Thickness": {
+  "日本語": "太さ",
+  "Español": "Grosor",
+  "Deutsch": "Stärke",
+  "Français": "Épaisseur",
+  "한국어": "두께",
+  "中文": "粗细",
+  "العربية": "السماكة",
+  "Tiếng Việt": "Độ dày"
+ },
+ "Image": {
+  "日本語": "画像",
+  "Español": "Imagen",
+  "Deutsch": "Bild",
+  "Français": "Image",
+  "한국어": "이미지",
+  "中文": "图片",
+  "العربية": "صورة",
+  "Tiếng Việt": "Hình ảnh"
+ },
+ "A picture from a PNG or JPEG file. You can also drop image files on this page": {
+  "日本語": "PNG または JPEG ファイルの画像です。画像ファイルをこのページにドロップすることもできます",
+  "Español": "Una imagen de un archivo PNG o JPEG. También puedes soltar archivos de imagen en esta página",
+  "Deutsch": "Ein Bild aus einer PNG- oder JPEG-Datei. Du kannst Bilddateien auch auf diese Seite ziehen",
+  "Français": "Une image issue d'un fichier PNG ou JPEG. Vous pouvez aussi déposer des fichiers image sur cette page",
+  "한국어": "PNG 또는 JPEG 파일의 그림입니다. 이미지 파일을 이 페이지에 끌어다 놓을 수도 있습니다",
+  "中文": "来自 PNG 或 JPEG 文件的图片。也可以把图片文件拖放到此页面",
+  "العربية": "صورة من ملف PNG أو JPEG. يمكنك أيضًا إفلات ملفات الصور على هذه الصفحة",
+  "Tiếng Việt": "Một hình từ tệp PNG hoặc JPEG. Bạn cũng có thể thả tệp hình ảnh vào trang này"
+ },
+ "Choose an image": {
+  "日本語": "画像を選択",
+  "Español": "Elegir una imagen",
+  "Deutsch": "Bild auswählen",
+  "Français": "Choisir une image",
+  "한국어": "이미지 선택",
+  "中文": "选择图片",
+  "العربية": "اختيار صورة",
+  "Tiếng Việt": "Chọn hình ảnh"
+ },
+ "Images (*.png *.jpg *.jpeg)": {
+  "日本語": "画像 (*.png *.jpg *.jpeg)",
+  "Español": "Imágenes (*.png *.jpg *.jpeg)",
+  "Deutsch": "Bilder (*.png *.jpg *.jpeg)",
+  "Français": "Images (*.png *.jpg *.jpeg)",
+  "한국어": "이미지 (*.png *.jpg *.jpeg)",
+  "中文": "图片 (*.png *.jpg *.jpeg)",
+  "العربية": "صور (*.png *.jpg *.jpeg)",
+  "Tiếng Việt": "Hình ảnh (*.png *.jpg *.jpeg)"
+ },
+ "Buddy couldn't read that image. PNG and JPEG images can be added.": {
+  "日本語": "Buddy はその画像を読み込めませんでした。追加できるのは PNG と JPEG の画像です。",
+  "Español": "Buddy no pudo leer esa imagen. Se pueden añadir imágenes PNG y JPEG.",
+  "Deutsch": "Buddy konnte dieses Bild nicht lesen. PNG- und JPEG-Bilder können hinzugefügt werden.",
+  "Français": "Buddy n'a pas pu lire cette image. Les images PNG et JPEG peuvent être ajoutées.",
+  "한국어": "Buddy가 그 이미지를 읽지 못했습니다. PNG와 JPEG 이미지를 추가할 수 있습니다.",
+  "中文": "Buddy 无法读取该图片。可以添加 PNG 和 JPEG 图片。",
+  "العربية": "تعذّر على Buddy قراءة تلك الصورة. يمكن إضافة صور PNG و JPEG.",
+  "Tiếng Việt": "Buddy không đọc được hình đó. Có thể thêm hình PNG và JPEG."
+ },
+ "An image's colour is the colour of its glow": {
+  "日本語": "画像の色はグローの色になります",
+  "Español": "El color de una imagen es el color de su brillo",
+  "Deutsch": "Die Farbe eines Bildes ist die Farbe seines Leuchtens",
+  "Français": "La couleur d'une image est celle de son halo",
+  "한국어": "이미지의 색은 글로우의 색입니다",
+  "中文": "图片的颜色即其发光的颜色",
+  "العربية": "لون الصورة هو لون توهّجها",
+  "Tiếng Việt": "Màu của hình ảnh là màu phát sáng của nó"
+ },
+ "The image \"{name}\" isn't where it was. Put it back, or remove it from the stage.": {
+  "日本語": "画像「{name}」が元の場所にありません。元に戻すか、ステージから削除してください。",
+  "Español": "La imagen \"{name}\" ya no está donde estaba. Devuélvela a su sitio o quítala del escenario.",
+  "Deutsch": "Das Bild „{name}“ ist nicht mehr dort, wo es war. Lege es zurück oder entferne es von der Bühne.",
+  "Français": "L'image « {name} » n'est plus là où elle était. Remettez-la en place ou retirez-la de la scène.",
+  "한국어": "이미지 \"{name}\"이(가) 원래 위치에 없습니다. 제자리에 돌려놓거나 스테이지에서 제거하세요.",
+  "中文": "图片“{name}”已不在原处。请放回原处，或从舞台上移除它。",
+  "العربية": "الصورة \"{name}\" ليست في مكانها. أعِدها، أو أزِلها من المسرح.",
+  "Tiếng Việt": "Hình \"{name}\" không còn ở chỗ cũ. Hãy đặt lại, hoặc gỡ nó khỏi sân khấu."
+ },
+ "Show the shapes as they look": {
+  "日本語": "図形の見た目を表示",
+  "Español": "Mostrar las formas tal como se ven",
+  "Deutsch": "Die Formen so zeigen, wie sie aussehen",
+  "Français": "Montrer les formes telles qu'elles apparaissent",
+  "한국어": "도형이 보이는 모습 표시",
+  "中文": "按此外观显示形状",
+  "العربية": "اعرض الأشكال كما تبدو",
+  "Tiếng Việt": "Hiển thị các hình theo trạng thái"
+ },
+ "Only this shape": {
+  "日本語": "この図形だけ",
+  "Español": "Solo esta forma",
+  "Deutsch": "Nur diese Form",
+  "Français": "Cette forme seulement",
+  "한국어": "이 도형만",
+  "中文": "仅此形状",
+  "العربية": "هذا الشكل فقط",
+  "Tiếng Việt": "Chỉ hình này"
+ },
+ "Lifts (%)": {
+  "日本語": "浮き上がり (%)",
+  "Español": "Se eleva (%)",
+  "Deutsch": "Hebt sich (%)",
+  "Français": "S'élève (%)",
+  "한국어": "떠오름(%)",
+  "中文": "上浮（%）",
+  "العربية": "يرتفع (%)",
+  "Tiếng Việt": "Nhấc lên (%)"
+ },
+ "Outlined (%)": {
+  "日本語": "輪郭線 (%)",
+  "Español": "Contorno (%)",
+  "Deutsch": "Umrandet (%)",
+  "Français": "Contour (%)",
+  "한국어": "윤곽선(%)",
+  "中文": "轮廓（%）",
+  "العربية": "يُحدَّد (%)",
+  "Tiếng Việt": "Có viền (%)"
+ },
+ "These are every shape's, unless “Only this shape” gives the shape you picked its own.": {
+  "日本語": "これはすべての図形に共通です。「この図形だけ」をオンにすると、選んだ図形だけの設定になります。",
+  "Español": "Son los de todas las formas, salvo que «Solo esta forma» le dé a la forma elegida los suyos propios.",
+  "Deutsch": "Sie gelten für jede Form, außer „Nur diese Form“ gibt der gewählten Form eigene.",
+  "Français": "Ils valent pour chaque forme, sauf si « Cette forme seulement » donne les siens à la forme choisie.",
+  "한국어": "모든 도형에 적용됩니다. “이 도형만”을 켜면 선택한 도형만의 설정이 됩니다.",
+  "中文": "这些适用于每个形状，除非“仅此形状”让你选中的形状有自己的设置。",
+  "العربية": "هذه لكل الأشكال، ما لم يمنح «هذا الشكل فقط» الشكلَ الذي اخترته إعداداته الخاصّة.",
+  "Tiếng Việt": "Đây là thiết lập của mọi hình, trừ khi “Chỉ hình này” cho hình bạn đã chọn thiết lập riêng."
+ },
+ "A thin line traced round a shape. Turn it up for Hover or Pressed with “Outlined” in States…": {
+  "日本語": "図形の周りに描く細い線です。「状態…」の「輪郭線」で、ホバーや押下のときの強さを上げてください。",
+  "Español": "Una línea fina trazada alrededor de una forma. Súbela para Al pasar o Pulsado con «Contorno» en Estados…",
+  "Deutsch": "Eine dünne Linie um eine Form. Stelle sie für Hover oder Gedrückt mit „Umrandet“ unter Zustände… höher.",
+  "Français": "Une fine ligne tracée autour d'une forme. Augmentez-la pour Survol ou Appuyé avec « Contour » dans États…",
+  "한국어": "도형 둘레에 그리는 가는 선입니다. 상태…의 “윤곽선”으로 호버나 눌림일 때의 강도를 높이세요.",
+  "中文": "沿形状描出的一条细线。在“状态…”中用“轮廓”调高悬停或按下时的强度。",
+  "العربية": "خطّ رفيع يُرسم حول الشكل. زِده للتحويم أو الضغط عبر «يُحدَّد» في الحالات…",
+  "Tiếng Việt": "Một đường mảnh vẽ quanh hình. Tăng lên cho Rê chuột hoặc Đang nhấn bằng “Có viền” trong Trạng thái…"
+ }
+}

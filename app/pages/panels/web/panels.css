@@ -1,0 +1,193 @@
+/* Panels, on top of web/buddy.css and Data Graphics' graphics.css (the page's frame):
+   Layers on the left, the stage with its page chips and the timeline dock under it in
+   the middle, and on the right what is picked - the window's own settings when nothing
+   is. Theme colours only - the stage's and the tiles' pictures are drawn by panels.js. */
+
+.pn-work { flex: 1 1 auto; min-height: 0; display: flex; gap: 14px; padding-bottom: 10px; }
+.pn-left { flex: 0 0 230px; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.pn-mid { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.pn-right { flex: 0 0 290px; min-width: 0; min-height: 0; overflow-y: auto; padding-right: 4px; }
+.pn-mid > * { flex: none; }
+.pn-right [hidden], .pn-left [hidden], .pn-mid [hidden], .dg-pop [hidden] { display: none; }
+
+/* + Add, and the layers of the page in view. */
+.pn-add { align-self: stretch; justify-content: center; }
+.pn-add[aria-expanded="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.pn-layers { flex: 1 1 auto; min-height: 60px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; padding-right: 2px; }
+.pn-layers:empty { display: none; }
+.pn-layer {
+    display: flex; align-items: center; gap: 4px; padding: 3px 6px 3px 4px; border-radius: var(--r-sm);
+    cursor: pointer; font-size: var(--fs-sm); color: var(--text); user-select: none; min-width: 0;
+}
+.pn-layer:hover { background: var(--raised-bg); }
+.pn-layer:focus-visible { outline: var(--bw) solid var(--primary); outline-offset: -1px; }
+.pn-layer[aria-selected="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.pn-layer-twist {
+    flex: none; width: 16px; height: 16px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; opacity: .7;
+}
+.pn-layer-twist svg { width: 12px; height: 12px; transition: transform .12s; }
+.pn-layer[aria-expanded="true"] > .pn-layer-twist svg { transform: rotate(90deg); }
+.pn-layer-gap { flex: none; width: 16px; }
+.pn-layer-text { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-layer-role { color: var(--text-dim); }
+.pn-layer[aria-selected="true"] .pn-layer-role { color: inherit; opacity: .75; }
+.pn-layer .field { flex: 1 1 auto; min-width: 0; padding: 1px 4px; }
+.pn-layer-dot { flex: none; width: 6px; height: 6px; border-radius: var(--r-full); background: var(--primary); }
+.pn-layer[aria-selected="true"] .pn-layer-dot { background: currentColor; }
+/* A row dragged: where it would go is a line between rows, or the container it would
+   go into lit; what's dragged is dimmed and named by the pointer (Design's feel). */
+.pn-layer.pn-dragged { opacity: .45; }
+.pn-layer.pn-drop-into { box-shadow: inset 0 0 0 2px var(--primary); }
+.pn-drop-line { position: fixed; z-index: 60; height: 2px; border-radius: 1px; background: var(--primary); pointer-events: none; }
+.pn-drop-line[hidden] { display: none; }
+.pn-drop-ghost {
+    position: fixed; z-index: 61; max-width: 200px; padding: 2px 8px; border-radius: var(--r-sm); pointer-events: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    background: var(--selection-bg); color: var(--selection-fg); font-size: var(--fs-xs); opacity: .9;
+}
+body.pn-rows-dragging, body.pn-rows-dragging * { cursor: grabbing !important; }
+
+/* The shelf, in its panel over the stage: a small live picture of each layout or component. */
+.pn-add-pop { left: 262px; top: 64px; right: auto; bottom: auto; width: min(600px, calc(100vw - 280px)); max-height: calc(100vh - 140px); }
+.pn-add-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pn-add-row .segmented { flex: none; }
+.dg-pop .pn-find { flex: 1 1 140px; width: auto; min-width: 0; }
+.pn-shelf { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+.pn-shelf-group { margin: 6px 0 0; }
+.pn-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 6px; }
+.pn-tile {
+    display: flex; flex-direction: column; align-items: stretch; gap: 4px; padding: 5px; min-width: 0;
+    border-radius: var(--r-md); border: var(--bw) solid var(--card-border); background: var(--field-bg);
+    color: var(--text); font-size: var(--fs-xs); cursor: pointer; text-align: center;
+}
+.pn-tile:hover { border-color: var(--primary); }
+.pn-tile:disabled { opacity: .45; cursor: default; }
+.pn-tile[aria-current="true"] { border-color: var(--primary); }
+.pn-tile canvas { display: block; width: 100%; height: auto; aspect-ratio: 180 / 64; border-radius: var(--r-sm); background: #0c0d0f; }
+.pn-tile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The page chips and Window | In the frame, over the stage. */
+.pn-bar { display: flex; align-items: center; gap: 10px; }
+.pn-bar > .segmented { flex: none; }
+.pn-pages { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.pn-chip {
+    display: inline-flex; align-items: center; gap: 2px; border-radius: var(--r-full);
+    border: var(--bw) solid var(--card-border); background: var(--field-bg);
+}
+.pn-chip[aria-selected="true"] { background: var(--selection-bg); color: var(--selection-fg); border-color: transparent; }
+.pn-chip-name { border: 0; background: none; color: inherit; padding: 4px 10px; cursor: pointer; font: inherit; font-size: var(--fs-sm); white-space: nowrap; }
+.pn-chip-x { border: 0; background: none; color: inherit; padding: 2px 6px 2px 0; cursor: pointer; display: inline-flex; }
+.pn-chip-x svg { width: 12px; height: 12px; }
+.pn-chip input { width: 130px; padding: 3px 8px; font-size: var(--fs-sm); border-radius: var(--r-full); }
+
+/* The stage fills what the middle column has; the canvas is placed in it by panels.js. */
+.pn-mid > .pn-stage { flex: 1 1 auto; min-height: 200px; position: relative; display: block; }
+.pn-stage canvas { position: absolute; left: 0; top: 0; max-width: none; touch-action: none; cursor: default; }
+.pn-stage.try canvas { cursor: none; }
+.pn-stage.recording { border-color: var(--danger); }
+.ix-rec-time { color: var(--danger-text); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.ix-rec-time:empty { display: none; }
+
+/* The timeline dock: the player in its head, the lanes under it. */
+.pn-dock { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: var(--bw) solid var(--card-border); }
+.pn-dock-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pn-dock-head input[type="range"] { flex: 1 1 120px; min-width: 80px; accent-color: var(--primary); }
+.pn-dock-head .dg-time { min-width: 72px; text-align: left; }
+.pn-dock-body { display: flex; flex-direction: column; gap: 6px; }
+.pn-lanes { max-height: 196px; }
+.pn-lanes .dg-lane { cursor: default; }
+.pn-lanes .dg-lane-name { flex-basis: 132px; }
+button.dg-lane-name {
+    border: 0; background: none; padding: 0; margin: 0; text-align: left; cursor: pointer; font: inherit;
+    font-size: var(--fs-sm); color: var(--text-strong);
+}
+button.dg-lane-name:hover > span:first-child { text-decoration: underline; }
+.pn-lanes .dg-lane.pn-mine { background: var(--raised-bg); }
+.pn-lanes .dg-lane.pn-mine .dg-lane-name { color: var(--primary); }
+.pn-lane-more { font-size: var(--fs-xs); color: var(--text-dim); padding: 2px 4px; }
+.pn-lanes .dg-lane-track { cursor: ew-resize; touch-action: none; }
+.pn-band {
+    position: absolute; top: 3px; bottom: 3px; border-radius: var(--r-xs); pointer-events: none;
+    background: color-mix(in srgb, var(--primary) 40%, transparent); overflow: hidden;
+    color: var(--text-strong); font-size: var(--fs-xs); line-height: 12px; padding: 0 4px; white-space: nowrap;
+}
+.pn-band.alt { background: color-mix(in srgb, var(--text-dim) 30%, transparent); }
+.pn-band.press { top: 9px; background: color-mix(in srgb, var(--primary) 85%, transparent); }
+.pn-band.arrive { background: color-mix(in srgb, var(--text-dim) 45%, transparent); }
+.pn-band.type { background: color-mix(in srgb, var(--primary) 65%, transparent); }
+.pn-key {
+    position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; transform: rotate(45deg);
+    border: 1.5px solid var(--text-strong); background: transparent; pointer-events: none; box-sizing: border-box;
+}
+.pn-key.solid { background: var(--primary); border-color: var(--primary); pointer-events: auto; cursor: grab; }
+.pn-key.held { cursor: grabbing; }
+.pn-key.round { border-radius: var(--r-full); transform: none; }
+.pn-key.dot { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border: 0; background: var(--text-dim); border-radius: var(--r-full); transform: none; }
+.pn-ramp { position: absolute; inset: 2px 0; width: 100%; height: calc(100% - 4px); pointer-events: none; }
+.pn-ramp polyline { fill: none; stroke: var(--primary); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+
+/* The right column. */
+.pn-side { display: flex; flex-direction: column; gap: 16px; }
+.pn-picked-name { margin: 0; font-size: var(--fs-md); color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-picked-name .pn-layer-role { font-weight: 400; }
+.pn-trail { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-height: 22px; margin-top: -10px; font-size: var(--fs-sm); }
+.pn-trail button { border: 0; background: none; color: var(--text-dim); padding: 2px 4px; cursor: pointer; border-radius: var(--r-sm); font: inherit; }
+.pn-trail button:hover { color: var(--text-strong); }
+.pn-trail button[aria-current="true"] { color: var(--text-strong); font-weight: 700; }
+.pn-trail-sep { color: var(--text-dim); }
+.pn-accents { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.pn-swatch {
+    width: 22px; height: 22px; padding: 0; border-radius: var(--r-full); cursor: pointer;
+    border: 2px solid transparent; outline: var(--bw) solid var(--field-border); outline-offset: -1px;
+}
+.pn-swatch[aria-pressed="true"] { border-color: var(--text-strong); }
+#box-px-box { flex: 0 1 76px; }
+#box-px { width: 100%; }
+
+/* An image box: its picture, and the buttons that change it. */
+.pn-image { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.pn-image-look {
+    flex: none; width: 72px; height: 54px; border-radius: var(--r-sm); overflow: hidden; display: flex;
+    align-items: center; justify-content: center; background: var(--field-bg); border: var(--bw) solid var(--field-border); color: var(--text-dim);
+}
+.pn-image-look img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pn-image-look svg { width: 22px; height: 22px; }
+.pn-image-do { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.pn-image .dg-hint { flex: 1 1 100%; }
+
+/* A layer's animations: a check and its one main control each. */
+.pn-anims { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pn-anim { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-height: 30px; }
+.pn-anim > .check { flex: 1 1 140px; }
+.pn-anim > select.field { flex: 0 1 150px; width: auto; min-width: 0; }
+.pn-anim .lbl.narrow { flex: 0 1 110px; }
+.pn-anim .lbl.wide { flex: 1 1 100%; }
+.pn-anim .field { width: 100%; }
+
+.pn-changes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pn-changes li { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); }
+.pn-changes li span { flex: 1 1 auto; min-width: 0; }
+.pn-changes .btn.icon { padding: 2px; }
+.pn-changes .btn.icon svg, .pn-rule .btn.icon svg { width: 14px; height: 14px; }
+
+/* The pop-ups' own parts. */
+.pn-states { display: flex; gap: 8px; margin: 0; }
+.pn-state { flex: 1 1 0; margin: 0; display: flex; flex-direction: column; gap: 4px; align-items: center; min-width: 0; }
+.pn-state canvas { width: 100%; height: auto; aspect-ratio: 120 / 72; border-radius: var(--r-sm); background: #0c0d0f; display: block; }
+.pn-state figcaption { font-size: var(--fs-xs); color: var(--text-dim); }
+.pn-state-cols { display: flex; gap: 12px; }
+.pn-state-cols .dg-fields { flex: 1 1 0; flex-direction: column; align-items: stretch; gap: 4px; }
+.pn-rows { min-height: 120px; resize: vertical; font-variant-numeric: tabular-nums; }
+.pn-rules { display: flex; flex-direction: column; gap: 10px; }
+.pn-rule { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: var(--fs-sm); }
+.pn-rule select.field { width: auto; max-width: 150px; }
+.pn-rule input.field { width: 56px; }
+
+@media (max-width: 980px) {
+    .pn-work { flex-wrap: wrap; overflow-y: auto; }
+    .pn-left, .pn-right { flex: 1 1 100%; }
+    .pn-left { max-height: 260px; }
+    .pn-mid { flex: 1 1 100%; min-height: 520px; }
+    .pn-add-pop { left: 12px; width: calc(100vw - 24px); }
+}

@@ -396,6 +396,8 @@ class ScreenColorDropper(QObject):
     # macOS only: why the dropper ended without a colour, for the page to
     # show (the worker reports after the constructor has returned).
     failed = Signal(str)
+    # Whenever it's over - a colour taken (after color_sampled), cancelled or failed.
+    ended = Signal()
     _click_detected = Signal(object, object)
 
     def __init__(self, hide_parent_callback=None, show_parent_callback=None, parent=None):
@@ -516,6 +518,7 @@ class ScreenColorDropper(QObject):
             self.failed.emit(problem)
         if hex_color:
             self.color_sampled.emit(hex_color)
+        self.ended.emit()
 
     # ------------------------------------------------------------ Windows --
 
@@ -565,3 +568,4 @@ class ScreenColorDropper(QObject):
 
         if hex_color:
             self.color_sampled.emit(hex_color)
+        self.ended.emit()

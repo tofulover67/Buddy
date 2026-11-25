@@ -33,6 +33,7 @@ TOOL = "tool"
 MERGED = {
     "marker_manager": ("stills_exporter", "youtube_chapters"),
     "media_manager": ("batch_clip_renamer", "media_relink"),
+    "design_studio": ("design", "interactions"),
 }
 
 

@@ -64,6 +64,10 @@ REGISTRY = [
     # Not yet checked on a Mac (its player and video surface are the new part).
     ("Editing Tools", _tool("dailies", "Dailies", "Editing Tools", "pages.dailies.page", "DailiesPage")),
     ("Editing Tools", _tool("text_animator", "Animation", "Editing Tools", "pages.text_animator.page", "AnimationPage", mac=True)),
+    # Design (a canvas to draw graphics on), Interactions (shapes that answer a recorded
+    # cursor) and Panels (a mock app window with pages), as its tabs - each added as Fusion
+    # nodes; none checked on a Mac yet.
+    ("Editing Tools", _tool("design_studio", "Design Studio", "Editing Tools", "pages.design_studio.page", "DesignStudioPage")),
     ("Editing Tools", _tool("transcribe", "Subtitles", "Editing Tools", "pages.transcribe.page", "TranscribePage", mac=True)),
     ("Editing Tools", _tool("audio_assistant", "Audio Assistant", "Editing Tools", "pages.audio_assistant.page", "AudioAssistantPage", mac=True)),
     # Not yet checked on a Mac (its Web Audio and the computer keys).

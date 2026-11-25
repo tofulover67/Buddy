@@ -1,0 +1,1773 @@
+{
+ "_comment": "Panels. English -> each language; see core/i18n.py.",
+ "Browser": {
+  "日本語": "ブラウザー",
+  "Español": "Navegador",
+  "Deutsch": "Browser",
+  "Français": "Navigateur",
+  "한국어": "브라우저",
+  "中文": "浏览器",
+  "العربية": "متصفّح",
+  "Tiếng Việt": "Trình duyệt"
+ },
+ "Phone": {
+  "日本語": "スマートフォン",
+  "Español": "Teléfono",
+  "Deutsch": "Handy",
+  "Français": "Téléphone",
+  "한국어": "휴대폰",
+  "中文": "手机",
+  "العربية": "هاتف",
+  "Tiếng Việt": "Điện thoại"
+ },
+ "Dialog": {
+  "日本語": "ダイアログ",
+  "Español": "Diálogo",
+  "Deutsch": "Dialog",
+  "Français": "Boîte de dialogue",
+  "한국어": "대화 상자",
+  "中文": "对话框",
+  "العربية": "مربّع حوار",
+  "Tiếng Việt": "Hộp thoại"
+ },
+ "Widget": {
+  "日本語": "ウィジェット",
+  "Español": "Widget",
+  "Deutsch": "Widget",
+  "Français": "Widget",
+  "한국어": "위젯",
+  "中文": "小组件",
+  "العربية": "أداة",
+  "Tiếng Việt": "Tiện ích"
+ },
+ "Plain": {
+  "日本語": "シンプル",
+  "Español": "Sencillo",
+  "Deutsch": "Schlicht",
+  "Français": "Sobre",
+  "한국어": "심플",
+  "中文": "简洁",
+  "العربية": "بسيط",
+  "Tiếng Việt": "Đơn giản"
+ },
+ "Cartoon": {
+  "日本語": "カートゥーン",
+  "Español": "Cómic",
+  "Deutsch": "Comic",
+  "Français": "BD",
+  "한국어": "카툰",
+  "中文": "卡通",
+  "العربية": "كرتوني",
+  "Tiếng Việt": "Hoạt hình"
+ },
+ "Accent colour": {
+  "日本語": "アクセントカラー",
+  "Español": "Color de acento",
+  "Deutsch": "Akzentfarbe",
+  "Français": "Couleur d'accent",
+  "한국어": "강조 색",
+  "中文": "强调色",
+  "العربية": "لون التمييز",
+  "Tiếng Việt": "Màu nhấn"
+ },
+ "Dark or light": {
+  "日本語": "ダークまたはライト",
+  "Español": "Oscuro o claro",
+  "Deutsch": "Dunkel oder hell",
+  "Français": "Sombre ou clair",
+  "한국어": "다크 또는 라이트",
+  "中文": "深色或浅色",
+  "العربية": "داكن أو فاتح",
+  "Tiếng Việt": "Tối hoặc sáng"
+ },
+ "Each page's boxes arrive one after another as it comes on": {
+  "日本語": "ページが表示されるとき、そのボックスが 1 つずつ順に現れます",
+  "Español": "Las cajas de cada página llegan una tras otra cuando aparece",
+  "Deutsch": "Die Boxen jeder Seite erscheinen nacheinander, wenn die Seite kommt",
+  "Français": "Les blocs de chaque page arrivent l'un après l'autre quand elle apparaît",
+  "한국어": "페이지가 나타날 때 박스가 하나씩 차례로 등장합니다",
+  "中文": "每个页面出现时，其中的框依次出现",
+  "العربية": "تظهر مربّعات كل صفحة واحدًا تلو الآخر عند ظهورها",
+  "Tiếng Việt": "Các khung của mỗi trang lần lượt xuất hiện khi trang hiện ra"
+ },
+ "Shelf": {
+  "日本語": "シェルフ",
+  "Español": "Estante",
+  "Deutsch": "Ablage",
+  "Français": "Étagère",
+  "한국어": "선반",
+  "中文": "素材架",
+  "العربية": "الرفّ",
+  "Tiếng Việt": "Kệ"
+ },
+ "A whole page, ready-made": {
+  "日本語": "完成済みのページ全体",
+  "Español": "Una página entera, ya hecha",
+  "Deutsch": "Eine ganze Seite, fertig gebaut",
+  "Français": "Une page entière, toute faite",
+  "한국어": "완성된 페이지 전체",
+  "中文": "现成的整个页面",
+  "العربية": "صفحة كاملة جاهزة",
+  "Tiếng Việt": "Cả một trang, làm sẵn"
+ },
+ "A piece to put into the box you picked": {
+  "日本語": "選んだボックスに入れるパーツ",
+  "Español": "Una pieza para poner en la caja que elegiste",
+  "Deutsch": "Ein Teil für die gewählte Box",
+  "Français": "Un élément à placer dans le bloc choisi",
+  "한국어": "선택한 박스에 넣을 요소",
+  "中文": "放进你选中的框里的部件",
+  "العربية": "قطعة توضع في المربّع الذي اخترته",
+  "Tiếng Việt": "Một thành phần để đặt vào khung bạn đã chọn"
+ },
+ "Insert": {
+  "日本語": "挿入",
+  "Español": "Insertar",
+  "Deutsch": "Einfügen",
+  "Français": "Insérer",
+  "한국어": "삽입",
+  "中文": "插入",
+  "العربية": "إدراج",
+  "Tiếng Việt": "Chèn"
+ },
+ "Pick a box to change it, drag the window to move it": {
+  "日本語": "ボックスを選んで変更し、ウィンドウをドラッグして移動します",
+  "Español": "Elige una caja para cambiarla, arrastra la ventana para moverla",
+  "Deutsch": "Wähle eine Box, um sie zu ändern, ziehe das Fenster, um es zu bewegen",
+  "Français": "Choisissez un bloc pour le modifier, faites glisser la fenêtre pour la déplacer",
+  "한국어": "박스를 선택해 바꾸고, 창을 끌어 옮깁니다",
+  "中文": "选择一个框来修改它，拖动窗口来移动它",
+  "العربية": "اختر مربّعًا لتغييره، واسحب النافذة لتحريكها",
+  "Tiếng Việt": "Chọn một khung để thay đổi, kéo cửa sổ để di chuyển"
+ },
+ "Your mouse is the cursor: the boxes answer it": {
+  "日本語": "マウスがカーソルになり、ボックスが反応します",
+  "Español": "Tu ratón es el cursor: las cajas le responden",
+  "Deutsch": "Deine Maus ist der Cursor: Die Boxen reagieren darauf",
+  "Français": "Votre souris est le curseur : les blocs lui répondent",
+  "한국어": "마우스가 커서가 되어 박스가 반응합니다",
+  "中文": "你的鼠标就是光标：框会对它作出反应",
+  "العربية": "فأرتك هي المؤشّر: المربّعات تستجيب له",
+  "Tiếng Việt": "Chuột của bạn là con trỏ: các khung phản hồi nó"
+ },
+ "Window width": {
+  "日本語": "ウィンドウの幅",
+  "Español": "Ancho de la ventana",
+  "Deutsch": "Fensterbreite",
+  "Français": "Largeur de la fenêtre",
+  "한국어": "창 너비",
+  "中文": "窗口宽度",
+  "العربية": "عرض النافذة",
+  "Tiếng Việt": "Chiều rộng cửa sổ"
+ },
+ "What happens when": {
+  "日本語": "いつ何が起きるか",
+  "Español": "Qué pasa y cuándo",
+  "Deutsch": "Was wann passiert",
+  "Français": "Ce qui se passe et quand",
+  "한국어": "언제 무엇이 일어나는지",
+  "中文": "何时发生什么",
+  "العربية": "ما يحدث ومتى",
+  "Tiếng Việt": "Điều gì xảy ra khi nào"
+ },
+ "Solid keys are yours to drag. Hollow keys are worked out from the cursor's path and move when it does. The round one is a click.": {
+  "日本語": "塗りつぶしのキーはドラッグして動かせます。中抜きのキーはカーソルの軌跡から求められ、軌跡が変わると一緒に動きます。丸いキーはクリックです。",
+  "Español": "Las claves rellenas puedes arrastrarlas. Las huecas se calculan a partir del recorrido del cursor y se mueven con él. La redonda es un clic.",
+  "Deutsch": "Volle Keys kannst du ziehen. Hohle Keys ergeben sich aus dem Weg des Cursors und bewegen sich mit ihm. Die runde ist ein Klick.",
+  "Français": "Les clés pleines se déplacent à la souris. Les clés creuses sont calculées d'après le trajet du curseur et bougent avec lui. La ronde est un clic.",
+  "한국어": "채워진 키는 끌어서 옮길 수 있습니다. 속이 빈 키는 커서의 경로에서 계산되며 경로가 바뀌면 함께 움직입니다. 둥근 키는 클릭입니다.",
+  "中文": "实心关键帧可以拖动。空心关键帧由光标的路径算出，路径变了它们也会跟着移动。圆形的是一次点击。",
+  "العربية": "المفاتيح المصمتة يمكنك سحبها. أمّا المفرّغة فتُحسب من مسار المؤشّر وتتحرّك معه. والمستديرة نقرة.",
+  "Tiếng Việt": "Khóa đặc là khóa bạn kéo được. Khóa rỗng được tính từ đường đi của con trỏ và di chuyển theo nó. Khóa tròn là một lần bấm."
+ },
+ "Shown on black here. On your timeline only the window and the cursor are drawn, over whatever is under them.": {
+  "日本語": "ここでは黒の上に表示されます。タイムラインではウィンドウとカーソルだけが、下にあるものの上に描かれます。",
+  "Español": "Aquí se muestra sobre negro. En tu línea de tiempo solo se dibujan la ventana y el cursor, sobre lo que haya debajo.",
+  "Deutsch": "Hier auf Schwarz gezeigt. In deiner Timeline werden nur das Fenster und der Cursor gezeichnet, über allem, was darunter liegt.",
+  "Français": "Affiché ici sur du noir. Sur votre timeline, seuls la fenêtre et le curseur sont dessinés, par-dessus ce qui se trouve dessous.",
+  "한국어": "여기서는 검은 배경에 표시됩니다. 타임라인에서는 창과 커서만 아래에 있는 것 위에 그려집니다.",
+  "中文": "这里显示在黑色背景上。在你的时间线上只绘制窗口和光标，覆盖在下方内容之上。",
+  "العربية": "يُعرض هنا على خلفية سوداء. على خطّك الزمني تُرسم النافذة والمؤشّر فقط، فوق ما تحتهما.",
+  "Tiếng Việt": "Ở đây hiển thị trên nền đen. Trên timeline chỉ cửa sổ và con trỏ được vẽ, đè lên những gì bên dưới."
+ },
+ "Where the picked box is": {
+  "日本語": "選んだボックスの場所",
+  "Español": "Dónde está la caja elegida",
+  "Deutsch": "Wo die gewählte Box liegt",
+  "Français": "Où se trouve le bloc choisi",
+  "한국어": "선택한 박스의 위치",
+  "中文": "所选框的位置",
+  "العربية": "موضع المربّع المختار",
+  "Tiếng Việt": "Vị trí của khung đã chọn"
+ },
+ "As wide as the room it has": {
+  "日本語": "使える幅いっぱい",
+  "Español": "Tan ancha como el espacio que tiene",
+  "Deutsch": "So breit wie der Platz, den sie hat",
+  "Français": "Aussi large que la place disponible",
+  "한국어": "주어진 공간만큼 넓게",
+  "中文": "与可用空间一样宽",
+  "العربية": "بعرض المساحة المتاحة له",
+  "Tiếng Việt": "Rộng bằng chỗ trống nó có"
+ },
+ "As wide as what's in it": {
+  "日本語": "中身に合わせた幅",
+  "Español": "Tan ancha como lo que contiene",
+  "Deutsch": "So breit wie ihr Inhalt",
+  "Français": "Aussi large que son contenu",
+  "한국어": "내용만큼 넓게",
+  "中文": "与其内容一样宽",
+  "العربية": "بعرض ما فيه",
+  "Tiếng Việt": "Rộng bằng nội dung bên trong"
+ },
+ "A width of its own": {
+  "日本語": "独自の幅",
+  "Español": "Un ancho propio",
+  "Deutsch": "Eine eigene Breite",
+  "Français": "Une largeur à lui",
+  "한국어": "고유한 너비",
+  "中文": "自定宽度",
+  "العربية": "عرض خاصّ به",
+  "Tiếng Việt": "Chiều rộng riêng"
+ },
+ "Width in px": {
+  "日本語": "幅 (px)",
+  "Español": "Ancho en px",
+  "Deutsch": "Breite in px",
+  "Français": "Largeur en px",
+  "한국어": "너비(px)",
+  "中文": "宽度（px）",
+  "العربية": "العرض بالبكسل",
+  "Tiếng Việt": "Chiều rộng (px)"
+ },
+ "Off, it stays still": {
+  "日本語": "オフにすると動きません",
+  "Español": "Desactivada, se queda quieta",
+  "Deutsch": "Aus bleibt sie still",
+  "Français": "Désactivé, il reste immobile",
+  "한국어": "끄면 움직이지 않습니다",
+  "中文": "关闭后它保持不动",
+  "العربية": "عند الإيقاف يبقى ثابتًا",
+  "Tiếng Việt": "Tắt đi thì nó đứng yên"
+ },
+ "When it is clicked: Go to": {
+  "日本語": "クリックされたときの移動先",
+  "Español": "Al hacer clic: ir a",
+  "Deutsch": "Beim Klicken: gehe zu",
+  "Français": "Au clic : aller à",
+  "한국어": "클릭했을 때 이동할 곳",
+  "中文": "点击时：转到",
+  "العربية": "عند النقر: انتقل إلى",
+  "Tiếng Việt": "Khi được bấm: Chuyển đến"
+ },
+ "With": {
+  "日本語": "切り替え方",
+  "Español": "Con",
+  "Deutsch": "Mit",
+  "Français": "Avec",
+  "한국어": "전환 방식",
+  "中文": "过渡方式",
+  "العربية": "مع",
+  "Tiếng Việt": "Với"
+ },
+ "Done (%)": {
+  "日本語": "完了 (%)",
+  "Español": "Hecho (%)",
+  "Deutsch": "Erledigt (%)",
+  "Français": "Fait (%)",
+  "한국어": "완료(%)",
+  "中文": "完成（%）",
+  "العربية": "المنجَز (%)",
+  "Tiếng Việt": "Hoàn thành (%)"
+ },
+ "Chart": {
+  "日本語": "グラフ",
+  "Español": "Gráfico",
+  "Deutsch": "Diagramm",
+  "Français": "Graphique",
+  "한국어": "차트",
+  "中文": "图表",
+  "العربية": "مخطّط",
+  "Tiếng Việt": "Biểu đồ"
+ },
+ "How boxes answer": {
+  "日本語": "ボックスの反応",
+  "Español": "Cómo responden las cajas",
+  "Deutsch": "Wie Boxen reagieren",
+  "Français": "Comment les blocs répondent",
+  "한국어": "박스의 반응 방식",
+  "中文": "框如何反应",
+  "العربية": "كيف تستجيب المربّعات",
+  "Tiếng Việt": "Cách các khung phản hồi"
+ },
+ "Show the boxes as they look": {
+  "日本語": "ボックスの見た目を表示",
+  "Español": "Mostrar las cajas tal como se ven",
+  "Deutsch": "Die Boxen so zeigen, wie sie aussehen",
+  "Français": "Montrer les blocs tels qu'ils apparaissent",
+  "한국어": "박스가 보이는 모습 표시",
+  "中文": "按此外观显示框",
+  "العربية": "اعرض المربّعات كما تبدو",
+  "Tiếng Việt": "Hiển thị các khung như khi chúng"
+ },
+ "As they are with the cursor away": {
+  "日本語": "カーソルが離れているときの状態",
+  "Español": "Como están con el cursor lejos",
+  "Deutsch": "So, wie sie ohne Cursor sind",
+  "Français": "Tels qu'ils sont, curseur ailleurs",
+  "한국어": "커서가 떨어져 있을 때의 모습",
+  "中文": "光标不在上面时的样子",
+  "العربية": "كما تكون والمؤشّر بعيد عنها",
+  "Tiếng Việt": "Như khi con trỏ ở xa"
+ },
+ "Rest": {
+  "日本語": "通常",
+  "Español": "Reposo",
+  "Deutsch": "Ruhe",
+  "Français": "Repos",
+  "한국어": "기본",
+  "中文": "静止",
+  "العربية": "السكون",
+  "Tiếng Việt": "Nghỉ"
+ },
+ "As they are with the cursor over them": {
+  "日本語": "カーソルが上にあるときの状態",
+  "Español": "Como están con el cursor encima",
+  "Deutsch": "So, wie sie unter dem Cursor sind",
+  "Français": "Tels qu'ils sont sous le curseur",
+  "한국어": "커서가 위에 있을 때의 모습",
+  "中文": "光标在上面时的样子",
+  "العربية": "كما تكون والمؤشّر فوقها",
+  "Tiếng Việt": "Như khi con trỏ ở trên chúng"
+ },
+ "Hover": {
+  "日本語": "ホバー",
+  "Español": "Al pasar",
+  "Deutsch": "Hover",
+  "Français": "Survol",
+  "한국어": "호버",
+  "中文": "悬停",
+  "العربية": "التحويم",
+  "Tiếng Việt": "Rê chuột"
+ },
+ "As they are while they're clicked": {
+  "日本語": "クリックされている間の状態",
+  "Español": "Como están mientras se hace clic en ellas",
+  "Deutsch": "So, wie sie beim Klicken sind",
+  "Français": "Tels qu'ils sont pendant le clic",
+  "한국어": "클릭되는 동안의 모습",
+  "中文": "被点击时的样子",
+  "العربية": "كما تكون أثناء النقر عليها",
+  "Tiếng Việt": "Như khi chúng đang được bấm"
+ },
+ "Pressed": {
+  "日本語": "押下",
+  "Español": "Pulsado",
+  "Deutsch": "Gedrückt",
+  "Français": "Appuyé",
+  "한국어": "눌림",
+  "中文": "按下",
+  "العربية": "مضغوط",
+  "Tiếng Việt": "Đang nhấn"
+ },
+ "States": {
+  "日本語": "状態",
+  "Español": "Estados",
+  "Deutsch": "Zustände",
+  "Français": "États",
+  "한국어": "상태",
+  "中文": "状态",
+  "العربية": "الحالات",
+  "Tiếng Việt": "Trạng thái"
+ },
+ "What changes the page": {
+  "日本語": "ページを切り替えるもの",
+  "Español": "Qué cambia la página",
+  "Deutsch": "Was die Seite wechselt",
+  "Français": "Ce qui change la page",
+  "한국어": "페이지를 바꾸는 것",
+  "中文": "什么会切换页面",
+  "العربية": "ما يغيّر الصفحة",
+  "Tiếng Việt": "Điều gì đổi trang"
+ },
+ "Nothing yet. Pick a button and choose a page under “When it is clicked”.": {
+  "日本語": "まだありません。ボタンを選び、「クリックされたときの移動先」でページを選んでください。",
+  "Español": "Nada todavía. Elige un botón y una página en «Al hacer clic».",
+  "Deutsch": "Noch nichts. Wähle einen Button und unter „Beim Klicken“ eine Seite.",
+  "Français": "Rien pour l'instant. Choisissez un bouton, puis une page sous « Au clic ».",
+  "한국어": "아직 없습니다. 버튼을 선택하고 “클릭했을 때 이동할 곳”에서 페이지를 고르세요.",
+  "中文": "还没有。选一个按钮，然后在“点击时”下选择一个页面。",
+  "العربية": "لا شيء بعد. اختر زرًّا ثم اختر صفحة تحت «عند النقر».",
+  "Tiếng Việt": "Chưa có gì. Chọn một nút rồi chọn trang ở “Khi được bấm”."
+ },
+ "+ Rule…": {
+  "日本語": "+ ルール…",
+  "Español": "+ Regla…",
+  "Deutsch": "+ Regel…",
+  "Français": "+ Règle…",
+  "한국어": "+ 규칙…",
+  "中文": "+ 规则…",
+  "العربية": "+ قاعدة…",
+  "Tiếng Việt": "+ Quy tắc…"
+ },
+ "Only this box": {
+  "日本語": "このボックスだけ",
+  "Español": "Solo esta caja",
+  "Deutsch": "Nur diese Box",
+  "Français": "Ce bloc seulement",
+  "한국어": "이 박스만",
+  "中文": "仅此框",
+  "العربية": "هذا المربّع فقط",
+  "Tiếng Việt": "Chỉ khung này"
+ },
+ "Grows (%)": {
+  "日本語": "拡大 (%)",
+  "Español": "Crece (%)",
+  "Deutsch": "Wächst (%)",
+  "Français": "Grandit (%)",
+  "한국어": "커짐(%)",
+  "中文": "放大（%）",
+  "العربية": "يكبر (%)",
+  "Tiếng Việt": "Lớn lên (%)"
+ },
+ "Lifts (px)": {
+  "日本語": "浮き上がり (px)",
+  "Español": "Se eleva (px)",
+  "Deutsch": "Hebt sich (px)",
+  "Français": "S'élève (px)",
+  "한국어": "떠오름(px)",
+  "中文": "上浮（px）",
+  "العربية": "يرتفع (بكسل)",
+  "Tiếng Việt": "Nhấc lên (px)"
+ },
+ "Glows (%)": {
+  "日本語": "発光 (%)",
+  "Español": "Brilla (%)",
+  "Deutsch": "Leuchtet (%)",
+  "Français": "Brille (%)",
+  "한국어": "빛남(%)",
+  "中文": "发光（%）",
+  "العربية": "يتوهّج (%)",
+  "Tiếng Việt": "Phát sáng (%)"
+ },
+ "Seconds a click takes": {
+  "日本語": "クリックにかかる秒数",
+  "Español": "Segundos que dura un clic",
+  "Deutsch": "Sekunden, die ein Klick braucht",
+  "Français": "Secondes que dure un clic",
+  "한국어": "클릭에 걸리는 초",
+  "中文": "一次点击所需的秒数",
+  "العربية": "الثواني التي تستغرقها النقرة",
+  "Tiếng Việt": "Số giây một lần bấm"
+ },
+ "These are every box's, unless “Only this box” gives the box you picked its own.": {
+  "日本語": "これはすべてのボックスに共通です。「このボックスだけ」をオンにすると、選んだボックスだけの設定になります。",
+  "Español": "Son los de todas las cajas, salvo que «Solo esta caja» le dé a la caja elegida los suyos propios.",
+  "Deutsch": "Sie gelten für jede Box, außer „Nur diese Box“ gibt der gewählten Box eigene.",
+  "Français": "Ils valent pour chaque bloc, sauf si « Ce bloc seulement » donne les siens au bloc choisi.",
+  "한국어": "모든 박스에 적용됩니다. “이 박스만”을 켜면 선택한 박스만의 설정이 됩니다.",
+  "中文": "这些适用于每个框，除非“仅此框”让你选中的框有自己的设置。",
+  "العربية": "هذه لكل المربّعات، ما لم يمنح «هذا المربّع فقط» المربّعَ الذي اخترته إعداداته الخاصّة.",
+  "Tiếng Việt": "Đây là thiết lập của mọi khung, trừ khi “Chỉ khung này” cho khung bạn đã chọn thiết lập riêng."
+ },
+ "Area": {
+  "日本語": "面",
+  "Español": "Área",
+  "Deutsch": "Fläche",
+  "Français": "Aire",
+  "한국어": "영역",
+  "中文": "面积",
+  "العربية": "مساحة",
+  "Tiếng Việt": "Vùng"
+ },
+ "Donut": {
+  "日本語": "ドーナツ",
+  "Español": "Anillo",
+  "Deutsch": "Ring",
+  "Français": "Anneau",
+  "한국어": "도넛",
+  "中文": "环形",
+  "العربية": "حلقة",
+  "Tiếng Việt": "Bánh vòng"
+ },
+ "Sparkline": {
+  "日本語": "スパークライン",
+  "Español": "Minigráfico",
+  "Deutsch": "Sparkline",
+  "Français": "Sparkline",
+  "한국어": "스파크라인",
+  "中文": "迷你图",
+  "العربية": "خطّ مصغّر",
+  "Tiếng Việt": "Biểu đồ mini"
+ },
+ "Mon\t12\nTue\t19\nWed\t8": {
+  "日本語": "月\t12\n火\t19\n水\t8",
+  "Español": "lun\t12\nmar\t19\nmié\t8",
+  "Deutsch": "Mo\t12\nDi\t19\nMi\t8",
+  "Français": "lun\t12\nmar\t19\nmer\t8",
+  "한국어": "월\t12\n화\t19\n수\t8",
+  "中文": "周一\t12\n周二\t19\n周三\t8",
+  "العربية": "الإثنين\t12\nالثلاثاء\t19\nالأربعاء\t8",
+  "Tiếng Việt": "T2\t12\nT3\t19\nT4\t8"
+ },
+ "A rule changes the page when a chart or a progress bar has drawn on far enough.": {
+  "日本語": "ルールは、グラフや進捗バーが十分に描かれたときにページを切り替えます。",
+  "Español": "Una regla cambia la página cuando un gráfico o una barra de progreso se ha dibujado lo suficiente.",
+  "Deutsch": "Eine Regel wechselt die Seite, wenn ein Diagramm oder ein Fortschrittsbalken weit genug gezeichnet ist.",
+  "Français": "Une règle change la page quand un graphique ou une barre de progression s'est assez tracé.",
+  "한국어": "규칙은 차트나 진행률 막대가 충분히 그려졌을 때 페이지를 바꿉니다.",
+  "中文": "当图表或进度条绘制到足够程度时，规则会切换页面。",
+  "العربية": "تغيّر القاعدة الصفحة حين يكتمل رسم مخطّط أو شريط تقدّم بما يكفي.",
+  "Tiếng Việt": "Một quy tắc đổi trang khi biểu đồ hoặc thanh tiến độ đã được vẽ đủ xa."
+ },
+ "Add a rule": {
+  "日本語": "ルールを追加",
+  "Español": "Añadir una regla",
+  "Deutsch": "Regel hinzufügen",
+  "Français": "Ajouter une règle",
+  "한국어": "규칙 추가",
+  "中文": "添加规则",
+  "العربية": "إضافة قاعدة",
+  "Tiếng Việt": "Thêm quy tắc"
+ },
+ "Seconds a page change takes": {
+  "日本語": "ページの切り替えにかかる秒数",
+  "Español": "Segundos que tarda un cambio de página",
+  "Deutsch": "Sekunden, die ein Seitenwechsel dauert",
+  "Français": "Secondes que dure un changement de page",
+  "한국어": "페이지 전환에 걸리는 초",
+  "中文": "切换页面所需的秒数",
+  "العربية": "الثواني التي يستغرقها تغيير الصفحة",
+  "Tiếng Việt": "Số giây một lần đổi trang"
+ },
+ "A page change, unless its link says": {
+  "日本語": "ページの切り替え方 (リンク側で指定がない場合)",
+  "Español": "Un cambio de página, salvo que su enlace diga otra cosa",
+  "Deutsch": "Ein Seitenwechsel, außer sein Link sagt etwas anderes",
+  "Français": "Un changement de page, sauf si son lien l'indique",
+  "한국어": "페이지 전환 방식(링크에 지정이 없을 때)",
+  "中文": "页面切换方式（除非其链接另有指定）",
+  "العربية": "تغيير الصفحة، ما لم يحدّد رابطه غير ذلك",
+  "Tiếng Việt": "Cách đổi trang, trừ khi liên kết của nó chỉ định khác"
+ },
+ "Seconds between boxes as a page builds on": {
+  "日本語": "ページが順に表示されるときのボックス間の秒数",
+  "Español": "Segundos entre cajas cuando una página aparece escalonada",
+  "Deutsch": "Sekunden zwischen den Boxen, wenn eine Seite sich aufbaut",
+  "Français": "Secondes entre les blocs quand une page apparaît progressivement",
+  "한국어": "페이지가 차례로 등장할 때 박스 사이의 초",
+  "中文": "页面逐个出现时各框之间的秒数",
+  "العربية": "الثواني بين المربّعات حين تظهر الصفحة تباعًا",
+  "Tiếng Việt": "Số giây giữa các khung khi một trang hiện lần lượt"
+ },
+ "Seconds each box takes to build on": {
+  "日本語": "各ボックスが現れるのにかかる秒数",
+  "Español": "Segundos que tarda cada caja en aparecer",
+  "Deutsch": "Sekunden, die jede Box zum Erscheinen braucht",
+  "Français": "Secondes que met chaque bloc à apparaître",
+  "한국어": "각 박스가 등장하는 데 걸리는 초",
+  "中文": "每个框出现所需的秒数",
+  "العربية": "الثواني التي يستغرقها كل مربّع ليظهر",
+  "Tiếng Việt": "Số giây mỗi khung cần để hiện ra"
+ },
+ "Replace the panel Buddy put there before": {
+  "日本語": "以前 Buddy が置いたパネルを置き換える",
+  "Español": "Reemplazar el panel que Buddy puso ahí antes",
+  "Deutsch": "Das Panel ersetzen, das Buddy dort zuvor platziert hat",
+  "Français": "Remplacer le panneau que Buddy y a mis auparavant",
+  "한국어": "Buddy가 전에 놓은 패널 교체",
+  "中文": "替换 Buddy 之前放在那里的面板",
+  "العربية": "استبدال اللوحة التي وضعها Buddy هناك من قبل",
+  "Tiếng Việt": "Thay bảng Buddy đã đặt ở đó trước đây"
+ },
+ "Panel added on V{track}.": {
+  "日本語": "パネルを V{track} に追加しました。",
+  "Español": "Panel añadido en V{track}.",
+  "Deutsch": "Panel auf V{track} hinzugefügt.",
+  "Français": "Panneau ajouté sur V{track}.",
+  "한국어": "패널을 V{track}에 추가했습니다.",
+  "中文": "面板已添加到 V{track}。",
+  "العربية": "أُضيفت اللوحة على V{track}.",
+  "Tiếng Việt": "Đã thêm bảng trên V{track}."
+ },
+ "Panel replaced on V{track}.": {
+  "日本語": "V{track} のパネルを置き換えました。",
+  "Español": "Panel reemplazado en V{track}.",
+  "Deutsch": "Panel auf V{track} ersetzt.",
+  "Français": "Panneau remplacé sur V{track}.",
+  "한국어": "V{track}의 패널을 교체했습니다.",
+  "中文": "已替换 V{track} 上的面板。",
+  "العربية": "استُبدلت اللوحة على V{track}.",
+  "Tiếng Việt": "Đã thay bảng trên V{track}."
+ },
+ "Adding the panel…": {
+  "日本語": "パネルを追加中…",
+  "Español": "Añadiendo el panel…",
+  "Deutsch": "Panel wird hinzugefügt…",
+  "Français": "Ajout du panneau…",
+  "한국어": "패널 추가 중…",
+  "中文": "正在添加面板…",
+  "العربية": "جارٍ إضافة اللوحة…",
+  "Tiếng Việt": "Đang thêm bảng…"
+ },
+ "Adding a panel": {
+  "日本語": "パネルを追加中",
+  "Español": "Añadiendo un panel",
+  "Deutsch": "Ein Panel wird hinzugefügt",
+  "Français": "Ajout d'un panneau",
+  "한국어": "패널 추가 중",
+  "中文": "正在添加面板",
+  "العربية": "جارٍ إضافة لوحة",
+  "Tiếng Việt": "Đang thêm một bảng"
+ },
+ "Couldn't add the panel": {
+  "日本語": "パネルを追加できませんでした",
+  "Español": "No se pudo añadir el panel",
+  "Deutsch": "Das Panel konnte nicht hinzugefügt werden",
+  "Français": "Impossible d'ajouter le panneau",
+  "한국어": "패널을 추가하지 못했습니다",
+  "中文": "无法添加面板",
+  "العربية": "تعذّرت إضافة اللوحة",
+  "Tiếng Việt": "Không thể thêm bảng"
+ },
+ "A panel holds up to {n} pages.": {
+  "日本語": "パネルに置けるページは {n} 個までです。",
+  "Español": "Un panel admite hasta {n} páginas.",
+  "Deutsch": "Ein Panel fasst bis zu {n} Seiten.",
+  "Français": "Un panneau contient jusqu'à {n} pages.",
+  "한국어": "패널에는 페이지를 {n}개까지 넣을 수 있습니다.",
+  "中文": "一个面板最多容纳 {n} 个页面。",
+  "العربية": "تتّسع اللوحة لما يصل إلى {n} صفحات.",
+  "Tiếng Việt": "Một bảng chứa tối đa {n} trang."
+ },
+ "A panel holds up to {n} rules.": {
+  "日本語": "パネルに置けるルールは {n} 個までです。",
+  "Español": "Un panel admite hasta {n} reglas.",
+  "Deutsch": "Ein Panel fasst bis zu {n} Regeln.",
+  "Français": "Un panneau contient jusqu'à {n} règles.",
+  "한국어": "패널에는 규칙을 {n}개까지 넣을 수 있습니다.",
+  "中文": "一个面板最多容纳 {n} 条规则。",
+  "العربية": "تتّسع اللوحة لما يصل إلى {n} قواعد.",
+  "Tiếng Việt": "Một bảng chứa tối đa {n} quy tắc."
+ },
+ "Click one to make the page in view that layout.": {
+  "日本語": "クリックすると、表示中のページがそのレイアウトになります。",
+  "Español": "Haz clic en uno para dar ese diseño a la página que ves.",
+  "Deutsch": "Klicke eins an, um der angezeigten Seite dieses Layout zu geben.",
+  "Français": "Cliquez sur l'une pour donner cette mise en page à la page affichée.",
+  "한국어": "클릭하면 보고 있는 페이지가 그 레이아웃이 됩니다.",
+  "中文": "点击一个，让当前显示的页面使用该布局。",
+  "العربية": "انقر واحدًا لتصير الصفحة المعروضة بهذا التخطيط.",
+  "Tiếng Việt": "Bấm một bố cục để trang đang xem dùng bố cục đó."
+ },
+ "Goes into {name}.": {
+  "日本語": "{name} に入ります。",
+  "Español": "Va dentro de {name}.",
+  "Deutsch": "Kommt in {name}.",
+  "Français": "Va dans {name}.",
+  "한국어": "{name} 안에 들어갑니다.",
+  "中文": "放进 {name}。",
+  "العربية": "يدخل في {name}.",
+  "Tiếng Việt": "Đặt vào {name}."
+ },
+ "Goes onto the page in view. Pick a box first to put it in there.": {
+  "日本語": "表示中のページに入ります。ボックスの中に入れるには、先にそのボックスを選んでください。",
+  "Español": "Va a la página que ves. Elige antes una caja para ponerlo dentro de ella.",
+  "Deutsch": "Kommt auf die angezeigte Seite. Wähle zuerst eine Box, um es dort hineinzulegen.",
+  "Français": "Va sur la page affichée. Choisissez d'abord un bloc pour le mettre dedans.",
+  "한국어": "보고 있는 페이지에 들어갑니다. 박스 안에 넣으려면 먼저 그 박스를 선택하세요.",
+  "中文": "放到当前显示的页面上。先选一个框，可以把它放进那个框里。",
+  "العربية": "يوضع على الصفحة المعروضة. اختر مربّعًا أولًا لتضعه داخله.",
+  "Tiếng Việt": "Đặt lên trang đang xem. Chọn một khung trước để đặt vào trong đó."
+ },
+ "Double-click or press F2 to rename it": {
+  "日本語": "ダブルクリックするか F2 を押すと名前を変更できます",
+  "Español": "Haz doble clic o pulsa F2 para cambiarle el nombre",
+  "Deutsch": "Doppelklicken oder F2 drücken, um sie umzubenennen",
+  "Français": "Double-cliquez ou appuyez sur F2 pour la renommer",
+  "한국어": "두 번 클릭하거나 F2를 눌러 이름 바꾸기",
+  "中文": "双击或按 F2 重命名",
+  "العربية": "انقر نقرًا مزدوجًا أو اضغط F2 لإعادة تسميتها",
+  "Tiếng Việt": "Bấm đúp hoặc nhấn F2 để đổi tên"
+ },
+ "Remove this page": {
+  "日本語": "このページを削除",
+  "Español": "Quitar esta página",
+  "Deutsch": "Diese Seite entfernen",
+  "Français": "Supprimer cette page",
+  "한국어": "이 페이지 제거",
+  "中文": "移除此页面",
+  "العربية": "إزالة هذه الصفحة",
+  "Tiếng Việt": "Gỡ trang này"
+ },
+ "+ Page": {
+  "日本語": "+ ページ",
+  "Español": "+ Página",
+  "Deutsch": "+ Seite",
+  "Français": "+ Page",
+  "한국어": "+ 페이지",
+  "中文": "+ 页面",
+  "العربية": "+ صفحة",
+  "Tiếng Việt": "+ Trang"
+ },
+ "Add an empty page": {
+  "日本語": "空のページを追加",
+  "Español": "Añadir una página vacía",
+  "Deutsch": "Eine leere Seite hinzufügen",
+  "Français": "Ajouter une page vide",
+  "한국어": "빈 페이지 추가",
+  "中文": "添加空白页面",
+  "العربية": "إضافة صفحة فارغة",
+  "Tiếng Việt": "Thêm một trang trống"
+ },
+ "Page name": {
+  "日本語": "ページ名",
+  "Español": "Nombre de la página",
+  "Deutsch": "Seitenname",
+  "Français": "Nom de la page",
+  "한국어": "페이지 이름",
+  "中文": "页面名称",
+  "العربية": "اسم الصفحة",
+  "Tiếng Việt": "Tên trang"
+ },
+ "Nothing": {
+  "日本語": "なし",
+  "Español": "Nada",
+  "Deutsch": "Nichts",
+  "Français": "Rien",
+  "한국어": "없음",
+  "中文": "无",
+  "العربية": "لا شيء",
+  "Tiếng Việt": "Không gì"
+ },
+ "A page's own box can't be removed": {
+  "日本語": "ページそのもののボックスは削除できません",
+  "Español": "La caja propia de una página no se puede quitar",
+  "Deutsch": "Die eigene Box einer Seite kann nicht entfernt werden",
+  "Français": "Le bloc propre à une page ne peut pas être supprimé",
+  "한국어": "페이지 자체의 박스는 제거할 수 없습니다",
+  "中文": "页面自身的框无法移除",
+  "العربية": "لا يمكن إزالة المربّع الخاصّ بالصفحة",
+  "Tiếng Việt": "Không thể gỡ khung riêng của một trang"
+ },
+ "Click on": {
+  "日本語": "クリック:",
+  "Español": "Clic en",
+  "Deutsch": "Klick auf",
+  "Français": "Clic sur",
+  "한국어": "클릭:",
+  "中文": "点击",
+  "العربية": "النقر على",
+  "Tiếng Việt": "Bấm vào"
+ },
+ "When": {
+  "日本語": "もし",
+  "Español": "Cuando",
+  "Deutsch": "Wenn",
+  "Français": "Quand",
+  "한국어": "만약",
+  "中文": "当",
+  "العربية": "عندما",
+  "Tiếng Việt": "Khi"
+ },
+ "is drawn past {over} % →": {
+  "日本語": "が {over} % を超えて描かれたら →",
+  "Español": "se dibuja más allá del {over} % →",
+  "Deutsch": "über {over} % gezeichnet ist →",
+  "Français": "est tracé au-delà de {over} % →",
+  "한국어": "이(가) {over}%를 넘게 그려지면 →",
+  "中文": "绘制超过 {over}% 时 →",
+  "العربية": "يُرسم بعد {over} % →",
+  "Tiếng Việt": "được vẽ quá {over} % →"
+ },
+ "At {t} s →": {
+  "日本語": "{t} 秒で →",
+  "Español": "A los {t} s →",
+  "Deutsch": "Bei {t} s →",
+  "Français": "À {t} s →",
+  "한국어": "{t}초에 →",
+  "中文": "在 {t} 秒时 →",
+  "العربية": "عند {t} ث →",
+  "Tiếng Việt": "Tại giây {t} →"
+ },
+ "Remove this rule": {
+  "日本語": "このルールを削除",
+  "Español": "Quitar esta regla",
+  "Deutsch": "Diese Regel entfernen",
+  "Français": "Supprimer cette règle",
+  "한국어": "이 규칙 제거",
+  "中文": "移除此规则",
+  "العربية": "إزالة هذه القاعدة",
+  "Tiếng Việt": "Gỡ quy tắc này"
+ },
+ "The next time": {
+  "日本語": "次に",
+  "Español": "La próxima vez que",
+  "Deutsch": "Wenn das nächste Mal",
+  "Français": "La prochaine fois que",
+  "한국어": "다음에",
+  "中文": "下次",
+  "العربية": "في المرّة التالية التي",
+  "Tiếng Việt": "Lần tới khi"
+ },
+ "Chart or progress bar": {
+  "日本語": "グラフまたは進捗バー",
+  "Español": "Gráfico o barra de progreso",
+  "Deutsch": "Diagramm oder Fortschrittsbalken",
+  "Français": "Graphique ou barre de progression",
+  "한국어": "차트 또는 진행률 막대",
+  "中文": "图表或进度条",
+  "العربية": "مخطّط أو شريط تقدّم",
+  "Tiếng Việt": "Biểu đồ hoặc thanh tiến độ"
+ },
+ "is drawn past": {
+  "日本語": "が",
+  "Español": "se dibuja más allá del",
+  "Deutsch": "über",
+  "Français": "est tracé au-delà de",
+  "한국어": "이(가)",
+  "中文": "绘制超过",
+  "العربية": "يُرسم فيها بعد",
+  "Tiếng Việt": "được vẽ quá"
+ },
+ "%, go to": {
+  "日本語": "% を超えて描かれたら、移動先",
+  "Español": "%, ir a",
+  "Deutsch": "% gezeichnet ist, gehe zu",
+  "Français": "%, aller à",
+  "한국어": "%를 넘게 그려지면 이동:",
+  "中文": "% 时，转到",
+  "العربية": "%، انتقل إلى",
+  "Tiếng Việt": "%, chuyển đến"
+ },
+ "Page": {
+  "日本語": "ページ",
+  "Español": "Página",
+  "Deutsch": "Seite",
+  "Français": "Page",
+  "한국어": "페이지",
+  "中文": "页面",
+  "العربية": "الصفحة",
+  "Tiếng Việt": "Trang"
+ },
+ "with": {
+  "日本語": "切り替え方",
+  "Español": "con",
+  "Deutsch": "mit",
+  "Français": "avec",
+  "한국어": "전환 방식",
+  "中文": "过渡方式",
+  "العربية": "مع",
+  "Tiếng Việt": "với"
+ },
+ "Put a chart or a progress bar on a page to make a rule for it.": {
+  "日本語": "ルールを作るには、ページにグラフか進捗バーを置いてください。",
+  "Español": "Pon un gráfico o una barra de progreso en una página para crear una regla para él.",
+  "Deutsch": "Lege ein Diagramm oder einen Fortschrittsbalken auf eine Seite, um eine Regel dafür zu machen.",
+  "Français": "Placez un graphique ou une barre de progression sur une page pour lui créer une règle.",
+  "한국어": "규칙을 만들려면 페이지에 차트나 진행률 막대를 넣으세요.",
+  "中文": "在页面上放一个图表或进度条，才能为它制定规则。",
+  "العربية": "ضع مخطّطًا أو شريط تقدّم على صفحة لتنشئ قاعدة له.",
+  "Tiếng Việt": "Đặt một biểu đồ hoặc thanh tiến độ lên trang để tạo quy tắc cho nó."
+ },
+ "A rule needs a second page to go to.": {
+  "日本語": "ルールには移動先となる 2 つ目のページが必要です。",
+  "Español": "Una regla necesita una segunda página a la que ir.",
+  "Deutsch": "Eine Regel braucht eine zweite Seite, zu der sie wechselt.",
+  "Français": "Une règle a besoin d'une deuxième page où aller.",
+  "한국어": "규칙에는 이동할 두 번째 페이지가 필요합니다.",
+  "中文": "规则需要第二个页面作为目标。",
+  "العربية": "تحتاج القاعدة إلى صفحة ثانية تنتقل إليها.",
+  "Tiếng Việt": "Quy tắc cần một trang thứ hai để chuyển đến."
+ },
+ "Cursor": {
+  "日本語": "カーソル",
+  "Español": "Cursor",
+  "Deutsch": "Cursor",
+  "Français": "Curseur",
+  "한국어": "커서",
+  "中文": "光标",
+  "العربية": "المؤشّر",
+  "Tiếng Việt": "Con trỏ"
+ },
+ "A click": {
+  "日本語": "クリック",
+  "Español": "Un clic",
+  "Deutsch": "Ein Klick",
+  "Français": "Un clic",
+  "한국어": "클릭",
+  "中文": "一次点击",
+  "العربية": "نقرة",
+  "Tiếng Việt": "Một lần bấm"
+ },
+ "A click on {name}": {
+  "日本語": "{name} のクリック",
+  "Español": "Un clic en {name}",
+  "Deutsch": "Ein Klick auf {name}",
+  "Français": "Un clic sur {name}",
+  "한국어": "{name} 클릭",
+  "中文": "点击 {name}",
+  "العربية": "نقرة على {name}",
+  "Tiếng Việt": "Một lần bấm vào {name}"
+ },
+ "A rule": {
+  "日本語": "ルール",
+  "Español": "Una regla",
+  "Deutsch": "Eine Regel",
+  "Français": "Une règle",
+  "한국어": "규칙",
+  "中文": "一条规则",
+  "العربية": "قاعدة",
+  "Tiếng Việt": "Một quy tắc"
+ },
+ "A key you set": {
+  "日本語": "自分で置いたキー",
+  "Español": "Una clave que pusiste",
+  "Deutsch": "Ein Key, den du gesetzt hast",
+  "Français": "Une clé que vous avez posée",
+  "한국어": "직접 놓은 키",
+  "中文": "你设置的关键帧",
+  "العربية": "مفتاح وضعته",
+  "Tiếng Việt": "Một khóa bạn đặt"
+ },
+ "Hovered": {
+  "日本語": "ホバー開始",
+  "Español": "Cursor encima",
+  "Deutsch": "Hover begonnen",
+  "Français": "Survolé",
+  "한국어": "호버됨",
+  "中文": "开始悬停",
+  "العربية": "بدأ التحويم",
+  "Tiếng Việt": "Được rê chuột"
+ },
+ "drawn on": {
+  "日本語": "描画",
+  "Español": "dibujado",
+  "Deutsch": "gezeichnet",
+  "Français": "tracé",
+  "한국어": "그려짐",
+  "中文": "绘制",
+  "العربية": "الرسم",
+  "Tiếng Việt": "được vẽ"
+ },
+ "Move the mouse over the boxes and click them. Nothing is kept until you record.": {
+  "日本語": "マウスをボックスの上に動かしてクリックしてみてください。記録するまで何も保存されません。",
+  "Español": "Mueve el ratón sobre las cajas y haz clic en ellas. No se guarda nada hasta que grabes.",
+  "Deutsch": "Bewege die Maus über die Boxen und klicke sie an. Nichts wird behalten, bis du aufzeichnest.",
+  "Français": "Passez la souris sur les blocs et cliquez dessus. Rien n'est gardé tant que vous n'enregistrez pas.",
+  "한국어": "마우스를 박스 위로 옮기고 클릭해 보세요. 녹화하기 전에는 아무것도 저장되지 않습니다.",
+  "中文": "把鼠标移到框上并点击。录制之前不会保留任何内容。",
+  "العربية": "حرّك الفأرة فوق المربّعات وانقرها. لا يُحفظ شيء حتى تسجّل.",
+  "Tiếng Việt": "Đưa chuột lên các khung và bấm vào chúng. Không gì được giữ lại cho đến khi bạn ghi."
+ },
+ "Click a box to pick it. Drag the window to move it, its right edge to make it wider.": {
+  "日本語": "ボックスをクリックして選びます。ウィンドウをドラッグすると移動し、右端をドラッグすると幅が変わります。",
+  "Español": "Haz clic en una caja para elegirla. Arrastra la ventana para moverla, y su borde derecho para ensancharla.",
+  "Deutsch": "Klicke eine Box an, um sie zu wählen. Ziehe das Fenster, um es zu bewegen, und seinen rechten Rand, um es breiter zu machen.",
+  "Français": "Cliquez sur un bloc pour le choisir. Faites glisser la fenêtre pour la déplacer, et son bord droit pour l'élargir.",
+  "한국어": "박스를 클릭해 선택합니다. 창을 끌면 옮겨지고, 오른쪽 가장자리를 끌면 넓어집니다.",
+  "中文": "点击一个框来选中它。拖动窗口来移动它，拖动它的右边缘来加宽。",
+  "العربية": "انقر مربّعًا لتختاره. اسحب النافذة لتحريكها، وحافّتها اليمنى لتوسيعها.",
+  "Tiếng Việt": "Bấm một khung để chọn. Kéo cửa sổ để di chuyển, kéo cạnh phải để làm rộng ra."
+ },
+ "Website": {
+  "日本語": "ウェブサイト",
+  "Español": "Sitio web",
+  "Deutsch": "Website",
+  "Français": "Site web",
+  "한국어": "웹사이트",
+  "中文": "网站",
+  "العربية": "موقع ويب",
+  "Tiếng Việt": "Trang web"
+ },
+ "Data": {
+  "日本語": "データ",
+  "Español": "Datos",
+  "Deutsch": "Daten",
+  "Français": "Données",
+  "한국어": "데이터",
+  "中文": "数据",
+  "العربية": "البيانات",
+  "Tiếng Việt": "Dữ liệu"
+ },
+ "Gallery": {
+  "日本語": "ギャラリー",
+  "Español": "Galería",
+  "Deutsch": "Galerie",
+  "Français": "Galerie",
+  "한국어": "갤러리",
+  "中文": "图库",
+  "العربية": "معرض",
+  "Tiếng Việt": "Thư viện ảnh"
+ },
+ "Landing page": {
+  "日本語": "ランディングページ",
+  "Español": "Página de aterrizaje",
+  "Deutsch": "Landingpage",
+  "Français": "Page d'atterrissage",
+  "한국어": "랜딩 페이지",
+  "中文": "落地页",
+  "العربية": "صفحة هبوط",
+  "Tiếng Việt": "Trang đích"
+ },
+ "Pricing": {
+  "日本語": "料金プラン",
+  "Español": "Precios",
+  "Deutsch": "Preise",
+  "Français": "Tarifs",
+  "한국어": "요금제",
+  "中文": "定价",
+  "العربية": "الأسعار",
+  "Tiếng Việt": "Bảng giá"
+ },
+ "Article": {
+  "日本語": "記事",
+  "Español": "Artículo",
+  "Deutsch": "Artikel",
+  "Français": "Article",
+  "한국어": "기사",
+  "中文": "文章",
+  "العربية": "مقالة",
+  "Tiếng Việt": "Bài viết"
+ },
+ "Product page": {
+  "日本語": "商品ページ",
+  "Español": "Página de producto",
+  "Deutsch": "Produktseite",
+  "Français": "Page produit",
+  "한국어": "상품 페이지",
+  "中文": "商品页",
+  "العربية": "صفحة منتج",
+  "Tiếng Việt": "Trang sản phẩm"
+ },
+ "Sign-in form": {
+  "日本語": "サインインフォーム",
+  "Español": "Formulario de acceso",
+  "Deutsch": "Anmeldeformular",
+  "Français": "Formulaire de connexion",
+  "한국어": "로그인 양식",
+  "中文": "登录表单",
+  "العربية": "نموذج تسجيل الدخول",
+  "Tiếng Việt": "Biểu mẫu đăng nhập"
+ },
+ "Dashboard": {
+  "日本語": "ダッシュボード",
+  "Español": "Panel de control",
+  "Deutsch": "Dashboard",
+  "Français": "Tableau de bord",
+  "한국어": "대시보드",
+  "中文": "仪表板",
+  "العربية": "لوحة المعلومات",
+  "Tiếng Việt": "Bảng điều khiển"
+ },
+ "Board (kanban)": {
+  "日本語": "ボード (カンバン)",
+  "Español": "Tablero (kanban)",
+  "Deutsch": "Board (Kanban)",
+  "Français": "Tableau (kanban)",
+  "한국어": "보드(칸반)",
+  "中文": "看板",
+  "العربية": "لوحة (كانبان)",
+  "Tiếng Việt": "Bảng (kanban)"
+ },
+ "Music player": {
+  "日本語": "音楽プレーヤー",
+  "Español": "Reproductor de música",
+  "Deutsch": "Musikplayer",
+  "Français": "Lecteur de musique",
+  "한국어": "음악 플레이어",
+  "中文": "音乐播放器",
+  "العربية": "مشغّل موسيقى",
+  "Tiếng Việt": "Trình phát nhạc"
+ },
+ "File browser": {
+  "日本語": "ファイルブラウザー",
+  "Español": "Explorador de archivos",
+  "Deutsch": "Dateibrowser",
+  "Français": "Explorateur de fichiers",
+  "한국어": "파일 탐색기",
+  "中文": "文件浏览器",
+  "العربية": "مستعرض الملفات",
+  "Tiếng Việt": "Trình duyệt tệp"
+ },
+ "Stat tiles": {
+  "日本語": "数値タイル",
+  "Español": "Tarjetas de cifras",
+  "Deutsch": "Kennzahl-Kacheln",
+  "Français": "Tuiles de chiffres",
+  "한국어": "통계 타일",
+  "中文": "数据卡片",
+  "العربية": "بطاقات الأرقام",
+  "Tiếng Việt": "Ô số liệu"
+ },
+ "Line chart": {
+  "日本語": "折れ線グラフ",
+  "Español": "Gráfico de líneas",
+  "Deutsch": "Liniendiagramm",
+  "Français": "Graphique en courbe",
+  "한국어": "꺾은선 차트",
+  "中文": "折线图",
+  "العربية": "مخطّط خطّي",
+  "Tiếng Việt": "Biểu đồ đường"
+ },
+ "Bars and a donut": {
+  "日本語": "棒グラフとドーナツ",
+  "Español": "Barras y un anillo",
+  "Deutsch": "Balken und ein Ring",
+  "Français": "Barres et un anneau",
+  "한국어": "막대와 도넛",
+  "中文": "柱状图和环形图",
+  "العربية": "أعمدة وحلقة",
+  "Tiếng Việt": "Cột và bánh vòng"
+ },
+ "Table": {
+  "日本語": "表",
+  "Español": "Tabla",
+  "Deutsch": "Tabelle",
+  "Français": "Tableau",
+  "한국어": "표",
+  "中文": "表格",
+  "العربية": "جدول",
+  "Tiếng Việt": "Bảng"
+ },
+ "Leaderboard": {
+  "日本語": "ランキング",
+  "Español": "Clasificación",
+  "Deutsch": "Rangliste",
+  "Français": "Classement",
+  "한국어": "순위표",
+  "中文": "排行榜",
+  "العربية": "لوحة الصدارة",
+  "Tiếng Việt": "Bảng xếp hạng"
+ },
+ "Photo grid": {
+  "日本語": "写真グリッド",
+  "Español": "Cuadrícula de fotos",
+  "Deutsch": "Fotoraster",
+  "Français": "Grille de photos",
+  "한국어": "사진 그리드",
+  "中文": "照片网格",
+  "العربية": "شبكة صور",
+  "Tiếng Việt": "Lưới ảnh"
+ },
+ "Card gallery": {
+  "日本語": "カードギャラリー",
+  "Español": "Galería de tarjetas",
+  "Deutsch": "Kartengalerie",
+  "Français": "Galerie de cartes",
+  "한국어": "카드 갤러리",
+  "中文": "卡片图库",
+  "العربية": "معرض بطاقات",
+  "Tiếng Việt": "Thư viện thẻ"
+ },
+ "Cover row": {
+  "日本語": "カバーの列",
+  "Español": "Fila de portadas",
+  "Deutsch": "Cover-Reihe",
+  "Français": "Rangée de couvertures",
+  "한국어": "표지 줄",
+  "中文": "封面行",
+  "العربية": "صفّ أغلفة",
+  "Tiếng Việt": "Hàng ảnh bìa"
+ },
+ "Heading": {
+  "日本語": "見出し",
+  "Español": "Título",
+  "Deutsch": "Überschrift",
+  "Français": "Titre",
+  "한국어": "제목",
+  "中文": "标题",
+  "العربية": "عنوان",
+  "Tiếng Việt": "Tiêu đề"
+ },
+ "Field": {
+  "日本語": "入力欄",
+  "Español": "Campo",
+  "Deutsch": "Feld",
+  "Français": "Champ",
+  "한국어": "입력란",
+  "中文": "输入框",
+  "العربية": "حقل",
+  "Tiếng Việt": "Ô nhập"
+ },
+ "List": {
+  "日本語": "リスト",
+  "Español": "Lista",
+  "Deutsch": "Liste",
+  "Français": "Liste",
+  "한국어": "목록",
+  "中文": "列表",
+  "العربية": "قائمة",
+  "Tiếng Việt": "Danh sách"
+ },
+ "Area chart": {
+  "日本語": "面グラフ",
+  "Español": "Gráfico de área",
+  "Deutsch": "Flächendiagramm",
+  "Français": "Graphique en aires",
+  "한국어": "영역 차트",
+  "中文": "面积图",
+  "العربية": "مخطّط مساحي",
+  "Tiếng Việt": "Biểu đồ vùng"
+ },
+ "Bar chart": {
+  "日本語": "棒グラフ",
+  "Español": "Gráfico de barras",
+  "Deutsch": "Balkendiagramm",
+  "Français": "Graphique en barres",
+  "한국어": "막대 차트",
+  "中文": "柱状图",
+  "العربية": "مخطّط أعمدة",
+  "Tiếng Việt": "Biểu đồ cột"
+ },
+ "Progress": {
+  "日本語": "進捗バー",
+  "Español": "Progreso",
+  "Deutsch": "Fortschritt",
+  "Français": "Progression",
+  "한국어": "진행률",
+  "中文": "进度条",
+  "العربية": "التقدّم",
+  "Tiếng Việt": "Tiến độ"
+ },
+ "Badge": {
+  "日本語": "バッジ",
+  "Español": "Insignia",
+  "Deutsch": "Badge",
+  "Français": "Badge",
+  "한국어": "배지",
+  "中文": "徽章",
+  "العربية": "شارة",
+  "Tiếng Việt": "Huy hiệu"
+ },
+ "Divider": {
+  "日本語": "区切り線",
+  "Español": "Separador",
+  "Deutsch": "Trennlinie",
+  "Français": "Séparateur",
+  "한국어": "구분선",
+  "中文": "分隔线",
+  "العربية": "فاصل",
+  "Tiếng Việt": "Đường phân cách"
+ },
+ "Moved off": {
+  "日本語": "外れた",
+  "Español": "Salió",
+  "Deutsch": "Verlassen",
+  "Français": "Sorti",
+  "한국어": "벗어남",
+  "中文": "移开",
+  "العربية": "غادر",
+  "Tiếng Việt": "Rời khỏi"
+ },
+ "At once": {
+  "日本語": "即時",
+  "Español": "Al instante",
+  "Deutsch": "Sofort",
+  "Français": "Immédiat",
+  "한국어": "즉시",
+  "中文": "立即",
+  "العربية": "فورًا",
+  "Tiếng Việt": "Ngay lập tức"
+ },
+ "+ Add": {
+  "日本語": "+ 追加",
+  "Español": "+ Añadir",
+  "Deutsch": "+ Hinzufügen",
+  "Français": "+ Ajouter",
+  "한국어": "+ 추가",
+  "中文": "+ 添加",
+  "العربية": "+ إضافة",
+  "Tiếng Việt": "+ Thêm"
+ },
+ "A whole page, ready-made, or a piece to put into the box you picked": {
+  "日本語": "完成済みのページ全体、または選んだボックスに入れるパーツ",
+  "Español": "Una página entera, ya hecha, o una pieza para poner en la caja que elegiste",
+  "Deutsch": "Eine ganze Seite, fertig gebaut, oder ein Teil für die gewählte Box",
+  "Français": "Une page entière, toute faite, ou un élément à placer dans le bloc choisi",
+  "한국어": "완성된 페이지 전체, 또는 선택한 박스에 넣을 요소",
+  "中文": "现成的整个页面，或放进你选中的框里的部件",
+  "العربية": "صفحة كاملة جاهزة، أو قطعة توضع في المربّع الذي اخترته",
+  "Tiếng Việt": "Cả một trang làm sẵn, hoặc một thành phần để đặt vào khung bạn đã chọn"
+ },
+ "This page is empty. Add a piece to it with + Add.": {
+  "日本語": "このページは空です。「+ 追加」からパーツを追加してください。",
+  "Español": "Esta página está vacía. Añádele una pieza con + Añadir.",
+  "Deutsch": "Diese Seite ist leer. Füge mit + Hinzufügen ein Teil hinzu.",
+  "Français": "Cette page est vide. Ajoutez-y un élément avec + Ajouter.",
+  "한국어": "이 페이지는 비어 있습니다. + 추가로 요소를 넣으세요.",
+  "中文": "此页面是空的。用“+ 添加”放入一个部件。",
+  "العربية": "هذه الصفحة فارغة. أضِف إليها قطعة عبر + إضافة.",
+  "Tiếng Việt": "Trang này đang trống. Thêm một thành phần bằng + Thêm."
+ },
+ "Drag a layer to move it up or down, or into a card or a row.": {
+  "日本語": "レイヤーをドラッグすると上下に移動したり、カードや横並びの中に入れたりできます。",
+  "Español": "Arrastra una capa para subirla o bajarla, o para meterla en una tarjeta o una fila.",
+  "Deutsch": "Ziehe eine Ebene, um sie nach oben oder unten zu bewegen oder in eine Karte oder Zeile zu legen.",
+  "Français": "Faites glisser une couche pour la monter ou la descendre, ou la mettre dans une carte ou une rangée.",
+  "한국어": "레이어를 끌어 위아래로 옮기거나 카드나 행 안에 넣을 수 있습니다.",
+  "中文": "拖动图层可上下移动，或放进卡片或行里。",
+  "العربية": "اسحب طبقة لتحريكها لأعلى أو لأسفل، أو إلى داخل بطاقة أو صفّ.",
+  "Tiếng Việt": "Kéo một lớp để di chuyển lên xuống, hoặc vào trong một thẻ hay một hàng."
+ },
+ "How the stage shows the window": {
+  "日本語": "ステージでのウィンドウの見せ方",
+  "Español": "Cómo muestra el escenario la ventana",
+  "Deutsch": "Wie die Bühne das Fenster zeigt",
+  "Français": "Comment la scène montre la fenêtre",
+  "한국어": "스테이지에 창을 보여 주는 방식",
+  "中文": "舞台如何显示窗口",
+  "العربية": "كيف يعرض المسرح النافذة",
+  "Tiếng Việt": "Cách sân khấu hiển thị cửa sổ"
+ },
+ "The window as large as the stage holds it": {
+  "日本語": "ステージに収まる最大の大きさでウィンドウを表示",
+  "Español": "La ventana tan grande como quepa en el escenario",
+  "Deutsch": "Das Fenster so groß, wie die Bühne es fasst",
+  "Français": "La fenêtre aussi grande que la scène le permet",
+  "한국어": "스테이지에 들어가는 가장 큰 크기로 창 표시",
+  "中文": "窗口以舞台能容纳的最大尺寸显示",
+  "العربية": "النافذة بأكبر حجم يتّسع له المسرح",
+  "Tiếng Việt": "Cửa sổ lớn nhất mà sân khấu chứa được"
+ },
+ "The window where it will sit on your timeline": {
+  "日本語": "タイムライン上で置かれる位置にウィンドウを表示",
+  "Español": "La ventana donde quedará en tu línea de tiempo",
+  "Deutsch": "Das Fenster dort, wo es in deiner Timeline sitzen wird",
+  "Français": "La fenêtre là où elle se placera sur votre timeline",
+  "한국어": "타임라인에 놓일 위치에 창 표시",
+  "中文": "窗口在你的时间线上所处的位置",
+  "العربية": "النافذة حيث ستكون على خطّك الزمني",
+  "Tiếng Việt": "Cửa sổ ở đúng chỗ nó sẽ nằm trên timeline"
+ },
+ "In the frame": {
+  "日本語": "フレーム内",
+  "Español": "En el encuadre",
+  "Deutsch": "Im Bild",
+  "Français": "Dans l'image",
+  "한국어": "프레임 안",
+  "中文": "画面中",
+  "العربية": "في الإطار",
+  "Tiếng Việt": "Trong khung hình"
+ },
+ "Hide timeline": {
+  "日本語": "タイムラインを隠す",
+  "Español": "Ocultar la línea de tiempo",
+  "Deutsch": "Timeline ausblenden",
+  "Français": "Masquer la timeline",
+  "한국어": "타임라인 숨기기",
+  "中文": "隐藏时间线",
+  "العربية": "إخفاء الخط الزمني",
+  "Tiếng Việt": "Ẩn timeline"
+ },
+ "Show timeline": {
+  "日本語": "タイムラインを表示",
+  "Español": "Mostrar la línea de tiempo",
+  "Deutsch": "Timeline einblenden",
+  "Français": "Afficher la timeline",
+  "한국어": "타임라인 보기",
+  "中文": "显示时间线",
+  "العربية": "إظهار الخط الزمني",
+  "Tiếng Việt": "Hiện timeline"
+ },
+ "The window": {
+  "日本語": "ウィンドウ",
+  "Español": "La ventana",
+  "Deutsch": "Das Fenster",
+  "Français": "La fenêtre",
+  "한국어": "창",
+  "中文": "窗口",
+  "العربية": "النافذة",
+  "Tiếng Việt": "Cửa sổ"
+ },
+ "Builds on as it arrives": {
+  "日本語": "表示時にボックスを順に出す",
+  "Español": "Aparece escalonada al llegar",
+  "Deutsch": "Baut sich beim Erscheinen auf",
+  "Français": "Apparaît progressivement à son arrivée",
+  "한국어": "나타날 때 차례로 등장",
+  "中文": "出现时逐个显示",
+  "العربية": "تظهر تباعًا عند وصولها",
+  "Tiếng Việt": "Hiện lần lượt khi xuất hiện"
+ },
+ "Drawn as": {
+  "日本語": "表示方法",
+  "Español": "Se dibuja como",
+  "Deutsch": "Gezeichnet als",
+  "Français": "Dessiné comme",
+  "한국어": "표시 방식",
+  "中文": "绘制为",
+  "العربية": "يُرسم بشكل",
+  "Tiếng Việt": "Vẽ thành"
+ },
+ "What it shows": {
+  "日本語": "表示内容",
+  "Español": "Qué muestra",
+  "Deutsch": "Was es zeigt",
+  "Français": "Ce qu'il montre",
+  "한국어": "표시 내용",
+  "中文": "显示内容",
+  "العربية": "ما يعرضه",
+  "Tiếng Việt": "Nội dung hiển thị"
+ },
+ "Choose image…": {
+  "日本語": "画像を選択…",
+  "Español": "Elegir imagen…",
+  "Deutsch": "Bild auswählen…",
+  "Français": "Choisir une image…",
+  "한국어": "이미지 선택…",
+  "中文": "选择图片…",
+  "العربية": "اختيار صورة…",
+  "Tiếng Việt": "Chọn hình ảnh…"
+ },
+ "Remove image": {
+  "日本語": "画像を外す",
+  "Español": "Quitar la imagen",
+  "Deutsch": "Bild entfernen",
+  "Français": "Retirer l'image",
+  "한국어": "이미지 제거",
+  "中文": "移除图片",
+  "العربية": "إزالة الصورة",
+  "Tiếng Việt": "Gỡ hình"
+ },
+ "It fills the box and is cropped to it. You can also drop an image file on this page, or double-click the box.": {
+  "日本語": "画像はボックスいっぱいに表示され、はみ出た部分は切り取られます。画像ファイルをこのページにドロップするか、ボックスをダブルクリックしても設定できます。",
+  "Español": "Llena la caja y se recorta a ella. También puedes soltar un archivo de imagen en esta página o hacer doble clic en la caja.",
+  "Deutsch": "Es füllt die Box und wird auf sie zugeschnitten. Du kannst auch eine Bilddatei auf diese Seite ziehen oder die Box doppelklicken.",
+  "Français": "Elle remplit le bloc et y est recadrée. Vous pouvez aussi déposer un fichier image sur cette page, ou double-cliquer sur le bloc.",
+  "한국어": "박스를 가득 채우고 박스에 맞게 잘립니다. 이미지 파일을 이 페이지에 끌어다 놓거나 박스를 두 번 클릭해도 됩니다.",
+  "中文": "图片会填满框并按框裁剪。也可以把图片文件拖放到此页面，或双击该框。",
+  "العربية": "تملأ الصورة المربّع وتُقَصّ على قدّه. يمكنك أيضًا إفلات ملف صورة على هذه الصفحة، أو النقر مزدوجًا على المربّع.",
+  "Tiếng Việt": "Hình lấp đầy khung và được cắt vừa khung. Bạn cũng có thể thả tệp hình vào trang này, hoặc bấm đúp vào khung."
+ },
+ "Animations": {
+  "日本語": "アニメーション",
+  "Español": "Animaciones",
+  "Deutsch": "Animationen",
+  "Français": "Animations",
+  "한국어": "애니메이션",
+  "中文": "动画",
+  "العربية": "الحركات",
+  "Tiếng Việt": "Hoạt ảnh"
+ },
+ "Off, it is just there": {
+  "日本語": "オフにすると最初から表示されています",
+  "Español": "Desactivado, simplemente está ahí",
+  "Deutsch": "Aus ist es einfach da",
+  "Français": "Désactivé, il est simplement là",
+  "한국어": "끄면 처음부터 그대로 있습니다",
+  "中文": "关闭后它直接显示",
+  "العربية": "عند الإيقاف يكون موجودًا من البداية",
+  "Tiếng Việt": "Tắt đi thì nó có sẵn ở đó"
+ },
+ "How it arrives": {
+  "日本語": "登場のしかた",
+  "Español": "Cómo aparece",
+  "Deutsch": "Wie es erscheint",
+  "Français": "Comment il arrive",
+  "한국어": "등장 방식",
+  "中文": "出现方式",
+  "العربية": "كيف يظهر",
+  "Tiếng Việt": "Cách nó xuất hiện"
+ },
+ "As the page builds": {
+  "日本語": "ページの表示に合わせる",
+  "Español": "Como aparece la página",
+  "Deutsch": "Wie die Seite sich aufbaut",
+  "Français": "Comme la page apparaît",
+  "한국어": "페이지 등장에 맞춰",
+  "中文": "随页面逐个出现",
+  "العربية": "مع ظهور الصفحة",
+  "Tiếng Việt": "Theo cách trang hiện ra"
+ },
+ "Its words appear letter by letter": {
+  "日本語": "文字が 1 文字ずつ現れます",
+  "Español": "Sus palabras aparecen letra a letra",
+  "Deutsch": "Seine Wörter erscheinen Buchstabe für Buchstabe",
+  "Français": "Ses mots apparaissent lettre par lettre",
+  "한국어": "글자가 한 자씩 나타납니다",
+  "中文": "文字逐字出现",
+  "العربية": "تظهر كلماته حرفًا حرفًا",
+  "Tiếng Việt": "Chữ hiện ra từng ký tự"
+ },
+ "Types on": {
+  "日本語": "タイプ表示",
+  "Español": "Se escribe",
+  "Deutsch": "Tippt sich ein",
+  "Français": "Se tape",
+  "한국어": "타이핑 효과",
+  "中文": "逐字打出",
+  "العربية": "يُكتب حرفًا حرفًا",
+  "Tiếng Việt": "Gõ dần"
+ },
+ "Letters a second": {
+  "日本語": "1 秒あたりの文字数",
+  "Español": "Letras por segundo",
+  "Deutsch": "Buchstaben pro Sekunde",
+  "Français": "Lettres par seconde",
+  "한국어": "초당 글자 수",
+  "中文": "每秒字数",
+  "العربية": "أحرف في الثانية",
+  "Tiếng Việt": "Số chữ mỗi giây"
+ },
+ "What it types": {
+  "日本語": "入力する文字",
+  "Español": "Qué escribe",
+  "Deutsch": "Was es tippt",
+  "Français": "Ce qu'il tape",
+  "한국어": "입력할 글자",
+  "中文": "打出的文字",
+  "العربية": "ما يكتبه",
+  "Tiếng Việt": "Nội dung gõ"
+ },
+ "A chart or a progress bar draws on as its page builds": {
+  "日本語": "グラフや進捗バーは、ページの表示に合わせて描かれます",
+  "Español": "Un gráfico o una barra de progreso se dibuja mientras aparece su página",
+  "Deutsch": "Ein Diagramm oder Fortschrittsbalken zeichnet sich, während seine Seite sich aufbaut",
+  "Français": "Un graphique ou une barre de progression se trace pendant que sa page apparaît",
+  "한국어": "차트나 진행률 막대는 페이지가 등장하면서 그려집니다",
+  "中文": "图表或进度条会随页面出现而逐渐绘制",
+  "العربية": "يُرسم المخطّط أو شريط التقدّم تدريجيًا مع ظهور صفحته",
+  "Tiếng Việt": "Biểu đồ hoặc thanh tiến độ được vẽ dần khi trang của nó hiện ra"
+ },
+ "Draws on": {
+  "日本語": "描画される",
+  "Español": "Se dibuja",
+  "Deutsch": "Zeichnet sich",
+  "Français": "Se trace",
+  "한국어": "그려지기",
+  "中文": "逐渐绘制",
+  "العربية": "يُرسم تدريجيًا",
+  "Tiếng Việt": "Vẽ dần"
+ },
+ "When it is clicked": {
+  "日本語": "クリックされたとき",
+  "Español": "Al hacer clic",
+  "Deutsch": "Beim Klicken",
+  "Français": "Au clic",
+  "한국어": "클릭했을 때",
+  "中文": "点击时",
+  "العربية": "عند النقر",
+  "Tiếng Việt": "Khi được bấm"
+ },
+ "What to add": {
+  "日本語": "追加するもの",
+  "Español": "Qué añadir",
+  "Deutsch": "Was hinzufügen",
+  "Français": "Quoi ajouter",
+  "한국어": "추가할 것",
+  "中文": "要添加的内容",
+  "العربية": "ما الذي تضيفه",
+  "Tiếng Việt": "Thêm gì"
+ },
+ "A whole page": {
+  "日本語": "ページ全体",
+  "Español": "Una página entera",
+  "Deutsch": "Eine ganze Seite",
+  "Français": "Une page entière",
+  "한국어": "페이지 전체",
+  "中文": "整个页面",
+  "العربية": "صفحة كاملة",
+  "Tiếng Việt": "Cả một trang"
+ },
+ "A piece": {
+  "日本語": "パーツ",
+  "Español": "Una pieza",
+  "Deutsch": "Ein Teil",
+  "Français": "Un élément",
+  "한국어": "요소",
+  "中文": "部件",
+  "العربية": "قطعة",
+  "Tiếng Việt": "Một thành phần"
+ },
+ "Find by name": {
+  "日本語": "名前で探す",
+  "Español": "Buscar por nombre",
+  "Deutsch": "Nach Namen suchen",
+  "Français": "Rechercher par nom",
+  "한국어": "이름으로 찾기",
+  "中文": "按名称查找",
+  "العربية": "البحث بالاسم",
+  "Tiếng Việt": "Tìm theo tên"
+ },
+ "Nothing has that name.": {
+  "日本語": "その名前のものはありません。",
+  "Español": "Nada tiene ese nombre.",
+  "Deutsch": "Nichts hat diesen Namen.",
+  "Français": "Rien ne porte ce nom.",
+  "한국어": "그 이름을 가진 것이 없습니다.",
+  "中文": "没有叫这个名字的项。",
+  "العربية": "لا شيء بهذا الاسم.",
+  "Tiếng Việt": "Không có mục nào tên như vậy."
+ },
+ "Typing": {
+  "日本語": "タイピング",
+  "Español": "Escritura",
+  "Deutsch": "Tippen",
+  "Français": "Frappe",
+  "한국어": "타이핑",
+  "中文": "打字",
+  "العربية": "الكتابة",
+  "Tiếng Việt": "Gõ chữ"
+ },
+ "Starts": {
+  "日本語": "開始",
+  "Español": "Empieza",
+  "Deutsch": "Beginnt",
+  "Français": "Commence",
+  "한국어": "시작",
+  "中文": "开始于",
+  "العربية": "يبدأ",
+  "Tiếng Việt": "Bắt đầu"
+ },
+ "With the page": {
+  "日本語": "ページと同時",
+  "Español": "Con la página",
+  "Deutsch": "Mit der Seite",
+  "Français": "Avec la page",
+  "한국어": "페이지와 함께",
+  "中文": "随页面出现",
+  "العربية": "مع الصفحة",
+  "Tiếng Việt": "Cùng với trang"
+ },
+ "Show the typing caret": {
+  "日本語": "キャレットを表示",
+  "Español": "Mostrar la barra de escritura",
+  "Deutsch": "Die Schreibmarke zeigen",
+  "Français": "Afficher la barre de saisie",
+  "한국어": "캐럿 표시",
+  "中文": "显示插入符",
+  "العربية": "إظهار علامة الإدراج",
+  "Tiếng Việt": "Hiện dấu nháy"
+ },
+ "“When it is clicked”: until the cursor clicks it, a text shows nothing and a field its own words.": {
+  "日本語": "「クリックされたとき」：カーソルがクリックするまで、テキストには何も表示されず、入力欄には元の文字が表示されます。",
+  "Español": "«Al hacer clic»: hasta que el cursor hace clic, un texto no muestra nada y un campo, sus propias palabras.",
+  "Deutsch": "„Beim Klicken“: Bis der Cursor darauf klickt, zeigt ein Text nichts und ein Feld seine eigenen Wörter.",
+  "Français": "« Au clic » : tant que le curseur n'a pas cliqué, un texte n'affiche rien et un champ ses propres mots.",
+  "한국어": "“클릭했을 때”: 커서가 클릭하기 전까지 텍스트에는 아무것도 표시되지 않고 입력란에는 원래 글자가 표시됩니다.",
+  "中文": "“点击时”：在光标点击之前，文本什么也不显示，输入框显示它自己的文字。",
+  "العربية": "«عند النقر»: إلى أن ينقره المؤشّر، لا يعرض النص شيئًا ويعرض الحقل كلماته الخاصّة.",
+  "Tiếng Việt": "“Khi được bấm”: cho đến khi con trỏ bấm vào, chữ không hiện gì còn ô nhập hiện chữ của chính nó."
+ },
+ "Starts typing": {
+  "日本語": "タイピング開始",
+  "Español": "Empieza a escribir",
+  "Deutsch": "Beginnt zu tippen",
+  "Français": "Commence à taper",
+  "한국어": "타이핑 시작",
+  "中文": "开始打字",
+  "العربية": "يبدأ الكتابة",
+  "Tiếng Việt": "Bắt đầu gõ"
+ },
+ "Layer name": {
+  "日本語": "レイヤー名",
+  "Español": "Nombre de la capa",
+  "Deutsch": "Ebenenname",
+  "Français": "Nom de la couche",
+  "한국어": "레이어 이름",
+  "中文": "图层名称",
+  "العربية": "اسم الطبقة",
+  "Tiếng Việt": "Tên lớp"
+ },
+ "Pick this layer": {
+  "日本語": "このレイヤーを選択",
+  "Español": "Elegir esta capa",
+  "Deutsch": "Diese Ebene wählen",
+  "Français": "Choisir cette couche",
+  "한국어": "이 레이어 선택",
+  "中文": "选择此图层",
+  "العربية": "اختيار هذه الطبقة",
+  "Tiếng Việt": "Chọn lớp này"
+ },
+ "It has an animation of its own": {
+  "日本語": "独自のアニメーションがあります",
+  "Español": "Tiene una animación propia",
+  "Deutsch": "Hat eine eigene Animation",
+  "Français": "A sa propre animation",
+  "한국어": "고유한 애니메이션이 있습니다",
+  "中文": "有自己的动画",
+  "العربية": "له حركة خاصّة به",
+  "Tiếng Việt": "Có hoạt ảnh riêng"
+ },
+ "Hover / Pressed": {
+  "日本語": "ホバー / 押下",
+  "Español": "Al pasar / Pulsado",
+  "Deutsch": "Hover / Gedrückt",
+  "Français": "Survol / Appuyé",
+  "한국어": "호버 / 눌림",
+  "中文": "悬停 / 按下",
+  "العربية": "التحويم / مضغوط",
+  "Tiếng Việt": "Rê chuột / Đang nhấn"
+ },
+ "+ {n} more": {
+  "日本語": "ほか {n} 件",
+  "Español": "+ {n} más",
+  "Deutsch": "+ {n} weitere",
+  "Français": "+ {n} de plus",
+  "한국어": "+ {n}개 더",
+  "中文": "另外 {n} 个",
+  "العربية": "+ {n} أخرى",
+  "Tiếng Việt": "+ {n} nữa"
+ },
+ "Row": {
+  "日本語": "横並び",
+  "Español": "Fila",
+  "Deutsch": "Zeile",
+  "Français": "Rangée",
+  "한국어": "행",
+  "中文": "行",
+  "العربية": "صف",
+  "Tiếng Việt": "Hàng"
+ },
+ "Column": {
+  "日本語": "縦並び",
+  "Español": "Columna",
+  "Deutsch": "Spalte",
+  "Français": "Colonne",
+  "한국어": "열",
+  "中文": "列",
+  "العربية": "عمود",
+  "Tiếng Việt": "Cột"
+ },
+ "Click a box to pick it. Drag the window's right edge to make it wider. Switch to In the frame to move it.": {
+  "日本語": "ボックスをクリックして選びます。ウィンドウの右端をドラッグすると幅が変わります。移動するには「フレーム内」に切り替えてください。",
+  "Español": "Haz clic en una caja para elegirla. Arrastra el borde derecho de la ventana para ensancharla. Cambia a En el encuadre para moverla.",
+  "Deutsch": "Klicke eine Box an, um sie zu wählen. Ziehe den rechten Rand des Fensters, um es breiter zu machen. Wechsle zu Im Bild, um es zu bewegen.",
+  "Français": "Cliquez sur un bloc pour le choisir. Faites glisser le bord droit de la fenêtre pour l'élargir. Passez à Dans l'image pour la déplacer.",
+  "한국어": "박스를 클릭해 선택합니다. 창의 오른쪽 가장자리를 끌면 넓어집니다. 옮기려면 프레임 안으로 바꾸세요.",
+  "中文": "点击一个框来选中它。拖动窗口的右边缘来加宽。切换到“画面中”即可移动它。",
+  "العربية": "انقر مربّعًا لتختاره. اسحب الحافّة اليمنى للنافذة لتوسيعها. انتقل إلى «في الإطار» لتحريكها.",
+  "Tiếng Việt": "Bấm một khung để chọn. Kéo cạnh phải của cửa sổ để làm rộng ra. Chuyển sang Trong khung hình để di chuyển nó."
+ },
+ "The stage shows the window in the frame now, where the cursor moves.": {
+  "日本語": "ステージは今、カーソルが動くフレーム内のウィンドウを表示しています。",
+  "Español": "Ahora el escenario muestra la ventana en el encuadre, donde se mueve el cursor.",
+  "Deutsch": "Die Bühne zeigt das Fenster jetzt im Bild, wo sich der Cursor bewegt.",
+  "Français": "La scène montre maintenant la fenêtre dans l'image, là où le curseur se déplace.",
+  "한국어": "이제 스테이지가 커서가 움직이는 프레임 안의 창을 보여 줍니다.",
+  "中文": "舞台现在显示画面中的窗口，也就是光标移动的地方。",
+  "العربية": "يعرض المسرح الآن النافذة في الإطار، حيث يتحرّك المؤشّر.",
+  "Tiếng Việt": "Sân khấu giờ hiển thị cửa sổ trong khung hình, nơi con trỏ di chuyển."
+ },
+ "The image \"{name}\" isn't where it was. Put it back, or take it off its image box.": {
+  "日本語": "画像「{name}」が元の場所にありません。元に戻すか、画像ボックスから外してください。",
+  "Español": "La imagen \"{name}\" ya no está donde estaba. Devuélvela a su sitio o quítala de su caja de imagen.",
+  "Deutsch": "Das Bild „{name}“ ist nicht mehr dort, wo es war. Lege es zurück oder nimm es aus seiner Bildbox.",
+  "Français": "L'image « {name} » n'est plus là où elle était. Remettez-la en place ou retirez-la de son bloc image.",
+  "한국어": "이미지 \"{name}\"이(가) 원래 위치에 없습니다. 제자리에 돌려놓거나 이미지 박스에서 빼세요.",
+  "中文": "图片“{name}”已不在原处。请放回原处，或把它从图片框中移除。",
+  "العربية": "الصورة \"{name}\" ليست في مكانها. أعِدها، أو أزِلها من مربّع الصورة الخاصّ بها.",
+  "Tiếng Việt": "Hình \"{name}\" không còn ở chỗ cũ. Hãy đặt lại, hoặc gỡ nó khỏi khung hình ảnh của nó."
+ },
+ "There's no image box for a picture here. Add one from + Add first.": {
+  "日本語": "ここには画像を入れる画像ボックスがありません。先に「+ 追加」から追加してください。",
+  "Español": "Aquí no hay ninguna caja de imagen para una foto. Añade una antes desde + Añadir.",
+  "Deutsch": "Hier gibt es keine Bildbox für ein Bild. Füge zuerst eine über + Hinzufügen hinzu.",
+  "Français": "Il n'y a pas de bloc image pour une image ici. Ajoutez-en d'abord un avec + Ajouter.",
+  "한국어": "여기에는 그림을 넣을 이미지 박스가 없습니다. 먼저 + 추가에서 하나 넣으세요.",
+  "中文": "这里没有可放图片的图片框。请先通过“+ 添加”添加一个。",
+  "العربية": "لا يوجد هنا مربّع صورة لصورة. أضِف واحدًا أولًا من + إضافة.",
+  "Tiếng Việt": "Ở đây không có khung hình ảnh nào cho ảnh. Hãy thêm một khung từ + Thêm trước."
+ }
+}

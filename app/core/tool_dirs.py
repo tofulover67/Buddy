@@ -48,8 +48,8 @@ FILES = {"svg_importer": ".figma_fusion_importer_settings.json"}
 BUCKETS = (
     "asset_manager", "audio_assistant", "audit", "automation", "batch_clip_renamer", "buddy_network",
     "color_palette", "command_center", "dailies", "data_counters", "data_graphics", "data_graphs", "daw",
-    "essentials", "footage_search", "games", "generative",
-    "image_importer", "manual_chat", "marker_manager", "media_manager", "media_relink", "podcast",
+    "design", "design_studio", "essentials", "footage_search", "games", "generative",
+    "image_importer", "interactions", "manual_chat", "marker_manager", "media_manager", "media_relink", "panels", "podcast",
     "podcast_shorts", "podcast_switch", "podcast_sync", "podcast_text", "project_setup",
     "stills_exporter", "svg_importer", "text_animator", "time_tracker", "transcribe", "web", "youtube_chapters",
     "animation_previews", "buddy_web", "davinci_time_tracker", "color_palette_manager", "resolve_bin_generator",

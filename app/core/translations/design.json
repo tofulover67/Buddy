@@ -1,0 +1,1743 @@
+{
+ "_comment": "Design. English -> each language; see core/i18n.py.",
+ "Design": {
+  "日本語": "デザイン",
+  "Español": "Diseño",
+  "Deutsch": "Design",
+  "Français": "Design",
+  "한국어": "디자인",
+  "中文": "设计",
+  "العربية": "التصميم",
+  "Tiếng Việt": "Thiết kế"
+ },
+ "Draw shapes, text and pictures on a canvas, and add the design to your timeline as Fusion nodes.": {
+  "日本語": "キャンバスに図形、テキスト、画像を描き、そのデザインを Fusion ノードとしてタイムラインに追加します。",
+  "Español": "Dibuja formas, texto e imágenes en un lienzo y añade el diseño a tu línea de tiempo como nodos de Fusion.",
+  "Deutsch": "Zeichne Formen, Text und Bilder auf eine Leinwand und füge das Design als Fusion-Nodes zu deiner Timeline hinzu.",
+  "Français": "Dessinez des formes, du texte et des images sur un canevas, puis ajoutez le design à votre timeline sous forme de nœuds Fusion.",
+  "한국어": "캔버스에 도형, 텍스트, 그림을 그리고 그 디자인을 Fusion 노드로 타임라인에 추가합니다.",
+  "中文": "在画布上绘制形状、文字和图片，并将设计作为 Fusion 节点添加到时间线。",
+  "العربية": "ارسم أشكالاً ونصوصاً وصوراً على لوحة، وأضف التصميم إلى الخط الزمني كعُقد Fusion.",
+  "Tiếng Việt": "Vẽ hình, chữ và ảnh trên một khung vẽ, rồi thêm thiết kế vào dòng thời gian dưới dạng các nút Fusion."
+ },
+ "Design added on V{track}.": {
+  "日本語": "デザインを V{track} に追加しました。",
+  "Español": "Diseño añadido en V{track}.",
+  "Deutsch": "Design auf V{track} hinzugefügt.",
+  "Français": "Design ajouté sur V{track}.",
+  "한국어": "디자인을 V{track}에 추가했습니다.",
+  "中文": "设计已添加到 V{track}。",
+  "العربية": "تمت إضافة التصميم على V{track}.",
+  "Tiếng Việt": "Đã thêm thiết kế vào V{track}."
+ },
+ "Design replaced on V{track}.": {
+  "日本語": "V{track} のデザインを置き換えました。",
+  "Español": "Diseño reemplazado en V{track}.",
+  "Deutsch": "Design auf V{track} ersetzt.",
+  "Français": "Design remplacé sur V{track}.",
+  "한국어": "V{track}의 디자인을 교체했습니다.",
+  "中文": "已替换 V{track} 上的设计。",
+  "العربية": "تم استبدال التصميم على V{track}.",
+  "Tiếng Việt": "Đã thay thiết kế trên V{track}."
+ },
+ "Couldn't add the design": {
+  "日本語": "デザインを追加できませんでした",
+  "Español": "No se pudo añadir el diseño",
+  "Deutsch": "Das Design konnte nicht hinzugefügt werden",
+  "Français": "Impossible d'ajouter le design",
+  "한국어": "디자인을 추가하지 못했습니다",
+  "中文": "无法添加设计",
+  "العربية": "تعذّرت إضافة التصميم",
+  "Tiếng Việt": "Không thể thêm thiết kế"
+ },
+ "Adding the design…": {
+  "日本語": "デザインを追加中…",
+  "Español": "Añadiendo el diseño…",
+  "Deutsch": "Design wird hinzugefügt…",
+  "Français": "Ajout du design…",
+  "한국어": "디자인 추가 중…",
+  "中文": "正在添加设计…",
+  "العربية": "جارٍ إضافة التصميم…",
+  "Tiếng Việt": "Đang thêm thiết kế…"
+ },
+ "Adding a design": {
+  "日本語": "デザインを追加中",
+  "Español": "Añadiendo un diseño",
+  "Deutsch": "Design wird hinzugefügt",
+  "Français": "Ajout d'un design",
+  "한국어": "디자인 추가 중",
+  "中文": "正在添加设计",
+  "العربية": "جارٍ إضافة تصميم",
+  "Tiếng Việt": "Đang thêm thiết kế"
+ },
+ "A design holds up to {n} layers.": {
+  "日本語": "デザインに入れられるレイヤーは {n} 個までです。",
+  "Español": "Un diseño admite hasta {n} capas.",
+  "Deutsch": "Ein Design fasst bis zu {n} Ebenen.",
+  "Français": "Un design contient jusqu'à {n} calques.",
+  "한국어": "디자인에는 레이어를 {n}개까지 넣을 수 있습니다.",
+  "中文": "一个设计最多可包含 {n} 个图层。",
+  "العربية": "يتّسع التصميم لما يصل إلى {n} طبقة.",
+  "Tiếng Việt": "Một thiết kế chứa tối đa {n} lớp."
+ },
+ "The image \"{name}\" isn't where it was. Put it back, or remove it from the design.": {
+  "日本語": "画像「{name}」が元の場所にありません。元に戻すか、デザインから削除してください。",
+  "Español": "La imagen «{name}» ya no está donde estaba. Vuelve a ponerla o quítala del diseño.",
+  "Deutsch": "Das Bild „{name}“ ist nicht mehr dort, wo es war. Lege es zurück oder entferne es aus dem Design.",
+  "Français": "L'image « {name} » n'est plus à sa place. Remettez-la ou retirez-la du design.",
+  "한국어": "이미지 \"{name}\"이(가) 원래 위치에 없습니다. 다시 가져다 놓거나 디자인에서 제거하세요.",
+  "中文": "图片“{name}”已不在原来的位置。请放回原处，或将其从设计中移除。",
+  "العربية": "الصورة \"{name}\" ليست في مكانها السابق. أعدها إلى مكانها أو أزلها من التصميم.",
+  "Tiếng Việt": "Ảnh \"{name}\" không còn ở chỗ cũ. Hãy đặt lại hoặc xóa nó khỏi thiết kế."
+ },
+ "There's nothing to add yet. Draw something on the canvas first.": {
+  "日本語": "まだ追加するものがありません。まずキャンバスに何か描いてください。",
+  "Español": "Todavía no hay nada que añadir. Dibuja algo en el lienzo primero.",
+  "Deutsch": "Es gibt noch nichts hinzuzufügen. Zeichne zuerst etwas auf die Leinwand.",
+  "Français": "Il n'y a encore rien à ajouter. Dessinez d'abord quelque chose sur le canevas.",
+  "한국어": "아직 추가할 것이 없습니다. 먼저 캔버스에 무언가를 그리세요.",
+  "中文": "还没有可添加的内容。请先在画布上画点东西。",
+  "العربية": "لا يوجد ما يُضاف بعد. ارسم شيئاً على اللوحة أولاً.",
+  "Tiếng Việt": "Chưa có gì để thêm. Hãy vẽ gì đó lên khung vẽ trước."
+ },
+ "Design saved.": {
+  "日本語": "デザインを保存しました。",
+  "Español": "Diseño guardado.",
+  "Deutsch": "Design gespeichert.",
+  "Français": "Design enregistré.",
+  "한국어": "디자인을 저장했습니다.",
+  "中文": "设计已保存。",
+  "العربية": "تم حفظ التصميم.",
+  "Tiếng Việt": "Đã lưu thiết kế."
+ },
+ "That design couldn't be opened.": {
+  "日本語": "そのデザインを開けませんでした。",
+  "Español": "No se pudo abrir ese diseño.",
+  "Deutsch": "Dieses Design konnte nicht geöffnet werden.",
+  "Français": "Impossible d'ouvrir ce design.",
+  "한국어": "그 디자인을 열 수 없습니다.",
+  "中文": "无法打开该设计。",
+  "العربية": "تعذّر فتح ذلك التصميم.",
+  "Tiếng Việt": "Không thể mở thiết kế đó."
+ },
+ "Couldn't save the design": {
+  "日本語": "デザインを保存できませんでした",
+  "Español": "No se pudo guardar el diseño",
+  "Deutsch": "Das Design konnte nicht gespeichert werden",
+  "Français": "Impossible d'enregistrer le design",
+  "한국어": "디자인을 저장하지 못했습니다",
+  "中文": "无法保存设计",
+  "العربية": "تعذّر حفظ التصميم",
+  "Tiếng Việt": "Không thể lưu thiết kế"
+ },
+ "Couldn't delete the design": {
+  "日本語": "デザインを削除できませんでした",
+  "Español": "No se pudo eliminar el diseño",
+  "Deutsch": "Das Design konnte nicht gelöscht werden",
+  "Français": "Impossible de supprimer le design",
+  "한국어": "디자인을 삭제하지 못했습니다",
+  "中文": "无法删除设计",
+  "العربية": "تعذّر حذف التصميم",
+  "Tiếng Việt": "Không thể xóa thiết kế"
+ },
+ "{n} layers": {
+  "日本語": "{n} 個のレイヤー",
+  "Español": "{n} capas",
+  "Deutsch": "{n} Ebenen",
+  "Français": "{n} calques",
+  "한국어": "레이어 {n}개",
+  "中文": "{n} 个图层",
+  "العربية": "{n} طبقة",
+  "Tiếng Việt": "{n} lớp"
+ },
+ "Start a new one": {
+  "日本語": "新しく始める",
+  "Español": "Empezar uno nuevo",
+  "Deutsch": "Neues beginnen",
+  "Français": "En commencer un nouveau",
+  "한국어": "새로 시작",
+  "中文": "新建一个",
+  "العربية": "ابدأ واحداً جديداً",
+  "Tiếng Việt": "Bắt đầu cái mới"
+ },
+ "The timeline is {w} x {h}: the design is fitted into it, as large as goes.": {
+  "日本語": "タイムラインは {w} x {h} です。デザインは収まる最大の大きさで合わせられます。",
+  "Español": "La línea de tiempo es de {w} x {h}: el diseño se ajusta a ella, tan grande como quepa.",
+  "Deutsch": "Die Timeline ist {w} x {h}: Das Design wird so groß wie möglich eingepasst.",
+  "Français": "La timeline fait {w} x {h} : le design y est ajusté, aussi grand que possible.",
+  "한국어": "타임라인은 {w} x {h}입니다. 디자인은 들어가는 최대 크기로 맞춰집니다.",
+  "中文": "时间线为 {w} x {h}：设计会以能容纳的最大尺寸适配其中。",
+  "العربية": "الخط الزمني {w} x {h}: يُلائَم التصميم داخله بأكبر حجم ممكن.",
+  "Tiếng Việt": "Dòng thời gian là {w} x {h}: thiết kế được đặt vừa vào đó, lớn nhất có thể."
+ },
+ "Rectangle": {
+  "日本語": "長方形",
+  "Español": "Rectángulo",
+  "Deutsch": "Rechteck",
+  "Français": "Rectangle",
+  "한국어": "사각형",
+  "中文": "矩形",
+  "العربية": "مستطيل",
+  "Tiếng Việt": "Hình chữ nhật"
+ },
+ "Ellipse": {
+  "日本語": "楕円",
+  "Español": "Elipse",
+  "Deutsch": "Ellipse",
+  "Français": "Ellipse",
+  "한국어": "타원",
+  "中文": "椭圆",
+  "العربية": "قطع ناقص",
+  "Tiếng Việt": "Hình elip"
+ },
+ "Polygon": {
+  "日本語": "多角形",
+  "Español": "Polígono",
+  "Deutsch": "Polygon",
+  "Français": "Polygone",
+  "한국어": "다각형",
+  "中文": "多边形",
+  "العربية": "مضلّع",
+  "Tiếng Việt": "Đa giác"
+ },
+ "Path": {
+  "日本語": "パス",
+  "Español": "Trazado",
+  "Deutsch": "Pfad",
+  "Français": "Tracé",
+  "한국어": "패스",
+  "中文": "路径",
+  "العربية": "مسار",
+  "Tiếng Việt": "Đường vẽ"
+ },
+ "Group": {
+  "日本語": "グループ",
+  "Español": "Grupo",
+  "Deutsch": "Gruppe",
+  "Français": "Groupe",
+  "한국어": "그룹",
+  "中文": "编组",
+  "العربية": "مجموعة",
+  "Tiếng Việt": "Nhóm"
+ },
+ "Save this design, or open one you saved": {
+  "日本語": "このデザインを保存するか、保存したものを開きます",
+  "Español": "Guarda este diseño o abre uno que hayas guardado",
+  "Deutsch": "Dieses Design speichern oder ein gespeichertes öffnen",
+  "Français": "Enregistrer ce design ou en ouvrir un enregistré",
+  "한국어": "이 디자인을 저장하거나 저장한 디자인을 엽니다",
+  "中文": "保存此设计，或打开已保存的设计",
+  "العربية": "احفظ هذا التصميم أو افتح تصميماً محفوظاً",
+  "Tiếng Việt": "Lưu thiết kế này hoặc mở một thiết kế đã lưu"
+ },
+ "Designs…": {
+  "日本語": "デザイン…",
+  "Español": "Diseños…",
+  "Deutsch": "Designs…",
+  "Français": "Designs…",
+  "한국어": "디자인…",
+  "中文": "设计…",
+  "العربية": "التصاميم…",
+  "Tiếng Việt": "Thiết kế…"
+ },
+ "Not saved": {
+  "日本語": "未保存",
+  "Español": "Sin guardar",
+  "Deutsch": "Nicht gespeichert",
+  "Français": "Non enregistré",
+  "한국어": "저장 안 됨",
+  "中文": "未保存",
+  "العربية": "غير محفوظ",
+  "Tiếng Việt": "Chưa lưu"
+ },
+ "Select and move (V)": {
+  "日本語": "選択と移動 (V)",
+  "Español": "Seleccionar y mover (V)",
+  "Deutsch": "Auswählen und verschieben (V)",
+  "Français": "Sélectionner et déplacer (V)",
+  "한국어": "선택 및 이동 (V)",
+  "中文": "选择并移动 (V)",
+  "العربية": "تحديد وتحريك (V)",
+  "Tiếng Việt": "Chọn và di chuyển (V)"
+ },
+ "Rectangle (R)": {
+  "日本語": "長方形 (R)",
+  "Español": "Rectángulo (R)",
+  "Deutsch": "Rechteck (R)",
+  "Français": "Rectangle (R)",
+  "한국어": "사각형 (R)",
+  "中文": "矩形 (R)",
+  "العربية": "مستطيل (R)",
+  "Tiếng Việt": "Hình chữ nhật (R)"
+ },
+ "Ellipse (O)": {
+  "日本語": "楕円 (O)",
+  "Español": "Elipse (O)",
+  "Deutsch": "Ellipse (O)",
+  "Français": "Ellipse (O)",
+  "한국어": "타원 (O)",
+  "中文": "椭圆 (O)",
+  "العربية": "قطع ناقص (O)",
+  "Tiếng Việt": "Hình elip (O)"
+ },
+ "Line (L)": {
+  "日本語": "線 (L)",
+  "Español": "Línea (L)",
+  "Deutsch": "Linie (L)",
+  "Français": "Ligne (L)",
+  "한국어": "선 (L)",
+  "中文": "直线 (L)",
+  "العربية": "خط (L)",
+  "Tiếng Việt": "Đường thẳng (L)"
+ },
+ "Pen: click for corners, drag for curves (P)": {
+  "日本語": "ペン：クリックで角、ドラッグで曲線 (P)",
+  "Español": "Pluma: clic para esquinas, arrastra para curvas (P)",
+  "Deutsch": "Stift: Klicken für Ecken, Ziehen für Kurven (P)",
+  "Français": "Plume : cliquez pour les angles, glissez pour les courbes (P)",
+  "한국어": "펜: 클릭하면 모서리, 드래그하면 곡선 (P)",
+  "中文": "钢笔：单击得到角点，拖动得到曲线 (P)",
+  "العربية": "القلم: انقر للزوايا، واسحب للمنحنيات (P)",
+  "Tiếng Việt": "Bút: nhấp để tạo góc, kéo để tạo đường cong (P)"
+ },
+ "Pen": {
+  "日本語": "ペン",
+  "Español": "Pluma",
+  "Deutsch": "Stift",
+  "Français": "Plume",
+  "한국어": "펜",
+  "中文": "钢笔",
+  "العربية": "القلم",
+  "Tiếng Việt": "Bút"
+ },
+ "Text (T)": {
+  "日本語": "テキスト (T)",
+  "Español": "Texto (T)",
+  "Deutsch": "Text (T)",
+  "Français": "Texte (T)",
+  "한국어": "텍스트 (T)",
+  "中文": "文字 (T)",
+  "العربية": "نص (T)",
+  "Tiếng Việt": "Chữ (T)"
+ },
+ "Pick a tool and draw on the canvas.": {
+  "日本語": "ツールを選んでキャンバスに描きます。",
+  "Español": "Elige una herramienta y dibuja en el lienzo.",
+  "Deutsch": "Wähle ein Werkzeug und zeichne auf die Leinwand.",
+  "Français": "Choisissez un outil et dessinez sur le canevas.",
+  "한국어": "도구를 골라 캔버스에 그리세요.",
+  "中文": "选择一个工具，在画布上绘制。",
+  "العربية": "اختر أداة وارسم على اللوحة.",
+  "Tiếng Việt": "Chọn một công cụ rồi vẽ lên khung vẽ."
+ },
+ "Bring forward (Ctrl+])": {
+  "日本語": "前面へ (Ctrl+])",
+  "Español": "Traer adelante (Ctrl+])",
+  "Deutsch": "Nach vorne (Strg+])",
+  "Français": "Avancer (Ctrl+])",
+  "한국어": "앞으로 가져오기 (Ctrl+])",
+  "中文": "上移一层 (Ctrl+])",
+  "العربية": "تقديم للأمام (Ctrl+])",
+  "Tiếng Việt": "Đưa lên trước (Ctrl+])"
+ },
+ "Send backward (Ctrl+[)": {
+  "日本語": "背面へ (Ctrl+[)",
+  "Español": "Enviar atrás (Ctrl+[)",
+  "Deutsch": "Nach hinten (Strg+[)",
+  "Français": "Reculer (Ctrl+[)",
+  "한국어": "뒤로 보내기 (Ctrl+[)",
+  "中文": "下移一层 (Ctrl+[)",
+  "العربية": "إرسال للخلف (Ctrl+[)",
+  "Tiếng Việt": "Đưa ra sau (Ctrl+[)"
+ },
+ "Backward": {
+  "日本語": "背面へ",
+  "Español": "Atrás",
+  "Deutsch": "Nach hinten",
+  "Français": "Reculer",
+  "한국어": "뒤로",
+  "中文": "下移",
+  "العربية": "للخلف",
+  "Tiếng Việt": "Ra sau"
+ },
+ "Canvas": {
+  "日本語": "キャンバス",
+  "Español": "Lienzo",
+  "Deutsch": "Leinwand",
+  "Français": "Canevas",
+  "한국어": "캔버스",
+  "中文": "画布",
+  "العربية": "اللوحة",
+  "Tiếng Việt": "Khung vẽ"
+ },
+ "Show the whole canvas": {
+  "日本語": "キャンバス全体を表示",
+  "Español": "Mostrar todo el lienzo",
+  "Deutsch": "Ganze Leinwand zeigen",
+  "Français": "Afficher tout le canevas",
+  "한국어": "캔버스 전체 보기",
+  "中文": "显示整个画布",
+  "العربية": "إظهار اللوحة كاملة",
+  "Tiếng Việt": "Hiện toàn bộ khung vẽ"
+ },
+ "Make the canvas the size of the open timeline": {
+  "日本語": "キャンバスを開いているタイムラインのサイズにします",
+  "Español": "Dar al lienzo el tamaño de la línea de tiempo abierta",
+  "Deutsch": "Leinwand auf die Größe der geöffneten Timeline setzen",
+  "Français": "Donner au canevas la taille de la timeline ouverte",
+  "한국어": "캔버스를 열려 있는 타임라인 크기로 맞춥니다",
+  "中文": "将画布设为当前时间线的尺寸",
+  "العربية": "اجعل اللوحة بحجم الخط الزمني المفتوح",
+  "Tiếng Việt": "Đặt khung vẽ bằng kích thước dòng thời gian đang mở"
+ },
+ "Match the timeline": {
+  "日本語": "タイムラインに合わせる",
+  "Español": "Igualar a la línea de tiempo",
+  "Deutsch": "An Timeline anpassen",
+  "Français": "Adapter à la timeline",
+  "한국어": "타임라인에 맞추기",
+  "中文": "匹配时间线",
+  "العربية": "مطابقة الخط الزمني",
+  "Tiếng Việt": "Khớp với dòng thời gian"
+ },
+ "Click a layer to change it. Shift-click picks more than one.": {
+  "日本語": "レイヤーをクリックして変更します。Shift+クリックで複数選択できます。",
+  "Español": "Haz clic en una capa para cambiarla. Shift+clic selecciona más de una.",
+  "Deutsch": "Klicke auf eine Ebene, um sie zu ändern. Mit Umschalt-Klick wählst du mehrere aus.",
+  "Français": "Cliquez sur un calque pour le modifier. Shift+clic en sélectionne plusieurs.",
+  "한국어": "레이어를 클릭해 변경하세요. Shift+클릭으로 여러 개를 선택합니다.",
+  "中文": "单击图层即可修改。按住 Shift 单击可选择多个。",
+  "العربية": "انقر على طبقة لتغييرها. النقر مع Shift يحدد أكثر من واحدة.",
+  "Tiếng Việt": "Nhấp vào một lớp để thay đổi nó. Shift+nhấp để chọn nhiều lớp."
+ },
+ "Turn": {
+  "日本語": "回転",
+  "Español": "Giro",
+  "Deutsch": "Drehung",
+  "Français": "Rotation",
+  "한국어": "회전",
+  "中文": "旋转",
+  "العربية": "الدوران",
+  "Tiếng Việt": "Xoay"
+ },
+ "Line up": {
+  "日本語": "整列",
+  "Español": "Alinear",
+  "Deutsch": "Ausrichten",
+  "Français": "Aligner",
+  "한국어": "정렬",
+  "中文": "对齐",
+  "العربية": "محاذاة",
+  "Tiếng Việt": "Căn chỉnh"
+ },
+ "Line up the left sides": {
+  "日本語": "左端を揃える",
+  "Español": "Alinear los lados izquierdos",
+  "Deutsch": "Linke Seiten ausrichten",
+  "Français": "Aligner les côtés gauches",
+  "한국어": "왼쪽 가장자리 맞추기",
+  "中文": "左边对齐",
+  "العربية": "محاذاة الجوانب اليسرى",
+  "Tiếng Việt": "Căn các cạnh trái"
+ },
+ "Line up the middles, across": {
+  "日本語": "左右の中央を揃える",
+  "Español": "Alinear los centros, en horizontal",
+  "Deutsch": "Mitten waagerecht ausrichten",
+  "Français": "Aligner les centres, horizontalement",
+  "한국어": "가로 가운데 맞추기",
+  "中文": "水平居中对齐",
+  "العربية": "محاذاة المنتصفات أفقياً",
+  "Tiếng Việt": "Căn giữa theo chiều ngang"
+ },
+ "Centre": {
+  "日本語": "中央",
+  "Español": "Centro",
+  "Deutsch": "Mitte",
+  "Français": "Centre",
+  "한국어": "가운데",
+  "中文": "居中",
+  "العربية": "الوسط",
+  "Tiếng Việt": "Giữa"
+ },
+ "Line up the right sides": {
+  "日本語": "右端を揃える",
+  "Español": "Alinear los lados derechos",
+  "Deutsch": "Rechte Seiten ausrichten",
+  "Français": "Aligner les côtés droits",
+  "한국어": "오른쪽 가장자리 맞추기",
+  "中文": "右边对齐",
+  "العربية": "محاذاة الجوانب اليمنى",
+  "Tiếng Việt": "Căn các cạnh phải"
+ },
+ "Line up the tops": {
+  "日本語": "上端を揃える",
+  "Español": "Alinear las partes superiores",
+  "Deutsch": "Oberkanten ausrichten",
+  "Français": "Aligner les hauts",
+  "한국어": "위쪽 가장자리 맞추기",
+  "中文": "顶边对齐",
+  "العربية": "محاذاة الأعالي",
+  "Tiếng Việt": "Căn các cạnh trên"
+ },
+ "Line up the middles, down": {
+  "日本語": "上下の中央を揃える",
+  "Español": "Alinear los centros, en vertical",
+  "Deutsch": "Mitten senkrecht ausrichten",
+  "Français": "Aligner les centres, verticalement",
+  "한국어": "세로 가운데 맞추기",
+  "中文": "垂直居中对齐",
+  "العربية": "محاذاة المنتصفات رأسياً",
+  "Tiếng Việt": "Căn giữa theo chiều dọc"
+ },
+ "Middle": {
+  "日本語": "中段",
+  "Español": "Medio",
+  "Deutsch": "Mitte (senkrecht)",
+  "Français": "Milieu",
+  "한국어": "중간",
+  "中文": "中间",
+  "العربية": "المنتصف",
+  "Tiếng Việt": "Chính giữa"
+ },
+ "Line up the bottoms": {
+  "日本語": "下端を揃える",
+  "Español": "Alinear las partes inferiores",
+  "Deutsch": "Unterkanten ausrichten",
+  "Français": "Aligner les bas",
+  "한국어": "아래쪽 가장자리 맞추기",
+  "中文": "底边对齐",
+  "العربية": "محاذاة الأسافل",
+  "Tiếng Việt": "Căn các cạnh dưới"
+ },
+ "What it says": {
+  "日本語": "文字の内容",
+  "Español": "Lo que dice",
+  "Deutsch": "Was dort steht",
+  "Français": "Ce qu'il dit",
+  "한국어": "표시할 문구",
+  "中文": "文字内容",
+  "العربية": "ما يقوله",
+  "Tiếng Việt": "Nội dung chữ"
+ },
+ "Which side of its place the text runs": {
+  "日本語": "テキストが位置のどちら側に流れるか",
+  "Español": "Hacia qué lado de su posición corre el texto",
+  "Deutsch": "Auf welcher Seite seiner Position der Text läuft",
+  "Français": "De quel côté de sa position le texte s'étend",
+  "한국어": "텍스트가 위치의 어느 쪽으로 흐르는지",
+  "中文": "文字从其位置向哪一侧排列",
+  "العربية": "إلى أي جانب من موضعه يمتد النص",
+  "Tiếng Việt": "Chữ chạy về phía nào so với vị trí của nó"
+ },
+ "Fill": {
+  "日本語": "塗り",
+  "Español": "Relleno",
+  "Deutsch": "Füllung",
+  "Français": "Remplissage",
+  "한국어": "채우기",
+  "中文": "填充",
+  "العربية": "التعبئة",
+  "Tiếng Việt": "Tô"
+ },
+ "Gradient": {
+  "日本語": "グラデーション",
+  "Español": "Degradado",
+  "Deutsch": "Verlauf",
+  "Français": "Dégradé",
+  "한국어": "그라디언트",
+  "中文": "渐变",
+  "العربية": "تدرّج",
+  "Tiếng Việt": "Chuyển màu"
+ },
+ "Fill colour": {
+  "日本語": "塗りの色",
+  "Español": "Color de relleno",
+  "Deutsch": "Füllfarbe",
+  "Français": "Couleur de remplissage",
+  "한국어": "채우기 색",
+  "中文": "填充颜色",
+  "العربية": "لون التعبئة",
+  "Tiếng Việt": "Màu tô"
+ },
+ "Gradient…": {
+  "日本語": "グラデーション…",
+  "Español": "Degradado…",
+  "Deutsch": "Verlauf…",
+  "Français": "Dégradé…",
+  "한국어": "그라디언트…",
+  "中文": "渐变…",
+  "العربية": "تدرّج…",
+  "Tiếng Việt": "Chuyển màu…"
+ },
+ "Stroke": {
+  "日本語": "線",
+  "Español": "Trazo",
+  "Deutsch": "Kontur",
+  "Français": "Contour",
+  "한국어": "획",
+  "中文": "描边",
+  "العربية": "الحدّ",
+  "Tiếng Việt": "Nét viền"
+ },
+ "Stroke colour": {
+  "日本語": "線の色",
+  "Español": "Color del trazo",
+  "Deutsch": "Konturfarbe",
+  "Français": "Couleur du contour",
+  "한국어": "획 색",
+  "中文": "描边颜色",
+  "العربية": "لون الحدّ",
+  "Tiếng Việt": "Màu nét viền"
+ },
+ "Corners and ends…": {
+  "日本語": "角と端…",
+  "Español": "Esquinas y extremos…",
+  "Deutsch": "Ecken und Enden…",
+  "Français": "Angles et extrémités…",
+  "한국어": "모서리와 끝…",
+  "中文": "拐角与端点…",
+  "العربية": "الزوايا والنهايات…",
+  "Tiếng Việt": "Góc và đầu mút…"
+ },
+ "Shadow and blur…": {
+  "日本語": "影とぼかし…",
+  "Español": "Sombra y desenfoque…",
+  "Deutsch": "Schatten und Weichzeichnen…",
+  "Français": "Ombre et flou…",
+  "한국어": "그림자와 흐림…",
+  "中文": "阴影与模糊…",
+  "العربية": "الظل والتمويه…",
+  "Tiếng Việt": "Bóng và làm mờ…"
+ },
+ "Move the points of a path drawn with the pen": {
+  "日本語": "ペンで描いたパスのポイントを動かします",
+  "Español": "Mover los puntos de un trazado dibujado con la pluma",
+  "Deutsch": "Punkte eines mit dem Stift gezeichneten Pfads verschieben",
+  "Français": "Déplacer les points d'un tracé dessiné à la plume",
+  "한국어": "펜으로 그린 패스의 점을 옮깁니다",
+  "中文": "移动用钢笔绘制的路径上的点",
+  "العربية": "حرّك نقاط مسار مرسوم بالقلم",
+  "Tiếng Việt": "Di chuyển các điểm của đường vẽ bằng bút"
+ },
+ "Edit points": {
+  "日本語": "ポイントを編集",
+  "Español": "Editar puntos",
+  "Deutsch": "Punkte bearbeiten",
+  "Français": "Modifier les points",
+  "한국어": "점 편집",
+  "中文": "编辑节点",
+  "العربية": "تحرير النقاط",
+  "Tiếng Việt": "Sửa điểm"
+ },
+ "Group (Ctrl+G)": {
+  "日本語": "グループ化 (Ctrl+G)",
+  "Español": "Agrupar (Ctrl+G)",
+  "Deutsch": "Gruppieren (Strg+G)",
+  "Français": "Grouper (Ctrl+G)",
+  "한국어": "그룹 (Ctrl+G)",
+  "中文": "编组 (Ctrl+G)",
+  "العربية": "تجميع (Ctrl+G)",
+  "Tiếng Việt": "Nhóm (Ctrl+G)"
+ },
+ "Ungroup (Ctrl+Shift+G)": {
+  "日本語": "グループ解除 (Ctrl+Shift+G)",
+  "Español": "Desagrupar (Ctrl+Shift+G)",
+  "Deutsch": "Gruppierung aufheben (Strg+Umschalt+G)",
+  "Français": "Dissocier (Ctrl+Shift+G)",
+  "한국어": "그룹 해제 (Ctrl+Shift+G)",
+  "中文": "取消编组 (Ctrl+Shift+G)",
+  "العربية": "فك التجميع (Ctrl+Shift+G)",
+  "Tiếng Việt": "Bỏ nhóm (Ctrl+Shift+G)"
+ },
+ "Ungroup": {
+  "日本語": "グループ解除",
+  "Español": "Desagrupar",
+  "Deutsch": "Gruppierung aufheben",
+  "Français": "Dissocier",
+  "한국어": "그룹 해제",
+  "中文": "取消编组",
+  "العربية": "فك التجميع",
+  "Tiếng Việt": "Bỏ nhóm"
+ },
+ "Duplicate (Ctrl+D)": {
+  "日本語": "複製 (Ctrl+D)",
+  "Español": "Duplicar (Ctrl+D)",
+  "Deutsch": "Duplizieren (Strg+D)",
+  "Français": "Dupliquer (Ctrl+D)",
+  "한국어": "복제 (Ctrl+D)",
+  "中文": "复制一份 (Ctrl+D)",
+  "العربية": "تكرار (Ctrl+D)",
+  "Tiếng Việt": "Nhân đôi (Ctrl+D)"
+ },
+ "Combine shapes": {
+  "日本語": "図形を合成",
+  "Español": "Combinar formas",
+  "Deutsch": "Formen kombinieren",
+  "Français": "Combiner les formes",
+  "한국어": "도형 결합",
+  "中文": "组合形状",
+  "العربية": "دمج الأشكال",
+  "Tiếng Việt": "Kết hợp hình"
+ },
+ "One shape from all of them": {
+  "日本語": "すべてをひとつの図形にします",
+  "Español": "Una sola forma con todas",
+  "Deutsch": "Eine Form aus allen",
+  "Français": "Une seule forme à partir de toutes",
+  "한국어": "모두를 하나의 도형으로",
+  "中文": "将它们合成一个形状",
+  "العربية": "شكل واحد منها جميعاً",
+  "Tiếng Việt": "Một hình từ tất cả các hình"
+ },
+ "Unite": {
+  "日本語": "合体",
+  "Español": "Unir",
+  "Deutsch": "Vereinen",
+  "Français": "Unir",
+  "한국어": "합치기",
+  "中文": "并集",
+  "العربية": "توحيد",
+  "Tiếng Việt": "Hợp nhất"
+ },
+ "The bottom shape with the others cut out of it": {
+  "日本語": "いちばん下の図形から他の図形を切り抜きます",
+  "Español": "La forma de abajo con las demás recortadas de ella",
+  "Deutsch": "Die unterste Form, aus der die anderen ausgeschnitten sind",
+  "Français": "La forme du dessous, les autres découpées dedans",
+  "한국어": "맨 아래 도형에서 나머지를 잘라냅니다",
+  "中文": "用其他形状裁掉最底层的形状",
+  "العربية": "الشكل السفلي مع اقتطاع الأشكال الأخرى منه",
+  "Tiếng Việt": "Hình dưới cùng bị các hình khác khoét đi"
+ },
+ "Subtract": {
+  "日本語": "型抜き",
+  "Español": "Restar",
+  "Deutsch": "Abziehen",
+  "Français": "Soustraire",
+  "한국어": "빼기",
+  "中文": "减去",
+  "العربية": "طرح",
+  "Tiếng Việt": "Trừ"
+ },
+ "Only where they all overlap": {
+  "日本語": "すべてが重なる部分だけ",
+  "Español": "Solo donde todas se superponen",
+  "Deutsch": "Nur wo sich alle überlappen",
+  "Français": "Seulement là où elles se chevauchent toutes",
+  "한국어": "모두 겹치는 부분만",
+  "中文": "仅保留全部重叠的部分",
+  "العربية": "فقط حيث تتداخل جميعها",
+  "Tiếng Việt": "Chỉ phần tất cả cùng chồng lên nhau"
+ },
+ "Intersect": {
+  "日本語": "交差",
+  "Español": "Intersecar",
+  "Deutsch": "Schnittmenge",
+  "Français": "Intersection",
+  "한국어": "교차",
+  "中文": "交集",
+  "العربية": "تقاطع",
+  "Tiếng Việt": "Giao nhau"
+ },
+ "Everything but where they overlap": {
+  "日本語": "重なる部分以外のすべて",
+  "Español": "Todo menos donde se superponen",
+  "Deutsch": "Alles außer dort, wo sie sich überlappen",
+  "Français": "Tout sauf là où elles se chevauchent",
+  "한국어": "겹치는 부분만 뺀 전부",
+  "中文": "除重叠部分以外的全部",
+  "العربية": "كل شيء عدا مواضع التداخل",
+  "Tiếng Việt": "Tất cả trừ phần chồng lên nhau"
+ },
+ "Exclude": {
+  "日本語": "中マド",
+  "Español": "Excluir",
+  "Deutsch": "Ausschließen",
+  "Français": "Exclure",
+  "한국어": "제외",
+  "中文": "排除",
+  "العربية": "استبعاد",
+  "Tiếng Việt": "Loại trừ"
+ },
+ "0 runs left to right, 90 top to bottom. Each colour sits a share of the way along, 0 to 100.": {
+  "日本語": "0 は左から右、90 は上から下です。各色は 0 から 100 の位置に置かれます。",
+  "Español": "0 va de izquierda a derecha, 90 de arriba abajo. Cada color se sitúa a una parte del recorrido, de 0 a 100.",
+  "Deutsch": "0 läuft von links nach rechts, 90 von oben nach unten. Jede Farbe sitzt auf einem Anteil des Wegs, 0 bis 100.",
+  "Français": "0 va de gauche à droite, 90 de haut en bas. Chaque couleur se place à une part du parcours, de 0 à 100.",
+  "한국어": "0은 왼쪽에서 오른쪽, 90은 위에서 아래입니다. 각 색은 0에서 100 사이의 위치에 놓입니다.",
+  "中文": "0 为从左到右，90 为从上到下。每种颜色位于路径上 0 到 100 之间的某一位置。",
+  "العربية": "0 يتجه من اليسار إلى اليمين، و90 من الأعلى إلى الأسفل. يقع كل لون عند نسبة من المسافة، من 0 إلى 100.",
+  "Tiếng Việt": "0 chạy từ trái sang phải, 90 từ trên xuống dưới. Mỗi màu nằm ở một phần quãng đường, từ 0 đến 100."
+ },
+ "Add a colour": {
+  "日本語": "色を追加",
+  "Español": "Añadir un color",
+  "Deutsch": "Farbe hinzufügen",
+  "Français": "Ajouter une couleur",
+  "한국어": "색 추가",
+  "中文": "添加颜色",
+  "العربية": "إضافة لون",
+  "Tiếng Việt": "Thêm một màu"
+ },
+ "Corners and ends": {
+  "日本語": "角と端",
+  "Español": "Esquinas y extremos",
+  "Deutsch": "Ecken und Enden",
+  "Français": "Angles et extrémités",
+  "한국어": "모서리와 끝",
+  "中文": "拐角与端点",
+  "العربية": "الزوايا والنهايات",
+  "Tiếng Việt": "Góc và đầu mút"
+ },
+ "Sharp": {
+  "日本語": "シャープ",
+  "Español": "Aguda",
+  "Deutsch": "Spitz",
+  "Français": "Vif",
+  "한국어": "뾰족하게",
+  "中文": "尖角",
+  "العربية": "حادّة",
+  "Tiếng Việt": "Nhọn"
+ },
+ "Cut": {
+  "日本語": "面取り",
+  "Español": "Biselada",
+  "Deutsch": "Abgeschrägt",
+  "Français": "Biseauté",
+  "한국어": "깎기",
+  "中文": "斜切",
+  "العربية": "مشطوفة",
+  "Tiếng Việt": "Vát"
+ },
+ "Ends": {
+  "日本語": "端",
+  "Español": "Extremos",
+  "Deutsch": "Enden",
+  "Français": "Extrémités",
+  "한국어": "끝",
+  "中文": "端点",
+  "العربية": "النهايات",
+  "Tiếng Việt": "Đầu mút"
+ },
+ "Ends show on lines and open paths.": {
+  "日本語": "端は線と開いたパスに表示されます。",
+  "Español": "Los extremos se ven en líneas y trazados abiertos.",
+  "Deutsch": "Enden sind bei Linien und offenen Pfaden zu sehen.",
+  "Français": "Les extrémités apparaissent sur les lignes et les tracés ouverts.",
+  "한국어": "끝은 선과 열린 패스에 나타납니다.",
+  "中文": "端点样式见于直线和开放路径。",
+  "العربية": "تظهر النهايات على الخطوط والمسارات المفتوحة.",
+  "Tiếng Việt": "Đầu mút hiện trên đường thẳng và đường vẽ hở."
+ },
+ "Shadow and blur": {
+  "日本語": "影とぼかし",
+  "Español": "Sombra y desenfoque",
+  "Deutsch": "Schatten und Weichzeichnen",
+  "Français": "Ombre et flou",
+  "한국어": "그림자와 흐림",
+  "中文": "阴影与模糊",
+  "العربية": "الظل والتمويه",
+  "Tiếng Việt": "Bóng và làm mờ"
+ },
+ "Softness": {
+  "日本語": "やわらかさ",
+  "Español": "Suavidad",
+  "Deutsch": "Weichheit",
+  "Français": "Douceur",
+  "한국어": "부드러움",
+  "中文": "柔和度",
+  "العربية": "النعومة",
+  "Tiếng Việt": "Độ mềm"
+ },
+ "Shadow strength": {
+  "日本語": "影の強さ",
+  "Español": "Intensidad de la sombra",
+  "Deutsch": "Schattenstärke",
+  "Français": "Intensité de l'ombre",
+  "한국어": "그림자 강도",
+  "中文": "阴影强度",
+  "العربية": "قوة الظل",
+  "Tiếng Việt": "Độ đậm của bóng"
+ },
+ "Blur the layer": {
+  "日本語": "レイヤーをぼかす",
+  "Español": "Desenfocar la capa",
+  "Deutsch": "Ebene weichzeichnen",
+  "Français": "Flouter le calque",
+  "한국어": "레이어 흐리게",
+  "中文": "模糊图层",
+  "العربية": "تمويه الطبقة",
+  "Tiếng Việt": "Làm mờ lớp"
+ },
+ "Designs": {
+  "日本語": "デザイン",
+  "Español": "Diseños",
+  "Deutsch": "Designs",
+  "Français": "Designs",
+  "한국어": "디자인",
+  "中文": "设计",
+  "العربية": "التصاميم",
+  "Tiếng Việt": "Thiết kế"
+ },
+ "Keep this as a new design, leaving the saved one as it was": {
+  "日本語": "保存済みのものはそのままに、これを新しいデザインとして保存します",
+  "Español": "Guardar esto como un diseño nuevo, dejando el guardado como estaba",
+  "Deutsch": "Dies als neues Design behalten und das gespeicherte unverändert lassen",
+  "Français": "Garder ceci comme nouveau design, en laissant l'enregistré tel quel",
+  "한국어": "저장된 것은 그대로 두고 이것을 새 디자인으로 저장합니다",
+  "中文": "另存为新设计，已保存的那份保持不变",
+  "العربية": "احتفظ بهذا كتصميم جديد مع ترك المحفوظ كما كان",
+  "Tiếng Việt": "Giữ bản này như một thiết kế mới, để nguyên bản đã lưu"
+ },
+ "Save as new": {
+  "日本語": "新規として保存",
+  "Español": "Guardar como nuevo",
+  "Deutsch": "Als neu speichern",
+  "Français": "Enregistrer comme nouveau",
+  "한국어": "새로 저장",
+  "中文": "另存为新设计",
+  "العربية": "حفظ كجديد",
+  "Tiếng Việt": "Lưu thành bản mới"
+ },
+ "New design": {
+  "日本語": "新規デザイン",
+  "Español": "Diseño nuevo",
+  "Deutsch": "Neues Design",
+  "Français": "Nouveau design",
+  "한국어": "새 디자인",
+  "中文": "新建设计",
+  "العربية": "تصميم جديد",
+  "Tiếng Việt": "Thiết kế mới"
+ },
+ "Designs you save are listed here, to open again.": {
+  "日本語": "保存したデザインはここに一覧表示され、また開けます。",
+  "Español": "Los diseños que guardes aparecen aquí, para volver a abrirlos.",
+  "Deutsch": "Gespeicherte Designs stehen hier, zum erneuten Öffnen.",
+  "Français": "Les designs que vous enregistrez sont listés ici, pour les rouvrir.",
+  "한국어": "저장한 디자인이 여기에 나열되어 다시 열 수 있습니다.",
+  "中文": "你保存的设计会列在这里，可再次打开。",
+  "العربية": "تُدرج هنا التصاميم التي تحفظها، لتفتحها من جديد.",
+  "Tiếng Việt": "Các thiết kế bạn lưu được liệt kê ở đây để mở lại."
+ },
+ "Replace the design Buddy put there before": {
+  "日本語": "Buddy が前にそこに置いたデザインを置き換える",
+  "Español": "Reemplazar el diseño que Buddy puso ahí antes",
+  "Deutsch": "Das Design ersetzen, das Buddy dort zuvor platziert hat",
+  "Français": "Remplacer le design que Buddy y a placé auparavant",
+  "한국어": "Buddy가 전에 거기에 넣은 디자인 교체",
+  "中文": "替换 Buddy 之前放在那里的设计",
+  "العربية": "استبدال التصميم الذي وضعه Buddy هناك من قبل",
+  "Tiếng Việt": "Thay thiết kế Buddy đã đặt ở đó trước đây"
+ },
+ "Drag a point or its handles. Alt-click a point to make it a corner or a curve. Delete removes it. Escape is done.": {
+  "日本語": "ポイントかそのハンドルをドラッグします。Alt+クリックで角と曲線を切り替えます。Delete で削除、Escape で完了です。",
+  "Español": "Arrastra un punto o sus tiradores. Alt+clic en un punto lo convierte en esquina o curva. Delete lo quita. Escape termina.",
+  "Deutsch": "Ziehe einen Punkt oder seine Griffe. Alt-Klick macht aus einem Punkt eine Ecke oder Kurve. Delete entfernt ihn. Escape beendet.",
+  "Français": "Faites glisser un point ou ses poignées. Alt+clic sur un point en fait un angle ou une courbe. Delete le supprime. Escape termine.",
+  "한국어": "점이나 핸들을 드래그하세요. Alt+클릭으로 모서리와 곡선을 바꿉니다. Delete로 삭제하고 Escape로 마칩니다.",
+  "中文": "拖动节点或其手柄。按住 Alt 单击节点可在角点与曲线之间切换。Delete 删除节点，Escape 完成。",
+  "العربية": "اسحب نقطة أو مقابضها. النقر مع Alt على نقطة يجعلها زاوية أو منحنى. Delete يحذفها. Escape للانتهاء.",
+  "Tiếng Việt": "Kéo một điểm hoặc tay nắm của nó. Alt+nhấp vào điểm để đổi giữa góc và đường cong. Delete xóa điểm. Escape để xong."
+ },
+ "Click for a corner, drag for a curve. Click the first point to close the shape, or press Enter to stop.": {
+  "日本語": "クリックで角、ドラッグで曲線になります。最初のポイントをクリックすると図形が閉じ、Enter で終了します。",
+  "Español": "Haz clic para una esquina, arrastra para una curva. Haz clic en el primer punto para cerrar la forma, o pulsa Enter para parar.",
+  "Deutsch": "Klicken für eine Ecke, Ziehen für eine Kurve. Klicke auf den ersten Punkt, um die Form zu schließen, oder drücke Enter zum Beenden.",
+  "Français": "Cliquez pour un angle, glissez pour une courbe. Cliquez sur le premier point pour fermer la forme, ou appuyez sur Enter pour arrêter.",
+  "한국어": "클릭하면 모서리, 드래그하면 곡선입니다. 첫 점을 클릭하면 도형이 닫히고, Enter를 누르면 멈춥니다.",
+  "中文": "单击得到角点，拖动得到曲线。单击第一个节点可闭合形状，或按 Enter 结束。",
+  "العربية": "انقر لزاوية، واسحب لمنحنى. انقر على النقطة الأولى لإغلاق الشكل، أو اضغط Enter للتوقف.",
+  "Tiếng Việt": "Nhấp để tạo góc, kéo để tạo đường cong. Nhấp vào điểm đầu tiên để khép hình, hoặc nhấn Enter để dừng."
+ },
+ "Click where the text goes.": {
+  "日本語": "テキストを置く場所をクリックします。",
+  "Español": "Haz clic donde va el texto.",
+  "Deutsch": "Klicke dorthin, wo der Text stehen soll.",
+  "Français": "Cliquez à l'endroit où va le texte.",
+  "한국어": "텍스트를 넣을 곳을 클릭하세요.",
+  "中文": "单击要放置文字的位置。",
+  "العربية": "انقر حيث يوضع النص.",
+  "Tiếng Việt": "Nhấp vào chỗ đặt chữ."
+ },
+ "Drag on the canvas to draw. Shift keeps it square.": {
+  "日本語": "キャンバスをドラッグして描きます。Shift で正方形に保ちます。",
+  "Español": "Arrastra en el lienzo para dibujar. Shift lo mantiene cuadrado.",
+  "Deutsch": "Ziehe auf der Leinwand, um zu zeichnen. Umschalt hält es quadratisch.",
+  "Français": "Glissez sur le canevas pour dessiner. Shift garde la forme carrée.",
+  "한국어": "캔버스에서 드래그해 그리세요. Shift를 누르면 정사각형이 유지됩니다.",
+  "中文": "在画布上拖动即可绘制。按住 Shift 可保持正方形。",
+  "العربية": "اسحب على اللوحة للرسم. Shift يبقيه مربعاً.",
+  "Tiếng Việt": "Kéo trên khung vẽ để vẽ. Shift giữ cho hình vuông."
+ },
+ "Where along": {
+  "日本語": "位置",
+  "Español": "Posición en el recorrido",
+  "Deutsch": "Position im Verlauf",
+  "Français": "Position sur le parcours",
+  "한국어": "위치",
+  "中文": "位置",
+  "العربية": "الموضع على المسار",
+  "Tiếng Việt": "Vị trí dọc đường"
+ },
+ "Remove this colour": {
+  "日本語": "この色を削除",
+  "Español": "Quitar este color",
+  "Deutsch": "Diese Farbe entfernen",
+  "Français": "Retirer cette couleur",
+  "한국어": "이 색 제거",
+  "中文": "移除此颜色",
+  "العربية": "إزالة هذا اللون",
+  "Tiếng Việt": "Bỏ màu này"
+ },
+ "Combined": {
+  "日本語": "合成",
+  "Español": "Combinada",
+  "Deutsch": "Kombiniert",
+  "Français": "Combinée",
+  "한국어": "결합됨",
+  "中文": "组合",
+  "العربية": "مدموج",
+  "Tiếng Việt": "Kết hợp"
+ },
+ "Unlock": {
+  "日本語": "ロック解除",
+  "Español": "Desbloquear",
+  "Deutsch": "Entsperren",
+  "Français": "Déverrouiller",
+  "한국어": "잠금 해제",
+  "中文": "解锁",
+  "العربية": "إلغاء القفل",
+  "Tiếng Việt": "Mở khóa"
+ },
+ "Lock": {
+  "日本語": "ロック",
+  "Español": "Bloquear",
+  "Deutsch": "Sperren",
+  "Français": "Verrouiller",
+  "한국어": "잠금",
+  "中文": "锁定",
+  "العربية": "قفل",
+  "Tiếng Việt": "Khóa"
+ },
+ "Delete this saved design": {
+  "日本語": "この保存済みデザインを削除",
+  "Español": "Eliminar este diseño guardado",
+  "Deutsch": "Dieses gespeicherte Design löschen",
+  "Français": "Supprimer ce design enregistré",
+  "한국어": "저장된 이 디자인 삭제",
+  "中文": "删除这个已保存的设计",
+  "العربية": "حذف هذا التصميم المحفوظ",
+  "Tiếng Việt": "Xóa thiết kế đã lưu này"
+ },
+ "Delete this saved design?": {
+  "日本語": "この保存済みデザインを削除しますか？",
+  "Español": "¿Eliminar este diseño guardado?",
+  "Deutsch": "Dieses gespeicherte Design löschen?",
+  "Français": "Supprimer ce design enregistré ?",
+  "한국어": "저장된 이 디자인을 삭제할까요?",
+  "中文": "要删除这个已保存的设计吗？",
+  "العربية": "هل تريد حذف هذا التصميم المحفوظ؟",
+  "Tiếng Việt": "Xóa thiết kế đã lưu này?"
+ },
+ "This design isn't saved": {
+  "日本語": "このデザインは保存されていません",
+  "Español": "Este diseño no está guardado",
+  "Deutsch": "Dieses Design ist nicht gespeichert",
+  "Français": "Ce design n'est pas enregistré",
+  "한국어": "이 디자인은 저장되지 않았습니다",
+  "中文": "此设计尚未保存",
+  "العربية": "هذا التصميم غير محفوظ",
+  "Tiếng Việt": "Thiết kế này chưa được lưu"
+ },
+ "What you've changed since it was last saved will be lost.": {
+  "日本語": "最後に保存してからの変更は失われます。",
+  "Español": "Lo que hayas cambiado desde que se guardó por última vez se perderá.",
+  "Deutsch": "Was du seit dem letzten Speichern geändert hast, geht verloren.",
+  "Français": "Ce que vous avez modifié depuis le dernier enregistrement sera perdu.",
+  "한국어": "마지막 저장 이후의 변경 사항이 사라집니다.",
+  "中文": "自上次保存以来的更改将会丢失。",
+  "العربية": "سيضيع ما غيّرته منذ آخر حفظ.",
+  "Tiếng Việt": "Những gì bạn đã thay đổi từ lần lưu gần nhất sẽ bị mất."
+ },
+ "It can't be brought back. What's on the canvas stays.": {
+  "日本語": "元に戻せません。キャンバスの内容はそのまま残ります。",
+  "Español": "No se puede recuperar. Lo que hay en el lienzo se queda.",
+  "Deutsch": "Es lässt sich nicht zurückholen. Was auf der Leinwand ist, bleibt.",
+  "Français": "Il ne pourra pas être récupéré. Ce qui est sur le canevas reste.",
+  "한국어": "되돌릴 수 없습니다. 캔버스에 있는 것은 그대로 남습니다.",
+  "中文": "删除后无法恢复。画布上的内容会保留。",
+  "العربية": "لا يمكن استرجاعه. ما على اللوحة يبقى.",
+  "Tiếng Việt": "Không thể khôi phục. Những gì trên khung vẽ vẫn giữ nguyên."
+ },
+ "Open the other one": {
+  "日本語": "もう一方を開く",
+  "Español": "Abrir el otro",
+  "Deutsch": "Das andere öffnen",
+  "Français": "Ouvrir l'autre",
+  "한국어": "다른 것 열기",
+  "中文": "打开另一个",
+  "العربية": "افتح الآخر",
+  "Tiếng Việt": "Mở cái kia"
+ },
+ "Keep working": {
+  "日本語": "作業を続ける",
+  "Español": "Seguir trabajando",
+  "Deutsch": "Weiterarbeiten",
+  "Français": "Continuer à travailler",
+  "한국어": "계속 작업",
+  "中文": "继续编辑",
+  "العربية": "متابعة العمل",
+  "Tiếng Việt": "Tiếp tục làm việc"
+ },
+ "Keep the width and height in step": {
+  "日本語": "幅と高さを連動させる",
+  "Español": "Mantener el ancho y el alto enlazados",
+  "Deutsch": "Breite und Höhe verknüpfen",
+  "Français": "Lier la largeur et la hauteur",
+  "한국어": "너비와 높이를 함께 유지",
+  "中文": "保持宽度和高度联动",
+  "العربية": "إبقاء العرض والارتفاع مترابطين",
+  "Tiếng Việt": "Giữ chiều rộng và chiều cao đi cùng nhau"
+ },
+ "Space across": {
+  "日本語": "横に等間隔",
+  "Español": "Espaciar en horizontal",
+  "Deutsch": "Waagerecht verteilen",
+  "Français": "Espacer horizontalement",
+  "한국어": "가로 간격 맞추기",
+  "中文": "水平等距",
+  "العربية": "تباعد أفقي",
+  "Tiếng Việt": "Giãn đều ngang"
+ },
+ "Space down": {
+  "日本語": "縦に等間隔",
+  "Español": "Espaciar en vertical",
+  "Deutsch": "Senkrecht verteilen",
+  "Français": "Espacer verticalement",
+  "한국어": "세로 간격 맞추기",
+  "中文": "垂直等距",
+  "العربية": "تباعد رأسي",
+  "Tiếng Việt": "Giãn đều dọc"
+ },
+ "Make the gaps between them equal, across": {
+  "日本語": "横方向の間隔を等しくします",
+  "Español": "Igualar los espacios entre ellas, en horizontal",
+  "Deutsch": "Abstände dazwischen waagerecht angleichen",
+  "Français": "Égaliser les espaces entre eux, horizontalement",
+  "한국어": "가로 방향의 간격을 같게 합니다",
+  "中文": "使它们之间的水平间距相等",
+  "العربية": "اجعل الفراغات بينها متساوية أفقياً",
+  "Tiếng Việt": "Làm các khoảng cách giữa chúng bằng nhau theo chiều ngang"
+ },
+ "Make the gaps between them equal, down": {
+  "日本語": "縦方向の間隔を等しくします",
+  "Español": "Igualar los espacios entre ellas, en vertical",
+  "Deutsch": "Abstände dazwischen senkrecht angleichen",
+  "Français": "Égaliser les espaces entre eux, verticalement",
+  "한국어": "세로 방향의 간격을 같게 합니다",
+  "中文": "使它们之间的垂直间距相等",
+  "العربية": "اجعل الفراغات بينها متساوية رأسياً",
+  "Tiếng Việt": "Làm các khoảng cách giữa chúng bằng nhau theo chiều dọc"
+ },
+ "Number fields take sums (120+40, 300/2), and dragging a field's name changes it. Alt-drag a layer to copy it. Hold Alt while resizing to grow it from its middle, or over another layer to measure the gap.": {
+  "日本語": "数値欄には計算式 (120+40, 300/2) を入力でき、欄の名前をドラッグすると値が変わります。Alt+ドラッグでレイヤーを複製します。サイズ変更中に Alt を押すと中心から伸び、別のレイヤーの上で押すと間隔を測れます。",
+  "Español": "Los campos numéricos admiten operaciones (120+40, 300/2), y arrastrar el nombre de un campo cambia su valor. Alt+arrastrar copia una capa. Mantén Alt al redimensionar para crecer desde el centro, o sobre otra capa para medir el espacio.",
+  "Deutsch": "Zahlenfelder nehmen Rechnungen an (120+40, 300/2), und Ziehen am Namen eines Felds ändert den Wert. Alt-Ziehen kopiert eine Ebene. Halte Alt beim Skalieren, um aus der Mitte zu wachsen, oder über einer anderen Ebene, um den Abstand zu messen.",
+  "Français": "Les champs numériques acceptent les calculs (120+40, 300/2), et faire glisser le nom d'un champ change sa valeur. Alt+glisser copie un calque. Maintenez Alt en redimensionnant pour grandir depuis le centre, ou au-dessus d'un autre calque pour mesurer l'écart.",
+  "한국어": "숫자 칸에는 계산식(120+40, 300/2)을 넣을 수 있고, 칸 이름을 드래그하면 값이 바뀝니다. Alt+드래그로 레이어를 복사합니다. 크기를 바꿀 때 Alt를 누르면 가운데에서 커지고, 다른 레이어 위에서 누르면 간격을 잽니다.",
+  "中文": "数字框可输入算式 (120+40, 300/2)，拖动字段名称可改变数值。按住 Alt 拖动图层可复制。调整大小时按住 Alt 从中心缩放，悬停在其他图层上按住 Alt 可测量间距。",
+  "العربية": "تقبل حقول الأرقام العمليات الحسابية (120+40, 300/2)، وسحب اسم الحقل يغيّر قيمته. السحب مع Alt ينسخ الطبقة. اضغط Alt أثناء تغيير الحجم للتكبير من المنتصف، أو فوق طبقة أخرى لقياس الفراغ.",
+  "Tiếng Việt": "Ô số nhận phép tính (120+40, 300/2), và kéo tên của ô sẽ đổi giá trị. Alt+kéo để sao chép một lớp. Giữ Alt khi đổi kích thước để lớn dần từ tâm, hoặc trên một lớp khác để đo khoảng cách."
+ },
+ "Flip what's picked": {
+  "日本語": "選択したものを反転",
+  "Español": "Voltear la selección",
+  "Deutsch": "Auswahl spiegeln",
+  "Français": "Retourner la sélection",
+  "한국어": "선택한 항목 뒤집기",
+  "中文": "翻转所选内容",
+  "العربية": "قلب المحدد",
+  "Tiếng Việt": "Lật phần đã chọn"
+ },
+ "Flip across": {
+  "日本語": "左右反転",
+  "Español": "Voltear horizontal",
+  "Deutsch": "Horizontal spiegeln",
+  "Français": "Retourner horizontalement",
+  "한국어": "좌우 뒤집기",
+  "中文": "水平翻转",
+  "العربية": "قلب أفقي",
+  "Tiếng Việt": "Lật ngang"
+ },
+ "Flip down": {
+  "日本語": "上下反転",
+  "Español": "Voltear vertical",
+  "Deutsch": "Vertikal spiegeln",
+  "Français": "Retourner verticalement",
+  "한국어": "상하 뒤집기",
+  "中文": "垂直翻转",
+  "العربية": "قلب عمودي",
+  "Tiếng Việt": "Lật dọc"
+ },
+ "Mirror it left to right (Shift+H)": {
+  "日本語": "左右に反転します (Shift+H)",
+  "Español": "Reflejar de izquierda a derecha (Shift+H)",
+  "Deutsch": "Von links nach rechts spiegeln (Umschalt+H)",
+  "Français": "Refléter de gauche à droite (Shift+H)",
+  "한국어": "좌우로 뒤집습니다 (Shift+H)",
+  "中文": "左右镜像 (Shift+H)",
+  "العربية": "عكس من اليسار إلى اليمين (Shift+H)",
+  "Tiếng Việt": "Lật từ trái sang phải (Shift+H)"
+ },
+ "Mirror it top to bottom (Shift+V)": {
+  "日本語": "上下に反転します (Shift+V)",
+  "Español": "Reflejar de arriba abajo (Shift+V)",
+  "Deutsch": "Von oben nach unten spiegeln (Umschalt+V)",
+  "Français": "Refléter de haut en bas (Shift+V)",
+  "한국어": "위아래로 뒤집습니다 (Shift+V)",
+  "中文": "上下镜像 (Shift+V)",
+  "العربية": "عكس من الأعلى إلى الأسفل (Shift+V)",
+  "Tiếng Việt": "Lật từ trên xuống dưới (Shift+V)"
+ },
+ "Rulers": {
+  "日本語": "定規",
+  "Español": "Reglas",
+  "Deutsch": "Lineale",
+  "Français": "Règles",
+  "한국어": "눈금자",
+  "中文": "标尺",
+  "العربية": "المساطر",
+  "Tiếng Việt": "Thước"
+ },
+ "Show or hide the rulers (Shift+R). Drag from a ruler to make a guide": {
+  "日本語": "定規の表示/非表示（Shift+R）。定規からドラッグするとガイドを作れます",
+  "Español": "Mostrar u ocultar las reglas (Shift+R). Arrastra desde una regla para crear una guía",
+  "Deutsch": "Lineale ein- oder ausblenden (Shift+R). Aus einem Lineal ziehen, um eine Hilfslinie anzulegen",
+  "Français": "Afficher ou masquer les règles (Shift+R). Faites glisser depuis une règle pour créer un repère",
+  "한국어": "눈금자 표시/숨기기(Shift+R). 눈금자에서 끌어 오면 안내선이 생깁니다",
+  "中文": "显示或隐藏标尺（Shift+R）。从标尺拖出即可创建参考线",
+  "العربية": "إظهار المساطر أو إخفاؤها (Shift+R). اسحب من مسطرة لإنشاء دليل",
+  "Tiếng Việt": "Hiện hoặc ẩn thước (Shift+R). Kéo từ thước ra để tạo đường gióng"
+ },
+ "Guides": {
+  "日本語": "ガイド",
+  "Español": "Guías",
+  "Deutsch": "Hilfslinien",
+  "Français": "Repères",
+  "한국어": "안내선",
+  "中文": "参考线",
+  "العربية": "الأدلة",
+  "Tiếng Việt": "Đường gióng"
+ },
+ "Guides: show, lock or clear them": {
+  "日本語": "ガイド：表示、ロック、すべて削除",
+  "Español": "Guías: mostrarlas, bloquearlas o borrarlas",
+  "Deutsch": "Hilfslinien: einblenden, sperren oder löschen",
+  "Français": "Repères : les afficher, les verrouiller ou les effacer",
+  "한국어": "안내선: 표시, 잠금, 모두 지우기",
+  "中文": "参考线：显示、锁定或清除",
+  "العربية": "الأدلة: إظهارها أو قفلها أو مسحها",
+  "Tiếng Việt": "Đường gióng: hiện, khóa hoặc xóa hết"
+ },
+ "Show guides": {
+  "日本語": "ガイドを表示",
+  "Español": "Mostrar guías",
+  "Deutsch": "Hilfslinien einblenden",
+  "Français": "Afficher les repères",
+  "한국어": "안내선 표시",
+  "中文": "显示参考线",
+  "العربية": "إظهار الأدلة",
+  "Tiếng Việt": "Hiện đường gióng"
+ },
+ "Lock guides": {
+  "日本語": "ガイドをロック",
+  "Español": "Bloquear guías",
+  "Deutsch": "Hilfslinien sperren",
+  "Français": "Verrouiller les repères",
+  "한국어": "안내선 잠금",
+  "中文": "锁定参考线",
+  "العربية": "قفل الأدلة",
+  "Tiếng Việt": "Khóa đường gióng"
+ },
+ "Clear guides": {
+  "日本語": "ガイドをすべて削除",
+  "Español": "Borrar guías",
+  "Deutsch": "Hilfslinien löschen",
+  "Français": "Effacer les repères",
+  "한국어": "안내선 모두 지우기",
+  "中文": "清除参考线",
+  "العربية": "مسح الأدلة",
+  "Tiếng Việt": "Xóa đường gióng"
+ },
+ "Hide rulers": {
+  "日本語": "定規を隠す",
+  "Español": "Ocultar reglas",
+  "Deutsch": "Lineale ausblenden",
+  "Français": "Masquer les règles",
+  "한국어": "눈금자 숨기기",
+  "中文": "隐藏标尺",
+  "العربية": "إخفاء المساطر",
+  "Tiếng Việt": "Ẩn thước"
+ },
+ "Where the guide is, in px. Leave it empty to remove the guide": {
+  "日本語": "ガイドの位置（px）。空にするとガイドを削除します",
+  "Español": "Posición de la guía, en px. Déjalo vacío para quitar la guía",
+  "Deutsch": "Position der Hilfslinie in px. Leer lassen, um die Hilfslinie zu entfernen",
+  "Français": "Position du repère, en px. Laissez vide pour supprimer le repère",
+  "한국어": "안내선 위치(px). 비워 두면 안내선이 지워집니다",
+  "中文": "参考线的位置（px）。留空即删除参考线",
+  "العربية": "موضع الدليل بالبكسل. اتركه فارغًا لإزالة الدليل",
+  "Tiếng Việt": "Vị trí của đường gióng, tính bằng px. Để trống để xóa đường gióng"
+ },
+ "Where the guide is": {
+  "日本語": "ガイドの位置",
+  "Español": "Posición de la guía",
+  "Deutsch": "Position der Hilfslinie",
+  "Français": "Position du repère",
+  "한국어": "안내선 위치",
+  "中文": "参考线位置",
+  "العربية": "موضع الدليل",
+  "Tiếng Việt": "Vị trí đường gióng"
+ },
+ "There's no room for more guides that way.": {
+  "日本語": "この向きにはこれ以上ガイドを追加できません。",
+  "Español": "No caben más guías en esa dirección.",
+  "Deutsch": "In dieser Richtung passen keine weiteren Hilfslinien.",
+  "Français": "Impossible d'ajouter d'autres repères dans ce sens.",
+  "한국어": "이 방향으로는 안내선을 더 추가할 수 없습니다.",
+  "中文": "这个方向无法再添加参考线。",
+  "العربية": "لا مجال لمزيد من الأدلة في هذا الاتجاه.",
+  "Tiếng Việt": "Không thể thêm đường gióng theo hướng này nữa."
+ },
+ "Auto layout": {
+  "日本語": "オートレイアウト",
+  "Español": "Diseño automático",
+  "Deutsch": "Auto-Layout",
+  "Français": "Mise en page auto",
+  "한국어": "자동 레이아웃",
+  "中文": "自动布局",
+  "العربية": "تخطيط تلقائي",
+  "Tiếng Việt": "Bố cục tự động"
+ },
+ "Put the picked layers in a frame that lines them up and grows with them (Shift+A)": {
+  "日本語": "選んだレイヤーを、整列させて中身に合わせて大きさが変わるフレームに入れます (Shift+A)",
+  "Español": "Pon las capas elegidas en un marco que las alinea y crece con ellas (Shift+A)",
+  "Deutsch": "Die gewählten Ebenen in einen Rahmen setzen, der sie aufreiht und mit ihnen wächst (Shift+A)",
+  "Français": "Placer les calques choisis dans un cadre qui les aligne et grandit avec eux (Shift+A)",
+  "한국어": "고른 레이어를 한 줄로 정렬하고 내용에 맞춰 커지는 프레임에 넣습니다 (Shift+A)",
+  "中文": "将所选图层放入一个框架，让它们排成一行并随内容变大 (Shift+A)",
+  "العربية": "ضع الطبقات المختارة في إطار يصفّها وينمو معها (Shift+A)",
+  "Tiếng Việt": "Đặt các lớp đã chọn vào một khung xếp chúng thẳng hàng và lớn lên theo chúng (Shift+A)"
+ },
+ "Which way the layers run": {
+  "日本語": "レイヤーを並べる向き",
+  "Español": "Hacia dónde van las capas",
+  "Deutsch": "In welche Richtung die Ebenen laufen",
+  "Français": "Dans quel sens vont les calques",
+  "한국어": "레이어가 놓이는 방향",
+  "中文": "图层排列的方向",
+  "العربية": "اتجاه ترتيب الطبقات",
+  "Tiếng Việt": "Hướng xếp các lớp"
+ },
+ "Gap": {
+  "日本語": "間隔",
+  "Español": "Espacio",
+  "Deutsch": "Abstand",
+  "Français": "Écart",
+  "한국어": "간격",
+  "中文": "间距",
+  "العربية": "الفجوة",
+  "Tiếng Việt": "Khoảng cách"
+ },
+ "Padding": {
+  "日本語": "余白",
+  "Español": "Relleno",
+  "Deutsch": "Innenabstand",
+  "Français": "Marge intérieure",
+  "한국어": "안쪽 여백",
+  "中文": "内边距",
+  "العربية": "الحشو",
+  "Tiếng Việt": "Đệm"
+ },
+ "Where the layers sit across the line": {
+  "日本語": "並びに対して横方向のどこに置くか",
+  "Español": "Dónde quedan las capas a lo ancho de la fila",
+  "Deutsch": "Wo die Ebenen quer zur Reihe sitzen",
+  "Français": "Où se placent les calques en travers de la ligne",
+  "한국어": "줄을 가로지르는 방향으로 레이어가 놓이는 곳",
+  "中文": "图层在行的横向上的位置",
+  "العربية": "موضع الطبقات عبر الصف",
+  "Tiếng Việt": "Vị trí các lớp theo chiều ngang của hàng"
+ },
+ "Padding and size…": {
+  "日本語": "余白とサイズ…",
+  "Español": "Relleno y tamaño…",
+  "Deutsch": "Innenabstand und Größe…",
+  "Français": "Marge et taille…",
+  "한국어": "여백과 크기…",
+  "中文": "内边距和大小…",
+  "العربية": "الحشو والحجم…",
+  "Tiếng Việt": "Đệm và kích thước…"
+ },
+ "Padding and size": {
+  "日本語": "余白とサイズ",
+  "Español": "Relleno y tamaño",
+  "Deutsch": "Innenabstand und Größe",
+  "Français": "Marge et taille",
+  "한국어": "여백과 크기",
+  "中文": "内边距和大小",
+  "العربية": "الحشو والحجم",
+  "Tiếng Việt": "Đệm và kích thước"
+ },
+ "Padding down": {
+  "日本語": "上下の余白",
+  "Español": "Relleno vertical",
+  "Deutsch": "Abstand oben und unten",
+  "Français": "Marge verticale",
+  "한국어": "위아래 여백",
+  "中文": "上下内边距",
+  "العربية": "الحشو العمودي",
+  "Tiếng Việt": "Đệm trên dưới"
+ },
+ "Hug": {
+  "日本語": "内容に合わせる",
+  "Español": "Ajustar",
+  "Deutsch": "Anpassen",
+  "Français": "Ajuster",
+  "한국어": "내용에 맞춤",
+  "中文": "适应内容",
+  "العربية": "احتضان",
+  "Tiếng Việt": "Ôm sát"
+ },
+ "Fixed": {
+  "日本語": "固定",
+  "Español": "Fijo",
+  "Deutsch": "Fest",
+  "Français": "Fixe",
+  "한국어": "고정",
+  "中文": "固定",
+  "العربية": "ثابت",
+  "Tiếng Việt": "Cố định"
+ },
+ "Hug makes the frame as large as what's in it. Fixed keeps the size it has; dragging its sides fixes it.": {
+  "日本語": "「内容に合わせる」はフレームを中身と同じ大きさにします。「固定」は今の大きさを保ちます。辺をドラッグすると固定になります。",
+  "Español": "Ajustar hace el marco tan grande como lo que contiene. Fijo mantiene el tamaño que tiene; arrastrar sus lados lo fija.",
+  "Deutsch": "Anpassen macht den Rahmen so groß wie seinen Inhalt. Fest behält die Größe, die er hat; das Ziehen an seinen Seiten macht sie fest.",
+  "Français": "Ajuster rend le cadre aussi grand que son contenu. Fixe garde la taille qu'il a ; tirer ses côtés la fixe.",
+  "한국어": "내용에 맞춤은 프레임을 안에 든 것만큼 크게 합니다. 고정은 지금 크기를 유지하며, 가장자리를 끌면 고정됩니다.",
+  "中文": "“适应内容”让框架与其中内容一样大。“固定”保持现有大小；拖动它的边会将其固定。",
+  "العربية": "الاحتضان يجعل الإطار بحجم ما فيه. الثابت يحافظ على حجمه الحالي، وسحب جوانبه يجعله ثابتاً.",
+  "Tiếng Việt": "Ôm sát làm khung lớn bằng những gì bên trong. Cố định giữ kích thước hiện có; kéo các cạnh của nó sẽ cố định nó."
+ },
+ "Double-click to pick a layer inside. Drag a layer along the line to move it among the others, or off the frame to take it out.": {
+  "日本語": "ダブルクリックで中のレイヤーを選べます。レイヤーを並びに沿ってドラッグすると順番が変わり、フレームの外へドラッグすると取り出せます。",
+  "Español": "Haz doble clic para elegir una capa de dentro. Arrastra una capa a lo largo de la fila para moverla entre las demás, o fuera del marco para sacarla.",
+  "Deutsch": "Doppelklicke, um eine Ebene darin zu wählen. Ziehe eine Ebene entlang der Reihe, um sie zwischen die anderen zu setzen, oder aus dem Rahmen, um sie herauszunehmen.",
+  "Français": "Double-cliquez pour choisir un calque à l'intérieur. Faites glisser un calque le long de la ligne pour le déplacer parmi les autres, ou hors du cadre pour l'en sortir.",
+  "한국어": "더블클릭하면 안의 레이어를 고릅니다. 레이어를 줄을 따라 끌면 다른 레이어 사이로 옮겨지고, 프레임 밖으로 끌면 빠집니다.",
+  "中文": "双击可选中其中的图层。沿着行拖动图层可在其他图层之间移动它，拖出框架则将它取出。",
+  "العربية": "انقر نقراً مزدوجاً لاختيار طبقة بداخله. اسحب طبقة على طول الصف لنقلها بين الأخرى، أو خارج الإطار لإخراجها.",
+  "Tiếng Việt": "Nhấp đúp để chọn một lớp bên trong. Kéo một lớp dọc theo hàng để đổi chỗ nó giữa các lớp khác, hoặc ra khỏi khung để lấy nó ra."
+ },
+ "Component": {
+  "日本語": "コンポーネント",
+  "Español": "Componente",
+  "Deutsch": "Komponente",
+  "Français": "Composant",
+  "한국어": "컴포넌트",
+  "中文": "组件",
+  "العربية": "مكوّن",
+  "Tiếng Việt": "Thành phần"
+ },
+ "Instance": {
+  "日本語": "インスタンス",
+  "Español": "Instancia",
+  "Deutsch": "Instanz",
+  "Français": "Instance",
+  "한국어": "인스턴스",
+  "中文": "实例",
+  "العربية": "نسخة",
+  "Tiếng Việt": "Phiên bản"
+ },
+ "Components": {
+  "日本語": "コンポーネント",
+  "Español": "Componentes",
+  "Deutsch": "Komponenten",
+  "Français": "Composants",
+  "한국어": "컴포넌트",
+  "中文": "组件",
+  "العربية": "المكوّنات",
+  "Tiếng Việt": "Thành phần"
+ },
+ "Components…": {
+  "日本語": "コンポーネント…",
+  "Español": "Componentes…",
+  "Deutsch": "Komponenten…",
+  "Français": "Composants…",
+  "한국어": "컴포넌트…",
+  "中文": "组件…",
+  "العربية": "المكوّنات…",
+  "Tiếng Việt": "Thành phần…"
+ },
+ "Place an instance of one of this design's components": {
+  "日本語": "このデザインのコンポーネントのインスタンスを配置します",
+  "Español": "Coloca una instancia de uno de los componentes de este diseño",
+  "Deutsch": "Eine Instanz einer Komponente dieses Designs platzieren",
+  "Français": "Placer une instance de l'un des composants de ce design",
+  "한국어": "이 디자인의 컴포넌트 인스턴스를 배치합니다",
+  "中文": "放置此设计中某个组件的实例",
+  "العربية": "ضع نسخة من أحد مكوّنات هذا التصميم",
+  "Tiếng Việt": "Đặt một phiên bản của một thành phần trong thiết kế này"
+ },
+ "Create component": {
+  "日本語": "コンポーネントを作成",
+  "Español": "Crear componente",
+  "Deutsch": "Komponente erstellen",
+  "Français": "Créer un composant",
+  "한국어": "컴포넌트 만들기",
+  "中文": "创建组件",
+  "العربية": "إنشاء مكوّن",
+  "Tiếng Việt": "Tạo thành phần"
+ },
+ "Create component (Ctrl+Alt+K)": {
+  "日本語": "コンポーネントを作成 (Ctrl+Alt+K)",
+  "Español": "Crear componente (Ctrl+Alt+K)",
+  "Deutsch": "Komponente erstellen (Ctrl+Alt+K)",
+  "Français": "Créer un composant (Ctrl+Alt+K)",
+  "한국어": "컴포넌트 만들기 (Ctrl+Alt+K)",
+  "中文": "创建组件 (Ctrl+Alt+K)",
+  "العربية": "إنشاء مكوّن (Ctrl+Alt+K)",
+  "Tiếng Việt": "Tạo thành phần (Ctrl+Alt+K)"
+ },
+ "Go to main component": {
+  "日本語": "メインコンポーネントへ移動",
+  "Español": "Ir al componente principal",
+  "Deutsch": "Zur Hauptkomponente",
+  "Français": "Aller au composant principal",
+  "한국어": "메인 컴포넌트로 이동",
+  "中文": "转到主组件",
+  "العربية": "الانتقال إلى المكوّن الرئيسي",
+  "Tiếng Việt": "Đến thành phần chính"
+ },
+ "Pick the main component this instance follows": {
+  "日本語": "このインスタンスが従うメインコンポーネントを選択します",
+  "Español": "Selecciona el componente principal que sigue esta instancia",
+  "Deutsch": "Die Hauptkomponente auswählen, der diese Instanz folgt",
+  "Français": "Sélectionner le composant principal que suit cette instance",
+  "한국어": "이 인스턴스가 따르는 메인 컴포넌트를 선택합니다",
+  "中文": "选中此实例所跟随的主组件",
+  "العربية": "حدّد المكوّن الرئيسي الذي تتبعه هذه النسخة",
+  "Tiếng Việt": "Chọn thành phần chính mà phiên bản này đi theo"
+ },
+ "Detach instance": {
+  "日本語": "インスタンスを切り離す",
+  "Español": "Separar instancia",
+  "Deutsch": "Instanz lösen",
+  "Français": "Détacher l'instance",
+  "한국어": "인스턴스 분리",
+  "中文": "分离实例",
+  "العربية": "فصل النسخة",
+  "Tiếng Việt": "Tách phiên bản"
+ },
+ "Detach instance (Ctrl+Alt+B)": {
+  "日本語": "インスタンスを切り離す (Ctrl+Alt+B)",
+  "Español": "Separar instancia (Ctrl+Alt+B)",
+  "Deutsch": "Instanz lösen (Ctrl+Alt+B)",
+  "Français": "Détacher l'instance (Ctrl+Alt+B)",
+  "한국어": "인스턴스 분리 (Ctrl+Alt+B)",
+  "中文": "分离实例 (Ctrl+Alt+B)",
+  "العربية": "فصل النسخة (Ctrl+Alt+B)",
+  "Tiếng Việt": "Tách phiên bản (Ctrl+Alt+B)"
+ },
+ "Pick some layers and click Create component (Ctrl+Alt+K) to make one.": {
+  "日本語": "レイヤーを選んで「コンポーネントを作成」(Ctrl+Alt+K) をクリックすると作成できます。",
+  "Español": "Selecciona algunas capas y haz clic en Crear componente (Ctrl+Alt+K) para crear uno.",
+  "Deutsch": "Wähle Ebenen aus und klicke auf „Komponente erstellen“ (Ctrl+Alt+K), um eine zu erstellen.",
+  "Français": "Sélectionnez des calques et cliquez sur Créer un composant (Ctrl+Alt+K) pour en créer un.",
+  "한국어": "레이어를 선택하고 컴포넌트 만들기(Ctrl+Alt+K)를 클릭하면 만들 수 있습니다.",
+  "中文": "选中一些图层并点击“创建组件”(Ctrl+Alt+K) 即可创建。",
+  "العربية": "حدّد بعض الطبقات وانقر على «إنشاء مكوّن» (Ctrl+Alt+K) لإنشاء واحد.",
+  "Tiếng Việt": "Chọn vài lớp rồi bấm Tạo thành phần (Ctrl+Alt+K) để tạo một thành phần."
+ },
+ "Place puts an instance in the middle of the view. Instances follow their main component: change the main, and every instance changes with it. Duplicate or Alt-drag a main to make an instance too.": {
+  "日本語": "「配置」で表示の中央にインスタンスを置きます。インスタンスはメインコンポーネントに従います。メインを変えると、すべてのインスタンスも一緒に変わります。メインを複製するか Alt を押しながらドラッグしても、インスタンスを作成できます。",
+  "Español": "Colocar pone una instancia en el centro de la vista. Las instancias siguen a su componente principal: cambia el principal y todas las instancias cambian con él. También puedes duplicar un principal o arrastrarlo con Alt para crear una instancia.",
+  "Deutsch": "„Platzieren“ setzt eine Instanz in die Mitte der Ansicht. Instanzen folgen ihrer Hauptkomponente: Ändere die Hauptkomponente, und jede Instanz ändert sich mit. Eine Hauptkomponente zu duplizieren oder mit Alt zu ziehen, erstellt ebenfalls eine Instanz.",
+  "Français": "Placer pose une instance au milieu de la vue. Les instances suivent leur composant principal : modifiez le principal, et chaque instance change avec lui. Dupliquer un principal ou le faire glisser avec Alt crée aussi une instance.",
+  "한국어": "배치를 누르면 보기 가운데에 인스턴스가 놓입니다. 인스턴스는 메인 컴포넌트를 따릅니다. 메인을 바꾸면 모든 인스턴스가 함께 바뀝니다. 메인을 복제하거나 Alt를 누른 채 드래그해도 인스턴스가 만들어집니다.",
+  "中文": "“放置”会在视图中央放一个实例。实例跟随其主组件：更改主组件，所有实例都会随之改变。复制主组件或按住 Alt 拖动它，也会创建实例。",
+  "العربية": "يضع «وضع» نسخة في منتصف العرض. تتبع النسخ مكوّنها الرئيسي: غيّر الرئيسي فتتغيّر كل النسخ معه. يؤدي تكرار المكوّن الرئيسي أو سحبه مع Alt إلى إنشاء نسخة أيضاً.",
+  "Tiếng Việt": "Đặt sẽ thả một phiên bản vào giữa khung nhìn. Các phiên bản đi theo thành phần chính: đổi thành phần chính thì mọi phiên bản đổi theo. Nhân bản hoặc kéo thành phần chính khi giữ Alt cũng tạo một phiên bản."
+ },
+ "Place": {
+  "日本語": "配置",
+  "Español": "Colocar",
+  "Deutsch": "Platzieren",
+  "Français": "Placer",
+  "한국어": "배치",
+  "中文": "放置",
+  "العربية": "وضع",
+  "Tiếng Việt": "Đặt"
+ },
+ "An instance of it in the middle of the view": {
+  "日本語": "表示の中央にこのインスタンスを置きます",
+  "Español": "Una instancia en el centro de la vista",
+  "Deutsch": "Eine Instanz davon in der Mitte der Ansicht",
+  "Français": "Une instance au milieu de la vue",
+  "한국어": "보기 가운데에 인스턴스를 놓습니다",
+  "中文": "在视图中央放一个它的实例",
+  "العربية": "نسخة منه في منتصف العرض",
+  "Tiếng Việt": "Một phiên bản của nó ở giữa khung nhìn"
+ },
+ "Delete this component?": {
+  "日本語": "このコンポーネントを削除しますか?",
+  "Español": "¿Eliminar este componente?",
+  "Deutsch": "Diese Komponente löschen?",
+  "Français": "Supprimer ce composant ?",
+  "한국어": "이 컴포넌트를 삭제할까요?",
+  "中文": "删除此组件?",
+  "العربية": "حذف هذا المكوّن؟",
+  "Tiếng Việt": "Xóa thành phần này?"
+ },
+ "Ungroup this component?": {
+  "日本語": "このコンポーネントのグループを解除しますか?",
+  "Español": "¿Desagrupar este componente?",
+  "Deutsch": "Gruppierung dieser Komponente aufheben?",
+  "Français": "Dissocier ce composant ?",
+  "한국어": "이 컴포넌트의 그룹을 해제할까요?",
+  "中文": "取消此组件的编组?",
+  "العربية": "فك تجميع هذا المكوّن؟",
+  "Tiếng Việt": "Rã nhóm thành phần này?"
+ },
+ "Its instance becomes a plain group, where it is now, looking as it does.": {
+  "日本語": "そのインスタンスは、今の場所と見た目のまま、普通のグループになります。",
+  "Español": "Su instancia pasa a ser un grupo normal, donde está ahora y con el mismo aspecto.",
+  "Deutsch": "Ihre Instanz wird zu einer einfachen Gruppe, an ihrem Platz und so, wie sie aussieht.",
+  "Français": "Son instance devient un simple groupe, là où elle est et telle qu'elle apparaît.",
+  "한국어": "그 인스턴스는 지금 자리와 모습 그대로 일반 그룹이 됩니다.",
+  "中文": "它的实例会变成普通编组，位置和外观保持不变。",
+  "العربية": "تصبح نسخته مجموعة عادية، في مكانها الحالي وبالشكل نفسه.",
+  "Tiếng Việt": "Phiên bản của nó thành một nhóm thường, ở đúng chỗ và giữ nguyên dáng vẻ."
+ },
+ "Its {n} instances become plain groups, where they are now, looking as they do.": {
+  "日本語": "その {n} 個のインスタンスは、今の場所と見た目のまま、普通のグループになります。",
+  "Español": "Sus {n} instancias pasan a ser grupos normales, donde están ahora y con el mismo aspecto.",
+  "Deutsch": "Ihre {n} Instanzen werden zu einfachen Gruppen, an ihrem Platz und so, wie sie aussehen.",
+  "Français": "Ses {n} instances deviennent de simples groupes, là où elles sont et telles qu'elles apparaissent.",
+  "한국어": "그 인스턴스 {n}개는 지금 자리와 모습 그대로 일반 그룹이 됩니다.",
+  "中文": "它的 {n} 个实例会变成普通编组，位置和外观保持不变。",
+  "العربية": "تصبح نسخه البالغ عددها {n} مجموعات عادية، في أماكنها الحالية وبالشكل نفسه.",
+  "Tiếng Việt": "{n} phiên bản của nó thành các nhóm thường, ở đúng chỗ và giữ nguyên dáng vẻ."
+ },
+ "A design draws up to {n} layers, each instance counted as all of its main's layers.": {
+  "日本語": "デザインに描けるレイヤーは最大 {n} 個です。インスタンスはメインのレイヤーをすべて数えます。",
+  "Español": "Un diseño dibuja hasta {n} capas, y cada instancia cuenta como todas las capas de su principal.",
+  "Deutsch": "Ein Design zeichnet bis zu {n} Ebenen, jede Instanz gezählt mit allen Ebenen ihrer Hauptkomponente.",
+  "Français": "Un design dessine jusqu'à {n} calques, chaque instance comptant pour tous les calques de son principal.",
+  "한국어": "디자인에는 레이어를 최대 {n}개까지 그릴 수 있으며, 인스턴스는 메인의 레이어를 모두 셉니다.",
+  "中文": "一个设计最多绘制 {n} 个图层，每个实例按其主组件的全部图层计算。",
+  "العربية": "يرسم التصميم حتى {n} طبقة، وتُحسب كل نسخة بكل طبقات مكوّنها الرئيسي.",
+  "Tiếng Việt": "Một thiết kế vẽ tối đa {n} lớp, mỗi phiên bản được tính bằng mọi lớp của thành phần chính."
+ },
+ "An instance moves but isn't mirrored: flip its main component, or detach it first.": {
+  "日本語": "インスタンスは移動しますが反転はしません。メインコンポーネントを反転するか、先に切り離してください。",
+  "Español": "Una instancia se mueve pero no se refleja: voltea su componente principal o sepárala primero.",
+  "Deutsch": "Eine Instanz wird verschoben, aber nicht gespiegelt: Spiegle ihre Hauptkomponente oder löse sie zuerst.",
+  "Français": "Une instance se déplace mais n'est pas retournée : retournez son composant principal ou détachez-la d'abord.",
+  "한국어": "인스턴스는 이동하지만 뒤집히지 않습니다. 메인 컴포넌트를 뒤집거나 먼저 분리하세요.",
+  "中文": "实例会移动但不会翻转：请翻转它的主组件，或先将其分离。",
+  "العربية": "تتحرك النسخة لكنها لا تنقلب: اقلب مكوّنها الرئيسي أو افصلها أولاً.",
+  "Tiếng Việt": "Bản sao được di chuyển nhưng không lật: hãy lật thành phần chính của nó, hoặc tách nó ra trước."
+ },
+ "Round each corner its own way": {
+  "日本語": "角ごとに丸みを変える",
+  "Español": "Redondear cada esquina por separado",
+  "Deutsch": "Jede Ecke einzeln abrunden",
+  "Français": "Arrondir chaque coin séparément",
+  "한국어": "모서리마다 따로 둥글게",
+  "中文": "分别设置每个角的圆角",
+  "العربية": "تدوير كل زاوية على حدة",
+  "Tiếng Việt": "Bo tròn từng góc riêng"
+ },
+ "Each corner": {
+  "日本語": "角ごと",
+  "Español": "Cada esquina",
+  "Deutsch": "Jede Ecke",
+  "Français": "Chaque coin",
+  "한국어": "모서리별",
+  "中文": "每个角",
+  "العربية": "كل زاوية",
+  "Tiếng Việt": "Từng góc"
+ },
+ "Top left": {
+  "日本語": "左上",
+  "Español": "Arriba a la izquierda",
+  "Deutsch": "Oben links",
+  "Français": "En haut à gauche",
+  "한국어": "왼쪽 위",
+  "中文": "左上",
+  "العربية": "أعلى اليسار",
+  "Tiếng Việt": "Trên trái"
+ },
+ "Top right": {
+  "日本語": "右上",
+  "Español": "Arriba a la derecha",
+  "Deutsch": "Oben rechts",
+  "Français": "En haut à droite",
+  "한국어": "오른쪽 위",
+  "中文": "右上",
+  "العربية": "أعلى اليمين",
+  "Tiếng Việt": "Trên phải"
+ },
+ "Bottom left": {
+  "日本語": "左下",
+  "Español": "Abajo a la izquierda",
+  "Deutsch": "Unten links",
+  "Français": "En bas à gauche",
+  "한국어": "왼쪽 아래",
+  "中文": "左下",
+  "العربية": "أسفل اليسار",
+  "Tiếng Việt": "Dưới trái"
+ },
+ "Bottom right": {
+  "日本語": "右下",
+  "Español": "Abajo a la derecha",
+  "Deutsch": "Unten rechts",
+  "Français": "En bas à droite",
+  "한국어": "오른쪽 아래",
+  "中文": "右下",
+  "العربية": "أسفل اليمين",
+  "Tiếng Việt": "Dưới phải"
+ },
+ "Or drag the dots inside the corners on the canvas. Alt-drag a dot to round that corner alone.": {
+  "日本語": "キャンバス上で角の内側の点をドラッグしても変えられます。Alt キーを押しながら点をドラッグすると、その角だけが丸くなります。",
+  "Español": "También puedes arrastrar los puntos dentro de las esquinas en el lienzo. Arrastra un punto con Alt para redondear solo esa esquina.",
+  "Deutsch": "Oder ziehe die Punkte innen in den Ecken auf der Leinwand. Ziehe einen Punkt mit Alt, um nur diese Ecke abzurunden.",
+  "Français": "Ou faites glisser les points à l'intérieur des coins sur le canevas. Faites glisser un point avec Alt pour n'arrondir que ce coin.",
+  "한국어": "또는 캔버스에서 모서리 안쪽의 점을 드래그하세요. Alt 키를 누른 채 점을 드래그하면 그 모서리만 둥글어집니다.",
+  "中文": "也可以在画布上拖动角内侧的圆点。按住 Alt 拖动圆点，只改变那一个角。",
+  "العربية": "أو اسحب النقاط داخل الزوايا على اللوحة. اسحب نقطة مع الضغط على Alt لتدوير تلك الزاوية وحدها.",
+  "Tiếng Việt": "Hoặc kéo các chấm bên trong góc trên khung vẽ. Giữ Alt khi kéo một chấm để chỉ bo tròn góc đó."
+ },
+ "Move the shape's points one by one (a shape that isn't a path becomes one)": {
+  "日本語": "図形のポイントを1つずつ動かします（パスでない図形はパスになります）",
+  "Español": "Mueve los puntos de la forma uno a uno (una forma que no es un trazado se convierte en uno)",
+  "Deutsch": "Die Punkte der Form einzeln verschieben (eine Form, die kein Pfad ist, wird zu einem)",
+  "Français": "Déplacer les points de la forme un par un (une forme qui n'est pas un tracé en devient un)",
+  "한국어": "도형의 점을 하나씩 옮깁니다 (패스가 아닌 도형은 패스가 됩니다)",
+  "中文": "逐个移动形状的节点（不是路径的形状会变成路径）",
+  "العربية": "تحريك نقاط الشكل واحدة تلو الأخرى (الشكل الذي ليس مسارًا يصبح مسارًا)",
+  "Tiếng Việt": "Di chuyển từng điểm của hình (hình không phải đường dẫn sẽ thành đường dẫn)"
+ },
+ "Put it back as it was when you drew it: its shape, size, turn and look. It stays where it is.": {
+  "日本語": "描いたときの状態に戻します（形、サイズ、回転、見た目）。位置はそのままです。",
+  "Español": "Vuelve a dejarlo como estaba al dibujarlo: su forma, tamaño, giro y aspecto. Se queda donde está.",
+  "Deutsch": "Setzt es zurück, wie es beim Zeichnen war: Form, Größe, Drehung und Aussehen. Es bleibt, wo es ist.",
+  "Français": "Le remet tel qu'il était quand vous l'avez dessiné : sa forme, sa taille, sa rotation et son apparence. Il reste à sa place.",
+  "한국어": "그렸을 때의 모습으로 되돌립니다: 모양, 크기, 회전, 모양새. 위치는 그대로입니다.",
+  "中文": "恢复到刚画出时的样子：形状、大小、旋转和外观。位置保持不变。",
+  "العربية": "يعيده كما كان عندما رسمته: شكله وحجمه ودورانه ومظهره. ويبقى في مكانه.",
+  "Tiếng Việt": "Đưa về như lúc bạn vừa vẽ: hình dạng, kích thước, góc xoay và giao diện. Vị trí giữ nguyên."
+ }
+}

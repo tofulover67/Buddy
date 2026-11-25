@@ -1,0 +1,103 @@
+{
+ "_comment": "Design. English -> each language; see core/i18n.py.",
+ "Click the design to take its colour. Escape stops.": {
+  "日本語": "デザインをクリックすると、その色を取ります。Escape で終わります。",
+  "Español": "Haz clic en el diseño para tomar su color. Escape termina.",
+  "Deutsch": "Klicke auf das Design, um seine Farbe zu übernehmen. Escape beendet.",
+  "Français": "Cliquez sur le design pour prendre sa couleur. Escape arrête.",
+  "한국어": "디자인을 클릭해 그 색을 가져옵니다. Escape로 멈춥니다.",
+  "中文": "单击设计即可取用该处的颜色。Escape 停止。",
+  "العربية": "انقر على التصميم لأخذ لونه. Escape للإيقاف.",
+  "Tiếng Việt": "Nhấp vào thiết kế để lấy màu của nó. Escape để dừng."
+ },
+ "Click the design to take its colour for the stroke. Escape stops.": {
+  "日本語": "デザインをクリックすると、その色を線に使います。Escape で終わります。",
+  "Español": "Haz clic en el diseño para tomar su color para el trazo. Escape termina.",
+  "Deutsch": "Klicke auf das Design, um seine Farbe für die Kontur zu übernehmen. Escape beendet.",
+  "Français": "Cliquez sur le design pour prendre sa couleur pour le contour. Escape arrête.",
+  "한국어": "디자인을 클릭해 그 색을 선에 가져옵니다. Escape로 멈춥니다.",
+  "中文": "单击设计即可取用该处的颜色作为描边。Escape 停止。",
+  "العربية": "انقر على التصميم لأخذ لونه للحدّ. Escape للإيقاف.",
+  "Tiếng Việt": "Nhấp vào thiết kế để lấy màu của nó cho viền. Escape để dừng."
+ },
+ "Click the design to take its colour. Shift-click gives it to the stroke. Escape stops.": {
+  "日本語": "デザインをクリックすると、その色を取ります。Shift+クリックで線の色になります。Escape で終わります。",
+  "Español": "Haz clic en el diseño para tomar su color. Shift+clic lo da al trazo. Escape termina.",
+  "Deutsch": "Klicke auf das Design, um seine Farbe zu übernehmen. Mit Umschalt-Klick geht sie an die Kontur. Escape beendet.",
+  "Français": "Cliquez sur le design pour prendre sa couleur. Shift+clic la donne au contour. Escape arrête.",
+  "한국어": "디자인을 클릭해 그 색을 가져옵니다. Shift+클릭하면 선에 적용됩니다. Escape로 멈춥니다.",
+  "中文": "单击设计即可取用该处的颜色。按住 Shift 单击则用于描边。Escape 停止。",
+  "العربية": "انقر على التصميم لأخذ لونه. النقر مع Shift يعطيه للحدّ. Escape للإيقاف.",
+  "Tiếng Việt": "Nhấp vào thiết kế để lấy màu của nó. Shift+nhấp để dùng cho viền. Escape để dừng."
+ },
+ "Nothing here": {
+  "日本語": "何もありません",
+  "Español": "Nada aquí",
+  "Deutsch": "Hier ist nichts",
+  "Français": "Rien ici",
+  "한국어": "아무것도 없음",
+  "中文": "此处无内容",
+  "العربية": "لا شيء هنا",
+  "Tiếng Việt": "Không có gì ở đây"
+ },
+ "Take this colour from the canvas": {
+  "日本語": "この色をキャンバスから取る",
+  "Español": "Tomar este color del lienzo",
+  "Deutsch": "Diese Farbe von der Leinwand nehmen",
+  "Français": "Prendre cette couleur sur le canevas",
+  "한국어": "이 색을 캔버스에서 가져오기",
+  "中文": "从画布取用此颜色",
+  "العربية": "خذ هذا اللون من اللوحة",
+  "Tiếng Việt": "Lấy màu này từ khung vẽ"
+ },
+ "Anywhere on the screen": {
+  "日本語": "画面のどこからでも",
+  "Español": "En cualquier parte de la pantalla",
+  "Deutsch": "Überall auf dem Bildschirm",
+  "Français": "N'importe où sur l'écran",
+  "한국어": "화면 어디에서나",
+  "中文": "屏幕上任意位置",
+  "العربية": "في أي مكان على الشاشة",
+  "Tiếng Việt": "Bất cứ đâu trên màn hình"
+ },
+ "Take the colour from anywhere on the screen, outside Buddy too. A right-click stops.": {
+  "日本語": "画面のどこからでも色を取ります。Buddy の外からも取れます。右クリックで終わります。",
+  "Español": "Toma el color de cualquier parte de la pantalla, también fuera de Buddy. Un clic derecho termina.",
+  "Deutsch": "Übernimm die Farbe von überall auf dem Bildschirm, auch außerhalb von Buddy. Ein Rechtsklick beendet.",
+  "Français": "Prenez la couleur n'importe où sur l'écran, même hors de Buddy. Un clic droit arrête.",
+  "한국어": "화면 어디에서나, Buddy 밖에서도 색을 가져옵니다. 오른쪽 클릭으로 멈춥니다.",
+  "中文": "从屏幕上任意位置取色，Buddy 之外也可以。右键单击停止。",
+  "العربية": "خذ اللون من أي مكان على الشاشة، حتى خارج Buddy. النقر بالزر الأيمن للإيقاف.",
+  "Tiếng Việt": "Lấy màu từ bất cứ đâu trên màn hình, cả bên ngoài Buddy. Nhấp chuột phải để dừng."
+ },
+ "Nothing is drawn there to take a colour from.": {
+  "日本語": "そこには色を取れるものが何も描かれていません。",
+  "Español": "Ahí no hay nada dibujado de lo que tomar un color.",
+  "Deutsch": "Dort ist nichts gezeichnet, von dem eine Farbe genommen werden kann.",
+  "Français": "Rien n'est dessiné là pour en prendre la couleur.",
+  "한국어": "그곳에는 색을 가져올 것이 그려져 있지 않습니다.",
+  "中文": "那里没有绘制任何可取色的内容。",
+  "العربية": "لا شيء مرسوم هناك لأخذ لون منه.",
+  "Tiếng Việt": "Không có gì được vẽ ở đó để lấy màu."
+ },
+ "What's picked has no colour like that to change.": {
+  "日本語": "選んだものには、変えられるそのような色がありません。",
+  "Español": "Lo seleccionado no tiene un color así que cambiar.",
+  "Deutsch": "Das Ausgewählte hat keine solche Farbe, die sich ändern ließe.",
+  "Français": "Ce qui est sélectionné n'a pas de couleur de ce genre à changer.",
+  "한국어": "선택한 항목에는 바꿀 수 있는 그런 색이 없습니다.",
+  "中文": "所选内容没有可更改的此类颜色。",
+  "العربية": "ما تم تحديده ليس له لون كهذا لتغييره.",
+  "Tiếng Việt": "Thứ đã chọn không có màu như vậy để thay đổi."
+ },
+ "Pick a layer first, then press I to take a colour for it.": {
+  "日本語": "先にレイヤーを選んでから I を押すと、その色を取れます。",
+  "Español": "Primero selecciona una capa y luego pulsa I para tomar un color para ella.",
+  "Deutsch": "Wähle zuerst eine Ebene aus und drücke dann I, um eine Farbe für sie zu übernehmen.",
+  "Français": "Sélectionnez d'abord un calque, puis appuyez sur I pour lui prendre une couleur.",
+  "한국어": "먼저 레이어를 선택한 뒤 I를 눌러 색을 가져오세요.",
+  "中文": "请先选择一个图层，然后按 I 为它取色。",
+  "العربية": "اختر طبقة أولاً، ثم اضغط I لأخذ لون لها.",
+  "Tiếng Việt": "Hãy chọn một lớp trước, rồi nhấn I để lấy màu cho nó."
+ }
+}

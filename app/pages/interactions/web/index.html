@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Interactions</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <!-- The page's frame - head, preview and player, groups of controls, pop-up panels,
+         foot - is Data Graphics', whose page this one is built on (page.py). -->
+    <link rel="stylesheet" href="../../data_graphics/web/graphics.css">
+    <link rel="stylesheet" href="interactions.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page dg">
+    <header class="page-head dg-head">
+        <nav class="tabs dg-tabs" role="tablist" id="graphics-tabs" aria-label="Design Studio tools">
+            <button type="button" role="tab" data-tab="design" aria-selected="false">Design</button>
+            <button type="button" role="tab" data-tab="interactions" aria-selected="true">Interactions</button>
+            <button type="button" role="tab" data-tab="panels" aria-selected="false">Panels</button>
+        </nav>
+        <span class="dg-history">
+            <button type="button" class="btn ghost icon" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
+            <button type="button" class="btn ghost icon" id="redo" title="Redo (Ctrl+Y)" aria-label="Redo"></button>
+            <button type="button" class="btn ghost" id="reset" title="Start again from the template">Reset</button>
+        </span>
+        <span class="spacer"></span>
+        <span class="dg-where">
+            <span class="dg-dot" id="dot" aria-hidden="true"></span>
+            <span class="dg-where-text" id="timeline" translate="no"></span>
+        </span>
+        <button type="button" class="btn ghost icon" id="refresh" title="Read the open timeline again"
+                aria-label="Read the timeline again"></button>
+    </header>
+
+    <div class="dg-scroll">
+        <div class="dg-work">
+            <section class="dg-view" aria-label="Preview">
+                <div class="row ix-modes">
+                    <div class="segmented" id="mode" role="group" aria-label="What the mouse does on the stage">
+                        <button type="button" data-value="arrange" title="Move and resize the shapes">Arrange</button>
+                        <button type="button" data-value="try" title="Your mouse is the cursor: the shapes answer it">Try it</button>
+                    </div>
+                    <span class="spacer"></span>
+                    <span class="ix-rec-time" id="rec-time" translate="no"></span>
+                    <button type="button" class="btn" id="record" title="Keep what your mouse does as the cursor in the clip">Record the cursor</button>
+                </div>
+                <div class="dg-stage ix-stage" id="stage-box"><canvas id="stage" width="640" height="360"></canvas></div>
+                <div class="dg-player">
+                    <button type="button" class="btn icon" id="play"></button>
+                    <input type="range" id="scrub" min="0" max="1" value="0" step="1" aria-label="Position">
+                    <span class="dg-time" id="time" translate="no"></span>
+                </div>
+                <p class="dg-hint" id="hint"></p>
+                <p class="dg-hint">Shown on black here. On your timeline only the shapes and the cursor are drawn, over whatever is under them.</p>
+                <p class="warn" id="problem"></p>
+            </section>
+
+            <div class="dg-controls">
+                <section class="dg-group" aria-labelledby="g-shapes">
+                    <h2 class="dg-group-title" id="g-shapes">Add a shape</h2>
+                    <div class="dg-presets" id="kinds" role="group" aria-label="Add a shape">
+                        <button type="button" class="btn" data-kind="button">Button</button>
+                        <button type="button" class="btn" data-kind="card">Card</button>
+                        <button type="button" class="btn" data-kind="circle">Circle</button>
+                        <button type="button" class="btn" data-kind="image" title="A picture from a PNG or JPEG file. You can also drop image files on this page">Image</button>
+                    </div>
+                </section>
+
+                <section class="dg-group" id="picked-group" aria-labelledby="g-picked">
+                    <h2 class="dg-group-title" id="g-picked">The shape you picked</h2>
+                    <p class="dg-hint" id="none-picked">Click a shape on the stage to change it.</p>
+                    <div id="picked-fields">
+                        <div class="dg-fields">
+                            <label class="lbl wide">Label
+                                <input type="text" class="field" id="el-label" maxlength="40" autocomplete="off" spellcheck="false">
+                            </label>
+                            <label class="lbl wide" id="el-radius-box">Corners
+                                <input type="range" id="el-radius" min="0" max="100" step="1">
+                            </label>
+                        </div>
+                        <div class="dg-checks">
+                            <label class="dg-pick">Colour <input type="color" class="dg-colour" id="el-colour"></label>
+                            <label class="check" title="Off, it stays still: a panel behind the others"><input type="checkbox" id="el-reacts"> Answers the cursor</label>
+                        </div>
+                        <div class="dg-presets">
+                            <button type="button" class="btn" id="el-front">Bring to front</button>
+                            <button type="button" class="btn" id="el-remove">Remove</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-answer">
+                    <h2 class="dg-group-title" id="g-answer">How shapes answer</h2>
+                    <div class="dg-checks">
+                        <div class="segmented" id="look" role="group" aria-label="Show the shapes as they look">
+                            <button type="button" data-value="rest" title="As they are with the cursor away">Rest</button>
+                            <button type="button" data-value="hover" title="As they are with the cursor over them">Hover</button>
+                            <button type="button" data-value="press" title="As they are while they're clicked">Pressed</button>
+                        </div>
+                    </div>
+                    <div class="dg-presets">
+                        <button type="button" class="btn" id="edit-states" aria-expanded="false">States…</button>
+                        <button type="button" class="btn" id="edit-timing" aria-expanded="false">Timing…</button>
+                        <button type="button" class="btn" id="edit-outline" aria-expanded="false">Outline…</button>
+                        <button type="button" class="btn" id="edit-labels" aria-expanded="false">Label text…</button>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-cursor">
+                    <h2 class="dg-group-title" id="g-cursor">The cursor</h2>
+                    <div class="dg-checks">
+                        <div class="segmented" data-key="cursor" role="group" aria-label="The cursor">
+                            <button type="button" data-value="windows" title="The pointer Windows has: white, edged in black"><span translate="no">Windows</span></button>
+                            <button type="button" data-value="mac" title="The pointer a Mac has: black, edged in white"><span translate="no">Mac</span></button>
+                            <button type="button" data-value="dot">A dot</button>
+                            <button type="button" data-value="none" title="The shapes still answer it">Not drawn</button>
+                        </div>
+                    </div>
+                    <div class="dg-fields">
+                        <label class="lbl">Size
+                            <input type="range" data-key="cursor_size" min="1" max="20" step="0.5">
+                        </label>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- The detailed options, each a small panel over the page. -->
+    <section class="dg-pop" id="states-pop" hidden aria-labelledby="states-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="states-title">States</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="ix-states">
+            <figure class="ix-state"><canvas id="state-rest" width="120" height="72" role="img" aria-label="Rest"></canvas><figcaption>Rest</figcaption></figure>
+            <figure class="ix-state"><canvas id="state-hover" width="120" height="72" role="img" aria-label="Hover"></canvas><figcaption>Hover</figcaption></figure>
+            <figure class="ix-state"><canvas id="state-press" width="120" height="72" role="img" aria-label="Pressed"></canvas><figcaption>Pressed</figcaption></figure>
+        </div>
+        <label class="check" id="own-box"><input type="checkbox" id="own-states"> Only this shape</label>
+        <div class="ix-state-cols">
+            <div class="dg-fields" data-state="hover">
+                <h3 class="dg-group-title">Hover</h3>
+                <label class="lbl wide">Grows (%)<input type="range" data-answer="grow" min="-50" max="50" step="0.5"></label>
+                <label class="lbl wide">Lifts (%)<input type="range" data-answer="lift" min="-20" max="20" step="0.1"></label>
+                <label class="lbl wide">Glows (%)<input type="range" data-answer="glow" min="0" max="100" step="1"></label>
+                <label class="lbl wide">Outlined (%)<input type="range" data-answer="outline" min="0" max="100" step="1"></label>
+            </div>
+            <div class="dg-fields" data-state="press">
+                <h3 class="dg-group-title">Pressed</h3>
+                <label class="lbl wide">Grows (%)<input type="range" data-answer="grow" min="-50" max="50" step="0.5"></label>
+                <label class="lbl wide">Lifts (%)<input type="range" data-answer="lift" min="-20" max="20" step="0.1"></label>
+                <label class="lbl wide">Glows (%)<input type="range" data-answer="glow" min="0" max="100" step="1"></label>
+                <label class="lbl wide">Outlined (%)<input type="range" data-answer="outline" min="0" max="100" step="1"></label>
+            </div>
+        </div>
+        <p class="dg-hint">These are every shape's, unless “Only this shape” gives the shape you picked its own.</p>
+    </section>
+
+    <section class="dg-pop" id="timing-pop" hidden aria-labelledby="timing-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="timing-title">Timing</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="lbl">Seconds a hover takes to come and go
+            <input type="text" class="field" data-key="hover_seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="lbl">Seconds a click takes to dip and come back
+            <input type="text" class="field" data-key="press_seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="lbl">Seconds the clip lasts
+            <input type="text" class="field" data-key="seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <p class="dg-hint">Recording the cursor sets how long the clip lasts. Shorter cuts the end off; longer holds the cursor where it stopped.</p>
+    </section>
+
+    <section class="dg-pop" id="outline-pop" hidden aria-labelledby="outline-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="outline-title">Outline</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="dg-pick">Colour <input type="color" class="dg-colour" data-key="outline_colour"></label>
+        <label class="lbl">Thickness
+            <input type="range" data-key="outline_width" min="0.1" max="5" step="0.1">
+        </label>
+        <p class="dg-hint">A thin line traced round a shape. Turn it up for Hover or Pressed with “Outlined” in States…</p>
+    </section>
+
+    <section class="dg-pop" id="labels-pop" hidden aria-labelledby="labels-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="labels-title">Label text</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="lbl">Font
+            <select class="field" id="font" data-key="font" translate="no"></select>
+        </label>
+        <label class="lbl">Style
+            <select class="field" id="style" data-key="style" translate="no"></select>
+        </label>
+        <label class="lbl">Size
+            <input type="range" data-key="label_size" min="1" max="20" step="0.1">
+        </label>
+        <label class="dg-pick">Colour <input type="color" class="dg-colour" data-key="label_colour"></label>
+    </section>
+
+    <footer class="dg-foot">
+        <span class="dg-note">You get a new clip at the playhead. Nothing you already have is changed.</span>
+        <label class="check"><input type="checkbox" id="replace"> Replace the interaction Buddy put there before</label>
+        <button type="button" class="btn accent dg-main-btn" id="add">Add to timeline</button>
+    </footer>
+</main>
+<script src="interactions.js"></script>
+<script src="../../data_graphics/web/tabs.js"></script>
+</body>
+</html>

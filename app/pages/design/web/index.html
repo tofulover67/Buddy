@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Design</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <!-- The page's frame - head, groups of controls, pop-up panels, foot - is Data
+         Graphics', whose page this one is built on (page.py). -->
+    <link rel="stylesheet" href="../../data_graphics/web/graphics.css">
+    <link rel="stylesheet" href="design.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page dg ds">
+    <header class="page-head dg-head">
+        <nav class="tabs dg-tabs" role="tablist" id="graphics-tabs" aria-label="Design Studio tools">
+            <button type="button" role="tab" data-tab="design" aria-selected="true">Design</button>
+            <button type="button" role="tab" data-tab="interactions" aria-selected="false">Interactions</button>
+            <button type="button" role="tab" data-tab="panels" aria-selected="false">Panels</button>
+        </nav>
+        <span class="dg-history">
+            <button type="button" class="btn ghost icon" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
+            <button type="button" class="btn ghost icon" id="redo" title="Redo (Ctrl+Y)" aria-label="Redo"></button>
+        </span>
+        <button type="button" class="btn" id="edit-designs" aria-expanded="false" title="Save this design, or open one you saved">Designs…</button>
+        <button type="button" class="btn" id="edit-components" aria-expanded="false" title="Place an instance of one of this design's components">Components…</button>
+        <span class="ds-name" id="name" translate="no"></span>
+        <span class="ds-unsaved" id="unsaved" hidden>Not saved</span>
+        <span class="spacer"></span>
+        <span class="dg-where">
+            <span class="dg-dot" id="dot" aria-hidden="true"></span>
+            <span class="dg-where-text" id="timeline" translate="no"></span>
+        </span>
+        <button type="button" class="btn ghost icon" id="refresh" title="Read the open timeline again"
+                aria-label="Read the timeline again"></button>
+    </header>
+
+    <div class="ds-work">
+        <aside class="ds-left">
+            <div class="ds-tools" id="tools" role="group" aria-label="Tools">
+                <button type="button" class="btn ghost icon" data-tool="select" title="Select and move (V)" aria-label="Select">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 2l10 7-4.6.9 2.6 5-1.8.9-2.6-5L4 14z"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="rect" title="Rectangle (R)" aria-label="Rectangle">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="1.5"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="ellipse" title="Ellipse (O)" aria-label="Ellipse">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><ellipse cx="9" cy="9" rx="6.5" ry="6.5"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="line" title="Line (L)" aria-label="Line">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 15L15 3"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="polygon" title="Polygon" aria-label="Polygon">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2l6.5 4.7-2.5 7.8H5L2.5 6.7z"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="star" title="Star" aria-label="Star">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2l2.1 4.6 5 .6-3.7 3.4 1 4.9L9 13l-4.4 2.5 1-4.9L1.9 7.2l5-.6z"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="pen" title="Pen: click for corners, drag for curves (P)" aria-label="Pen">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 15l1-4.5L12 2.5l3.5 3.5L7.5 14zM10.5 4l3.5 3.5"/></svg></button>
+                <button type="button" class="btn ghost icon" data-tool="text" title="Text (T)" aria-label="Text">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 5V3.5h11V5M9 3.5v11M6.5 14.5h5"/></svg></button>
+                <button type="button" class="btn ghost icon" id="new-image" title="A picture from a PNG or JPEG file. You can also drop image files on this page" aria-label="Image">
+                    <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2.5" y="3.5" width="13" height="11" rx="1.5"/><path d="M2.5 12l4-4 3.5 3.5 2-2 3.5 3.5"/></svg></button>
+            </div>
+            <h2 class="dg-group-title">Layers</h2>
+            <div class="ds-layers" id="layers" role="listbox" aria-label="Layers" aria-multiselectable="true"></div>
+            <p class="dg-hint" id="no-layers">Pick a tool and draw on the canvas.</p>
+            <div class="ds-layer-buttons">
+                <button type="button" class="btn ghost" id="order-up" title="Bring forward (Ctrl+])">Forward</button>
+                <button type="button" class="btn ghost" id="order-down" title="Send backward (Ctrl+[)">Backward</button>
+            </div>
+        </aside>
+
+        <section class="ds-mid" aria-label="Canvas">
+            <div class="ds-stage" id="stage-box"><canvas id="stage" width="640" height="360"></canvas><canvas id="rulers" width="640" height="360" aria-hidden="true"></canvas>
+                <button type="button" class="ds-ruler-corner" id="ruler-corner" aria-haspopup="menu" title="Guides: show, lock or clear them" aria-label="Guides">
+                    <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 4h9M4 1.5v9"/></svg></button></div>
+            <div class="ds-bar">
+                <button type="button" class="btn ghost" id="zoom-out" title="Zoom out" aria-label="Zoom out"><span translate="no">−</span></button>
+                <span class="ds-zoom" id="zoom" translate="no"></span>
+                <button type="button" class="btn ghost" id="zoom-in" title="Zoom in" aria-label="Zoom in"><span translate="no">+</span></button>
+                <button type="button" class="btn ghost" id="zoom-fit" title="Show the whole canvas">Fit</button>
+                <button type="button" class="btn ghost" id="rulers-toggle" aria-pressed="true" title="Show or hide the rulers (Shift+R). Drag from a ruler to make a guide">Rulers</button>
+                <span class="dg-hint" id="hint"></span>
+                <span class="spacer"></span>
+                <span class="warn" id="problem"></span>
+            </div>
+        </section>
+
+        <aside class="ds-right dg-controls">
+            <section class="dg-group" id="canvas-group">
+                <h2 class="dg-group-title">Canvas</h2>
+                <div class="dg-fields">
+                    <label class="lbl narrow">Width
+                        <input type="text" class="field" id="canvas-w" inputmode="numeric" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow">Height
+                        <input type="text" class="field" id="canvas-h" inputmode="numeric" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow">Seconds
+                        <input type="text" class="field" id="seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                </div>
+                <div class="dg-presets">
+                    <button type="button" class="btn" id="match-timeline" title="Make the canvas the size of the open timeline">Match the timeline</button>
+                </div>
+                <p class="dg-hint" id="size-note"></p>
+                <p class="dg-hint">Click a layer to change it. Shift-click picks more than one.</p>
+                <p class="dg-hint">Number fields take sums (120+40, 300/2), and dragging a field's name changes it. Alt-drag a layer to copy it. Hold Alt while resizing to grow it from its middle, or over another layer to measure the gap.</p>
+            </section>
+
+            <section class="dg-group" id="place-group">
+                <h2 class="dg-group-title" id="picked-title" translate="no"></h2>
+                <div class="dg-fields" id="box-fields">
+                    <label class="lbl narrow"><span translate="no">X</span>
+                        <input type="text" class="field" data-prop="x" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow"><span translate="no">Y</span>
+                        <input type="text" class="field" data-prop="y" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow" data-for="rot">Turn
+                        <input type="text" class="field" data-prop="rot" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow" data-for="w">Width
+                        <input type="text" class="field" data-prop="w" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <button type="button" class="btn ghost icon ds-link" id="link-size" data-for="linked" aria-pressed="false"
+                            title="Keep the width and height in step" aria-label="Keep the width and height in step">
+                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M7.5 10.5l3-3M8 5.5l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7L11.7 9.2M10 12.5l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7L6.3 8.8"/></svg></button>
+                    <label class="lbl narrow" data-for="h">Height
+                        <input type="text" class="field" data-prop="h" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow" data-for="radius">Corners
+                        <input type="text" class="field" data-prop="radius" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <button type="button" class="btn ghost icon ds-link" id="edit-corners" aria-expanded="false"
+                            title="Round each corner its own way" aria-label="Round each corner its own way">
+                        <svg viewBox="0 0 18 18" aria-hidden="true"><path d="M4 14V9a5 5 0 0 1 5-5h5"/><path d="M11 14h3v-3"/></svg></button>
+                    <label class="lbl narrow" data-for="sides">Points
+                        <input type="text" class="field" data-prop="sides" inputmode="numeric" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl narrow" data-for="inner">Depth
+                        <input type="text" class="field" data-prop="inner" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                </div>
+                <div class="dg-presets" id="align" role="group" aria-label="Line up">
+                    <button type="button" class="btn ghost" data-align="left" title="Line up the left sides">Left</button>
+                    <button type="button" class="btn ghost" data-align="center" title="Line up the middles, across">Centre</button>
+                    <button type="button" class="btn ghost" data-align="right" title="Line up the right sides">Right</button>
+                    <button type="button" class="btn ghost" data-align="top" title="Line up the tops">Top</button>
+                    <button type="button" class="btn ghost" data-align="middle" title="Line up the middles, down">Middle</button>
+                    <button type="button" class="btn ghost" data-align="bottom" title="Line up the bottoms">Bottom</button>
+                    <button type="button" class="btn ghost" data-spread="x" title="Make the gaps between them equal, across">Space across</button>
+                    <button type="button" class="btn ghost" data-spread="y" title="Make the gaps between them equal, down">Space down</button>
+                </div>
+            </section>
+
+            <section class="dg-group" id="layout-group">
+                <h2 class="dg-group-title">Auto layout</h2>
+                <div class="dg-checks">
+                    <div class="segmented" data-prop="layout.direction" role="group" aria-label="Which way the layers run">
+                        <button type="button" data-value="row">Across</button>
+                        <button type="button" data-value="column">Down</button>
+                        <button type="button" data-value="none">Off</button>
+                    </div>
+                </div>
+                <div id="layout-flow">
+                    <div class="dg-fields">
+                        <label class="lbl narrow">Gap
+                            <input type="text" class="field" data-prop="layout.gap" inputmode="decimal" autocomplete="off" spellcheck="false">
+                        </label>
+                        <label class="lbl narrow">Padding
+                            <input type="text" class="field" id="layout-pad" data-prop="layout.pad" inputmode="decimal" autocomplete="off" spellcheck="false">
+                        </label>
+                    </div>
+                    <div class="dg-checks">
+                        <div class="segmented" id="layout-align" data-prop="layout.align" role="group" aria-label="Where the layers sit across the line">
+                            <button type="button" data-value="start">Top</button>
+                            <button type="button" data-value="center">Middle</button>
+                            <button type="button" data-value="end">Bottom</button>
+                        </div>
+                        <button type="button" class="btn" id="edit-layout" aria-expanded="false">Padding and size…</button>
+                    </div>
+                </div>
+                <p class="dg-hint">Double-click to pick a layer inside. Drag a layer along the line to move it among the others, or off the frame to take it out.</p>
+            </section>
+
+            <section class="dg-group" id="text-group">
+                <h2 class="dg-group-title">Text</h2>
+                <div class="dg-fields">
+                    <label class="lbl wide">What it says
+                        <input type="text" class="field" id="text-value" data-prop="text" maxlength="200" autocomplete="off" spellcheck="false">
+                    </label>
+                    <label class="lbl">Font
+                        <select class="field" id="font" translate="no"></select>
+                    </label>
+                    <label class="lbl">Style
+                        <select class="field" id="style" translate="no"></select>
+                    </label>
+                    <label class="lbl narrow">Size
+                        <input type="text" class="field" data-prop="size" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                </div>
+                <div class="dg-checks">
+                    <div class="segmented" data-prop="align" role="group" aria-label="Which side of its place the text runs">
+                        <button type="button" data-value="left">Left</button>
+                        <button type="button" data-value="center">Centre</button>
+                        <button type="button" data-value="right">Right</button>
+                    </div>
+                    <label class="dg-pick">Colour <input type="color" class="dg-colour" data-prop="colour"></label>
+                </div>
+            </section>
+
+            <section class="dg-group" id="fill-group">
+                <h2 class="dg-group-title">Fill</h2>
+                <div class="dg-checks">
+                    <div class="segmented" data-prop="fill.type" role="group" aria-label="Fill">
+                        <button type="button" data-value="none">None</button>
+                        <button type="button" data-value="solid">Colour</button>
+                        <button type="button" data-value="linear">Gradient</button>
+                    </div>
+                    <input type="color" class="dg-colour" id="fill-colour" data-prop="fill.colour" aria-label="Fill colour">
+                    <button type="button" class="btn" id="edit-gradient" aria-expanded="false">Gradient…</button>
+                </div>
+            </section>
+
+            <section class="dg-group" id="stroke-group">
+                <h2 class="dg-group-title">Stroke</h2>
+                <div class="dg-checks">
+                    <label class="lbl narrow">Width
+                        <input type="text" class="field" data-prop="stroke.width" inputmode="decimal" autocomplete="off" spellcheck="false">
+                    </label>
+                    <input type="color" class="dg-colour" data-prop="stroke.colour" aria-label="Stroke colour">
+                    <button type="button" class="btn" id="edit-stroke" aria-expanded="false">Corners and ends…</button>
+                </div>
+            </section>
+
+            <section class="dg-group" id="look-group">
+                <h2 class="dg-group-title">Look</h2>
+                <div class="dg-fields">
+                    <label class="lbl wide">Opacity
+                        <input type="range" data-prop="opacity" min="0" max="100" step="1">
+                    </label>
+                </div>
+                <div class="dg-presets">
+                    <button type="button" class="btn" id="edit-effects" aria-expanded="false">Shadow and blur…</button>
+                    <button type="button" class="btn" id="edit-points" title="Move the shape's points one by one (a shape that isn't a path becomes one)">Edit points</button>
+                    <button type="button" class="btn" id="reset-layer" title="Put it back as it was when you drew it: its shape, size, turn and look. It stays where it is.">Reset</button>
+                </div>
+            </section>
+
+            <section class="dg-group" id="arrange-group">
+                <h2 class="dg-group-title">Arrange</h2>
+                <div class="dg-presets">
+                    <button type="button" class="btn" id="group" title="Group (Ctrl+G)">Group</button>
+                    <button type="button" class="btn" id="ungroup" title="Ungroup (Ctrl+Shift+G)">Ungroup</button>
+                    <button type="button" class="btn" id="auto-layout" title="Put the picked layers in a frame that lines them up and grows with them (Shift+A)">Auto layout</button>
+                    <button type="button" class="btn" id="duplicate" title="Duplicate (Ctrl+D)">Duplicate</button>
+                    <button type="button" class="btn" id="remove" title="Delete">Delete</button>
+                </div>
+                <div class="dg-presets" id="flip" role="group" aria-label="Flip what's picked">
+                    <button type="button" class="btn" data-flip="x" title="Mirror it left to right (Shift+H)">Flip across</button>
+                    <button type="button" class="btn" data-flip="y" title="Mirror it top to bottom (Shift+V)">Flip down</button>
+                </div>
+                <div class="dg-presets" id="component-buttons">
+                    <button type="button" class="btn" id="make-component" title="Create component (Ctrl+Alt+K)">Create component</button>
+                    <button type="button" class="btn" id="go-main" title="Pick the main component this instance follows">Go to main component</button>
+                    <button type="button" class="btn" id="detach" title="Detach instance (Ctrl+Alt+B)">Detach instance</button>
+                </div>
+                <div class="dg-presets" id="combine" role="group" aria-label="Combine shapes">
+                    <button type="button" class="btn" data-op="union" title="One shape from all of them">Unite</button>
+                    <button type="button" class="btn" data-op="subtract" title="The bottom shape with the others cut out of it">Subtract</button>
+                    <button type="button" class="btn" data-op="intersect" title="Only where they all overlap">Intersect</button>
+                    <button type="button" class="btn" data-op="exclude" title="Everything but where they overlap">Exclude</button>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <!-- The detailed options, each a small panel over the page. -->
+    <section class="dg-pop" id="gradient-pop" hidden aria-labelledby="gradient-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="gradient-title">Gradient</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="lbl">Direction
+            <input type="range" data-prop="fill.angle" min="0" max="360" step="1">
+        </label>
+        <div class="ds-stops" id="stops"></div>
+        <div class="dg-presets">
+            <button type="button" class="btn" id="add-stop">Add a colour</button>
+        </div>
+        <p class="dg-hint">0 runs left to right, 90 top to bottom. Each colour sits a share of the way along, 0 to 100.</p>
+    </section>
+
+    <section class="dg-pop" id="stroke-pop" hidden aria-labelledby="stroke-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="stroke-title">Corners and ends</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <span class="lbl">Corners</span>
+        <div class="segmented" data-prop="stroke.join" role="group" aria-label="Corners">
+            <button type="button" data-value="miter">Sharp</button>
+            <button type="button" data-value="round">Round</button>
+            <button type="button" data-value="bevel">Cut</button>
+        </div>
+        <span class="lbl">Ends</span>
+        <div class="segmented" data-prop="stroke.cap" role="group" aria-label="Ends">
+            <button type="button" data-value="butt">Flat</button>
+            <button type="button" data-value="round">Round</button>
+            <button type="button" data-value="square">Square</button>
+        </div>
+        <p class="dg-hint">Ends show on lines and open paths.</p>
+    </section>
+
+    <section class="dg-pop" id="corners-pop" hidden aria-labelledby="corners-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="corners-title">Each corner</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="dg-fields">
+            <label class="lbl narrow">Top left
+                <input type="text" class="field" data-prop="radii.0" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="lbl narrow">Top right
+                <input type="text" class="field" data-prop="radii.1" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+        </div>
+        <div class="dg-fields">
+            <label class="lbl narrow">Bottom left
+                <input type="text" class="field" data-prop="radii.3" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="lbl narrow">Bottom right
+                <input type="text" class="field" data-prop="radii.2" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+        </div>
+        <p class="dg-hint">Or drag the dots inside the corners on the canvas. Alt-drag a dot to round that corner alone.</p>
+    </section>
+
+    <section class="dg-pop" id="effects-pop" hidden aria-labelledby="effects-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="effects-title">Shadow and blur</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="dg-checks">
+            <label class="check"><input type="checkbox" data-prop="shadow.on"> Shadow</label>
+            <label class="dg-pick">Colour <input type="color" class="dg-colour" data-prop="shadow.colour"></label>
+        </div>
+        <div class="dg-fields">
+            <label class="lbl narrow">Across
+                <input type="text" class="field" data-prop="shadow.dx" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="lbl narrow">Down
+                <input type="text" class="field" data-prop="shadow.dy" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="lbl narrow">Softness
+                <input type="text" class="field" data-prop="shadow.blur" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+        </div>
+        <label class="lbl">Shadow strength
+            <input type="range" data-prop="shadow.opacity" min="0" max="100" step="1">
+        </label>
+        <label class="lbl">Blur the layer
+            <input type="range" data-prop="blur" min="0" max="100" step="1">
+        </label>
+    </section>
+
+    <section class="dg-pop" id="designs-pop" hidden aria-labelledby="designs-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="designs-title">Designs</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="lbl">Name
+            <input type="text" class="field" id="design-name" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Untitled">
+        </label>
+        <div class="dg-presets">
+            <button type="button" class="btn accent" id="save">Save</button>
+            <button type="button" class="btn" id="save-copy" title="Keep this as a new design, leaving the saved one as it was">Save as new</button>
+            <button type="button" class="btn" id="new-design">New design</button>
+        </div>
+        <h3 class="dg-group-title">Saved</h3>
+        <div class="ds-designs" id="designs"></div>
+        <p class="dg-hint" id="no-designs">Designs you save are listed here, to open again.</p>
+    </section>
+
+    <section class="dg-pop" id="layout-pop" hidden aria-labelledby="layout-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="layout-title">Padding and size</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="dg-fields">
+            <label class="lbl narrow">Padding across
+                <input type="text" class="field" data-prop="layout.padx" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="lbl narrow">Padding down
+                <input type="text" class="field" data-prop="layout.pady" inputmode="decimal" autocomplete="off" spellcheck="false">
+            </label>
+        </div>
+        <span class="lbl">Width</span>
+        <div class="segmented" data-prop="layout.w" role="group" aria-label="Width">
+            <button type="button" data-value="hug">Hug</button>
+            <button type="button" data-value="fixed">Fixed</button>
+        </div>
+        <span class="lbl">Height</span>
+        <div class="segmented" data-prop="layout.h" role="group" aria-label="Height">
+            <button type="button" data-value="hug">Hug</button>
+            <button type="button" data-value="fixed">Fixed</button>
+        </div>
+        <p class="dg-hint">Hug makes the frame as large as what's in it. Fixed keeps the size it has; dragging its sides fixes it.</p>
+    <section class="dg-pop" id="components-pop" hidden aria-labelledby="components-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="components-title">Components</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="ds-designs" id="components"></div>
+        <p class="dg-hint" id="no-components">Pick some layers and click Create component (Ctrl+Alt+K) to make one.</p>
+        <p class="dg-hint">Place puts an instance in the middle of the view. Instances follow their main component: change the main, and every instance changes with it. Duplicate or Alt-drag a main to make an instance too.</p>
+    </section>
+
+    <footer class="dg-foot">
+        <span class="dg-note">You get a new clip at the playhead. Nothing you already have is changed.</span>
+        <label class="check"><input type="checkbox" id="replace"> Replace the design Buddy put there before</label>
+        <button type="button" class="btn accent dg-main-btn" id="add">Add to timeline</button>
+    </footer>
+</main>
+<script src="design.js"></script>
+<script src="../../data_graphics/web/tabs.js"></script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; script-src file: qrc:; style-src file: 'unsafe-inline'; font-src file:; img-src file: data:">
+    <title>Panels</title>
+    <link rel="stylesheet" href="../../../web/buddy.css">
+    <!-- The page's frame - head, preview and player, groups of controls, pop-up panels,
+         foot - is Data Graphics', whose page this one is built on (page.py). -->
+    <link rel="stylesheet" href="../../data_graphics/web/graphics.css">
+    <link rel="stylesheet" href="panels.css">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="../../../web/buddy.js"></script>
+</head>
+<body>
+<main class="page dg pn">
+    <header class="page-head dg-head">
+        <nav class="tabs dg-tabs" role="tablist" id="graphics-tabs" aria-label="Design Studio tools">
+            <button type="button" role="tab" data-tab="design" aria-selected="false">Design</button>
+            <button type="button" role="tab" data-tab="interactions" aria-selected="false">Interactions</button>
+            <button type="button" role="tab" data-tab="panels" aria-selected="true">Panels</button>
+        </nav>
+        <span class="dg-history">
+            <button type="button" class="btn ghost icon" id="undo" title="Undo (Ctrl+Z)" aria-label="Undo"></button>
+            <button type="button" class="btn ghost icon" id="redo" title="Redo (Ctrl+Y)" aria-label="Redo"></button>
+            <button type="button" class="btn ghost" id="reset" title="Start again from the template">Reset</button>
+        </span>
+        <span class="spacer"></span>
+        <span class="dg-where">
+            <span class="dg-dot" id="dot" aria-hidden="true"></span>
+            <span class="dg-where-text" id="timeline" translate="no"></span>
+        </span>
+        <button type="button" class="btn ghost icon" id="refresh" title="Read the open timeline again"
+                aria-label="Read the timeline again"></button>
+    </header>
+
+    <div class="pn-work">
+        <!-- What is on the page in view, and the way to add more. -->
+        <aside class="pn-left" aria-label="Layers">
+            <button type="button" class="btn pn-add" id="add-open" aria-expanded="false" aria-haspopup="dialog"
+                    title="A whole page, ready-made, or a piece to put into the box you picked">+ Add</button>
+            <h2 class="dg-group-title" id="layers-title">Layers</h2>
+            <div class="pn-layers" id="layers" role="tree" aria-labelledby="layers-title"></div>
+            <p class="dg-hint" id="no-layers">This page is empty. Add a piece to it with + Add.</p>
+            <p class="dg-hint">Drag a layer to move it up or down, or into a card or a row.</p>
+        </aside>
+
+        <section class="pn-mid" aria-label="Preview">
+            <div class="pn-bar">
+                <div class="pn-pages" id="pages" role="tablist" aria-label="Pages"></div>
+                <span class="spacer"></span>
+                <div class="segmented" id="fit" role="group" aria-label="How the stage shows the window">
+                    <button type="button" data-value="window" title="The window as large as the stage holds it">Window</button>
+                    <button type="button" data-value="frame" title="The window where it will sit on your timeline">In the frame</button>
+                </div>
+            </div>
+            <div class="dg-stage pn-stage" id="stage-box"><canvas id="stage" width="640" height="360"></canvas></div>
+            <p class="dg-hint" id="hint"></p>
+            <p class="dg-hint" id="black-hint">Shown on black here. On your timeline only the window and the cursor are drawn, over whatever is under them.</p>
+            <p class="warn" id="problem"></p>
+
+            <!-- The timeline: the player, and under it a lane per thing that moves. -->
+            <section class="pn-dock" id="dock" aria-label="Timeline">
+                <div class="pn-dock-head">
+                    <button type="button" class="btn icon" id="play"></button>
+                    <span class="dg-time" id="time" translate="no"></span>
+                    <input type="range" id="scrub" min="0" max="1" value="0" step="1" aria-label="Position">
+                    <div class="segmented" id="mode" role="group" aria-label="What the mouse does on the stage">
+                        <button type="button" data-value="edit" title="Pick a box to change it, drag the window to move it">Edit</button>
+                        <button type="button" data-value="try" title="Your mouse is the cursor: the boxes answer it">Try it</button>
+                    </div>
+                    <span class="ix-rec-time" id="rec-time" translate="no"></span>
+                    <button type="button" class="btn" id="record" title="Keep what your mouse does as the cursor in the clip">Record the cursor</button>
+                    <button type="button" class="btn ghost" id="dock-toggle" aria-expanded="true" aria-controls="dock-body">Hide timeline</button>
+                </div>
+                <div class="pn-dock-body" id="dock-body">
+                    <div class="dg-lanes pn-lanes" id="lanes" aria-label="What happens when"></div>
+                    <p class="dg-hint">Solid keys are yours to drag. Hollow keys are worked out from the cursor's path and move when it does. The round one is a click.</p>
+                </div>
+            </section>
+        </section>
+
+        <aside class="pn-right dg-controls">
+            <!-- Nothing picked: the window's own settings. -->
+            <div class="pn-side" id="window-side">
+                <section class="dg-group" aria-labelledby="g-window">
+                    <h2 class="dg-group-title" id="g-window">The window</h2>
+                    <div class="dg-fields">
+                        <label class="lbl">Kind
+                            <select class="field" data-key="kind">
+                                <option value="app">App</option>
+                                <option value="browser">Browser</option>
+                                <option value="phone">Phone</option>
+                                <option value="dialog">Dialog</option>
+                                <option value="widget">Widget</option>
+                            </select>
+                        </label>
+                        <label class="lbl">Style
+                            <select class="field" data-key="style">
+                                <option value="mac" translate="no">Mac</option>
+                                <option value="plain">Plain</option>
+                                <option value="glass">Glass</option>
+                                <option value="windows" translate="no">Windows</option>
+                                <option value="cartoon">Cartoon</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="dg-checks">
+                        <span class="pn-accents" id="accents" role="group" aria-label="Accent colour"></span>
+                        <input type="color" class="dg-colour" id="accent" aria-label="Accent colour" title="Accent colour">
+                    </div>
+                    <div class="dg-checks">
+                        <div class="segmented" id="dark" role="group" aria-label="Dark or light">
+                            <button type="button" data-value="true">Dark</button>
+                            <button type="button" data-value="false">Light</button>
+                        </div>
+                    </div>
+                    <div class="dg-fields">
+                        <label class="lbl wide">Window width
+                            <input type="range" id="width" min="320" max="1600" step="1">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-page">
+                    <h2 class="dg-group-title" id="g-page">This page</h2>
+                    <div class="dg-checks">
+                        <label class="check" title="Each page's boxes arrive one after another as it comes on"><input type="checkbox" id="build-on"> Builds on as it arrives</label>
+                        <button type="button" class="btn" id="edit-timing" aria-expanded="false">Timing…</button>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-cursor">
+                    <h2 class="dg-group-title" id="g-cursor">The cursor</h2>
+                    <div class="dg-fields">
+                        <label class="lbl">Drawn as
+                            <select class="field" data-key="cursor">
+                                <option value="windows" translate="no">Windows</option>
+                                <option value="mac" translate="no">Mac</option>
+                                <option value="dot">A dot</option>
+                                <option value="none">Not drawn</option>
+                            </select>
+                        </label>
+                        <label class="lbl">Size
+                            <input type="range" data-key="cursor_size" min="1" max="20" step="0.5">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-changes">
+                    <h2 class="dg-group-title" id="g-changes">What changes the page</h2>
+                    <ul class="pn-changes" id="changes"></ul>
+                    <p class="dg-hint" id="no-changes">Nothing yet. Pick a button and choose a page under “When it is clicked”.</p>
+                    <div class="dg-presets">
+                        <button type="button" class="btn" id="edit-rules" aria-expanded="false">+ Rule…</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- A layer picked: what it is, what it says, how it moves. -->
+            <div class="pn-side" id="layer-side" hidden>
+                <h2 class="pn-picked-name" id="picked-name"></h2>
+                <nav class="pn-trail" id="trail" aria-label="Where the picked box is"></nav>
+
+                <section class="dg-group" id="content-group" aria-label="What it shows">
+                    <div class="dg-fields" id="box-text-row">
+                        <label class="lbl wide">Text
+                            <input type="text" class="field" id="box-text" maxlength="240" autocomplete="off" spellcheck="false">
+                        </label>
+                    </div>
+                    <div class="pn-image" id="image-row">
+                        <div class="pn-image-look" id="image-look"><img id="image-preview" alt="" hidden></div>
+                        <div class="pn-image-do">
+                            <button type="button" class="btn" id="image-choose">Choose image…</button>
+                            <button type="button" class="btn ghost" id="image-clear">Remove image</button>
+                        </div>
+                        <p class="dg-hint">It fills the box and is cropped to it. You can also drop an image file on this page, or double-click the box.</p>
+                    </div>
+                    <div class="dg-presets" id="chart-row">
+                        <button type="button" class="btn" id="edit-chart" aria-expanded="false">Chart…</button>
+                    </div>
+                    <div class="dg-fields" id="box-p-box">
+                        <label class="lbl wide">Done (%)
+                            <input type="range" id="box-p" min="0" max="100" step="1">
+                        </label>
+                    </div>
+                    <div class="dg-checks">
+                        <span class="muted small">Width</span>
+                        <div class="segmented" id="box-w" role="group" aria-label="Width">
+                            <button type="button" data-value="fill" title="As wide as the room it has">Fill</button>
+                            <button type="button" data-value="hug" title="As wide as what's in it">Hug</button>
+                            <button type="button" data-value="fixed" title="A width of its own">Fixed</button>
+                        </div>
+                        <label class="lbl narrow" id="box-px-box">
+                            <input type="text" class="field" id="box-px" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Width in px">
+                        </label>
+                    </div>
+                </section>
+
+                <section class="dg-group" aria-labelledby="g-anims">
+                    <h2 class="dg-group-title" id="g-anims">Animations</h2>
+                    <ul class="pn-anims" id="anims">
+                        <li class="pn-anim" data-anim="arrive">
+                            <label class="check" title="Off, it is just there"><input type="checkbox" id="an-arrive"> Arrives</label>
+                            <select class="field" id="an-arrive-kind" aria-label="How it arrives">
+                                <option value="">As the page builds</option>
+                                <option value="fade">Fades in</option>
+                                <option value="rise">Rises in</option>
+                                <option value="pop">Pops in</option>
+                            </select>
+                        </li>
+                        <li class="pn-anim" data-anim="type">
+                            <label class="check" title="Its words appear letter by letter"><input type="checkbox" id="an-type"> Types on</label>
+                            <label class="lbl narrow pn-anim-more" id="an-type-speed-box">Letters a second
+                                <input type="text" class="field" id="an-type-speed" inputmode="decimal" autocomplete="off" spellcheck="false">
+                            </label>
+                            <button type="button" class="btn ghost pn-anim-more" id="edit-typing" aria-expanded="false">Edit…</button>
+                            <label class="lbl wide pn-anim-more" id="an-type-text-box">What it types
+                                <input type="text" class="field" id="an-type-text" maxlength="240" autocomplete="off" spellcheck="false">
+                            </label>
+                        </li>
+                        <li class="pn-anim" data-anim="answer">
+                            <label class="check" title="Off, it stays still"><input type="checkbox" id="box-reacts"> Answers the cursor</label>
+                            <button type="button" class="btn ghost" id="edit-states" aria-expanded="false">States…</button>
+                        </li>
+                        <li class="pn-anim" data-anim="draw">
+                            <label class="check" title="A chart or a progress bar draws on as its page builds"><input type="checkbox" id="an-draw" checked disabled> Draws on</label>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="dg-group" aria-label="When it is clicked">
+                    <div class="dg-fields">
+                        <label class="lbl">When it is clicked: Go to
+                            <select class="field" id="box-go"></select>
+                        </label>
+                        <label class="lbl" id="box-with-box">With
+                            <select class="field" id="box-with">
+                                <option value="fade">Fade</option>
+                                <option value="slide">Slide</option>
+                                <option value="match">Match</option>
+                            </select>
+                        </label>
+                    </div>
+                </section>
+
+                <div class="dg-presets">
+                    <button type="button" class="btn" id="box-remove">Remove</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- The shelf, over the stage: a whole page, or a piece to put into one. -->
+    <section class="dg-pop pn-add-pop" id="add-pop" hidden role="dialog" aria-labelledby="add-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="add-title">Add</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="pn-add-row">
+            <div class="segmented" id="add-mode" role="group" aria-label="What to add">
+                <button type="button" data-value="layouts" title="A whole page, ready-made">A whole page</button>
+                <button type="button" data-value="insert" title="A piece to put into the box you picked">A piece</button>
+            </div>
+            <input type="search" class="field pn-find" id="add-find" placeholder="Find by name" aria-label="Find by name" autocomplete="off" spellcheck="false">
+        </div>
+        <p class="dg-hint" id="shelf-hint"></p>
+        <div class="pn-shelf" id="shelf"></div>
+        <p class="dg-hint" id="no-tiles" hidden>Nothing has that name.</p>
+    </section>
+
+    <!-- The detailed options, each a small panel over the page. -->
+    <section class="dg-pop" id="states-pop" hidden aria-labelledby="states-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="states-title">States</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="pn-states">
+            <figure class="pn-state"><canvas id="state-rest" width="120" height="72" role="img" aria-label="Rest"></canvas><figcaption>Rest</figcaption></figure>
+            <figure class="pn-state"><canvas id="state-hover" width="120" height="72" role="img" aria-label="Hover"></canvas><figcaption>Hover</figcaption></figure>
+            <figure class="pn-state"><canvas id="state-press" width="120" height="72" role="img" aria-label="Pressed"></canvas><figcaption>Pressed</figcaption></figure>
+        </div>
+        <div class="dg-checks">
+            <span class="muted small">Show the boxes as they look</span>
+            <div class="segmented" id="look" role="group" aria-label="Show the boxes as they look">
+                <button type="button" data-value="rest" title="As they are with the cursor away">Rest</button>
+                <button type="button" data-value="hover" title="As they are with the cursor over them">Hover</button>
+                <button type="button" data-value="press" title="As they are while they're clicked">Pressed</button>
+            </div>
+        </div>
+        <label class="check" id="own-box"><input type="checkbox" id="own-states"> Only this box</label>
+        <div class="pn-state-cols">
+            <div class="dg-fields" data-state="hover">
+                <h3 class="dg-group-title">Hover</h3>
+                <label class="lbl wide">Grows (%)<input type="range" data-answer="grow" min="-50" max="50" step="0.5"></label>
+                <label class="lbl wide">Lifts (px)<input type="range" data-answer="lift" min="-40" max="40" step="0.5"></label>
+                <label class="lbl wide">Glows (%)<input type="range" data-answer="glow" min="0" max="100" step="1"></label>
+            </div>
+            <div class="dg-fields" data-state="press">
+                <h3 class="dg-group-title">Pressed</h3>
+                <label class="lbl wide">Grows (%)<input type="range" data-answer="grow" min="-50" max="50" step="0.5"></label>
+                <label class="lbl wide">Lifts (px)<input type="range" data-answer="lift" min="-40" max="40" step="0.5"></label>
+                <label class="lbl wide">Glows (%)<input type="range" data-answer="glow" min="0" max="100" step="1"></label>
+            </div>
+        </div>
+        <label class="lbl">Seconds a hover takes to come and go
+            <input type="text" class="field" id="hover-seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="lbl">Seconds a click takes
+            <input type="text" class="field" id="press-seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <p class="dg-hint">These are every box's, unless “Only this box” gives the box you picked its own.</p>
+    </section>
+
+    <section class="dg-pop" id="typing-pop" hidden aria-labelledby="typing-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="typing-title">Typing</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="lbl">Starts
+            <select class="field" id="an-type-start">
+                <option value="page">With the page</option>
+                <option value="click">When it is clicked</option>
+            </select>
+        </label>
+        <label class="check"><input type="checkbox" id="an-type-caret"> Show the typing caret</label>
+        <p class="dg-hint">“When it is clicked”: until the cursor clicks it, a text shows nothing and a field its own words.</p>
+    </section>
+
+    <section class="dg-pop" id="chart-pop" hidden aria-labelledby="chart-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="chart-title">Chart</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <span class="muted small">Draw them as</span>
+        <div class="segmented" id="chart-shape" role="group" aria-label="Draw them as">
+            <button type="button" data-value="bars">Bars</button>
+            <button type="button" data-value="line">A line</button>
+            <button type="button" data-value="area">Area</button>
+            <button type="button" data-value="pie">A pie</button>
+            <button type="button" data-value="donut">Donut</button>
+            <button type="button" data-value="spark">Sparkline</button>
+        </div>
+        <label class="lbl">Rows
+            <textarea class="field pn-rows" id="chart-rows" rows="7" spellcheck="false" placeholder="Mon	12&#10;Tue	19&#10;Wed	8"></textarea>
+        </label>
+        <p class="dg-hint">Paste two columns – a name and a number – or type a row on each line. They take the place of the rows you have.</p>
+    </section>
+
+    <section class="dg-pop" id="rules-pop" hidden aria-labelledby="rules-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="rules-title">Rules</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <div class="pn-rules" id="rules"></div>
+        <p class="dg-hint" id="no-rules">A rule changes the page when a chart or a progress bar has drawn on far enough.</p>
+        <div class="dg-presets">
+            <button type="button" class="btn" id="add-rule">Add a rule</button>
+        </div>
+        <p class="dg-hint" id="rule-why"></p>
+    </section>
+
+    <section class="dg-pop" id="timing-pop" hidden aria-labelledby="timing-title">
+        <div class="dg-pop-head">
+            <h2 class="dg-pop-title" id="timing-title">Timing</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost icon dg-pop-close" aria-label="Close"></button>
+        </div>
+        <label class="lbl">Seconds the clip lasts
+            <input type="text" class="field" data-key="seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="lbl">Seconds a page change takes
+            <input type="text" class="field" data-key="go_seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <span class="muted small">A page change, unless its link says</span>
+        <div class="segmented" data-key="go_with" role="group" aria-label="A page change, unless its link says">
+            <button type="button" data-value="fade">Fade</button>
+            <button type="button" data-value="slide">Slide</button>
+            <button type="button" data-value="match">Match</button>
+        </div>
+        <label class="lbl">Seconds between boxes as a page builds on
+            <input type="text" class="field" id="build-stagger" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="lbl">Seconds each box takes to build on
+            <input type="text" class="field" id="build-seconds" inputmode="decimal" autocomplete="off" spellcheck="false">
+        </label>
+        <p class="dg-hint">Recording the cursor sets how long the clip lasts. Shorter cuts the end off; longer holds the cursor where it stopped.</p>
+    </section>
+
+    <footer class="dg-foot">
+        <span class="dg-note">You get a new clip at the playhead. Nothing you already have is changed.</span>
+        <label class="check"><input type="checkbox" id="replace"> Replace the panel Buddy put there before</label>
+        <button type="button" class="btn accent dg-main-btn" id="add">Add to timeline</button>
+    </footer>
+</main>
+<script src="panels.js"></script>
+<script src="../../data_graphics/web/tabs.js"></script>
+</body>
+</html>

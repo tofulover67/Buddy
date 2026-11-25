@@ -36,6 +36,10 @@ BLURBS = {
     "media_manager": "Renames a bin's clips in one go, and relinks offline media.",
     "dailies": "Review the Media Pool's footage clip after clip, with named source tapes, notes and metadata.",
     "text_animator": "Motion presets, animated titles, zooms and transitions for the clips you select.",
+    "interactions": "Buttons and cards that grow, glow and click under a cursor you record, added to your timeline.",
+    "design_studio": "Draw graphics on a canvas, build buttons that answer a cursor you record, or mock up a whole app "
+                     "window with pages, and add them to your timeline as Fusion nodes.",
+    "design": "Draw shapes, text and pictures on a canvas, and add the design to your timeline as Fusion nodes.",
     "transcribe": "Subtitles from the timeline's dialogue, and translations of them, made on this computer.",
     "audio_assistant": "An easier way to set a clip's volume, fades and loudness, clean up voices and fit music "
                        "to length.",

@@ -1,0 +1,33 @@
+{
+ "_comment": "Design Studio. English -> each language; see core/i18n.py.",
+ "Design Studio": {
+  "日本語": "デザインスタジオ",
+  "Español": "Estudio de diseño",
+  "Deutsch": "Design Studio",
+  "Français": "Studio de design",
+  "한국어": "디자인 스튜디오",
+  "中文": "设计工作室",
+  "العربية": "استوديو التصميم",
+  "Tiếng Việt": "Xưởng thiết kế"
+ },
+ "Design Studio tools": {
+  "日本語": "デザインスタジオのツール",
+  "Español": "Herramientas del Estudio de diseño",
+  "Deutsch": "Werkzeuge von Design Studio",
+  "Français": "Outils du Studio de design",
+  "한국어": "디자인 스튜디오 도구",
+  "中文": "设计工作室工具",
+  "العربية": "أدوات استوديو التصميم",
+  "Tiếng Việt": "Công cụ của Xưởng thiết kế"
+ },
+ "Draw graphics on a canvas, build buttons that answer a cursor you record, or mock up a whole app window with pages, and add them to your timeline as Fusion nodes.": {
+  "日本語": "キャンバスにグラフィックを描いたり、記録したカーソルに反応するボタンを作ったり、ページのあるアプリのウィンドウ全体をモックアップしたりして、Fusion ノードとしてタイムラインに追加します。",
+  "Español": "Dibuja gráficos en un lienzo, crea botones que responden a un cursor que grabas o simula la ventana entera de una app con sus páginas, y añádelos a tu línea de tiempo como nodos de Fusion.",
+  "Deutsch": "Zeichne Grafiken auf eine Leinwand, baue Buttons, die auf einen aufgezeichneten Cursor reagieren, oder entwirf ein ganzes App-Fenster mit Seiten – und füge alles als Fusion-Nodes zu deiner Timeline hinzu.",
+  "Français": "Dessinez des graphismes sur un canevas, créez des boutons qui répondent à un curseur que vous enregistrez, ou maquettez toute une fenêtre d'app avec ses pages, puis ajoutez-les à votre timeline sous forme de nœuds Fusion.",
+  "한국어": "캔버스에 그래픽을 그리거나, 녹화한 커서에 반응하는 버튼을 만들거나, 페이지가 있는 앱 창 전체를 목업으로 만들어 Fusion 노드로 타임라인에 추가합니다.",
+  "中文": "在画布上绘制图形、制作会对你录制的光标作出反应的按钮，或模拟带多个页面的完整应用窗口，并将它们作为 Fusion 节点添加到时间线。",
+  "العربية": "ارسم رسومات على لوحة، أو ابنِ أزرارًا تستجيب لمؤشّر تسجّله، أو صمّم نموذجًا لنافذة تطبيق كاملة بصفحاتها، وأضِفها إلى خطّك الزمني كعُقد Fusion.",
+  "Tiếng Việt": "Vẽ đồ họa trên khung vẽ, tạo nút phản hồi con trỏ bạn ghi lại, hoặc dựng mô phỏng cả một cửa sổ ứng dụng có nhiều trang, rồi thêm chúng vào timeline dưới dạng các nút Fusion."
+ }
+}

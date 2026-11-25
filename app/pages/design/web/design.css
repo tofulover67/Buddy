@@ -1,0 +1,122 @@
+/* Design, on top of web/buddy.css and Data Graphics' graphics.css (the page's frame):
+   tools and layers on the left, the canvas in the middle, what's picked on the right.
+   Theme colours only - the canvas's own picture is drawn by design.js. */
+
+.ds-work { flex: 1 1 auto; min-height: 0; display: flex; gap: 14px; padding-bottom: 12px; }
+.ds-left { flex: 0 0 196px; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.ds-mid { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.ds-right { flex: 0 0 292px; min-width: 0; min-height: 0; overflow-y: auto; padding-right: 4px; }
+.ds-right .dg-group[hidden], .ds-right [hidden], .ds-left [hidden], .ds-unsaved[hidden] { display: none; }
+
+.ds-name { color: var(--text-strong); font-size: var(--fs-sm); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-unsaved { color: var(--text-dim); font-size: var(--fs-xs); }
+
+.ds-tools { display: flex; flex-wrap: wrap; gap: 2px; }
+.ds-tools svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+.ds-tools button[aria-pressed="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+
+.ds-layers { flex: 1 1 auto; min-height: 60px; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; }
+.ds-layers:empty { display: none; }
+.ds-layer {
+    display: flex; align-items: center; gap: 4px; padding: 3px 4px; border-radius: var(--r-sm);
+    cursor: pointer; font-size: var(--fs-sm); color: var(--text); user-select: none;
+}
+.ds-layer[aria-selected="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.ds-layer.off .ds-layer-name { opacity: .45; }
+.ds-layer-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-layer-kind { flex: none; color: var(--text-dim); font-size: var(--fs-xs); }
+.ds-layer[aria-selected="true"] .ds-layer-kind { color: inherit; opacity: .7; }
+.ds-layer .field { flex: 1 1 auto; min-width: 0; padding: 1px 4px; }
+.ds-layer-flag {
+    flex: none; width: 20px; height: 20px; padding: 0; border: 0; border-radius: var(--r-xs); background: none;
+    color: inherit; cursor: pointer; opacity: .25; font-size: var(--fs-xs);
+}
+.ds-layer-flag:hover, .ds-layer-flag.on { opacity: 1; }
+.ds-layer-flag svg { width: 14px; height: 14px; }
+.ds-layer-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+/* layers-drag: a row dragged up or down the list - where it would go is a line between
+   rows, or the container it would go into lit; what's dragged is dimmed and named by
+   the pointer. */
+.ds-layer.ds-dragged { opacity: .45; }
+.ds-layer.ds-drop-into { box-shadow: inset 0 0 0 2px var(--primary); }
+.ds-drop-line { position: fixed; z-index: 60; height: 2px; border-radius: 1px; background: var(--primary); pointer-events: none; }
+.ds-drop-line[hidden] { display: none; }
+.ds-drop-ghost {
+    position: fixed; z-index: 61; max-width: 200px; padding: 2px 8px; border-radius: var(--r-sm); pointer-events: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    background: var(--selection-bg); color: var(--selection-fg); font-size: var(--fs-xs); opacity: .9;
+}
+body.ds-rows-dragging, body.ds-rows-dragging * { cursor: grabbing !important; }
+
+.ds-stage {
+    flex: 1 1 auto; min-height: 120px; position: relative; overflow: hidden; border-radius: var(--r-md);
+    background: #0c0d0f; border: var(--bw) solid var(--card-border);
+}
+/* Its size is said outright: a canvas left to itself is as large as the pixels it holds,
+   which on a screen scaled 150% is half as large again as the stage. */
+.ds-stage canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: default; }
+/* Image files held over the page: they can be let go here. */
+.ds-stage.drop { border-color: var(--primary); }
+/* ---- rulers -- The rulers and guides are drawn on a canvas over the stage's own that
+   the mouse goes through (design.js); its corner is a button for the guides' menu. */
+.ds-stage #rulers { pointer-events: none; }
+.ds-ruler-corner {
+    position: absolute; left: 0; top: 0; z-index: 2; width: 20px; height: 20px; padding: 0; display: flex;
+    align-items: center; justify-content: center; border: 0; border-radius: var(--r-md) 0 0 0; background: #17191d;
+    color: #8a909b; cursor: pointer;
+}
+.ds-ruler-corner:hover, .ds-ruler-corner:focus-visible { color: #ffffff; }
+.ds-ruler-corner[hidden] { display: none; }
+.ds-ruler-corner svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.ds-guide-field { position: absolute; z-index: 3; width: 64px; padding: 1px 4px; font-size: var(--fs-xs); }
+#rulers-toggle[aria-pressed="true"] { color: var(--text-strong); }
+#rulers-toggle[aria-pressed="false"] { color: var(--text-dim); }
+.ds-bar { flex: none; display: flex; align-items: center; gap: 6px; min-height: 30px; }
+.ds-bar .btn { padding: 2px 9px; }
+.ds-zoom { min-width: 44px; text-align: center; color: var(--text-dim); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.ds-bar .warn { margin: 0; }
+
+.ds-right .dg-presets .btn.ghost { padding: 4px 8px; }
+.ds-right .dg-checks .lbl.narrow { flex: 0 1 84px; }
+.ds-right .dg-checks .field { width: 100%; }
+
+/* The link between Width and Height, and a field's name that can be dragged. */
+.ds-link { align-self: flex-end; margin: 0 -6px 2px; padding: 4px; }
+.ds-link svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
+.ds-link[aria-pressed="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.ds-scrub { cursor: ew-resize; }
+.ds-scrub .field { cursor: text; }
+
+.ds-stops { display: flex; flex-direction: column; gap: 6px; }
+.ds-stop { display: flex; align-items: center; gap: 8px; }
+.ds-stop input[type="range"] { flex: 1; min-width: 0; accent-color: var(--primary); }
+
+.ds-designs { display: flex; flex-direction: column; gap: 2px; max-height: 240px; overflow-y: auto; }
+.ds-designs:empty { display: none; }
+.ds-design { display: flex; align-items: center; gap: 6px; padding: 2px 4px; border-radius: var(--r-sm); }
+.ds-design.current { background: var(--raised-bg); }
+.ds-design-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm); }
+.ds-design .btn { padding: 2px 9px; }
+#no-designs[hidden], #no-layers[hidden], #no-components[hidden] { display: none; }
+
+/* Main components and their instances, in the layers list. */
+.ds-layer.main:not([aria-selected="true"]) .ds-layer-name { color: #a58bff; }
+.ds-layer.instance:not([aria-selected="true"]) .ds-layer-name { color: #a58bff; font-style: italic; }
+
+/* ---- eyedropper -- a dropper button beside each colour, and the cursor over the
+   canvas while it's on (its tip, 4 18, is the pixel taken). */
+.ds-swatch { display: inline-flex; align-items: center; gap: 2px; }
+.ds-swatch:has(> input[hidden]) { display: none; }
+.ds-drop { width: 26px; height: 26px; }
+.ds-drop svg { width: 16px; height: 16px; }
+.ds-drop[aria-pressed="true"] { background: var(--selection-bg); color: var(--selection-fg); }
+.ds-bar #ds-drop-screen[hidden] { display: none; }
+.ds-stage canvas.ds-dropping {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='black' stroke-width='3.4'%3E%3Cpath d='M14.5 5.5l4 4'/%3E%3Cpath d='M17.5 3.5a2.1 2.1 0 0 1 3 3l-2 2-3-3z'/%3E%3Cpath d='M15.5 8.5L7 17l-3 1 1-3 8.5-8.5'/%3E%3C/g%3E%3Cg stroke='white' stroke-width='1.5'%3E%3Cpath d='M14.5 5.5l4 4'/%3E%3Cpath d='M17.5 3.5a2.1 2.1 0 0 1 3 3l-2 2-3-3z' fill='white'/%3E%3Cpath d='M15.5 8.5L7 17l-3 1 1-3 8.5-8.5'/%3E%3C/g%3E%3C/svg%3E") 4 18, crosshair;
+}
+
+@media (max-width: 860px) {
+    .ds-work { flex-wrap: wrap; overflow-y: auto; }
+    .ds-left, .ds-right { flex: 1 1 100%; }
+    .ds-mid { flex: 1 1 100%; min-height: 320px; }
+}

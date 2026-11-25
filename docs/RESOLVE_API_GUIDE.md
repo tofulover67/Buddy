@@ -470,6 +470,201 @@ the Fusion page, not that the connection failed.
   - **A sibling reading a `GroupOperator`'s `Output1` gets nothing** in an
     imported comp too, not only in a paste: a `Merge` fed from the group came
     out empty. Test comps keep their tools flat.
+- **An expression can read where another tool's input was on earlier frames**
+  - a hover that eases in with no keys of its own. Measured on Studio 21.1.2,
+  2026-11-25, from `TimelineItem.ExportFrame` of an imported comp: a `Custom`
+  tool (`Cursor`) holding a keyed point on `PointIn1` and keyed numbers on
+  `NumberIn1..3`, and per button a `Custom` whose `NumberIn1` averages "was the
+  cursor inside" over the last six frames, read by a `RectangleMask`'s
+  `Width`, `Height` and `Level`.
+  - `Cursor:GetValue("PointIn1", time - k).X` and
+    `Cursor:GetValue("NumberIn2", time - k)` both look back: the button grew
+    over exactly six frames and shrank over six.
+  - `Cursor.PointIn1[time - k].X` does **not**: it reads the current frame
+    whatever `k` is (the button snapped to full size on the frame the cursor
+    arrived).
+  - A `:` at the start makes the expression a block of Lua statements ending in
+    `return` - `:local s = 0; for k = 0, 5 do ... end; return s / 6` drew the
+    same frames as the written-out sum.
+  - A tool's expression reads its own inputs by bare name (`NumberIn1 *
+    NumberIn1`), and an expression reading another expression's input chains.
+  - Before the clip's first frame the look-back reads the first key: a cursor
+    that starts on a shape has it fully hovered on frame 0.
+  - Inside such a block another tool's point and numbers read as usual
+    (`Mask.Center.X`, `Mask.Width`), a Point input takes another's whole
+    (`Pivot = Input { Expression = "Mask.Center", }`) or one built
+    (`Point(Mask.Center.X, Mask.Center.Y + 0.01)` on a Text+'s `Center`), and
+    the loop's length can be another tool's input (`for k = 0, Cursor.NumberIn2 - 1`).
+    Interactions' comps are made of these (`pages/interactions/comp.py`) and
+    rendered to within a pixel of the arithmetic on every frame.
+  - A `PolylineMask`'s `Center` moves its points with it (wired to an
+    `XYPath`, a pointer's tip stays on the path), its `Size` scales them about
+    there, and a closed one with a `BorderWidth` is the shape grown by half
+    that width all round - an edge, with another mask of the same points over
+    it.
+  - A `RectangleMask` or an `EllipseMask` with `Solid = 0` and a `BorderWidth`
+    (a share of the frame's width, the whole thickness) is the shape's outline,
+    rounded corners and all, half inside the edge and half out; its `Level`
+    takes an expression like any other input.
+  - Cost: 40 such buttons took about 550 ms a frame to export against about
+    160 ms for the same tools with plain values - roughly 10 ms a button a
+    frame, each button's state being read by five inputs. Four buttons were
+    no slower than any small comp (about 110 ms).
+- **A still image in a generated comp is a `Loader`, written in the comp's
+  text - never added through the API.** Measured on Studio 21.1.2, 2026-11-25.
+  - `comp.AddTool("Loader")` from a script **opens Resolve's "Open File"
+    dialog** and leaves it open (the call itself returns, and `loader.Clip =
+    path` still works). While that dialog is up every `ImportFusionComp`
+    returns False at once and `resolve.GetCurrentPage()` reads None; nothing
+    says why. Someone has to press Cancel in Resolve. When imports that worked
+    a minute ago all fail, look at Resolve's window title before the comp.
+  - Written as text it imports with no dialog and holds the still for the
+    whole clip: `Name = Loader { Clips = { Clip { ID = "Clip1", Filename =
+    "D:\\Footage\\logo.png", FormatID = "PNGFormat", StartFrame = -1,
+    LengthSetManually = true, TrimIn = 0, TrimOut = 0, ExtendFirst = 0,
+    ExtendLast = 0, Loop = 0, AspectMode = 0, Depth = 0, TimeCode = 0,
+    GlobalStart = 0, GlobalEnd = 0 }, }, Inputs = { ... }, }` - what
+    `SaveSettings` writes for one. A JPEG's `FormatID` is `"JpegFormat"`. A
+    PNG takes `["Clip1.PNGFormat.PostMultiply"] = Input { Value = 1, }`, and
+    its see-through parts then merge cleanly.
+  - The Loader's picture is its own size, not the comp's. A `Merge` puts it on
+    a frame-sized Background: `Size` 1 is the picture's own px, `Center` where
+    its middle goes, and an `EffectMask` on that Merge crops it (rounded
+    corners). `pages/interactions/comp.py` `_fill` is the working code.
+- **A shape's answers as states, still live** (Interactions, `pages/interactions/comp.py`).
+  Measured on Studio 21.1.2, 2026-11-25: the template, and one with a lift and an
+  outline for every shape and one button with states of its own, placed on a scratch
+  1920x1080 timeline, 18 frames of each exported and laid over the preview: within
+  0.3 of 255 on average on every frame.
+  - **A `Custom` tool's Point inputs hold a pair of numbers** (X hovered, Y pressed)
+    and expressions read them through `.X` / `.Y` - by bare name inside the tool
+    (`PointIn1.X`), by the tool's name from another (`Cursor.PointIn2`), and as
+    `Point(Cursor.NumberIn4, Cursor.NumberIn5)`. A Custom has 8 number inputs; the
+    pairs are how a shape carries four answers for two states.
+  - **A Transform's `Center = Point(0.5, 0.5 + lift)` with its Pivot at the shape's
+    middle** moves the shape straight up by `lift` of the frame's height and still
+    sizes it about that middle; with a lift of 0 it lands where it did.
+  - 18 frames exported in 1.9 s with four shapes; not timed against the build before.
+- **A whole mock window baked to keys** (Panels, `pages/panels/comp.py`).
+  Measured on Studio 21.1.2, 2026-11-25: the template (three pages, a click,
+  hovers, a build-on, two charts; 779 tools) and a Cartoon browser window that
+  slides forward a page, glides back with Match and fades on, placed with
+  `ImportFusionComp` on a scratch 1920x1080 timeline, 14-16 frames of each
+  exported with `TimelineItem.ExportFrame` and laid over the page's own
+  preview of the same frame. Every frame came within 1.2 of 255 on average
+  (most 0.3-0.7), the difference in the text's and edges' antialiasing.
+  - **A `Merge`'s `Size` sizes a full-frame foreground about the frame's
+    middle**, so a box on its own full-frame canvas grows about its own
+    middle (mx, my) with `Center = (1 - s) x (mx, my) + s x 0.5 + the move`.
+    Hover, press, build-on and a Match glide are all this one Merge.
+  - **Canvases nest.** A moving box's subtree on its own cleared Background,
+    put on by one Merge, inside another box's the same way, inside the
+    page's: what is in a box grows, lifts and fades with it.
+  - **A page's Merge takes an `EffectMask`** (two masks multiplied: the
+    window's inside and its rounded body) and a sliding page is cropped to it.
+  - **One output can feed two Merges**: a page arriving over one later in the
+    chain is merged a second time above them all, its first Merge held at 0.
+  - **An `XYPath` with a spline on one side and a plain number on the other**
+    plays (the side that holds needs no spline).
+  - **Fade a group as one picture.** The comp blends a canvas, so the preview
+    has to as well: drawn prim by prim at the same alpha, a box's hard shadow
+    shows through its fill mid-fade (11.8 of 255 off in a Cartoon Match).
+  - **A box drawn as nothing of its own has nothing to glow**: a soft mask of
+    its bare place put a slab behind a hovered table row.
+  - **Pictures and typing** (the same day, one panel: a 1200x400 PNG in a
+    16:9 box, a 400x1000 JPEG in a narrow one arriving with a pop, a centred
+    heading typing with the page, a field typing when clicked, both with a
+    caret; 16 frames, each within 0.4 of 255 of the preview):
+    a Loader written as text, put on by a Merge whose `Size` is the box's
+    width over the cropped part's width and cropped by a RectangleMask on the
+    Merge's `EffectMask`, fills its box unstretched; a Text+ set from its left
+    (`HorizontalLeftCenterRight = -1`) at the line's start with its
+    `StyledText` keyed letter by letter (`text_spline`) types in place, the
+    letters already shown not moving; a field's placeholder goes by its
+    Merge's `Blend` on the first letter's frame; a caret as a RectangleMask
+    with its `Center` keyed in steps stands after the last letter.
+    A centred line that types starts where the letter-width rule puts it, so
+    it sits a few px to one side of where the font would centre it - the same
+    in the preview and in Resolve.
+  - Not measured: how long a comp this size takes to import and to render,
+    3840x2160 and upright timelines, faces other than Arial.
+- **A drawn design as masks and Backgrounds** (Design, `pages/design/comp.py`).
+  Measured on Studio 21.1.2, 2026-11-25: designs placed with
+  `ImportFusionComp` on a scratch timeline, a frame exported with
+  `TimelineItem.ExportFrame` and laid over the same design drawn by the
+  page's own canvas (a 2D context), on 1920x1080, 3840x2160 and 1080x1920
+  timelines. `ExportFrame`'s `filePath` must be a whole path: a bare file
+  name answers `{'success': False, 'error': 'Failed to write image'}`.
+  - **Three ways to draw the same shapes came out the same.** A
+    `RectangleMask`/`EllipseMask` per rectangle and ellipse, a `PolylineMask`
+    for everything, and the SVG Importer's engine (`build_group_lua`, flat)
+    fed the design as an SVG: each within 0.07 of 255 of the canvas on
+    average, the difference all in the edges' antialiasing, and within a few
+    thousand edge pixels of each other. Design writes its own (the first):
+    29 tools where the engine's had 38, a rectangle stays a rectangle in
+    Fusion, and text, images, groups and combined shapes go through one path.
+  - **`Angle` turns a `RectangleMask`, an `EllipseMask` and a `Merge`'s
+    foreground counter-clockwise** about their `Center`, in pixels - a
+    rectangle turned 20 degrees on a 16:9 or a 9:16 frame stays a rectangle.
+    Clockwise on screen is a negative Angle.
+  - **`CornerRadius`** is the radius over half the shorter side (1 is a
+    pill), a true arc.
+  - **A `RectangleMask` with `Solid = 0` and a `BorderWidth`** has sharp
+    outer corners when its `CornerRadius` is 0: it matched a mitred stroke.
+    A `PolylineMask`'s `JoinStyle` 0, 1, 2 matched bevel, round and miter
+    (with `MiterLimit = 10`, the canvas's own), and its `CapStyle` 0, 1, 2
+    butt, round and square.
+  - **A linear gradient**: a `Background` with `Type = FuID { "Gradient" }`,
+    `GradientType = FuID { "Linear" }`, `Start` and `End` as points 0..1 with
+    y up, and `Gradient = Gradient { Colors = { [0] = { r, g, b, a }, ... } }`
+    matched a canvas gradient between the same two points.
+  - **Opacity as a `Merge`'s `Blend`** matched the canvas's alpha, for a
+    shape, an image, and a whole group merged onto a canvas of its own first.
+  - **Combining masks**: a mask whose `EffectMask` is the mask before it,
+    with `PaintMode = FuID { "Merge" }` unites them, `"Subtract"` cuts the
+    later one out of what came before, `"Multiply"` keeps their overlap and
+    `"Invert"` everything but it - three in a chain too. All four matched the
+    canvas's `source-over`, `destination-out`, `destination-in` and `xor`.
+  - **How soft**: against a Gaussian of sigma px (the canvas's `blur(sigma
+    px)`), a mask's `SoftEdge` of `2.15 x sigma / frame width` and a `Blur`'s
+    `XBlurSize` of `1670 x sigma / frame width` (0.87 per px on a 1920 px
+    frame) gave the same 10%-90% edge to within a tenth. `XBlurSize` is a
+    share of the frame's width like the masks' units: the same number blurred
+    twice as many px on a frame twice as wide, and by the width on an upright
+    one. A Text+ shadow's `SoftnessX3`/`Y3` of `120 x sigma / letter size`
+    was within a tenth as well.
+  - **Text** written with `Center` where the canvas turns it, `Size = letter
+    size / (0.716 x width)` for Arial and `HorizontalLeftCenterRight` -1, 0
+    or 1 was the same width to the pixel and started, centred or ended on the
+    same x; it sat 0.02 em lower than a baseline drawn 0.375 em below the
+    Center (4 px on 200 px letters), as noted for Arial above.
+  - **An image**: a `Merge`'s `Size = wanted width / the picture's own
+    width`, `Center`, `Angle` and a `RectangleMask` as its `EffectMask`
+    (rounded corners, turned with it) matched the canvas's picture, turned
+    and rounded, to the edges' antialiasing.
+- **Flips, components and auto layout frames** (Design, same setup and method,
+  2026-11-25 - three test designs, each within the canvas's antialiased edges and
+  the 2-3 px text offset noted above):
+  - A Transform with `FlipHoriz = 1` / `FlipVert = 1` between a Loader and the Merge
+    that places and turns it mirrors the picture before it is turned, as the canvas
+    does.
+  - `AngleY = 180` (across) or `AngleX = 180` (up and down) on a Text+ mirrors it about
+    its Center, before its `AngleZ` turn.
+  - **A Text+ shadow's `Offset3` turns and mirrors with the text**: 40 px to the right
+    of text turned 90 degrees came out 40 px below it, and mirrored across it came out
+    on the left. Design keeps shadows where they are on screen, so it writes the
+    offset taken back through the text's turn and flips (`comp._text_shadow`).
+  - Tool names with an underscore (`Button4_Card1Mask`, an instance's) import as
+    written.
+- **Corners rounded each their own way, and rounded polygons and stars** (Design,
+  same setup and method, 2026-11-25): a `RectangleMask` has one `CornerRadius`, so a
+  box whose four corners differ is written as a `PolylineMask`, each rounded corner two
+  points with quarter-circle handles (`geometry._box`). A rounded polygon or star is a
+  polyline with each corner cut back along both sides and joined by an arc
+  (`geometry.rounded`). One test design held these with a stroke, a shadow, a gradient,
+  a turn and a flip, an image's mask, a frame's background, a boolean's base and hole,
+  and an instance scaling its main's corners. All of them matched the canvas: mean
+  difference 0.11/255 over the frame, nothing over 64/255 outside antialiased edges.
 - **Another program polling Resolve can stop the script server starting.**
   Seen 2026-11-23: after Resolve crashed, every restart logged `Started script
   server` then `Failed to connect to script server`, and nothing - not

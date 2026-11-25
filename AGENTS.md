@@ -29,11 +29,12 @@ server/                  the Buddy Network server
 docs/RESOLVE_API_GUIDE.md  Resolve scripting traps - read before calling Resolve
 ```
 
-Four tools are a row of sub tabs, each sub tab a page package of its own:
+Five tools are a row of sub tabs, each sub tab a page package of its own:
 `podcast/` (sync, switch, text_edit, shorts) and `data_graphics/` (counters,
 graphs - what's still to build is in `docs/DATA_GRAPHICS_PLAN.md`) hold theirs inside
-the host's folder; `media_manager/` (batch_clip_renamer, media_relink) and
-`marker_manager/` (stills_exporter, youtube_chapters) hold theirs beside it.
+the host's folder; `media_manager/` (batch_clip_renamer, media_relink),
+`marker_manager/` (stills_exporter, youtube_chapters) and `design_studio/`
+(design, interactions, panels) hold theirs beside it.
 
 A search skips what `.ignore` lists - the translations, mostly - so a search
 for a piece of the app's text finds the code that draws it. To search the

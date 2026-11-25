@@ -1,0 +1,25 @@
+/* Interactions, on top of web/buddy.css and Data Graphics' graphics.css (the page's
+   frame): the stage and what's round it. Theme colours only - the stage's own picture
+   is drawn by interactions.js. */
+
+.ix-modes { gap: 10px; flex-wrap: wrap; }
+.ix-rec-time { color: var(--danger-text); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.ix-rec-time:empty { display: none; }
+
+.ix-stage canvas { touch-action: none; cursor: default; }
+/* Trying it, the drawn cursor is the only one. */
+.ix-stage.try canvas { cursor: none; }
+.ix-stage.recording { border-color: var(--danger); }
+/* Image files held over the page: they can be let go here. */
+.ix-stage.drop { border-color: var(--primary); }
+
+/* States…: the three states side by side as small pictures, Hover's and Pressed's sliders under them. */
+.ix-states { display: flex; gap: 8px; margin: 0; }
+.ix-state { flex: 1 1 0; margin: 0; display: flex; flex-direction: column; gap: 4px; align-items: center; min-width: 0; }
+.ix-state canvas { width: 100%; height: auto; aspect-ratio: 120 / 72; border-radius: var(--r-sm); background: #0c0d0f; display: block; }
+.ix-state figcaption { font-size: var(--fs-xs); color: var(--text-dim); }
+.ix-state-cols { display: flex; gap: 12px; }
+.ix-state-cols .dg-fields { flex: 1 1 0; flex-direction: column; align-items: stretch; gap: 4px; }
+
+#picked-fields { display: flex; flex-direction: column; gap: 10px; }
+#picked-fields[hidden], #none-picked[hidden], #el-radius-box[hidden] { display: none; }
