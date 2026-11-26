@@ -19,9 +19,10 @@ from pages.panels import clock, comp, model, place, solve, styles
 FRAME = (1920, 1080)
 FPS = 24.0
 JOBS = {"panels.add": ("pages.panels.place", "add")}
-# The template - three pages, a dashboard of ~40 boxes, build-on, a click, a slide - stays under this many tools
-# (779 when a moving box began to carry what is in it, from 665 when each box moved alone).
-MOST_TOOLS = 850
+# The template - three pages, a dashboard of ~40 boxes, build-on, two clicks, two slides - stays under this many tools
+# (779 when a moving box began to carry what is in it, from 665 when each box moved alone; 995 since the
+# cursor goes on to the third page too, so its boxes build on as well).
+MOST_TOOLS = 1050
 
 
 def page(pid, name, *children):
@@ -160,6 +161,17 @@ class CompTests(unittest.TestCase):
         self.assertNotIn("GroupOperator", text)
         self.assertNotIn("sMerge", text)
         self.assertNotIn("Expression", text)                                # baked: nothing in Resolve is live
+
+    def test_a_text_that_counts_is_keyed_with_what_it_says(self):
+        spec = model.clean({"kind": "widget", "width": 300, "zoom": 1, "seconds": 3, "path": [[0, 1, 1]], "clicks": [],
+                        "build": {"on": False},
+                        "pages": [{"root": {"role": "section", "pad": 10, "children": [
+                            {"role": "text", "text": "1:00", "count": True, "run": {"by": "", "seconds": 2}},
+                            {"role": "text", "text": "Still"}]}}]})
+        text = comp.comp_text(spec, (1920, 1080), 24.0, 72)
+        self.assertEqual(text.count("Counted = BezierSpline"), 1)
+        for said in ("0:00", "0:30", "1:00"):
+            self.assertIn(f'"{said}"', text)
 
     def test_the_template_stays_small(self):
         made = Comp(model.clean({}))

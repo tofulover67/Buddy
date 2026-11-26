@@ -9,7 +9,19 @@ larger, its middle at "x", "y" (% of the frame, across and down). The cursor's "
 and "clicks" are Interactions' (seconds, and % of the frame).
 
 A page is {"id", "name", "layout" (the catalogue's layout it was made from, "" for
-none), "root"}; the root and everything under it is a box:
+none), "secs", "by", "root"}; the root and everything under it is a box.
+
+The story ("auto": true): Buddy moves the cursor. The clip shows the pages in the order
+they are listed, each for its "secs" (0: as long as what happens on it needs), and goes
+on to the next when the cursor clicks the page's "by" box - or, "by" "", when its time
+is up. On each page the cursor also clicks, one after another, every box whose click
+starts something there (a bar, a count, a field's typing). story() says when each of
+those happens; clean() makes the cursor's "path" and "clicks", the "page_keys", the
+linked boxes' "go", "start" and "seconds" from it - so the clock, the preview and the
+comp read a panel with a story exactly as they read one whose cursor was recorded
+("auto": false: the path, clicks, links and keys are the panel's own).
+
+A box:
 
     role      section (holds "children"), text, button, field, image, icon, divider,
               badge, progress, chart
@@ -21,6 +33,10 @@ none), "root"}; the root and everything under it is a box:
     behaviour "reacts" (it answers the cursor), "states" (its own hover and press, in
               place of the panel's "answers"), "go" ({"page", "with"}: clicked, the
               panel goes to that page)
+    round 4   "count" (a text's number runs up from nothing to what it says), "run"
+              ({"by", "seconds"}: when a progress bar's or a chart's draw-on, or a count,
+              starts - "by" the box whose click starts it, "" for with the page - and how
+              long it takes, at a steady rate; None: as the page builds)
     round 2   "image" ({"path", "px"}: an image box's picture, filling it and cropped to
               it), "type" ({"speed", "start", "caret", "text"}: a text's or a field's
               words type on), "arrive" ({"kind"}: its own way of arriving, in place of
@@ -75,6 +91,20 @@ TYPE_SPEED = (2.0, 60.0)
 TYPE_STARTS = ("page", "click")
 TYPE_ROLES = ("text", "field")
 ARRIVALS = ("rise", "fade", "pop", "none")
+# What starts by itself or by a click and runs at a steady rate: a bar or chart drawing on, a number counting up.
+RUN_SECONDS = (0.2, 60.0)
+RUN_ROLES = ("progress", "chart")
+COUNT_SECONDS = 1.5         # how long a count takes unless told
+# The pages a new panel has, and the layout each is made from.
+TEMPLATE_PAGES = (("Sign in", "signin"), ("Dashboard", "dashboard"), ("Settings", "settings"))
+# The story's pace, seconds: a page shown with nothing to click; how long after a page
+# arrives its first click comes, and the next after that; what is left after the last
+# thing has run; how long before a page's time is up its leaving click comes.
+PAGE_SECONDS = 2.0
+MAX_PAGE_SECONDS = 30.0
+STORY_LEAD, STORY_GAP, STORY_TAIL, STORY_LEAVE = 1.0, 1.2, 0.5, 0.2
+CURSOR_TRAVEL, CURSOR_EARLY, CURSOR_STAYS, CLICK_SECONDS = 0.8, 0.2, 0.3, 0.12
+CURSOR_HOME = (30.0, 96.0)  # where the cursor waits before its first click, % of the frame
 
 # Everything about a panel but its pages and its cursor, which the template has.
 DEFAULTS = {
@@ -83,6 +113,7 @@ DEFAULTS = {
     "width": 620.0, "zoom": 1.5, "x": 50.0, "y": 50.0,
     "font": "Arial", "face": "Regular", "bold_face": "Bold",
     "seconds": 6.0,
+    "auto": False,          # Buddy moves the cursor, by the pages' story (a new panel: true)
     # The pointer of the computer Buddy is on, to start with, as Interactions has it.
     "cursor": _INTERACTIONS["cursor"], "cursor_size": 5.0,
     # How every reacting box answers, unless it has states of its own: % bigger, px
@@ -101,6 +132,7 @@ BOX_DEFAULTS = {
     "variant": "", "text": "", "right": False, "strong": False, "on": False, "p": 60.0, "chart": None, "hue": 0.0,
     "reacts": False, "states": None, "go": None,
     "image": None, "type": None, "arrive": None,
+    "count": False, "run": None,
 }
 BOX_KEYS = ("name", *(key for key in BOX_DEFAULTS if key != "image"))   # what with_box may change (a picture: with_image)
 FILLS = ("section", "image", "chart", "field", "progress", "divider")      # the roles as wide as their room, unless told
@@ -174,6 +206,45 @@ def _type(raw, role):
             "text": _words(raw.get("text"), MAX_TEXT) if field else ""}
 
 
+_NUMBER = re.compile(r"(\d+):(\d\d)(?!\d)|\d[\d,]*(?:\.\d+)?")
+
+
+def counted(text, share):
+    """A text with its first number `share` (0..1) of the way up from nothing: a time
+    ("1:24") counts its seconds, any other number keeps its decimals and its commas -
+    "$1,204" at a half is "$602". The text itself for one with no number, or at 1."""
+    found = _NUMBER.search(text)
+    share = min(1.0, max(0.0, float(share)))
+    if found is None or share >= 1.0:
+        return text
+    said = found.group(0)
+    if found.group(1) is not None:
+        now = int((int(found.group(1)) * 60 + int(found.group(2))) * share + 1e-9)
+        made = f"{now // 60}:{now % 60:02d}"
+    else:
+        plain = said.replace(",", "")
+        places = len(plain.partition(".")[2])
+        now = float(plain) * share
+        made = f"{now:.{places}f}" if places else str(int(now + 1e-9))
+        if "," in said:
+            whole, dot, rest = made.partition(".")
+            made = f"{int(whole):,}" + dot + rest
+    return text[:found.start()] + made + text[found.end():]
+
+
+def counts(text):
+    """Whether a text has a number to count up to."""
+    return _NUMBER.search(text or "") is not None
+
+
+def _run(raw, auto=None):
+    """When a draw-on or a count starts and how long it takes, or `auto` for none."""
+    if not isinstance(raw, dict):
+        return auto
+    return {"by": raw.get("by") if isinstance(raw.get("by"), str) else "",
+            "seconds": number(raw.get("seconds"), (auto or {}).get("seconds", 3.0), *RUN_SECONDS)}
+
+
 def _arrive(raw):
     if not isinstance(raw, dict) or raw.get("kind") not in ARRIVALS:
         return None
@@ -226,6 +297,9 @@ def _box(raw, along, depth, left):
         "go": {"page": str(raw["go"].get("page") or ""), "with": raw["go"].get("with")} if isinstance(raw.get("go"), dict) else None,
         "image": _image(raw.get("image")) if role == "image" else None,
         "type": _type(raw.get("type"), role), "arrive": _arrive(raw.get("arrive")),
+        "count": (count := role == "text" and bool(raw.get("count")) and counts(_words(raw.get("text"), MAX_TEXT))),
+        "run": _run(raw.get("run"), {"by": "", "seconds": COUNT_SECONDS} if count else None)
+        if count or role in RUN_ROLES else None,
         "children": children,
     }
 
@@ -265,7 +339,11 @@ def _page(raw, n):
         root = _box({"role": "section", "pad": 14, "gap": 10, "children": [raw["root"]] if root else []}, False, 0, [MAX_BOXES])
     layout = raw.get("layout") if raw.get("layout") in catalogue.LAYOUTS else ""
     return {"id": raw.get("id") if isinstance(raw.get("id"), str) else "",
-            "name": _words(raw.get("name"), MAX_NAME) or f"Page {n}", "layout": layout, "root": root}
+            "name": _words(raw.get("name"), MAX_NAME) or f"Page {n}", "layout": layout,
+            # The story: how long it shows (0: as long as it needs), and the box whose click goes on ("": its time does).
+            "secs": number(raw.get("secs"), 0.0, 0.0, MAX_PAGE_SECONDS) if not isinstance(raw.get("secs"), bool) else 0.0,
+            "by": raw.get("by") if isinstance(raw.get("by"), str) else "",
+            "root": root}
 
 
 # -------------------------------------------------------------- the cursor --
@@ -312,26 +390,82 @@ def _template():
     if _made:
         return _made
     pages = [{"id": f"p{n}", "name": name, "layout": layout, "root": catalogue.layout(layout)}
-             for n, (name, layout) in enumerate((("Sign in", "signin"), ("Dashboard", "dashboard"), ("Settings", "settings")), 1)]
-    for box in pages[0]["root"]["children"]:
-        if box["role"] == "button" and not box.get("variant"):
-            box["go"] = {"page": "p2", "with": ""}
-    base = clean({**DEFAULTS, "pages": pages, "start": "p1", "path": [[0.0, 50.0, 50.0]], "clicks": []})
-    solved = solve.solve_all(base)
-
-    def middle(page_id, found, down=0.5):
-        placed = next(b for b in solved[page_id]["boxes"] if found(b))
-        x, y = solve.to_frame(base, solved[page_id]["h"], placed["x"] + placed["w"] / 2, placed["y"] + placed["h"] * down)
-        return [round(x, 2), round(y, 2)]
-    press = middle("p1", lambda b: b["role"] == "button" and b["variant"] == "")
-    tile = middle("p2", lambda b: b["name"] == "Stat")
-    graph = middle("p2", lambda b: b["role"] == "chart")
-    _made.update({
-        "title": "Booking app", "pages": base["pages"], "start": "p1",
-        "path": [[0.0, 22.0, 90.0], [1.1, *press], [1.9, *press], [3.0, *tile], [3.6, *tile], [4.7, *graph], [6.0, 80.0, 92.0]],
-        "clicks": [[1.5, 1.65]],
-    })
+             for n, (name, layout) in enumerate(TEMPLATE_PAGES, 1)]
+    # The story: Sign in's button goes on to the Dashboard, whose sidebar's Settings item goes on to Settings.
+    base = clean({**DEFAULTS, "pages": pages, "path": [[0.0, 50.0, 50.0]], "clicks": []})
+    button = next(b["id"] for b in base["pages"][0]["root"]["children"] if b["role"] == "button" and not b["variant"])
+    item = next(b["id"] for b in every(base["pages"][1]["root"]) if b["variant"] == "navitem" and b["name"] == "Settings")
+    made = clean({**base, "auto": True, "pages": [{**base["pages"][0], "by": button}, {**base["pages"][1], "by": item, "secs": 3.0},
+                                                  base["pages"][2]]})
+    _made.update({"title": "Booking app", "auto": True, "pages": made["pages"]})
     return _made
+
+
+def story(spec):
+    """The clip, page by page, when Buddy moves the cursor: [{"page", "at" (the second it
+    starts), "secs", "own" (whether its length was given), "by" (the box whose click goes
+    on to the next page, "" for its time), "leave" (when that click comes, None for
+    none), "clicks": [[second, box id]] (the clicks that start things on it), "last"}]
+    - the pages in the order they are listed."""
+    out, t = [], 0.0
+    for i, page in enumerate(spec["pages"]):
+        boxes = list(every(page["root"]))
+        last = i == len(spec["pages"]) - 1
+        by = "" if last else page["by"]
+        starters, longest = [], 0.6
+        for box in boxes:
+            run, types = box["run"], box["type"]
+            if run and run["by"]:
+                longest = max(longest, run["seconds"])
+                if run["by"] not in starters:
+                    starters.append(run["by"])
+            if types and types["start"] == "click":
+                longest = max(longest, len(types["text"] or box["text"]) / types["speed"])
+                if box["id"] not in starters:
+                    starters.append(box["id"])
+        starters = [s for s in starters if s != by]           # what the leaving click starts, starts as the page goes
+        needs = STORY_LEAD + STORY_GAP * (len(starters) - 1) + longest + STORY_TAIL if starters else PAGE_SECONDS
+        secs = page["secs"] or round(min(MAX_PAGE_SECONDS, needs), 1)
+        clicks = [[round(t + min(STORY_LEAD + STORY_GAP * k, max(0.1, secs - 2 * STORY_LEAVE)), 3), s] for k, s in enumerate(starters)]
+        out.append({"page": page["id"], "at": round(t, 3), "secs": secs, "own": bool(page["secs"]), "by": by,
+                    "leave": round(t + secs - STORY_LEAVE, 3) if by else None, "clicks": clicks, "last": last})
+        t += secs
+    return out
+
+
+def _staged(spec):
+    """What a story makes of a panel: the cursor's "path" and "clicks", the "page_keys",
+    how long the clip is and where it starts - the cursor crossing to each box in time to
+    click it."""
+    told = story(spec)
+    seconds = round(min(MAX_SECONDS, max(MIN_SECONDS, sum(part["secs"] for part in told))), 3)
+    solved = solve.solve_all(spec)
+    placed = {box["id"]: (pid, box) for pid, page in solved.items() for box in page["boxes"]}
+    keys, events = [], []
+    for n, part in enumerate(told):
+        events += [(t, box_id) for t, box_id in part["clicks"]]
+        if part["by"]:
+            events.append((part["leave"], part["by"]))
+        elif not part["last"]:
+            keys.append([round(part["at"] + part["secs"], 3), told[n + 1]["page"], spec["go_with"]])
+    path, clicks = [[0.0, *CURSOR_HOME]], []
+    for t, box_id in sorted(events):
+        if box_id not in placed or t >= seconds:
+            continue                                # a box the window is too narrow to show: nothing to click
+        pid, box = placed[box_id]
+        x, y = solve.to_frame(spec, solved[pid]["h"], box["x"] + box["w"] / 2, box["y"] + box["h"] / 2)
+        x, y = round(min(100.0, max(0.0, x)), 2), round(min(100.0, max(0.0, y)), 2)
+        went = max(path[-1][0] + 0.02, t - CURSOR_TRAVEL)
+        if went < t - CURSOR_EARLY - 0.02:
+            if went > path[-1][0] + 0.03:
+                path.append([round(went, 3), path[-1][1], path[-1][2]])     # it waits where it was until it's time to go
+            path.append([round(t - CURSOR_EARLY, 3), x, y])
+        else:
+            path.append([round(went, 3), x, y])
+        path.append([round(max(path[-1][0] + 0.02, t + CURSOR_STAYS), 3), x, y])
+        clicks.append([round(t, 3), round(t + CLICK_SECONDS, 3)])
+    return {"seconds": seconds, "start": spec["pages"][0]["id"], "page_keys": keys,
+            "path": [key for key in path if key[0] <= seconds], "clicks": clicks}
 
 
 def is_template(spec):
@@ -347,13 +481,29 @@ def clean(raw):
     if not isinstance(raw.get("pages"), list):
         raw = {**_template(), **{k: v for k, v in raw.items() if k != "pages"}}
     seconds = number(raw.get("seconds"), DEFAULTS["seconds"], MIN_SECONDS, MAX_SECONDS)
+    auto = bool(raw.get("auto", DEFAULTS["auto"]))
     pages = [_page(page, n) for n, page in enumerate(raw["pages"][:MAX_PAGES], 1)] or [_page({}, 1)]
     _numbered(pages, "p")
     _numbered([box for page in pages for box in every(page["root"])], "b")
     page_ids = [page["id"] for page in pages]
     drawn_on = set()
-    for page in pages:
-        for box in every(page["root"]):
+    for at, page in enumerate(pages):
+        here = list(every(page["root"]))
+        # The box whose click goes on to the next page: one of this page's own.
+        if not any(box["id"] == page["by"] for box in here[1:]):
+            page["by"] = ""
+        for box in here:
+            if auto:
+                # In a story the links are the story's: the "by" box goes to the next page, nothing else goes anywhere.
+                onward = at + 1 < len(pages) and box["id"] == page["by"]
+                box["go"] = {"page": page_ids[at + 1], "with": ""} if onward else None
+            # What starts it: a box of its own page - by id, or (a layout's own boxes,
+            # which have no ids yet) "@" and the box's words or name.
+            by = box["run"]["by"] if box["run"] else ""
+            if by.startswith("@"):
+                by = next((b["id"] for b in here if by[1:] in (b["text"], b["name"]) and b is not box), "")
+            if box["run"]:
+                box["run"] = {**box["run"], "by": by if any(b["id"] == by and b is not box for b in here) else ""}
             go = box["go"]
             if go is not None:
                 box["go"] = {"page": go["page"], "with": go["with"] if go["with"] in GO_WITH else ""} \
@@ -382,7 +532,7 @@ def clean(raw):
 
     answers = raw.get("answers") if isinstance(raw.get("answers"), dict) else {}
     build = raw.get("build") if isinstance(raw.get("build"), dict) else {}
-    return {
+    made = {
         "kind": raw.get("kind") if raw.get("kind") in KINDS else DEFAULTS["kind"],
         "style": raw.get("style") if raw.get("style") in STYLES else DEFAULTS["style"],
         "accent": colour(raw.get("accent"), DEFAULTS["accent"]),
@@ -396,7 +546,7 @@ def clean(raw):
         "bold_face": str(raw.get("bold_face") or DEFAULTS["bold_face"])[:MAX_FONT],
         "pages": pages,
         "start": raw.get("start") if raw.get("start") in page_ids else page_ids[0],
-        "seconds": seconds,
+        "seconds": seconds, "auto": auto,
         "path": _path(raw.get("path"), seconds), "clicks": _clicks(raw.get("clicks"), seconds),
         "cursor": raw.get("cursor") if raw.get("cursor") in CURSORS else DEFAULTS["cursor"],
         "cursor_size": number(raw.get("cursor_size"), DEFAULTS["cursor_size"], 1.0, 20.0),
@@ -409,6 +559,9 @@ def clean(raw):
                   "stagger": number(build.get("stagger"), DEFAULTS["build"]["stagger"], 0.0, 0.5),
                   "seconds": number(build.get("seconds"), DEFAULTS["build"]["seconds"], 0.05, 2.0)},
     }
+    if auto:
+        made.update(_staged(made))
+    return made
 
 
 # ------------------------------------------------------------------- reads --
@@ -499,9 +652,11 @@ def with_box(spec, box_id, key, value):
     found = find(spec, box_id) if key in BOX_KEYS else None
     if found is None:
         return None
-    if key in ("type", "arrive") and isinstance(value, dict):
+    if key in ("type", "arrive", "run") and isinstance(value, dict):
         value = {**(found["box"][key] or {}), **value}
-    return _changed(spec, _with_roots(spec, lambda box: {**box, key: value} if box["id"] == box_id else box))
+    # A plain row turned to run downwards is a column from then on, and is called one.
+    renamed = {"name": ""} if key == "dir" and _wrapper(found["box"]) else {}
+    return _changed(spec, _with_roots(spec, lambda box: {**box, key: value, **renamed} if box["id"] == box_id else box))
 
 
 def with_image(spec, box_id, path, px=None):
@@ -533,13 +688,95 @@ def with_move(spec, box_id, into, at=None):
     moving = found["box"]
 
     def put(box):
-        kids = [kid for kid in box["children"] if kid["id"] != box_id]
-        if box["id"] == into:
-            n = len(kids)
-            where = n if at is None or isinstance(at, bool) else int(min(n, max(0, number(at, n))))
-            kids = [*kids[:where], moving, *kids[where:]]
-        elif len(kids) == len(box["children"]):
+        if box["id"] != into:
             return box
+        n = len(box["children"])
+        where = n if at is None or isinstance(at, bool) else int(min(n, max(0, number(at, n))))
+        return {**box, "children": [*box["children"][:where], moving, *box["children"][where:]]}
+    page = found["page"]
+    root = _mapped(_taken(page["root"], box_id, keep=(into,)), put)
+    return _changed(spec, {**spec, "pages": [{**p, "root": root} if p["id"] == page["id"] else p for p in spec["pages"]]})
+
+
+def _wrapper(box):
+    """Whether a box is only there to line others up: a plain row or column nobody named."""
+    return box["role"] == "section" and box["variant"] == "" and box["name"] in ("Row", "Column")
+
+
+def _taken(root, box_id, keep=()):
+    """A page's tree without a box - and without the plain rows and columns (_wrapper)
+    taking it out leaves with nothing to line up: one left empty goes, one left with a
+    single box gives its place to that box.
+    `keep`: the boxes that stay even so (the one the box is going into or beside)."""
+    def without(box, top):
+        kids, lost = [], False
+        for child in box["children"]:
+            made = None if child["id"] == box_id else without(child, False)
+            if made is None:
+                lost = True
+            else:
+                kids.append(made)
+        if lost and len(kids) < 2 and not top and box["id"] not in keep and _wrapper(box):
+            return kids[0] if kids else None        # one box left in it: that box takes its place
+        return {**box, "children": kids} if lost or any(a is not b for a, b in zip(kids, box["children"])) else box
+    return without(root, True)
+
+
+SIDES = ("left", "right", "above", "below")
+
+
+def with_beside(spec, box_id, target_id, side):
+    """A box, and everything in it, put next to another on its page: to its "left" or
+    "right", "above" or "below". Where the two can't sit that way as they are - side by
+    side in a column, one over the other in a row - the other box's place is taken by a
+    new row (or column) holding them both. None for a page's own box, boxes on different
+    pages, a box put beside itself or something in it, or no change."""
+    found, target = find(spec, box_id), find(spec, target_id)
+    if found is None or target is None or side not in SIDES or found["parent"] is None or target["parent"] is None:
+        return None
+    if target["page"]["id"] != found["page"]["id"] or any(b["id"] == target_id for b in every(found["box"])):
+        return None
+    moving, holder = found["box"], target["parent"]
+    along = "row" if side in ("left", "right") else "column"
+    first = side in ("left", "above")
+    # Lines of a wrapping row run across but stack downwards: beside is still beside.
+    if holder["dir"] == along:
+        def put(box):
+            if box["id"] != holder["id"]:
+                return box
+            kids = []
+            for kid in box["children"]:
+                kids += [moving, kid] if kid["id"] == target_id and first else [kid, moving] if kid["id"] == target_id else [kid]
+            return {**box, "children": kids}
+    else:
+        def put(box):
+            if box["id"] != holder["id"]:
+                return box
+            # The other box as it is now: the one moved may have come out of it.
+            return {**box, "children": [
+                {"role": "section", "dir": along, "gap": holder["gap"] or 8.0, "children": [moving, kid] if first else [kid, moving],
+                 **({"align": "stretch"} if along == "row" else {})} if kid["id"] == target_id else kid
+                for kid in box["children"]]}
+    page = found["page"]
+    root = _mapped(_taken(page["root"], box_id, keep=(holder["id"], target_id)), put)
+    return _changed(spec, {**spec, "pages": [{**p, "root": root} if p["id"] == page["id"] else p for p in spec["pages"]]})
+
+
+def with_copy(spec, box_id):
+    """A second one of a box, and of everything in it, right after it - with ids of its
+    own (clean gives them). None for a page's own box, or a page that's full."""
+    found = find(spec, box_id)
+    if found is None or found["parent"] is None:
+        return None
+    if sum(1 for _ in every(found["page"]["root"])) + sum(1 for _ in every(found["box"])) > MAX_BOXES:
+        return None
+
+    def put(box):
+        if box["id"] != found["parent"]["id"]:
+            return box
+        kids = []
+        for kid in box["children"]:
+            kids += [kid, kid] if kid["id"] == box_id else [kid]
         return {**box, "children": kids}
     return _changed(spec, _with_roots(spec, put, found["page"]["id"]))
 
@@ -550,6 +787,7 @@ def animations(spec, box_id):
         arrive  {"on", "kind": its own ("rise" | "fade" | "pop" | "none") or "" (the
                 page's build: a rise), "build": whether the page builds on}       every box
         type    {"on", "speed", "start", "caret", "text"}           a text or a field
+        count   {"on"}                                               a text with a number in it
         answer  {"on": it answers the cursor, "own": it has states of its own,
                 "go": the page a click on it goes to, or ""}         every box
         draw    {"on": True}                                         a chart or a progress bar
@@ -565,6 +803,8 @@ def animations(spec, box_id):
             "build": spec["build"]["on"]}]
     if box["role"] in TYPE_ROLES:
         out.append({"id": "type", "on": box["type"] is not None, **(box["type"] or _type({}, box["role"]))})
+    if box["role"] == "text" and counts(box["text"]):
+        out.append({"id": "count", "on": box["count"]})
     out.append({"id": "answer", "on": box["reacts"], "own": box["states"] is not None,
                 "go": (box["go"] or {}).get("page", "")})
     if box["role"] in ("chart", "progress"):
@@ -609,7 +849,9 @@ def with_layout(spec, page_id, layout_id):
     if page is None or entry is None:
         return None
     old = catalogue.LAYOUTS.get(page["layout"])
-    plain = page["name"] == (old["name"] if old else "") or re.fullmatch(r"Page \d+", page["name"])
+    # Its name is the layout's still - or the one a new panel's page of that layout has ("Sign in").
+    given = {old["name"] if old else "", *(name for name, layout in TEMPLATE_PAGES if layout == page["layout"])}
+    plain = page["name"] in given or re.fullmatch(r"Page \d+", page["name"])
     made = {**page, "layout": layout_id, "root": entry["make"](), "name": entry["name"] if plain else page["name"]}
     return _changed(spec, {**spec, "pages": [made if p["id"] == page_id else p for p in spec["pages"]]})
 
@@ -627,6 +869,65 @@ def without_page(spec, page_id):
     if page_of(spec, page_id) is None or len(spec["pages"]) < 2:
         return None
     return _changed(spec, {**spec, "pages": [p for p in spec["pages"] if p["id"] != page_id]})
+
+
+def with_page_move(spec, page_id, at):
+    """A page moved to place `at` among the pages (counted without it). The pages' order
+    is the order they are listed and numbered in; which one the clip starts on is
+    "start" (with_start). None for a page there isn't, or no change."""
+    page = page_of(spec, page_id)
+    if page is None or isinstance(at, bool):
+        return None
+    rest = [p for p in spec["pages"] if p["id"] != page_id]
+    where = int(min(len(rest), max(0, number(at, len(rest)))))
+    return _changed(spec, {**spec, "pages": [*rest[:where], page, *rest[where:]]})
+
+
+def with_page_copy(spec, page_id):
+    """A second one of a page, right after it: the same boxes (with ids of their own) and
+    the same links, named after it with the next number. None when the panel has all
+    the pages it may."""
+    page = page_of(spec, page_id)
+    if page is None or len(spec["pages"]) >= MAX_PAGES:
+        return None
+    names = {p["name"] for p in spec["pages"]}
+    stem = re.sub(r" \d+$", "", page["name"])[:MAX_NAME - 3]
+    name = next(f"{stem} {n}" for n in range(2, MAX_PAGES + 3) if f"{stem} {n}" not in names)
+    pages = []
+    for p in spec["pages"]:
+        pages += [p, {**p, "id": "", "name": name}] if p["id"] == page_id else [p]
+    return _changed(spec, {**spec, "pages": pages})
+
+
+def with_start(spec, page_id):
+    """The page the clip starts on. None for a page there isn't, or the one it is."""
+    if page_of(spec, page_id) is None:
+        return None
+    return _changed(spec, {**spec, "start": page_id})
+
+
+def with_story(spec, page_id, key, value):
+    """One thing about a page's part in the story: "secs", how long it shows (0: as long
+    as what happens on it needs), or "by", the box of the page whose click goes on to the
+    next one ("": its time does). None for a page or a key there isn't, or no change."""
+    if page_of(spec, page_id) is None or key not in ("secs", "by"):
+        return None
+    return _changed(spec, {**spec, "pages": [{**p, key: value} if p["id"] == page_id else p for p in spec["pages"]]})
+
+
+def with_started(spec, box_id, by):
+    """A click on box `by` starts box `box_id`: a progress bar or a chart draws on from it,
+    a text with a number counts up from it. None for a box that can do neither, boxes on
+    different pages, a box started by itself, or no change."""
+    found, starter = find(spec, box_id), find(spec, by)
+    if found is None or starter is None or box_id == by or found["page"]["id"] != starter["page"]["id"]:
+        return None
+    box = found["box"]
+    if box["role"] not in RUN_ROLES and not (box["role"] == "text" and counts(box["text"])):
+        return None
+    run = {"by": by, "seconds": (box["run"] or {}).get("seconds", 3.0)}
+    more = {"count": True} if box["role"] == "text" else {}
+    return _changed(spec, _with_roots(spec, lambda b: {**b, **more, "run": run} if b["id"] == box_id else b, found["page"]["id"]))
 
 
 def with_page_name(spec, page_id, name):
@@ -694,4 +995,5 @@ def with_recording(spec, samples, clicks, seconds):
     """The panel with a newly recorded cursor: its path thinned, the clip as long as
     the recording."""
     seconds = number(seconds, spec["seconds"], MIN_SECONDS, MAX_SECONDS)
-    return _changed(spec, {**spec, "seconds": seconds, "path": thinned(_path(samples, seconds)), "clicks": clicks})
+    # A cursor recorded is the panel's own from then on: the story no longer moves it.
+    return _changed(spec, {**spec, "auto": False, "seconds": seconds, "path": thinned(_path(samples, seconds)), "clicks": clicks})

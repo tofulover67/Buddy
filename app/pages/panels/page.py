@@ -23,8 +23,9 @@ that has none) - filling the box and cropped to it.
 Protocol:
     to the view    state, picked, toast, alert, drop_hover
     from the view  set, box, insert, remove_box, layout, page_add, page_remove,
-                   page_rename, page_show, answers, rule, rule_remove, recorded,
-                   image, image_clear, move, pick,
+                   page_rename, page_show, page_move, page_copy, page_start, flow, story, starts,
+                   answers, rule, rule_remove, recorded,
+                   image, image_clear, move, beside, copy_box, pick,
                    option, add, refresh, undo, redo, reset, switch_tab
 """
 
@@ -68,6 +69,10 @@ class PanelsPage(GraphicPage):
 
     def build_state(self):
         super().build_state()
+        # A panel kept from before there was a story: Buddy moves its cursor from now on.
+        kept = self.settings.get("spec")
+        if isinstance(kept, dict) and "auto" not in kept:
+            self.spec = M.clean({**self.spec, "auto": True})
         self.showing = self.spec["start"]       # the page in view
         self.picked = ""                        # the box picked in the view (pick), where a dropped picture goes
         self._faces = {}                        # {(family, style): {"em", "baseline"}}, measured once each
@@ -125,6 +130,8 @@ class PanelsPage(GraphicPage):
                 "replace": bool(self.settings.get("replace", True)), "adding": self.adding,
                 "can_undo": bool(self.undo_steps), "can_redo": bool(self.redo_steps),
                 "is_template": M.is_template(self.spec),
+                # The clip page by page, as the strip under the stage shows it.
+                "story": M.story(self.spec),
                 # Where the view finds each image box's picture.
                 "images": {box["id"]: QUrl.fromLocalFile(box["image"]["path"]).toString() for box in M.images(self.spec)},
                 # Every way each box of the page in view moves: its Animations list.
@@ -193,15 +200,64 @@ class PanelsPage(GraphicPage):
         payload = payload or {}
         self._edit(M.with_layout(self.spec, payload.get("page") or self.showing, payload.get("layout")))
 
-    def on_page_add(self, _payload=None):
-        if self.adding:
+    def _full(self):
+        """Says so, when the panel has all the pages it may."""
+        if len(self.spec["pages"]) < M.MAX_PAGES:
+            return False
+        self.emit("toast", {"text": f"A panel holds up to {M.MAX_PAGES} pages."})
+        return True
+
+    def on_page_add(self, payload=None):
+        """One more page, shown: empty, or - {"layout"} - made from the shelf's layout."""
+        if self.adding or self._full():
             return
-        if len(self.spec["pages"]) >= M.MAX_PAGES:
-            return self.emit("toast", {"text": f"A panel holds up to {M.MAX_PAGES} pages."})
         spec = M.with_page(self.spec)
         if spec is not None:
-            self.showing = spec["pages"][-1]["id"]
+            new = spec["pages"][-1]["id"]
+            spec = M.with_layout(spec, new, (payload or {}).get("layout")) or spec
+            self.showing = new
             self.change_to(spec)
+
+    def on_page_copy(self, payload):
+        """A second one of a page, right after it, shown: {"id"}."""
+        if self.adding or self._full():
+            return
+        spec = M.with_page_copy(self.spec, (payload or {}).get("id"))
+        if spec is not None:
+            had = set(self._page_ids())
+            self.showing = next(page["id"] for page in spec["pages"] if page["id"] not in had)
+            self.change_to(spec)
+
+    def on_page_move(self, payload):
+        """A page to another place in the list: {"id", "at" (counted without it)}."""
+        payload = payload or {}
+        self._edit(M.with_page_move(self.spec, payload.get("id"), payload.get("at")))
+
+    def on_story(self, payload):
+        """One thing about a page's part in the story: {"page", "key" ("secs" | "by"), "value"}."""
+        payload = payload or {}
+        self._edit(M.with_story(self.spec, payload.get("page"), payload.get("key"), payload.get("value")),
+                   f"story:{payload.get('page')}:{payload.get('key')}")
+
+    def on_starts(self, payload):
+        """A click on one box starts another - a bar, a chart, a number: {"id", "by"}."""
+        payload = payload or {}
+        self._edit(M.with_started(self.spec, payload.get("id"), payload.get("by")))
+
+    def on_flow(self, _payload=None):
+        """The pages one after another: each shown for an equal share of the clip, in the
+        order they are listed, from the one the clip starts on - as keys on the Page lane,
+        in place of the keys there were. Links and rules still work besides."""
+        ids = self._page_ids()
+        at = ids.index(self.spec["start"])
+        order = ids[at:] + ids[:at]
+        each = self.spec["seconds"] / len(order)
+        self._edit({**self.spec, "page_keys": [[round(n * each, 3), pid, self.spec["go_with"]]
+                                               for n, pid in enumerate(order) if n]} if len(order) > 1 else None)
+
+    def on_page_start(self, payload):
+        """The page the clip starts on: {"id"}."""
+        self._edit(M.with_start(self.spec, (payload or {}).get("id")))
 
     def on_page_remove(self, payload):
         self._edit(M.without_page(self.spec, (payload or {}).get("id")))
@@ -259,6 +315,24 @@ class PanelsPage(GraphicPage):
         payload = payload or {}
         at = payload.get("at")
         self._edit(M.with_move(self.spec, payload.get("id"), payload.get("into"), None if at in (None, -1) else at))
+
+    def on_beside(self, payload):
+        """A layer put next to another, in a new row or column where they need one:
+        {"id", "target", "side" ("left", "right", "above", "below")}."""
+        payload = payload or {}
+        self._edit(M.with_beside(self.spec, payload.get("id"), payload.get("target"), payload.get("side")))
+
+    def on_copy_box(self, payload):
+        """A second one of a layer, right after it; the view is told to pick it. {"id"}."""
+        spec = M.with_copy(self.spec, (payload or {}).get("id"))
+        if spec is None or self.adding:
+            return
+        had = {box["id"] for box in M.boxes(self.spec)}
+        new = [box["id"] for box in M.boxes(spec) if box["id"] not in had]
+        self.change_to(spec)
+        if new:
+            self.picked = new[0]
+            self.emit("picked", {"id": new[0]})
 
     # ----------------------------------------------------------- images --
 

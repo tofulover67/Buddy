@@ -45,6 +45,12 @@ The rules:
   bar after the last letter shown, caret()) stands from then until the last letter and
   for CARET_HOLD seconds after, blinking CARET_BLINK times a second (on for the first
   half of each blink).
+- A box with a "run" - a progress bar or a chart drawing on, a text counting up - starts
+  on its own terms and goes at a steady rate over its seconds: "by" "" from when the box
+  has arrived (a drawn one: from when its draw-on would start), each time its page
+  arrives; "by" a box, from the frame of the first click (button down) inside that box
+  on that arrival of the page - until then a bar is empty and a count says nothing yet
+  (its number at 0). A count shows model.counted(text, share), stepped once a frame.
 """
 
 from pages.data_graphics import easing
@@ -179,6 +185,26 @@ def clock(spec, fps, frame=FRAME):
     typed_by_click = {pid: [(b["id"], b["x"], b["y"], b["x"] + b["w"], b["y"] + b["h"]) for b in page["boxes"]
                             if b["id"] in facts["typers"] and b["type"]["start"] == "click"] for pid, page in solved.items()}
     clicked_in = []                         # [(frame, box id)]: clicks on boxes that type from one
+    # What runs on its own terms (a "run"): where each begins after its page arrives, and the
+    # boxes whose click starts one.
+    runs = {b["id"]: b["run"] for page in solved.values() for b in page["boxes"] if b.get("run")}
+    run_frames = {bid: max(1, int(round(run["seconds"] * fps))) for bid, run in runs.items()}
+    counters = {b["id"]: b["text"] for page in solved.values() for b in page["boxes"] if b.get("count") and b["id"] in runs}
+    run_here = {pid: [b["id"] for b in page["boxes"] if b["id"] in runs] for pid, page in solved.items()}
+    starters = {pid: [(b["id"], b["x"], b["y"], b["x"] + b["w"], b["y"] + b["h"]) for b in page["boxes"]
+                      if any(runs[r]["by"] == b["id"] for r in run_here[pid])] for pid, page in solved.items()}
+    run_rows = {bid: [None] * total for bid in runs}
+    began = {}                              # {box id: the frame its run begins on}, of the page showing
+
+    def arrive(page_id, f):
+        for bid in run_here[page_id]:
+            began.pop(bid, None)
+            if not runs[bid]["by"]:
+                plan = plans[page_id]
+                began[bid] = f + (plan["draws"][bid][0] if bid in plan["draws"] else sum(plan["boxes"].get(bid, (0, 0))))
+
+    def run_share(bid, f):
+        return min(run_frames[bid], max(0, f - began[bid])) / run_frames[bid] if bid in began else 0.0
     go_frames = max(0, int(round(spec["go_seconds"] * fps)))
     keys = [(min(total - 1, int(round(t * fps))), page, how) for t, page, how in spec["page_keys"]]
     rules = [rule for rule in spec["rules"] if rule["box"] in facts["home"]]
@@ -188,13 +214,15 @@ def clock(spec, fps, frame=FRAME):
     showing, arrived, busy, next_key = spec["start"], 0, 0, 0
     over, pressed = [""] * total, [""] * total
     was_over, was_pressed, grabbed = "", "", None
+    arrive(showing, 0)
     for f in range(total):
         while next_key < len(keys) and keys[next_key][0] <= f:
             waiting.append(("key", keys[next_key][1], keys[next_key][2], ""))
             next_key += 1
         for rule in rules:
             if rule["id"] not in fired and facts["home"][rule["box"]] == showing \
-                    and _share(plans[showing], rule["box"], f - arrived) * 100.0 > rule["over"]:
+                    and (run_share(rule["box"], f) if rule["box"] in runs
+                         else _share(plans[showing], rule["box"], f - arrived)) * 100.0 > rule["over"]:
                 fired.add(rule["id"])
                 events.append({"frame": f, "kind": "rule", "box": rule["box"], "page": rule["page"]})
                 waiting.append(("rule", rule["page"], rule["with"], rule["box"]))
@@ -224,6 +252,15 @@ def clock(spec, fps, frame=FRAME):
             if target in links:
                 waiting.append(("click", links[target]["page"], links[target]["with"] or spec["go_with"], target))
             clicked_in += [(f, box[0]) for box in typed_by_click[showing] if box[1] <= x < box[3] and box[2] <= y < box[4]]
+            for box in starters[showing]:
+                if box[1] <= x < box[3] and box[2] <= y < box[4]:
+                    for bid in run_here[showing]:
+                        if runs[bid]["by"] == box[0]:
+                            began.setdefault(bid, f)
+        for bid in run_here[showing]:
+            run_rows[bid][f] = min(run_frames[bid], max(0, f - began[bid])) if bid in began else 0
+            if began.get(bid) == f:
+                events.append({"frame": f, "kind": "run", "box": bid, "page": showing})
         while waiting and f >= busy:
             why, page, how, box = waiting.pop(0)
             if page == showing:
@@ -232,6 +269,7 @@ def clock(spec, fps, frame=FRAME):
             events.append({"frame": f, "kind": "page", "box": box, "page": page})
             showing, arrived, busy = page, f, f + go_frames
             was_over = ""                       # the page under the cursor is another: its boxes start afresh
+            arrive(page, f)
             break
 
     n_hover = interactions.look_back(spec["answers"]["hover_seconds"], fps)
@@ -252,6 +290,23 @@ def clock(spec, fps, frame=FRAME):
                 row[f] = _share(plan, box_id, f - change["at"])
             row[done:again] = [1.0] * (again - done)
 
+    # What runs on its own terms: how far along each is on every frame (held as it was
+    # while its page is leaving or away), in place of the build's draw-on - and what a
+    # count says at each step.
+    said = {}
+    for bid, row in run_rows.items():
+        last = 0
+        for f, at in enumerate(row):
+            if at is None:
+                row[f] = last
+            else:
+                last = at
+        n = run_frames[bid]
+        if bid in draw:
+            draw[bid] = [at / n for at in row]
+        if bid in counters:
+            said[bid] = {"steps": [model.counted(counters[bid], i / n) for i in range(n + 1)], "at": row}
+
     typed, carets = _typing(facts, changes, plans, clicked_in, fps, total, events)
     events.sort(key=lambda event: event["frame"])
     return {"total": total,
@@ -259,7 +314,7 @@ def clock(spec, fps, frame=FRAME):
             "down": [1 if d else 0 for d in held],
             "pages": changes, "amounts": amounts,
             "build": {pid: plan["boxes"] for pid, plan in plans.items()},
-            "draw": draw, "events": events, "typed": typed, "caret": carets}
+            "draw": draw, "events": events, "typed": typed, "caret": carets, "said": said}
 
 
 def _typing(facts, changes, plans, clicked_in, fps, total, events):
@@ -511,5 +566,8 @@ def pose(spec, clock, frame):
     return {"pages": pages, "cursor": list(clock["cursor"][f]), "down": clock["down"][f],
             "draw": {box_id: row[f] for box_id, row in clock["draw"].items() if home.get(box_id) in showing},
             "typed": {box_id: row[f] for box_id, row in clock.get("typed", {}).items() if home.get(box_id) in showing},
+            # What each counting text says on the frame.
+            "said": {box_id: row["steps"][row["at"][f]] for box_id, row in clock.get("said", {}).items()
+                     if home.get(box_id) in showing},
             "caret": {box_id: row[f] for box_id, row in clock.get("caret", {}).items()
                       if row[f] is not None and home.get(box_id) in showing}}

@@ -65,8 +65,8 @@ def badge(words):
     return box("badge", text=words, w="hug")
 
 
-def progress(p):
-    return box("progress", p=p)
+def progress(p, **more):
+    return box("progress", p=p, **more)
 
 
 def rows_of(labels, seed):
@@ -282,8 +282,9 @@ def _kanban():
 def _player():
     return col([
         image(1.0, maxw=220, center=True), text("Slow Morning", "h1", center=True),
-        text("Low Tide - Side A", "caption", center=True), progress(38),
-        row([text("1:24", "caption", w="fill"), text("3:41", "caption", w="hug")]),
+        # Play starts the song: the bar fills to where it says, and the time runs up to it.
+        text("Low Tide - Side A", "caption", center=True), progress(38, run={"by": "@Play", "seconds": 4.0}),
+        row([text("1:24", "caption", w="fill", count=True, run={"by": "@Play", "seconds": 4.0}), text("3:41", "caption", w="hug")]),
         row([button("Back", "ghost"), button("Play"), button("Next", "ghost")], justify="center"),
     ], pad=18, gap=9, maxw=320, center=True)
 

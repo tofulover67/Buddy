@@ -59,7 +59,7 @@ def state_of(spec, showing=None, **more):
             "limits": {"width": [M.MIN_WIDTH, M.MAX_WIDTH], "seconds": [M.MIN_SECONDS, M.MAX_SECONDS],
                        "pages": M.MAX_PAGES, "rules": M.MAX_RULES},
             "replace": True, "adding": False, "can_undo": False, "can_redo": False,
-            "is_template": spec == M.clean({}),
+            "is_template": spec == M.clean({}), "story": M.story(spec),
             "images": images,
             "animations": {box["id"]: M.animations(spec, box["id"]) for box in M.every(M.page_of(spec, showing)["root"])},
             **more}
@@ -91,7 +91,8 @@ class ViewTests(unittest.TestCase):
         cls.app = qt_app()
         if not isinstance(cls.app, QApplication):     # another file's test made a bare one
             raise unittest.SkipTest("a QCoreApplication was made first; a web view needs a QApplication")
-        cls.spec = M.clean({})
+        cls.story = M.clean({})                                # a new panel: Buddy moves the cursor
+        cls.spec = M.clean({**cls.story, "auto": False})       # the same, the cursor its own: what the older tests are about
 
     def setUp(self):
         from PySide6.QtCore import QEventLoop, QTimer, QUrl
@@ -241,12 +242,13 @@ class ViewTests(unittest.TestCase):
         self.click("#add-open")
         self.assertFalse(self.hidden("#add-pop"))
         self.assertEqual(self.js("return document.getElementById('add-open').getAttribute('aria-expanded');"), "true")
-        # A whole page first, its groups; then the pieces.
+        # On a page with something on it, the pieces first; then a whole page, in its groups.
+        self.assertTrue(self.hidden("[data-part=layouts]"))
+        self.assertFalse(self.hidden("[data-part=insert]"))
+        self.click("#add-mode [data-value=layouts]")
         self.assertFalse(self.hidden("[data-part=layouts]"))
         self.assertTrue(self.hidden("[data-part=insert]"))
         self.click("#add-mode [data-value=insert]")
-        self.assertTrue(self.hidden("[data-part=layouts]"))
-        self.assertFalse(self.hidden("[data-part=insert]"))
         # The field finds them by name.
         self.js("const f = document.getElementById('add-find'); f.value = 'chart'; f.dispatchEvent(new Event('input')); return true;")
         shown = self.js("return [...document.querySelectorAll('[data-part=insert] .pn-tile')].filter(b => !b.hidden).map(b => b.dataset.id);")
@@ -265,6 +267,7 @@ class ViewTests(unittest.TestCase):
     def test_a_layout_tile_makes_the_page_in_view_that_layout(self):
         self.show(showing="p2")
         self.click("#add-open")
+        self.click("#add-mode [data-value=layouts]")
         self.click("[data-part=layouts] .pn-tile[data-id=pricing]")
         self.assertEqual(self.sent(), [["layout", {"page": "p2", "layout": "pricing"}]])
         self.assertTrue(self.hidden("#add-pop"))
@@ -284,7 +287,7 @@ class ViewTests(unittest.TestCase):
         self.click("[data-part=insert] .pn-tile[data-id=card]")
         self.assertEqual(self.sent(), [["insert", {"component": "card", "into": field["id"], "at": -1}]])
 
-    def test_a_click_picks_the_deepest_box_and_the_trail_picks_what_its_in(self):
+    def test_a_click_picks_a_box_and_the_trail_picks_what_its_in(self):
         self.show()
         button = self.placed("p1", lambda b: b["role"] == "button" and b["variant"] == "")
         x, y = self.middle(button)
@@ -293,22 +296,21 @@ class ViewTests(unittest.TestCase):
                 if b["x"] <= x <= b["x"] + b["w"] and b["y"] <= y <= b["y"] + b["h"]][-1]
         self.assertEqual(want, button["id"])
         self.assertEqual(self.js(f"return panelsView.hit({x}, {y});"), button["id"])
-        # Nothing picked: the right column is the window's.
-        self.assertFalse(self.hidden("#window-side"))
-        self.assertTrue(self.hidden("#layer-side"))
+        # Nothing picked: no card. Picked: its card, by it on the stage.
+        self.assertTrue(self.hidden("#pick-card"))
         self.click_stage(x, y)
         self.assertEqual(self.js("return panelsView.info().picked;"), button["id"])
-        self.assertTrue(self.hidden("#window-side"))
-        self.assertFalse(self.hidden("#layer-side"))
+        self.assertFalse(self.hidden("#pick-card"))
+        self.js("document.getElementById('card-more').open = true; return true;")
         trail = self.js("return [...document.querySelectorAll('#trail button')].map(b => b.textContent);")
         self.assertEqual(trail, ["Window", "Button"])
         self.assertEqual(self.js("return document.getElementById('picked-name').textContent;"), "Button · Sign in")
         self.assertEqual(self.js("return document.getElementById('box-go').value;"), "p2")
         # The stage's pick marks its row in Layers.
         self.assertEqual([r[0] for r in self.rows() if r[3] == "true"], [button["id"]])
-        self.click("#trail button")
+        self.click("#card-close")
         self.assertEqual(self.js("return panelsView.info().picked;"), "")
-        self.assertFalse(self.hidden("#window-side"))
+        self.assertTrue(self.hidden("#pick-card"))
         # Picking is the view's own - Python is only told where a dropped picture would go.
         self.assertEqual(self.sent(), [])
         self.assertEqual(self.sent("pick"), [["pick", {"id": button["id"]}], ["pick", {"id": ""}]])
@@ -390,7 +392,7 @@ class ViewTests(unittest.TestCase):
         named = {r[0]: r[2] for r in self.rows()}
         self.assertEqual([named[i] for i in ("b34", "b38")], ["Stat · Sales", "Stat · Orders"])
         # Picking a box deep in opens what it's in; a state update keeps what was opened and closed.
-        self.click_stage(*self.middle(self.placed("p2", lambda b: b["id"] == "b70")))
+        self.js("panelsView.pick('b70'); return true;")
         self.assertIn("b70", [r[0] for r in self.rows()])
         self.click("#layers [data-id=b13] .pn-layer-twist")
         opened = [r[0] for r in self.rows()]
@@ -459,6 +461,8 @@ class ViewTests(unittest.TestCase):
 
     def test_a_row_dragged_moves_its_box(self):
         self.show()
+        self.click("#layers-open")
+        self.assertFalse(self.hidden("#layers-pop"))
         # Down past the next one: into the same column, one place on (counted without it).
         line, lit = self.row_drag("b2", "b3", 0.9)
         self.assertEqual((line, lit), (True, []))
@@ -486,7 +490,7 @@ class ViewTests(unittest.TestCase):
     def test_the_animations_of_a_text(self):
         self.show()
         self.click("#layers [data-id=b2]")
-        rows = self.js("return [...document.querySelectorAll('#anims [data-anim]')].filter(r => !r.hidden).map(r => r.dataset.anim);")
+        rows = self.js("return [...document.querySelectorAll('.pn-anims [data-anim]')].filter(r => !r.hidden).map(r => r.dataset.anim);")
         self.assertEqual(rows, [a["id"] for a in self.state["animations"]["b2"]])
         self.assertEqual(rows, ["arrive", "type", "answer"])
         self.assertTrue(self.js("return document.getElementById('an-arrive').checked;"))
@@ -523,9 +527,10 @@ class ViewTests(unittest.TestCase):
         # A chart draws on: always, no control.
         self.show(showing="p2")
         chart = self.placed("p2", lambda b: b["role"] == "chart")
-        self.click_stage(*self.middle(chart))
+        self.click_stage(*self.middle(chart))                         # the chart's card...
+        self.click_stage(*self.middle(chart))                         # ...and then the chart in it
         self.assertEqual(self.js("return panelsView.info().picked;"), chart["id"])
-        rows = self.js("return [...document.querySelectorAll('#anims [data-anim]')].filter(r => !r.hidden).map(r => r.dataset.anim);")
+        rows = self.js("return [...document.querySelectorAll('.pn-anims [data-anim]')].filter(r => !r.hidden).map(r => r.dataset.anim);")
         self.assertIn("draw", rows)
         self.assertTrue(self.js("const c = document.getElementById('an-draw'); return c.checked && c.disabled;"))
         self.assertFalse(self.hidden("#edit-chart"))
@@ -612,51 +617,512 @@ class ViewTests(unittest.TestCase):
     def test_window_or_in_the_frame(self):
         self.show()
         self.assertEqual(self.js("return panelsView.info().fit;"), "window")
-        self.assertTrue(self.hidden("#black-hint"))
         big = self.js("return panelsView.toPage(100, 0)[0] - panelsView.toPage(0, 0)[0];")
         self.click("#fit [data-value=frame]")
         self.assertEqual(self.js("return panelsView.info().fit;"), "frame")
-        self.assertFalse(self.hidden("#black-hint"))
         small = self.js("return panelsView.toPage(100, 0)[0] - panelsView.toPage(0, 0)[0];")
         self.assertGreater(big, small * 1.2)          # the window fills the stage, larger than on the frame
-        # Trying it shows the frame, and says so.
+        # Trying it shows the frame, and a banner over the stage says what the stage is doing - with the way out.
         self.click("#fit [data-value=window]")
+        self.assertTrue(self.hidden("#stage-banner"))
         self.click("#mode [data-value=try]")
         self.assertEqual(self.js("return panelsView.info().fit;"), "frame")
-        self.assertIn("in the frame now", self.js("return document.getElementById('hint').textContent;"))
+        self.assertEqual(self.js("return document.getElementById('banner-text').textContent;"),
+                         "Your mouse is the cursor now. Nothing is kept.")
+        self.click("#banner-done")
+        self.assertEqual(self.js("return panelsView.info().mode;"), "edit")
+        self.assertTrue(self.hidden("#stage-banner"))
         self.assertEqual(self.sent(), [])
 
-    def test_the_timeline_hides_and_comes_back(self):
+    def test_the_timeline_in_detail_is_shown_from_more(self):
         self.show()
+        # The story is what's under the stage; the lanes, Try it and Record are for who asks.
+        self.assertTrue(self.hidden("#dock"))
+        self.assertFalse(self.hidden("#play"))
+        self.assertFalse(self.hidden("#pages"))
+        self.click("#more-open")
+        labels = self.js("return [...document.querySelectorAll('.menu-pop button')].map(b => b.textContent);")
+        self.assertEqual(labels, ["Try it with your mouse", "Record a cursor of your own", "Let Buddy move the cursor again",
+                                  "Show the window in the frame", "The timeline in detail", "Replace the panel Buddy put there before"])
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === 'The timeline in detail').click(); return true;")
         self.assertFalse(self.hidden("#lanes"))
-        self.assertEqual(self.js("return document.getElementById('dock-toggle').textContent;"), "Hide timeline")
+        self.assertEqual(self.js("try { return [sessionStorage.getItem('buddy.panels.timeline'), panelsView.info().dock]; }"
+                                 " catch (e) { return ['shown', true]; }"), ["shown", True])
         self.click("#dock-toggle")
         self.assertTrue(self.hidden("#lanes"))
-        self.assertEqual(self.js("return [document.getElementById('dock-toggle').textContent, panelsView.info().dock];"),
-                         ["Show timeline", False])
-        self.assertEqual(self.js("try { return sessionStorage.getItem('buddy.panels.timeline'); } catch (e) { return 'hidden'; }"),
-                         "hidden")
-        self.click("#dock-toggle")
-        self.assertFalse(self.hidden("#lanes"))
-        self.assertFalse(self.hidden("#play"))
+        self.assertEqual(self.sent(), [])
 
-    def test_the_page_chips(self):
+    def test_the_pages_list(self):
         self.show()
-        chips = self.js("return [...document.querySelectorAll('.pn-chip-name')].map(b => [b.textContent, b.getAttribute('aria-selected')]);")
-        self.assertEqual(chips, [["1 · Sign in", "true"], ["2 · Dashboard", "false"], ["3 · Settings", "false"]])
-        self.js("document.querySelectorAll('.pn-chip-name')[1].click(); return true;")
-        self.js("document.getElementById('page-add').click(); return true;")
-        self.js("document.querySelector('.pn-chip-x').click(); return true;")
-        self.assertEqual(self.sent(), [["page_show", {"id": "p2"}], ["page_add", {}], ["page_remove", {"id": "p1"}]])
+        rows = self.js("return [...document.querySelectorAll('#pages .pn-page')].map(r => [r.dataset.page,"
+                       " r.querySelector('.pn-page-name').textContent, r.getAttribute('aria-selected'),"
+                       " !!r.querySelector('.pn-page-start')]);")
+        self.assertEqual(rows, [["p1", "1Sign in", "true", True], ["p2", "2Dashboard", "false", False],
+                                ["p3", "3Settings", "false", False]])
+        # Each has a small picture of itself; over the stage is the one in view, by name.
+        drawn = self.js("""
+            return [...document.querySelectorAll('#pages canvas')].map(c => {
+                const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+                let n = 0;
+                for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++;
+                return n > c.width;
+            });""")
+        self.assertEqual(drawn, [True, True, True])
+        self.assertEqual(self.js("return [document.getElementById('page-name').textContent, document.getElementById('page-count').textContent,"
+                                 " document.getElementById('page-prev').disabled, document.getElementById('page-next').disabled];"),
+                         ["Sign in", "1 / 3", True, False])
+        self.js("document.querySelectorAll('#pages .pn-page')[1].click(); return true;")
+        self.click("#page-add")
+        self.click("#page-next")
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'PageDown', bubbles: true})); return true;")
+        self.assertEqual(self.sent(), [["page_show", {"id": "p2"}], ["page_add", {}], ["page_show", {"id": "p2"}],
+                                       ["page_show", {"id": "p2"}]])
         self.forget()
-        self.js("document.querySelectorAll('.pn-chip-name')[2].dispatchEvent(new MouseEvent('dblclick', {bubbles: true})); return true;")
-        self.js("const f = document.querySelector('.pn-chip input'); f.value = 'Preferences';"
+        self.js("document.querySelectorAll('#pages .pn-page')[2].dispatchEvent(new MouseEvent('dblclick', {bubbles: true})); return true;")
+        self.js("const f = document.querySelector('#pages input'); f.value = 'Preferences';"
                 " f.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true})); return true;")
         self.assertEqual(self.sent(), [["page_rename", {"id": "p3", "name": "Preferences"}]])
-        # One page: nothing to remove it with.
+        self.forget()
+        # The rest is in a page's menu: its "more" button, or a right-click.
+        menu = lambda: self.js("return [...document.querySelectorAll('.menu-pop button')].map(b => [b.textContent, b.disabled]);")   # noqa: E731
+        pick = lambda text: self.js("[...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === "   # noqa: E731
+                                    + json.dumps(text) + ").click(); return true;")
+        self.js("document.querySelector('#pages .pn-page[data-page=p1] .pn-page-more').click(); return true;")
+        self.assertEqual(menu(), [["Rename", False], ["Duplicate", False], ["Start the clip on this page", True],
+                                  ["Move earlier", True], ["Move later", False], ["Remove", False]])
+        pick("Duplicate")
+        for label in ("Move later", "Remove"):
+            self.js("document.querySelector('#pages .pn-page[data-page=p1]').dispatchEvent(new MouseEvent('contextmenu',"
+                    " {bubbles: true, cancelable: true, clientX: 60, clientY: 80})); return true;")
+            pick(label)
+        self.js("document.querySelector('#pages .pn-page[data-page=p2] .pn-page-more').click(); return true;")
+        pick("Start the clip on this page")
+        self.assertEqual(self.sent(), [["page_copy", {"id": "p1"}], ["page_move", {"id": "p1", "at": 1}],
+                                       ["page_remove", {"id": "p1"}], ["page_start", {"id": "p2"}]])
+        # One page: it can't be removed.
         one = M.clean({**self.spec, "pages": self.spec["pages"][:1]})
         self.show(one)
-        self.assertEqual(self.js("return document.querySelectorAll('.pn-chip-x').length;"), 0)
+        self.js("document.querySelector('#pages .pn-page-more').click(); return true;")
+        self.assertEqual(menu()[-1], ["Remove", True])
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+
+    def test_a_page_dragged_moves_it(self):
+        self.show()
+
+        def drag(from_id, to_id, share):
+            self.js(f"""
+                const row = id => document.querySelector(`#pages .pn-page[data-page="${{id}}"]`);
+                const a = row({json.dumps(from_id)}).getBoundingClientRect(), b = row({json.dumps(to_id)}).getBoundingClientRect();
+                const ev = (node, kind, x, y) => node.dispatchEvent(new PointerEvent(kind, {{clientX: x, clientY: y, button: 0,
+                    buttons: kind === 'pointerup' ? 0 : 1, pointerId: 9, bubbles: true, isPrimary: true}}));
+                ev(row({json.dumps(from_id)}), 'pointerdown', a.left + a.width / 2, a.top + 20);
+                ev(document.body, 'pointermove', a.left + a.width / 2 + 12, a.top + 20);
+                ev(document.body, 'pointermove', b.left + b.width * {share}, b.top + 20);
+                ev(document.body, 'pointerup', b.left + b.width * {share}, b.top + 20);
+                return true;""")
+        drag("p1", "p3", 0.9)                                        # past the last: the end (counted without it)
+        self.assertEqual(self.sent(), [["page_move", {"id": "p1", "at": 2}]])
+        self.forget()
+        drag("p3", "p1", 0.1)
+        self.assertEqual(self.sent(), [["page_move", {"id": "p3", "at": 0}]])
+        self.forget()
+        drag("p2", "p3", 0.2)                                        # just under itself: where it is - no more than a click
+        self.assertEqual(self.sent(), [["page_show", {"id": "p2"}]])
+        self.assertEqual(M.with_page_move(self.spec, "p1", 2)["pages"][-1]["id"], "p1")
+
+    def chart_page(self):
+        """The template with a fourth page in view: a chart's card, a line of text, a button."""
+        spec = M.with_page(self.spec)
+        page = spec["pages"][-1]
+        for component in ("line_chart", "text", "button"):
+            spec = M.with_insert(spec, component, page["root"]["id"])
+        self.show(spec, showing=page["id"])
+        find = lambda found: self.placed(page["id"], found)                       # noqa: E731
+        return (find(lambda b: b["variant"] == "card"), find(lambda b: b["role"] == "chart"),
+                find(lambda b: b["role"] == "text" and b["variant"] == "body"), find(lambda b: b["role"] == "button"))
+
+    def test_a_click_picks_the_whole_piece_first_then_what_is_in_it(self):
+        card, chart, text, button = self.chart_page()
+        picked = lambda: self.js("return panelsView.info().picked;")              # noqa: E731
+        self.click_stage(*self.middle(chart))
+        self.assertEqual(picked(), card["id"])
+        self.click_stage(*self.middle(chart))
+        self.assertEqual(picked(), chart["id"])
+        self.click_stage(*self.middle(chart))                         # nothing further in: it stays
+        self.assertEqual(picked(), chart["id"])
+        # The plain row that only lines the card's heading up is passed over; Layers has it.
+        heading = self.placed(self.state["showing"], lambda b: b["role"] == "text" and b["variant"] == "h2")
+        self.click_stage(*self.middle(heading))                       # beside the picked chart, at its depth
+        self.assertEqual(picked(), heading["id"])
+        self.click_stage(*self.middle(text))                          # out of the card: the outermost thing there
+        self.assertEqual(picked(), text["id"])
+        # A double-click goes straight to the innermost; Escape steps back out.
+        x, y = self.middle(heading)
+        self.js(f"const [cx, cy] = panelsView.toPage({x}, {y}); panelsView.picture().dispatchEvent(new MouseEvent('dblclick',"
+                " {clientX: cx, clientY: cy, bubbles: true})); return true;")
+        self.assertEqual(picked(), heading["id"])
+        for want in (heading["parent"], card["id"], ""):
+            self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+            self.assertEqual(picked(), want)
+        # What the pointer is on is named, and marked in Layers.
+        self.pointer("pointermove", *self.middle(button))
+        self.assertEqual(self.js("return panelsView.info().hover;"), button["id"])
+        self.assertFalse(self.hidden("#hover-tag"))
+        self.assertEqual(self.js("return document.querySelector('#layers .pn-hovered').dataset.id;"), button["id"])
+        self.assertEqual(self.sent(), [])
+
+    def test_the_picked_box_is_dragged_to_another_place_on_the_stage(self):
+        card, chart, text, button = self.chart_page()
+        root = self.state["solved"][self.state["showing"]]["boxes"][0]
+
+        def drag(box, x, y, up=True):
+            bx, by = self.middle(box)
+            self.pointer("pointerdown", bx, by, 1)
+            self.pointer("pointermove", bx + 9, by + 9, 1)
+            self.pointer("pointermove", x, y, 1)
+            drop = self.js(f"return panelsView.dropAt({x}, {y}, {json.dumps(box['id'])});")
+            if up:
+                self.pointer("pointerup", x, y, 0)
+            return drop
+        # Onto the top half of the text: before it, among the page's boxes (counted without the button).
+        drop = drag(button, text["x"] + text["w"] / 2, text["y"] + 2)
+        self.assertEqual((drop["into"], drop["at"], drop["same"]), (root["id"], 1, False))
+        self.assertEqual(self.sent(), [["move", {"id": button["id"], "into": root["id"], "at": 1}]])
+        self.forget()
+        # By the card's right side: beside it - Python makes the row.
+        drop = drag(button, card["x"] + card["w"] - 5, card["y"] + card["h"] / 2)
+        self.assertEqual((drop["beside"], drop["side"]), (card["id"], "right"))
+        self.assertEqual(self.sent(), [["beside", {"id": button["id"], "target": card["id"], "side": "right"}]])
+        self.forget()
+        # Well inside the card: into it, after the chart.
+        drop = drag(button, chart["x"] + chart["w"] / 2, chart["y"] + chart["h"] - 4)
+        self.assertEqual((drop["into"], drop["at"]), (card["id"], 2))
+        self.assertEqual(self.sent(), [["move", {"id": button["id"], "into": card["id"], "at": 2}]])
+        self.forget()
+        # Where it already is, a click that barely moves, and a drag let go with Escape: nothing.
+        drop = drag(button, text["x"] + text["w"] / 2, text["y"] + text["h"] - 1)
+        self.assertTrue(drop["same"])
+        self.click_stage(*self.middle(button))
+        drag(text, card["x"] + card["w"] / 2, card["y"] + 2, up=False)
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+        self.pointer("pointerup", card["x"] + card["w"] / 2, card["y"] + 2, 0)
+        self.assertEqual(self.sent(), [])
+        # A card never goes into itself: over its own middle it's aimed at the page.
+        self.click_stage(*self.middle(text))
+        self.js(f"panelsView.pick({json.dumps(card['id'])}); return true;")
+        drop = drag(card, *self.middle(chart))
+        self.assertEqual(drop["into"], root["id"])
+
+    def test_the_picked_boxs_edges_size_it(self):
+        card, chart, text, button = self.chart_page()
+        self.js(f"panelsView.pick({json.dumps(chart['id'])}); return true;")
+        x, y = chart["x"] + chart["w"] / 2, chart["y"] + chart["h"]
+        self.pointer("pointerdown", x, y, 1)
+        self.pointer("pointermove", x, y - 60, 1)
+        self.pointer("pointerup", x, y - 60, 0)
+        self.assertEqual(self.sent()[-1], ["box", {"id": chart["id"], "key": "h", "value": round(chart["h"] - 60)}])
+        self.forget()
+        self.js(f"panelsView.pick({json.dumps(card['id'])}); return true;")
+        x, y = card["x"] + card["w"], card["y"] + card["h"] / 2
+        self.pointer("pointerdown", x, y, 1)
+        self.pointer("pointermove", x - 120, y, 1)
+        self.pointer("pointerup", x - 120, y, 0)
+        self.assertEqual(self.sent()[-1], ["box", {"id": card["id"], "key": "w", "value": round(card["w"] - 120)}])
+        self.forget()
+        # A line of text has no height to set: its bottom edge isn't a handle.
+        self.js(f"panelsView.pick({json.dumps(text['id'])}); return true;")
+        self.assertTrue(self.hidden("#box-h-row"))
+        # The same from the right column: a height of its own, or as it comes out.
+        self.js(f"panelsView.pick({json.dumps(chart['id'])}); return true;")
+        self.assertFalse(self.hidden("#box-h-row"))
+        self.assertTrue(self.hidden("#box-hpx-box"))
+        self.click("#box-h [data-value=fixed]")
+        self.assertEqual(self.sent(), [["box", {"id": chart["id"], "key": "h", "value": round(chart["h"])}]])
+        fixed = M.with_box(self.state["spec"], chart["id"], "h", 120)
+        self.show(fixed, showing=self.state["showing"])
+        self.forget()
+        self.assertEqual(self.js("return document.getElementById('box-hpx').value;"), "120")
+        self.click("#box-h [data-value=hug]")
+        self.assertEqual(self.sent(), [["box", {"id": chart["id"], "key": "h", "value": "hug"}]])
+
+    def test_the_picked_layers_toolbar_and_keys(self):
+        card, chart, text, button = self.chart_page()
+        root = self.state["solved"][self.state["showing"]]["boxes"][0]
+        self.assertTrue(self.hidden("#pick-tools"))
+        self.click_stage(*self.middle(text))
+        self.assertFalse(self.hidden("#pick-tools"))
+        self.assertEqual(self.js("return [document.getElementById('pick-name').textContent,"
+                                 " document.getElementById('tool-back').disabled, document.getElementById('tool-forth').disabled,"
+                                 " document.getElementById('pick-tools').classList.contains('down')];"),
+                         [f"Text · {M.find(self.state['spec'], text['id'])['box']['text']}", False, False, True])
+        for tool in ("tool-back", "tool-forth", "tool-copy"):
+            self.click("#" + tool)
+        key = lambda init: self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {bubbles: true, cancelable: true, "   # noqa: E731
+                                   + init + "})); return true;")
+        key("key: 'ArrowUp', altKey: true")
+        key("key: 'ArrowDown', altKey: true")
+        key("key: 'd', ctrlKey: true")
+        move = lambda at: ["move", {"id": text["id"], "into": root["id"], "at": at}]                                    # noqa: E731
+        copy = ["copy_box", {"id": text["id"]}]
+        self.assertEqual(self.sent(), [move(0), move(2), copy, move(0), move(2), copy])
+        self.forget()
+        self.click("#box-copy")
+        self.click("#tool-remove")
+        self.assertEqual(self.sent(), [copy, ["remove_box", {"id": text["id"]}]])
+        self.forget()
+        # The first of its container can't go earlier; "out" picks what it's in.
+        self.js(f"panelsView.pick({json.dumps(chart['id'])}); return true;")
+        self.assertEqual(self.js("return [document.getElementById('tool-back').disabled, document.getElementById('tool-forth').disabled];"),
+                         [False, True])
+        self.click("#tool-out")
+        self.assertEqual(self.js("return panelsView.info().picked;"), card["id"])
+        # A row's menu has the same.
+        self.js(f"document.querySelector('#layers [data-id={button['id']}]').dispatchEvent(new MouseEvent('contextmenu',"
+                " {bubbles: true, cancelable: true, clientX: 60, clientY: 300})); return true;")
+        self.assertEqual(self.js("return [...document.querySelectorAll('.menu-pop button')].map(b => [b.textContent, b.disabled]);"),
+                         [["Rename", False], ["Duplicate", False], ["Move it earlier", False], ["Move it later", True],
+                          ["Remove", False]])
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === 'Move it earlier').click(); return true;")
+        self.assertEqual(self.sent(), [["move", {"id": button["id"], "into": root["id"], "at": 1}]])
+
+    def test_a_container_says_which_way_its_boxes_go_and_how_much_room(self):
+        card, chart, text, button = self.chart_page()
+        self.js(f"panelsView.pick({json.dumps(card['id'])}); return true;")
+        self.assertFalse(self.hidden("#box-dir-row"))
+        self.assertEqual(self.js("return document.querySelector('#box-dir [aria-pressed=true]').dataset.value;"), "column")
+        self.click("#box-dir [data-value=row]")
+        self.assertTrue(self.hidden("#spacing-pop"))
+        self.click("#edit-spacing")
+        self.assertFalse(self.hidden("#spacing-pop"))
+        self.assertTrue(self.hidden("#box-wrap-box"))                 # only a row wraps
+        self.js("const g = document.getElementById('box-gap'); g.value = '20'; g.dispatchEvent(new Event('input', {bubbles: true}));"
+                " const p = document.getElementById('box-pad'); p.value = '6'; p.dispatchEvent(new Event('input', {bubbles: true}));"
+                " return true;")
+        self.click("#box-align [data-value=center]")
+        self.wait(120)
+        self.assertEqual(sorted(self.sent(), key=lambda s: s[1]["key"]),
+                         [["box", {"id": card["id"], "key": "align", "value": "center"}],
+                          ["box", {"id": card["id"], "key": "dir", "value": "row"}],
+                          ["box", {"id": card["id"], "key": "gap", "value": 20}],
+                          ["box", {"id": card["id"], "key": "pad", "value": [6, 6, 6, 6]}]])
+        # What isn't a container has no such thing, and the panel closes.
+        self.js(f"panelsView.pick({json.dumps(text['id'])}); return true;")
+        self.assertTrue(self.hidden("#box-dir-row"))
+        self.assertTrue(self.hidden("#spacing-pop"))
+
+    def test_an_empty_page_says_how_to_begin(self):
+        self.show()
+        self.assertTrue(self.hidden("#empty-page"))
+        spec = M.with_page(self.spec)
+        self.show(spec, showing=spec["pages"][-1]["id"])
+        self.assertFalse(self.hidden("#empty-page"))
+        self.click("#empty-piece")
+        self.assertFalse(self.hidden("#add-pop"))
+        self.assertEqual(self.js("return panelsView.info().addMode;"), "insert")
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+        self.click("#empty-layout")
+        self.assertEqual(self.js("return panelsView.info().addMode;"), "layouts")
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+        # + Add opens on what the page needs: a whole page for an empty one, a piece otherwise.
+        self.click("#add-open")
+        self.assertEqual(self.js("return panelsView.info().addMode;"), "layouts")
+        self.click("#add-open")
+        self.show()
+        self.click("#add-open")
+        self.assertEqual(self.js("return panelsView.info().addMode;"), "insert")
+        # A link is followed from the box that has it.
+        self.click("#add-open")
+        button = self.placed("p1", lambda b: b["role"] == "button" and b["variant"] == "")
+        self.js(f"panelsView.pick({json.dumps(button['id'])}); return true;")
+        self.js("document.getElementById('card-more').open = true; return true;")
+        self.assertFalse(self.hidden("#box-go-row"))
+        self.click("#box-go-open")
+        self.assertEqual(self.sent(), [["page_show", {"id": "p2"}]])
+
+    def test_the_window_has_a_title(self):
+        self.show()
+        self.assertEqual(self.js("return document.querySelector('[data-key=title]').value;"), "Booking app")
+        self.js("const f = document.querySelector('[data-key=title]'); f.value = 'Tide'; f.dispatchEvent(new Event('change', {bubbles: true}));"
+                " return true;")
+        self.assertEqual(self.sent(), [["set", {"key": "title", "value": "Tide"}]])
+
+    def player(self, **more):
+        """The template with a fourth page in view: the music player. (its bar, its time, its Play button)"""
+        spec = M.with_layout(M.with_page(self.spec), "p4", "player")
+        self.show(M.clean({**spec, **more}), showing="p4")
+        find = lambda found: self.placed("p4", found)                               # noqa: E731
+        return find(lambda b: b["role"] == "progress"), find(lambda b: b["text"] == "1:24"), find(lambda b: b["text"] == "Play")
+
+    def test_a_page_nothing_leads_to_says_so_and_one_after_another_asks_for_them_all(self):
+        self.player()
+        marks = self.js("return [...document.querySelectorAll('#pages .pn-page')].map(r => (r.querySelector('.pn-page-start') || {}).textContent || '');")
+        self.assertEqual(marks, ["The clip starts here", "", "", "Never shown in the clip"])
+        self.click("#flow")
+        self.assertEqual(self.sent(), [["flow", {}]])
+        self.forget()
+        # A time of its own can be taken off again.
+        keyed = M.clean({**self.state["spec"], "page_keys": [[2.0, "p4", "fade"], [5.0, "p1", "fade"]]})
+        self.show(keyed, showing="p4")
+        self.assertFalse(self.js("return !!document.querySelector('#pages .pn-page[data-page=p4] .pn-never');"))
+        self.js("[...document.querySelectorAll('#changes li')].find(l => l.textContent.startsWith('At 2')).querySelector('button').click();"
+                " return true;")
+        self.assertEqual(self.sent(), [["set", {"key": "page_keys", "value": [[5.0, "p1", "fade"]]}]])
+
+    def test_choosing_a_page_always_shows_it(self):
+        self.show()
+        # Trying it, the stage is the mouse's: a page chosen ends that and is shown, still.
+        self.click("#mode [data-value=try]")
+        self.js("document.querySelectorAll('#pages .pn-page')[2].click(); return true;")
+        self.assertEqual(self.js("return [panelsView.info().mode, panelsView.info().view];"), ["edit", "edit"])
+        self.assertEqual(self.sent(), [["page_show", {"id": "p3"}]])
+        self.forget()
+        # Playing, the stage is the clock's: the same.
+        self.click("#play")
+        self.assertTrue(self.js("return panelsView.info().playing;"))
+        self.js("document.querySelectorAll('#pages .pn-page')[0].click(); return true;")
+        self.assertEqual(self.js("return [panelsView.info().playing, panelsView.info().view];"), [False, "edit"])
+
+    def test_a_number_counts_and_a_click_starts_what_runs(self):
+        bar, time, play = self.player()
+        self.js(f"panelsView.pick({json.dumps(time['id'])}); return true;")
+        self.assertTrue(self.js("return document.getElementById('an-count').checked;"))
+        self.assertFalse(self.hidden("#an-run-row"))
+        options = self.js("return [...document.getElementById('an-run-by').options].map(o => [o.value, o.textContent]);")
+        self.assertEqual(options[0], ["", "With the page"])
+        self.assertIn([play["id"], "On a click on Play"], options)
+        self.assertEqual(self.js("return [document.getElementById('an-run-by').value, document.getElementById('an-run-seconds').value];"),
+                         [play["id"], "4"])
+        self.js("const s = document.getElementById('an-run-by'); s.value = ''; s.dispatchEvent(new Event('change')); return true;")
+        self.js("const f = document.getElementById('an-run-seconds'); f.value = '2,5'; f.dispatchEvent(new Event('change')); return true;")
+        self.click("#an-count")
+        run = lambda value: ["box", {"id": time["id"], "key": "run", "value": value}]     # noqa: E731
+        self.assertEqual(self.sent(), [run({"by": "", "seconds": 4}), run({"by": play["id"], "seconds": 2.5}),
+                                       ["box", {"id": time["id"], "key": "count", "value": False}]])
+        self.forget()
+        # A bar draws on as the page builds unless something starts it; a text with no number has neither.
+        self.js(f"panelsView.pick({json.dumps(bar['id'])}); return true;")
+        self.assertEqual(self.js("return document.getElementById('an-run-by').options[0].textContent;"), "As the page builds")
+        self.js("const s = document.getElementById('an-run-by'); s.value = ''; s.dispatchEvent(new Event('change')); return true;")
+        self.assertEqual(self.sent(), [["box", {"id": bar["id"], "key": "run", "value": None}]])
+        title = self.placed("p4", lambda b: b["text"] == "Slow Morning")
+        self.js(f"panelsView.pick({json.dumps(title['id'])}); return true;")
+        self.assertTrue(self.hidden("#an-run-row"))
+        self.assertTrue(self.hidden("#an-count"))
+
+    def test_the_view_says_what_a_count_says_as_the_clock_does(self):
+        bar, time, play = self.player()
+        x, y = solve.to_frame(self.state["spec"], self.state["solved"]["p4"]["h"], *self.middle(play), FRAME)
+        spec = M.clean({**self.state["spec"], "start": "p4", "path": [[0, x, y]], "clicks": [[1.0, 1.2]], "seconds": 6})
+        state = self.show(spec, showing="p4")
+        for frame in (0, 30, 60, 100, 143):
+            want = clock.pose(spec, state["clock"], frame)
+            got = self.js(f"return panelsView.pose(null, {frame});")
+            close(self, got, want, f"frame {frame}")
+        self.assertEqual(clock.pose(spec, state["clock"], 72)["said"][time["id"]], "0:42")
+        # In Edit the page is shown whole: the bar full, the time as it's written.
+        self.assertEqual(self.js("return panelsView.info().view;"), "edit")
+
+    def test_the_story_strip_when_buddy_moves_the_cursor(self):
+        spec = M.with_layout(M.with_page(self.story), "p4", "player")
+        self.show(spec, showing="p4")
+        boxes = {b["text"]: b["id"] for b in M.every(spec["pages"][3]["root"]) if b["text"]}
+        cards = self.js("return [...document.querySelectorAll('#pages .pn-page')].map(r => [r.dataset.page,"
+                        " r.querySelector('.pn-page-secs').textContent, [...r.querySelectorAll('.pn-page-note')].map(n => n.textContent)]);")
+        self.assertEqual(cards, [["p1", "2 s", []], ["p2", "3 s", []], ["p3", "2 s", []], ["p4", "5.5 s", ["click “Play” · 1 s"]]])
+        # Between two cards: how the clip goes on.
+        pills = self.js("return [...document.querySelectorAll('#pages .pn-link')].map(b => [b.dataset.from, b.querySelector('.pn-pill').textContent]);")
+        self.assertEqual(pills, [["p1", "click “Sign in”"], ["p2", "click “Settings”"], ["p3", "after 2 s"]])
+        self.assertTrue(self.hidden("#flow"))
+        self.js("document.querySelector('#pages .pn-link[data-from=p3]').click(); return true;")
+        menu = self.js("return [...document.querySelectorAll('.menu-pop button')].map(b => [b.textContent, b.getAttribute('aria-checked')]);")
+        self.assertEqual(menu[0], ["When its time is up (2 s)", "true"])
+        self.assertIn(["Click on “Save”", "false"], menu)
+        save = next(b["id"] for b in M.every(spec["pages"][2]["root"]) if b["text"] == "Save")
+        self.js("[...document.querySelectorAll('.menu-pop button')].find(b => b.textContent === 'Click on “Save”').click(); return true;")
+        self.js("document.querySelector('#pages .pn-link[data-from=p1]').click();"
+                " [...document.querySelectorAll('.menu-pop button')][0].click(); return true;")
+        self.assertEqual(self.sent(), [["story", {"page": "p3", "key": "by", "value": save}], ["story", {"page": "p1", "key": "by", "value": ""}]])
+        self.forget()
+        # A card's seconds are its own to set; nothing typed gives them back.
+        for said, value in (("4,5", 4.5), ("", 0)):
+            self.js("document.querySelector('#pages .pn-page[data-page=p2] .pn-page-secs').click(); return true;")
+            self.js(f"const f = document.querySelector('#pages .pn-page[data-page=p2] input'); f.value = {json.dumps(said)};"
+                    " f.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true})); return true;")
+            self.assertEqual(self.sent(), [["story", {"page": "p2", "key": "secs", "value": value}]])
+            self.forget()
+        # In a story the clip starts on the first page: the menu doesn't offer another.
+        self.js("document.querySelector('#pages .pn-page[data-page=p2] .pn-page-more').click(); return true;")
+        labels = self.js("return [...document.querySelectorAll('.menu-pop button')].map(b => b.textContent);")
+        self.assertEqual(labels, ["Rename", "Duplicate", "Move earlier", "Move later", "Remove"])
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+        # The arrows either side of the window.
+        self.click("#page-prev")
+        self.assertEqual(self.sent(), [["page_show", {"id": "p3"}]])
+        self.assertEqual(self.js("return [document.getElementById('page-prev').disabled, document.getElementById('page-next').disabled];"),
+                         [False, True])
+        self.assertEqual(boxes["Play"], self.state["story"][3]["clicks"][0][1])
+
+    def test_the_card_says_what_a_click_starts_and_picks_more_on_the_page(self):
+        spec = M.with_layout(M.with_page(self.story), "p4", "player")
+        self.show(spec, showing="p4")
+        find = lambda found: self.placed("p4", found)                               # noqa: E731
+        play, nxt, bar = find(lambda b: b["text"] == "Play"), find(lambda b: b["text"] == "Next"), find(lambda b: b["role"] == "progress")
+        time, total = find(lambda b: b["text"] == "1:24"), find(lambda b: b["text"] == "3:41")
+        self.js(f"panelsView.pick({json.dumps(play['id'])}); return true;")
+        self.assertFalse(self.hidden("#pick-card"))
+        rows = self.js("return [...document.querySelectorAll('#clicked-list li')].map(l => [l.dataset.id, l.querySelector('.pn-clicked-what').textContent,"
+                       " (l.querySelector('input') || {}).value]);")
+        self.assertEqual(rows, [[bar["id"], "The bar fills up", "4"], [time["id"], "“1:24” counts up", "4"]])
+        self.assertTrue(self.hidden("#no-clicked"))
+        self.assertTrue(self.hidden("#leave-add"))                    # the last page goes on to nothing
+        self.js("const f = document.querySelector('#clicked-list li input'); f.value = '2'; f.dispatchEvent(new Event('change')); return true;")
+        self.js("document.querySelectorAll('#clicked-list li button')[1].click(); return true;")
+        self.assertEqual(self.sent(), [["box", {"id": bar["id"], "key": "run", "value": {"by": play["id"], "seconds": 2}}],
+                                       ["box", {"id": time["id"], "key": "count", "value": False}]])
+        self.forget()
+        # "+ Start something": the next click on the stage picks what - a bar, a chart, a number.
+        self.js(f"panelsView.pick({json.dumps(nxt['id'])}); return true;")
+        self.assertFalse(self.hidden("#no-clicked"))
+        self.click("#start-add")
+        self.assertEqual(self.js("return [panelsView.info().choosing, document.getElementById('banner-text').textContent];"),
+                         ["start", "Click the bar, the chart or the number this should start."])
+        self.assertTrue(self.hidden("#pick-card"))
+        title = find(lambda b: b["text"] == "Slow Morning")
+        self.click_stage(*self.middle(title))                         # words with no number: not that
+        self.assertEqual((self.sent(), self.js("return panelsView.info().choosing;")), ([], "start"))
+        self.click_stage(*self.middle(total))
+        self.assertEqual(self.sent(), [["starts", {"id": total["id"], "by": nxt["id"]}]])
+        self.assertEqual(self.js("return [panelsView.info().choosing, panelsView.info().picked];"), ["", nxt["id"]])
+        self.forget()
+        self.click("#start-add")
+        self.js("document.body.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true})); return true;")
+        self.assertEqual(self.js("return [panelsView.info().choosing, panelsView.info().picked];"), ["", nxt["id"]])
+        # On a page that isn't the last, a box can be what goes on to the next one.
+        self.show(spec, showing="p3")
+        save = self.placed("p3", lambda b: b["text"] == "Save")
+        self.js(f"panelsView.pick({json.dumps(save['id'])}); return true;")
+        self.assertFalse(self.hidden("#leave-add"))
+        self.click("#leave-add")
+        self.assertEqual(self.sent(), [["story", {"page": "p3", "key": "by", "value": save["id"]}]])
+        went = M.with_story(spec, "p3", "by", save["id"])
+        self.show(went, showing="p3")
+        self.js(f"panelsView.pick({json.dumps(save['id'])}); return true;")
+        self.assertEqual(self.js("return [...document.querySelectorAll('#clicked-list li')].map(l => l.querySelector('.pn-clicked-what').textContent);"),
+                         ["The clip goes on to the next page"])
+        self.assertTrue(self.hidden("#leave-add"))
+
+    def test_the_windows_look_and_the_layers_are_panels_from_the_bar(self):
+        self.show()
+        self.assertTrue(self.hidden("#look-pop"))
+        self.assertTrue(self.hidden("#layers-pop"))
+        self.click("#look-open")
+        self.assertFalse(self.hidden("#look-pop"))
+        self.assertFalse(self.hidden("[data-key=title]"))
+        self.click("#layers-open")                                   # one panel at a time
+        self.assertTrue(self.hidden("#look-pop"))
+        self.assertFalse(self.hidden("#layers"))
+        self.assertEqual(self.js("return document.querySelectorAll('#layers .pn-layer').length > 3;"), True)
+        self.assertEqual(self.sent(), [])
 
     def test_trying_it_the_boxes_answer_and_nothing_is_sent(self):
         self.show()

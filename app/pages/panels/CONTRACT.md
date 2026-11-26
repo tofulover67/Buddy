@@ -463,3 +463,166 @@ Additions to the shapes above - nothing above was changed, only filled in:
   `..._CaretMask`, `..._CaretFill`.
 - **place**: a picture whose file is gone is refused before anything is placed:
   'The image "<name>" isn't where it was. Put it back, or take it off its image box.'
+
+## Round 3 - moving between pages, working on the stage
+
+Asked for by the owner after adding a Line chart to an empty page: "a system to move
+smoothly between several built pages" and "to easily move or adjust layers within any
+given page". The page's layout changes with it (web/): Pages is a list at the top of the
+left column - a small picture, a number and a name each - over Layers; the stage has the
+page in view by name with the pages either side one click away; the picked box has a
+small toolbar by it and handles on its right and bottom edges.
+
+### model.py gains
+
+    with_page_move(spec, page_id, at)     a page to place `at` among the pages (counted without it)
+    with_page_copy(spec, page_id)         a second one right after it: the same boxes with ids of their
+                                          own, the same links, named "<name> 2" (the next number free)
+    with_start(spec, page_id)             the page the clip starts on ("start")
+    with_copy(spec, box_id)               a second one of a box, and what is in it, right after it
+    with_beside(spec, box_id, target_id, side)     side: "left" | "right" | "above" | "below"
+        the box next to another on its page. Where the two can't sit that way as they are
+        (side by side in a column, one over the other in a row) the other box's place is
+        taken by a new plain section holding both: a row ("align" "stretch") or a column,
+        its gap the gap of what it is put in (8 for none). Otherwise it is only moved.
+
+A plain row or column nobody named (role section, variant "", name "Row" or "Column":
+`_wrapper`) is only there to line boxes up, so taking a box out of one (with_move,
+with_beside) tidies it: left empty it goes, left with one box that box takes its place.
+A card, or a container with a name of its own, stays as it is. with_box(..., "dir", ...)
+on such a wrapper drops its name, so a row turned to run downwards is called a column.
+The pages' order is only the order they are listed and numbered in; "start" says where
+the clip begins.
+
+### page.py gains
+
+    from the view  page_add {layout?}             an empty page, or one made from a layout - one step
+                   page_copy {id}                 the copy is shown
+                   page_move {id, at}
+                   page_start {id}
+                   beside {id, target, side}
+                   copy_box {id}                  answered with `picked {id}` of the copy
+
+### web/ - what the view does itself (nothing of it is part of the panel)
+
+- A click on the stage picks the outermost box under it that the picked box isn't in,
+  passing over the plain wrappers above (they are picked in Layers, or by Escape from
+  what is in them); a click on the picked box picks the next one in; a double-click the
+  innermost (`hit`). `panelsView.pickFor(x, y)` -> {id, next}.
+- The picked box dragged: `panelsView.dropAt(x, y, id)` -> {into, at, line | rect, same}
+  (a `move`) or {beside, side, line} (a `beside`). The container aimed at is the innermost
+  section under the pointer that the box isn't in - or, within 7 screen px of its edge
+  or in the outer 22 % (44 screen px at most) of the sides across its parent's line,
+  that parent.
+- The picked box's right edge sends `box {key: "w", value: px}`, its bottom edge (a
+  section, an image, a chart) `box {key: "h", value: px}`; a height in px is the box's
+  height whatever its "aspect".
+- Escape: a recording stops, else a drag is let go, else an open panel closes, else the
+  pick steps out to what the box is in. Alt+Up / Alt+Down move the picked box one
+  earlier or later, Ctrl+D copies it, Page Up / Page Down show the page before or after.
+
+## Round 4 - pages that flow, things a click starts
+
+Asked for by the owner: the default pages "don't all flow into each other", choosing a
+page "doesn't always make it populate the screen", "every part of a preset page should
+be easily animatable. for example if I press play on the music player, the bar should
+animate up to match the time listed, and the time should move accordingly too", a page
+made into a music player was still called "Sign in", and the window's title couldn't be
+changed.
+
+### A box gains
+
+    "count": false | true      role text, with a number in it: the number runs up from nothing to
+                               what it says - model.counted(text, share): a time ("1:24") by its
+                               seconds, any other number keeping its decimals and commas
+    "run":   null | {"by": box id | "", "seconds": 0.2..60}
+                               roles progress and chart (their draw-on) and a text that counts:
+                               when it starts - "" with the page, else on the first click inside
+                               that box of its own page - and how long it takes, at a steady rate.
+                               null: a bar or chart draws on as the page builds (as before); a
+                               count always has one ({"by": "", "seconds": COUNT_SECONDS} unless told).
+                               In a layout's own tree, which has no ids yet, "by" is "@" and the
+                               box's words or name ("@Play"); clean() makes it the id. A "by" that
+                               isn't a box of the same page is "".
+
+model.animations() lists {"id": "count", "on"} for a text with a number in it.
+
+### clock.py
+
+    clock()["said"] = {box id: {"steps": [what it says at each step of its run], "at": [step per frame]}}
+    clock()["events"] gains {"kind": "run", "frame", "box", "page"} where each begins
+    pose()["said"] = {box id: what it says on the frame}       # counting texts on the pages that show
+A run begins, each time its page arrives: "by" "" - a drawn box when its draw-on would
+start, a count when its box has arrived; "by" a box - the frame of the first button-down
+inside that box. On frame f it is `min(n, f - begins) / n` of the way (n = seconds x fps,
+1 at least), 0 before it begins; while its page is leaving or away it holds. A drawn
+box's row in "draw" is this in place of the build's; a rule watching it sees this.
+
+### The template, the pages' names
+
+A new panel's Dashboard has its sidebar's Settings item linked to the third page, and
+its cursor clicks it: 8 s, three pages shown. with_layout() names a page after its new
+layout when its name is still its old layout's, "Page n", or the name the template gave
+a page of that layout (TEMPLATE_PAGES: "Sign in").
+
+### page.py
+
+    from the view  flow {}        page_keys become: every page after the start page, in the list's
+                                  order (round from the start page), each at an equal share of the clip
+    `set {key: "title"}` is the window's title (a field in the view now).
+
+### web/
+
+A page chosen in Pages is shown still, to work on: it stops a recording, playback and
+Try it. A page the clock never shows says "Never shown in the clip". Trying it, a run
+begins as the clock has it (liveRuns), stepped by wall time.
+
+## Round 5 - the window is the tool; Buddy moves the cursor
+
+The owner, after rounds 3 and 4: "I'm still confused ... if Buddy isn't full screen, it's
+nearly impossible to use ... maybe some < > side scrolling arrows on the edges of the
+window to move between pages?" A mockup was agreed ("Yeah let's try this"): one bar, the
+stage with an arrow either side, a story strip under it, one card by what is picked -
+nothing beside the stage - and a cursor nobody has to record.
+
+### The story (model.py)
+
+    spec "auto": true          Buddy moves the cursor (a new panel; false: the cursor is the panel's own)
+    page "secs": 0..30         how long it shows (0: as long as what happens on it needs)
+    page "by":  box id | ""    the box of the page whose click goes on to the next page ("": its time does)
+
+    story(spec) -> [{"page", "at", "secs", "own", "by", "leave", "clicks": [[second, box id]], "last"}]
+    with_story(spec, page_id, "secs" | "by", value)
+    with_started(spec, box_id, by)      a click on `by` starts `box_id`: its "run" (and "count", for a text)
+
+The pages are shown in the order they are listed, from the first. On a page the cursor
+clicks, one after another (STORY_LEAD after it arrives, STORY_GAP apart), every box
+whose click starts something there - a "run" with a "by", a field or text that types
+from a click; a page with such clicks and no "secs" lasts as long as they and the
+longest thing they start need. A page with a "by" is left by a click on it STORY_LEAVE
+before its time is up; one without, by a key at its end.
+
+With "auto", clean() makes these FROM the story, whatever was given: "start" (the first
+page), "seconds", "path", "clicks", "page_keys", and every box's "go" (the "by" box
+goes to the next page; no other box goes anywhere). So clock.py, the view's pose and
+comp.py read a panel with a story exactly as they read a recorded one. with_recording()
+sets "auto" false; `set {key: "auto", value: true}` gives the story back. A panel kept
+from before there was a story has no "auto": page.py gives it one.
+
+### page.py
+
+    state gains    story (model.story(spec))
+    from the view  story {page, key, value}      with_story
+                   starts {id, by}               with_started
+
+### web/
+
+The page is: the bar (the tabs, Undo/Redo/Reset, + Add, Window look, Layers, More, Add
+to timeline); the stage with `#page-prev` / `#page-next` either side; the story (`#play`,
+`#scrub`, then `#pages`: a `.pn-page` card a page and a `.pn-link` between two). The
+picked box's settings are a card on the stage (`#pick-card`: what it says, `#clicked-list`
+- what a click on it starts - how it shows up, and the rest under `#card-more`); the
+window's are the Window look panel, Layers a panel; the lanes, Try it and Record are in
+`#dock`, hidden until More asks for it. `choosing` ({kind: "start", by} | {kind: "leave",
+page}) makes the next click on the stage pick a box for `starts` or `story`; a banner
+over the stage says so, as it does while trying it and recording.

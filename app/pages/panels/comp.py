@@ -217,7 +217,10 @@ def _sample(spec, frame, fps, comp_frames, solved):
                       "boxes": {bid: {key: _held(v) if shown else [REST[key]] * comp_frames for key, v in looks.items()}
                                 for bid, looks in boxes.items()}}
     draw, typed, carets = {}, {bid: [None] * comp_frames for bid in clk.get("typed") or {}}, {}
+    said = {bid: [None] * comp_frames for bid in clk.get("said") or {}}
     for f, pose in enumerate(poses):
+        for bid, words in (pose.get("said") or {}).items():
+            said[bid][f] = str(words)
         for bid, share in (pose.get("draw") or {}).items():
             draw.setdefault(bid, [None] * comp_frames)[f] = float(share)
         for bid, shown in (pose.get("typed") or {}).items():
@@ -228,6 +231,8 @@ def _sample(spec, frame, fps, comp_frames, solved):
             # Letters shown, held where its page doesn't show (0 where it never does).
             "typed": {bid: _held(v) if any(s is not None for s in v) else [0] * comp_frames for bid, v in typed.items()},
             "caret": carets,            # {box id: [x, y, w, h] where it shows, else None, per frame}
+            # What a counting text says, held where its page doesn't show (never shown: nothing here).
+            "said": {bid: _held(v) for bid, v in said.items() if any(s is not None for s in v)},
             "order": [[entry.get("page") for entry in pose.get("pages") or []] for pose in poses],
             "cursor": [tuple(pose.get("cursor") or (0.0, 0.0)) for pose in poses],
             "down": [1.0 if pose.get("down") else 0.0 for pose in poses]}
@@ -542,6 +547,14 @@ class _Comp:
                 return None                     # it never shows a letter
             if len(keys) > 1:
                 keyed = f"{stem}Typed"
+                self.add(fc.text_spline(keyed, keys))
+            words = shown[0]
+        elif p["box"] in self.samples.get("said", {}):
+            # A text that counts up: what it says on each frame, keyed as a typing line's is.
+            shown = self.samples["said"][p["box"]]
+            keys = [(f, s) for f, s in enumerate(shown) if f == 0 or s != shown[f - 1]]
+            if len(keys) > 1:
+                keyed = f"{stem}Counted"
                 self.add(fc.text_spline(keyed, keys))
             words = shown[0]
         self.add(text_look.text_plus(stem, self.frame, self.comp_frames, look, metrics, p["size"] * self.u.k,

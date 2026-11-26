@@ -45,7 +45,8 @@ ROOMY = {"image": 120.0, "chart": 120.0, "progress": 80.0, "divider": 8.0}     #
 CUT = "…"
 
 # What a placed box carries of its box, besides where it is.
-LOOK = ("variant", "name", "text", "right", "strong", "on", "center", "p", "chart", "hue", "reacts", "image", "type", "arrive")
+LOOK = ("variant", "name", "text", "right", "strong", "on", "center", "p", "chart", "hue", "reacts", "image", "type", "arrive",
+        "count", "run")
 
 
 def letter(box):

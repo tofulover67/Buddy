@@ -56,6 +56,12 @@ def panel(*roots, **more):
                     "path": [[0, 1, 1]], "clicks": [], **more})
 
 
+def recorded(**more):
+    """A new panel whose cursor is its own - as one recorded is - and not the story's:
+    the same path, clicks and links, from then on the panel's to change."""
+    return M.clean({**M.clean({}), "auto": False, **more})
+
+
 def placed(spec, page="p1"):
     return {b["id"]: b for b in S.solve(spec, page)["boxes"]}
 
@@ -196,7 +202,8 @@ class ModelTests(unittest.TestCase):
         self.assertEqual([(p["name"], p["layout"]) for p in spec["pages"]],
                          [("Sign in", "signin"), ("Dashboard", "dashboard"), ("Settings", "settings")])
         linked = [box for box in M.boxes(spec) if box["go"]]
-        self.assertEqual([(b["role"], b["text"], b["go"]) for b in linked], [("button", "Sign in", {"page": "p2", "with": ""})])
+        self.assertEqual([(b["role"], b["text"], b["go"]) for b in linked], [("button", "Sign in", {"page": "p2", "with": ""}),
+                                                                             ("section", "", {"page": "p3", "with": ""})])
         # The whole window is on a 16:9 frame, and the cursor's click lands on that button.
         solved = S.solve(spec, "p1")
         left, top = S.to_frame(spec, solved["h"], 0, 0, FRAME)
@@ -205,14 +212,14 @@ class ModelTests(unittest.TestCase):
         for fps in (24, 30, 60):
             played = K.clock(spec, fps, FRAME)
             self.assertEqual([(c["page"], c["why"], c["box"]) for c in played["pages"]],
-                             [("p1", "start", ""), ("p2", "click", linked[0]["id"])], fps)
+                             [("p1", "start", ""), ("p2", "click", linked[0]["id"]), ("p3", "click", linked[1]["id"])], fps)
         # A panel with pages of its own gets no template cursor.
         mine = M.clean({"pages": [{}]})
         self.assertEqual((mine["path"], mine["clicks"], mine["title"]), ([[0.0, 50.0, 50.0]], [], ""))
         self.assertEqual(M.clean({"style": "glass"})["pages"], spec["pages"])
 
     def test_a_box_is_found_and_changed(self):
-        spec = M.clean({})
+        spec = recorded()
         button = next(box for box in M.boxes(spec) if box["go"])
         found = M.find(spec, button["id"])
         self.assertEqual((found["box"], found["page"]["id"], found["parent"]["id"]),
@@ -256,7 +263,7 @@ class ModelTests(unittest.TestCase):
         self.assertIsNone(M.without_box(spec, "b999"))
 
     def test_pages_are_added_named_made_over_and_removed(self):
-        spec = M.clean({})
+        spec = recorded()
         more = M.with_page(spec)
         self.assertEqual([(p["id"], p["name"], p["layout"]) for p in more["pages"]][-1], ("p4", "Page 4", ""))
         self.assertEqual(more["pages"][-1]["root"]["children"], [])
@@ -338,7 +345,7 @@ class ModelTests(unittest.TestCase):
 
     def test_frames_faces_and_the_id(self):
         spec = M.clean({})
-        self.assertEqual((M.frames(spec, 24), K.frames(spec, 24), M.frames(M.clean({"seconds": 0}), 1)), (144, 144, 2))
+        self.assertEqual((M.frames(spec, 24), K.frames(spec, 24), M.frames(M.clean({"seconds": 0, "auto": False}), 1)), (168, 168, 2))
         self.assertEqual(M.faces(spec), [("Arial", "Regular"), ("Arial", "Bold")])
         self.assertEqual(M.faces(M.clean({"bold_face": "Regular"})), [("Arial", "Regular")])
         one = M.panel_id(spec, FRAME, 24)
@@ -480,7 +487,8 @@ class SolveTests(unittest.TestCase):
         spec = M.clean({})
         boxes = S.solve(spec, "p2")["boxes"]
         self.assertEqual({"id", "role", "variant", "name", "x", "y", "w", "h", "depth", "parent", "lines", "size", "text", "right",
-                          "strong", "on", "center", "p", "chart", "hue", "reacts", "image", "type", "arrive", "type_lines"},
+                          "strong", "on", "center", "p", "chart", "hue", "reacts", "image", "type", "arrive", "type_lines",
+                          "count", "run"},
                          set(boxes[0]))
         seen = {""}
         for box in boxes:
@@ -780,7 +788,7 @@ class ClockTests(unittest.TestCase):
         self.assertEqual((played["draw"][bar][30], played["draw"][bar][-1]), (0.0, 1.0))
 
     def test_a_page_builds_on_in_reading_order(self):
-        spec = M.clean({**M.clean({}), "build": {"on": True, "stagger": 0.1, "seconds": 0.5}, "seconds": 10, "start": "p2"})
+        spec = M.clean({**recorded(), "build": {"on": True, "stagger": 0.1, "seconds": 0.5}, "seconds": 10, "start": "p2"})
         played = K.clock(spec, 30, FRAME)
         self.assertEqual(set(played["build"]), {"p1", "p2", "p3"})
         for page in ("p1", "p2", "p3"):
@@ -817,7 +825,7 @@ class ClockTests(unittest.TestCase):
         stay = named(spec, "Stay")
         self.assertEqual(K.pose(spec, played, 0), {"pages": [{"page": "p1", "alpha": 1.0, "dx": 0.0, "boxes": {}}],
                                                    "cursor": played["cursor"][0], "down": 0, "draw": {},
-                                                   "typed": {}, "caret": {}})
+                                                   "typed": {}, "said": {}, "caret": {}})
         hovered = K.pose(spec, played, 19)
         self.assertEqual(hovered["pages"][0]["boxes"], {stay["id"]: {**K.REST, "scale": 1.1, "dy": -3.0, "glow": 0.4}})
         self.assertAlmostEqual(hovered["cursor"][0], stay["x"] + stay["w"] / 2, places=1)
@@ -934,7 +942,7 @@ class ClockTests(unittest.TestCase):
         one, other = K.clock(spec, 30, FRAME), K.clock(M.clean({}), 30, FRAME)
         self.assertEqual(one, other)
         self.assertEqual(json.loads(json.dumps(one)), one)
-        self.assertEqual(set(one), {"total", "cursor", "down", "pages", "amounts", "build", "draw", "events", "typed", "caret"})
+        self.assertEqual(set(one), {"total", "cursor", "down", "pages", "amounts", "build", "draw", "events", "typed", "caret", "said"})
         self.assertEqual(S.solve_all(spec), S.solve_all(M.clean({})))
         self.assertEqual(Y.drawn(spec, "p2"), Y.drawn(M.clean({}), "p2"))
         self.assertEqual(json.loads(json.dumps(Y.drawn(spec, "p2"))), Y.drawn(spec, "p2"))
@@ -945,7 +953,7 @@ class ClockTests(unittest.TestCase):
         self.assertNotEqual(one["cursor"], K.clock(spec, 30, (1080, 1920))["cursor"])
 
     def test_a_minute_at_sixty_frames_a_second_is_quick(self):
-        template = M.clean({})
+        template = recorded()
         spec = M.clean({**template, "seconds": 60, "page_keys": [[20, "p3", "match"], [40, "p2", "fade"]],
                         "path": [[t, 20 + (t * 7) % 60, 20 + (t * 11) % 60] for t in range(60)],
                         "clicks": [[t + 0.2, t + 0.4] for t in range(0, 60, 3)]})
@@ -1063,6 +1071,269 @@ class RoundTwoModelTests(unittest.TestCase):
                         (ids["One"], ids["Other"], 0),           # onto another page
                         ("b999", ids["Root"], 0), (ids["One"], "b999", 0)):
             self.assertIsNone(M.with_move(spec, *refused), refused)
+
+    def test_a_layer_goes_beside_another_in_a_row_or_column_made_for_the_two(self):
+        spec = panel({"role": "section", "name": "Root", "children": [
+            {"role": "section", "variant": "card", "name": "Card", "children": [
+                {"role": "text", "text": "Two", "name": "Two"}, {"role": "text", "text": "Three", "name": "Three"}]},
+            {"role": "text", "text": "One", "name": "One"},
+            {"role": "section", "dir": "row", "name": "Bar", "children": [
+                {"role": "button", "text": "Go", "name": "Go"}, {"role": "button", "text": "Stop", "name": "Stop"}]}]},
+            {"role": "section", "name": "Other", "children": [{"role": "text", "text": "Far", "name": "Far"}]})
+        ids = {b["name"]: b["id"] for b in M.boxes(spec)}
+
+        def tree(made, page=0):
+            def walk(box):
+                return (box["name"], [walk(c) for c in box["children"]]) if box["role"] == "section" else box["name"]
+            return walk(made["pages"][page]["root"])[1]
+        card, bar = ("Card", ["Two", "Three"]), ("Bar", ["Go", "Stop"])
+        # In a column, left and right of a box need a row: one is made, in the other box's place.
+        right = M.with_beside(spec, ids["One"], ids["Card"], "right")
+        self.assertEqual(tree(right), [("Row", [card, "One"]), bar])
+        row = right["pages"][0]["root"]["children"][0]
+        self.assertEqual((row["dir"], row["align"], row["variant"], row["w"]), ("row", "stretch", "", "fill"))
+        self.assertEqual(tree(M.with_beside(spec, ids["One"], ids["Card"], "left")), [("Row", ["One", card]), bar])
+        # Above and below are already how a column runs: it is only moved.
+        self.assertEqual(tree(M.with_beside(spec, ids["Bar"], ids["Card"], "above")), [bar, card, "One"])
+        self.assertEqual(tree(M.with_beside(spec, ids["Card"], ids["Bar"], "below")), ["One", bar, card])
+        # In a row it is the other way round: a column is made for one over the other.
+        self.assertEqual(tree(M.with_beside(spec, ids["Stop"], ids["Go"], "left")), [card, "One", ("Bar", ["Stop", "Go"])])
+        over = M.with_beside(spec, ids["One"], ids["Go"], "above")
+        self.assertEqual(tree(over), [card, ("Bar", [("Column", ["One", "Go"]), "Stop"])])
+        # A box brought out of the one it goes beside: that one is as it is without it.
+        self.assertEqual(tree(M.with_beside(spec, ids["Two"], ids["Card"], "right")), [("Row", [("Card", ["Three"]), "Two"]), "One", bar])
+        # Taken out again, the row made for the two gives its place back to the one box left.
+        self.assertEqual(tree(M.with_move(right, ids["One"], ids["Root"], None)), [card, bar, "One"])
+        both = M.with_move(M.with_move(right, ids["One"], ids["Root"], None), ids["Card"], ids["Bar"], 0)
+        self.assertEqual(tree(both), [("Bar", [card, "Go", "Stop"]), "One"])
+        # A container somebody named, or a card, stays though it is left empty.
+        emptied = M.with_move(M.with_move(spec, ids["Go"], ids["Root"], 0), ids["Stop"], ids["Root"], 0)
+        self.assertEqual(tree(emptied), ["Stop", "Go", card, "One", ("Bar", [])])
+        for made in (right, over, both):
+            every = [b["id"] for b in M.boxes(made)]
+            self.assertEqual(len(every), len(set(every)))
+            self.assertEqual(made, M.clean(made))
+        for refused in ((ids["Root"], ids["Card"], "right"),      # a page's own box
+                        (ids["One"], ids["Root"], "right"),       # beside the page's own box
+                        (ids["One"], ids["One"], "right"),        # beside itself
+                        (ids["Card"], ids["Two"], "right"),       # beside what is in it
+                        (ids["One"], ids["Far"], "right"),        # onto another page
+                        (ids["One"], ids["Card"], "below"),       # where it already is
+                        (ids["One"], ids["Card"], "near"),
+                        ("b999", ids["Card"], "right"), (ids["One"], "b999", "right")):
+            self.assertIsNone(M.with_beside(spec, *refused), refused)
+
+    def test_a_plain_row_turned_is_called_a_column(self):
+        spec = panel({"role": "section", "name": "Root", "children": [
+            {"role": "section", "dir": "row", "children": [{"role": "text", "text": "One"}, {"role": "text", "text": "Two"}]},
+            {"role": "section", "dir": "row", "name": "Bar", "children": []}]})
+        plain, bar = (c["id"] for c in spec["pages"][0]["root"]["children"])
+        turned = M.find(M.with_box(spec, plain, "dir", "column"), plain)["box"]
+        self.assertEqual((turned["dir"], turned["name"]), ("column", "Column"))
+        kept = M.find(M.with_box(spec, bar, "dir", "column"), bar)["box"]
+        self.assertEqual((kept["dir"], kept["name"]), ("column", "Bar"))
+
+    def test_a_layer_is_copied_with_ids_of_its_own(self):
+        spec = M.clean({})
+        chart = next(b["id"] for b in M.every(M.page_of(spec, "p2")["root"]) if b["role"] == "chart")
+        card = M.find(spec, chart)["parent"]
+        ruled = M.with_rule(spec, "", "box", chart)
+        made = M.with_copy(ruled, card["id"])
+        kids = M.find(made, M.find(made, card["id"])["parent"]["id"])["box"]["children"]
+        at = [k["id"] for k in kids].index(card["id"])
+        first, second = kids[at], kids[at + 1]
+        self.assertNotEqual(first["id"], second["id"])
+
+        def look(box):
+            return {**{k: v for k, v in box.items() if k != "id"}, "children": [look(c) for c in box["children"]]}
+        self.assertEqual(look(first), look(second))
+        self.assertEqual(first, card)                                     # the first one is the one there was
+        every = [b["id"] for b in M.boxes(made)]
+        self.assertEqual(len(every), len(set(every)))
+        self.assertEqual(made["rules"], ruled["rules"])                   # its rule stays with the one it watched
+        self.assertIsNone(M.with_copy(spec, spec["pages"][0]["root"]["id"]))
+        self.assertIsNone(M.with_copy(spec, "b999"))
+        full = panel({"role": "section", "children": [{"role": "section", "name": "Many", "children": [
+            {"role": "text", "text": str(n)} for n in range(M.MAX_BOXES // 2)]}]})
+        self.assertIsNone(M.with_copy(full, full["pages"][0]["root"]["children"][0]["id"]))
+
+    def test_pages_are_moved_copied_and_started_on(self):
+        spec = recorded()
+        order = lambda made: [p["id"] for p in made["pages"]]                       # noqa: E731
+        self.assertEqual(order(M.with_page_move(spec, "p3", 0)), ["p3", "p1", "p2"])
+        self.assertEqual(order(M.with_page_move(spec, "p1", 1)), ["p2", "p1", "p3"])
+        self.assertEqual(order(M.with_page_move(spec, "p1", 99)), ["p2", "p3", "p1"])
+        self.assertEqual(M.with_page_move(spec, "p3", 0)["start"], "p1")            # where the clip starts is its own
+        for refused in (("p1", 0), ("p9", 0), ("p1", True)):
+            self.assertIsNone(M.with_page_move(spec, *refused), refused)
+        copied = M.with_page_copy(spec, "p1")
+        self.assertEqual([(p["id"], p["name"]) for p in copied["pages"]],
+                         [("p1", "Sign in"), ("p4", "Sign in 2"), ("p2", "Dashboard"), ("p3", "Settings")])
+        self.assertEqual(copied["pages"][0], spec["pages"][0])
+        every = [b["id"] for b in M.boxes(copied)]
+        self.assertEqual(len(every), len(set(every)))
+        goes = lambda page: [b["go"] for b in M.every(page["root"]) if b["go"]]     # noqa: E731
+        self.assertEqual(goes(copied["pages"][1]), goes(spec["pages"][0]))          # its links go where the first one's do
+        again = M.with_page_copy(copied, "p4")
+        self.assertEqual(again["pages"][2]["name"], "Sign in 3")
+        self.assertIsNone(M.with_page_copy(spec, "p9"))
+        full = spec
+        while len(full["pages"]) < M.MAX_PAGES:
+            full = M.with_page(full)
+        self.assertIsNone(M.with_page_copy(full, "p1"))
+        self.assertEqual(M.with_start(spec, "p2")["start"], "p2")
+        self.assertIsNone(M.with_start(spec, "p1"))
+        self.assertIsNone(M.with_start(spec, "p9"))
+
+    def test_a_number_counts_up_from_nothing(self):
+        self.assertEqual([M.counted("1:24", s) for s in (0, 0.5, 0.999, 1)], ["0:00", "0:42", "1:23", "1:24"])
+        self.assertEqual([M.counted("$1,204.50", s) for s in (0, 0.5, 1)], ["$0.00", "$602.25", "$1,204.50"])
+        self.assertEqual([M.counted("92 %", s) for s in (0, 0.5, 2)], ["0 %", "46 %", "92 %"])
+        self.assertEqual(M.counted("Peak 4,120", 0.25), "Peak 1,030")
+        self.assertEqual(M.counted("No number here", 0.5), "No number here")
+        self.assertTrue(M.counts("3:41") and M.counts("Top 5") and not M.counts("Play") and not M.counts(""))
+
+    def test_what_counts_and_what_runs_is_cleaned(self):
+        spec = panel({"role": "section", "children": [
+            {"role": "progress", "p": 38, "run": {"by": "@Play", "seconds": 4}},
+            {"role": "text", "text": "1:24", "count": True, "run": {"by": "@Play", "seconds": 999}},
+            {"role": "text", "text": "Total 12", "count": True},
+            {"role": "text", "text": "Nothing to count", "count": True, "run": {"by": "", "seconds": 2}},
+            {"role": "button", "text": "Play", "count": True, "run": {"by": "@Play"}},
+            {"role": "chart", "run": {"by": "b999", "seconds": "x"}},
+            {"role": "progress", "run": {"by": "@Far"}}]},
+            {"role": "section", "children": [{"role": "button", "text": "Far"}]})
+        bar, time, total, words, play, chart, other = spec["pages"][0]["root"]["children"]
+        self.assertEqual(bar["run"], {"by": play["id"], "seconds": 4.0})            # "@" and its words: the box of its page
+        self.assertEqual((time["count"], time["run"]), (True, {"by": play["id"], "seconds": 60.0}))
+        self.assertEqual((total["count"], total["run"]), (True, {"by": "", "seconds": M.COUNT_SECONDS}))
+        self.assertEqual((words["count"], words["run"]), (False, None))             # no number: nothing to count
+        self.assertEqual((play["count"], play["run"]), (False, None))               # only a text counts, only a bar or chart draws
+        self.assertEqual(chart["run"], {"by": "", "seconds": 3.0})                  # a box there isn't: with the page
+        self.assertEqual(other["run"]["by"], "")                                    # nor one on another page
+        self.assertEqual(spec, M.clean(spec))
+        # One thing about it changed: laid over what it has; None takes it off; a count turned off loses its run.
+        faster = M.with_box(spec, bar["id"], "run", {"seconds": 2})
+        self.assertEqual(M.find(faster, bar["id"])["box"]["run"], {"by": play["id"], "seconds": 2.0})
+        self.assertIsNone(M.find(M.with_box(spec, bar["id"], "run", None), bar["id"])["box"]["run"])
+        still = M.find(M.with_box(spec, time["id"], "count", False), time["id"])["box"]
+        self.assertEqual((still["count"], still["run"]), (False, None))
+        # Without the box that starts it, it starts with the page.
+        self.assertEqual(M.find(M.without_box(spec, play["id"]), bar["id"])["box"]["run"]["by"], "")
+        self.assertEqual([a["id"] for a in M.animations(spec, time["id"])], ["arrive", "type", "count", "answer"])
+        self.assertEqual([a["id"] for a in M.animations(spec, words["id"])], ["arrive", "type", "answer"])
+
+    def test_a_click_starts_what_runs_on_it_and_it_goes_at_a_steady_rate(self):
+        spec = panel({"role": "section", "pad": 10, "children": [
+            {"role": "progress", "p": 50, "run": {"by": "@Play", "seconds": 2}},
+            {"role": "text", "text": "1:00", "count": True, "run": {"by": "@Play", "seconds": 2}},
+            {"role": "text", "text": "40 %", "count": True, "run": {"by": "", "seconds": 1}},
+            {"role": "button", "text": "Play"}]},
+            build={"on": False, "stagger": 0.04, "seconds": 0.35}, seconds=6)
+        bar, time, share, play = spec["pages"][0]["root"]["children"]
+        at = named(spec, "Button")
+        x, y = S.to_frame(spec, S.solve(spec, "p1")["h"], at["x"] + at["w"] / 2, at["y"] + at["h"] / 2, (400, 400))
+        fps = 10
+        clicked = M.clean({**spec, "path": [[0, x, y]], "clicks": [[2.0, 2.2], [4.0, 4.2]]})
+        played = K.clock(clicked, fps, (400, 400))
+        # Nothing until the click; then a steady rate over its seconds; a second click starts nothing again.
+        self.assertEqual([played["draw"][bar["id"]][f] for f in (0, 19, 20, 25, 30, 40, 59)], [0.0, 0.0, 0.0, 0.25, 0.5, 1.0, 1.0])
+        said = played["said"][time["id"]]
+        self.assertEqual((said["steps"][0], said["steps"][10], said["steps"][-1], len(said["steps"])), ("0:00", "0:30", "1:00", 21))
+        self.assertEqual([said["steps"][said["at"][f]] for f in (0, 20, 25, 30, 40, 59)],
+                         ["0:00", "0:00", "0:15", "0:30", "1:00", "1:00"])
+        # With the page: from when it has arrived.
+        own = played["said"][share["id"]]
+        self.assertEqual([own["steps"][own["at"][f]] for f in (0, 5, 10, 59)], ["0 %", "20 %", "40 %", "40 %"])
+        self.assertEqual([(e["frame"], e["box"]) for e in played["events"] if e["kind"] == "run"],
+                         [(0, share["id"]), (20, bar["id"]), (20, time["id"])])
+        pose = K.pose(clicked, played, 25)
+        self.assertEqual((pose["draw"][bar["id"]], pose["said"]), (0.25, {time["id"]: "0:15", share["id"]: "40 %"}))
+        # Never clicked, it never runs.
+        idle = K.clock(M.clean({**spec, "path": [[0, 1, 1]], "clicks": []}), fps, (400, 400))
+        self.assertEqual((set(idle["draw"][bar["id"]]), set(idle["said"][time["id"]]["at"])), ({0.0}, {0}))
+        # A rule watches a bar that runs as it runs.
+        ruled = M.clean({**clicked, "pages": [*clicked["pages"], {"root": {"role": "section", "children": []}}],
+                         "rules": [{"box": bar["id"], "over": 50, "page": "p2", "with": "fade"}]})
+        self.assertEqual([(c["at"], c["why"]) for c in K.clock(ruled, fps, (400, 400))["pages"]], [(0, "start"), (31, "rule")])
+
+    def test_the_music_players_play_runs_its_bar_and_its_time(self):
+        spec = M.with_layout(M.clean({}), "p1", "player")
+        self.assertEqual(spec["pages"][0]["name"], "Music player")            # a new panel's own page name follows its layout
+        boxes = list(M.every(spec["pages"][0]["root"]))
+        play = next(b for b in boxes if b["text"] == "Play")
+        bar = next(b for b in boxes if b["role"] == "progress")
+        time = next(b for b in boxes if b["text"] == "1:24")
+        self.assertEqual((bar["run"], time["run"], time["count"]),
+                         ({"by": play["id"], "seconds": 4.0}, {"by": play["id"], "seconds": 4.0}, True))
+
+    def test_a_new_panels_cursor_goes_through_every_page(self):
+        spec = M.clean({})
+        played = K.clock(spec, 24)
+        self.assertEqual([c["page"] for c in played["pages"]], ["p1", "p2", "p3"])
+        self.assertEqual((spec["seconds"], spec["auto"]), (7.0, True))
+
+    def test_the_story_moves_the_cursor(self):
+        spec = M.clean({})
+        told = M.story(spec)
+        button = next(b["id"] for b in spec["pages"][0]["root"]["children"] if b["role"] == "button" and not b["variant"])
+        self.assertEqual([(p["page"], p["at"], p["secs"], p["own"], p["last"]) for p in told],
+                         [("p1", 0.0, 2.0, False, False), ("p2", 2.0, 3.0, True, False), ("p3", 5.0, 2.0, False, True)])
+        self.assertEqual((told[0]["by"], told[0]["leave"], told[2]["by"], told[2]["leave"]), (button, 1.8, "", None))
+        # What clean() makes of it: the clip's length, where it starts, the clicks - and the links.
+        self.assertEqual((spec["seconds"], spec["start"], spec["page_keys"]), (7.0, "p1", []))
+        self.assertEqual(spec["clicks"], [[1.8, 1.92], [4.8, 4.92]])
+        self.assertEqual(M.find(spec, button)["box"]["go"], {"page": "p2", "with": ""})
+        self.assertEqual([c["page"] for c in K.clock(spec, 24)["pages"]], ["p1", "p2", "p3"])
+        times = [key[0] for key in spec["path"]]
+        self.assertEqual(times, sorted(set(times)))
+        # The cursor is on the button when it clicks it.
+        at = next(b for b in S.solve(spec, "p1")["boxes"] if b["id"] == button)
+        x, y = S.to_frame(spec, S.solve(spec, "p1")["h"], at["x"] + at["w"] / 2, at["y"] + at["h"] / 2)
+        self.assertIn([1.6, round(x, 2), round(y, 2)], spec["path"])
+        # A page goes on when its time is up instead: a key, no click, no link.
+        timed = M.with_story(spec, "p1", "by", "")
+        self.assertEqual((timed["page_keys"], timed["clicks"], M.find(timed, button)["box"]["go"]),
+                         ([[2.0, "p2", "slide"]], [[4.8, 4.92]], None))
+        self.assertEqual([c["why"] for c in K.clock(timed, 24)["pages"]], ["start", "key", "click"])
+        # How long a page shows is its own to set; 0 gives it back to what happens on it.
+        longer = M.with_story(spec, "p3", "secs", 4.5)
+        self.assertEqual((longer["seconds"], M.story(longer)[2]["own"], M.with_story(longer, "p3", "secs", 0)), (9.5, True, spec))
+        # The order of the pages is the order of the story, and the first is where it starts.
+        moved = M.with_page_move(spec, "p3", 0)
+        self.assertEqual((moved["start"], [p["page"] for p in M.story(moved)]), ("p3", ["p3", "p1", "p2"]))
+        for refused in (("p9", "secs", 2), ("p1", "name", "x"), ("p1", "by", button), ("p3", "by", button)):
+            made = M.with_story(spec, *refused)
+            self.assertTrue(made is None or made["pages"][2]["by"] == "", refused)   # a box of another page is no one's "by"
+        # A link is the story's: one set by hand doesn't hold, and the last page goes nowhere.
+        self.assertIsNone(M.with_box(spec, button, "go", {"page": "p3", "with": "fade"}))
+        self.assertEqual(spec, M.clean(spec))
+
+    def test_the_story_clicks_what_starts_things(self):
+        spec = M.with_layout(M.with_page(M.clean({})), "p4", "player")
+        boxes = list(M.every(spec["pages"][3]["root"]))
+        play = next(b["id"] for b in boxes if b["text"] == "Play")
+        last = M.story(spec)[3]
+        # Its time is what happens on it: a second before the click, the 4 s the bar takes, a little after.
+        self.assertEqual((last["at"], last["secs"], last["clicks"], last["by"]), (7.0, 5.5, [[8.0, play]], ""))
+        self.assertEqual(spec["seconds"], 12.5)
+        played = K.clock(spec, 24)
+        self.assertEqual([(c["page"], c["why"]) for c in played["pages"]][-1], ("p4", "key"))
+        self.assertEqual([e["frame"] for e in played["events"] if e["kind"] == "run"], [192, 192])
+        # A click here starts that there: a bar, a chart, a number - nothing else, and nothing of another page.
+        nxt = next(b["id"] for b in boxes if b["text"] == "Next")
+        total = next(b["id"] for b in boxes if b["text"] == "3:41")
+        made = M.with_started(spec, total, nxt)
+        box = M.find(made, total)["box"]
+        self.assertEqual((box["count"], box["run"]), (True, {"by": nxt, "seconds": 3.0}))
+        self.assertEqual(M.story(made)[3]["clicks"], [[8.0, play], [9.2, nxt]])
+        title = next(b["id"] for b in boxes if b["text"] == "Slow Morning")
+        for refused in ((title, nxt), (total, total), (total, "b999"), ("b999", nxt), (total, spec["pages"][0]["root"]["children"][0]["id"])):
+            self.assertIsNone(M.with_started(spec, *refused), refused)
+        # A cursor recorded is the panel's own: the story lets go of it, and stays let go.
+        own = M.with_recording(spec, [[0, 10, 10], [1, 20, 20], [2, 30, 30]], [[1.0, 1.1]], 3.0)
+        self.assertEqual((own["auto"], own["seconds"], own["clicks"]), (False, 3.0, [[1.0, 1.1]]))
+        self.assertEqual(M.clean(own), own)
 
     def test_every_way_a_box_moves_is_listed(self):
         spec = panel({"role": "section", "children": [

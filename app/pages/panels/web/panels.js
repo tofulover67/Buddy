@@ -5,9 +5,20 @@
 // (styles.py: a list of prims), and what happens on every frame (clock.py). This
 // draws what it is sent and reports what was done:
 //
+//   the stage   the window, one page at a time, as large as the page has room for; an
+//               arrow either side of it shows the page before or after
+//   the story   under the stage: a card a page, in the order the clip shows them, and
+//               between two cards how the clip goes on - a click on a box, or the page's
+//               time being up. Buddy moves the cursor by it (model.py's story) unless a
+//               cursor was recorded
+//   the card    by the picked box: what it says, what a click on it starts, how it shows
+//               up - and the rest under More
 //   + Add       the shelf, over the stage: a whole page (a layout) or a piece (a component)
-//   Layers      the boxes of the page in view as a tree: picked, renamed, removed, dragged
-//   Edit        a click picks a box; the window is dragged to move it, its edge to size it
+//   Layers      (a panel, from the bar) the boxes of the page in view as a tree
+//   Window look (a panel, from the bar) the window's own settings
+//   Edit        a click picks a box (the whole piece first, a second click what is in it);
+//               the picked box is dragged to another place, its right or bottom edge to
+//               size it; the window is dragged to move it, its edge to size it
 //   Try it      the mouse is the cursor: the boxes answer it, a link changes the page
 //   Record      what the mouse does on the stage is kept - sent once, when stopped
 //   the dock    the clock played back, frame for frame, under it a lane per thing that moves
@@ -44,13 +55,16 @@
     let hold = null;              // a drag on the stage or a lane
     let rec = null;               // recording: {t0, samples, clicks, downAt}
     let index = {boxes: new Map(), placed: {}};
-    let dockOpen = true;
+    let dockOpen = false;         // the timeline in detail (the lanes, Try it, Record): shown from More
+    let choosing = null;          // the next click on the stage picks: {kind: "start", by} | {kind: "leave", page}
+    let hover = "";               // the box the pointer is on, on the stage or in Layers
+    let addWant = "";             // what + Add was asked to open on ("layouts" | "insert"), else by the page
     // Which containers are open in Layers, page by page, for the session: {page: Map(id -> open)}.
     // One never opened or closed is open only at the top level (the page's own box's children).
     const folds = new Map();
 
     try {
-        dockOpen = sessionStorage.getItem(DOCK_KEY) !== "hidden";
+        dockOpen = sessionStorage.getItem(DOCK_KEY) === "shown";
     } catch (_err) {
         // no storage: just for now
     }
@@ -276,7 +290,10 @@
         for (const [id, row] of Object.entries(ck.caret || {})) {
             if (row[f] !== null && row[f] !== undefined && showing.has(known.home[id])) caret[id] = row[f];
         }
-        return {pages, cursor: [...ck.cursor[f]], down: ck.down[f], draw, typed, caret};
+        // What each text that counts up says on the frame.
+        const said = {};
+        for (const [id, row] of Object.entries(ck.said || {})) if (showing.has(known.home[id])) said[id] = row.steps[row.at[f]];
+        return {pages, cursor: [...ck.cursor[f]], down: ck.down[f], draw, typed, said, caret};
     }
 
     // ------------------------------------------------------- lookups --
@@ -409,7 +426,7 @@
     function animated(id) {
         const box = boxOf(id);
         if (!box) return false;
-        return !!box.type || ownArrival(box) || !!box.states || !!box.go || state.spec.rules.some(r => r.box === id);
+        return !!box.type || ownArrival(box) || !!box.states || !!box.go || !!box.run || state.spec.rules.some(r => r.box === id);
     }
 
     function ownArrival(box) {
@@ -769,7 +786,7 @@
     function drawPageOn(ctx, layer, ps, pageAlpha) {
         const prims = state.drawn[layer.page] || [], placed = index.placed[layer.page] || new Map();
         const looks = new Map(), page = state.solved[layer.page];
-        const drawShares = ps.draw || {}, typed = ps.typed, carets = ps.caret || {};
+        const drawShares = ps.draw || {}, typed = ps.typed, carets = ps.caret || {}, said = ps.said || {};
         const lookOf = id => {
             if (!looks.has(id)) looks.set(id, carried(page, layer.boxes, id));
             return looks.get(id);
@@ -816,7 +833,11 @@
                 to.globalAlpha = was * own;
                 boxFrame(to, where, bp);
                 if (bp.glow > 0.001) glow(to, prims, where, bp.glow);
-                for (const p of ps_) drawPrim(to, p, id in drawShares ? drawShares[id] : 1, to.getTransform().a, shown);
+                // A text that counts up says what the frame has it at.
+                for (const p of ps_) {
+                    drawPrim(to, id in said && p.kind === "text" ? {...p, text: said[id]} : p,
+                             id in drawShares ? drawShares[id] : 1, to.getTransform().a, shown);
+                }
                 if (carets[id]) {
                     // The typing caret (clock.caret): a thin upright bar the letters' colour.
                     const [cx, cy, cw, ch] = carets[id], words = ps_.find(p => p.kind === "text" && Array.isArray(p.type));
@@ -955,20 +976,87 @@
         else { ps = editPose(); cursor = false; }
         render(ctx, ps, cursor, p.s, p.fh);
         if (!live() && !playing && view === "edit" && mode === "edit") drawEditing(ctx, p);
+        placeOverlays();
         drawTime();
+    }
+
+    // The theme's accent, for what is drawn over the stage while editing.
+    function accent() {
+        return getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#4d9fff";
+    }
+
+    function placedHere(id) {
+        const placed = state && index.placed[state.showing];
+        return (placed && placed.get(id)) || null;
+    }
+
+    // Whether a box's height can be set by hand: what holds others, a picture, a chart.
+    function tallable(box) {
+        return !!box && ["section", "image", "chart"].includes(box.role);
     }
 
     function drawEditing(ctx, p) {
         const one = 1 / ctx.getTransform().a;          // a device px, in panel px
-        const ratio = window.devicePixelRatio || 1;
+        const ratio = window.devicePixelRatio || 1, px = ratio * one, tint = accent();
+        const dragging = hold && hold.kind === "box" && hold.on;
         ctx.save();
-        const it = picked && index.placed[state.showing] && index.placed[state.showing].get(picked);
+        // What the pointer is on: what a click would pick.
+        const over = !hold && hover && hover !== picked ? placedHere(hover) : null;
+        if (over) {
+            ctx.strokeStyle = "#ffffffb0";
+            ctx.lineWidth = px;
+            ctx.strokeRect(over.x, over.y, over.w, over.h);
+        }
+        const it = picked ? placedHere(picked) : null;
         if (it) {
-            ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 1.5 * ratio * one;
-            ctx.setLineDash([5 * ratio * one, 4 * ratio * one]);
+            ctx.strokeStyle = tint;
+            ctx.lineWidth = 1.5 * px;
+            if (dragging) {
+                ctx.fillStyle = "#ffffff1f";
+                ctx.fillRect(it.x, it.y, it.w, it.h);
+                ctx.setLineDash([5 * px, 4 * px]);
+            }
             ctx.strokeRect(it.x, it.y, it.w, it.h);
             ctx.setLineDash([]);
+            if (!dragging && it.parent) {
+                // The handles that size it: its right edge, and - what has a height to set - its bottom one.
+                const knob = (cx, cy, w, h) => {
+                    ctx.beginPath();
+                    ctx.roundRect(cx - w / 2, cy - h / 2, w, h, Math.min(w, h) / 2);
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fill();
+                    ctx.lineWidth = px;
+                    ctx.stroke();
+                };
+                knob(it.x + it.w, it.y + it.h / 2, 5 * px, Math.min(18 * px, Math.max(8 * px, it.h * 0.6)));
+                if (tallable(boxOf(picked))) knob(it.x + it.w / 2, it.y + it.h, Math.min(18 * px, Math.max(8 * px, it.w * 0.6)), 5 * px);
+            }
+        }
+        // A box being dragged: where it would go - a line between two boxes, or beside one;
+        // a container with nothing in it, lit.
+        const drop = dragging ? hold.drop : null;
+        if (drop) {
+            ctx.globalAlpha = drop.same ? 0.45 : 1;
+            ctx.strokeStyle = tint;
+            ctx.fillStyle = tint;
+            if (drop.rect) {
+                ctx.lineWidth = 2 * px;
+                ctx.strokeRect(drop.rect.x, drop.rect.y, drop.rect.w, drop.rect.h);
+            } else {
+                const [x1, y1, x2, y2] = drop.line;
+                ctx.lineWidth = 3 * px;
+                ctx.lineCap = "round";
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+                for (const [x, y] of [[x1, y1], [x2, y2]]) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3.5 * px, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.globalAlpha = 1;
         }
         // The handle on the window's right edge that sizes it.
         const w = hold && hold.kind === "width" ? hold.width : p.w;
@@ -983,6 +1071,50 @@
             ctx.strokeRect(p.w / 2 - w / 2, 0, w, p.h);
         }
         ctx.restore();
+    }
+
+    // What sits over the stage while editing: the picked box's card beside it, the name of
+    // what the pointer is on, and - on a page with nothing on it - how to begin.
+    function placeOverlays() {
+        const card = $("pick-card"), tag = $("hover-tag"), empty = $("empty-page");
+        const editing = !!state && !live() && !playing && view === "edit" && mode === "edit";
+        const root = editing ? rootOfShowing() : null;
+        empty.hidden = !(root && !root.children.length);
+        const busy = hold && ((hold.kind === "box" && hold.on) || hold.kind === "size" || hold.kind === "width" || hold.kind === "move");
+        const it = editing && picked && !busy && !choosing ? placedHere(picked) : null;
+        const over = editing && !hold && hover && hover !== picked ? placedHere(hover) : null;
+        const show = !!(it && it.parent);
+        if (card.hidden === show) card.hidden = !show;
+        tag.hidden = !(over && over.parent);
+        if (!show && tag.hidden) return;
+        const stage = $("stage-box").getBoundingClientRect(), canvas = $("stage").getBoundingClientRect();
+        const m = mapFor(canvas.width, canvas.height);
+        const where = b => ({left: canvas.left - stage.left + m.ox + b.x * m.s, top: canvas.top - stage.top + m.oy + b.y * m.s,
+                             w: b.w * m.s, h: b.h * m.s});
+        if (show) {
+            // Off the window where the stage has the room - to its right, else its left -
+            // else beside the box, else over the stage's right side; never taller than
+            // the stage: it scrolls.
+            const r = where(it), win = where({x: 0, y: 0, w: state.solved[state.showing].w, h: state.solved[state.showing].h});
+            card.style.maxHeight = Math.max(120, stage.height - 12) + "px";
+            const cw = card.offsetWidth, ch = Math.min(card.offsetHeight, stage.height - 12);
+            const fits = at => at >= 6 && at + cw <= stage.width - 6;
+            let x = [win.left + win.w + 10, win.left - cw - 10, r.left + r.w + 10, r.left - cw - 10].find(fits);
+            if (x === undefined) x = Math.max(6, stage.width - cw - 6);
+            const y = Math.max(6, Math.min(stage.height - ch - 6, r.top - 8));
+            Object.assign(card.style, {left: Math.round(x) + "px", top: Math.round(y) + "px"});
+        }
+        if (!tag.hidden) {
+            const box = boxOf(hover), name = box ? layerName(box, ".pn-tag-role").map(n => n.textContent).join("") : "";
+            if (tag.dataset.of !== hover + name) {
+                tag.dataset.of = hover + name;
+                tag.replaceChildren(...layerName(box, ".pn-tag-role"));
+            }
+            const r = where(over), w = tag.offsetWidth, h = tag.offsetHeight;
+            let y = r.top - h - 3;
+            if (y < 2) y = Math.min(stage.height - h - 2, r.top + r.h + 3);
+            Object.assign(tag.style, {left: Math.max(2, Math.min(stage.width - w - 2, r.left)) + "px", top: Math.max(2, y) + "px"});
+        }
     }
 
     function drawTime() {
@@ -1089,65 +1221,454 @@
             : into ? `Goes into ${label(into)}.` : "Goes onto the page in view. Pick a box first to put it in there.";
     }
 
-    // -------------------------------------------------- the page chips --
+    // ----------------------------------------------------------- the story --
+    // Under the stage: a card a page, in the order they are listed - which, when Buddy
+    // moves the cursor, is the order the clip shows them. Between two cards is how the
+    // clip goes on: a click on a box of the page, or its time being up; a click on that
+    // chooses. A card's seconds are how long its page shows. A click on a card shows
+    // its page, a drag moves it, a double-click or F2 renames it, a right-click (or its
+    // "more" button) has the rest. Either side of the window, an arrow shows the page
+    // before or after.
 
-    function drawPages() {
-        if (renaming) return;                       // the field being typed in stays
-        const pages = state.spec.pages, one = pages.length < 2;
-        const chips = pages.map((page, i) => {
-            const chosen = page.id === state.showing;
-            const name = el("button.pn-chip-name", {type: "button", role: "tab", "aria-selected": String(chosen),
-                                                    title: "Double-click or press F2 to rename it",
-                                                    onclick: () => showPage(page.id), ondblclick: () => startRename(page.id)},
-                            [`${i + 1} · `, el("span", {translate: "no", text: page.name})]);
-            const parts = [name];
-            if (chosen && !one) {
-                const x = el("button.pn-chip-x", {type: "button", "aria-label": "Remove this page", title: "Remove this page",
-                                                  onclick: () => Buddy.send("page_remove", {id: page.id})});
-                x.append(Buddy.icon("close"));
-                x.disabled = !!state.adding;
-                parts.push(x);
-            }
-            return el("span.pn-chip", {dataset: {page: page.id}, "aria-selected": String(chosen)}, parts);
-        });
-        const add = el("button.btn.ghost", {type: "button", id: "page-add", text: "+ Page", title: "Add an empty page",
-                                            onclick: () => Buddy.send("page_add", {})});
-        add.disabled = !!state.adding || pages.length >= ((state.limits || {}).pages || 8);
-        $("pages").replaceChildren(...chips, add);
+    const PAGE_LOOK = [96, 60];   // a page's small picture, px
+    let pagesFor = "";
+    let pageDrag = null;          // a page's card pressed: {id, x, cx, pointer, on, at, line}
+    let pageClickGone = false;    // the click that ends a drag shows nothing
+
+    function mostPages() {
+        return (state.limits || {}).pages || 8;
     }
 
+    // The pages the clip gets to, as the clock plays it.
+    function shownInClip() {
+        return new Set(state.clock.pages.map(change => change.page));
+    }
+
+    function auto() {
+        return !!(state && state.spec.auto);
+    }
+
+    // A page's part in the story (model.story), when Buddy moves the cursor.
+    function partOf(pageId) {
+        return (state.story || []).find(part => part.page === pageId) || null;
+    }
+
+    function seconds(n) {
+        return `${plain(+Number(n).toFixed(1))} s`;
+    }
+
+    // How long a page shows in the clip as the clock plays it (a recorded cursor's).
+    function shownFor(pageId) {
+        const changes = state.clock.pages;
+        let frames = 0;
+        changes.forEach((change, i) => {
+            if (change.page === pageId) frames += (i + 1 < changes.length ? changes[i + 1].at : state.clock.total) - change.at;
+        });
+        return frames / state.fps;
+    }
+
+    function quoted(box) {
+        return el("span", {translate: "no", text: `“${label(box)}”`});
+    }
+
+    function pageRow(page, i) {
+        const chosen = page.id === state.showing, part = auto() ? partOf(page.id) : null;
+        const more = el("button.pn-page-more", {type: "button", "aria-label": "More", title: "More", tabindex: "-1",
+                                                onclick: e => {
+                                                    e.stopPropagation();
+                                                    const r = e.currentTarget.getBoundingClientRect();
+                                                    pageMenu(page.id, r.left, r.bottom + 2);
+                                                }});
+        more.append(Buddy.icon("more"));
+        // How long it shows: its own to set when Buddy moves the cursor.
+        const secs = part
+            ? el("button.pn-page-secs", {type: "button", translate: "no", text: seconds(part.secs), tabindex: "-1",
+                                         title: Buddy.t("How long this page shows. Click to change it."),
+                                         onclick: e => { e.stopPropagation(); editSecs(page.id); }})
+            : el("span.pn-page-secs", {translate: "no", text: seconds(shownFor(page.id))});
+        const notes = [];
+        if (part) {
+            part.clicks.forEach(([t, id]) => {
+                const box = boxOf(id);
+                if (box) notes.push(el("span.pn-page-note", {}, [el("span", {text: "click"}), " ", quoted(box), " ",
+                                                                 el("span", {translate: "no", text: `· ${seconds(t - part.at)}`})]));
+            });
+        } else if (page.id === state.spec.start) {
+            notes.push(el("span.pn-page-start", {text: "The clip starts here"}));
+        } else if (!shownInClip().has(page.id)) {
+            notes.push(el("span.pn-page-start.pn-never", {text: "Never shown in the clip",
+                                                          title: "Nothing leads to this page. Link a box to it, or use One after another."}));
+        }
+        return el("div.pn-page", {role: "option", "aria-selected": String(chosen), tabindex: chosen ? "0" : "-1",
+                                  dataset: {page: page.id}, title: "Double-click or press F2 to rename it",
+                                  onclick: () => showPage(page.id), ondblclick: () => startRename(page.id),
+                                  oncontextmenu: e => { e.preventDefault(); pageMenu(page.id, e.clientX, e.clientY); }}, [
+            el("canvas.pn-page-look", {width: PAGE_LOOK[0], height: PAGE_LOOK[1], "aria-hidden": "true"}),
+            el("span.pn-page-text", {}, [
+                el("span.pn-page-name", {}, [el("span.pn-page-no", {translate: "no", text: String(i + 1)}),
+                                             el("span", {translate: "no", text: page.name})]),
+                secs]),
+            ...notes, more]);
+    }
+
+    // Between two cards: how the clip goes on from the first to the second.
+    function linkPill(page, next) {
+        const part = auto() ? partOf(page.id) : null;
+        let said;
+        if (part) {
+            const box = part.by ? boxOf(part.by) : null;
+            said = box ? [el("span", {text: "click"}), " ", quoted(box)]
+                : [el("span", {text: "after"}), " ", el("span", {translate: "no", text: seconds(part.secs)})];
+        } else {
+            // A recorded cursor: how the clock got to the next page, if it did.
+            const change = state.clock.pages.find(c => c.page === next.id && c.why !== "start");
+            const box = change && change.box ? boxOf(change.box) : null;
+            said = !change ? [el("span", {text: "not reached"})]
+                : change.why === "click" && box ? [el("span", {text: "click"}), " ", quoted(box)]
+                : change.why === "rule" ? [el("span", {text: "a rule"})]
+                : [el("span", {text: "at"}), " ", el("span", {translate: "no", text: seconds(change.at / state.fps)})];
+        }
+        const arrow = glyph('<path d="M3 12h17M14 6l6 6-6 6"/>');
+        return el("button.pn-link", {type: "button", dataset: {from: page.id}, title: "How the clip goes on to the next page",
+                                     onclick: e => {
+                                         const r = e.currentTarget.getBoundingClientRect();
+                                         linkMenu(page.id, r.left, r.bottom + 2);
+                                     }}, [arrow, el("span.pn-pill", {}, said)]);
+    }
+
+    function drawPages() {
+        const pages = state.spec.pages;
+        if (!renaming && !(pageDrag && pageDrag.on)) {
+            const key = JSON.stringify([state.showing, state.spec.start, pages.map(page => [page.id, page.name]), state.story,
+                                        auto() ? 0 : state.clock.pages.map(c => [c.at, c.page, c.why, c.box]), !!state.adding]);
+            if (key !== pagesFor) {
+                pagesFor = key;
+                const parts = [];
+                pages.forEach((page, i) => {
+                    parts.push(pageRow(page, i));
+                    if (i + 1 < pages.length) parts.push(linkPill(page, pages[i + 1]));
+                });
+                $("pages").replaceChildren(...parts);
+                const shown = $("pages").querySelector('.pn-page[aria-selected="true"]');
+                if (shown && shown.scrollIntoView) shown.scrollIntoView({block: "nearest", inline: "nearest"});
+            }
+        }
+        // Each page's small picture, as the page is now.
+        $("pages").querySelectorAll(".pn-page").forEach(row => {
+            const id = row.dataset.page, solved = state.solved[id], canvas = row.querySelector("canvas");
+            if (solved && canvas) picture(canvas, state.drawn[id] || [], [0, 0, solved.w, solved.h], PAGE_LOOK[0], PAGE_LOOK[1]);
+        });
+        const at = pages.findIndex(page => page.id === state.showing);
+        $("page-name").textContent = at >= 0 ? pages[at].name : "";
+        $("page-count").textContent = `${at + 1} / ${pages.length}`;
+        $("page-prev").disabled = at <= 0;
+        $("page-next").disabled = at < 0 || at >= pages.length - 1;
+        $("page-add").disabled = !!state.adding || pages.length >= mostPages();
+        $("story-note").textContent = auto()
+            ? "Left to right is what the clip shows. Buddy moves the cursor: click what's between two pages to choose how it goes on."
+            : "A cursor you recorded decides what shows. More has “Let Buddy move the cursor again”.";
+    }
+
+    // A page chosen is on the stage, whatever the stage was doing: playing stops, trying
+    // it ends, and the page is shown still, to work on.
     function showPage(id) {
         if (!state) return;
+        if (rec) stopRecording();
+        if (playing) pause();
+        if (mode === "try") setMode("edit");
         view = "edit";
         if (id !== state.showing) Buddy.send("page_show", {id});
-        else if (!playing) paint();
+        else paint();
+    }
+
+    // The page before (-1) or after (1) the one in view.
+    function stepPage(by) {
+        if (!state) return;
+        const pages = state.spec.pages, to = pages[pages.findIndex(page => page.id === state.showing) + by];
+        if (to) showPage(to.id);
+    }
+
+    function pageMenu(id, x, y) {
+        const pages = state.spec.pages, at = pages.findIndex(page => page.id === id), busy = !!state.adding;
+        if (at < 0) return;
+        Buddy.menu({x, y, items: [
+            {label: "Rename", disabled: busy, onClick: () => startRename(id)},
+            {label: "Duplicate", disabled: busy || pages.length >= mostPages(), onClick: () => Buddy.send("page_copy", {id})},
+            // With a recorded cursor the clip starts where it is told to; in a story, on the first page.
+            ...(auto() ? [] : [{label: "Start the clip on this page", disabled: busy || state.spec.start === id,
+                                onClick: () => Buddy.send("page_start", {id})}]),
+            {sep: true},
+            {label: "Move earlier", disabled: busy || at === 0, onClick: () => Buddy.send("page_move", {id, at: at - 1})},
+            {label: "Move later", disabled: busy || at === pages.length - 1, onClick: () => Buddy.send("page_move", {id, at: at + 1})},
+            {sep: true},
+            {label: "Remove", danger: true, disabled: busy || pages.length < 2, onClick: () => Buddy.send("page_remove", {id})},
+        ]});
+    }
+
+    // The boxes of a page a click could be on: its buttons and what answers the cursor.
+    function clickables(pageId) {
+        const page = pageOf(pageId), out = [];
+        const walk = box => {
+            if (box.role === "button" || box.reacts) out.push(box);
+            box.children.forEach(walk);
+        };
+        if (page) page.root.children.forEach(walk);
+        return out;
+    }
+
+    // How the clip goes on from a page: its time being up, or a click on one of its boxes.
+    function linkMenu(pageId, x, y) {
+        const part = partOf(pageId), busy = !!state.adding;
+        if (!auto() || !part) {
+            return Buddy.menu({x, y, items: [{label: "Let Buddy move the cursor again", disabled: busy,
+                                              onClick: () => Buddy.send("set", {key: "auto", value: true})}]});
+        }
+        const by = value => () => Buddy.send("story", {page: pageId, key: "by", value});
+        const boxes = clickables(pageId);
+        Buddy.menu({x, y, items: [
+            {heading: "Go on to the next page"},
+            {label: `${Buddy.t("When its time is up")} (${seconds(part.secs)})`, raw: true, checked: !part.by, disabled: busy, onClick: by("")},
+            ...boxes.slice(0, 10).map(box => ({label: `${Buddy.t("Click on")} “${label(box)}”`, raw: true,
+                                               checked: part.by === box.id, disabled: busy, onClick: by(box.id)})),
+            {sep: true},
+            {label: "Pick what's clicked, on the page…", disabled: busy, onClick: () => {
+                showPage(pageId);
+                choose({kind: "leave", page: pageId});
+            }},
+        ]});
+    }
+
+    // A field in place of something on a card: Enter keeps it, Escape doesn't.
+    function cardField(id, node, value, label_, keep) {
+        renaming = id;
+        const input = el("input.field", {type: "text", value, maxlength: "40", "aria-label": label_,
+                                         autocomplete: "off", spellcheck: "false"});
+        let done = false;
+        const finish = kept => {
+            if (done) return;
+            done = true;
+            renaming = "";
+            if (kept) keep(input.value.trim());
+            pagesFor = "";
+            drawPages();
+        };
+        input.addEventListener("keydown", e => {
+            e.stopPropagation();
+            if (e.key === "Enter") { e.preventDefault(); finish(true); }
+            else if (e.key === "Escape") { e.preventDefault(); finish(false); }
+        });
+        input.addEventListener("blur", () => finish(true));
+        ["click", "dblclick", "pointerdown"].forEach(kind => input.addEventListener(kind, e => e.stopPropagation()));
+        node.replaceWith(input);
+        input.focus();
+        input.select();
     }
 
     function startRename(id) {
         const page = pageOf(id);
-        if (!page || state.adding) return;
-        renaming = id;
-        const chip = $("pages").querySelector(`.pn-chip[data-page="${id}"]`);
-        if (!chip) { renaming = ""; return; }
-        const input = el("input.field", {type: "text", value: page.name, maxlength: "40", "aria-label": "Page name",
-                                         autocomplete: "off", spellcheck: "false"});
-        let done = false;
-        const finish = keep => {
-            if (done) return;
-            done = true;
-            renaming = "";
-            const name = input.value.trim();
-            if (keep && name && name !== page.name) Buddy.send("page_rename", {id, name});
-            drawPages();
-        };
-        input.addEventListener("keydown", e => {
-            if (e.key === "Enter") { e.preventDefault(); finish(true); }
-            else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(false); }
+        if (!page || state.adding || renaming) return;
+        const row = $("pages").querySelector(`.pn-page[data-page="${id}"]`), name = row && row.querySelector(".pn-page-name");
+        if (!name) return;
+        cardField(id, name, page.name, "Page name", said => {
+            if (said && said !== page.name) Buddy.send("page_rename", {id, name: said});
         });
-        input.addEventListener("blur", () => finish(true));
-        chip.replaceChildren(input);
-        input.focus();
-        input.select();
+    }
+
+    // How long a page shows: a number of seconds - or nothing, for as long as what happens on it needs.
+    function editSecs(id) {
+        const part = partOf(id);
+        if (!part || state.adding || renaming) return;
+        const row = $("pages").querySelector(`.pn-page[data-page="${id}"]`), secs = row && row.querySelector(".pn-page-secs");
+        if (!secs) return;
+        cardField(id, secs, part.own ? plain(part.secs) : "", "Seconds this page shows", said => {
+            const v = Number(String(said).replace(",", "."));
+            Buddy.send("story", {page: id, key: "secs", value: said && Number.isFinite(v) && v > 0 ? v : 0});
+        });
+    }
+
+    // A page's card dragged along the strip to another place: a line between two cards says where.
+    function pageDragShow() {
+        const d = pageDrag, rows = [...$("pages").querySelectorAll(".pn-page")], box = $("pages").getBoundingClientRect();
+        let gap = rows.findIndex(r => { const b = r.getBoundingClientRect(); return d.cx < b.left + b.width / 2; });
+        if (gap < 0) gap = rows.length;
+        const from = rows.findIndex(r => r.dataset.page === d.id);
+        d.at = gap > from ? gap - 1 : gap;              // counted without the page dragged
+        d.same = d.at === from;
+        rows.forEach(r => r.classList.toggle("pn-dragged", r.dataset.page === d.id));
+        const edge = gap < rows.length ? rows[gap].getBoundingClientRect().left - 3 : rows[rows.length - 1].getBoundingClientRect().right + 2;
+        d.line.hidden = d.same;
+        Object.assign(d.line.style, {left: edge + "px", top: box.top + 2 + "px", width: "2px", height: Math.max(8, box.height - 4) + "px"});
+    }
+
+    function endPageDrag(drop) {
+        const d = pageDrag;
+        pageDrag = null;
+        if (!d || !d.on) return;
+        d.line.remove();
+        document.body.classList.remove("pn-rows-dragging");
+        try { $("pages").releasePointerCapture(d.pointer); } catch (_gone) { /* never held */ }
+        pageClickGone = true;
+        $("pages").querySelectorAll(".pn-page").forEach(r => r.classList.remove("pn-dragged"));
+        if (drop && !d.same && !state.adding) Buddy.send("page_move", {id: d.id, at: d.at});
+        else {
+            drawPages();
+            if (drop) showPage(d.id);           // let go where it was: a click with an unsteady hand
+        }
+    }
+
+    function bindPages() {
+        const list = $("pages");
+        list.addEventListener("pointerdown", e => {
+            pageClickGone = false;
+            const row = e.target.closest(".pn-page");
+            if (!row || !state || e.button !== 0 || pageDrag || state.adding || e.target.closest("button, input")) return;
+            pageDrag = {id: row.dataset.page, x: e.clientX, cx: e.clientX, pointer: e.pointerId, on: false};
+        });
+        window.addEventListener("pointermove", e => {
+            const d = pageDrag;
+            if (!d || e.pointerId !== d.pointer) return;
+            d.cx = e.clientX;
+            if (!d.on) {
+                if (Math.abs(d.cx - d.x) < 2 * ROW_DRAG || state.spec.pages.length < 2) return;
+                d.on = true;
+                try { list.setPointerCapture(d.pointer); } catch (_gone) { /* a pointer that has already left */ }
+                d.line = el("div.pn-drop-line", {hidden: true});
+                document.body.append(d.line);
+                document.body.classList.add("pn-rows-dragging");
+            }
+            e.preventDefault();
+            pageDragShow();
+        });
+        window.addEventListener("pointerup", e => { if (pageDrag && e.pointerId === pageDrag.pointer) endPageDrag(true); });
+        window.addEventListener("pointercancel", e => { if (pageDrag && e.pointerId === pageDrag.pointer) endPageDrag(false); });
+        window.addEventListener("keydown", e => {
+            if (!pageDrag || e.key !== "Escape") return;
+            if (pageDrag.on) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            endPageDrag(false);
+        }, true);
+        list.addEventListener("click", e => {
+            if (!pageClickGone) return;
+            pageClickGone = false;
+            e.stopPropagation();
+            e.preventDefault();
+        }, true);
+        // Left and right walk the pages.
+        list.addEventListener("keydown", e => {
+            if (e.target.closest("input") || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
+            e.preventDefault();
+            stepPage(e.key === "ArrowRight" ? 1 : -1);
+        });
+        $("page-add").addEventListener("click", () => Buddy.send("page_add", {}));
+        $("page-prev").append(Buddy.icon("left"));
+        $("page-next").append(Buddy.icon("right"));
+        $("page-prev").addEventListener("click", () => stepPage(-1));
+        $("page-next").addEventListener("click", () => stepPage(1));
+    }
+
+    // ------------------------------------------- what a click on a box starts --
+    // On the picked box's card: what a click on it sets going - a bar filling, a chart
+    // drawing on, a number counting up, the clip going on to the next page. "+ Start
+    // something" asks for the thing on the page: the next click on the stage picks it.
+
+    function fillClicked(box) {
+        const list = $("clicked-list");
+        if (list.contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
+        const here = index.boxes.get(box.id).page, busy = !!state.adding, items = [];
+        const part = auto() ? partOf(here) : null;
+        const x = (title, onClick) => {
+            const b = el("button.btn.ghost.icon", {type: "button", "aria-label": title, title, onclick: onClick});
+            b.append(Buddy.icon("close"));
+            b.disabled = busy;
+            return b;
+        };
+        const walk = b => {
+            if (b.run && b.run.by === box.id) {
+                const said = b.role === "progress" ? [el("span", {text: "The bar fills up"})]
+                    : b.role === "chart" ? [el("span", {text: "The chart draws on"})]
+                    : [quoted(b), " ", el("span", {text: "counts up"})];
+                const secs = el("input.field", {type: "text", inputmode: "decimal", value: plain(b.run.seconds), "aria-label": "Seconds",
+                                                title: "Seconds", autocomplete: "off", spellcheck: "false"});
+                secs.addEventListener("change", () => {
+                    const v = Number(String(secs.value).replace(",", "."));
+                    if (Number.isFinite(v) && v > 0) Buddy.send("box", {id: b.id, key: "run", value: {by: box.id, seconds: v}});
+                });
+                secs.disabled = busy;
+                items.push(el("li", {dataset: {id: b.id}}, [el("span.pn-clicked-what", {}, said), secs, el("span.muted.small", {translate: "no", text: "s"}),
+                                                           x("Take this off", () => Buddy.send("box", b.role === "text"
+                                                               ? {id: b.id, key: "count", value: false} : {id: b.id, key: "run", value: null}))]));
+            }
+            b.children.forEach(walk);
+        };
+        walk(pageOf(here).root);
+        if (box.type && box.type.start === "click") items.push(el("li", {}, [el("span.pn-clicked-what", {text: "Its words type on"})]));
+        if (part && part.by === box.id) {
+            items.push(el("li", {dataset: {leave: "1"}}, [el("span.pn-clicked-what", {text: "The clip goes on to the next page"}),
+                                                         x("Take this off", () => Buddy.send("story", {page: here, key: "by", value: ""}))]));
+        }
+        list.replaceChildren(...items);
+        $("no-clicked").hidden = items.length > 0;
+        $("start-add").disabled = busy;
+        $("leave-add").hidden = !part || part.last || part.by === box.id;
+        $("leave-add").disabled = busy;
+        // A link of its own to any page is a recorded cursor's; in a story the story has it.
+        $("go-group").hidden = auto();
+    }
+
+    // The banner over the stage: what the stage is waiting for or doing, and the way out of it.
+    function drawBanner() {
+        const said = choosing && choosing.kind === "start" ? "Click the bar, the chart or the number this should start."
+            : choosing ? "Click the button or box that goes on to the next page."
+            : rec ? "Recording. Move and click as it should play."
+            : mode === "try" ? "Your mouse is the cursor now. Nothing is kept."
+            : "";
+        $("stage-banner").hidden = !said;
+        $("banner-text").textContent = said;
+        $("banner-done").textContent = choosing ? "Cancel" : rec ? "Stop" : "Done";
+    }
+
+    function choose(what) {
+        choosing = what;
+        drawBanner();
+        if (state && !playing && !live()) paint();
+    }
+
+    // A click on the stage while something is being chosen: the box under it that can be that.
+    function chosenAt(x, y) {
+        const chain = chainOf(hit(x, y)).slice(1).reverse();            // innermost first, without the page's own box
+        if (choosing.kind === "start") {
+            const to = chain.find(b => b.id !== choosing.by && (b.role === "progress" || b.role === "chart" || (b.role === "text" && /\d/.test(b.text))));
+            if (!to) return Buddy.toast("Click a bar, a chart or a text with a number in it.", 3200);
+            Buddy.send("starts", {id: to.id, by: choosing.by});
+        } else {
+            const to = chain.find(b => b.role === "button" || b.reacts) || chain[0];
+            if (!to) return undefined;
+            Buddy.send("story", {page: choosing.page, key: "by", value: to.id});
+        }
+        return choose(null);
+    }
+
+    // What the bar's More has: the stage as your mouse's, a cursor of your own, and the rest.
+    function moreMenu(x, y) {
+        const busy = !!state.adding;
+        Buddy.menu({x, y, items: [
+            {label: "Try it with your mouse", checked: mode === "try", onClick: () => {
+                if (rec) stopRecording();
+                setMode(mode === "try" ? "edit" : "try");
+            }},
+            {label: rec ? "Stop recording" : "Record a cursor of your own", disabled: busy, checked: false,
+             onClick: () => (rec ? stopRecording() : startRecording())},
+            {label: "Let Buddy move the cursor again", disabled: busy || auto(), checked: false,
+             onClick: () => Buddy.send("set", {key: "auto", value: true})},
+            {sep: true},
+            {label: "Show the window in the frame", checked: fit === "frame", onClick: () => setFit(fit === "frame" ? "window" : "frame", false)},
+            {label: "The timeline in detail", checked: dockOpen, onClick: () => $("dock-toggle").click()},
+            {sep: true},
+            {label: "Replace the panel Buddy put there before", checked: !!state.replace,
+             onClick: () => Buddy.send("option", {key: "replace", value: !state.replace})},
+        ]});
     }
 
     // ------------------------------------------------------- the layers --
@@ -1210,7 +1731,10 @@
         const row = el("div.pn-layer", {role: "treeitem", "aria-level": String(info.depth + 1), "aria-selected": String(selected),
                                         tabindex: "-1", dataset: {id: info.id},
                                         onclick: () => { pick(info.id); },
-                                        ondblclick: () => renameLayer(info.id)}, parts);
+                                        ondblclick: () => renameLayer(info.id),
+                                        oncontextmenu: e => { e.preventDefault(); pick(info.id); layerMenu(info.id, e.clientX, e.clientY); },
+                                        onpointerenter: () => setHover(info.id),
+                                        onpointerleave: () => { if (hover === info.id) setHover(""); }}, parts);
         if (info.kids > 0) row.setAttribute("aria-expanded", String(info.open));
         row.style.paddingLeft = 4 + info.depth * ROW_INDENT + "px";
         return row;
@@ -1237,8 +1761,68 @@
         const focusable = rows.find(r => r.dataset.id === picked) || rows[0];
         rows.forEach(r => {
             r.setAttribute("aria-selected", String(r.dataset.id === picked));
+            r.classList.toggle("pn-hovered", r.dataset.id === hover && hover !== picked);
             r.tabIndex = r === focusable ? 0 : -1;
         });
+    }
+
+    // The box the pointer is on - on the stage or in Layers - is outlined in both.
+    function setHover(id) {
+        id = id || "";
+        if (id === hover) return;
+        hover = id;
+        markLayers();
+        if (state && !playing && !live()) paint();
+    }
+
+    // ------------------------------------------------ what's done to a layer --
+    // The same few things from the stage's toolbar, a row's menu, the right column and
+    // the keys: one earlier or later among what it's with, a second one of it, gone.
+
+    function placeOf(id) {
+        const found = index.boxes.get(id), parent = found && boxOf(found.parent);
+        return parent ? {parent, at: parent.children.findIndex(c => c.id === id)} : null;
+    }
+
+    // Whether a box can go one earlier (-1) or later (1) among the boxes it's with.
+    function canStep(id, by) {
+        const where = placeOf(id);
+        return !!where && where.at + by >= 0 && where.at + by < where.parent.children.length;
+    }
+
+    function stepBox(id, by) {
+        const where = placeOf(id);
+        if (!where || state.adding || !canStep(id, by)) return;
+        Buddy.send("move", {id, into: where.parent.id, at: where.at + by});      // counted without it
+    }
+
+    function copyBox(id) {
+        if (placeOf(id) && !state.adding) Buddy.send("copy_box", {id});
+    }
+
+    function removeBox(id) {
+        if (!placeOf(id) || state.adding) return;
+        Buddy.send("remove_box", {id});
+        if (id === picked) picked = "";
+    }
+
+    // What the picked box is in - or nothing, for one that's in the page itself.
+    function pickOut() {
+        const found = index.boxes.get(picked), up = found && index.boxes.get(found.parent);
+        pick(up && up.parent ? found.parent : "");
+    }
+
+    function layerMenu(id, x, y) {
+        const busy = !!state.adding;
+        Buddy.menu({x, y, items: [
+            {label: "Rename", disabled: busy, onClick: () => renameLayer(id)},
+            {label: "Duplicate", disabled: busy, onClick: () => copyBox(id)},
+            {sep: true},
+            {label: "Move it earlier", disabled: busy || !canStep(id, -1), onClick: () => stepBox(id, -1)},
+            {label: "Move it later", disabled: busy || !canStep(id, 1), onClick: () => stepBox(id, 1)},
+            {sep: true},
+            {label: "Remove", danger: true, disabled: busy, onClick: () => removeBox(id)},
+        ]});
     }
 
     function layerRowOf(id) {
@@ -1428,7 +2012,7 @@
         list.addEventListener("scroll", () => { if (rowDrag && rowDrag.on) rowDragShow(); });
         // The arrows walk the tree: up and down the rows, right opens, left closes or goes out.
         list.addEventListener("keydown", e => {
-            if (e.target.closest("input")) return;
+            if (e.target.closest("input") || e.altKey) return;     // with Alt the arrows move the layer (bindKeys)
             const i = layerRows.findIndex(r => r.id === picked), info = layerRows[i];
             let next = null;
             if (e.key === "ArrowDown") next = layerRows[Math.min(layerRows.length - 1, i + 1)];
@@ -1546,8 +2130,59 @@
             const box = boxOf(picked);
             if (box && box.go) setBox("go", {page: box.go.page, with: e.target.value});
         });
+        // Its height: as tall as it comes out, or a height of its own.
+        $("box-h").addEventListener("click", e => {
+            const b = e.target.closest("button[data-value]"), box = boxOf(picked);
+            if (!b || !box) return;
+            if (b.dataset.value === "fixed") {
+                const it = placedAnywhere(picked);
+                if (typeof box.h !== "number") setBox("h", Math.round(it ? it.h : 120));
+            } else {
+                setBox("h", "hug");
+            }
+        });
+        const tall = wait => {
+            const v = Number(String($("box-hpx").value).replace(",", "."));
+            if (Number.isFinite(v) && v > 0) setBox("h", v, wait);
+        };
+        $("box-hpx").addEventListener("input", () => tall(TYPING_MS));
+        $("box-hpx").addEventListener("change", () => tall(0));
+        // A container: which way what's in it runs, and the room between and round it.
+        $("box-dir").addEventListener("click", e => {
+            const b = e.target.closest("button[data-value]");
+            if (b) setBox("dir", b.dataset.value);
+        });
+        $("box-gap").addEventListener("input", e => setBox("gap", Number(e.target.value), 30));
+        $("box-pad").addEventListener("input", e => {
+            const v = Number(e.target.value);
+            setBox("pad", [v, v, v, v], 30);
+        });
+        $("box-align").addEventListener("click", e => {
+            const b = e.target.closest("button[data-value]");
+            if (b) setBox("align", b.dataset.value);
+        });
+        $("box-wrap").addEventListener("change", e => setBox("wrap", e.target.checked));
+        $("box-go-open").addEventListener("click", () => {
+            const box = boxOf(picked);
+            if (box && box.go) showPage(box.go.page);
+        });
         $("box-p").addEventListener("input", e => setBox("p", Number(e.target.value), 30));
         $("box-remove").addEventListener("click", removePicked);
+        $("box-copy").addEventListener("click", () => copyBox(picked));
+        // The picked layer's actions, by its box on the stage.
+        $("tool-out").append(glyph('<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v5"/>'));
+        $("tool-back").append(Buddy.icon("left"));
+        $("tool-forth").append(Buddy.icon("right"));
+        $("tool-copy").append(Buddy.icon("copy"));
+        $("tool-remove").append(Buddy.icon("trash"));
+        $("tool-out").addEventListener("click", pickOut);
+        $("tool-back").addEventListener("click", () => stepBox(picked, -1));
+        $("tool-forth").addEventListener("click", () => stepBox(picked, 1));
+        $("tool-copy").addEventListener("click", () => copyBox(picked));
+        $("tool-remove").addEventListener("click", removePicked);
+        // A page with nothing on it: the two ways to begin.
+        $("empty-layout").addEventListener("click", () => openShelf("layouts"));
+        $("empty-piece").addEventListener("click", () => openShelf("insert"));
         $("image-choose").addEventListener("click", () => { if (picked && !state.adding) Buddy.send("image", {id: picked}); });
         $("image-clear").addEventListener("click", () => { if (picked && !state.adding) Buddy.send("image_clear", {id: picked}); });
         $("chart-shape").addEventListener("click", e => {
@@ -1587,6 +2222,38 @@
         $("an-type-text").addEventListener("input", e => typing("text", () => e.target.value, TYPING_MS));
         $("an-type-text").addEventListener("change", e => typing("text", () => e.target.value, 0));
         $("box-reacts").addEventListener("change", e => setBox("reacts", e.target.checked));
+        $("an-count").addEventListener("change", e => setBox("count", e.target.checked));
+        $("an-run-by").addEventListener("change", e => {
+            const box = boxOf(picked);
+            if (!box) return;
+            // "As the page builds" is a bar's or a chart's own draw-on: no run of its own.
+            if (!e.target.value && !box.count) setBox("run", null);
+            else setBox("run", {by: e.target.value, seconds: box.run ? box.run.seconds : 3});
+        });
+        const runSeconds = wait => {
+            const box = boxOf(picked), v = Number(String($("an-run-seconds").value).replace(",", "."));
+            if (box && box.run && Number.isFinite(v) && v > 0) setBox("run", {by: box.run.by, seconds: v}, wait);
+        };
+        $("an-run-seconds").addEventListener("input", () => runSeconds(TYPING_MS));
+        $("an-run-seconds").addEventListener("change", () => runSeconds(0));
+        $("flow").addEventListener("click", () => Buddy.send("flow", {}));
+        // The card: closed, and what a click on its box starts.
+        $("card-close").append(Buddy.icon("close"));
+        $("card-close").addEventListener("click", () => pick(""));
+        $("start-add").addEventListener("click", () => { if (picked) choose({kind: "start", by: picked}); });
+        $("leave-add").addEventListener("click", () => {
+            const found = index.boxes.get(picked);
+            if (found) Buddy.send("story", {page: found.page, key: "by", value: picked});
+        });
+        $("banner-done").addEventListener("click", () => {
+            if (choosing) choose(null);
+            else if (rec) stopRecording();
+            else setMode("edit");
+        });
+        $("more-open").addEventListener("click", e => {
+            const r = e.currentTarget.getBoundingClientRect();
+            if (state) moreMenu(r.left, r.bottom + 2);
+        });
 
         // How boxes answer (the States panel).
         $("look").addEventListener("click", e => {
@@ -1650,9 +2317,21 @@
         });
     }
 
+    // An icon of this page's own, drawn as Buddy's are.
+    function glyph(paths) {
+        const span = document.createElement("span");
+        span.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
+        return span.firstChild;
+    }
+
+    function openShelf(what) {
+        if (!state || state.adding) return;
+        addWant = what;
+        addPanel.show(true);
+    }
+
     function drawDock() {
-        $("dock-body").hidden = !dockOpen;
-        $("dock-toggle").textContent = dockOpen ? "Hide timeline" : "Show timeline";
+        $("dock").hidden = !dockOpen;
         $("dock-toggle").setAttribute("aria-expanded", String(dockOpen));
         if (state && !playing && !live()) paint();
     }
@@ -1723,17 +2402,43 @@
     function fillPicked() {
         const box = picked ? boxOf(picked) : null;
         if (!box) picked = "";
-        $("window-side").hidden = !!box;
-        $("layer-side").hidden = !box;
         drawTrail();
         if (!box) {
             chartPop.show(false);
             typingPop.show(false);
+            spacingPop.show(false);
             return;
         }
         const root = index.boxes.get(picked).parent === "";
         const busy = !!state.adding;
         $("picked-name").replaceChildren(...layerName(box));
+        // By its box on the stage: its name, and which way "earlier" and "later" are.
+        $("pick-name").replaceChildren(...layerName(box, ".pn-tools-role"));
+        const where = placeOf(picked), across = !!where && where.parent.dir === "row";
+        $("pick-tools").classList.toggle("down", !across);
+        $("tool-back").disabled = busy || !canStep(picked, -1);
+        $("tool-forth").disabled = busy || !canStep(picked, 1);
+        $("tool-copy").disabled = $("tool-remove").disabled = busy;
+        // Its height, and - a container - how what's in it is laid out.
+        const tall = typeof box.h === "number" ? "fixed" : "hug";
+        $("box-h-row").hidden = root || !tallable(box);
+        pressed($("box-h"), tall);
+        $("box-hpx-box").hidden = tall !== "fixed";
+        if (tall === "fixed") put($("box-hpx"), box.h);
+        $("box-dir-row").hidden = box.role !== "section";
+        $("box-drag-hint").hidden = root;
+        if (box.role === "section") {
+            pressed($("box-dir"), box.dir);
+            put($("box-gap"), box.gap);
+            put($("box-pad"), box.pad[0]);
+            pressed($("box-align"), box.align);
+            $("box-wrap").checked = !!box.wrap;
+            $("box-wrap-box").hidden = box.dir !== "row";
+        } else {
+            spacingPop.show(false);
+        }
+        $("box-go-row").hidden = !box.go;
+        $("box-copy").disabled = busy || root;
         $("box-text-row").hidden = !hasText(box);
         if (hasText(box)) put($("box-text"), box.text);
         const how = typeof box.w === "number" ? "fixed" : box.w;
@@ -1785,7 +2490,8 @@
     function fillAnims(box) {
         const anims = new Map(animsOf(box.id).map(a => [a.id, a]));
         const busy = !!state.adding;
-        document.querySelectorAll("#anims [data-anim]").forEach(row => { row.hidden = !anims.has(row.dataset.anim); });
+        document.querySelectorAll(".pn-anims [data-anim]").forEach(row => { row.hidden = !anims.has(row.dataset.anim); });
+        fillClicked(box);
         const kind = box.arrive && box.arrive.kind ? box.arrive.kind : "";
         const arrive = anims.get("arrive");
         $("an-arrive").checked = arrive && "on" in arrive ? !!arrive.on : kind !== "none";
@@ -1795,7 +2501,7 @@
         const typing = box.type || null;
         $("an-type").checked = !!typing;
         $("an-type").disabled = busy;
-        document.querySelectorAll('#anims [data-anim="type"] .pn-anim-more').forEach(node => { node.hidden = !typing; });
+        document.querySelectorAll('.pn-anims [data-anim="type"] .pn-anim-more').forEach(node => { node.hidden = !typing; });
         $("an-type-text-box").hidden = !typing || box.role !== "field";
         if (typing) {
             put($("an-type-speed"), typing.speed);
@@ -1807,6 +2513,28 @@
         }
         $("box-reacts").checked = !!box.reacts;
         $("box-reacts").disabled = busy;
+        // A number that counts up; and, for it or for a bar or chart that draws on, what
+        // starts it - the page, or a click on one of the page's boxes - and how long it takes.
+        $("an-count").checked = !!box.count;
+        $("an-count").disabled = busy;
+        const runs = box.role === "progress" || box.role === "chart" || !!box.count;
+        $("an-run-row").hidden = !runs;
+        if (!runs) return;
+        const by = $("an-run-by"), here = index.boxes.get(box.id).page, root = pageOf(here).root;
+        const options = [["", box.count ? "With the page" : "As the page builds"]];
+        const walk = b => {
+            if (b.id !== box.id && (b.role === "button" || b.reacts || b.go)) options.push([b.id, label(b)]);
+            b.children.forEach(walk);
+        };
+        root.children.forEach(walk);
+        // (An option holds only words: the box's name is the person's, the rest is put into their language here.)
+        by.replaceChildren(...options.map(([value, text], i) => i
+            ? el("option", {value, translate: "no", text: `${Buddy.t("On a click on")} ${text}`})
+            : el("option", {value, text})));
+        by.value = box.run ? box.run.by : "";
+        by.disabled = busy;
+        $("an-run-seconds-box").hidden = !box.run;
+        if (box.run) put($("an-run-seconds"), box.run.seconds);
     }
 
     function drawTrail() {
@@ -1837,11 +2565,7 @@
     }
 
     function removePicked() {
-        if (!picked || state.adding) return;
-        const found = index.boxes.get(picked);
-        if (!found || !found.parent) return;
-        Buddy.send("remove_box", {id: picked});
-        picked = "";
+        if (picked) removeBox(picked);
     }
 
     function fillStates() {
@@ -1917,9 +2641,13 @@
             items.push(el("li", {}, [el("span", {}, ["When ", named(box ? label(box) : "?"), ` is drawn past ${plain(rule.over)} % → `,
                                                      named(pageName(rule.page)), ", ", WITH[rule.with]]), x]));
         });
-        spec.page_keys.forEach(([t, page, how]) => {
-            items.push(el("li", {}, [el("span", {}, [`At ${plain(t)} s → `, named(pageName(page)), ", ", WITH[how]])]));
+        spec.page_keys.forEach(([t, page, how], i) => {
+            const x = el("button.btn.ghost.icon", {type: "button", "aria-label": "Remove this time", title: "Remove this time",
+                                                   onclick: () => Buddy.send("set", {key: "page_keys", value: spec.page_keys.filter((_k, j) => j !== i)})});
+            x.append(Buddy.icon("close"));
+            items.push(el("li", {}, [el("span", {}, [`At ${plain(t)} s → `, named(pageName(page)), ", ", WITH[how]]), x]));
         });
+        $("flow").disabled = !!state.adding || spec.pages.length < 2;
         $("changes").replaceChildren(...items);
         $("no-changes").hidden = items.length > 0;
     }
@@ -2027,10 +2755,17 @@
         return me;
     }
 
+    // + Add opens on what the page needs: a whole page for one with nothing on it, else a piece.
     const addPanel = panel("add-pop", ["add-open"], () => {
+        const root = state ? rootOfShowing() : null;
+        addMode = addWant || (root && !root.children.length ? "layouts" : "insert");
+        addWant = "";
         if (state) markShelf();
         $("add-find").focus();
     });
+    const spacingPop = panel("spacing-pop", ["edit-spacing"]);
+    panel("look-pop", ["look-open"]);
+    panel("layers-pop", ["layers-open"], () => state && fillLayers());
     const statesPop = panel("states-pop", ["edit-states"], () => state && drawStates());
     const chartPop = panel("chart-pop", ["edit-chart"]);
     const typingPop = panel("typing-pop", ["edit-typing"]);
@@ -2048,7 +2783,7 @@
     // Cursor and Page; then the picked layer's lanes, one for each way it moves; then the
     // page's other layers that move of their own accord. A lane's name picks its layer.
 
-    const ANIM_LANES = {arrive: "Arrives", type: "Types on", answer: "Hover / Pressed", draw: "Draws on"};
+    const ANIM_LANES = {arrive: "Arrives", type: "Types on", answer: "Hover / Pressed", draw: "Draws on", count: "Counts up"};
 
     function pos(f) {
         return `${f / Math.max(1, state.clock.total - 1) * 100}%`;
@@ -2135,6 +2870,10 @@
             return rows ? [...bands(rows.hover, "hover"), ...bands(rows.press, "press"), ...happened] : happened;
         }
         if (which === "draw") return ck.draw[id] ? [ramp(ck.draw[id])] : [];
+        if (which === "count") {
+            const row = ck.said && ck.said[id];
+            return row ? [ramp(row.at), ...ck.events.filter(e => e.box === id && e.kind === "run").map(e => key(e.frame, "", {title: "Starts"}))] : [];
+        }
         return [];
     }
 
@@ -2157,6 +2896,7 @@
         if (rows && (rows.hover.some(v => v > 0.5) || rows.press.some(v => v > 0.5))) out.push("answer");
         if (ck.typed && ck.typed[id] && ck.typed[id].some(v => v > 0)) out.push("type");
         if (ck.draw[id]) out.push("draw");
+        if (ck.said && ck.said[id]) out.push("count");
         if (ownArrival(boxOf(id))) out.push("arrive");
         return out;
     }
@@ -2307,6 +3047,7 @@
     let grabbed = null;           // the box the button went down on
     let livePage = "";
     let liveChanges = [];         // [{at (ms), page, from, with, ms}] - the pages trying it has been to
+    let liveRuns = {};            // {box id: when (ms) its run began} on the page being tried
     let lastTick = 0;
     let trying = false;
 
@@ -2320,6 +3061,7 @@
         grabbed = null;
         livePage = fromPage || livePage || state.showing;
         liveChanges = [{at: performance.now() - 1e6, page: livePage, from: "", with: "cut", ms: 0}];
+        liveArrive(livePage, performance.now());
         if (trying) return;
         trying = true;
         requestAnimationFrame(tryTick);
@@ -2340,6 +3082,12 @@
             // "clickable"): a linked box changes the page even when it doesn't answer.
             const target = clickBox(mouse.x, mouse.y, livePage);
             const box = target ? boxOf(target.id) : null;
+            // What runs from a click on a box under the mouse begins (clock.py's "run").
+            for (const b of state.solved[livePage].boxes) {
+                if (b.run && b.run.by && !(b.id in liveRuns) && inside(index.placed[livePage].get(b.run.by), mouse.x, mouse.y)) {
+                    liveRuns[b.id] = performance.now();
+                }
+            }
             if (box && box.go) goLive(box.go.page, box.go.with || state.spec.go_with);
         }
     }
@@ -2350,6 +3098,13 @@
         liveChanges.push({at: now, page, from: livePage, with: how, ms: Math.round(state.spec.go_seconds * state.fps) * 1000 / state.fps});
         livePage = page;
         grabbed = null;
+        liveArrive(page, now);
+    }
+
+    // A page arrived at while trying it: what runs with the page begins, the rest waits for its click.
+    function liveArrive(page, now) {
+        liveRuns = {};
+        for (const b of (state.solved[page] || {boxes: []}).boxes) if (b.run && !b.run.by) liveRuns[b.id] = now;
     }
 
     function tryTick(now) {
@@ -2408,10 +3163,20 @@
         if (changes.length === 1) changes[0].from = "";
         const draw = {};
         const since = ago(liveChanges[liveChanges.length - 1].at);
+        const said = {};
         state.solved[livePage].boxes.forEach(b => {
-            if (b.role === "chart" || b.role === "progress") draw[b.id] = [liveShare(livePage, b.id, since)];
+            if (b.run) {
+                // What runs on its own terms: steadily over its seconds from when it began.
+                const row = ck.said && ck.said[b.id];
+                const n = row ? row.steps.length - 1 : Math.max(1, Math.round(b.run.seconds * fps));
+                const step = b.id in liveRuns ? Math.min(n, Math.max(0, ago(liveRuns[b.id]))) : 0;
+                if (b.role === "chart" || b.role === "progress") draw[b.id] = [step / n];
+                if (row) said[b.id] = {steps: row.steps, at: [step]};
+            } else if (b.role === "chart" || b.role === "progress") {
+                draw[b.id] = [liveShare(livePage, b.id, since)];
+            }
         });
-        const one = {total: 1, pages: changes, amounts, build: ck.build, draw,
+        const one = {total: 1, pages: changes, amounts, build: ck.build, draw, said,
                      cursor: [[mouse.x, mouse.y]], down: [mouse.down ? 1 : 0], events: []};
         return pose(state, 0, one);
     }
@@ -2463,16 +3228,14 @@
         $("stage-box").classList.toggle("recording", on);
         $("rec-time").textContent = "";
         drawHint();
+        drawBanner();
     }
 
     function drawHint() {
-        const said = rec ? "Recording starts when you move onto the stage. Move and click as it should play, then press Stop."
-            : mode === "try" ? "Move the mouse over the boxes and click them. Nothing is kept until you record."
-            : fit === "frame" ? "Click a box to pick it. Drag the window to move it, its right edge to make it wider."
-            : "Click a box to pick it. Drag the window's right edge to make it wider. Switch to In the frame to move it.";
-        const parts = [el("span", {text: said})];
-        if (forced && fit === "frame") parts.push(" ", el("span", {text: "The stage shows the window in the frame now, where the cursor moves."}));
-        $("hint").replaceChildren(...parts);
+        const said = mode !== "edit" || rec ? ""
+            : fit === "frame" ? "Click a thing to change it. Drag it to move it; drag the window itself to place it in the frame."
+            : "Click a thing to change it, and again for what's in it. Drag it to move it.";
+        $("hint").textContent = said;
     }
 
     function setMode(next, fromPage) {
@@ -2480,12 +3243,133 @@
         pressed($("mode"), mode);
         $("stage-box").classList.toggle("try", mode === "try");
         if (mode === "try" && fit !== "frame") setFit("frame", true);
+        if (mode !== "edit") choosing = null;
         drawHint();
+        drawBanner();
         if (live()) startTrying(fromPage || state && state.showing);
         else if (!playing && state) paint();
     }
 
     // ------------------------------------------------------- the stage --
+    // Editing, a click picks the piece under it - the whole of it first (a card, a
+    // chart, a row of tiles), and a second click what is in that; a double-click goes
+    // straight to the innermost. The plain rows and columns that only line things up
+    // are passed over: Layers has them. The picked box is dragged to another place (a
+    // line shows where: between two boxes, or beside one - which makes a row, or a
+    // column, of the two) and sized by its right and bottom edges.
+
+    const STAGE_DRAG = 4;         // how far the pointer moves before a box is dragged, screen px
+    const BESIDE = 0.22;          // the share of a box's side that means "next to it"...
+    const BESIDE_MOST = 44;       // ...up to this many screen px
+
+    function plainWrap(box) {
+        return !!box && box.role === "section" && box.variant === "" && (box.name === "Row" || box.name === "Column");
+    }
+
+    // The boxes of the page in view under a place, outermost first: without the page's
+    // own box and without the plain rows and columns - unless they are all there is
+    // there, then the innermost of them.
+    function chainAt(x, y) {
+        const page = state.solved[state.showing], all = [];
+        if (page) page.boxes.forEach(b => { if (b.parent && x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) all.push(b.id); });
+        const real = all.filter(id => !plainWrap(boxOf(id)));
+        return real.length ? real : all.slice(-1);
+    }
+
+    // What a click there picks, and what a second click on it would: {id, next}. Next to
+    // the picked box it stays at that depth: the outermost thing there that the picked
+    // box isn't in.
+    function pickFor(x, y) {
+        const chain = chainAt(x, y);
+        if (!chain.length) return {id: "", next: ""};
+        const at = chain.indexOf(picked);
+        if (at >= 0) return {id: picked, next: chain[at + 1] || ""};
+        return {id: chain.find(c => !(picked && within(picked, c))) || chain[chain.length - 1], next: ""};
+    }
+
+    // Which edge of the picked box a place is on: "w" (its right), "h" (its bottom), "".
+    function handleAt(p) {
+        const it = picked ? placedHere(picked) : null;
+        if (!it || !it.parent) return "";
+        const out = HANDLE * p.px, back = 3 * p.px;
+        if (p.x >= it.x + it.w - back && p.x <= it.x + it.w + out && p.y >= it.y && p.y <= it.y + it.h) return "w";
+        if (tallable(boxOf(picked)) && p.y >= it.y + it.h - back && p.y <= it.y + it.h + out && p.x >= it.x && p.x <= it.x + it.w) return "h";
+        return "";
+    }
+
+    // Where the dragged box would go with the pointer at (x, y) panel px (`px`: a screen
+    // px in panel px): {into, at, line | rect, same} - among a container's boxes, "at"
+    // counted without the box dragged, "same" where it already is - or {beside, side,
+    // line}: next to that box. A line is [x1, y1, x2, y2] in panel px.
+    function stageDropAt(x, y, id, px) {
+        const page = state.solved[state.showing], placed = index.placed[state.showing];
+        if (!page || !placed || !boxOf(id)) return null;
+        const has = b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+        const sideOf = (it, along) => {
+            // In a column a box's left and right mean beside it; in a row, its top and bottom.
+            const reach = Math.min((along ? it.h : it.w) * BESIDE, BESIDE_MOST * px);
+            if (along) return y - it.y < reach ? "above" : it.y + it.h - y < reach ? "below" : "";
+            return x - it.x < reach ? "left" : it.x + it.w - x < reach ? "right" : "";
+        };
+        // The innermost container under the pointer that the box isn't in...
+        let host = page.boxes[0];
+        for (const b of page.boxes) if (b.role === "section" && !within(b.id, id) && has(b)) host = b;
+        // ...unless the pointer is by its edge: then it's the container itself that is aimed at.
+        const edge = 7 * px;
+        while (host.parent) {
+            const up = boxOf(host.parent);
+            const near = x - host.x < edge || host.x + host.w - x < edge || y - host.y < edge || host.y + host.h - y < edge;
+            if (!near && !sideOf(host, up.dir === "row")) break;
+            host = placed.get(host.parent);
+        }
+        const box = boxOf(host.id), found = index.boxes.get(id);
+        const from = found.parent === host.id ? box.children.findIndex(c => c.id === id) : -1;
+        const shown = box.children.filter(c => c.id !== id).map((c, i) => ({at: i, it: placed.get(c.id)})).filter(k => k.it);
+        if (!shown.length) return {into: host.id, at: 0, rect: host, same: from === 0};
+        let near = shown[0], best = Infinity;
+        for (const k of shown) {
+            const d = Math.hypot(Math.max(k.it.x - x, 0, x - k.it.x - k.it.w), Math.max(k.it.y - y, 0, y - k.it.y - k.it.h));
+            if (d < best) { best = d; near = k; }
+        }
+        const it = near.it, along = box.dir === "row", half = box.gap / 2;
+        const side = best === 0 ? sideOf(it, along) : "";
+        if (side) {
+            const line = side === "left" ? [it.x - half, it.y, it.x - half, it.y + it.h]
+                : side === "right" ? [it.x + it.w + half, it.y, it.x + it.w + half, it.y + it.h]
+                : side === "above" ? [it.x, it.y - half, it.x + it.w, it.y - half]
+                : [it.x, it.y + it.h + half, it.x + it.w, it.y + it.h + half];
+            return {beside: it.id, side, line};
+        }
+        const before = along ? x < it.x + it.w / 2 : y < it.y + it.h / 2;
+        const at = near.at + (before ? 0 : 1);
+        const line = along ? [before ? it.x - half : it.x + it.w + half, it.y, before ? it.x - half : it.x + it.w + half, it.y + it.h]
+            : [it.x, before ? it.y - half : it.y + it.h + half, it.x + it.w, before ? it.y - half : it.y + it.h + half];
+        return {into: host.id, at, line, same: from === at};
+    }
+
+    // A size being dragged: the box's edge follows the mouse - twice as fast for a box
+    // that sits in the middle of its room, whose two sides move together.
+    function sizeTo(p) {
+        const box = boxOf(hold.id), where = placeOf(hold.id);
+        if (!box || !where) return;
+        if (hold.edge === "w") {
+            const middle = where.parent.dir === "column" && (box.center || where.parent.align === "center");
+            hold.value = Math.max(8, Math.round(hold.start.w + (p.x - hold.x0) * (middle ? 2 : 1)));
+            setBox("w", hold.value, 40);
+        } else {
+            hold.value = Math.max(8, Math.round(hold.start.h + p.y - hold.y0));
+            setBox("h", hold.value, 40);
+        }
+    }
+
+    function stageCursor(p) {
+        const place_ = place(state), edge = handleAt(p);
+        if (edge) return edge === "w" ? "ew-resize" : "ns-resize";
+        if (Math.abs(p.x - place_.w) <= HANDLE * p.px && p.y >= 0 && p.y <= place_.h) return "ew-resize";
+        const found = pickFor(p.x, p.y);
+        if (found.id) return found.id === picked ? "grab" : "pointer";
+        return fit === "frame" && p.x >= 0 && p.x <= place_.w && p.y >= 0 && p.y <= place_.h ? "move" : "";
+    }
 
     function bindStage() {
         const canvas = $("stage");
@@ -2503,17 +3387,27 @@
             if (playing) pause();
             view = "edit";
             if (state.adding) return paint();
+            if (choosing) return chosenAt(p.x, p.y);
             const place_ = place(state);
+            const edge = handleAt(p);
+            if (edge) {
+                // The picked box's right or bottom edge: its width or its height.
+                hold = {kind: "size", edge, id: picked, x0: p.x, y0: p.y, start: {...placedHere(picked)}, value: null};
+                return paint();
+            }
             if (Math.abs(p.x - place_.w) <= HANDLE * p.px && p.y >= 0 && p.y <= place_.h) {
                 const box = canvas.getBoundingClientRect();
                 hold = {kind: "width", x0: p.x, start: place_.w, width: place_.w, map: null};
                 hold.map = mapFor(box.width, box.height);
                 return paint();
             }
-            const id = hit(p.x, p.y);
-            const found = index.boxes.get(id);
-            if (found && found.parent) {
-                pick(id);
+            const found = pickFor(p.x, p.y);
+            if (found.id) {
+                // A box: picked now, dragged if the pointer moves - and on one already
+                // picked, a click that doesn't move goes one further in.
+                const next = found.id === picked ? found.next : "";
+                if (found.id !== picked) pick(found.id);
+                hold = {kind: "box", id: found.id, cx: e.clientX, cy: e.clientY, next, on: false, drop: null};
                 return;
             }
             if (fit === "frame" && p.x >= 0 && p.x <= place_.w && p.y >= 0 && p.y <= place_.h) {
@@ -2535,13 +3429,21 @@
                 return;
             }
             if (!hold) {
-                const place_ = place(state);
-                const edge = Math.abs(p.x - place_.w) <= HANDLE * p.px && p.y >= 0 && p.y <= place_.h;
-                const id = hit(p.x, p.y), found = index.boxes.get(id);
-                canvas.style.cursor = edge ? "ew-resize" : found && found.parent ? "pointer" : id && fit === "frame" ? "move" : "";
+                canvas.style.cursor = stageCursor(p);
+                const found = pickFor(p.x, p.y);
+                setHover(found.id === picked ? found.next : found.id);
                 return;
             }
-            if (hold.kind === "move") {
+            if (hold.kind === "box") {
+                if (!hold.on) {
+                    if (Math.hypot(e.clientX - hold.cx, e.clientY - hold.cy) < STAGE_DRAG || state.adding || !placeOf(hold.id)) return;
+                    hold.on = true;
+                    canvas.style.cursor = "grabbing";
+                }
+                hold.drop = stageDropAt(p.x, p.y, hold.id, p.px);
+            } else if (hold.kind === "size") {
+                sizeTo(p);
+            } else if (hold.kind === "move") {
                 const spec = state.spec;
                 spec.x = +(hold.x + p.fx - hold.fx).toFixed(2);
                 spec.y = +(hold.y + p.fy - hold.fy).toFixed(2);
@@ -2557,6 +3459,7 @@
             }
             paint();
         });
+        canvas.addEventListener("pointerleave", () => { if (!hold) setHover(""); });
         const drop = e => {
             if (mode === "try") {
                 mouse = {...mouse, down: false};
@@ -2568,9 +3471,21 @@
                 return;
             }
             const was = hold;
-            if (!was || (was.kind !== "move" && was.kind !== "width")) return;
+            if (!was || !["move", "width", "box", "size"].includes(was.kind)) return;
             hold = null;
-            if (e.type === "pointerup") {
+            const up = e.type === "pointerup";
+            if (was.kind === "box") {
+                const to = was.on && up ? was.drop : null;
+                if (to && !to.same && !state.adding) {
+                    if (to.beside) Buddy.send("beside", {id: was.id, target: to.beside, side: to.side});
+                    else Buddy.send("move", {id: was.id, into: to.into, at: to.at});
+                } else if (!was.on && up && was.next) {
+                    pick(was.next);
+                }
+                canvas.style.cursor = "";
+            } else if (was.kind === "size") {
+                if (up && was.value !== null) setBox(was.edge, was.value);
+            } else if (up) {
                 if (was.kind === "move" && (state.spec.x !== was.x || state.spec.y !== was.y)) {
                     setField("x", state.spec.x);
                     setField("y", state.spec.y);
@@ -2582,10 +3497,11 @@
         };
         canvas.addEventListener("pointerup", drop);
         canvas.addEventListener("pointercancel", drop);
-        // A double-click on an image box asks for its picture.
+        // A double-click goes straight to the innermost box; on an image box it asks for its picture.
         canvas.addEventListener("dblclick", e => {
             if (!state || mode !== "edit" || state.adding) return;
-            const p = at(e), id = hit(p.x, p.y), box = boxOf(id);
+            const p = at(e), id = hit(p.x, p.y), found = index.boxes.get(id), box = boxOf(id);
+            if (found && found.parent && id !== picked) pick(id);
             if (box && box.role === "image") Buddy.send("image", {id});
         });
     }
@@ -2607,8 +3523,17 @@
         document.addEventListener("keydown", e => {
             const blocked = document.querySelector(".modal-backdrop") || document.getElementById("picker");
             if (e.key === "Escape" && !blocked) {
-                if (rec) stopRecording();
-                panels.forEach(p => p.show(false));
+                // One thing at a time: a recording stops, a drag is let go, a panel closes -
+                // and with none of those, the pick steps out to what the box is in.
+                const open = panels.filter(p => !p.pop.hidden);
+                if (choosing) choose(null);
+                else if (rec) stopRecording();
+                else if (hold && (hold.kind === "box" || hold.kind === "size")) {
+                    hold = null;
+                    $("stage").style.cursor = "";
+                    paint();
+                } else if (open.length) open.forEach(p => p.show(false));
+                else if (state && picked && mode === "edit" && !typing(e.target)) pickOut();
                 return;
             }
             if (typing(e.target) || blocked || !state) return;
@@ -2616,13 +3541,23 @@
             if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === "z" || key === "y")) {
                 e.preventDefault();
                 Buddy.send(key === "y" || e.shiftKey ? "redo" : "undo");
+            } else if ((e.ctrlKey || e.metaKey) && !e.altKey && key === "d" && mode === "edit" && picked) {
+                e.preventDefault();
+                copyBox(picked);
+            } else if (e.altKey && !e.ctrlKey && !e.metaKey && mode === "edit" && picked
+                       && ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(e.key)) {
+                e.preventDefault();
+                stepBox(picked, e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 1);
+            } else if ((e.key === "PageUp" || e.key === "PageDown") && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                stepPage(e.key === "PageUp" ? -1 : 1);
             } else if ((key === "delete" || key === "backspace") && mode === "edit" && picked) {
                 e.preventDefault();
                 removePicked();
             } else if (e.key === "F2") {
                 e.preventDefault();
-                const chip = e.target.closest && e.target.closest(".pn-chip");
-                if (chip) startRename(chip.dataset.page);
+                const row = e.target.closest && e.target.closest(".pn-page");
+                if (row) startRename(row.dataset.page);
                 else if (picked) renameLayer(picked);
                 else startRename(state.showing);
             } else if (e.key === " " && !e.ctrlKey && !e.metaKey && !(e.target.closest && e.target.closest("button, a"))) {
@@ -2645,6 +3580,10 @@
         }
         reindex();
         if (picked && (!index.boxes.has(picked) || index.boxes.get(picked).page !== s.showing)) picked = "";
+        if (hover && (!index.boxes.has(hover) || index.boxes.get(hover).page !== s.showing)) hover = "";
+        if (hold && (hold.kind === "box" || hold.kind === "size") && hold.id !== picked) hold = null;
+        if (choosing && !s.solved[choosing.page || s.showing]) choosing = null;
+        $("flow").hidden = !!s.spec.auto;               // a story already shows every page, one after another
         if (livePage && !s.solved[livePage]) livePage = s.showing;
         $("timeline").textContent = s.timeline || "";
         $("dot").classList.toggle("on", !!s.connected);
@@ -2680,6 +3619,7 @@
     bind();
     bindStage();
     bindLanes();
+    bindPages();
     bindLayers();
     bindKeys();
     $("undo").append(Buddy.icon("undo"));
@@ -2738,9 +3678,12 @@
         },
         pick: id => pick(id),
         hit: (x, y, pageId) => hit(x, y, pageId),
+        pickFor: (x, y) => pickFor(x, y),
+        dropAt: (x, y, id) => stageDropAt(x, y, id, 1),
         picture: () => $("stage"),
         state: () => state,
-        info: () => ({mode, view, fit, look, picked, frame, playing, recording: !!rec, livePage, dock: dockOpen}),
+        info: () => ({mode, view, fit, look, picked, hover, frame, playing, recording: !!rec, livePage, dock: dockOpen, addMode,
+                      choosing: choosing ? choosing.kind : ""}),
         live: () => (live() ? livePose() : null),
         toPage: (x, y) => {                     // panel px to client px on the stage, for synthetic events
             const box = $("stage").getBoundingClientRect(), m = mapFor(box.width, box.height);

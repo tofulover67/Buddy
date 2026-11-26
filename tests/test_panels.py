@@ -98,7 +98,9 @@ class WiringTests(unittest.TestCase):
                 'The image "logo.png" isn\'t where it was. Put it back, or take it off its image box.',
                 "There's no image box for a picture here. Add one from + Add first.",
                 # What the script writes that the pattern below doesn't find.
-                "Goes into Sign in.", "+ Page", "Nothing", "Window", "Click on", "When", "is drawn past 60 % →",
+                "Goes into Sign in.", "+ Page", "On a click on", "Starts", "Rename", "click", "after", "at", "a rule", "not reached",
+                "counts up", "Click on", "When its time is up", "How long this page shows. Click to change it.", "Cancel", "Done",
+                "Seconds", "Stop recording", "Move earlier", "Move later", "Remove", "Move up", "More", "Nothing", "Window", "Click on", "When", "is drawn past 60 % →",
                 "At 1.5 s →", "Remove this rule", "Percent", "With", "with", "is drawn past", "%, go to", "Page",
                 "Chart or progress bar", "Cursor", "A click", "A click on Get started", "A rule", "Pressed", "Hovered",
                 "drawn on", "Play", "Pause", "Stop", "Nothing was recorded.", "Back to the template.", "Undo",
@@ -107,7 +109,8 @@ class WiringTests(unittest.TestCase):
                 *re.findall(r'(?:textContent =|toast\(|[?:]) "([A-Z][^"]{8,})"', self.script)]
         self.assertGreater(len(said), 150)
         for text in ("Record the cursor", "Try it", "Add to timeline", "Click one to make the page in view that layout.",
-                     "Click a box to pick it. Drag the window to move it, its right edge to make it wider."):
+                     "Click a thing to change it, and again for what's in it. Drag it to move it.",
+                     "Click a thing to change it. Drag it to move it; drag the window itself to place it in the frame."):
             self.assertIn(text, said)
         for text in said:
             if text in PROPER:
@@ -185,6 +188,10 @@ class PageTests(unittest.TestCase):
     def last(self, name):
         return next(data for n, data in reversed(self.sent) if n == name)
 
+    def recorded(self):
+        """The page's panel with a cursor of its own, as one recorded - not the story's."""
+        self.page.spec = M.clean({**self.page.spec, "auto": False})
+
     def states(self):
         return [data for n, data in self.sent if n == "state"]
 
@@ -259,6 +266,7 @@ class PageTests(unittest.TestCase):
     # ----------------------------------------------------------- actions --
 
     def test_a_field_changed_is_cleaned_kept_and_sent_back(self):
+        self.recorded()
         for key, value in (("kind", "phone"), ("style", "glass"), ("accent", "#E4572E"), ("dark", False),
                            ("width", 9999), ("x", 30), ("y", "40"), ("cursor", "dot"), ("seconds", 12),
                            ("build", {"on": False, "stagger": 0.1, "seconds": 0.5}), ("page_keys", [[1.0, "p2"]]),
@@ -283,6 +291,7 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.page.undo_steps, [])
 
     def test_one_thing_about_a_box_is_changed(self):
+        self.recorded()
         button = self.first("button")
         for key, value in (("text", "  Go   on "), ("w", 140), ("reacts", False), ("go", {"page": "p3", "with": "fade"})):
             self.page.on_box({"id": button, "key": key, "value": value})
@@ -330,7 +339,10 @@ class PageTests(unittest.TestCase):
     def test_a_page_becomes_a_layout_from_the_shelf(self):
         self.page.on_layout({"layout": "pricing"})                  # the page in view
         page = self.page_of("p1")
-        self.assertEqual((page["layout"], page["name"]), ("pricing", "Sign in"))     # a name of its own is kept
+        self.assertEqual((page["layout"], page["name"]), ("pricing", "Pricing"))     # still the template's name: it follows
+        self.page.on_page_rename({"id": "p2", "name": "Home"})
+        self.page.on_layout({"page": "p2", "layout": "player"})
+        self.assertEqual((self.page_of("p2")["layout"], self.page_of("p2")["name"]), ("player", "Home"))   # a name of its own is kept
         self.page.on_layout({"page": "p3", "layout": "chat"})
         page = self.page_of("p3")
         self.assertEqual((page["layout"], page["name"]), ("chat", "Chat"))          # named after its layout, it follows
@@ -582,6 +594,120 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.page.picked, "")
         self.page.adding = True
         self.assertFalse(self.page.accepts_drops())
+
+    def test_a_page_is_made_from_a_layout_copied_moved_and_started_on(self):
+        self.recorded()
+        self.page.on_page_add({"layout": "chat"})
+        state = self.last("state")
+        self.assertEqual((state["showing"], self.page_of("p4")["layout"], self.page_of("p4")["name"]), ("p4", "chat", "Chat"))
+        self.assertEqual(len(self.page.undo_steps), 1)                  # the page and its layout: one step
+        self.page.on_page_copy({"id": "p2"})
+        state = self.last("state")
+        self.assertEqual([(p["id"], p["name"]) for p in state["spec"]["pages"]],
+                         [("p1", "Sign in"), ("p2", "Dashboard"), ("p5", "Dashboard 2"), ("p3", "Settings"), ("p4", "Chat")])
+        self.assertEqual(state["showing"], "p5")
+        self.page.on_page_move({"id": "p5", "at": 0})
+        self.assertEqual([p["id"] for p in self.page.spec["pages"]], ["p5", "p1", "p2", "p3", "p4"])
+        self.assertEqual((self.page.spec["start"], self.page.showing), ("p1", "p5"))
+        self.page.on_page_start({"id": "p5"})
+        self.assertEqual(self.last("state")["spec"]["start"], "p5")
+        steps = len(self.page.undo_steps)
+        for nothing in (lambda: self.page.on_page_start({"id": "p5"}), lambda: self.page.on_page_start({"id": "p9"}),
+                        lambda: self.page.on_page_move({"id": "p5", "at": 0}), lambda: self.page.on_page_copy({"id": "p9"}),
+                        lambda: self.page.on_page_move(None), lambda: self.page.on_page_copy(None)):
+            nothing()
+        self.assertEqual(len(self.page.undo_steps), steps)
+        while len(self.page.spec["pages"]) < M.MAX_PAGES:
+            self.page.on_page_add()
+        self.sent.clear()
+        self.page.on_page_copy({"id": "p1"})
+        self.assertEqual(len(self.page.spec["pages"]), M.MAX_PAGES)
+        self.assertEqual(self.last("toast"), {"text": f"A panel holds up to {M.MAX_PAGES} pages."})
+
+    def test_a_layer_goes_beside_another_and_is_copied(self):
+        root = self.page_of("p1")["root"]
+        first, second = root["children"][0]["id"], root["children"][1]["id"]
+        self.page.on_beside({"id": second, "target": first, "side": "right"})
+        row = self.page_of("p1")["root"]["children"][0]
+        self.assertEqual((row["dir"], [c["id"] for c in row["children"]]), ("row", [first, second]))
+        steps = len(self.page.undo_steps)
+        self.page.on_beside({"id": second, "target": first, "side": "right"})     # where it is: nothing changes
+        self.page.on_beside({"id": root["id"], "target": first, "side": "left"})
+        self.page.on_beside(None)
+        self.assertEqual(len(self.page.undo_steps), steps)
+        self.sent.clear()
+        button = self.first("button")
+        self.page.on_copy_box({"id": button})
+        kids = M.find(self.page.spec, button)["parent"]["children"]
+        at = [k["id"] for k in kids].index(button)
+        self.assertEqual((kids[at + 1]["role"], kids[at + 1]["text"]), ("button", kids[at]["text"]))
+        self.assertEqual(self.last("picked"), {"id": kids[at + 1]["id"]})          # the new one is picked
+        self.assertEqual(self.page.picked, kids[at + 1]["id"])
+        steps = len(self.page.undo_steps)
+        self.page.on_copy_box({"id": self.page_of("p1")["root"]["id"]})
+        self.page.on_copy_box(None)
+        self.assertEqual(len(self.page.undo_steps), steps)
+        self.page.on_undo()
+        self.assertIsNone(M.find(self.page.spec, kids[at + 1]["id"]))
+
+    def test_the_pages_one_after_another(self):
+        self.recorded()
+        self.page.on_page_add({"layout": "player"})
+        self.assertNotIn("p4", [c["page"] for c in self.last("state")["clock"]["pages"]])     # nothing leads to it
+        self.page.on_flow({})
+        state = self.last("state")
+        each = state["spec"]["seconds"] / 4
+        self.assertEqual(state["spec"]["page_keys"], [[each, "p2", "slide"], [2 * each, "p3", "slide"], [3 * each, "p4", "slide"]])
+        self.assertEqual([c["page"] for c in state["clock"]["pages"]], ["p1", "p2", "p3", "p4"])
+        self.page.on_page_start({"id": "p3"})                       # from the page the clip starts on, round the list
+        self.page.on_flow()
+        self.assertEqual([key[1] for key in self.page.spec["page_keys"]], ["p4", "p1", "p2"])
+        steps = len(self.page.undo_steps)
+        self.page.on_flow()                                         # the same again: nothing changes
+        self.assertEqual(len(self.page.undo_steps), steps)
+        for page_id in ("p1", "p2", "p4"):
+            self.page.on_page_remove({"id": page_id})
+        mine = self.page.spec
+        self.page.on_flow()                                         # one page: nowhere to go
+        self.assertEqual(self.page.spec, mine)
+
+    def test_the_story_is_sent_and_changed(self):
+        self.page.web_ready()
+        state = self.last("state")
+        self.assertEqual([part["page"] for part in state["story"]], ["p1", "p2", "p3"])
+        self.assertTrue(state["spec"]["auto"])
+        self.page.on_story({"page": "p3", "key": "secs", "value": 4})
+        self.assertEqual((self.last("state")["story"][2]["secs"], self.page.spec["seconds"]), (4.0, 9.0))
+        self.page.on_story({"page": "p1", "key": "by", "value": ""})
+        self.assertEqual(self.page.spec["page_keys"], [[2.0, "p2", "slide"]])
+        steps = len(self.page.undo_steps)
+        for nothing in ({"page": "p9", "key": "secs", "value": 2}, {"page": "p1", "key": "by", "value": ""}, None):
+            self.page.on_story(nothing)
+        self.assertEqual(len(self.page.undo_steps), steps)
+        # A click on one box starts another.
+        self.page.on_page_add({"layout": "player"})
+        boxes = {b["text"]: b["id"] for b in M.every(self.page_of("p4")["root"]) if b["text"]}
+        self.page.on_starts({"id": boxes["3:41"], "by": boxes["Next"]})
+        self.assertEqual(M.find(self.page.spec, boxes["3:41"])["box"]["run"], {"by": boxes["Next"], "seconds": 3.0})
+        steps = len(self.page.undo_steps)
+        self.page.on_starts({"id": boxes["Slow Morning"], "by": boxes["Next"]})
+        self.page.on_starts(None)
+        self.assertEqual(len(self.page.undo_steps), steps)
+        # A cursor recorded takes the story's place; "auto" set again gives it back.
+        self.page.on_recorded({"samples": [[0, 10, 10], [1, 30, 30], [2, 50, 50]], "clicks": [], "seconds": 2})
+        self.assertFalse(self.page.spec["auto"])
+        self.page.on_set({"key": "auto", "value": True})
+        self.assertTrue(self.page.spec["auto"])
+        self.assertEqual(self.page.spec["seconds"], sum(part["secs"] for part in self.last("state")["story"]))
+
+    def test_a_panel_kept_from_before_the_story_gets_one(self):
+        old = {k: v for k, v in M.clean({**self.template, "auto": False}).items() if k != "auto"}
+        self.host.buckets["panels"]["spec"] = old
+        from pages.panels.page import PanelsPage
+        page = PanelsPage(self.host)
+        self.addCleanup(page.deleteLater)
+        self.assertTrue(page.spec["auto"])
+        self.assertEqual(page.spec, M.clean(page.spec))
 
     def test_a_layer_is_moved_and_its_typing_and_arrival_are_set(self):
         root = self.page_of("p1")["root"]
